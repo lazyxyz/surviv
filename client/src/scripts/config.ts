@@ -29,8 +29,8 @@ export const Config = {
         },
         open_as: {
             name: "Open Asia",
-            mainAddress: "https://surviv.fun",
-            gameAddress: "wss://<ID>.surviv.fun"
+            mainAddress: "https://as.surviv.fun",
+            gameAddress: "wss://<ID>.as.surviv.fun"
         }
     },
     defaultRegion: "na"
