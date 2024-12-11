@@ -26,6 +26,11 @@ export const Config = {
             name: "Asia",
             mainAddress: "https://as.suroi.io",
             gameAddress: "wss://<ID>.as.suroi.io"
+        },
+        open_as: {
+            name: "Open Asia",
+            mainAddress: "https://surviv.fun",
+            gameAddress: "wss://<ID>.surviv.fun"
         }
     },
     defaultRegion: "na"
