@@ -581,7 +581,7 @@ In addition, we've made many quality of life changes, including shorter guns, cu
       <li>Doors now open automatically when approaching them.</li>
   </ul>
   <li>The server with the best ping is now selected automatically. Player count and ping is now displayed for each server.</li>
-  <li>The North America and Europe servers have been upgraded again.</li>
+  <li>The Suroi North America and Suroi Europe servers have been upgraded again.</li>
   <li>The Play Again button now allows you to rejoin the game with 1 click. To return to the menu, click the Menu button.</li>
   <li>Explosive obstacles now emit smoke particles when they're close to destroyed.</li>
   <li>You can now click on players to spectate them, which should make it easier to report teamers.</li>
@@ -626,7 +626,7 @@ Our scouts have fully mapped out the island, including its beaches. We've decide
   <li>Better sounds! Sounds now play more reliably. Sound falloff has been added, meaning further away sounds are quieter, and a subtle stereo effect has been added.</li>
   <li>Place names! There are now named places on the map, like in surviv.io.</li>
   <li>Fixed an issue causing the game to freeze for a few seconds every round.</li>
-  <li>New servers! The main, North America server has been upgraded from 2 cores and 2 GB RAM to 4 cores and 4 GB RAM. The Europe server has been upgraded to 4 cores and 8 GB RAM.</li>
+  <li>New servers! The main, Suroi North America server has been upgraded from 2 cores and 2 GB RAM to 4 cores and 4 GB RAM. The Suroi Europe server has been upgraded to 4 cores and 8 GB RAM.</li>
   <li>Added 3 new skins and 1 emote.</li>
   <li>Made the warehouse and porta potty entrances more obvious. Added holes to the house roof.</li>
   <li>Your rank is now shown on the game over screen.</li>
@@ -713,7 +713,7 @@ Surians can now customize their skins, and express themselves with emotes too! E
 <ul>
   <li>Better healing items! Healing items can now be picked up, and take time to use. Added tablets, which heal 50% adrenaline.</li>
   <li>Better kill feed! Redesigned the kill feed. It now shows weapon icons instead of names.</li>
-  <li>South America server! A 4th server, hosted in São Paulo, Brazil, is now available. To select it, click on the dropdown above the play button.</li>
+  <li>Suroi South America server! A 4th server, hosted in São Paulo, Brazil, is now available. To select it, click on the dropdown above the play button.</li>
   <li>Mobile improvements! Added auto loot pickup, and improved the UI.</li>
   <li>Better settings! The settings menu has been redesigned. Added options to change minimap and joystick transparency, and joystick size.</li>
   <li>The Lewis gun and Tango 51 are now more common. The MCX Spear is now less common.</li>
@@ -764,7 +764,7 @@ Surians can now customize their skins, and express themselves with emotes too! E
 <ul>
   <li>Loot! Crates now drop guns and healing items. Players no longer spawn with guns.</li>
   <li>More guns! Added 4 guns: the Mosin-Nagant (a sniper), Model 37 (a pump shotgun), SAF-200 (a burst fire SMG), and G19 (a full auto pistol). Recoil has also been added, meaning guns slow you down when firing.</li>
-  <li>Server selector! You can now choose between 3 servers: one in North America (Detroit, Michigan), one in Europe (London, England), and one in Asia (Osaka, Japan).</li>
+  <li>Server selector! You can now choose between 3 servers: one in Suroi North America (Detroit, Michigan), one in Suroi Europe (London, England), and one in Suroi Asia (Osaka, Japan).</li>
   <li>Added an "Equip Other Gun" keybind (defaults to space bar).</li>
   <li>Added a "Swap Gun Slots" keybind (defaults to T).</li>
   <li>Added a keybind to toggle the minimap (defaults to N).</li>
