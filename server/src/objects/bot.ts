@@ -83,6 +83,10 @@ export class Bot extends Actor {
         this.processInputs(packet);
     }
 
+    moving() {
+        
+    }
+
     randomMoving() {
         // Random direction change every 3 seconds
         if (this.game.now - this.lastDirectionChange > 3000) {
