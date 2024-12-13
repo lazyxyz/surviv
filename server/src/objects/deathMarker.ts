@@ -2,17 +2,17 @@ import { ObjectCategory } from "@common/constants";
 import { RectangleHitbox } from "@common/utils/hitbox";
 import { type FullData } from "@common/utils/objectsSerializations";
 import { BaseGameObject } from "./gameObject";
-import { type Player } from "./player";
+import { Actor } from "./actor";
 
 export class DeathMarker extends BaseGameObject.derive(ObjectCategory.DeathMarker) {
     override readonly fullAllocBytes = 1;
     override readonly partialAllocBytes = 12;
     override readonly hitbox: RectangleHitbox;
 
-    readonly player: Player;
+    readonly player: Actor;
     isNew = true;
 
-    constructor(player: Player, layer: number) {
+    constructor(player: Actor, layer: number) {
         super(player.game, player.position);
         this.player = player;
         this.layer = layer;

@@ -5,11 +5,11 @@ import { PerkIds } from "@common/definitions/perks";
 import { Numeric } from "@common/utils/math";
 import { type Timeout } from "@common/utils/misc";
 import { type ReifiableDef } from "@common/utils/objectDefinitions";
-import { type Player } from "../objects/player";
+import { type Actor } from "../objects/actor";
 import { type GunItem } from "./gunItem";
 
 export abstract class Action {
-    readonly player: Player;
+    readonly player: Actor;
 
     private readonly _timeout: Timeout;
 
@@ -17,7 +17,7 @@ export abstract class Action {
 
     readonly speedMultiplier: number = 1;
 
-    protected constructor(player: Player, time: number) {
+    protected constructor(player: Actor, time: number) {
         this.player = player;
         this._timeout = player.game.addTimeout(this.execute.bind(this), time * 1000);
         this.player.setPartialDirty();
@@ -42,7 +42,7 @@ export class ReviveAction extends Action {
 
     override readonly speedMultiplier = 0.5;
 
-    constructor(reviver: Player, readonly target: Player) {
+    constructor(reviver: Actor, readonly target: Actor) {
         super(reviver, GameConstants.player.reviveTime / reviver.mapPerkOrDefault(PerkIds.FieldMedic, ({ usageMod }) => usageMod, 1));
     }
 
@@ -71,7 +71,7 @@ export class ReloadAction extends Action {
 
     readonly fullReload: boolean;
 
-    constructor(player: Player, readonly item: GunItem) {
+    constructor(player: Actor, readonly item: GunItem) {
         const fullReload = item.definition.reloadFullOnEmpty && item.ammo <= 0;
         super(
             player,
@@ -128,7 +128,7 @@ export class HealingAction extends Action {
     readonly item: HealingItemDefinition;
     override readonly speedMultiplier = 0.5;
 
-    constructor(player: Player, item: ReifiableDef<HealingItemDefinition>) {
+    constructor(player: Actor, item: ReifiableDef<HealingItemDefinition>) {
         const itemDef = Loots.reify<HealingItemDefinition>(item);
         super(
             player,

@@ -2,17 +2,17 @@ import { CustomTeamMessages, type CustomTeamMessage } from "@common/typings";
 import { random } from "@common/utils/random";
 import { type WebSocket } from "uWebSockets.js";
 import { findGame } from "./gameManager";
-import { type Player } from "./objects/player";
+import { type Actor } from "./objects/actor";
 import { customTeams } from "./server";
 import { removeFrom } from "./utils/misc";
 
 export class Team {
     readonly id: number;
 
-    private readonly _players: Player[] = [];
-    get players(): readonly Player[] { return this._players; }
+    private readonly _players: Actor[] = [];
+    get players(): readonly Actor[] { return this._players; }
 
-    readonly _indexMapping = new Map<Player, number>();
+    readonly _indexMapping = new Map<Actor, number>();
 
     kills = 0;
 
@@ -23,13 +23,13 @@ export class Team {
         this.autoFill = autoFill;
     }
 
-    addPlayer(player: Player): void {
+    addPlayer(player: Actor): void {
         player.colorIndex = this.getNextAvailableColorIndex();
         this._indexMapping.set(player, this._players.push(player) - 1);
         this.setDirty();
     }
 
-    removePlayer(player: Player): boolean {
+    removePlayer(player: Actor): boolean {
         const index = this._indexMapping.get(player);
         const exists = index !== undefined;
         if (exists) {
@@ -127,7 +127,7 @@ export class Team {
         return this.players.some(player => !player.dead && !player.disconnected);
     }
 
-    getLivingPlayers(): Player[] {
+    getLivingPlayers(): Actor[] {
         return this.players.filter(player => !player.dead && !player.disconnected);
     }
 }

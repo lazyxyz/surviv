@@ -4,7 +4,7 @@ import { PerkData, PerkIds, type PerkDefinition } from "@common/definitions/perk
 import { Skins } from "@common/definitions/skins";
 import { PerkManager } from "@common/utils/perkManager";
 import { weightedRandom } from "@common/utils/random";
-import { type Player } from "../objects/player";
+import { type Actor } from "../objects/actor";
 import { GunItem } from "./gunItem";
 
 export type UpdatablePerkDefinition = PerkDefinition & { readonly updateInterval: number };
@@ -13,7 +13,7 @@ export class ServerPerkManager extends PerkManager {
     private readonly _selfData: Record<string, unknown> = {};
 
     constructor(
-        readonly owner: Player,
+        readonly owner: Actor,
         perks?: number | readonly PerkDefinition[]
     ) {
         super(perks);

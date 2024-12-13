@@ -16,11 +16,11 @@ import { Building } from "./objects/building";
 import { DamageParams } from "./objects/gameObject";
 import { Loot, type ItemData } from "./objects/loot";
 import { Obstacle } from "./objects/obstacle";
-import { Player } from "./objects/player";
+import { Actor } from "./objects/actor";
 import { Logger } from "./utils/misc";
 
 interface PlayerDamageEvent extends DamageParams {
-    readonly player: Player
+    readonly player: Actor
 }
 
 interface ObstacleDamageEvent extends DamageParams {
@@ -58,7 +58,7 @@ export const Events = {
     player_will_connect: makeEvent(true),
     /**
      * Emitted after the instantiation of
-     * the {@link Player} object and its placement
+     * the {@link Actor} object and its placement
      *
      * This event cannot be cancelled
      */
@@ -93,7 +93,7 @@ export const Events = {
      */
     player_disconnect: makeEvent(),
     /**
-     * Emitted at the end of a player's {@link Player.update() first update pass}
+     * Emitted at the end of a player's {@link Actor.update() first update pass}
      * (which is in charge of updating physical quantities,
      * updating health/adren/zoom, and using items)
      */
@@ -422,40 +422,40 @@ export const Events = {
 
 export interface EventDataMap {
     readonly player_will_connect: never
-    readonly player_did_connect: Player
+    readonly player_did_connect: Actor
 
     readonly player_will_join: {
-        readonly player: Player
+        readonly player: Actor
         readonly joinPacket: JoinPacketData
     }
     readonly player_did_join: {
-        readonly player: Player
+        readonly player: Actor
         readonly joinPacket: JoinPacketData
     }
 
-    readonly player_disconnect: Player
-    readonly player_update: Player
-    readonly player_start_attacking: Player
-    readonly player_stop_attacking: Player
+    readonly player_disconnect: Actor
+    readonly player_update: Actor
+    readonly player_start_attacking: Actor
+    readonly player_stop_attacking: Actor
     readonly player_input: {
-        readonly player: Player
+        readonly player: Actor
         readonly packet: PlayerInputData
     }
     readonly player_will_emote: {
-        readonly player: Player
+        readonly player: Actor
         readonly emote: AllowedEmoteSources
     }
     readonly player_did_emote: {
-        readonly player: Player
+        readonly player: Actor
         readonly emote: AllowedEmoteSources
     }
     readonly player_will_map_ping: {
-        readonly player: Player
+        readonly player: Actor
         readonly ping: PlayerPing
         readonly position: Vector
     }
     readonly player_did_map_ping: {
-        readonly player: Player
+        readonly player: Actor
         readonly ping: PlayerPing
         readonly position: Vector
     }
@@ -464,7 +464,7 @@ export interface EventDataMap {
     readonly player_did_piercing_damaged: PlayerDamageEvent
     readonly player_will_die: Omit<PlayerDamageEvent, "amount">
     readonly player_did_die: Omit<PlayerDamageEvent, "amount">
-    readonly player_did_win: Player
+    readonly player_did_win: Actor
 
     readonly inv_item_equip: InventoryItem
     readonly inv_item_unequip: InventoryItem
@@ -521,11 +521,11 @@ export interface EventDataMap {
     readonly obstacle_did_destroy: ObstacleDamageEvent
     readonly obstacle_will_interact: {
         readonly obstacle: Obstacle
-        readonly player?: Player
+        readonly player?: Actor
     }
     readonly obstacle_did_interact: {
         readonly obstacle: Obstacle
-        readonly player?: Player
+        readonly player?: Actor
     }
 
     readonly loot_will_generate: {
@@ -548,11 +548,11 @@ export interface EventDataMap {
     readonly loot_will_interact: {
         readonly loot: Loot
         readonly canPickup?: boolean | InventoryMessages
-        readonly player: Player
+        readonly player: Actor
     }
     readonly loot_did_interact: {
         readonly loot: Loot
-        readonly player: Player
+        readonly player: Actor
     }
 
     readonly building_will_generate: {

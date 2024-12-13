@@ -39,7 +39,8 @@ import { type BaseGameObject, type GameObject } from "./objects/gameObject";
 import { Loot, type ItemData } from "./objects/loot";
 import { Obstacle } from "./objects/obstacle";
 import { Parachute } from "./objects/parachute";
-import { Player, type PlayerContainer } from "./objects/player";
+import { Player } from "./objects/player";
+import { Actor, type PlayerContainer } from "./objects/actor";
 import { SyncedParticle } from "./objects/syncedParticle";
 import { ThrowableProjectile } from "./objects/throwableProj";
 import { PluginManager } from "./pluginManager";
@@ -47,6 +48,10 @@ import { Team } from "./team";
 import { Grid } from "./utils/grid";
 import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
+import { Bot } from "./objects/bot";
+import { SkinDefinition, Skins } from "@common/definitions/skins";
+import { Emotes } from "@common/definitions/emotes";
+import { Badges } from "@common/definitions/badges";
 
 /*
     eslint-disable
@@ -70,17 +75,17 @@ export class Game implements GameData {
 
     updateObjects = false;
 
-    readonly livingPlayers = new Set<Player>();
+    readonly livingPlayers = new Set<Actor>();
     /**
      * Players that have connected but haven't sent a JoinPacket yet
      */
-    readonly connectingPlayers = new Set<Player>();
-    readonly connectedPlayers = new Set<Player>();
-    readonly spectatablePlayers: Player[] = [];
+    readonly connectingPlayers = new Set<Actor>();
+    readonly connectedPlayers = new Set<Actor>();
+    readonly spectatablePlayers: Actor[] = [];
     /**
      * New players created this tick
      */
-    readonly newPlayers: Player[] = [];
+    readonly newPlayers: Actor[] = [];
     /**
     * Players deleted this tick
     */
@@ -493,10 +498,10 @@ export class Game implements GameData {
         this.setGameData({ allowJoin: false });
     }
 
-    private _killLeader: Player | undefined;
-    get killLeader(): Player | undefined { return this._killLeader; }
+    private _killLeader: Actor | undefined;
+    get killLeader(): Actor | undefined { return this._killLeader; }
 
-    updateKillLeader(player: Player): void {
+    updateKillLeader(player: Actor): void {
         const oldKillLeader = this._killLeader;
 
         if (player.kills > (this._killLeader?.kills ?? (GameConstants.player.killLeaderMinKills - 1)) && !player.dead) {
@@ -510,9 +515,9 @@ export class Game implements GameData {
         }
     }
 
-    killLeaderDead(killer?: Player): void {
+    killLeaderDead(killer?: Actor): void {
         this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderDeadOrDisconnected, { attackerId: killer?.id });
-        let newKillLeader: Player | undefined;
+        let newKillLeader: Actor | undefined;
         for (const player of this.livingPlayers) {
             if (player.kills > (newKillLeader?.kills ?? (GameConstants.player.killLeaderMinKills - 1)) && !player.dead) {
                 newKillLeader = player;
@@ -522,9 +527,9 @@ export class Game implements GameData {
         this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderAssigned);
     }
 
-    killLeaderDisconnected(leader: Player): void {
+    killLeaderDisconnected(leader: Actor): void {
         this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderDeadOrDisconnected, { disconnected: true });
-        let newKillLeader: Player | undefined;
+        let newKillLeader: Actor | undefined;
         for (const player of this.livingPlayers) {
             if (player === leader) continue;
             if (player.kills > (newKillLeader?.kills ?? (GameConstants.player.killLeaderMinKills - 1)) && !player.dead) {
@@ -539,9 +544,9 @@ export class Game implements GameData {
 
     private _sendKillLeaderKFPacket<
         Message extends
-            | KillfeedMessageType.KillLeaderAssigned
-            | KillfeedMessageType.KillLeaderDeadOrDisconnected
-            | KillfeedMessageType.KillLeaderUpdated
+        | KillfeedMessageType.KillLeaderAssigned
+        | KillfeedMessageType.KillLeaderDeadOrDisconnected
+        | KillfeedMessageType.KillLeaderUpdated
     >(
         messageType: Message,
         options?: Partial<Omit<KillFeedPacketData & { readonly messageType: NoInfer<Message> }, "messageType" | "playerID" | "attackerKills">>
@@ -671,6 +676,149 @@ export class Game implements GameData {
         return player;
     }
 
+    createBot(): Bot {
+        let spawnPosition = Vec.create(this.map.width / 2, this.map.height / 2);
+        let spawnLayer;
+
+        let team: Team | undefined;
+        if (this.teamMode) {
+            const vacantTeams = this.teams.valueArray.filter(
+                team =>
+                    team.autoFill
+                    && team.players.length < (this.maxTeamSize as number)
+                    && team.hasLivingPlayers()
+            );
+            if (vacantTeams.length) {
+                team = pickRandomInArray(vacantTeams);
+            } else {
+                this.teams.add(team = new Team(this.nextTeamID));
+            }
+        }
+
+        switch (Config.spawn.mode) {
+            case SpawnMode.Normal: {
+                const hitbox = new CircleHitbox(5);
+                const gasPosition = this.gas.currentPosition;
+                const gasRadius = this.gas.newRadius ** 2;
+                const teamPosition = this.teamMode
+                    // teamMode should guarantee the `team` object's existence
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    ? pickRandomInArray(team!.getLivingPlayers())?.position
+                    : undefined;
+
+                let foundPosition = false;
+                for (let tries = 0; !foundPosition && tries < 200; tries++) {
+                    const position = this.map.getRandomPosition(
+                        hitbox,
+                        {
+                            maxAttempts: 500,
+                            spawnMode: MapObjectSpawnMode.GrassAndSand,
+                            getPosition: this.teamMode && teamPosition
+                                ? () => randomPointInsideCircle(teamPosition, 20, 10)
+                                : undefined,
+                            collides: position => Geometry.distanceSquared(position, gasPosition) >= gasRadius
+                        }
+                    );
+
+                    // Break if the above code couldn't find a valid position, as it's unlikely that subsequent loops will
+                    if (!position) break;
+                    else spawnPosition = position;
+
+                    // Ensure the position is at least 60 units from other players
+                    foundPosition = true;
+                    const radiusHitbox = new CircleHitbox(60, spawnPosition);
+                    for (const object of this.grid.intersectsHitbox(radiusHitbox)) {
+                        if (
+                            object.isPlayer
+                            // teamMode should guarantee the `team` object's existence
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                            && (!this.teamMode || !team!.players.includes(object))
+                        ) {
+                            foundPosition = false;
+                        }
+                    }
+                }
+
+                // Spawn on top of a random teammate if a valid position couldn't be found
+                if (!foundPosition && teamPosition) spawnPosition = teamPosition;
+                break;
+            }
+            case SpawnMode.Radius: {
+                const { x, y } = Config.spawn.position;
+                spawnPosition = randomPointInsideCircle(
+                    Vec.create(x, y),
+                    Config.spawn.radius
+                );
+                break;
+            }
+            case SpawnMode.Fixed: {
+                const { x, y } = Config.spawn.position;
+                spawnPosition = Vec.create(x, y);
+                spawnLayer = Config.spawn.layer ?? Layer.Ground;
+                break;
+            }
+            case SpawnMode.Center: {
+                // no-op; this is the default
+                break;
+            }
+        }
+
+        // Player is added to the players array when a JoinPacket is received from the client
+        const userData: PlayerContainer = {
+            autoFill: true,
+            isDev: false,
+            lobbyClearing: true,
+            weaponPreset: "fit",
+            ip: undefined
+        };
+        const bot = new Bot(this, userData, spawnPosition, spawnLayer, team);
+        this.connectingPlayers.add(bot);
+        return bot;
+    }
+
+    activeBot(): void {
+        let bot = this.createBot();
+        bot.name = "BOT1";
+        bot.isMobile = false;
+        const skin: SkinDefinition = Skins.fromString("hasanger");
+        if (
+            skin.itemType === ItemType.Skin
+            && !skin.hideFromLoadout
+            && ((skin.rolesRequired ?? [bot.role]).includes(bot.role))
+        ) {
+            bot.loadout.skin = skin;
+        }
+
+        bot.loadout.badge = undefined;
+        bot.loadout.emotes = [Emotes.fromString("happy_face")];
+
+        this.livingPlayers.add(bot);
+        this.spectatablePlayers.push(bot);
+        this.connectingPlayers.delete(bot);
+        this.connectedPlayers.add(bot);
+        this.newPlayers.push(bot);
+        this.grid.addObject(bot);
+        bot.setDirty();
+        this.aliveCountDirty = true;
+        this.updateObjects = true;
+        this.updateGameData({ aliveCount: this.aliveCount });
+
+        bot.joined = true;
+
+        bot.sendPacket(
+            JoinedPacket.create(
+                {
+                    maxTeamSize: this.maxTeamSize,
+                    teamID: bot.teamID ?? 0,
+                    emotes: bot.loadout.emotes
+                }
+            )
+        );
+
+        this.addTimeout(() => { bot.disableInvulnerability(); }, 5000);
+        Logger.log(`Bot ${this.id} | "${bot.name}" added`);
+    }
+
     // Called when a JoinPacket is sent by the client
     activatePlayer(player: Player, packet: JoinPacketData): void {
         const rejectedBy = this.pluginManager.emit("player_will_join", { player, joinPacket: packet });
@@ -734,6 +882,7 @@ export class Game implements GameData {
             && !this._started
             && this.startTimeout === undefined
         ) {
+            this.activeBot();
             this.startTimeout = this.addTimeout(() => {
                 this._started = true;
                 this.setGameData({ startedTime: this.now });
@@ -758,15 +907,15 @@ export class Game implements GameData {
                         },
                         body: `{ "username": "${username}" }`
                     }
-                // you fuckin stupid or smth?
-                // eslint-disable-next-line @typescript-eslint/use-unknown-in-catch-callback-variable
+                    // you fuckin stupid or smth?
+                    // eslint-disable-next-line @typescript-eslint/use-unknown-in-catch-callback-variable
                 ).catch(console.error);
             }
         }
         this.pluginManager.emit("player_did_join", { player, joinPacket: packet });
     }
 
-    removePlayer(player: Player): void {
+    removePlayer(player: Actor): void {
         if (player === this.killLeader) {
             this.killLeaderDisconnected(player);
         }
@@ -813,13 +962,16 @@ export class Game implements GameData {
             this.startTimeout = undefined;
         }
 
-        try {
-            player.socket.close();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_) {
-            /* not a really big deal if we can't close the socket */
-            // when does this ever fail?
+        if (player instanceof Player) {
+            try {
+                player.socket.close();
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (_) {
+                /* not a really big deal if we can't close the socket */
+                // when does this ever fail?
+            }
         }
+
         this.pluginManager.emit("player_disconnect", player);
     }
 

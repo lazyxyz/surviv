@@ -105,7 +105,7 @@ export class Actor extends BaseGameObject.derive(ObjectCategory.Player) {
     joined = false;
     disconnected = false;
 
-    private _team?: Team;
+    protected _team?: Team;
     get team(): Team | undefined { return this._team; }
 
     set team(value: Team) {
@@ -321,7 +321,7 @@ export class Actor extends BaseGameObject.derive(ObjectCategory.Player) {
 
     get zoom(): number { return this._scope.zoomLevel; }
 
-    readonly socket: WebSocket<PlayerContainer>;
+    // readonly socket: WebSocket<PlayerContainer>;
 
     private readonly _action: { type?: Action, dirty: boolean } = {
         type: undefined,
@@ -411,7 +411,7 @@ export class Actor extends BaseGameObject.derive(ObjectCategory.Player) {
     readonly perks = new ServerPerkManager(this, Perks.defaults);
     perkUpdateMap?: Map<UpdatablePerkDefinition, number>; // key = perk, value = last updated
 
-    constructor(game: Game, socket: WebSocket<PlayerContainer>, position: Vector, layer?: Layer, team?: Team) {
+    constructor(game: Game, userData: PlayerContainer, position: Vector, layer?: Layer, team?: Team) {
         super(game, position);
 
         if (layer !== undefined) {
@@ -427,8 +427,8 @@ export class Actor extends BaseGameObject.derive(ObjectCategory.Player) {
             team.setDirty();
         }
 
-        const userData = socket.getUserData();
-        this.socket = socket;
+        // const userData = socket.getUserData();
+        // this.socket = socket;
         this.name = GameConstants.player.defaultName;
         this.ip = userData.ip;
         this.role = userData.role;
@@ -1173,7 +1173,7 @@ export class Actor extends BaseGameObject.derive(ObjectCategory.Player) {
 
     private _firstPacket = true;
 
-    private readonly _packetStream = new PacketStream(new SuroiByteStream(new ArrayBuffer(1 << 16)));
+    // private readonly _packetStream = new PacketStream(new SuroiByteStream(new ArrayBuffer(1 << 16)));
 
     /**
      * Calculate visible objects, check team, and send packets
@@ -1433,17 +1433,17 @@ export class Actor extends BaseGameObject.derive(ObjectCategory.Player) {
 
         this._firstPacket = false;
 
-        this._packetStream.stream.index = 0;
-        for (const packet of this._packets) {
-            this._packetStream.serializeServerPacket(packet);
-        }
+        // this._packetStream.stream.index = 0;
+        // for (const packet of this._packets) {
+        //     this._packetStream.serializeServerPacket(packet);
+        // }
 
-        for (const packet of this.game.packets) {
-            this._packetStream.serializeServerPacket(packet);
-        }
+        // for (const packet of this.game.packets) {
+        //     this._packetStream.serializeServerPacket(packet);
+        // }
 
-        this._packets.length = 0;
-        this.sendData(this._packetStream.getBuffer());
+        // this._packets.length = 0;
+        // this.sendData(this._packetStream.getBuffer());
     }
 
     /**
@@ -1486,121 +1486,121 @@ export class Actor extends BaseGameObject.derive(ObjectCategory.Player) {
         return this.perks.mapOrDefault<Name, U>(perk, mapper, defaultValue);
     }
 
-    spectate(packet: SpectatePacketData): void {
-        if (!this.dead) return;
-        const game = this.game;
-        if (game.now - this.lastSpectateActionTime < 200) return;
-        this.lastSpectateActionTime = game.now;
+    // spectate(packet: SpectatePacketData): void {
+    //     if (!this.dead) return;
+    //     const game = this.game;
+    //     if (game.now - this.lastSpectateActionTime < 200) return;
+    //     this.lastSpectateActionTime = game.now;
 
-        let toSpectate: Actor | undefined;
+    //     let toSpectate: Actor | undefined;
 
-        const { spectatablePlayers } = game;
-        switch (packet.spectateAction) {
-            case SpectateActions.BeginSpectating: {
-                if (this.game.teamMode && this._team?.hasLivingPlayers()) {
-                    // Find closest teammate
-                    toSpectate = this._team.getLivingPlayers()
-                        .reduce((a, b) => Geometry.distanceSquared(a.position, this.position) < Geometry.distanceSquared(b.position, this.position) ? a : b);
-                } else if (this.killedBy !== undefined && !this.killedBy.dead) {
-                    toSpectate = this.killedBy;
-                } else if (spectatablePlayers.length > 1) {
-                    toSpectate = pickRandomInArray(spectatablePlayers);
-                }
-                break;
-            }
-            case SpectateActions.SpectatePrevious:
-                if (this.spectating !== undefined) {
-                    toSpectate = spectatablePlayers[
-                        Numeric.absMod(spectatablePlayers.indexOf(this.spectating) - 1, spectatablePlayers.length)
-                    ];
-                }
-                break;
-            case SpectateActions.SpectateNext:
-                if (this.spectating !== undefined) {
-                    toSpectate = spectatablePlayers[
-                        Numeric.absMod(spectatablePlayers.indexOf(this.spectating) + 1, spectatablePlayers.length)
-                    ];
-                }
-                break;
-            case SpectateActions.SpectateSpecific: {
-                toSpectate = spectatablePlayers.find(player => player.id === packet.playerID);
-                break;
-            }
-            case SpectateActions.SpectateKillLeader: {
-                toSpectate = game.killLeader;
-                break;
-            }
-            case SpectateActions.Report: {
-                const reportID = randomBytes(4).toString("hex");
-                // SERVER HOSTERS assign your custom server an ID somewhere then pass it into the report body region: region
-                const reportJson = {
-                    id: reportID,
-                    reporterName: this.name,
-                    suspectName: this.spectating?.name,
-                    suspectIP: this.spectating?.ip,
-                    reporterIP: this.ip
-                };
+    //     const { spectatablePlayers } = game;
+    //     switch (packet.spectateAction) {
+    //         case SpectateActions.BeginSpectating: {
+    //             if (this.game.teamMode && this._team?.hasLivingPlayers()) {
+    //                 // Find closest teammate
+    //                 toSpectate = this._team.getLivingPlayers()
+    //                     .reduce((a, b) => Geometry.distanceSquared(a.position, this.position) < Geometry.distanceSquared(b.position, this.position) ? a : b);
+    //             } else if (this.killedBy !== undefined && !this.killedBy.dead) {
+    //                 toSpectate = this.killedBy;
+    //             } else if (spectatablePlayers.length > 1) {
+    //                 toSpectate = pickRandomInArray(spectatablePlayers);
+    //             }
+    //             break;
+    //         }
+    //         case SpectateActions.SpectatePrevious:
+    //             if (this.spectating !== undefined) {
+    //                 toSpectate = spectatablePlayers[
+    //                     Numeric.absMod(spectatablePlayers.indexOf(this.spectating) - 1, spectatablePlayers.length)
+    //                 ];
+    //             }
+    //             break;
+    //         case SpectateActions.SpectateNext:
+    //             if (this.spectating !== undefined) {
+    //                 toSpectate = spectatablePlayers[
+    //                     Numeric.absMod(spectatablePlayers.indexOf(this.spectating) + 1, spectatablePlayers.length)
+    //                 ];
+    //             }
+    //             break;
+    //         case SpectateActions.SpectateSpecific: {
+    //             toSpectate = spectatablePlayers.find(player => player.id === packet.playerID);
+    //             break;
+    //         }
+    //         case SpectateActions.SpectateKillLeader: {
+    //             toSpectate = game.killLeader;
+    //             break;
+    //         }
+    //         case SpectateActions.Report: {
+    //             const reportID = randomBytes(4).toString("hex");
+    //             // SERVER HOSTERS assign your custom server an ID somewhere then pass it into the report body region: region
+    //             const reportJson = {
+    //                 id: reportID,
+    //                 reporterName: this.name,
+    //                 suspectName: this.spectating?.name,
+    //                 suspectIP: this.spectating?.ip,
+    //                 reporterIP: this.ip
+    //             };
 
-                this.sendPacket(ReportPacket.create({
-                    playerName: this.spectating?.name ?? "",
-                    reportID: reportID
-                }));
-                if (Config.protection) {
-                    const reportURL = String(Config.protection?.ipChecker?.logURL);
-                    const reportData = {
-                        embeds: [
-                            {
-                                title: "Report Received",
-                                description: `Report ID: \`${reportID}\``,
-                                color: 16711680,
-                                fields: [
-                                    {
-                                        name: "Username",
-                                        value: `\`${this.spectating?.name}\``
-                                    },
-                                    {
-                                        name: "Time reported",
-                                        value: this.game.now
-                                    },
-                                    {
-                                        name: "Reporter",
-                                        value: this.name
-                                    }
+    //             this.sendPacket(ReportPacket.create({
+    //                 playerName: this.spectating?.name ?? "",
+    //                 reportID: reportID
+    //             }));
+    //             if (Config.protection) {
+    //                 const reportURL = String(Config.protection?.ipChecker?.logURL);
+    //                 const reportData = {
+    //                     embeds: [
+    //                         {
+    //                             title: "Report Received",
+    //                             description: `Report ID: \`${reportID}\``,
+    //                             color: 16711680,
+    //                             fields: [
+    //                                 {
+    //                                     name: "Username",
+    //                                     value: `\`${this.spectating?.name}\``
+    //                                 },
+    //                                 {
+    //                                     name: "Time reported",
+    //                                     value: this.game.now
+    //                                 },
+    //                                 {
+    //                                     name: "Reporter",
+    //                                     value: this.name
+    //                                 }
 
-                                ]
-                            }
-                        ]
-                    };
+    //                             ]
+    //                         }
+    //                     ]
+    //                 };
 
-                    // Send report to Discord
-                    fetch(reportURL, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(reportData)
-                    }).catch(error => {
-                        console.error("Error: ", error);
-                    });
+    //                 // Send report to Discord
+    //                 fetch(reportURL, {
+    //                     method: "POST",
+    //                     headers: { "Content-Type": "application/json" },
+    //                     body: JSON.stringify(reportData)
+    //                 }).catch(error => {
+    //                     console.error("Error: ", error);
+    //                 });
 
-                    // Post the report to the server
-                    fetch(`${Config.protection?.punishments?.url}/reports`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", "api-key": Config?.protection?.punishments?.password || "" },
-                        body: JSON.stringify(reportJson)
-                    }).then(response => response.json())
-                        .then(console.log)
-                        .catch((e: unknown) => console.error(e));
-                }
-            }
-        }
+    //                 // Post the report to the server
+    //                 fetch(`${Config.protection?.punishments?.url}/reports`, {
+    //                     method: "POST",
+    //                     headers: { "Content-Type": "application/json", "api-key": Config?.protection?.punishments?.password || "" },
+    //                     body: JSON.stringify(reportJson)
+    //                 }).then(response => response.json())
+    //                     .then(console.log)
+    //                     .catch((e: unknown) => console.error(e));
+    //             }
+    //         }
+    //     }
 
-        if (toSpectate === undefined) return;
+    //     if (toSpectate === undefined) return;
 
-        this.spectating?.spectators.delete(this);
-        this.updateObjects = true;
-        this.startedSpectating = true;
-        this.spectating = toSpectate;
-        toSpectate.spectators.add(this);
-    }
+    //     this.spectating?.spectators.delete(this);
+    //     this.updateObjects = true;
+    //     this.startedSpectating = true;
+    //     this.spectating = toSpectate;
+    //     toSpectate.spectators.add(this);
+    // }
 
     disableInvulnerability(): void {
         if (this.invulnerable) {
@@ -1609,21 +1609,21 @@ export class Actor extends BaseGameObject.derive(ObjectCategory.Player) {
         }
     }
 
-    private readonly _packets: InputPacket[] = [];
+    protected readonly _packets: InputPacket[] = [];
 
     sendPacket(packet: InputPacket): void {
         this._packets.push(packet);
     }
 
-    disconnect(reason: string): void {
-        const stream = new PacketStream(new ArrayBuffer(128));
-        stream.serializeServerPacket(
-            DisconnectPacket.create({
-                reason
-            })
-        );
+    disconnect(reason?: string): void {
+        // const stream = new PacketStream(new ArrayBuffer(128));
+        // stream.serializeServerPacket(
+        //     DisconnectPacket.create({
+        //         reason
+        //     })
+        // );
 
-        this.sendData(stream.getBuffer());
+        // this.sendData(stream.getBuffer());
         this.disconnected = true;
         // timeout to make sure disconnect packet is sent
         setTimeout(() => {
@@ -1631,13 +1631,13 @@ export class Actor extends BaseGameObject.derive(ObjectCategory.Player) {
         }, 10);
     }
 
-    sendData(buffer: ArrayBuffer): void {
-        try {
-            this.socket.send(buffer, true, false);
-        } catch (e) {
-            console.warn("Error sending packet. Details:", e);
-        }
-    }
+    // sendData(buffer: ArrayBuffer): void {
+    //     try {
+    //         this.socket.send(buffer, true, false);
+    //     } catch (e) {
+    //         console.warn("Error sending packet. Details:", e);
+    //     }
+    // }
 
     private _clampDamageAmount(amount: number): number {
         if (this.health - amount > this.maxHealth) {
