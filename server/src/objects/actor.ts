@@ -2334,6 +2334,12 @@ export class Actor extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     processInputs(packet: PlayerInputData): void {
+        // if(packet.actions.length >0) {
+        //     console.log("actions: ", packet.actions);
+        // }
+
+        //     console.log("packet.attacking: ", packet.attacking);
+
         this.movement = {
             ...packet.movement,
             ...(packet.isMobile ? packet.mobile : { moving: false, angle: 0 })

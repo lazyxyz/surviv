@@ -776,47 +776,49 @@ export class Game implements GameData {
         return bot;
     }
 
-    activeBot(): void {
-        let bot = this.createBot();
-        bot.name = "BOT1";
-        bot.isMobile = false;
-        const skin: SkinDefinition = Skins.fromString("hasanger");
-        if (
-            skin.itemType === ItemType.Skin
-            && !skin.hideFromLoadout
-            && ((skin.rolesRequired ?? [bot.role]).includes(bot.role))
-        ) {
-            bot.loadout.skin = skin;
+    activeBot(botCount: number): void {
+        for (let i = 0; i < botCount; i++) {
+            let bot = this.createBot();
+            bot.name = `BOT ${bot.id}`;
+            bot.isMobile = true;
+            const skin: SkinDefinition = Skins.fromString("hasanger");
+            if (
+                skin.itemType === ItemType.Skin
+                && !skin.hideFromLoadout
+                && ((skin.rolesRequired ?? [bot.role]).includes(bot.role))
+            ) {
+                bot.loadout.skin = skin;
+            }
+
+            bot.loadout.badge = Badges.fromString('bdg_bleh');
+            bot.loadout.emotes = [Emotes.fromString("happy_face")];
+
+            this.livingPlayers.add(bot);
+            this.spectatablePlayers.push(bot);
+            this.connectingPlayers.delete(bot);
+            this.connectedPlayers.add(bot);
+            this.newPlayers.push(bot);
+            this.grid.addObject(bot);
+            bot.setDirty();
+            this.aliveCountDirty = true;
+            this.updateObjects = true;
+            this.updateGameData({ aliveCount: this.aliveCount });
+
+            bot.joined = true;
+
+            bot.sendPacket(
+                JoinedPacket.create(
+                    {
+                        maxTeamSize: this.maxTeamSize,
+                        teamID: bot.teamID ?? 0,
+                        emotes: bot.loadout.emotes
+                    }
+                )
+            );
+
+            this.addTimeout(() => { bot.disableInvulnerability(); }, 5000);
+            Logger.log(`Bot ${this.id} | "${bot.name}" added`);
         }
-
-        bot.loadout.badge = undefined;
-        bot.loadout.emotes = [Emotes.fromString("happy_face")];
-
-        this.livingPlayers.add(bot);
-        this.spectatablePlayers.push(bot);
-        this.connectingPlayers.delete(bot);
-        this.connectedPlayers.add(bot);
-        this.newPlayers.push(bot);
-        this.grid.addObject(bot);
-        bot.setDirty();
-        this.aliveCountDirty = true;
-        this.updateObjects = true;
-        this.updateGameData({ aliveCount: this.aliveCount });
-
-        bot.joined = true;
-
-        bot.sendPacket(
-            JoinedPacket.create(
-                {
-                    maxTeamSize: this.maxTeamSize,
-                    teamID: bot.teamID ?? 0,
-                    emotes: bot.loadout.emotes
-                }
-            )
-        );
-
-        this.addTimeout(() => { bot.disableInvulnerability(); }, 5000);
-        Logger.log(`Bot ${this.id} | "${bot.name}" added`);
     }
 
     // Called when a JoinPacket is sent by the client
@@ -882,7 +884,7 @@ export class Game implements GameData {
             && !this._started
             && this.startTimeout === undefined
         ) {
-            this.activeBot();
+            this.activeBot(20);
             this.startTimeout = this.addTimeout(() => {
                 this._started = true;
                 this.setGameData({ startedTime: this.now });
