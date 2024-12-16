@@ -25,6 +25,9 @@ export class Zombie extends Player {
         this.loadout.skin = Skins.fromString("bloodlust");
         this.loadout.badge = Badges.fromString('bdg_bleh');
         this.loadout.emotes = [Emotes.fromString("happy_face")];
+
+        const randomCola = Math.random() < 0.1 ? 1 : 0; // 10% chance for 1, 90% chance for 0
+        this.inventory.items.setItem('cola', randomCola);
     }
 
     private rotationDirection: number = 1;
