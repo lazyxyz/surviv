@@ -7,6 +7,7 @@ import { PlayerInputData } from "@common/packets/inputPacket";
 import { Skins } from "@common/definitions/skins";
 import { Badges } from "@common/definitions/badges";
 import { Emotes } from "@common/definitions/emotes";
+import { Gamer } from "../gamer";
 
 const CHASE_DISTANCE = 30;
 const ROTATION_SPEED = 0.2;
@@ -31,7 +32,7 @@ export class Zombie extends Player {
     update() {
         super.update();
         for (const obj of this.visibleObjects) {
-            if (obj instanceof Player && !obj.dead) {
+            if (obj instanceof Gamer && !obj.dead) {
                 if (Vec.length(Vec.sub(obj.position, this.position)) < CHASE_DISTANCE) {
                     this.attackNearestPlayer();
                     return;
@@ -44,11 +45,11 @@ export class Zombie extends Player {
     }
 
     attackNearestPlayer() {
-        let nearestPlayer: Player | null = null;
+        let nearestPlayer: Gamer | null = null;
         let nearestDistance = Infinity;
 
         for (const obj of this.visibleObjects) {
-            if (obj instanceof Player) {
+            if (obj instanceof Gamer) {
                 const distance = Vec.length(Vec.sub(obj.position, this.position));
                 if (distance < nearestDistance) {
                     nearestDistance = distance;

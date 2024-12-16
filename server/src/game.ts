@@ -48,7 +48,7 @@ import { Team } from "./team";
 import { Grid } from "./utils/grid";
 import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
-import { Bot, Zombie } from "./objects/bots";
+import {  Zombie } from "./objects/bots";
 import { SkinDefinition, Skins } from "@common/definitions/skins";
 import { Emotes } from "@common/definitions/emotes";
 import { Badges } from "@common/definitions/badges";
@@ -869,7 +869,7 @@ export class Game implements GameData {
             && !this._started
             && this.startTimeout === undefined
         ) {
-            this.activeZombie(20);
+            this.activeZombie(100);
             this.startTimeout = this.addTimeout(() => {
                 this._started = true;
                 this.setGameData({ startedTime: this.now });
