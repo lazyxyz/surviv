@@ -7,6 +7,11 @@ export const Config = {
             mainAddress: "http://127.0.0.1:8000",
             gameAddress: "ws://127.0.0.1:800<ID>"
         },
+        open_as: {
+            name: "Open Asia",
+            mainAddress: "https://as.surviv.fun",
+            gameAddress: "wss://<ID>.as.surviv.fun"
+        },
         na: {
             name: "Suroi North America",
             mainAddress: "https://na.suroi.io",
@@ -27,11 +32,6 @@ export const Config = {
             mainAddress: "https://as.suroi.io",
             gameAddress: "wss://<ID>.as.suroi.io"
         },
-        open_as: {
-            name: "Open Asia",
-            mainAddress: "https://as.surviv.fun",
-            gameAddress: "wss://<ID>.as.surviv.fun"
-        }
     },
     defaultRegion: "na"
 } satisfies ConfigType as ConfigType;
