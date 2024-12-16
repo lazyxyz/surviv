@@ -48,10 +48,11 @@ import { Team } from "./team";
 import { Grid } from "./utils/grid";
 import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
-import {  Zombie } from "./objects/bots";
+import { Zombie } from "./objects/bots";
 import { SkinDefinition, Skins } from "@common/definitions/skins";
 import { Emotes } from "@common/definitions/emotes";
 import { Badges } from "@common/definitions/badges";
+import { Ninja } from "./objects/bots/ninja";
 
 /*
     eslint-disable
@@ -676,109 +677,195 @@ export class Game implements GameData {
         return player;
     }
 
-    createZombie(): Player {
-        let spawnPosition = Vec.create(this.map.width / 2, this.map.height / 2);
-        let spawnLayer;
 
-        let team: Team | undefined;
-        if (this.teamMode) {
-            const vacantTeams = this.teams.valueArray.filter(
-                team =>
-                    team.autoFill
-                    && team.players.length < (this.maxTeamSize as number)
-                    && team.hasLivingPlayers()
-            );
-            if (vacantTeams.length) {
-                team = pickRandomInArray(vacantTeams);
-            } else {
-                this.teams.add(team = new Team(this.nextTeamID));
-            }
-        }
-
-        switch (Config.spawn.mode) {
-            case SpawnMode.Normal: {
-                const hitbox = new CircleHitbox(5);
-                const gasPosition = this.gas.currentPosition;
-                const gasRadius = this.gas.newRadius ** 2;
-                const teamPosition = this.teamMode
-                    // teamMode should guarantee the `team` object's existence
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    ? pickRandomInArray(team!.getLivingPlayers())?.position
-                    : undefined;
-
-                let foundPosition = false;
-                for (let tries = 0; !foundPosition && tries < 200; tries++) {
-                    const position = this.map.getRandomPosition(
-                        hitbox,
-                        {
-                            maxAttempts: 500,
-                            spawnMode: MapObjectSpawnMode.GrassAndSand,
-                            getPosition: this.teamMode && teamPosition
-                                ? () => randomPointInsideCircle(teamPosition, 20, 10)
-                                : undefined,
-                            collides: position => Geometry.distanceSquared(position, gasPosition) >= gasRadius
-                        }
-                    );
-
-                    // Break if the above code couldn't find a valid position, as it's unlikely that subsequent loops will
-                    if (!position) break;
-                    else spawnPosition = position;
-
-                    // Ensure the position is at least 60 units from other players
-                    foundPosition = true;
-                    const radiusHitbox = new CircleHitbox(60, spawnPosition);
-                    for (const object of this.grid.intersectsHitbox(radiusHitbox)) {
-                        if (
-                            object.isPlayer
-                            // teamMode should guarantee the `team` object's existence
-                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                            && (!this.teamMode || !team!.players.includes(object))
-                        ) {
-                            foundPosition = false;
-                        }
-                    }
-                }
-
-                // Spawn on top of a random teammate if a valid position couldn't be found
-                if (!foundPosition && teamPosition) spawnPosition = teamPosition;
-                break;
-            }
-            case SpawnMode.Radius: {
-                const { x, y } = Config.spawn.position;
-                spawnPosition = randomPointInsideCircle(
-                    Vec.create(x, y),
-                    Config.spawn.radius
-                );
-                break;
-            }
-            case SpawnMode.Fixed: {
-                const { x, y } = Config.spawn.position;
-                spawnPosition = Vec.create(x, y);
-                spawnLayer = Config.spawn.layer ?? Layer.Ground;
-                break;
-            }
-            case SpawnMode.Center: {
-                // no-op; this is the default
-                break;
-            }
-        }
-
-        // Player is added to the players array when a JoinPacket is received from the client
-        const userData: ActorContainer = {
-            autoFill: true,
-            isDev: false,
-            lobbyClearing: true,
-            weaponPreset: "fit",
-            ip: undefined
-        };
-        const bot = new Zombie(this, userData, spawnPosition, spawnLayer, team);
-        this.connectingPlayers.add(bot);
-        return bot;
-    }
 
     activeZombie(botCount: number): void {
+        const createZombie = (): Player => {
+            let spawnPosition = Vec.create(this.map.width / 2, this.map.height / 2);
+            let spawnLayer;
+
+            let team: Team | undefined;
+            if (this.teamMode) {
+                const vacantTeams = this.teams.valueArray.filter(
+                    team =>
+                        team.autoFill
+                        && team.players.length < (this.maxTeamSize as number)
+                        && team.hasLivingPlayers()
+                );
+                if (vacantTeams.length) {
+                    team = pickRandomInArray(vacantTeams);
+                } else {
+                    this.teams.add(team = new Team(this.nextTeamID));
+                }
+            }
+
+            const hitbox = new CircleHitbox(5);
+            const gasPosition = this.gas.currentPosition;
+            const gasRadius = this.gas.newRadius ** 2;
+            const teamPosition = this.teamMode
+                // teamMode should guarantee the `team` object's existence
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                ? pickRandomInArray(team!.getLivingPlayers())?.position
+                : undefined;
+
+            let foundPosition = false;
+            for (let tries = 0; !foundPosition && tries < 200; tries++) {
+                const position = this.map.getRandomPosition(
+                    hitbox,
+                    {
+                        maxAttempts: 500,
+                        spawnMode: MapObjectSpawnMode.GrassAndSand,
+                        getPosition: this.teamMode && teamPosition
+                            ? () => randomPointInsideCircle(teamPosition, 20, 10)
+                            : undefined,
+                        collides: position => Geometry.distanceSquared(position, gasPosition) >= gasRadius
+                    }
+                );
+
+                // Break if the above code couldn't find a valid position, as it's unlikely that subsequent loops will
+                if (!position) break;
+                else spawnPosition = position;
+
+                // Ensure the position is at least 60 units from other players
+                foundPosition = true;
+                const radiusHitbox = new CircleHitbox(60, spawnPosition);
+                for (const object of this.grid.intersectsHitbox(radiusHitbox)) {
+                    if (
+                        object.isPlayer
+                        // teamMode should guarantee the `team` object's existence
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        && (!this.teamMode || !team!.players.includes(object))
+                    ) {
+                        foundPosition = false;
+                    }
+                }
+            }
+
+            // Spawn on top of a random teammate if a valid position couldn't be found
+            if (!foundPosition && teamPosition) spawnPosition = teamPosition;
+
+            // Player is added to the players array when a JoinPacket is received from the client
+            const userData: ActorContainer = {
+                autoFill: true,
+                isDev: false,
+                lobbyClearing: true,
+                weaponPreset: "fists",
+                ip: undefined
+            };
+            const bot = new Zombie(this, userData, spawnPosition, spawnLayer, team);
+            this.connectingPlayers.add(bot);
+            return bot;
+        }
+
         for (let i = 0; i < botCount; i++) {
-            let bot = this.createZombie();
+            let bot = createZombie();
+            this.livingPlayers.add(bot);
+            this.spectatablePlayers.push(bot);
+            this.connectingPlayers.delete(bot);
+            this.connectedPlayers.add(bot);
+            this.newPlayers.push(bot);
+            this.grid.addObject(bot);
+            bot.setDirty();
+            this.aliveCountDirty = true;
+            this.updateObjects = true;
+            this.updateGameData({ aliveCount: this.aliveCount });
+            bot.joined = true;
+
+            bot.sendPacket(
+                JoinedPacket.create(
+                    {
+                        maxTeamSize: this.maxTeamSize,
+                        teamID: bot.teamID ?? 0,
+                        emotes: bot.loadout.emotes
+                    }
+                )
+            );
+
+            this.addTimeout(() => { bot.disableInvulnerability(); }, 5000);
+            Logger.log(`Bot ${this.id} | "${bot.name}" added`);
+        }
+    }
+
+    activeNinja(botCount: number): void {
+        const createZombie = (): Player => {
+            let spawnPosition = Vec.create(this.map.width / 2, this.map.height / 2);
+            let spawnLayer;
+
+            let team: Team | undefined;
+            if (this.teamMode) {
+                const vacantTeams = this.teams.valueArray.filter(
+                    team =>
+                        team.autoFill
+                        && team.players.length < (this.maxTeamSize as number)
+                        && team.hasLivingPlayers()
+                );
+                if (vacantTeams.length) {
+                    team = pickRandomInArray(vacantTeams);
+                } else {
+                    this.teams.add(team = new Team(this.nextTeamID));
+                }
+            }
+
+            const hitbox = new CircleHitbox(5);
+            const gasPosition = this.gas.currentPosition;
+            const gasRadius = this.gas.newRadius ** 2;
+            const teamPosition = this.teamMode
+                // teamMode should guarantee the `team` object's existence
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                ? pickRandomInArray(team!.getLivingPlayers())?.position
+                : undefined;
+
+            let foundPosition = false;
+            for (let tries = 0; !foundPosition && tries < 200; tries++) {
+                const position = this.map.getRandomPosition(
+                    hitbox,
+                    {
+                        maxAttempts: 500,
+                        spawnMode: MapObjectSpawnMode.GrassAndSand,
+                        getPosition: this.teamMode && teamPosition
+                            ? () => randomPointInsideCircle(teamPosition, 20, 10)
+                            : undefined,
+                        collides: position => Geometry.distanceSquared(position, gasPosition) >= gasRadius
+                    }
+                );
+
+                // Break if the above code couldn't find a valid position, as it's unlikely that subsequent loops will
+                if (!position) break;
+                else spawnPosition = position;
+
+                // Ensure the position is at least 60 units from other players
+                foundPosition = true;
+                const radiusHitbox = new CircleHitbox(60, spawnPosition);
+                for (const object of this.grid.intersectsHitbox(radiusHitbox)) {
+                    if (
+                        object.isPlayer
+                        // teamMode should guarantee the `team` object's existence
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        && (!this.teamMode || !team!.players.includes(object))
+                    ) {
+                        foundPosition = false;
+                    }
+                }
+            }
+
+            // Spawn on top of a random teammate if a valid position couldn't be found
+            if (!foundPosition && teamPosition) spawnPosition = teamPosition;
+
+            // Player is added to the players array when a JoinPacket is received from the client
+            const userData: ActorContainer = {
+                autoFill: false,
+                isDev: false,
+                lobbyClearing: true,
+                weaponPreset: "falchion",
+                ip: undefined
+            };
+            const bot = new Ninja(this, userData, spawnPosition, spawnLayer, team);
+            this.connectingPlayers.add(bot);
+            return bot;
+        }
+
+        for (let i = 0; i < botCount; i++) {
+            let bot = createZombie();
             this.livingPlayers.add(bot);
             this.spectatablePlayers.push(bot);
             this.connectingPlayers.delete(bot);
@@ -869,7 +956,8 @@ export class Game implements GameData {
             && !this._started
             && this.startTimeout === undefined
         ) {
-            this.activeZombie(100);
+            this.activeNinja(20);
+            this.activeZombie(5);
             this.startTimeout = this.addTimeout(() => {
                 this._started = true;
                 this.setGameData({ startedTime: this.now });
