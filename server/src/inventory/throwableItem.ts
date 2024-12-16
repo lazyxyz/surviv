@@ -7,7 +7,7 @@ import { ItemType, type ReifiableDef } from "@common/utils/objectDefinitions";
 import { Vec } from "@common/utils/vector";
 import { type Game } from "../game";
 import { type ItemData } from "../objects/loot";
-import { type Actor } from "../objects/actor";
+import { type Player } from "../objects/player";
 import { type ThrowableProjectile } from "../objects/throwableProj";
 import { CountableInventoryItem } from "./inventoryItem";
 
@@ -18,7 +18,7 @@ export class ThrowableItem extends CountableInventoryItem<ThrowableDefinition> {
 
     private _activeHandler?: GrenadeHandler;
 
-    constructor(definition: ReifiableDef<ThrowableDefinition>, owner: Actor, data?: ItemData<ThrowableDefinition>, count = 1) {
+    constructor(definition: ReifiableDef<ThrowableDefinition>, owner: Player, data?: ItemData<ThrowableDefinition>, count = 1) {
         super(definition, owner);
 
         this.count = count;
@@ -87,7 +87,7 @@ class GrenadeHandler {
     private _timer?: Timeout;
     private _projectile?: ThrowableProjectile;
 
-    readonly owner: Actor;
+    readonly owner: Player;
 
     constructor(
         readonly definition: ThrowableDefinition,

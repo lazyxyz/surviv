@@ -39,8 +39,8 @@ import { type BaseGameObject, type GameObject } from "./objects/gameObject";
 import { Loot, type ItemData } from "./objects/loot";
 import { Obstacle } from "./objects/obstacle";
 import { Parachute } from "./objects/parachute";
-import { Player } from "./objects/player";
-import { Actor, type PlayerContainer } from "./objects/actor";
+import { Player, type ActorContainer } from "./objects/player";
+import { Gamer, type PlayerContainer } from "./objects/gamer";
 import { SyncedParticle } from "./objects/syncedParticle";
 import { ThrowableProjectile } from "./objects/throwableProj";
 import { PluginManager } from "./pluginManager";
@@ -75,17 +75,17 @@ export class Game implements GameData {
 
     updateObjects = false;
 
-    readonly livingPlayers = new Set<Actor>();
+    readonly livingPlayers = new Set<Player>();
     /**
      * Players that have connected but haven't sent a JoinPacket yet
      */
-    readonly connectingPlayers = new Set<Actor>();
-    readonly connectedPlayers = new Set<Actor>();
-    readonly spectatablePlayers: Actor[] = [];
+    readonly connectingPlayers = new Set<Player>();
+    readonly connectedPlayers = new Set<Player>();
+    readonly spectatablePlayers: Player[] = [];
     /**
      * New players created this tick
      */
-    readonly newPlayers: Actor[] = [];
+    readonly newPlayers: Player[] = [];
     /**
     * Players deleted this tick
     */
@@ -254,7 +254,7 @@ export class Game implements GameData {
         this.tick();
     }
 
-    onMessage(stream: SuroiByteStream, player: Player): void {
+    onMessage(stream: SuroiByteStream, player: Gamer): void {
         const packetStream = new PacketStream(stream);
         while (true) {
             const packet = packetStream.deserializeClientPacket();
@@ -263,7 +263,7 @@ export class Game implements GameData {
         }
     }
 
-    onPacket(packet: OutputPacket, player: Player): void {
+    onPacket(packet: OutputPacket, player: Gamer): void {
         switch (true) {
             case packet instanceof JoinPacket:
                 this.activatePlayer(player, packet.output);
@@ -498,10 +498,10 @@ export class Game implements GameData {
         this.setGameData({ allowJoin: false });
     }
 
-    private _killLeader: Actor | undefined;
-    get killLeader(): Actor | undefined { return this._killLeader; }
+    private _killLeader: Player | undefined;
+    get killLeader(): Player | undefined { return this._killLeader; }
 
-    updateKillLeader(player: Actor): void {
+    updateKillLeader(player: Player): void {
         const oldKillLeader = this._killLeader;
 
         if (player.kills > (this._killLeader?.kills ?? (GameConstants.player.killLeaderMinKills - 1)) && !player.dead) {
@@ -515,9 +515,9 @@ export class Game implements GameData {
         }
     }
 
-    killLeaderDead(killer?: Actor): void {
+    killLeaderDead(killer?: Player): void {
         this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderDeadOrDisconnected, { attackerId: killer?.id });
-        let newKillLeader: Actor | undefined;
+        let newKillLeader: Player | undefined;
         for (const player of this.livingPlayers) {
             if (player.kills > (newKillLeader?.kills ?? (GameConstants.player.killLeaderMinKills - 1)) && !player.dead) {
                 newKillLeader = player;
@@ -527,9 +527,9 @@ export class Game implements GameData {
         this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderAssigned);
     }
 
-    killLeaderDisconnected(leader: Actor): void {
+    killLeaderDisconnected(leader: Player): void {
         this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderDeadOrDisconnected, { disconnected: true });
-        let newKillLeader: Actor | undefined;
+        let newKillLeader: Player | undefined;
         for (const player of this.livingPlayers) {
             if (player === leader) continue;
             if (player.kills > (newKillLeader?.kills ?? (GameConstants.player.killLeaderMinKills - 1)) && !player.dead) {
@@ -563,7 +563,7 @@ export class Game implements GameData {
         );
     }
 
-    addPlayer(socket: WebSocket<PlayerContainer>): Player | undefined {
+    addPlayer(socket: WebSocket<PlayerContainer>): Gamer | undefined {
         if (this.pluginManager.emit("player_will_connect")) {
             return undefined;
         }
@@ -670,13 +670,13 @@ export class Game implements GameData {
         }
 
         // Player is added to the players array when a JoinPacket is received from the client
-        const player = new Player(this, socket, spawnPosition, spawnLayer, team);
+        const player = new Gamer(this, socket, spawnPosition, spawnLayer, team);
         this.connectingPlayers.add(player);
         this.pluginManager.emit("player_did_connect", player);
         return player;
     }
 
-    createZombie(): Actor {
+    createZombie(): Player {
         let spawnPosition = Vec.create(this.map.width / 2, this.map.height / 2);
         let spawnLayer;
 
@@ -764,7 +764,7 @@ export class Game implements GameData {
         }
 
         // Player is added to the players array when a JoinPacket is received from the client
-        const userData: PlayerContainer = {
+        const userData: ActorContainer = {
             autoFill: true,
             isDev: false,
             lobbyClearing: true,
@@ -807,7 +807,7 @@ export class Game implements GameData {
     }
 
     // Called when a JoinPacket is sent by the client
-    activatePlayer(player: Player, packet: JoinPacketData): void {
+    activatePlayer(player: Gamer, packet: JoinPacketData): void {
         const rejectedBy = this.pluginManager.emit("player_will_join", { player, joinPacket: packet });
         if (rejectedBy) {
             player.disconnect(`Connection rejected by server plugin '${rejectedBy.constructor.name}'`);
@@ -902,7 +902,7 @@ export class Game implements GameData {
         this.pluginManager.emit("player_did_join", { player, joinPacket: packet });
     }
 
-    removePlayer(player: Actor): void {
+    removePlayer(player: Player): void {
         if (player === this.killLeader) {
             this.killLeaderDisconnected(player);
         }
@@ -949,7 +949,7 @@ export class Game implements GameData {
             this.startTimeout = undefined;
         }
 
-        if (player instanceof Player) {
+        if (player instanceof Gamer) {
             try {
                 player.socket.close();
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars

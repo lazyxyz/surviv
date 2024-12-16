@@ -1,12 +1,12 @@
 import type { AllowedEmoteSources } from "@common/packets/inputPacket";
-import { Actor } from "./actor";
+import { Player } from "./player";
 
 export class Emote {
     readonly playerID: number;
 
     constructor(
         readonly definition: AllowedEmoteSources,
-        readonly player: Actor
+        readonly player: Player
     ) {
         this.playerID = player.id;
     }

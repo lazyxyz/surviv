@@ -2,7 +2,7 @@ import { Loots, type LootDefinition, type WeaponDefinition } from "@common/defin
 import { Numeric } from "@common/utils/math";
 import { defaultModifiers, type ItemType, type ReifiableDef, type WearerAttributes } from "@common/utils/objectDefinitions";
 import { type ItemData } from "../objects/loot";
-import { type Actor } from "../objects/actor";
+import { type Player } from "../objects/player";
 
 /**
  * Represents some item in the player's inventory *that can be equipped*
@@ -20,7 +20,7 @@ export abstract class InventoryItem<Def extends WeaponDefinition = WeaponDefinit
     /**
      * The player this item belongs to
      */
-    readonly owner: Actor;
+    readonly owner: Player;
 
     private readonly _modifiers = defaultModifiers();
 
@@ -86,9 +86,9 @@ export abstract class InventoryItem<Def extends WeaponDefinition = WeaponDefinit
      * Creates a new `InventoryItem` given a string and a player
      * @param definition The definition of an item in the item schema
      * that will be represented by this instance
-     * @param owner The `Actor` this item belongs to
+     * @param owner The `Player` this item belongs to
      */
-    protected constructor(definition: ReifiableDef<LootDefinition>, owner: Actor) {
+    protected constructor(definition: ReifiableDef<LootDefinition>, owner: Player) {
         this.definition = Loots.reify(definition);
         this.category = this.definition.itemType;
         this.owner = owner;

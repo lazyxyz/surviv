@@ -2,9 +2,8 @@ import { Layer } from "@common/constants";
 import { type Vector, Vec } from "@common/utils/vector";
 import { Game } from "../../game";
 import { Team } from "../../team";
-import { Actor, PlayerContainer } from "../actor";
+import { Player, ActorContainer } from "../player";
 import { PlayerInputData } from "@common/packets/inputPacket";
-import { Player } from "../player";
 import { Skins } from "@common/definitions/skins";
 import { Badges } from "@common/definitions/badges";
 import { Emotes } from "@common/definitions/emotes";
@@ -14,8 +13,8 @@ const ROTATION_SPEED = 0.2;
 const IDLE_ROTATION_SPEED = 0.05;
 const MIN_DISTANCE_FROM_PLAYER = 5; // Minimum distance from the player to avoid colliding
 
-export class Zombie extends Actor {
-    constructor(game: Game, userData: PlayerContainer, position: Vector,
+export class Zombie extends Player {
+    constructor(game: Game, userData: ActorContainer, position: Vector,
         layer?: Layer, team?: Team) {
         super(game, userData, position, layer, team);
         this.baseSpeed = this.baseSpeed * 0.7;

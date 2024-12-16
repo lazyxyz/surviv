@@ -6,7 +6,7 @@ import { isMainThread, parentPort, Worker, workerData } from "node:worker_thread
 import { WebSocket } from "uWebSockets.js";
 import { Config } from "./config";
 import { Game } from "./game";
-import { PlayerContainer } from "./objects/player";
+import { PlayerContainer } from "./objects/gamer";
 import { maxTeamSize } from "./server";
 import { Logger } from "./utils/misc";
 import { createServer, forbidden, getIP } from "./utils/serverHelpers";

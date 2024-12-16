@@ -3,12 +3,11 @@ import { InputActions, Layer, SpectateActions } from "@common/constants";
 import { type Vector, Vec } from "@common/utils/vector";
 import { Game } from "../../game";
 import { Team } from "../../team";
-import { Actor, PlayerContainer } from "../actor";
+import { ActorContainer, Player } from "../player";
 import { Loot } from "../loot";
 import { Logger } from "../../utils/misc";
 import { PlayerInputData, InputAction } from "@common/packets/inputPacket";
 import { GameObject } from "../gameObject";
-import { Player } from "../player";
 import { Parachute } from "../parachute";
 
 
@@ -43,8 +42,8 @@ function detectBotAction(objects: Set<GameObject>): BotActions {
     return BotActions.Run;
 }
 
-export class Bot extends Actor {
-    constructor(game: Game, userData: PlayerContainer, position: Vector,
+export class Bot extends Player {
+    constructor(game: Game, userData: ActorContainer, position: Vector,
         layer?: Layer, team?: Team) {
         super(game, userData, position, layer, team);
     }

@@ -16,13 +16,11 @@ import { type Loot } from "./loot";
 import { type Obstacle } from "./obstacle";
 import { type Parachute } from "./parachute";
 import { type Player } from "./player";
-import { type Actor } from "./actor";
 import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
 
 export interface ObjectMapping {
     [ObjectCategory.Player]: Player
-    [ObjectCategory.Actor]: Actor
     [ObjectCategory.Obstacle]: Obstacle
     [ObjectCategory.DeathMarker]: DeathMarker
     [ObjectCategory.Loot]: Loot

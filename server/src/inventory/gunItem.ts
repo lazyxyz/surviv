@@ -12,7 +12,7 @@ import { ItemType, type ReifiableDef } from "@common/utils/objectDefinitions";
 import { randomFloat, randomPointInsideCircle } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
 import { type ItemData } from "../objects/loot";
-import { type Actor } from "../objects/actor";
+import { type Player } from "../objects/player";
 import { getPatterningShape } from "../utils/misc";
 import { ReloadAction } from "./action";
 import { InventoryItem } from "./inventoryItem";
@@ -49,10 +49,10 @@ export class GunItem extends InventoryItem<GunDefinition> {
     /**
      * Constructs a new gun
      * @param idString The `idString` of a `GunDefinition` in the item schema that this object is to base itself off of
-     * @param owner The `Actor` that owns this gun
+     * @param owner The `Player` that owns this gun
      * @throws {TypeError} If the `idString` given does not point to a definition for a gun
      */
-    constructor(idString: ReifiableDef<GunDefinition>, owner: Actor, data?: ItemData<GunDefinition>) {
+    constructor(idString: ReifiableDef<GunDefinition>, owner: Player, data?: ItemData<GunDefinition>) {
         super(idString, owner);
 
         if (this.category !== ItemType.Gun) {

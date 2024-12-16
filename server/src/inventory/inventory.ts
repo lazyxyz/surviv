@@ -11,7 +11,7 @@ import { Numeric } from "@common/utils/math";
 import { ExtendedMap, type AbstractConstructor, type Timeout } from "@common/utils/misc";
 import { ItemType, type ReferenceTo, type ReifiableDef } from "@common/utils/objectDefinitions";
 import { type ItemData } from "../objects/loot";
-import { type Actor } from "../objects/actor";
+import { type Player } from "../objects/player";
 import { HealingAction } from "./action";
 import { GunItem } from "./gunItem";
 import { InventoryItem } from "./inventoryItem";
@@ -35,7 +35,7 @@ export const InventoryItemMapping = {
     [ItemType.Melee]: MeleeItem,
     [ItemType.Throwable]: ThrowableItem
 } satisfies {
-    [K in ItemType]?: AbstractConstructor<InventoryItem, [def: ReifiableDef<LootDefForType<K>>, owner: Actor, data?: ItemData<LootDefForType<K>>]>
+    [K in ItemType]?: AbstractConstructor<InventoryItem, [def: ReifiableDef<LootDefForType<K>>, owner: Player, data?: ItemData<LootDefForType<K>>]>
 };
 
 /**
@@ -45,7 +45,7 @@ export class Inventory {
     /**
      * The player that this inventory belongs to
      */
-    readonly owner: Actor;
+    readonly owner: Player;
 
     readonly items = new ItemCollection(Object.entries(DEFAULT_INVENTORY));
 
@@ -164,7 +164,7 @@ export class Inventory {
 
     /**
      * Sets the index pointing to the active item, if it is valid. Passing an invalid index throws a `RangeError`
-     * If the assignment is successful, `Actor#dirty.activeWeaponIndex` is automatically set to `true` if the active item index changes
+     * If the assignment is successful, `Player#dirty.activeWeaponIndex` is automatically set to `true` if the active item index changes
      * @param slot The new slot
      * @returns Whether the swap was done successfully
      */
@@ -249,7 +249,7 @@ export class Inventory {
      * Creates a new inventory.
      * @param owner The player this inventory belongs to
      */
-    constructor(owner: Actor) {
+    constructor(owner: Player) {
         this.owner = owner;
 
         for (const item of [...HealingItems, ...Ammos, ...Scopes]) {
@@ -294,7 +294,7 @@ export class Inventory {
         const definition = Loots.reify<LootDefForType<Type>>(item);
 
         return new (
-            InventoryItemMapping[definition.itemType] as new (def: ReifiableDef<LootDefForType<Type>>, owner: Actor, data?: ItemData<LootDefForType<Type>>) => Item
+            InventoryItemMapping[definition.itemType] as new (def: ReifiableDef<LootDefForType<Type>>, owner: Player, data?: ItemData<LootDefForType<Type>>) => Item
         )(definition, this.owner, data);
     }
 

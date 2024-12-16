@@ -154,9 +154,7 @@ export enum ObjectCategory {
     Decal,
     Parachute,
     ThrowableProjectile,
-    SyncedParticle,
-    Bot,
-    Actor
+    SyncedParticle
 }
 
 export const enum AnimationType {

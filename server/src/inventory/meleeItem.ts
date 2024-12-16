@@ -8,7 +8,7 @@ import { ItemType, type ReifiableDef } from "@common/utils/objectDefinitions";
 import { Vec } from "@common/utils/vector";
 import { type CollidableGameObject } from "../objects/gameObject";
 import { type ItemData } from "../objects/loot";
-import { type Actor } from "../objects/actor";
+import { type Player } from "../objects/player";
 import { InventoryItem } from "./inventoryItem";
 
 /**
@@ -22,10 +22,10 @@ export class MeleeItem extends InventoryItem<MeleeDefinition> {
     /**
      * Constructs a new melee weapon
      * @param idString The `idString` of a `MeleeDefinition` in the item schema that this object is to base itself off of
-     * @param owner The `Actor` that owns this melee weapon
+     * @param owner The `Player` that owns this melee weapon
      * @throws {TypeError} If the `idString` given does not point to a definition for a melee weapon
      */
-    constructor(idString: ReifiableDef<MeleeDefinition>, owner: Actor, data?: ItemData<MeleeDefinition>) {
+    constructor(idString: ReifiableDef<MeleeDefinition>, owner: Player, data?: ItemData<MeleeDefinition>) {
         super(idString, owner);
 
         if (this.category !== ItemType.Melee) {
