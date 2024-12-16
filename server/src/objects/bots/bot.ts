@@ -1,13 +1,47 @@
 import { type WebSocket } from "uWebSockets.js";
 import { InputActions, Layer, SpectateActions } from "@common/constants";
 import { type Vector, Vec } from "@common/utils/vector";
-import { Game } from "../game";
-import { Team } from "../team";
-import { Actor, PlayerContainer } from "./actor";
-import { Loot } from "./loot";
-import { Logger } from "../utils/misc";
+import { Game } from "../../game";
+import { Team } from "../../team";
+import { Actor, PlayerContainer } from "../actor";
+import { Loot } from "../loot";
+import { Logger } from "../../utils/misc";
 import { PlayerInputData, InputAction } from "@common/packets/inputPacket";
+import { GameObject } from "../gameObject";
+import { Player } from "../player";
+import { Parachute } from "../parachute";
 
+
+const PICKUP_DISTANCE = 5;
+
+enum BotActions {
+    Loot,
+    Attack,
+    Run,
+    Idle
+}
+
+function detectBotAction(objects: Set<GameObject>): BotActions {
+    for (const obj of objects) {
+        if (obj instanceof Player) {
+            return BotActions.Attack;
+        }
+    }
+
+    for (const obj of objects) {
+        if (obj instanceof Loot) {
+            return BotActions.Loot;
+        }
+    }
+
+    for (const obj of objects) {
+        if (obj instanceof Parachute) {
+            return BotActions.Idle;
+        }
+    }
+
+    return BotActions.Run;
+}
 
 export class Bot extends Actor {
     constructor(game: Game, userData: PlayerContainer, position: Vector,
@@ -20,9 +54,30 @@ export class Bot extends Actor {
 
     update() {
         super.update();
+        let packet;
 
+        let botAction: BotActions = detectBotAction(this.nearObjects);
 
-        this.Looting();
+        switch (botAction) {
+            case BotActions.Attack:
+                // this.processInputs(packet);
+                break;
+
+            case BotActions.Run:
+                this.randomMoving();
+                break;
+
+            case BotActions.Loot: {
+                this.Looting();
+                break;
+            }
+            case BotActions.Idle:
+                // Idle logic here
+                break;
+
+            default:
+                throw new Error(`Unhandled BotAction: ${botAction}`);
+        }
     }
 
     Looting() {
@@ -59,8 +114,6 @@ export class Bot extends Actor {
                 left: directionToLoot.x < 0,
                 right: directionToLoot.x > 0
             };
-        } else {
-            movement = this.randomMoving();
         }
 
         // If the bot is close enough to the loot, pick it up
@@ -83,36 +136,47 @@ export class Bot extends Actor {
         this.processInputs(packet);
     }
 
-    moving() {
-        
-    }
-
     randomMoving() {
-        // Random direction change every 3 seconds
-        if (this.game.now - this.lastDirectionChange > 3000) {
+        if (this.game.now - this.lastDirectionChange > 2000) { // Change direction every 2 seconds
             this.lastDirectionChange = this.game.now;
             this.randomDirection();
         }
 
-        // Movement towards the center
-        const center = Vec.create(this.game.map.width / 2, this.game.map.height / 2);
+        const center = Vec.create(this.game.map.width / 3, this.game.map.height / 3);
         const directionToCenter = Vec.sub(center, this.position);
 
-        // Combine random direction and center-seeking behavior
-        const combinedDirection = Vec.add(this.randomDirectionVector, directionToCenter);
+        const angle = Math.PI / 2; // 90 degrees to move tangentially
+        const tangentialDirection = Vec.create(
+            -directionToCenter.y, // Perpendicular X component
+            directionToCenter.x  // Perpendicular Y component
+        );
 
-        return {
+        const normalizedTangentialDirection = Vec.normalize(tangentialDirection);
+
+        const combinedDirection = Vec.add(this.randomDirectionVector, normalizedTangentialDirection);
+
+        let movement = {
             up: combinedDirection.y < 0,
             down: combinedDirection.y > 0,
             left: combinedDirection.x < 0,
             right: combinedDirection.x > 0
-        }
+        };
+
+        const packet: PlayerInputData = {
+            movement: movement,
+            attacking: false,
+            actions: [],
+            isMobile: false,
+            turning: false,
+            mobile: undefined,
+            rotation: undefined,
+        };
+        this.processInputs(packet);
     }
+
 
     randomDirection() {
         const angle = Math.random() * 2 * Math.PI;
         this.randomDirectionVector = Vec.create(Math.cos(angle), Math.sin(angle));
     }
-
-
 }

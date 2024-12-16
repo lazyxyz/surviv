@@ -48,7 +48,7 @@ import { Team } from "./team";
 import { Grid } from "./utils/grid";
 import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
-import { Bot } from "./objects/bot";
+import { Bot, Zombie } from "./objects/bots";
 import { SkinDefinition, Skins } from "@common/definitions/skins";
 import { Emotes } from "@common/definitions/emotes";
 import { Badges } from "@common/definitions/badges";
@@ -676,7 +676,7 @@ export class Game implements GameData {
         return player;
     }
 
-    createBot(): Bot {
+    createZombie(): Actor {
         let spawnPosition = Vec.create(this.map.width / 2, this.map.height / 2);
         let spawnLayer;
 
@@ -771,28 +771,14 @@ export class Game implements GameData {
             weaponPreset: "fit",
             ip: undefined
         };
-        const bot = new Bot(this, userData, spawnPosition, spawnLayer, team);
+        const bot = new Zombie(this, userData, spawnPosition, spawnLayer, team);
         this.connectingPlayers.add(bot);
         return bot;
     }
 
-    activeBot(botCount: number): void {
+    activeZombie(botCount: number): void {
         for (let i = 0; i < botCount; i++) {
-            let bot = this.createBot();
-            bot.name = `BOT ${bot.id}`;
-            bot.isMobile = true;
-            const skin: SkinDefinition = Skins.fromString("hasanger");
-            if (
-                skin.itemType === ItemType.Skin
-                && !skin.hideFromLoadout
-                && ((skin.rolesRequired ?? [bot.role]).includes(bot.role))
-            ) {
-                bot.loadout.skin = skin;
-            }
-
-            bot.loadout.badge = Badges.fromString('bdg_bleh');
-            bot.loadout.emotes = [Emotes.fromString("happy_face")];
-
+            let bot = this.createZombie();
             this.livingPlayers.add(bot);
             this.spectatablePlayers.push(bot);
             this.connectingPlayers.delete(bot);
@@ -803,7 +789,6 @@ export class Game implements GameData {
             this.aliveCountDirty = true;
             this.updateObjects = true;
             this.updateGameData({ aliveCount: this.aliveCount });
-
             bot.joined = true;
 
             bot.sendPacket(
@@ -884,7 +869,7 @@ export class Game implements GameData {
             && !this._started
             && this.startTimeout === undefined
         ) {
-            this.activeBot(20);
+            this.activeZombie(20);
             this.startTimeout = this.addTimeout(() => {
                 this._started = true;
                 this.setGameData({ startedTime: this.now });
