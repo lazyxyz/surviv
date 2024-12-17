@@ -295,7 +295,6 @@ export async function setUpUI(game: Game): Promise<void> {
             selectedRegion = regionInfo[Config.defaultRegion];
             game.console.setBuiltInCVar("cv_region", "");
         }
-
         const region = getTranslatedString(`region_${game.console.getBuiltInCVar("cv_region")}` as TranslationKeys);
         if (region === "region_") {
             serverName.text(selectedRegion.name); // this for now until we find a way to selectedRegion.id

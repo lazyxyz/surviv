@@ -13,7 +13,7 @@ export const Config = {
             gameAddress: "wss://<ID>.as.surviv.fun"
         },
     },
-    defaultRegion: "na"
+    defaultRegion: "as"
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {

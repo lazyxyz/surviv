@@ -310,6 +310,5 @@
   "region_na": "North America"
   "region_eu": "Europe"
   "region_sa": "South America"
-  "region_as": "Asia",
-  "region_open_as": "Open Asia",
+  "region_as": "Asia"
 }
