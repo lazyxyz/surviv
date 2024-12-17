@@ -36,7 +36,7 @@ export class Ninja extends Player {
         this.loadout.badge = Badges.fromString("bdg_bleh");
         this.loadout.emotes = [Emotes.fromString("happy_face")];
         this.inventory.weapons[2] = new MeleeItem("seax", this);
-        this.inventory.scope = Scopes.definitions[2];
+        this.inventory.scope = Scopes.definitions[1];
         this.inventory.vest = Armors.fromString('basic_vest');
         this.inventory.helmet = Armors.fromString('basic_helmet');
 
