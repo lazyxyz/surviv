@@ -133,6 +133,12 @@
   box-shadow: inset 0 -4px palette.$discord_bg;
 }
 
+.btn-telegram {
+  background-image: url("/img/socials/telegram.svg");
+  background-color: palette.$telegram;
+  box-shadow: inset 0 -4px palette.$telegram_bg;
+}
+
 .btn-youtube {
   background-image: url("/img/socials/youtube.svg");
   background-color: palette.$youtube;

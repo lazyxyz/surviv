@@ -27,7 +27,7 @@ Any amount helps! All donation money goes towards keeping the servers running.
 [ko-fi.com/suroi](https://ko-fi.com/suroi)
 
 ## Join the Discord!
-[discord.surviv.fun](https://discord.surviv.fun)
+[discord.surviv.fun](https://socials.surviv.fun/discord)
 
 ## Installation and setup
 Start by installing [Node.js](https://nodejs.org) and [pnpm](https://pnpm.io).
