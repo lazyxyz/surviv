@@ -48,10 +48,7 @@ import { Team } from "./team";
 import { Grid } from "./utils/grid";
 import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
-import { BotType, Zombie } from "./objects/bots";
-import { SkinDefinition, Skins } from "@common/definitions/skins";
-import { Emotes } from "@common/definitions/emotes";
-import { Badges } from "@common/definitions/badges";
+import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
 
 /*
@@ -250,6 +247,11 @@ export class Game implements GameData {
 
         this.pluginManager.emit("game_created", this);
         Logger.log(`Game ${this.id} | Created in ${Date.now() - this._start} ms`);
+
+        this.activeZombie(20);
+        this.activeNinja(5);
+        this.activeAssassin(3);
+        Logger.log(`Bots added to game`);
 
         // Start the tick loop
         this.tick();
@@ -719,8 +721,10 @@ export class Game implements GameData {
         let bot: Player;
         if (botType == BotType.Zombie) {
             bot = new Zombie(this, botData, spawnPosition, spawnLayer, team);
-        } else {
+        } else if (botType == BotType.Ninja) {
             bot = new Ninja(this, botData, spawnPosition, spawnLayer, team);
+        } else {
+            bot = new Assassin(this, botData, spawnPosition, spawnLayer, team);
         }
 
         this.spectatablePlayers.push(bot);
@@ -744,7 +748,6 @@ export class Game implements GameData {
         );
 
         this.addTimeout(() => { bot.disableInvulnerability(); }, 5000);
-        Logger.log(`Bot ${this.id} | "${bot.name}" added`);
         return bot;
     }
 
@@ -773,6 +776,20 @@ export class Game implements GameData {
 
         for (let i = 0; i < botCount; i++) {
             this.createBot(BotType.Zombie, botData);
+        }
+    }
+    
+    activeAssassin(botCount: number): void {
+        const botData: ActorContainer = {
+            autoFill: false,
+            isDev: false,
+            lobbyClearing: true,
+            weaponPreset: "falchion",
+            ip: undefined
+        };
+
+        for (let i = 0; i < botCount; i++) {
+            this.createBot(BotType.Assassin, botData);
         }
     }
 
@@ -839,8 +856,7 @@ export class Game implements GameData {
             && !this._started
             && this.startTimeout === undefined
         ) {
-            this.activeNinja(100);
-            this.activeZombie(100);
+           
             this.startTimeout = this.addTimeout(() => {
                 this._started = true;
                 this.setGameData({ startedTime: this.now });
