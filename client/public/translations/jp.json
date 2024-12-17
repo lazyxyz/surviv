@@ -212,7 +212,7 @@
     "create_team_play": "ゲームをスタート",
     "report_reporting": "あなたは報告しています:",
     "report_id": "報告ID:",
-    "report_instructions": "\n    <p><strong>以下の手順に従ってください。</strong> そうしないと、レポートは無視されます。</p>\n    <h4>レポートの提出方法</h4>\n    <ol>\n      <li><a href=\"https://discord.suroi.io\">Discordサーバー</a>に参加します。</li>\n      <li><a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheatr-reports\n          チャンネル</a>に移動します。</li>\n      <li>固定された投稿にあるレポートのガイドラインをお読みください。</li>\n      <li>レポートを投稿として送信します。</li>\n    </ol>",
+    "report_instructions": "\n    <p><strong>以下の手順に従ってください。</strong> そうしないと、レポートは無視されます。</p>\n    <h4>レポートの提出方法</h4>\n    <ol>\n      <li><a href=\"https://discord.surviv.fun\">Discordサーバー</a>に参加します。</li>\n      <li><a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheatr-reports\n          チャンネル</a>に移動します。</li>\n      <li>固定された投稿にあるレポートのガイドラインをお読みください。</li>\n      <li>レポートを投稿として送信します。</li>\n    </ol>",
     "languages": "言語",
     "gauze": "ガーゼ",
     "medikit": "医療キット",
@@ -287,9 +287,9 @@
     "confetti_grenade": "紙吹雪爆弾",
     "dual_template": "二丁<gun>",
     "region_dev": "ローカルホスト",
-    "region_na": "Suroi 北アメリカ",
-    "region_eu": "Suroi ヨーロッパ",
-    "region_sa": "Suroi 南アメリカ",
-    "region_as": "Suroi アジア",
+    "region_na": "北アメリカ",
+    "region_eu": "ヨーロッパ",
+    "region_sa": "南アメリカ",
+    "region_as": "アジア",
     "region_open_as": "Open アジア"
 }

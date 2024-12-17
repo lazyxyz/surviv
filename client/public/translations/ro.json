@@ -195,7 +195,7 @@
     "create_team_play": "Începe Joaca",
     "report_reporting": "Raportând",
     "report_id": "Raport ID:",
-    "report_instructions": "\n      <p><strong>Vă rugăm citiți instrucțiunile de mai injos!</strong> Dacă nu, raportul dumneavoastră va fi ignorat.</p>\n      <h4>Cum să Submiteți un Raport</h4>\n      <ol>\n        <li>Intrați în <a href=\"https://discord.suroi.io\">serverul de Discord.</a></li>\n        <li>Duceți-vă la <a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheater-reports\n            channel.</a></li>\n        <li>Citiți regulile de raport la mesajul fixat.</li>\n        <li>Submiteți raportul dumneavoastră ca un mesaj.</li>\n      </ol>",
+    "report_instructions": "\n      <p><strong>Vă rugăm citiți instrucțiunile de mai injos!</strong> Dacă nu, raportul dumneavoastră va fi ignorat.</p>\n      <h4>Cum să Submiteți un Raport</h4>\n      <ol>\n        <li>Intrați în <a href=\"https://discord.surviv.fun\">serverul de Discord.</a></li>\n        <li>Duceți-vă la <a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheater-reports\n            channel.</a></li>\n        <li>Citiți regulile de raport la mesajul fixat.</li>\n        <li>Submiteți raportul dumneavoastră ca un mesaj.</li>\n      </ol>",
     "languages": "Limbile",
     "gauze": "Tifon",
     "medikit": "Trusă Medicală",
@@ -254,9 +254,8 @@
     "confetti_grenade": "Grenadă Cu Confetti",
     "dual_template": "Dublu <gun>",
     "region_dev": "Server Local",
-    "region_na": "Suroi America De Nord",
-    "region_eu": "Suroi Europa",
-    "region_sa": "Suroi America De Sud",
-    "region_as": "Suroi Asia",
-    "region_open_as": "Open Asia"
+    "region_na": "America De Nord",
+    "region_eu": "Europa",
+    "region_sa": "America De Sud",
+    "region_as": "Asia"
 }

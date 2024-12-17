@@ -211,7 +211,7 @@
     "create_team_play": "Spustit hru",
     "report_reporting": "Nahlašování",
     "report_id": "Nahlašovací ID:",
-    "report_instructions": "\n    <p><strong>Prosím dodržujte instrukce níže</strong> Pokud se jimi neřídíte, budete ignorováni.</p>\n    <h4>Jak poslat Nahlášení</h4>\n    <ol>\n      <li>Připojte se k <a href=\"https://discord.suroi.io\">Discord serveru.</a></li>\n      <li>Jděte do <a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheater-reports\n          kanálu.</a></li>\n      <li>Přečtěte si návod na nahlašování v připnutém příspěvku.</li>\n      <li>Pošlete Vaše nahlášení jako příspěvek.</li>\n    </ol>",
+    "report_instructions": "\n    <p><strong>Prosím dodržujte instrukce níže</strong> Pokud se jimi neřídíte, budete ignorováni.</p>\n    <h4>Jak poslat Nahlášení</h4>\n    <ol>\n      <li>Připojte se k <a href=\"https://discord.surviv.fun\">Discord serveru.</a></li>\n      <li>Jděte do <a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheater-reports\n          kanálu.</a></li>\n      <li>Přečtěte si návod na nahlašování v připnutém příspěvku.</li>\n      <li>Pošlete Vaše nahlášení jako příspěvek.</li>\n    </ol>",
     "languages": "Jayzyky",
     "gauze": "Obvaz",
     "medikit": "Lékárnička",
@@ -286,9 +286,9 @@
     "confetti_grenade": "Konfetový granát",
     "dual_template": "Dvojité <gun>",
     "region_dev": "Lokální server",
-    "region_na": "Suroi Severní Amerika",
-    "region_eu": "Suroi Evropa",
-    "region_sa": "Suroi Jižní Amerika",
-    "region_as": "Suroi Asie",
+    "region_na": "Severní Amerika",
+    "region_eu": "Evropa",
+    "region_sa": "Jižní Amerika",
+    "region_as": "Asie",
     "region_open_as": "Open Asie"
 }

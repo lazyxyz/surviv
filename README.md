@@ -19,7 +19,7 @@
 Suroi is an open-source 2D battle royale game inspired by [surviv.io](https://survivio.fandom.com/wiki/Surviv.io_Wiki). It is currently a work in progress.
 
 ## Play the game!
-[suroi.io](https://suroi.io)
+[surviv.fun](https://surviv.fun)
 
 ## Donate!
 Any amount helps! All donation money goes towards keeping the servers running.
@@ -27,7 +27,7 @@ Any amount helps! All donation money goes towards keeping the servers running.
 [ko-fi.com/suroi](https://ko-fi.com/suroi)
 
 ## Join the Discord!
-[discord.suroi.io](https://discord.suroi.io)
+[discord.surviv.fun](https://discord.surviv.fun)
 
 ## Installation and setup
 Start by installing [Node.js](https://nodejs.org) and [pnpm](https://pnpm.io).

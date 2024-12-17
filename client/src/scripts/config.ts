@@ -7,30 +7,10 @@ export const Config = {
             mainAddress: "http://127.0.0.1:8000",
             gameAddress: "ws://127.0.0.1:800<ID>"
         },
-        open_as: {
-            name: "Open Asia",
+        as: {
+            name: "Asia",
             mainAddress: "https://as.surviv.fun",
             gameAddress: "wss://<ID>.as.surviv.fun"
-        },
-        na: {
-            name: "Suroi North America",
-            mainAddress: "https://na.suroi.io",
-            gameAddress: "wss://<ID>.na.suroi.io"
-        },
-        eu: {
-            name: "Suroi Europe",
-            mainAddress: "https://eu.suroi.io",
-            gameAddress: "wss://<ID>.eu.suroi.io"
-        },
-        sa: {
-            name: "Suroi South America",
-            mainAddress: "https://sa.suroi.io",
-            gameAddress: "wss://<ID>.sa.suroi.io"
-        },
-        as: {
-            name: "Suroi Asia",
-            mainAddress: "https://as.suroi.io",
-            gameAddress: "wss://<ID>.as.suroi.io"
         },
     },
     defaultRegion: "na"

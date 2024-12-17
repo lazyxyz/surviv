@@ -209,7 +209,7 @@
     "create_team_play": "Ξεκίνα το παιχνίδι",
     "report_reporting": "Αναφορά",
     "report_id": "Αναγνωριστικό αναφοράς:",
-    "report_instructions": "\n      <p><strong>Παρακαλώ ακολουθήστε τις παρακάτω οδηγίες!</strong> Εάν δεν το κάνετε, η αναφορά σας θα αγνοηθεί.</p>\n      <h4>Πώς να υποβάλετε μια αναφορά</h4>\n      <ol>\n        <li>Μπείτε στον <a href=\"https://discord.suroi.io\">διακομιστή Discord.</a></li>\n        <li>Πηγαίνετε στο κανάλι <a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheater-reports\n            .</a></li>\n        <li>Διαβάστε τις οδηγίες αναφοράς στην καρφιτσωμένη ανάρτηση.</li>\n        <li>Υποβάλετε την αναφορά σας ως ανάρτηση.</li>\n      </ol>",
+    "report_instructions": "\n      <p><strong>Παρακαλώ ακολουθήστε τις παρακάτω οδηγίες!</strong> Εάν δεν το κάνετε, η αναφορά σας θα αγνοηθεί.</p>\n      <h4>Πώς να υποβάλετε μια αναφορά</h4>\n      <ol>\n        <li>Μπείτε στον <a href=\"https://discord.surviv.fun\">διακομιστή Discord.</a></li>\n        <li>Πηγαίνετε στο κανάλι <a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheater-reports\n            .</a></li>\n        <li>Διαβάστε τις οδηγίες αναφοράς στην καρφιτσωμένη ανάρτηση.</li>\n        <li>Υποβάλετε την αναφορά σας ως ανάρτηση.</li>\n      </ol>",
     "languages": "Γλώσσες",
     "gauze": "Γάζα",
     "medikit": "Ιατρικό Κιτ",
@@ -284,9 +284,9 @@
     "confetti_grenade": "Χειροβομβίδα Κομφετί",
     "dual_template": "Διπλό <gun>",
     "region_dev": "Τοπικός Διακομιστής",
-    "region_na": "Suroi Βόρεια Αμερική",
-    "region_eu": "Suroi Ευρώπη",
-    "region_sa": "Suroi Νότια Αμερική",
-    "region_as": "Suroi Ασία",
+    "region_na": "Βόρεια Αμερική",
+    "region_eu": "Ευρώπη",
+    "region_sa": "Νότια Αμερική",
+    "region_as": "Ασία",
     "region_open_as": "Open Ασία"
 }

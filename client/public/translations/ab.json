@@ -194,7 +194,7 @@
     "create_team_play": "Fillo lojen",
     "report_reporting": "Duke Raportuar",
     "report_id": "ID e Raportit:",
-    "report_instructions": "\n      <p><strong>Ju lutemi ndiqni udhëzimet e mëposhtme!</strong>Nëse jo, raporti juaj do të shpërfillet.</p>\n      <h4>Si të dorëzoni një raport</h4>\n      <ol>\n        <li>Bashkohuni me <a href=\"https://discord.suroi.io\">Serverin Discord.</a></li>\n        <li>Shkoni në <a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheater-reports\n            kanal.</a></li>\n        <li>Lexoni udhëzimet e raportit në postimin e mbërthyer.</li>\n        <li>Paraqisni raportin tuaj si një postim.</li>\n      </ol>",
+    "report_instructions": "\n      <p><strong>Ju lutemi ndiqni udhëzimet e mëposhtme!</strong>Nëse jo, raporti juaj do të shpërfillet.</p>\n      <h4>Si të dorëzoni një raport</h4>\n      <ol>\n        <li>Bashkohuni me <a href=\"https://discord.surviv.fun\">Serverin Discord.</a></li>\n        <li>Shkoni në <a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheater-reports\n            kanal.</a></li>\n        <li>Lexoni udhëzimet e raportit në postimin e mbërthyer.</li>\n        <li>Paraqisni raportin tuaj si një postim.</li>\n      </ol>",
     "languages": "Gjuhët",
     "gauze": "Fasho",
     "medikit": "Medikit",
@@ -238,9 +238,9 @@
     "confetti_grenade": "Granatë Konfeti",
     "dual_template": "Dyfishtë <gun>",
     "region_dev": "Serveri Localhost",
-    "region_na": "Suroi Amerika e Veriut",
-    "region_eu": "Suroi Europa",
-    "region_sa": "Suroi Amerika e Jugut",
-    "region_as": "Suroi Azia",
+    "region_na": "Amerika e Veriut",
+    "region_eu": "Europa",
+    "region_sa": "Amerika e Jugut",
+    "region_as": "Azia",
     "region_open_as": "Open Azia"
 }

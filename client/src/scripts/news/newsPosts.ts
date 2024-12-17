@@ -287,7 +287,7 @@ Special thanks to pap, Solstice, platonthek, eiπ, and the other devs for their 
         author: "HAZEL",
         title: "Just the Two of Us",
         bannerImage: "../img/news/v0.17.0.png",
-        content: `Much requested. Long awaited. Duos mode is here! Grab a friend and battle towards that tasty chicken dinner! Either queue with a random or send a custom link to someone. If you'd like to voice chat, join the <a href="https://discord.suroi.io" target="_blank">Discord server</a>. You could even use one of 3 new LMGs we've added to help you out…<br><br>
+        content: `Much requested. Long awaited. Duos mode is here! Grab a friend and battle towards that tasty chicken dinner! Either queue with a random or send a custom link to someone. If you'd like to voice chat, join the <a href="https://discord.surviv.fun" target="_blank">Discord server</a>. You could even use one of 3 new LMGs we've added to help you out…<br><br>
 
 The MG36 is for those who like assault rifles like the AK-47 but find themselves needing that little extra “oomph”. The lightness of an AR combined with the hard hitting obstacle multiplier of a LMG. Give it a try!<br><br>
 
@@ -764,7 +764,7 @@ Surians can now customize their skins, and express themselves with emotes too! E
 <ul>
   <li>Loot! Crates now drop guns and healing items. Players no longer spawn with guns.</li>
   <li>More guns! Added 4 guns: the Mosin-Nagant (a sniper), Model 37 (a pump shotgun), SAF-200 (a burst fire SMG), and G19 (a full auto pistol). Recoil has also been added, meaning guns slow you down when firing.</li>
-  <li>Server selector! You can now choose between 3 servers: one in Suroi North America (Detroit, Michigan), one in Suroi Europe (London, England), and one in Suroi Asia (Osaka, Japan).</li>
+  <li>Server selector! You can now choose between 3 servers: one in Suroi North America (Detroit, Michigan), one in Suroi Europe (London, England), and one in Asia (Osaka, Japan).</li>
   <li>Added an "Equip Other Gun" keybind (defaults to space bar).</li>
   <li>Added a "Swap Gun Slots" keybind (defaults to T).</li>
   <li>Added a keybind to toggle the minimap (defaults to N).</li>
@@ -827,7 +827,7 @@ Surians can now customize their skins, and express themselves with emotes too! E
         title: "We're back, baby",
         bannerImage: "../img/news/v0.1.0.png",
         content: `Kongregate may have shut down Surviv Reloaded, but that's not gonna stop me! Today, I'm releasing the first ever beta version of Suroi, an open-source 2D battle royale game inspired by surviv.io.
-To report a bug or suggest something, <a href="https://discord.suroi.io" target="_blank" rel="noopener noreferrer">join the Discord server</a>. If you have any questions, check out the FAQ on <a href="https://suroi.io/news" target="_blank" rel="noopener noreferrer">the news page</a>.`,
+To report a bug or suggest something, <a href="https://discord.surviv.fun" target="_blank" rel="noopener noreferrer">join the Discord server</a>. If you have any questions, check out the FAQ on <a href="https://surviv.fun/news" target="_blank" rel="noopener noreferrer">the news page</a>.`,
         longContent: `<h2>FAQ</h2>
 <h3>What is Suroi?</h3>
 <p>Suroi is a new open-source 2D battle royale game inspired by surviv.io. After Surviv Reloaded, my first surviv.io revival project, got DMCA'd by Kongregate, the Surviv Reloaded team started work on a new game, Suroi. Suroi is similar to surviv, but it's built from the ground up with 100% original assets and code.</p>
