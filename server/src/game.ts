@@ -248,9 +248,9 @@ export class Game implements GameData {
         this.pluginManager.emit("game_created", this);
         Logger.log(`Game ${this.id} | Created in ${Date.now() - this._start} ms`);
 
-        this.activeZombie(20);
-        this.activeNinja(10);
-        this.activeAssassin(5);
+        // this.activeZombie(20);
+        this.activeNinja(100);
+        // this.activeAssassin(100);
         Logger.log(`Bots added to game`);
 
         // Start the tick loop

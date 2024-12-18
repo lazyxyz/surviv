@@ -1,4 +1,4 @@
-import { Layer } from "@common/constants";
+import { GameConstants, Layer } from "@common/constants";
 import { type Vector, Vec } from "@common/utils/vector";
 import { Game } from "../../game";
 import { Team } from "../../team";
@@ -26,8 +26,6 @@ export class Assassin extends Player {
         super(game, userData, position, layer, team);
         this.isMobile = true; // Indicates the Assassin is a mobile character
         this.name = "Assassin"; // Character name
-        this.baseSpeed *= 0.7; // Reduced movement speed
-        this.health *= 0.5; // Reduced health
 
         this.inventory.scope = Scopes.definitions[1];
         this.loadout.skin = Skins.fromString("gold_tie_event");
@@ -69,7 +67,6 @@ export class Assassin extends Player {
         this.inventory.scope = Scopes.definitions[2];
     }
 
-    // Constants for Assassin behavior
     attackRotationRate = 0.35; // Maximum rotation speed per update
     shotRotationRate = 0.2; // Maximum rotation speed per update
     safeDistanceHideSpot = 0.5; // Minimum distance to maintain from hiding spots
@@ -77,6 +74,8 @@ export class Assassin extends Player {
     attackDistance = 20; // Use mele attack when gamer too close
     shotDistance = 100;
     shotNerf = 0.07; // 7%
+    speedNerf = 0.7;
+    attackSpeed = GameConstants.player.baseSpeed * 0.7; // Neff 30%
 
     update() {
         super.update();
@@ -85,19 +84,27 @@ export class Assassin extends Player {
         for (const obj of this.visibleObjects) {
             if (obj instanceof Gamer && !obj.dead) {
                 if (Vec.length(Vec.sub(obj.position, this.position)) < this.attackDistance) {
+                    this.inventory.setActiveWeaponIndex(2);
                     this.attackNearestPlayer();
                     return;
                 }
                 else if (Vec.length(Vec.sub(obj.position, this.position)) < this.shotDistance) {
+                    this.inventory.setActiveWeaponIndex(0);
                     if (this.inventory.items.hasItem((this.activeItemDefinition as GunDefinition).ammoType)) {
                         this.shotNearestPlayer();
                     } else {
                         this.inventory.setActiveWeaponIndex(2);
                         this.attackDistance = 30;
+                        this.shotDistance = this.attackDistance;
                     }
                     return;
                 }
             }
+        }
+
+        if (this.game.gas.isInGas(this.position)) {
+            this.moving();
+            return;
         }
 
         // Default to hiding if no players to chase
@@ -108,7 +115,6 @@ export class Assassin extends Player {
      * Attacks the nearest visible player.
      */
     shotNearestPlayer() {
-        this.inventory.setActiveWeaponIndex(0);
         let nearestPlayer: Gamer | null = null;
         let nearestDistance = Infinity;
 
@@ -136,7 +142,7 @@ export class Assassin extends Player {
             // Prepare input packet for attack movement
             const packet: PlayerInputData = {
                 movement: { up: false, down: false, left: false, right: false },
-                attacking: true, // Toggle attacking state
+                attacking: !this.attacking, // Toggle attacking state
                 actions: [],
                 isMobile: true,
                 turning: true,
@@ -158,6 +164,7 @@ export class Assassin extends Player {
     hide() {
         let nearestHideSpot: Obstacle | null = null;
         let nearestDistance = Infinity;
+        this.baseSpeed = GameConstants.player.baseSpeed;
 
         // Find the nearest suitable hiding spot
         for (const obj of this.visibleObjects) {
@@ -202,7 +209,7 @@ export class Assassin extends Player {
    * Attacks the nearest visible player.
    */
     attackNearestPlayer() {
-        this.inventory.setActiveWeaponIndex(2);
+        this.baseSpeed = this.attackSpeed;
         let nearestPlayer: Gamer | null = null;
         let nearestDistance = Infinity;
 
@@ -244,5 +251,36 @@ export class Assassin extends Player {
 
             this.processInputs(packet);
         }
+    }
+
+    moving() {
+        this.baseSpeed = GameConstants.player.baseSpeed;
+        this.inventory.setActiveWeaponIndex(2);
+        const moveSpot = this.game.gas.newPosition;
+
+        // Determine direction and distance to the hiding spot
+        const directionToHideSpot = Vec.normalize(Vec.sub(moveSpot, this.position));
+        const distanceToHideSpot = Vec.length(Vec.sub(moveSpot, this.position));
+
+        // Adjust rotation to face the hiding spot
+        const desiredRotation = Math.atan2(directionToHideSpot.y, directionToHideSpot.x);
+        const rotationDifference = desiredRotation - this.rotation;
+        const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), this.attackRotationRate) * Math.sign(rotationDifference);
+
+        const packet: PlayerInputData = {
+            movement: { up: false, down: false, left: false, right: false },
+            attacking: !this.attacking,
+            actions: [],
+            isMobile: true,
+            turning: true,
+            mobile: {
+                moving: distanceToHideSpot > this.safeDistanceHideSpot,
+                angle: adjustedRotation,
+            },
+            rotation: adjustedRotation,
+            distanceToMouse: undefined,
+        };
+
+        this.processInputs(packet);
     }
 }

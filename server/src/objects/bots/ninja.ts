@@ -1,4 +1,4 @@
-import { Layer } from "@common/constants";
+import { GameConstants, Layer } from "@common/constants";
 import { type Vector, Vec } from "@common/utils/vector";
 import { Game } from "../../game";
 import { Team } from "../../team";
@@ -13,28 +13,40 @@ import { Obstacle } from "../obstacle";
 import { Scopes } from "@common/definitions/scopes";
 import { Armors } from "@common/definitions/armors";
 
-// Constants for Ninja behavior
-const CHASE_RADIUS = 30; // Distance within which the Ninja will chase players
-const ROTATION_RATE = 0.35; // Maximum rotation speed per update
-const SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance to maintain from players
-const SAFE_DISTANCE_FROM_HIDE_SPOT = 0.5; // Minimum distance to maintain from hiding spots
-
 /**
  * Ninja Class
  * Represents a specialized player character with unique traits and behaviors.
  */
 export class Ninja extends Player {
+    private static readonly CHASE_RADIUS: number = 30; // Distance within which the Ninja will chase players
+    private static readonly ROTATION_RATE: number = 0.35; // Maximum rotation speed per update
+    private static readonly SAFE_DISTANCE_PLAYER: number = 5; // Minimum distance to maintain from players
+    private static readonly SAFE_DISTANCE_HIDE_SPOT: number = 0.5; // Minimum distance to maintain from hiding spots
+    private static readonly ATTACK_SPEED: number = GameConstants.player.baseSpeed * 0.7; // Attack speed 70% of base speed
+
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team) {
         super(game, userData, position, layer, team);
 
-        this.baseSpeed *= 0.7; // Reduced movement speed
-        this.health *= 0.5; // Reduced health
-        this.isMobile = true; // Indicates the Ninja is a mobile character
-        this.name = "Ninja"; // Character name
+        this.isMobile = true;
+        this.name = "Ninja";
 
+        this.initializeLoadout();
+        this.initializeInventory();
+    }
+
+    /** 
+     * Setup the initial loadout for the Ninja. 
+     */
+    private initializeLoadout(): void {
         this.loadout.skin = Skins.fromString("gold_tie_event");
         this.loadout.badge = Badges.fromString("bdg_bleh");
         this.loadout.emotes = [Emotes.fromString("happy_face")];
+    }
+
+    /** 
+     * Setup the Ninja's inventory. 
+     */
+    private initializeInventory(): void {
         this.inventory.weapons[2] = new MeleeItem("seax", this);
         this.inventory.scope = Scopes.definitions[1];
         this.inventory.vest = Armors.fromString('basic_vest');
@@ -44,113 +56,105 @@ export class Ninja extends Player {
         this.inventory.items.setItem('cola', randomCola);
     }
 
-    update() {
+    update(): void {
         super.update();
 
-        // Check if any visible player is within chase radius
+        if (this.chasePlayer()) return;
+
+        if (this.game.gas.isInGas(this.position)) {
+            this.moveToSafePosition();
+            return;
+        }
+
+        this.hideInSafeSpot();
+    }
+
+    /** 
+     * Chase the nearest visible player if within range. 
+     */
+    private chasePlayer(): boolean {
         for (const obj of this.visibleObjects) {
             if (obj instanceof Gamer && !obj.dead) {
-                if (Vec.length(Vec.sub(obj.position, this.position)) < CHASE_RADIUS) {
+                const distance = Vec.length(Vec.sub(obj.position, this.position));
+                if (distance < Ninja.CHASE_RADIUS) {
                     this.attackNearestPlayer();
-                    return;
+                    return true;
                 }
             }
         }
-
-        // Default to hiding if no players to chase
-        this.hide();
+        return false;
     }
 
-    /**
-     * Attacks the nearest visible player.
-     */
-    attackNearestPlayer() {
-        let nearestPlayer: Gamer | null = null;
-        let nearestDistance = Infinity;
-
-        // Find the nearest player
-        for (const obj of this.visibleObjects) {
-            if (obj instanceof Gamer) {
-                const distance = Vec.length(Vec.sub(obj.position, this.position));
-                if (distance < nearestDistance) {
-                    nearestDistance = distance;
-                    nearestPlayer = obj;
-                }
-            }
-        }
+    private attackNearestPlayer(): void {
+        const nearestPlayer = this.findNearestObject<Gamer>(Gamer);
 
         if (nearestPlayer) {
-            // Determine direction and distance to the player
-            const directionToPlayer = Vec.normalize(Vec.sub(nearestPlayer.position, this.position));
-            const distanceToPlayer = Vec.length(Vec.sub(nearestPlayer.position, this.position));
-
-            // Adjust rotation to face the player
-            const desiredRotation = Math.atan2(directionToPlayer.y, directionToPlayer.x);
-            const rotationDifference = desiredRotation - this.rotation;
-            const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), ROTATION_RATE) * Math.sign(rotationDifference);
-
-            // Prepare input packet for attack movement
-            const packet: PlayerInputData = {
-                movement: { up: false, down: false, left: false, right: false },
-                attacking: !this.attacking, // Toggle attacking state
-                actions: [],
-                isMobile: true,
-                turning: true,
-                mobile: {
-                    moving: distanceToPlayer > SAFE_DISTANCE_FROM_PLAYER,
-                    angle: adjustedRotation,
-                },
-                rotation: adjustedRotation,
-                distanceToMouse: undefined,
-            };
-
-            this.processInputs(packet);
+            this.baseSpeed = Ninja.ATTACK_SPEED;
+            this.moveToTarget(nearestPlayer.position, Ninja.SAFE_DISTANCE_PLAYER, true);
         }
     }
 
-    /**
-     * Moves the Ninja towards the nearest hiding spot (e.g., bush or tree).
+    private hideInSafeSpot(): void {
+        const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) => 
+            ["bush", "tree"].includes(obj.definition.material) && !obj.dead && !this.game.gas.isInGas(obj.position)
+        );
+
+        if (nearestHideSpot) {
+            this.baseSpeed = GameConstants.player.baseSpeed;
+            this.moveToTarget(nearestHideSpot.position, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
+        }
+    }
+
+    private moveToSafePosition(): void {
+        const moveSpot = this.game.gas.newPosition;
+        this.moveToTarget(moveSpot, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
+    }
+
+    /** 
+     * Generic function to move towards a target position while rotating appropriately. 
      */
-    hide() {
-        let nearestHideSpot: Obstacle | null = null;
+    private moveToTarget(targetPosition: Vector, safeDistance: number, isAttacking: boolean): void {
+        const directionToTarget = Vec.normalize(Vec.sub(targetPosition, this.position));
+        const distanceToTarget = Vec.length(Vec.sub(targetPosition, this.position));
+
+        const desiredRotation = Math.atan2(directionToTarget.y, directionToTarget.x);
+        const rotationDifference = desiredRotation - this.rotation;
+        const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), Ninja.ROTATION_RATE) * Math.sign(rotationDifference);
+
+        const packet: PlayerInputData = {
+            movement: { up: false, down: false, left: false, right: false },
+            attacking: isAttacking ? !this.attacking : false,
+            actions: [],
+            isMobile: true,
+            turning: true,
+            mobile: {
+                moving: distanceToTarget > safeDistance,
+                angle: adjustedRotation,
+            },
+            rotation: adjustedRotation,
+            distanceToMouse: undefined,
+        };
+
+        this.processInputs(packet);
+    }
+
+    /** 
+     * Find the nearest object of a specific type. 
+     */
+    private findNearestObject<T>(type: new (...args: any[]) => T, filter?: (obj: T) => boolean): T | null {
+        let nearestObject: T | null = null;
         let nearestDistance = Infinity;
 
-        // Find the nearest suitable hiding spot
         for (const obj of this.visibleObjects) {
-            if (obj instanceof Obstacle && !obj.dead && ["bush", "tree"].includes(obj.definition.material)) {
+            if (obj instanceof type && (!filter || filter(obj))) {
                 const distance = Vec.length(Vec.sub(obj.position, this.position));
                 if (distance < nearestDistance) {
                     nearestDistance = distance;
-                    nearestHideSpot = obj;
+                    nearestObject = obj;
                 }
             }
         }
 
-        if (nearestHideSpot) {
-            // Determine direction and distance to the hiding spot
-            const directionToHideSpot = Vec.normalize(Vec.sub(nearestHideSpot.position, this.position));
-            const distanceToHideSpot = Vec.length(Vec.sub(nearestHideSpot.position, this.position));
-
-            // Adjust rotation to face the hiding spot
-            const desiredRotation = Math.atan2(directionToHideSpot.y, directionToHideSpot.x);
-            const rotationDifference = desiredRotation - this.rotation;
-            const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), ROTATION_RATE) * Math.sign(rotationDifference);
-
-            const packet: PlayerInputData = {
-                movement: { up: false, down: false, left: false, right: false },
-                attacking: false,
-                actions: [],
-                isMobile: true,
-                turning: true,
-                mobile: {
-                    moving: distanceToHideSpot > SAFE_DISTANCE_FROM_HIDE_SPOT,
-                    angle: adjustedRotation,
-                },
-                rotation: adjustedRotation,
-                distanceToMouse: undefined,
-            };
-
-            this.processInputs(packet);
-        }
+        return nearestObject;
     }
 }
