@@ -87,7 +87,7 @@ if (isMainThread) {
                 nextSwitchTime: maxTeamSizeSwitchCron?.nextRun()?.getTime(),
                 protocolVersion: GameConstants.protocolVersion
             }));
-    }).get("/api/getGame", async(res, req) => {
+    }).get("/api/getGame", async (res, req) => {
         let aborted = false;
         res.onAborted(() => { aborted = true; });
         cors(res);
@@ -293,13 +293,12 @@ if (isMainThread) {
     }).listen(Config.host, Config.port, (): void => {
         console.log(
             `
- _____ _   _______ _____ _____
-/  ___| | | | ___ \\  _  |_   _|
-\\ \`--.| | | | |_/ / | | | | |
- \`--. \\ | | |    /| | | | | |
-/\\__/ / |_| | |\\ \\\\ \\_/ /_| |_
-\\____/ \\___/\\_| \\_|\\___/ \\___/
-            `);
+  SSSSS U   U RRRR  V   V IIIII V   V
+ S      U   U R   R V   V   I   V   V
+  SSS   U   U RRRR   V V    I    V V 
+     S  U   U R  R    V     I     V  
+  SSSS   UUU  R   R   V   IIIII   V  
+`);
 
         Logger.log(`Suroi Server v${version}`);
         Logger.log(`Listening on ${Config.host}:${Config.port}`);
@@ -339,7 +338,7 @@ if (isMainThread) {
         if (protection) {
             setInterval(() => {
                 if (protection.punishments?.url) {
-                    void (async() => {
+                    void (async () => {
                         try {
                             if (!protection.punishments?.url) return;
                             const response = await fetch(`${protection.punishments.url}/punishments`, { headers: { "api-key": protection.punishments.password } });

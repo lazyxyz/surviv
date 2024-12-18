@@ -699,7 +699,7 @@ export class Game implements GameData {
         }
 
         const hitbox = new CircleHitbox(5);
-        const gasPosition = this.gas.currentPosition;
+        const gasPosition = this.gas.newPosition;
         const gasRadius = this.gas.newRadius ** 2;
 
         let foundPosition = false;
