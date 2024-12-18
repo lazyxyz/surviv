@@ -249,8 +249,8 @@ export class Game implements GameData {
         Logger.log(`Game ${this.id} | Created in ${Date.now() - this._start} ms`);
 
         this.activeZombie(20);
-        this.activeNinja(5);
-        this.activeAssassin(3);
+        this.activeNinja(10);
+        this.activeAssassin(5);
         Logger.log(`Bots added to game`);
 
         // Start the tick loop
@@ -726,7 +726,7 @@ export class Game implements GameData {
         } else {
             bot = new Assassin(this, botData, spawnPosition, spawnLayer, team);
         }
-
+        this.livingPlayers.add(bot);
         this.spectatablePlayers.push(bot);
         this.connectedPlayers.add(bot);
         this.newPlayers.push(bot);

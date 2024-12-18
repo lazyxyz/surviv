@@ -10,9 +10,9 @@ import { Emotes } from "@common/definitions/emotes";
 import { Gamer } from "../gamer";
 
 const CHASE_DISTANCE = 30;
-const ROTATION_SPEED = 0.2;
+const ROTATION_RATE = 0.2;
 const IDLE_ROTATION_SPEED = 0.05;
-const MIN_DISTANCE_FROM_PLAYER = 5; // Minimum distance from the player to avoid colliding
+const SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance from the player to avoid colliding
 
 export class Zombie extends Player {
     constructor(game: Game, userData: ActorContainer, position: Vector,
@@ -51,6 +51,7 @@ export class Zombie extends Player {
         let nearestPlayer: Gamer | null = null;
         let nearestDistance = Infinity;
 
+        // Find the nearest player
         for (const obj of this.visibleObjects) {
             if (obj instanceof Gamer) {
                 const distance = Vec.length(Vec.sub(obj.position, this.position));
@@ -62,35 +63,30 @@ export class Zombie extends Player {
         }
 
         if (nearestPlayer) {
+            // Determine direction and distance to the player
             const directionToPlayer = Vec.normalize(Vec.sub(nearestPlayer.position, this.position));
             const distanceToPlayer = Vec.length(Vec.sub(nearestPlayer.position, this.position));
 
-            // Rotate towards the player
-            const desiredRotation = Math.atan2(directionToPlayer.y, directionToPlayer.x); // Calculate desired rotation angle
+            // Adjust rotation to face the player
+            const desiredRotation = Math.atan2(directionToPlayer.y, directionToPlayer.x);
             const rotationDifference = desiredRotation - this.rotation;
-            const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), ROTATION_SPEED) * Math.sign(rotationDifference); // Limit rotation speed
+            const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), ROTATION_RATE) * Math.sign(rotationDifference);
 
-            // Calculate the angle for mobile movement (angle in radians to degrees conversion)
-            const movement = {
-                up: false,
-                down: false,
-                left: false,
-                right: false,
-            };
-
+            // Prepare input packet for attack movement
             const packet: PlayerInputData = {
-                movement: movement,
-                attacking: !this.attacking,
+                movement: { up: false, down: false, left: false, right: false },
+                attacking: !this.attacking, // Toggle attacking state
                 actions: [],
                 isMobile: true,
                 turning: true,
                 mobile: {
-                    moving: distanceToPlayer > MIN_DISTANCE_FROM_PLAYER, // Move only if not too close
-                    angle: adjustedRotation
+                    moving: distanceToPlayer > SAFE_DISTANCE_FROM_PLAYER,
+                    angle: adjustedRotation,
                 },
                 rotation: adjustedRotation,
                 distanceToMouse: undefined,
             };
+
             this.processInputs(packet);
         }
     }
