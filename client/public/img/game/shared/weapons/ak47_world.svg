@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="svg1" xmlns="http://www.w3.org/2000/svg" width="122.9" height="22.81" viewBox="0 0 122.9 22.81">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #171717;
+      }
+
+      .cls-2 {
+        fill: #1a1a1a;
+      }
+
+      .cls-3 {
+        fill: #7d521b;
+        stroke: #261a08;
+      }
+
+      .cls-3, .cls-4, .cls-5, .cls-6 {
+        stroke-width: 3px;
+      }
+
+      .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8 {
+        stroke-linecap: round;
+      }
+
+      .cls-4 {
+        fill: #434343;
+      }
+
+      .cls-4, .cls-5, .cls-6, .cls-7 {
+        stroke: #171717;
+      }
+
+      .cls-5 {
+        fill: #3c3c3c;
+      }
+
+      .cls-6, .cls-8 {
+        fill: none;
+      }
+
+      .cls-7 {
+        fill: #505050;
+      }
+
+      .cls-7, .cls-8 {
+        stroke-width: 1.5px;
+      }
+
+      .cls-8 {
+        stroke: #1a1a1a;
+      }
+    </style>
+  </defs>
+  <path id="rect2023-2" class="cls-3" d="M49.7,6.81v5c0,1-.9,1.9-2,1.9H3.5c-1.1,0-2-.9-2-1.9V6.81c0-1,.9-1.9,2-1.9H47.6c1.2,.1,2.1,.9,2.1,1.9Z"/>
+  <path id="rect2077-2" class="cls-4" d="M75.3,15.31H27.4l-1.2-2.3V5.51l1.2-2.3h47.9V15.31Z"/>
+  <path id="path2637-2" class="cls-2" d="M30.3,2.51l-3.5,.1v13.8l3.5,.1v-4.3l1.5-1V7.21l-1.5-1V2.51Z"/>
+  <path id="path2938-2" class="cls-1" d="M63.8,16.51v6.1c-.1,.1-.2,.2-.3,.2h-.8c-.1,0-.2-.1-.3-.2v-1.6c0-.5,0-1-.3-1.4-.7-1-1.7-1.3-2.2-1.8-.3-.3-.2-1-.5-1.3h4.4Z"/>
+  <rect id="rect5115-2" class="cls-5" x="99.6" y="6.01" width="21.8" height="6.5" rx="1.38" ry="1.38"/>
+  <path id="rect983-2" class="cls-7" d="M71.9,3.41V15.01h-11.1v-2.8l7.1-1.6v-2.7l-7.1-1.6V3.41h11.1Z"/>
+  <path id="path1772-2" class="cls-6" d="M75.3,15.31H27.4l-1.2-2.3V5.51l1.2-2.3h47.9V15.31Z"/>
+  <path id="rect5006-2" class="cls-3" d="M105.8,7.51v3.4c0,2.6-1.7,4.8-4.2,4.9l-24.2,1.3c-1.2,0-2.2-1-2.2-2.3V3.81c0-1.3,1-2.4,2.2-2.3l24.2,1.3c2.5,0,4.2,2.1,4.2,4.7Z"/>
+  <g id="g2">
+    <path id="path1" class="cls-8" d="M59.47,11.88h-26.86"/>
+    <path id="path2" class="cls-8" d="M59.47,6.82h-26.86"/>
+  </g>
+</svg>

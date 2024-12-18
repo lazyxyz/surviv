@@ -1,0 +1,76 @@
+@use "../main.scss";
+@use "../pages/client/splash.scss";
+@use "../palette.scss";
+
+body {
+    background: palette.$bg;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+#news-page {
+    background: #16161680;
+    width: 95%;
+    max-width: 1000px;
+    margin: auto auto 50px;
+    border-radius: 15px;
+
+    h1 {
+        color: palette.$orange;
+        text-align: center;
+        font-family: "Inter", sans-serif;
+        font-size: 50px;
+    }
+
+    article {
+        width: 95%;
+        background-color: #08122b80;
+        margin: auto;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 25px;
+        border-radius: 10px;
+
+        .news-date {
+            color: gray;
+            font-size: 14px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+
+        .news-title {
+            color: palette.$blue;
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        span {
+            color: white;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .short-desc {
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .long-desc {
+            font-size: 16px;
+            line-height: 150%;
+        }
+
+        .news-banner {
+            display: flex;
+            margin: auto;
+        }
+
+        img {
+            height: auto;
+            margin: auto;
+            max-width: 90%;
+        }
+    }
+}

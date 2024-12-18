@@ -1,0 +1,34 @@
+# Build
+dist/
+
+# Node
+node_modules/
+
+server/reports
+punishments.json
+
+# Vite
+vite.config.ts.timestamp-*
+
+# IDE garbage
+.idea
+.DS_Store
+.vscode
+*.kate-swp
+.history
+
+# node-gyp sometimes does this
+build/
+
+# try to prevent chpster moments from happening
+*.desktop
+*.css
+
+# try to prevent damienvesper moments from happening
+.cache/
+.pnpm-cache/
+.npm/
+*.log
+
+# try to prevent error moments from happening (no pun intended)
+.env

@@ -1,0 +1,7 @@
+packages:
+  - 'server/'
+  - 'common/'
+  - 'client/'
+  - 'tests/'
+  - 'translations/'
+  - '!**dist/**'

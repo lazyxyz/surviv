@@ -1,0 +1,12 @@
+{
+  "name": "@surviv/common",
+  "description": "",
+  "private": true,
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "@types/node": "^22.7.5"
+  }
+}
