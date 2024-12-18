@@ -9,8 +9,8 @@ import { Badges } from "@common/definitions/badges";
 import { Emotes } from "@common/definitions/emotes";
 import { Gamer } from "../gamer";
 
-const CHASE_DISTANCE = 30;
-const ROTATION_RATE = 0.2;
+const CHASE_DISTANCE = 40;
+const ROTATION_RATE = 0.35;
 const IDLE_ROTATION_SPEED = 0.05;
 const SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance from the player to avoid colliding
 

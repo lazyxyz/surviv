@@ -15,7 +15,7 @@ import { Armors } from "@common/definitions/armors";
 
 // Constants for Ninja behavior
 const CHASE_RADIUS = 30; // Distance within which the Ninja will chase players
-const ROTATION_RATE = 0.2; // Maximum rotation speed per update
+const ROTATION_RATE = 0.35; // Maximum rotation speed per update
 const SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance to maintain from players
 const SAFE_DISTANCE_FROM_HIDE_SPOT = 0.5; // Minimum distance to maintain from hiding spots
 

@@ -13,14 +13,9 @@ import { Scopes } from "@common/definitions/scopes";
 import { GunItem } from "../../inventory/gunItem";
 import { Loots } from "@common/definitions/loots";
 import { MeleeItem } from "../../inventory/meleeItem";
+import { GunDefinition } from "@common/definitions/guns";
 
-// Constants for Assassin behavior
-const ATTACK_ROTATION_RATE = 0.2; // Maximum rotation speed per update
-const SHOT_ROTATION_RATE = 0.2; // Maximum rotation speed per update
-const SAFE_DISTANCE_FROM_HIDE_SPOT = 0.5; // Minimum distance to maintain from hiding spots
-const SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance to maintain from players
-const ATTACK_DISTANCE = 30; // Use mele attack when gamer too close
-const SHOT_DISTANCE = 100;
+
 
 /**
  * Assassin Class
@@ -33,7 +28,7 @@ export class Assassin extends Player {
         this.name = "Assassin"; // Character name
         this.baseSpeed *= 0.7; // Reduced movement speed
         this.health *= 0.5; // Reduced health
-        
+
         this.inventory.scope = Scopes.definitions[1];
         this.loadout.skin = Skins.fromString("gold_tie_event");
         this.loadout.badge = Badges.fromString("bdg_bleh");
@@ -74,17 +69,32 @@ export class Assassin extends Player {
         this.inventory.scope = Scopes.definitions[2];
     }
 
+    // Constants for Assassin behavior
+    attackRotationRate = 0.35; // Maximum rotation speed per update
+    shotRotationRate = 0.2; // Maximum rotation speed per update
+    safeDistanceHideSpot = 0.5; // Minimum distance to maintain from hiding spots
+    safeDistancePlayer = 5; // Minimum distance to maintain from players
+    attackDistance = 20; // Use mele attack when gamer too close
+    shotDistance = 100;
+    shotNerf = 0.07; // 7%
+
     update() {
         super.update();
 
         // Check if any visible player is within chase radius
         for (const obj of this.visibleObjects) {
             if (obj instanceof Gamer && !obj.dead) {
-                if (Vec.length(Vec.sub(obj.position, this.position)) < ATTACK_DISTANCE) {
+                if (Vec.length(Vec.sub(obj.position, this.position)) < this.attackDistance) {
                     this.attackNearestPlayer();
                     return;
-                } else if (Vec.length(Vec.sub(obj.position, this.position)) < SHOT_DISTANCE) {
-                    this.shotNearestPlayer();
+                }
+                else if (Vec.length(Vec.sub(obj.position, this.position)) < this.shotDistance) {
+                    if (this.inventory.items.hasItem((this.activeItemDefinition as GunDefinition).ammoType)) {
+                        this.shotNearestPlayer();
+                    } else {
+                        this.inventory.setActiveWeaponIndex(2);
+                        this.attackDistance = 30;
+                    }
                     return;
                 }
             }
@@ -120,9 +130,9 @@ export class Assassin extends Player {
             // Adjust rotation to face the player
             const desiredRotation = Math.atan2(directionToPlayer.y, directionToPlayer.x);
             const rotationDifference = desiredRotation - this.rotation;
-            const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), SHOT_ROTATION_RATE) * Math.sign(rotationDifference);
+            const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), this.shotRotationRate) * Math.sign(rotationDifference);
 
-            const randomRotation = (Math.random() * 0.2) - 0.1; // 10%
+            const randomRotation = (Math.random() * (this.shotNerf * 2)) - this.shotNerf;
             // Prepare input packet for attack movement
             const packet: PlayerInputData = {
                 movement: { up: false, down: false, left: false, right: false },
@@ -168,7 +178,7 @@ export class Assassin extends Player {
             // Adjust rotation to face the hiding spot
             const desiredRotation = Math.atan2(directionToHideSpot.y, directionToHideSpot.x);
             const rotationDifference = desiredRotation - this.rotation;
-            const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), ATTACK_ROTATION_RATE) * Math.sign(rotationDifference);
+            const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), this.attackRotationRate) * Math.sign(rotationDifference);
 
             const packet: PlayerInputData = {
                 movement: { up: false, down: false, left: false, right: false },
@@ -177,7 +187,7 @@ export class Assassin extends Player {
                 isMobile: true,
                 turning: true,
                 mobile: {
-                    moving: distanceToHideSpot > SAFE_DISTANCE_FROM_HIDE_SPOT,
+                    moving: distanceToHideSpot > this.safeDistanceHideSpot,
                     angle: adjustedRotation,
                 },
                 rotation: adjustedRotation,
@@ -215,7 +225,7 @@ export class Assassin extends Player {
             // Adjust rotation to face the player
             const desiredRotation = Math.atan2(directionToPlayer.y, directionToPlayer.x);
             const rotationDifference = desiredRotation - this.rotation;
-            const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), SHOT_ROTATION_RATE) * Math.sign(rotationDifference);
+            const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), this.shotRotationRate) * Math.sign(rotationDifference);
 
             // Prepare input packet for attack movement
             const packet: PlayerInputData = {
@@ -225,7 +235,7 @@ export class Assassin extends Player {
                 isMobile: true,
                 turning: true,
                 mobile: {
-                    moving: distanceToPlayer > SAFE_DISTANCE_FROM_PLAYER,
+                    moving: distanceToPlayer > this.safeDistancePlayer,
                     angle: adjustedRotation,
                 },
                 rotation: adjustedRotation,
