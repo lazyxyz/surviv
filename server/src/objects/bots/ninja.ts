@@ -18,11 +18,13 @@ import { Armors } from "@common/definitions/armors";
  * Represents a specialized player character with unique traits and behaviors.
  */
 export class Ninja extends Player {
-    private static readonly CHASE_RADIUS: number = 30; // Distance within which the Ninja will chase players
+    private static readonly BASE_CHASE_RADIUS: number = 30; // Distance within which the Ninja will chase players
     private static readonly ROTATION_RATE: number = 0.35; // Maximum rotation speed per update
     private static readonly SAFE_DISTANCE_PLAYER: number = 5; // Minimum distance to maintain from players
     private static readonly SAFE_DISTANCE_HIDE_SPOT: number = 0.5; // Minimum distance to maintain from hiding spots
-    private static readonly ATTACK_SPEED: number = GameConstants.player.baseSpeed * 0.7; // Attack speed 70% of base speed
+    private static readonly BASE_ATTACK_SPEED: number = GameConstants.player.baseSpeed * 0.7; // Attack speed 70% of base speed
+    private static readonly RADIUS_INCREMENT: number = 0.05; // Increase per stage 5%
+    private static readonly SPEED_INCREMENT: number = 0.03; // Increase per stage 3%
 
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team) {
         super(game, userData, position, layer, team);
@@ -58,7 +60,6 @@ export class Ninja extends Player {
 
     update(): void {
         super.update();
-
         if (this.chasePlayer()) return;
 
         if (this.game.gas.isInGas(this.position)) {
@@ -69,6 +70,22 @@ export class Ninja extends Player {
         this.hideInSafeSpot();
     }
 
+    /**
+   * Calculate chase radius based on gas stage.
+   */
+    private get chaseRadius(): number {
+        const stageMultiplier = 1 + Ninja.RADIUS_INCREMENT * this.game.gas.stage;
+        return Ninja.BASE_CHASE_RADIUS * stageMultiplier;
+    }
+
+    /**
+     * Calculate attack speed based on gas stage.
+     */
+    private get attackSpeed(): number {
+        const stageMultiplier = 1 + Ninja.SPEED_INCREMENT * this.game.gas.stage;
+        return Ninja.BASE_ATTACK_SPEED * stageMultiplier;
+    }
+
     /** 
      * Chase the nearest visible player if within range. 
      */
@@ -76,7 +93,7 @@ export class Ninja extends Player {
         for (const obj of this.visibleObjects) {
             if (obj instanceof Gamer && !obj.dead) {
                 const distance = Vec.length(Vec.sub(obj.position, this.position));
-                if (distance < Ninja.CHASE_RADIUS) {
+                if (distance < this.chaseRadius) {
                     this.attackNearestPlayer();
                     return true;
                 }
@@ -89,13 +106,13 @@ export class Ninja extends Player {
         const nearestPlayer = this.findNearestObject<Gamer>(Gamer);
 
         if (nearestPlayer) {
-            this.baseSpeed = Ninja.ATTACK_SPEED;
+            this.baseSpeed = this.attackSpeed;
             this.moveToTarget(nearestPlayer.position, Ninja.SAFE_DISTANCE_PLAYER, !this.attacking);
         }
     }
 
     private hideInSafeSpot(): void {
-        const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) => 
+        const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
             ["bush", "tree"].includes(obj.definition.material) && !obj.dead && !this.game.gas.isInGas(obj.position)
         );
 
