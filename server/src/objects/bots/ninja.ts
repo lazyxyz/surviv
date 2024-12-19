@@ -90,7 +90,7 @@ export class Ninja extends Player {
 
         if (nearestPlayer) {
             this.baseSpeed = Ninja.ATTACK_SPEED;
-            this.moveToTarget(nearestPlayer.position, Ninja.SAFE_DISTANCE_PLAYER, true);
+            this.moveToTarget(nearestPlayer.position, Ninja.SAFE_DISTANCE_PLAYER, !this.attacking);
         }
     }
 
@@ -107,7 +107,7 @@ export class Ninja extends Player {
 
     private moveToSafePosition(): void {
         const moveSpot = this.game.gas.newPosition;
-        this.moveToTarget(moveSpot, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
+        this.moveToTarget(moveSpot, Ninja.SAFE_DISTANCE_HIDE_SPOT, !this.attacking);
     }
 
     /** 
@@ -123,7 +123,7 @@ export class Ninja extends Player {
 
         const packet: PlayerInputData = {
             movement: { up: false, down: false, left: false, right: false },
-            attacking: isAttacking ? !this.attacking : false,
+            attacking: isAttacking,
             actions: [],
             isMobile: true,
             turning: true,
