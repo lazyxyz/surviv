@@ -496,7 +496,7 @@ export class Game implements GameData {
     createNewGame(): void {
         if (!this.allowJoin) return; // means a new game has already been created by this game
 
-        parentPort?.postMessage({ type: WorkerMessages.CreateNewGame });
+        parentPort?.postMessage({ type: WorkerMessages.CreateNewGame, maxTeamSize: this.maxTeamSize });
         Logger.log(`Game ${this.id} | Attempting to create new game`);
         this.setGameData({ allowJoin: false });
     }
@@ -580,7 +580,6 @@ export class Game implements GameData {
 
             if (teamID) {
                 team = this.customTeams.get(teamID);
-
                 if (
                     !team // team doesn't exist
                     || (team.players.length && !team.hasLivingPlayers()) // team isn't empty but has no living players
@@ -685,17 +684,7 @@ export class Game implements GameData {
 
         let team: Team | undefined;
         if (this.teamMode) {
-            const vacantTeams = this.teams.valueArray.filter(
-                team =>
-                    team.autoFill
-                    && team.players.length < (this.maxTeamSize as number)
-                    && team.hasLivingPlayers()
-            );
-            if (vacantTeams.length) {
-                team = pickRandomInArray(vacantTeams);
-            } else {
-                this.teams.add(team = new Team(this.nextTeamID));
-            }
+            this.teams.add(team = new Team(this.nextTeamID, false));
         }
 
         const hitbox = new CircleHitbox(5);
@@ -778,7 +767,7 @@ export class Game implements GameData {
             this.createBot(BotType.Zombie, botData);
         }
     }
-    
+
     activeAssassin(botCount: number): void {
         const botData: ActorContainer = {
             autoFill: false,
@@ -856,7 +845,7 @@ export class Game implements GameData {
             && !this._started
             && this.startTimeout === undefined
         ) {
-           
+
             this.startTimeout = this.addTimeout(() => {
                 this._started = true;
                 this.setGameData({ startedTime: this.now });

@@ -40,8 +40,9 @@ export type WorkerMessage =
     }
     | {
         readonly type:
-            | WorkerMessages.CreateNewGame
-            | WorkerMessages.Reset
+        | WorkerMessages.CreateNewGame
+        | WorkerMessages.Reset
+        readonly maxTeamSize: TeamSize
     };
 
 export interface GameData {
@@ -56,6 +57,7 @@ export class GameContainer {
     readonly worker: Worker;
 
     resolve: (id: number) => void;
+    maxTeamSize: TeamSize;
 
     private _data: GameData = {
         aliveCount: 0,
@@ -73,8 +75,9 @@ export class GameContainer {
 
     private readonly _ipPromiseMap = new Map<string, Array<() => void>>();
 
-    constructor(readonly id: number, resolve: (id: number) => void) {
+    constructor(readonly id: number, maxTeamSize: TeamSize, resolve: (id: number) => void) {
         this.resolve = resolve;
+        this.maxTeamSize = maxTeamSize;
         (
             this.worker = new Worker(
                 __filename,
@@ -97,7 +100,8 @@ export class GameContainer {
                     break;
                 }
                 case WorkerMessages.CreateNewGame: {
-                    void newGame();
+                    const teamSize = message.maxTeamSize;
+                    void newGame(undefined, teamSize);
                     break;
                 }
                 case WorkerMessages.IPAllowed: {
@@ -129,13 +133,14 @@ export class GameContainer {
     }
 }
 
-export async function findGame(): Promise<GetGameResponse> {
+export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
     let gameID: number;
-    let eligibleGames = games.filter((g?: GameContainer): g is GameContainer => !!g && g.allowJoin && !g.over);
+    let eligibleGames = games.filter((g?: GameContainer): g is GameContainer =>
+        !!g && g.maxTeamSize == teamSize && g.allowJoin && !g.over);
 
     // Attempt to create a new game if one isn't available
     if (!eligibleGames.length) {
-        gameID = await newGame();
+        gameID = await newGame(undefined, teamSize);
         if (gameID !== -1) {
             return { success: true, gameID };
         } else {
@@ -165,8 +170,9 @@ export async function findGame(): Promise<GetGameResponse> {
 
 let creatingID = -1;
 
-export async function newGame(id?: number): Promise<number> {
+export async function newGame(id?: number, maxTeamSize?: TeamSize): Promise<number> {
     return new Promise<number>(resolve => {
+        const teamSize = maxTeamSize ? maxTeamSize : TeamSize.Solo;
         if (creatingID !== -1) {
             resolve(creatingID);
         } else if (id !== undefined) {
@@ -174,17 +180,23 @@ export async function newGame(id?: number): Promise<number> {
             Logger.log(`Game ${id} | Creating...`);
             const game = games[id];
             if (!game) {
-                games[id] = new GameContainer(id, resolve);
+                games[id] = new GameContainer(id, teamSize, resolve);
             } else if (game.stopped) {
                 game.resolve = resolve;
-                game.sendMessage({ type: WorkerMessages.Reset });
+                game.sendMessage({ type: WorkerMessages.Reset, maxTeamSize: teamSize });
             } else {
                 Logger.warn(`Game ${id} | Already exists`);
                 resolve(id);
             }
         } else {
-            const maxGames = Config.maxGames;
-            for (let i = 0; i < maxGames; i++) {
+            let startGameId = Config.soloPort;
+            const maxGames = Config.maxGames + startGameId;
+
+            if (maxTeamSize == TeamSize.Squad) {
+                startGameId = Config.squadPort;
+            }
+
+            for (let i = startGameId; i < maxGames; i++) {
                 const game = games[i];
                 if (!game || game.stopped) {
                     void newGame(i).then(id => resolve(id));
@@ -369,8 +381,8 @@ if (!isMainThread) {
             Logger.log(`Game ${id} | "${player.name}" left`);
             game.removePlayer(player);
         }
-    }).listen(Config.host, Config.port + id + 1, (): void => {
-        Logger.log(`Game ${id} | Listening on ${Config.host}:${Config.port + id + 1}`);
+    }).listen(Config.host, id, (): void => {
+        Logger.log(`Game ${id} | Listening on ${Config.host}:${id}`);
     });
 
     if (Config.protection?.maxJoinAttempts) {

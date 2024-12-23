@@ -114,6 +114,7 @@ export class Game {
     teamID = -1;
 
     teamMode = false;
+    teamSize = TeamSize.Solo;
 
     /**
      * proxy for `activePlayer`'s layer

@@ -5,7 +5,7 @@ export const Config = {
         dev: {
             name: "Local Server",
             mainAddress: "http://127.0.0.1:8000",
-            gameAddress: "ws://127.0.0.1:800<ID>"
+            gameAddress: "ws://127.0.0.1:<ID>"
         },
         as: {
             name: "Asia",

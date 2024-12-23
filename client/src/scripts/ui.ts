@@ -65,32 +65,12 @@ export function unlockPlayButtons(): void { buttonsLocked = false; }
 let lastDisconnectTime: number | undefined;
 export function updateDisconnectTime(): void { lastDisconnectTime = Date.now(); }
 
-let btnMap: ReadonlyArray<readonly [TeamSize, JQuery<HTMLButtonElement>]>;
 export function resetPlayButtons(): void {
     if (buttonsLocked) return;
 
     $("#splash-options").removeClass("loading");
     $("#loading-text").text(getTranslatedString("loading_connecting"));
-   // $("#btn-cancel-finding-game").css("display", "none");
-
-    const { maxTeamSize } = selectedRegion ?? regionInfo[Config.defaultRegion];
-
-    const isSolo = maxTeamSize === TeamSize.Solo;
-
-    for (
-        const [size, btn] of (
-            btnMap ??= [
-                [TeamSize.Solo, $("#btn-play-solo")],
-                [TeamSize.Duo, $("#btn-play-duo")],
-                [TeamSize.Squad, $("#btn-play-squad")]
-            ]
-        )
-    // stfu
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-    ) btn.toggleClass("locked", maxTeamSize !== undefined && maxTeamSize !== size);
-
-    $("#team-option-btns").toggleClass("locked", isSolo);
-    $("#locked-msg").css("top", isSolo ? "225px" : "153px").toggle(maxTeamSize !== undefined);
+    $("#btn-cancel-finding-game").css("display", "none");
 }
 
 export async function setUpUI(game: Game): Promise<void> {
@@ -99,7 +79,8 @@ export async function setUpUI(game: Game): Promise<void> {
     // Change the menu based on the mode.
     if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/suroi_beta_${MODE.idString}.svg`);
     if (MODE.specialPlayButtons) {
-        const playButtons = [$("#btn-play-solo"), $("#btn-play-duo"), $("#btn-play-squad")];
+        const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
+        // const playButtons = [$("#btn-play-solo"), $("#btn-play-duo"), $("#btn-play-squad")];
         for (let buttonIndex = 0; buttonIndex < playButtons.length; buttonIndex++) {
             const button = playButtons[buttonIndex];
 
@@ -107,7 +88,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
             // Mode Logo
             if (MODE.modeLogoImage) {
-                const translationString = `play_${["solo", "duo", "squad"][buttonIndex]}`;
+                const translationString = `play_${["solo", "squad"][buttonIndex]}`;
 
                 button.html(`
                     <img class="btn-icon" width="26" height="26" src=${MODE.modeLogoImage}>
@@ -159,16 +140,16 @@ export async function setUpUI(game: Game): Promise<void> {
 
     const languageFieldset = $("#select-language-container fieldset");
     for (const [language, languageInfo] of Object.entries(TRANSLATIONS.translations)) {
-      languageFieldset.append(html`
+        languageFieldset.append(html`
           <div>
             <input type="radio" name="selected-language" id="language-${language}" value="${language}">
             <label for="language-${language}">${languageInfo.flag} ${languageInfo.name} (${languageInfo.percentage})</label>
           </div>
       `);
 
-      $<HTMLInputElement>(`#language-${language}`).on("click", () => {
-          game.console.setBuiltInCVar("cv_language", language);
-      }).prop("checked", game.console.getBuiltInCVar("cv_language") === language);
+        $<HTMLInputElement>(`#language-${language}`).on("click", () => {
+            game.console.setBuiltInCVar("cv_language", language);
+        }).prop("checked", game.console.getBuiltInCVar("cv_language") === language);
     }
 
     game.console.variables.addChangeListener("cv_language", () => location.reload());
@@ -246,7 +227,7 @@ export async function setUpUI(game: Game): Promise<void> {
     }
 
     ui.loadingText.text(getTranslatedString("loading_fetching_data"));
-    const regionPromises = Object.entries(regionMap).map(async([_, [regionID, region]]) => {
+    const regionPromises = Object.entries(regionMap).map(async ([_, [regionID, region]]) => {
         const listItem = regionUICache[regionID];
 
         const pingStartTime = Date.now();
@@ -311,7 +292,7 @@ export async function setUpUI(game: Game): Promise<void> {
     updateServerSelectors();
 
     // eslint-disable-next-line @typescript-eslint/no-deprecated
-    serverList.children("li.server-list-item").on("click", function(this: HTMLLIElement) {
+    serverList.children("li.server-list-item").on("click", function (this: HTMLLIElement) {
         const region = this.getAttribute("data-region");
 
         if (region === null) return;
@@ -328,7 +309,7 @@ export async function setUpUI(game: Game): Promise<void> {
         updateServerSelectors();
     });
 
-    const joinGame = (): void => {
+    const joinGame = (teamSize: number): void => {
         ui.splashOptions.addClass("loading");
         ui.loadingText.text(getTranslatedString("loading_finding_game"));
         // ui.cancelFindingGame.css("display", "");
@@ -338,7 +319,7 @@ export async function setUpUI(game: Game): Promise<void> {
         const target = selectedRegion;
 
         void $.get(
-            `${target.mainAddress}/api/getGame${teamID ? `?teamID=${teamID}` : ""}`,
+            `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ''}`,
             (data: GetGameResponse) => {
                 if (data.success) {
                     const params = new URLSearchParams();
@@ -367,8 +348,7 @@ export async function setUpUI(game: Game): Promise<void> {
                             console.error(e);
                         }
                     }
-
-                    game.connect(`${target.gameAddress.replace("<ID>", (data.gameID + 1).toString())}/play?${params.toString()}`);
+                    game.connect(`${target.gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`);
                     ui.splashMsg.hide();
 
                     // Check again because there is a small chance that the create-team-menu element won't hide.
@@ -410,15 +390,18 @@ export async function setUpUI(game: Game): Promise<void> {
     let lastPlayButtonClickTime = 0;
 
     // Join server when play buttons are clicked
-    $("#btn-play-solo, #btn-play-duo, #btn-play-squad").on("click", () => {
+    $("#btn-play-solo, #btn-play-squad").on("click", (event) => {
         const now = Date.now();
         if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit
         lastPlayButtonClickTime = now;
-        joinGame();
+        
+        const teamSize = event.target.id === "btn-play-solo" ? TeamSize.Solo : TeamSize.Squad;
+        joinGame(teamSize);
     });
+    
 
     const createTeamMenu = $("#create-team-menu");
-    $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function() {
+    $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function () {
         const now = Date.now();
         if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined) return;
         lastPlayButtonClickTime = now;
@@ -534,7 +517,7 @@ export async function setUpUI(game: Game): Promise<void> {
                 }
                 case CustomTeamMessages.Started: {
                     createTeamMenu.hide();
-                    joinGame();
+                    joinGame(TeamSize.Solo);
                     break;
                 }
             }
@@ -588,9 +571,9 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     // TODO
-   /* ui.cancelFindingGame.on("click", () => {
-        game.disconnect();
-    }); */
+    /* ui.cancelFindingGame.on("click", () => {
+         game.disconnect();
+     }); */
 
     const copyUrl = $<HTMLButtonElement>("#btn-copy-team-url");
     const hideUrl = $<HTMLButtonElement>("#btn-hide-team-url");
@@ -656,7 +639,7 @@ export async function setUpUI(game: Game): Promise<void> {
             });
     });
 
-    $<HTMLInputElement>("#create-team-toggle-auto-fill").on("click", function() {
+    $<HTMLInputElement>("#create-team-toggle-auto-fill").on("click", function () {
         autoFill = this.checked;
         teamSocket?.send(JSON.stringify({
             type: CustomTeamMessages.Settings,
@@ -664,7 +647,7 @@ export async function setUpUI(game: Game): Promise<void> {
         }));
     });
 
-    $<HTMLInputElement>("#create-team-toggle-lock").on("click", function() {
+    $<HTMLInputElement>("#create-team-toggle-lock").on("click", function () {
         teamSocket?.send(JSON.stringify({
             type: CustomTeamMessages.Settings,
             locked: this.checked
@@ -812,7 +795,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
     usernameField.val(game.console.getBuiltInCVar("cv_player_name"));
 
-    usernameField.on("input", function() {
+    usernameField.on("input", function () {
         // Replace fancy quotes & dashes, so they don't get stripped out
 
         game.console.setBuiltInCVar(
@@ -864,10 +847,10 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    $("#btn-play-again, #btn-spectate-replay").on("click", async() => {
+    $("#btn-play-again, #btn-spectate-replay").on("click", async () => {
         await game.endGame();
         if (teamSocket) teamSocket.send(JSON.stringify({ type: CustomTeamMessages.Start })); // TODO Check if player is team leader
-        else joinGame();
+        else joinGame(game.teamSize);
     });
 
     const sendSpectatePacket = (action: Exclude<SpectateActions, SpectateActions.SpectateSpecific>): void => {
@@ -893,7 +876,7 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     ui.btnReport.on("click", () => {
-            sendSpectatePacket(SpectateActions.Report);
+        sendSpectatePacket(SpectateActions.Report);
     });
     ui.spectateNext.on("click", () => {
         sendSpectatePacket(SpectateActions.SpectateNext);
@@ -1043,8 +1026,7 @@ export async function setUpUI(game: Game): Promise<void> {
             if (emote.category !== lastCategory) {
                 emoteList.append(
                     $<HTMLDivElement>(
-                        `<div class="emote-list-header">${
-                            getTranslatedString(`emotes_category_${EmoteCategory[emote.category]}` as TranslationKeys)
+                        `<div class="emote-list-header">${getTranslatedString(`emotes_category_${EmoteCategory[emote.category]}` as TranslationKeys)
                         }</div>`
                     )
                 );
@@ -1412,7 +1394,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
     const crosshairColor = $<HTMLInputElement>("#crosshair-color-picker");
 
-    crosshairColor.on("input", function() {
+    crosshairColor.on("input", function () {
         game.console.setBuiltInCVar("cv_crosshair_color", this.value);
         loadCrosshair();
     });
@@ -1426,7 +1408,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
     const crosshairStrokeColor = $<HTMLInputElement>("#crosshair-stroke-picker");
 
-    crosshairStrokeColor.on("input", function() {
+    crosshairStrokeColor.on("input", function () {
         game.console.setBuiltInCVar("cv_crosshair_stroke_color", this.value);
         loadCrosshair();
     });
@@ -1567,7 +1549,7 @@ export async function setUpUI(game: Game): Promise<void> {
     });
     renderSelect.value = game.console.getBuiltInCVar("cv_renderer");
 
-    void (async() => {
+    void (async () => {
         $("#webgpu-option").toggle(await isWebGPUSupported());
     })();
 
@@ -1744,7 +1726,7 @@ export async function setUpUI(game: Game): Promise<void> {
             localStorage.setItem("suroi_config", input);
             alert("Settings loaded successfully.");
             window.location.reload();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_) {
             error();
         }
@@ -2048,7 +2030,7 @@ export async function setUpUI(game: Game): Promise<void> {
     }
 
     for (const perkSlot of ["#perk-slot-0", "#perk-slot-1", "#perk-slot-2"]) {
-        $(perkSlot)[0].addEventListener("pointerdown", function(e: PointerEvent): void {
+        $(perkSlot)[0].addEventListener("pointerdown", function (e: PointerEvent): void {
             e.stopImmediatePropagation();
             if (e.button !== 2) return;
 
@@ -2244,7 +2226,7 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     const soloButtons = $<HTMLButtonElement>("#warning-btn-play-solo, #btn-play-solo");
-    $<HTMLInputElement>("#warning-modal-agree-checkbox").on("click", function() {
+    $<HTMLInputElement>("#warning-modal-agree-checkbox").on("click", function () {
         soloButtons.toggleClass("btn-disabled", !this.checked);
     });
 

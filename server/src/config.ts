@@ -19,16 +19,21 @@ export const enum GasMode {
 export const Config = {
     host: "127.0.0.1",
     port: 8000,
+    soloPort: 8001,
+    squadPort: 9001,
 
     map: "winter",
 
     spawn: { mode: SpawnMode.Normal },
 
-    maxTeamSize: TeamSize.Solo,
+    maxTeamSize: {
+        rotation: [TeamSize.Solo, TeamSize.Squad],
+        switchSchedule: 'all' // open all
+    },
 
     maxPlayersPerGame: 100,
     maxGames: 10,
-    gameJoinTime: 90,
+    gameJoinTime: 10,
 
     gas: { mode: GasMode.Normal },
 
@@ -73,6 +78,9 @@ export interface ConfigType {
      * For example, if it's 8000, the main server is hosted on port 8000, the first game server is on 8001, the second is on 8002, and so on.
      */
     readonly port: number
+
+    readonly soloPort: number;
+    readonly squadPort: number;
 
     /**
      * HTTPS/SSL options. Not used if running locally or with nginx.
