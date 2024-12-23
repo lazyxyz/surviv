@@ -15,7 +15,7 @@ import { Vec, type Vector } from "@common/utils/vector";
 import { type Game } from "../game";
 import { GunItem } from "../inventory/gunItem";
 import { BaseGameObject } from "./gameObject";
-import { Player } from "./player";
+import { type Player } from "./player";
 
 export type DataMap = Record<ItemType, unknown> & {
     [ItemType.Gun]: {

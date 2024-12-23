@@ -1,5 +1,5 @@
 import type { AllowedEmoteSources } from "@common/packets/inputPacket";
-import { Player } from "./player";
+import { type Player } from "./player";
 
 export class Emote {
     readonly playerID: number;

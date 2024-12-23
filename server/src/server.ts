@@ -46,8 +46,6 @@ if (isMainThread) {
         const searchParams = new URLSearchParams(req.getQuery());
         const teamSize = Number(searchParams.get("teamSize"));
 
-        console.log("teamSize: ", teamSize);
-
         let teamID;
         if (teamSize == TeamSize.Squad) {
             teamID = new URLSearchParams(req.getQuery()).get("teamID"); // must be here or it causes uWS errors

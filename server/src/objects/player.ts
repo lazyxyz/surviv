@@ -2074,11 +2074,8 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 attributeToDowner();
             } else if (sourceIsPlayer) {
                 if (source === this) {
-                    message.eventType(
-                        wasDowned
-                            ? KillfeedEventType.FinishedOff
-                            : KillfeedEventType.Suicide
-                    ).weaponUsed(weaponUsed?.definition);
+                    message.eventType(KillfeedEventType.Suicide)
+                        .weaponUsed(weaponUsed?.definition);
                 } else {
                     message.eventType(
                         wasDowned
@@ -2332,12 +2329,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     processInputs(packet: PlayerInputData): void {
-        // if(packet.actions.length >0) {
-        //     console.log("actions: ", packet.actions);
-        // }
-
-        //     console.log("packet.attacking: ", packet.attacking);
-
         this.movement = {
             ...packet.movement,
             ...(packet.isMobile ? packet.mobile : { moving: false, angle: 0 })

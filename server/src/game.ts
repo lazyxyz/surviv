@@ -547,9 +547,9 @@ export class Game implements GameData {
 
     private _sendKillLeaderKFPacket<
         Message extends
-        | KillfeedMessageType.KillLeaderAssigned
-        | KillfeedMessageType.KillLeaderDeadOrDisconnected
-        | KillfeedMessageType.KillLeaderUpdated
+            | KillfeedMessageType.KillLeaderAssigned
+            | KillfeedMessageType.KillLeaderDeadOrDisconnected
+            | KillfeedMessageType.KillLeaderUpdated
     >(
         messageType: Message,
         options?: Partial<Omit<KillFeedPacketData & { readonly messageType: NoInfer<Message> }, "messageType" | "playerID" | "attackerKills">>
@@ -845,7 +845,6 @@ export class Game implements GameData {
             && !this._started
             && this.startTimeout === undefined
         ) {
-
             this.startTimeout = this.addTimeout(() => {
                 this._started = true;
                 this.setGameData({ startedTime: this.now });
@@ -871,7 +870,6 @@ export class Game implements GameData {
                         body: `{ "username": "${username}" }`
                     }
                     // you fuckin stupid or smth?
-                    // eslint-disable-next-line @typescript-eslint/use-unknown-in-catch-callback-variable
                 ).catch(console.error);
             }
         }

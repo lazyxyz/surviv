@@ -10,7 +10,6 @@ import { Emotes } from "@common/definitions/emotes";
 import { Gamer } from "../gamer";
 import { MeleeItem } from "../../inventory/meleeItem";
 import { Obstacle } from "../obstacle";
-import { Scopes } from "@common/definitions/scopes";
 import { Armors } from "@common/definitions/armors";
 
 /**
@@ -50,7 +49,6 @@ export class Ninja extends Player {
      */
     private initializeInventory(): void {
         this.inventory.weapons[2] = new MeleeItem("seax", this);
-        this.inventory.scope = Scopes.definitions[1];
         this.inventory.vest = Armors.fromString('basic_vest');
         this.inventory.helmet = Armors.fromString('basic_helmet');
 

@@ -212,7 +212,7 @@
   "create_team_play": "ゲームをスタート"
   "report_reporting": "あなたは報告しています:"
   "report_id": "報告ID:"
-  "report_instructions": "\n    <p><strong>以下の手順に従ってください。</strong> そうしないと、レポートは無視されます。</p>\n    <h4>レポートの提出方法</h4>\n    <ol>\n      <li><a href=\"https://socials.surviv.fun/discord\">Discordサーバー</a>に参加します。</li>\n      <li><a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheatr-reports\n          チャンネル</a>に移動します。</li>\n      <li>固定された投稿にあるレポートのガイドラインをお読みください。</li>\n      <li>レポートを投稿として送信します。</li>\n    </ol>"
+  "report_instructions": "\n    <p><strong>以下の手順に従ってください。</strong> そうしないと、レポートは無視されます。</p>\n    <h4>レポートの提出方法</h4>\n    <ol>\n      <li><a href=\"https://discord.suroi.io\">Discordサーバー</a>に参加します。</li>\n      <li><a href=\"https://discord.com/channels/1077043833621184563/1135288369526607973\">#cheatr-reports\n          チャンネル</a>に移動します。</li>\n      <li>固定された投稿にあるレポートのガイドラインをお読みください。</li>\n      <li>レポートを投稿として送信します。</li>\n    </ol>"
   "languages": "言語"
   "gauze": "ガーゼ"
   "medikit": "医療キット"

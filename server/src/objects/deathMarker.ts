@@ -2,7 +2,7 @@ import { ObjectCategory } from "@common/constants";
 import { RectangleHitbox } from "@common/utils/hitbox";
 import { type FullData } from "@common/utils/objectsSerializations";
 import { BaseGameObject } from "./gameObject";
-import { Player } from "./player";
+import { type Player } from "./player";
 
 export class DeathMarker extends BaseGameObject.derive(ObjectCategory.DeathMarker) {
     override readonly fullAllocBytes = 1;

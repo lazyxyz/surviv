@@ -4,7 +4,7 @@ export type Variation = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type GetGameResponse =
     {
         readonly success: true
-        readonly gameID: number,
+        readonly gameID: number
     } |
     {
         readonly success: false

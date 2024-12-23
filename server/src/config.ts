@@ -22,7 +22,7 @@ export const Config = {
     soloPort: 8001,
     squadPort: 9001,
 
-    map: "winter",
+    map: "fall",
 
     spawn: { mode: SpawnMode.Normal },
 
@@ -33,7 +33,7 @@ export const Config = {
 
     maxPlayersPerGame: 100,
     maxGames: 10,
-    gameJoinTime: 10,
+    gameJoinTime: 60,
 
     gas: { mode: GasMode.Normal },
 

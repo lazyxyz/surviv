@@ -20,7 +20,7 @@ export const rules: RulesPost[] = [
           <li>1st offense: 30 day ban</li>
           <li>2nd offense: Permanent ban</li>
         </ul>
-        If you discover an exploit or vulnerability, please report it to the admins on the Discord server, or email support@surviv.fun. You will not be banned unless you abuse it or tell others about it.
+        If you discover an exploit or vulnerability, please report it to the admins on the Discord server, or email support@suroi.io. You will not be banned unless you abuse it or tell others about it.
 
         <br><br>
 
@@ -52,7 +52,7 @@ export const rules: RulesPost[] = [
         <br>
 
         <h2>VPN/proxy policy</h2>
-        To make ban evasion more difficult, VPNs and proxies are blocked. If you need one to play the game, you can request an exemption by contacting the admins on the Discord server, or emailing support@surviv.fun.
+        To make ban evasion more difficult, VPNs and proxies are blocked. If you need one to play the game, you can request an exemption by contacting the admins on the Discord server, or emailing support@suroi.io.
         `
     },
     {
