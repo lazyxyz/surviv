@@ -8,6 +8,7 @@ import { Skins } from "@common/definitions/skins";
 import { Badges } from "@common/definitions/badges";
 import { Emotes } from "@common/definitions/emotes";
 import { Gamer } from "../gamer";
+import { Scopes } from "@common/definitions/scopes";
 
 
 export class Zombie extends Player {
@@ -20,6 +21,7 @@ export class Zombie extends Player {
         this.loadout.skin = Skins.fromString("bloodlust");
         this.loadout.badge = Badges.fromString('bdg_bleh');
         this.loadout.emotes = [Emotes.fromString("happy_face")];
+        this.inventory.scope = Scopes.definitions[0];
 
         const randomCola = Math.random() < 0.3 ? 1 : 0; // 30% chance for 1, 90% chance for 0
         this.inventory.items.setItem('cola', randomCola);
@@ -29,7 +31,7 @@ export class Zombie extends Player {
 
     private static CHASE_DISTANCE = 40;
     private static ROTATION_RATE = 0.35;
-    private static IDLE_ROTATION_SPEED = 0.05;
+    private static IDLE_ROTATION_SPEED = 0.1;
     private static SAFE_DISTANCE_FROM_PLAYER = 5;
     private static BASE_SPEED = GameConstants.player.baseSpeed * 0.8;
 
@@ -53,7 +55,7 @@ export class Zombie extends Player {
 
         if (nearestPlayer) {
             this.baseSpeed = Zombie.BASE_SPEED;
-            this.moveToTarget(nearestPlayer.position, Zombie.SAFE_DISTANCE_FROM_PLAYER, !this.attacking);
+            this.moveToTarget2(nearestPlayer.position, Zombie.SAFE_DISTANCE_FROM_PLAYER, !this.attacking);
         }
     }
 
@@ -84,6 +86,40 @@ export class Zombie extends Player {
 
         this.processInputs(packet);
     }
+
+    private moveToTarget2(targetPosition: Vector, safeDistance: number, isAttacking: boolean): void {
+        const directionToTarget = Vec.normalize(Vec.sub(targetPosition, this.position));
+        const distanceToTarget = Vec.length(Vec.sub(targetPosition, this.position));
+
+        const desiredRotation = Math.atan2(directionToTarget.y, directionToTarget.x);
+        let rotationDifference = desiredRotation - this.rotation;
+
+        // Normalize rotationDifference to the range [-π, π]
+        rotationDifference = Math.atan2(Math.sin(rotationDifference), Math.cos(rotationDifference));
+
+        // Only adjust rotation if the difference exceeds a small threshold to prevent jitter
+        const rotationThreshold = 0.05; // Adjust this threshold as needed
+        if (Math.abs(rotationDifference) > rotationThreshold) {
+            this.rotation += Math.min(Math.abs(rotationDifference), Zombie.ROTATION_RATE) * Math.sign(rotationDifference);
+        }
+
+        const packet: PlayerInputData = {
+            movement: { up: false, down: false, left: false, right: false },
+            attacking: isAttacking,
+            actions: [],
+            isMobile: true,
+            turning: true,
+            mobile: {
+                moving: distanceToTarget > safeDistance,
+                angle: this.rotation,
+            },
+            rotation: this.rotation,
+            distanceToMouse: undefined,
+        };
+
+        this.processInputs(packet);
+    }
+
 
     /** 
  * Find the nearest object of a specific type. 

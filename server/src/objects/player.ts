@@ -16,14 +16,10 @@ import { DEFAULT_SCOPE, Scopes, type ScopeDefinition } from "@common/definitions
 import { type SkinDefinition } from "@common/definitions/skins";
 import { SyncedParticles, type SyncedParticleDefinition } from "@common/definitions/syncedParticles";
 import { Throwables, type ThrowableDefinition } from "@common/definitions/throwables";
-import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { GameOverPacket, type GameOverData } from "@common/packets/gameOverPacket";
 import { type AllowedEmoteSources, type NoMobile, type PlayerInputData } from "@common/packets/inputPacket";
 import { createKillfeedMessage, KillFeedPacket, type ForEventType } from "@common/packets/killFeedPacket";
 import { type InputPacket } from "@common/packets/packet";
-import { PacketStream } from "@common/packets/packetStream";
-import { ReportPacket } from "@common/packets/reportPacket";
-import { type SpectatePacketData } from "@common/packets/spectatePacket";
 import { UpdatePacket, type PlayerData, type UpdatePacketDataCommon, type UpdatePacketDataIn } from "@common/packets/updatePacket";
 import { CircleHitbox, RectangleHitbox, type Hitbox } from "@common/utils/hitbox";
 import { adjacentOrEqualLayer, isVisibleFromLayer } from "@common/utils/layer";
@@ -32,11 +28,8 @@ import { ExtendedMap, type SDeepMutable, type SMutable, type Timeout } from "@co
 import { defaultModifiers, ItemType, type EventModifiers, type ExtendedWearerAttributes, type PlayerModifiers, type ReferenceTo, type ReifiableDef, type WearerAttributes } from "@common/utils/objectDefinitions";
 import { type FullData } from "@common/utils/objectsSerializations";
 import { pickRandomInArray, randomPointInsideCircle, weightedRandom } from "@common/utils/random";
-import { SuroiByteStream } from "@common/utils/suroiByteStream";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
-import { randomBytes } from "crypto";
-import { type WebSocket } from "uWebSockets.js";
 import { Config } from "../config";
 import { SpawnableLoots } from "../data/lootTables";
 import { type Game } from "../game";
