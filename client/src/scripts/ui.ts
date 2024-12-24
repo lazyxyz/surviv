@@ -311,7 +311,7 @@ export async function setUpUI(game: Game): Promise<void> {
         const target = selectedRegion;
 
         void $.get(
-            `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ''}`,
+            `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}`,
             (data: GetGameResponse) => {
                 if (data.success) {
                     const params = new URLSearchParams();
@@ -382,18 +382,17 @@ export async function setUpUI(game: Game): Promise<void> {
     let lastPlayButtonClickTime = 0;
 
     // Join server when play buttons are clicked
-    $("#btn-play-solo, #btn-play-squad").on("click", (event) => {
+    $("#btn-play-solo, #btn-play-squad").on("click", event => {
         const now = Date.now();
         if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit
         lastPlayButtonClickTime = now;
-        
+
         const teamSize = event.target.id === "btn-play-solo" ? TeamSize.Solo : TeamSize.Squad;
         joinGame(teamSize);
     });
-    
 
     const createTeamMenu = $("#create-team-menu");
-    $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function () {
+    $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function() {
         const now = Date.now();
         if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined) return;
         lastPlayButtonClickTime = now;
@@ -839,7 +838,7 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    $("#btn-play-again, #btn-spectate-replay").on("click", async () => {
+    $("#btn-play-again, #btn-spectate-replay").on("click", async() => {
         await game.endGame();
         if (teamSocket) teamSocket.send(JSON.stringify({ type: CustomTeamMessages.Start })); // TODO Check if player is team leader
         else joinGame(game.teamSize);

@@ -11,7 +11,7 @@ export const Config = {
             name: "Asia",
             mainAddress: "https://as.surviv.fun",
             gameAddress: "wss://<ID>.as.surviv.fun"
-        },
+        }
     },
     defaultRegion: "as"
 } satisfies ConfigType as ConfigType;
