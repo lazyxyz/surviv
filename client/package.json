@@ -5,6 +5,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "lint": "eslint . --fix",
     "build": "vite build",
     "dev": "vite",
     "preview": "vite preview",

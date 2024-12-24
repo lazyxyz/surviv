@@ -6,14 +6,14 @@ export const Config = {
             name: "Local Server",
             mainAddress: "http://127.0.0.1:8000",
             gameAddress: "ws://127.0.0.1:<ID>",
-            teamAddress: "ws://127.0.0.1:8000",
+            teamAddress: "ws://127.0.0.1:8000"
         },
         as: {
             name: "Asia",
             mainAddress: "https://as.surviv.fun",
             gameAddress: "wss://<ID>.as.surviv.fun",
-            teamAddress: "wss://team.as.surviv.fun",
-        },
+            teamAddress: "wss://team.as.surviv.fun"
+        }
     },
     defaultRegion: "as"
 } satisfies ConfigType as ConfigType;
