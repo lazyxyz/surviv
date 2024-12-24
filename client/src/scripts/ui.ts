@@ -393,7 +393,7 @@ export async function setUpUI(game: Game): Promise<void> {
     
 
     const createTeamMenu = $("#create-team-menu");
-    $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function () {
+    $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function() {
         const now = Date.now();
         if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined) return;
         lastPlayButtonClickTime = now;
@@ -509,7 +509,7 @@ export async function setUpUI(game: Game): Promise<void> {
                 }
                 case CustomTeamMessages.Started: {
                     createTeamMenu.hide();
-                    joinGame(TeamSize.Solo);
+                    joinGame(TeamSize.Squad);
                     break;
                 }
             }
