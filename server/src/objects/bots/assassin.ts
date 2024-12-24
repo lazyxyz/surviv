@@ -31,7 +31,6 @@ export class Assassin extends Player {
     private static readonly AIM_DEVIATION = 0.07; // 7% aim deviation
     private static readonly BASE_ATTACK_SPEED = GameConstants.player.baseSpeed * 0.7;
     private static readonly RADIUS_INCREMENT: number = 0.05; // Increase per stage 5%
-    private static readonly AIM_INCREMENT: number = 0.03; // Increase per stage 5%
 
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team) {
         super(game, userData, position, layer, team);
@@ -84,11 +83,12 @@ export class Assassin extends Player {
         for (const obj of this.visibleObjects) {
             if (obj instanceof Gamer && !obj.dead) {
                 const distance = Vec.length(Vec.sub(obj.position, this.position));
-
                 if (distance < Assassin.ATTACK_RADIUS) {
+
                     this.initiateMeleeAttack();
                     return;
                 } else if (distance < this.shotRadius) {
+                    this.inventory.setActiveWeaponIndex(0);
                     if (this.canFire()) {
                         this.shotNearestPlayer();
                     } else {

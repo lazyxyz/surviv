@@ -5,12 +5,14 @@ export const Config = {
         dev: {
             name: "Local Server",
             mainAddress: "http://127.0.0.1:8000",
-            gameAddress: "ws://127.0.0.1:<ID>"
+            gameAddress: "ws://127.0.0.1:<ID>",
+            teamAddress: "ws://127.0.0.1:8000"
         },
         as: {
             name: "Asia",
             mainAddress: "https://as.surviv.fun",
-            gameAddress: "wss://<ID>.as.surviv.fun"
+            gameAddress: "wss://<ID>.as.surviv.fun",
+            teamAddress: "wss://team.as.surviv.fun"
         }
     },
     defaultRegion: "as"
@@ -38,6 +40,8 @@ export interface Region {
      * For example, if gameID is 0, and gameAddress is "ws://127.0.0.1:800<ID>", the resulting address will be ws://127.0.0.1:8001.
      */
     readonly gameAddress: string
+
+    readonly teamAddress: string
 }
 
 export interface ServerInfo {

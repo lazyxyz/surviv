@@ -41,6 +41,7 @@ interface RegionInfo {
     readonly name: string
     readonly mainAddress: string
     readonly gameAddress: string
+    readonly teamAddress: string
     readonly playerCount?: number
     readonly maxTeamSize?: number
     readonly nextSwitchTime?: number
@@ -450,8 +451,11 @@ export async function setUpUI(game: Game): Promise<void> {
                 console.error(e);
             }
         }
+        // const teamURL = `${selectedRegion.mainAddress.replace("http", "ws")}/team?${params.toString()}`;
+        const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
+        console.log("teamURL: ", teamURL);
 
-        teamSocket = new WebSocket(`${selectedRegion.mainAddress.replace("http", "ws")}/team?${params.toString()}`);
+        teamSocket = new WebSocket(teamURL);
 
         teamSocket.onmessage = (message: MessageEvent<string>): void => {
             const data = JSON.parse(message.data) as CustomTeamMessage;
@@ -508,7 +512,7 @@ export async function setUpUI(game: Game): Promise<void> {
                 }
                 case CustomTeamMessages.Started: {
                     createTeamMenu.hide();
-                    joinGame(TeamSize.Solo);
+                    joinGame(TeamSize.Squad);
                     break;
                 }
             }
