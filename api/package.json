@@ -4,6 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "build": "tsc --project tsconfig.json",
     "helper": "npx tsc helpers/generateSignature.ts"
   },
   "keywords": [],
