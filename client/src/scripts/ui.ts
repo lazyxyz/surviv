@@ -11,21 +11,20 @@ import { SpectatePacket } from "@common/packets/spectatePacket";
 import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, type GetGameResponse } from "@common/typings";
 import { ExtendedMap } from "@common/utils/misc";
 import { ItemType, type ReferenceTo } from "@common/utils/objectDefinitions";
-import { pickRandomInArray } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound } from "@pixi/sound";
 import $ from "jquery";
 import { Color, isMobile, isWebGPUSupported } from "pixi.js";
 import { TRANSLATIONS, getTranslatedString } from "../translations";
+import type { TranslationKeys } from "../typings/translations";
 import { Config, type ServerInfo } from "./config";
 import { type Game } from "./game";
 import { news } from "./news/newsPosts";
 import { body, createDropdown } from "./uiHelpers";
 import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaultClientCVars";
-import { EMOTE_SLOTS, MODE, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
+import { EMOTE_SLOTS, MODE, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
-import type { TranslationKeys } from "../typings/translations";
 
 /*
     eslint-disable
@@ -72,6 +71,145 @@ export function resetPlayButtons(): void {
     $("#splash-options").removeClass("loading");
     $("#loading-text").text(getTranslatedString("loading_connecting"));
     $("#btn-cancel-finding-game").css("display", "none");
+}
+
+export function visibleConnectWallet(game: Game): void {
+    // handler what conditions to open modal?
+    if (!localStorage.getItem(SELECTOR_WALLET)?.length) {
+        $(".connect-wallet-portal").css("display", "block");
+    }
+
+    // handler click to login...
+    for (const elements of $(".connect-wallet-item")) {
+      const paragraphElement = elements.children[1];
+      const logoElement = elements.children[0];
+
+      const isExisted = game.eip6963.providers?.find(
+        argument => argument?.info?.name === paragraphElement?.textContent
+      );
+
+      if (isExisted) {
+        elements.onclick = async() => {
+            try {
+                // hidden to show loading ICON
+                $(logoElement).css("display", "none");
+
+                // append loading ICON
+                {
+                    const newNode = document.createElement("div");
+
+                    newNode.className = "loading-icon";
+                    newNode.style.width = "36px";
+                    newNode.style.height = "36px";
+                    newNode.style.display = "flex";
+                    newNode.style.alignItems = "center";
+                    newNode.style.justifyContent = "center";
+                    newNode.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
+
+                    logoElement.after(newNode);
+                }
+
+                return await game.account.connect(isExisted);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                $(".loading-icon").css("display", "none");
+                $(logoElement).css("display", "block");
+            }
+        };
+      }
+
+      if (!isExisted) {
+        $(paragraphElement).css({ color: "#93C5FD" });
+
+        paragraphElement.insertAdjacentText("afterbegin", "Install ");
+
+        elements.onclick = () => {
+          if (paragraphElement?.textContent?.includes(WalletType.METAMASK)) {
+            return window.open("https://metamask.io/download/", "_blank");
+          }
+
+          if (paragraphElement?.textContent?.includes(WalletType.SUBWALLET)) {
+            return window.open("https://www.subwallet.app/download", "_blank");
+          }
+
+          if (paragraphElement?.textContent?.includes(WalletType.COINBASEWALLET)) {
+            return window.open(
+              "https://www.coinbase.com/wallet/downloads",
+              "_blank"
+            );
+          }
+
+          if (paragraphElement?.textContent?.includes(WalletType.TRUSTWALLET)) {
+            return window.open("https://trustwallet.com/download", "_blank");
+          }
+        };
+      }
+    }
+}
+
+export function visibleWallet(game: Game): void {
+    if (game?.eip6963.provider?.provider && game.account.address?.length) {
+        // handler first time you need visible container
+        {
+            $(".account-wallet-container").css("display", "block");
+        }
+
+        // handler placeholder for button
+        {
+            $(".account-wallet-placeholder").append(shorten(game.account.address));
+        }
+    }
+
+    // handler append children to fieldSet
+    {
+        const ListFieldSet = [
+            {
+                key: "address",
+                fieldName: "Copy Address",
+                icon: "./img/line/copy.svg",
+                onClick: () => {
+                    // https://dev.to/0shuvo0/copy-text-to-clipboard-in-jstwo-ways-1pn1
+                    if (navigator.clipboard) {
+                        return navigator.clipboard.writeText(String(game.account.address));
+                    }
+
+                    const textArea = document.createElement("textarea");
+                    textArea.value = String(game.account.address);
+
+                    document.body.appendChild(textArea);
+
+                    textArea.focus();
+                    textArea.select();
+
+                    // eslint-disable-next-line @typescript-eslint/no-deprecated
+                    document.execCommand("copy");
+                    document.body.removeChild(textArea);
+                }
+            },
+            {
+                key: "disconnect",
+                fieldName: "Disconnect",
+                icon: "./img/line/log-out.svg",
+                onClick: () => game.account.disconnect()
+            }
+        ];
+
+        for (const fields of ListFieldSet) {
+            $("#account-wallet-fieldset").append(`
+                <a id="account-wallet-btn-${fields.key}">
+                    <img width="20px" height="20px" src=${fields.icon} />
+                    ${fields.fieldName}
+                </a>
+            `);
+
+            $(`#account-wallet-btn-${fields.key}`).on("click", () => {
+                fields.onClick();
+            });
+        }
+    }
+
+    createDropdown(".account-wallet-container");
 }
 
 export async function setUpUI(game: Game): Promise<void> {
@@ -676,102 +814,6 @@ export async function setUpUI(game: Game): Promise<void> {
     }
 
     const usernameField = $<HTMLInputElement>("#username-input");
-
-    const youtubers = [
-        {
-            name: "123OP",
-            link: "https://www.youtube.com/@123op."
-        },
-        {
-            name: "bruh button official",
-            link: "https://www.youtube.com/@bruhbuttonofficial4658"
-        },
-        {
-            name: "viper",
-            link: "https://www.youtube.com/channel/UCey8-fJfkF7UFYdWBcegzWA"
-        },
-        {
-            name: "IoSilverAway",
-            link: "https://www.youtube.com/@iosilveraway_19"
-        },
-        {
-            name: "Ukraines dude",
-            link: "https://www.youtube.com/@Ukrainesdude"
-        },
-        {
-            name: "Ash",
-            link: "https://www.youtube.com/@AshMyBoi"
-        },
-        {
-            name: "Tuncres",
-            link: "https://www.youtube.com/@Tuncres2022"
-        },
-        {
-            name: "Данзан animations",
-            link: "https://www.youtube.com/@danzananimYT/videos"
-        },
-        {
-            name: "Pablo_Fan_",
-            link: "https://www.youtube.com/@Pablo_Fan_"
-        },
-        {
-            name: "g0dak",
-            link: "https://www.youtube.com/@g0dak"
-        },
-        {
-            name: "GAMERIO",
-            link: "https://www.youtube.com/@GAMERIO1"
-        },
-        {
-            name: "N00B.I0",
-            link: "https://www.youtube.com/@N00B.I0"
-        },
-        {
-            name: "Dablitter",
-            link: "https://www.youtube.com/@dablitter5719"
-        },
-        {
-            name: "DESTROYER [IHY]",
-            link: "https://www.youtube.com/@DESTROYERIHY"
-        },
-        {
-            name: "[ATMOS]Bl00D",
-            link: "https://www.youtube.com/@TheRealATMOS"
-        },
-        {
-            name: "Tuncres",
-            link: "https://www.youtube.com/@Tuncres2022"
-        },
-        {
-            name: "this.is.gls_",
-            link: "https://www.youtube.com/@this.is.gls_"
-        },
-        {
-            name: "LeeMinHaiz",
-            link: "https://www.youtube.com/@LeeMinHaiz"
-        }
-    ];
-    const youtuber = pickRandomInArray(youtubers);
-    $("#youtube-featured-name").text(youtuber.name);
-    $("#youtube-featured-content").attr("href", youtuber.link).removeAttr("target");
-
-    const streamers = [
-        {
-            name: "ikou",
-            link: "https://www.twitch.tv/ikou_yt"
-        },
-        {
-            name: "seth_mayo",
-            link: "https://www.twitch.tv/seth_mayo"
-        },
-        {
-            name: "PatchesSC",
-            link: "https://www.twitch.tv/patchessc"
-        }
-    ];
-    const streamer = pickRandomInArray(streamers);
-    $("#twitch-featured-name").text(streamer.name);
-    $("#twitch-featured-content").attr("href", streamer.link).removeAttr("target");
 
     const toggleRotateMessage = (): JQuery =>
         $("#splash-rotate-message").toggle(
