@@ -23,7 +23,6 @@ import { type SuroiByteStream } from "@common/utils/suroiByteStream";
 import { Vec, type Vector } from "@common/utils/vector";
 import { type WebSocket } from "uWebSockets.js";
 import { parentPort } from "worker_threads";
-
 import { Config, SpawnMode } from "./config";
 import { MapName, Maps } from "./data/maps";
 import { WorkerMessages, type GameData, type WorkerMessage } from "./gameManager";

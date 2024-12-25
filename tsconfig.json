@@ -2,14 +2,16 @@
   "extends": [
     "./client/tsconfig.node.json",
     "./common/tsconfig.json",
-    "./server/tsconfig.json"
+    "./server/tsconfig.json",
+    "./api/tsconfig.json"
   ],
   "include": [
     "package.json"
   ],
   "compilerOptions": {
     "paths": {
-      "@common/*": ["./common/src/*"]
+      "@common/*": ["./common/src/*"],
+      "@api/*": ["./api/src/*"]
     }
   }
 }

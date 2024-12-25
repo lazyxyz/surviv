@@ -1,0 +1,149 @@
+import { GameConstants, TeamSize } from "@common/constants";
+import { Badges } from "@common/definitions/badges";
+import { Skins } from "@common/definitions/skins";
+import { Numeric } from "@common/utils/math";
+import { URLSearchParams } from "node:url";
+import { TemplatedApp, type WebSocket } from "uWebSockets.js";
+import { Config } from "../config";
+import { CustomTeam, CustomTeamPlayer, type CustomTeamPlayerContainer } from "../team";
+import { cleanUsername } from "../utils/misc";
+import {  forbidden, getIP, textDecoder } from "../utils/serverHelpers";
+import { customTeams, maxTeamSize, teamsCreated } from "../server";
+
+export function initTeamRoutes(app: TemplatedApp) {
+    app.ws("/team", {
+        idleTimeout: 30,
+        /**
+         * Upgrade the connection to WebSocket.
+         */
+        upgrade(res, req, context) {
+            res.onAborted((): void => { /* Handle errors in WS connection */ });
+
+            const ip = getIP(res, req);
+            const maxTeams = Config.protection?.maxTeams;
+            if (
+                maxTeamSize === TeamSize.Solo
+                || (maxTeams && teamsCreated[ip] > maxTeams)
+            ) {
+                forbidden(res);
+                return;
+            }
+
+            const searchParams = new URLSearchParams(req.getQuery());
+            const teamID = searchParams.get("teamID");
+
+            let team!: CustomTeam;
+            const noTeamIdGiven = teamID !== null;
+            if (
+                noTeamIdGiven
+                // @ts-expect-error cleanest overall way to do this (`undefined` gets filtered out anyways)
+                && (team = customTeams.get(teamID)) === undefined
+            ) {
+                forbidden(res);
+                return;
+            }
+
+            if (noTeamIdGiven) {
+                if (team.locked || team.players.length >= (maxTeamSize as number)) {
+                    forbidden(res); // TODO "Team is locked" and "Team is full" messages
+                    return;
+                }
+            } else {
+                team = new CustomTeam();
+                customTeams.set(team.id, team);
+
+                if (Config.protection?.maxTeams) {
+                    teamsCreated[ip] = (teamsCreated[ip] ?? 0) + 1;
+                }
+            }
+
+            const name = cleanUsername(searchParams.get("name"));
+            let skin = searchParams.get("skin") ?? GameConstants.player.defaultSkin;
+            let badge = searchParams.get("badge") ?? undefined;
+
+            //
+            // Role
+            //
+            const password = searchParams.get("password");
+            const givenRole = searchParams.get("role");
+            let role = "";
+            let nameColor: number | undefined;
+
+            if (
+                password !== null
+                && givenRole !== null
+                && givenRole in Config.roles
+                && Config.roles[givenRole].password === password
+            ) {
+                role = givenRole;
+
+                if (Config.roles[givenRole].isDev) {
+                    try {
+                        const colorString = searchParams.get("nameColor");
+                        if (colorString) nameColor = Numeric.clamp(parseInt(colorString), 0, 0xffffff);
+                    } catch { /* lol your color sucks */ }
+                }
+            }
+
+            // Validate skin
+            const rolesRequired = Skins.fromStringSafe(skin)?.rolesRequired;
+            if (rolesRequired && !rolesRequired.includes(role)) {
+                skin = GameConstants.player.defaultSkin;
+            }
+
+            // Validate badge
+            const roles = badge ? Badges.fromStringSafe(badge)?.roles : undefined;
+            if (roles?.length && !roles.includes(role)) {
+                badge = undefined;
+            }
+
+            res.upgrade(
+                {
+                    player: new CustomTeamPlayer(
+                        team,
+                        name,
+                        skin,
+                        badge,
+                        nameColor
+                    )
+                },
+                req.getHeader("sec-websocket-key"),
+                req.getHeader("sec-websocket-protocol"),
+                req.getHeader("sec-websocket-extensions"),
+                context
+            );
+        },
+
+        /**
+         * Handle opening of the socket.
+         * @param socket The socket being opened.
+         */
+        open(socket: WebSocket<CustomTeamPlayerContainer>) {
+            const player = socket.getUserData().player;
+            player.socket = socket;
+            player.team.addPlayer(player);
+        },
+
+        /**
+         * Handle messages coming from the socket.
+         * @param socket The socket in question.
+         * @param message The message to handle.
+         */
+        message(socket: WebSocket<CustomTeamPlayerContainer>, message: ArrayBuffer) {
+            const player = socket.getUserData().player;
+            // we pray
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            void player.team.onMessage(player, JSON.parse(textDecoder.decode(message)));
+        },
+
+        /**
+         * Handle closing of the socket.
+         * @param socket The socket being closed.
+         */
+        close(socket: WebSocket<CustomTeamPlayerContainer>) {
+            const player = socket.getUserData().player;
+            player.team.removePlayer(player);
+        }
+    })
+}

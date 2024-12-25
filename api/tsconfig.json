@@ -1,27 +1,21 @@
 {
   "compilerOptions": {
     "target": "ES2022",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "module": "CommonJS",
     "moduleResolution": "node",
     "outDir": "./dist",
+    "jsx": "react",
+    "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "sourceMap": true,
     "strictNullChecks": true,
-    "strict": true,
-    "paths": {
-      "@common/*": ["../common/src/*"],
-      "@api/*": ["../api/src/*"]
-    }
+    "strict": true
   },
   "exclude": ["node_modules"],
   "include": [
     "src",
-    "../common/src",
-    "../api/src"
-  ],
-  "ts-node": {
-    "swc": true
-  }
+    "../common/src"
+  ]
 }
