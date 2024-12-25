@@ -31,7 +31,8 @@
     margin-left: 5px;
 }
 
-#report-modal-content, #warning-modal-content {
+#report-modal-content,
+#warning-modal-content {
     padding: 1rem;
 
     p {
@@ -195,6 +196,7 @@
                     }
                 }
             }
+
             #btn-start-game {
                 margin-left: auto;
             }
@@ -206,6 +208,8 @@
     position: absolute;
     right: 20px;
     top: 1rem;
+    z-index: 10;
+
 
     img {
         vertical-align: middle;
@@ -258,6 +262,7 @@
         }
     }
 }
+
 // TODO Refactor this, make classes
 .dialog {
     user-select: none;
@@ -385,10 +390,12 @@
             z-index: 10;
         }
     }
+
     #emote-wheel-bottom {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+
         .emote-win,
         .emote-death {
             display: flex;
@@ -411,6 +418,7 @@
                 margin-left: calc(104px - calc(24px + 2px + 5px));
                 margin-top: calc(-2px - 1px);
             }
+
             &.selected {
                 border-color: palette.$orange;
             }
@@ -426,6 +434,7 @@
                 height: 1em;
                 padding: 2px;
                 transform-origin: center;
+
                 &:hover {
                     transform: scale(1.1)
                 }
@@ -462,6 +471,7 @@
             &.selected {
                 border-color: palette.$orange;
             }
+
             .emote-name {
                 margin-top: auto;
             }
@@ -622,7 +632,7 @@
             @include variables.text-shadow;
             text-align: center;
         }
-      }
+    }
 
     @media screen and (max-width: 654px) {
         #emotes-list {
@@ -826,11 +836,11 @@
 }
 
 .text-field {
-  color: black;
-  font-size: 18px;
-  width: 350px;
-  padding: 4px 8px;
-  outline: none;
-  border: none;
-  border-radius: 8px;
+    color: black;
+    font-size: 18px;
+    width: 350px;
+    padding: 4px 8px;
+    outline: none;
+    border: none;
+    border-radius: 8px;
 }
