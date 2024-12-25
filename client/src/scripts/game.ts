@@ -178,7 +178,7 @@ export class Game {
         await initTranslation(game);
         game.inputManager.setupInputs();
 
-        const initPixi = async(): Promise<void> => {
+        const initPixi = async (): Promise<void> => {
             const renderMode = game.console.getBuiltInCVar("cv_renderer");
             const renderRes = game.console.getBuiltInCVar("cv_renderer_res");
 
@@ -276,8 +276,16 @@ export class Game {
         this.error = false;
 
         if (this.gameStarted) return;
+        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3YWxsZXRBZGRyZXNzIjoiMHg3MDBDMkNDOWRjMzQ0NTI2MzU1OTUwMjA4RTNlOTAzODc5NDVFMjExIiwiaWF0IjoxNzM1MTI1NTk1LCJleHAiOjE3MzU3MzAzOTV9.6lZmh4GV03UAOOSv4OuUD4aloSLu2VzLkCsIYF--Blc";
+        const url = new URL(address);
+        // Check if the URL already has query parameters
+        if (url.search) {
+            url.searchParams.append('token', token);
+        } else {
+            url.searchParams.set('token', token);
+        }
 
-        this._socket = new WebSocket(address);
+        this._socket = new WebSocket(url.toString());
         this._socket.binaryType = "arraybuffer";
 
         this._socket.onopen = (): void => {
@@ -1111,26 +1119,26 @@ export class Game {
                             ) || (
                                 type === ItemType.Gun
                                 && weapons?.some(
-                                        weapon => {
-                                            const definition = weapon?.definition;
+                                    weapon => {
+                                        const definition = weapon?.definition;
 
-                                            return definition?.itemType === ItemType.Gun
-                                                && (
+                                        return definition?.itemType === ItemType.Gun
+                                            && (
+                                                (
+                                                    object?.definition === definition
+                                                    && !definition.isDual
+                                                    && definition.dualVariant
+                                                ) // Picking up a single pistol when inventory has single pistol
+                                                || (
                                                     (
-                                                        object?.definition === definition
-                                                        && !definition.isDual
-                                                        && definition.dualVariant
-                                                    ) // Picking up a single pistol when inventory has single pistol
-                                                    || (
-                                                        (
-                                                            object.definition as DualGunNarrowing | undefined
-                                                        )?.singleVariant === definition.idString
-                                                    )
-                                                    // Picking up dual pistols when inventory has a pistol
-                                                    // TODO implement splitting of dual guns to not lost reload later
-                                                );
-                                        }
-                                    )
+                                                        object.definition as DualGunNarrowing | undefined
+                                                    )?.singleVariant === definition.idString
+                                                )
+                                                // Picking up dual pistols when inventory has a pistol
+                                                // TODO implement splitting of dual guns to not lost reload later
+                                            );
+                                    }
+                                )
                             )
                         )
                     ) {

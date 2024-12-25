@@ -3,8 +3,13 @@ import { ethers } from "ethers";
 import { v4 as uuidv4 } from "uuid";
 import { TemplatedApp } from "uWebSockets.js";
 
+import dotenv from 'dotenv';
+import { resolve } from 'path';
+
+dotenv.config({ path: resolve(__dirname, '../../.env') });
+
 // Secret for signing JWTs (use environment variables in production)
-const JWT_SECRET = "your-very-secure-secret";
+const JWT_SECRET = process.env.JWT_SECRET || "SURVIV.FUN";
 const TOKEN_DURATION = "7d";
 
 // Store nonces temporarily

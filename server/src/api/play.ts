@@ -5,10 +5,10 @@ import { Config } from "../config";
 import { Game } from "../game";
 import { PlayerContainer } from "../objects/gamer";
 import { Logger } from "../utils/misc";
-import {  forbidden, getIP } from "../utils/serverHelpers";
+import {  forbidden, getIP } from "../utils/serverHelpers"
+import {validateJWT} from "@api/auth";
 
 const simultaneousConnections: Record<string, number> = {};
-let joinAttempts: Record<string, number> = {};
 
 export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs:  Map<string, number>, joinAttempts: Record<string, number>) {
     app.ws("/play", {
@@ -47,7 +47,22 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs:  Map<s
                 }
             }
 
+             // Extract token from Authorization header
             const searchParams = new URLSearchParams(req.getQuery());
+            const token = searchParams.get('token');
+
+            if (!token) {
+                Logger.log(`Game ${game.id} | Missing JWT: ${ip}`);
+                forbidden(res);
+                return;
+            }
+
+            const decoded = validateJWT(token);
+            if (!decoded) {
+                Logger.log(`Game ${game.id} | Invalid JWT: ${ip}`);
+                forbidden(res);
+                return;
+            }
 
             //
             // Ensure IP is allowed
@@ -90,7 +105,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs:  Map<s
                 {
                     teamID: searchParams.get("teamID") ?? undefined,
                     autoFill: Boolean(searchParams.get("autoFill")),
-                    player: undefined,
+                    player: decoded.walletAddress,
                     ip,
                     role,
                     isDev,

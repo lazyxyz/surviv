@@ -30,6 +30,7 @@ export function initTeamRoutes(app: TemplatedApp) {
             }
 
             const searchParams = new URLSearchParams(req.getQuery());
+            
             const teamID = searchParams.get("teamID");
 
             let team!: CustomTeam;
