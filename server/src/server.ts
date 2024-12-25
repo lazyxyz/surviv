@@ -9,6 +9,7 @@ import { Logger } from "./utils/misc";
 import { createServer } from "./utils/serverHelpers";
 import { initGameRoutes } from "./api/game";
 import { initAuthRoutes } from "@api/index";
+import { initTeamRoutes } from "./api/team";
 
 export let teamsCreated: Record<string, number> = {};
 
@@ -18,6 +19,7 @@ export let maxTeamSize = typeof Config.maxTeamSize === "number" ? Config.maxTeam
 if (isMainThread) {
     let app = createServer();
     initGameRoutes(app);
+    initTeamRoutes(app);
     initAuthRoutes(app);
 
     app.listen(Config.host, Config.port, async (): Promise<void> => {
