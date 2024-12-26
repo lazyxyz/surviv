@@ -728,7 +728,9 @@ export class Game implements GameData {
         } else {
             bot = new Assassin(this, botData, spawnPosition, spawnLayer, team);
         }
-        this.livingPlayers.add(bot);
+        
+        // this.livingPlayers.add(bot);
+
         this.spectatablePlayers.push(bot);
         this.connectedPlayers.add(bot);
         this.newPlayers.push(bot);
@@ -842,9 +844,9 @@ export class Game implements GameData {
         player.sendData(this.map.buffer);
 
         this.addTimeout(() => { player.disableInvulnerability(); }, 5000);
-
+        
         if (
-            ((this.teamMode ? this.teams.size : this.aliveCount) - this.totalBots) > 0
+            (this.teamMode ? this.teams.size : this.aliveCount) > 1
             && !this._started
             && this.startTimeout === undefined
         ) {
