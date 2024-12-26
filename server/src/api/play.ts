@@ -73,31 +73,11 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs:  Map<s
             }
 
             //
-            // Validate and parse role and name color
+            // Validate and parse name color
             //
-            const password = searchParams.get("password");
-            const givenRole = searchParams.get("role");
-            let role: string | undefined;
-            let isDev = false;
 
-            let nameColor: number | undefined;
-            if (
-                password !== null
-                && givenRole !== null
-                && givenRole in Config.roles
-                && Config.roles[givenRole].password === password
-            ) {
-                role = givenRole;
-                isDev = Config.roles[givenRole].isDev ?? false;
-
-                if (isDev) {
-                    try {
-                        const colorString = searchParams.get("nameColor");
-                        if (colorString) nameColor = Numeric.clamp(parseInt(colorString), 0, 0xffffff);
-                    } catch { /* guess your color sucks lol */ }
-                }
-            }
-
+            let nameColor = 0xffffff;
+            
             //
             // Upgrade the connection
             //
@@ -107,8 +87,6 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs:  Map<s
                     autoFill: Boolean(searchParams.get("autoFill")),
                     player: decoded.walletAddress,
                     ip,
-                    role,
-                    isDev,
                     nameColor,
                     lobbyClearing: searchParams.get("lobbyClearing") === "true",
                     weaponPreset: searchParams.get("weaponPreset") ?? ""

@@ -7,7 +7,7 @@ import { TemplatedApp, type WebSocket } from "uWebSockets.js";
 import { Config } from "../config";
 import { CustomTeam, CustomTeamPlayer, type CustomTeamPlayerContainer } from "../team";
 import { cleanUsername } from "../utils/misc";
-import {  forbidden, getIP, textDecoder } from "../utils/serverHelpers";
+import { forbidden, getIP, textDecoder } from "../utils/serverHelpers";
 import { customTeams, maxTeamSize, teamsCreated } from "../server";
 
 export function initTeamRoutes(app: TemplatedApp) {
@@ -30,7 +30,7 @@ export function initTeamRoutes(app: TemplatedApp) {
             }
 
             const searchParams = new URLSearchParams(req.getQuery());
-            
+
             const teamID = searchParams.get("teamID");
 
             let team!: CustomTeam;
@@ -65,38 +65,14 @@ export function initTeamRoutes(app: TemplatedApp) {
             //
             // Role
             //
-            const password = searchParams.get("password");
-            const givenRole = searchParams.get("role");
-            let role = "";
-            let nameColor: number | undefined;
+            let nameColor: number = 0xffffff;
 
-            if (
-                password !== null
-                && givenRole !== null
-                && givenRole in Config.roles
-                && Config.roles[givenRole].password === password
-            ) {
-                role = givenRole;
-
-                if (Config.roles[givenRole].isDev) {
-                    try {
-                        const colorString = searchParams.get("nameColor");
-                        if (colorString) nameColor = Numeric.clamp(parseInt(colorString), 0, 0xffffff);
-                    } catch { /* lol your color sucks */ }
-                }
-            }
 
             // Validate skin
-            const rolesRequired = Skins.fromStringSafe(skin)?.rolesRequired;
-            if (rolesRequired && !rolesRequired.includes(role)) {
-                skin = GameConstants.player.defaultSkin;
-            }
+            skin = GameConstants.player.defaultSkin;
 
             // Validate badge
-            const roles = badge ? Badges.fromStringSafe(badge)?.roles : undefined;
-            if (roles?.length && !roles.includes(role)) {
-                badge = undefined;
-            }
+            badge = undefined;
 
             res.upgrade(
                 {

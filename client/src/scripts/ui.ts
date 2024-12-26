@@ -458,17 +458,19 @@ export async function setUpUI(game: Game): Promise<void> {
                     if (teamID) params.set("teamID", teamID);
                     if (autoFill) params.set("autoFill", String(autoFill));
 
-                    const devPass = game.console.getBuiltInCVar("dv_password");
-                    if (devPass) params.set("password", devPass);
+                    // const devPass = game.console.getBuiltInCVar("dv_password");
+                    // if (devPass) params.set("password", devPass);
 
-                    const role = game.console.getBuiltInCVar("dv_role");
-                    if (role) params.set("role", role);
+                    // const role = game.console.getBuiltInCVar("dv_role");
+                    // if (role) params.set("role", role);
 
                     const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
                     if (lobbyClearing) params.set("lobbyClearing", "true");
 
-                    const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
-                    if (weaponPreset) params.set("weaponPreset", weaponPreset);
+                    // const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
+                    // if (weaponPreset) params.set("weaponPreset", ""weaponPreset);
+                    
+                    params.set("weaponPreset", "mg5 negev chainsaw"); // TEST ADD ITEMS
 
                     const nameColor = game.console.getBuiltInCVar("dv_name_color");
                     if (nameColor) {

@@ -213,6 +213,8 @@ export class Game implements GameData {
     private readonly _start = this._now;
     get start(): number { return this._start; }
 
+    private totalBots: number = 0;
+
     /**
      * **Warning**: This is a getter _with side effects_! Make
      * sure to either use the id returned by this getter or
@@ -248,11 +250,22 @@ export class Game implements GameData {
         this.pluginManager.emit("game_created", this);
         Logger.log(`Game ${this.id} | Created in ${Date.now() - this._start} ms`);
 
-        this.activeZombie(20);
-        this.activeNinja(10);
-        this.activeAssassin(5);
-        Logger.log(`Bots added to game`);
+        if (Config.addBot) {
+            const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+        
+            const zombieCount = randomInRange(15, 20);
+            const ninjaCount = randomInRange(5, 10);
+            const assassinCount = randomInRange(3, 5);
+        
+            this.activeZombie(zombieCount);
+            this.activeNinja(ninjaCount);
+            this.activeAssassin(assassinCount);
+        
+            this.totalBots = zombieCount + ninjaCount + assassinCount;
+            Logger.log(`Bots added to game: Total Bots = ${this.totalBots} (Zombies: ${zombieCount}, Ninjas: ${ninjaCount}, Assassins: ${assassinCount})`);
+        }
 
+        
         // Start the tick loop
         this.tick();
     }
@@ -547,9 +560,9 @@ export class Game implements GameData {
 
     private _sendKillLeaderKFPacket<
         Message extends
-            | KillfeedMessageType.KillLeaderAssigned
-            | KillfeedMessageType.KillLeaderDeadOrDisconnected
-            | KillfeedMessageType.KillLeaderUpdated
+        | KillfeedMessageType.KillLeaderAssigned
+        | KillfeedMessageType.KillLeaderDeadOrDisconnected
+        | KillfeedMessageType.KillLeaderUpdated
     >(
         messageType: Message,
         options?: Partial<Omit<KillFeedPacketData & { readonly messageType: NoInfer<Message> }, "messageType" | "playerID" | "attackerKills">>
@@ -743,7 +756,6 @@ export class Game implements GameData {
     activeNinja(botCount: number): void {
         const botData: ActorContainer = {
             autoFill: false,
-            isDev: false,
             lobbyClearing: true,
             weaponPreset: "falchion",
             ip: undefined
@@ -757,7 +769,6 @@ export class Game implements GameData {
     activeZombie(botCount: number): void {
         const botData: ActorContainer = {
             autoFill: false,
-            isDev: false,
             lobbyClearing: true,
             weaponPreset: "falchion",
             ip: undefined
@@ -771,7 +782,6 @@ export class Game implements GameData {
     activeAssassin(botCount: number): void {
         const botData: ActorContainer = {
             autoFill: false,
-            isDev: false,
             lobbyClearing: true,
             weaponPreset: "falchion",
             ip: undefined
@@ -802,19 +812,8 @@ export class Game implements GameData {
         player.name = cleanUsername(packet.name);
 
         player.isMobile = packet.isMobile;
-        const skin = packet.skin;
-        if (
-            skin.itemType === ItemType.Skin
-            && !skin.hideFromLoadout
-            && ((skin.rolesRequired ?? [player.role]).includes(player.role))
-        ) {
-            player.loadout.skin = skin;
-        }
-
-        const badge = packet.badge;
-        if (!badge?.roles?.length || (player.role !== undefined && badge.roles.includes(player.role))) {
-            player.loadout.badge = badge;
-        }
+        player.loadout.skin = packet.skin;
+        player.loadout.badge = packet.badge;
         player.loadout.emotes = packet.emotes;
 
         this.livingPlayers.add(player);
@@ -845,7 +844,7 @@ export class Game implements GameData {
         this.addTimeout(() => { player.disableInvulnerability(); }, 5000);
 
         if (
-            (this.teamMode ? this.teams.size : this.aliveCount) > 1
+            ((this.teamMode ? this.teams.size : this.aliveCount) - this.totalBots) > 0
             && !this._started
             && this.startTimeout === undefined
         ) {

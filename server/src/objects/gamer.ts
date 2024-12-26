@@ -20,9 +20,7 @@ export interface PlayerContainer {
     readonly autoFill: boolean
     player?: Gamer
     readonly ip: string | undefined
-    readonly role?: string
 
-    readonly isDev: boolean
     readonly nameColor?: number
     readonly lobbyClearing: boolean
     readonly weaponPreset: string
@@ -39,8 +37,6 @@ export class Gamer extends Player {
             teamID: userData.teamID,
             autoFill: userData.autoFill,
             ip: userData.ip,
-            role: userData.role,
-            isDev: userData.isDev,
             nameColor: userData.nameColor,
             lobbyClearing: userData.lobbyClearing,
             weaponPreset: userData.weaponPreset,

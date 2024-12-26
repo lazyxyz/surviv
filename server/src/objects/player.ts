@@ -55,8 +55,6 @@ export interface ActorContainer {
     readonly teamID?: string
     readonly autoFill: boolean
     readonly ip: string | undefined
-    readonly role?: string
-    readonly isDev: boolean
     readonly nameColor?: number
     readonly lobbyClearing: boolean
     readonly weaponPreset: string
@@ -347,8 +345,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     lastSpectateActionTime = 0;
     lastPingTime = 0;
 
-    readonly role?: string;
-    readonly isDev: boolean;
     readonly hasColor: boolean;
     readonly nameColor: number;
 
@@ -422,8 +418,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         // this.socket = socket;
         this.name = GameConstants.player.defaultName;
         this.ip = userData.ip;
-        this.role = userData.role;
-        this.isDev = userData.isDev;
         this.nameColor = userData.nameColor ?? 0;
         this.hasColor = userData.nameColor !== undefined;
 
@@ -454,19 +448,16 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         }
         this.effectiveScope = DEFAULT_SCOPE;
 
-        const specialFunnies = this.isDev && userData.lobbyClearing && !Config.disableLobbyClearing;
         // Inventory preset
-        if (specialFunnies) {
+        {
             const [
-                weaponA, weaponB, melee,
-                killsA, killB, killsM
+                weaponA, weaponB, melee
             ] = userData.weaponPreset.split(" ");
 
             const backpack = this.inventory.backpack;
             const determinePreset = (
                 slot: 0 | 1 | 2,
                 weaponName: ReferenceTo<GunDefinition | MeleeDefinition>,
-                kills?: string
             ): void => {
                 const weaponDef = Loots.fromStringSafe<GunDefinition | MeleeDefinition>(weaponName);
                 let itemType: ItemType;
@@ -480,14 +471,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 this.inventory.addOrReplaceWeapon(slot, weaponDef);
                 const weapon = this.inventory.getWeapon(slot) as GunItem | MeleeItem;
 
-                let killCount: number;
-                if (!Number.isNaN(killCount = parseInt(kills ?? "", 10))) {
-                    weapon.stats.kills = killCount;
-                    weapon.refreshModifiers();
-                }
-
                 if (!(weapon instanceof GunItem)) return;
-
                 weapon.ammo = (weaponDef as GunDefinition).capacity;
                 const ammoPtr = (weaponDef as GunDefinition).ammoType;
                 const ammoType = Ammos.fromString(ammoPtr);
@@ -496,37 +480,17 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 this.inventory.items.setItem(ammoPtr, backpack.maxCapacity[ammoPtr]);
             };
 
-            this.inventory.backpack = Loots.fromString("tactical_pack");
-            this.inventory.vest = Loots.fromString("developr_vest");
-            this.inventory.helmet = Loots.fromString("tactical_helmet");
+            determinePreset(0, weaponA);
+            determinePreset(1, weaponB);
+            determinePreset(2, melee);
 
-            for (const { idString: item } of [...HealingItems, ...Scopes]) {
-                this.inventory.items.setItem(item, backpack.maxCapacity[item]);
+            if (this.maxAdrenaline !== GameConstants.player.maxAdrenaline) {
+                this.adrenaline = this.maxAdrenaline;
             }
 
-            this.inventory.scope = "8x_scope";
-
-            for (const scopeDef of Scopes.definitions) {
-                this.inventory.items.setItem(scopeDef.idString, 1);
-            }
-
-            determinePreset(0, weaponA, killsA);
-            determinePreset(1, weaponB, killB);
-            determinePreset(2, melee, killsM);
+            this.dirty.weapons = true;
+            this.updateAndApplyModifiers();
         }
-
-        // good chance that if these were changed, they're meant to be applied
-        if (this.maxHealth !== GameConstants.player.defaultHealth) {
-            this.health = this.maxHealth;
-        }
-
-        if (this.maxAdrenaline !== GameConstants.player.maxAdrenaline) {
-            this.adrenaline = this.maxAdrenaline;
-        }
-
-        this.dirty.weapons = true;
-
-        this.updateAndApplyModifiers();
     }
 
     giveGun(idString: ReferenceTo<GunDefinition>): void {
@@ -1107,7 +1071,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 this.piercingDamage({
                     amount: depletion.health * dt,
                     source: KillfeedEventType.Gas
-                //          ^^^^^^^^^^^^^^^^^^^^^ dubious
+                    //          ^^^^^^^^^^^^^^^^^^^^^ dubious
                 });
             }
 
@@ -1250,11 +1214,13 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         packet.playerData = {
             ...(
                 player.dirty.maxMinStats || forceInclude
-                    ? { minMax: {
-                        maxHealth: player.maxHealth,
-                        minAdrenaline: player.minAdrenaline,
-                        maxAdrenaline: player.maxAdrenaline
-                    } }
+                    ? {
+                        minMax: {
+                            maxHealth: player.maxHealth,
+                            minAdrenaline: player.minAdrenaline,
+                            maxAdrenaline: player.maxAdrenaline
+                        }
+                    }
                     : {}
             ),
             ...(
@@ -1274,10 +1240,12 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             ),
             ...(
                 player.dirty.id || forceInclude
-                    ? { id: {
-                        id: player.id,
-                        spectating: this.spectating !== undefined
-                    } }
+                    ? {
+                        id: {
+                            id: player.id,
+                            spectating: this.spectating !== undefined
+                        }
+                    }
                     : {}
             ),
             ...(
@@ -1287,22 +1255,24 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             ),
             ...(
                 player.dirty.weapons || forceInclude
-                    ? { inventory: {
-                        activeWeaponIndex: inventory.activeWeaponIndex,
-                        weapons: inventory.weapons.map(slot => {
-                            const item = slot;
+                    ? {
+                        inventory: {
+                            activeWeaponIndex: inventory.activeWeaponIndex,
+                            weapons: inventory.weapons.map(slot => {
+                                const item = slot;
 
-                            return (item && {
-                                definition: item.definition,
-                                count: item instanceof GunItem
-                                    ? item.ammo
-                                    : item instanceof CountableInventoryItem
-                                        ? item.count
-                                        : undefined,
-                                stats: item.stats
-                            }) satisfies ((PlayerData["inventory"] & object)["weapons"] & object)[number];
-                        })
-                    } }
+                                return (item && {
+                                    definition: item.definition,
+                                    count: item instanceof GunItem
+                                        ? item.ammo
+                                        : item instanceof CountableInventoryItem
+                                            ? item.count
+                                            : undefined,
+                                    stats: item.stats
+                                }) satisfies ((PlayerData["inventory"] & object)["weapons"] & object)[number];
+                            })
+                        }
+                    }
                     : {}
             ),
             ...(
@@ -1312,10 +1282,12 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             ),
             ...(
                 player.dirty.items || forceInclude
-                    ? { items: {
-                        items: inventory.items.asRecord(),
-                        scope: inventory.scope
-                    } }
+                    ? {
+                        items: {
+                            items: inventory.items.asRecord(),
+                            scope: inventory.scope
+                        }
+                    }
                     : {}
             ),
             ...(

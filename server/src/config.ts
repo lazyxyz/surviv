@@ -21,6 +21,7 @@ export const Config = {
     port: 8000,
     soloPort: 8001,
     squadPort: 9001,
+    addBot: true,
 
     map: "fall",
 
@@ -40,26 +41,6 @@ export const Config = {
     tps: 40,
 
     plugins: [],
-
-    roles: {
-        developr: { password: "developr", isDev: true },
-        designr: { password: "designr" },
-        lead_designr: { password: "lead_designr" },
-        vip_designr: { password: "vip_designr" },
-        lead_composr: { password: "lead_composr" },
-        composr: { password: "composr" },
-        sound_designr: { password: "sound_designr" },
-        moderatr: { password: "moderatr" },
-        administratr: { password: "administratr" },
-        content_creatr: { password: "content_creatr" },
-        donatr: { password: "donatr" },
-
-        hasanger: { password: "hasanger", isDev: true },
-        pap: { password: "pap", isDev: true },
-        error: { password: "error", isDev: true },
-        limenade: { password: "limenade", isDev: true },
-        solstice: { password: "solstice", isDev: true }
-    },
 
     authServer: {
         address: "http://localhost:8080"
@@ -81,7 +62,8 @@ export interface ConfigType {
 
     readonly soloPort: number;
     readonly squadPort: number;
-
+    readonly addBot: boolean;
+    
     /**
      * HTTPS/SSL options. Not used if running locally or with nginx.
      */
@@ -249,17 +231,6 @@ export interface ConfigType {
      */
     readonly ipHeader?: string
 
-    /**
-     * Roles. Each role has a different password and can give exclusive skins and cheats.
-     * If `isDev` is set to `true` for a role, cheats will be enabled for that role.
-     * To use roles, add `?password=PASSWORD&role=ROLE` to the URL, for example: `http://127.0.0.1:3000/?password=dev&role=dev`
-     * Dev cheats can be enabled using the `lobbyClearing` option (`http://127.0.0.1:3000/?password=dev&role=dev&lobbyClearing=true`),
-     * but the server must also have it enabled (thru {@link ConfigType.disableLobbyClearing})
-     */
-    readonly roles: Record<string, {
-        readonly password: string
-        readonly isDev?: boolean
-    }>
 
     /**
      * Disables the lobbyClearing option if set to `true`
