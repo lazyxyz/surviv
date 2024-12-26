@@ -1,75 +1,60 @@
 import $ from "jquery";
 
-import { PUBLIC_KEY, SELECTOR_WALLET, shorten } from "./utils/constants";
+import { ACCESS_TOKEN, PUBLIC_KEY, SELECTOR_WALLET, shorten } from "./utils/constants";
 import { EIP6963, type Provider6963Props } from "./eip6963";
+import { ethers } from "ethers";
+import { resetPlayButtons, type RegionInfo } from "./ui";
+import { Config } from "./config";
 
-export class Account extends EIP6963 {
-    address: string | null;
-    chain: number | null;
+const regionInfo: Record<string, RegionInfo> = Config.regions;
+const selectedRegion = regionInfo[Config.defaultRegion];
+
+export class Account {
+    address: string | null | undefined;
+    token: string | null | undefined;
+
+    readonly eip6963 = new EIP6963();
 
     constructor() {
-        super();
+        const getAddressFromStorage = localStorage.getItem(PUBLIC_KEY);
+        const getTokenFromStorage = localStorage.getItem(ACCESS_TOKEN);
+        const getSelectorFromStorage = localStorage.getItem(SELECTOR_WALLET);
 
-        this.address = null;
-        this.chain = null;
+        if (getAddressFromStorage?.length) {
+            this.address = getAddressFromStorage;
 
-        // update provider & event
-        if (localStorage.getItem(SELECTOR_WALLET)?.length) {
-            this.selectorProvider(String(localStorage.getItem(SELECTOR_WALLET)));
-
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            this.eventListener();
-        }
-
-        if (this.provider?.provider && localStorage.getItem(PUBLIC_KEY)?.length) {
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            this.connect(this.provider);
-        }
-    }
-
-    async eventListener(): Promise<void> {
-        const getProvider = this.provider;
-
-        if (!getProvider) {
-            return this.disconnect(); // not found meaning you need login again
-        }
-
-        // handler account exactly
-        {
-            const accounts = await getProvider.provider.request({
-                method: "eth_accounts"
-            }) as string[];
-
-            if (!accounts.length) {
-                this.disconnect();
-            } else {
-                this.address = accounts[0];
+            // visible elements
+            {
+                $(".account-wallet-placeholder").text(shorten(getAddressFromStorage));
+                $(".connect-wallet-portal").css("display", "none");
+                $(".account-wallet-container ").css("display", "block");
             }
         }
 
-        // handler emit
-        {
+        if (getTokenFromStorage?.length) {
+            this.token = getTokenFromStorage;
+        }
+
+        if (getSelectorFromStorage?.length) {
+            this.eip6963.provider = this.eip6963.providers?.find(argument => argument.info.name === getSelectorFromStorage);
+
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            getProvider.provider.on("accountsChanged", (params: string[]) => {
-                if (!params?.length) { return this.disconnect(); }
-
-                this.address = params[0];
-
-                $(".account-wallet-placeholder").text(shorten(params[0]));
-            });
-
-            // eslint-disable-next-line @stylistic/indent, @typescript-eslint/no-floating-promises
-           getProvider.provider.on("chainChanged", (params: string) => {
-                this.chain = parseInt(params);
-            });
+            this.eventListener();
         }
     }
 
     disconnect(): void {
         // clear localStorage
         {
+            localStorage.removeItem(ACCESS_TOKEN);
             localStorage.removeItem(PUBLIC_KEY);
             localStorage.removeItem(SELECTOR_WALLET);
+        }
+
+        // clear fields
+        {
+            this.address = null;
+            this.token = null;
         }
 
         // visible elements
@@ -84,13 +69,50 @@ export class Account extends EIP6963 {
             method: "eth_requestAccounts"
         }) as string[];
 
+        const requestNonce: {
+            nonce: string
+            success: boolean
+        } = await $.ajax({
+            type: "POST",
+            url: `${selectedRegion.mainAddress}/api/requestNonce`,
+            data: JSON.stringify({
+                walletAddress: accounts[0]
+            })
+        });
+
+        const verifySignature: {
+            token: string
+            success: boolean
+        } = await $.ajax({
+            type: "POST",
+            url: `${selectedRegion.mainAddress}/api/verifySignature`,
+            data: JSON.stringify({
+                walletAddress: accounts[0],
+                signature: await getProvider.provider.request({
+                    method: "personal_sign",
+                    params: [
+                        ethers.hexlify(ethers.toUtf8Bytes((requestNonce.nonce))),
+                        accounts[0]
+                    ]
+                })
+            })
+        });
+
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.eventListener();
 
+        // update field
+        {
+            this.address = accounts[0];
+            this.token = verifySignature.token;
+            this.eip6963.provider = getProvider;
+        }
+
         // update localstorage
         {
-            localStorage.setItem(SELECTOR_WALLET, getProvider.info.name);
             localStorage.setItem(PUBLIC_KEY, accounts[0]);
+            localStorage.setItem(ACCESS_TOKEN, verifySignature.token);
+            localStorage.setItem(SELECTOR_WALLET, getProvider.info.name);
         }
 
         // visible elements
@@ -98,14 +120,29 @@ export class Account extends EIP6963 {
             $(".account-wallet-placeholder").text(shorten(accounts[0]));
             $(".connect-wallet-portal").css("display", "none");
             $(".account-wallet-container ").css("display", "block");
+
+            resetPlayButtons();
         }
+    }
+
+    async eventListener(): Promise<void> {
+        const getProvider = this.eip6963.provider;
+
+        if (!getProvider) {
+            return this.disconnect(); // not found meaning you need login again
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        getProvider.provider.on("accountsChanged", () => {
+            return this.disconnect();
+        });
     }
 
     requestProvider(): void {
         window.addEventListener("eip6963:announceProvider", event => {
             const values = event["detail" as keyof Event] as unknown as Provider6963Props;
 
-            this.providers.push(values);
+            this.eip6963.providers.push(values);
         });
 
         window.dispatchEvent(new Event("eip6963:requestProvider"));

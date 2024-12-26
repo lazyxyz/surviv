@@ -477,7 +477,7 @@ export class GameConsole {
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                         main: `Javascript ${err.error ? `'${Object.getPrototypeOf(err.error)?.constructor?.name}'` : err.type} occurred at ${err.filename.replace(location.origin + location.pathname, "./")}:${err.lineno}:${err.colno}`,
                         // this is just peak ????? lol
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
                         detail: err.error ?? err.message
                     },
                     true

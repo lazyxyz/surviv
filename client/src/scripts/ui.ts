@@ -36,7 +36,7 @@ import { html, requestFullscreen } from "./utils/misc";
     `@stylistic/indent`: can eslint stop [expletive redacted] at indenting stuff
 */
 
-interface RegionInfo {
+export interface RegionInfo {
     readonly name: string
     readonly mainAddress: string
     readonly gameAddress: string

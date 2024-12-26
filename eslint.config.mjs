@@ -28,11 +28,11 @@ export default tseslint.config(
         },
         rules: {
             // ESLint
-            curly: ["warn", "multi-line"],
+            "curly": ["warn", "multi-line"],
             ["prefer-arrow-callback"]: "warn",
             ["prefer-template"]: "warn",
-            yoda: ["error", "never", { onlyEquality: true }],
-            eqeqeq: "error",
+            "yoda": ["error", "never", { onlyEquality: true }],
+            "eqeqeq": "error",
 
             // Stylistic
             ["@stylistic/arrow-parens"]: ["warn", "as-needed"],
@@ -146,9 +146,13 @@ export default tseslint.config(
             /**
              * These two methods do NOT have the same behavior, unlike what ESLint claims.
              */
-            ["@typescript-eslint/prefer-regexp-exec"]: "off"
+            ["@typescript-eslint/prefer-regexp-exec"]: "off",
 
             // #endregion
+
+            // i'm so tired with Unsafe assignment of an `any` value.
+            "@typescript-eslint/no-unsafe-assignment": "off"
+
         }
     },
     {

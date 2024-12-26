@@ -56,7 +56,7 @@ import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, u
 import { setUpCommands } from "./utils/console/commands";
 import { defaultClientCVars } from "./utils/console/defaultClientCVars";
 import { GameConsole } from "./utils/console/gameConsole";
-import { COLORS, EMOTE_SLOTS, LAYER_TRANSITION_DELAY, MODE, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
+import { COLORS, EMOTE_SLOTS, LAYER_TRANSITION_DELAY, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 import { EIP6963 } from "./eip6963";
@@ -178,7 +178,7 @@ export class Game {
         await initTranslation(game);
         game.inputManager.setupInputs();
 
-        const initPixi = async (): Promise<void> => {
+        const initPixi = async(): Promise<void> => {
             const renderMode = game.console.getBuiltInCVar("cv_renderer");
             const renderRes = game.console.getBuiltInCVar("cv_renderer_res");
 
@@ -273,16 +273,32 @@ export class Game {
     }
 
     connect(address: string): void {
+        const url = new URL(address);
+        const ui = this.uiManager.ui;
+
         this.error = false;
 
-        if (this.gameStarted) return;
-        const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ3YWxsZXRBZGRyZXNzIjoiMHg3MDBDMkNDOWRjMzQ0NTI2MzU1OTUwMjA4RTNlOTAzODc5NDVFMjExIiwiaWF0IjoxNzM1MTI1NTk1LCJleHAiOjE3MzU3MzAzOTV9.6lZmh4GV03UAOOSv4OuUD4aloSLu2VzLkCsIYF--Blc";
-        const url = new URL(address);
-        // Check if the URL already has query parameters
-        if (url.search) {
-            url.searchParams.append('token', token);
-        } else {
-            url.searchParams.set('token', token);
+        if (this.gameStarted || !this.account.token?.length) return;
+
+        // token is expired
+        {
+            const { exp } = parseJWT(this.account.token);
+
+            if (new Date().getTime() >= (exp * 1000)) {
+                $("#loading-text").text("Session expired. Please log in.");
+
+                setTimeout(() => this.account.disconnect(), 1000);
+                return;
+            }
+        }
+
+        // append token intro params
+        {
+            if (url.search) {
+                url.searchParams.append("token", this.account.token);
+            } else {
+                url.searchParams.set("token", this.account.token);
+            }
         }
 
         this._socket = new WebSocket(url.toString());
@@ -387,8 +403,6 @@ export class Game {
                 this.onPacket(packet);
             }
         };
-
-        const ui = this.uiManager.ui;
 
         this._socket.onerror = (): void => {
             this.error = true;

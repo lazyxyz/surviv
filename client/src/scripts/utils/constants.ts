@@ -64,6 +64,7 @@ export const BULLET_WHIZ_SCALE = 5;
 
 export const SELECTOR_WALLET = "SELECTOR_WALLET";
 export const PUBLIC_KEY = "PUBLIC_KEY";
+export const ACCESS_TOKEN = "ACCESS_TOKEN";
 
 export enum WalletType {
     METAMASK = "MetaMask",
@@ -90,4 +91,19 @@ export const shorten = (hash: string, length = 6): string => {
     const suffixed = hash.slice(-length);
 
     return prefix + middle + suffixed;
+};
+
+export const parseJWT = (token: string | undefined): {
+    address: string
+    exp: number
+    iat: number
+    roles: []
+    sub: string
+} => {
+    const arr = token?.split(".");
+    const base64Payload = (arr?.length || 0) > 1 ? arr?.[1] : undefined;
+
+    const payload = base64Payload ? Buffer.from(base64Payload, "base64") : "{}";
+
+    return JSON.parse(payload.toString()) as ReturnType<typeof parseJWT>;
 };

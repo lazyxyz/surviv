@@ -20,7 +20,7 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean):
     }
 
     // we pray
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     const spritesheets: SpritesheetData[] = highResolution
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         ? (await import("virtual:spritesheets-jsons-high-res")).atlases
