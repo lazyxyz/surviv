@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { ethers } from "ethers";
 import { v4 as uuidv4 } from "uuid";
-import { TemplatedApp } from "uWebSockets.js";
+import { HttpResponse, TemplatedApp } from "uWebSockets.js";
 
 import dotenv from 'dotenv';
 import { resolve } from 'path';
@@ -15,8 +15,16 @@ const TOKEN_DURATION = "7d";
 // Store nonces temporarily
 const nonces = new Map<string, string>();
 
+function setCORSHeaders(res: HttpResponse) {
+    res.writeHeader("Access-Control-Allow-Origin", "*");
+    res.writeHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+    res.writeHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+}
+
 export function requestNonce(app: TemplatedApp) {
     app.post("/api/requestNonce", (res) => {
+        setCORSHeaders(res);
+
         let aborted = false;
         res.onAborted(() => {
             aborted = true;
@@ -51,6 +59,8 @@ export function requestNonce(app: TemplatedApp) {
 
 export function verifySignature(app: TemplatedApp) {
     app.post("/api/verifySignature", (res) => {
+        setCORSHeaders(res);
+
         let aborted = false;
         res.onAborted(() => {
             aborted = true;
