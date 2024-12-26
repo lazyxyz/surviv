@@ -9,13 +9,13 @@ import { Config } from "./config";
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
 
-export class Account {
+export class Account extends EIP6963 {
     address: string | null | undefined;
     token: string | null | undefined;
 
-    readonly eip6963 = new EIP6963();
-
     constructor() {
+        super();
+
         const getAddressFromStorage = localStorage.getItem(PUBLIC_KEY);
         const getTokenFromStorage = localStorage.getItem(ACCESS_TOKEN);
         const getSelectorFromStorage = localStorage.getItem(SELECTOR_WALLET);
@@ -36,7 +36,7 @@ export class Account {
         }
 
         if (getSelectorFromStorage?.length) {
-            this.eip6963.provider = this.eip6963.providers?.find(argument => argument.info.name === getSelectorFromStorage);
+            this.provider = this.providers?.find(argument => argument.info.name === getSelectorFromStorage);
 
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             this.eventListener();
@@ -105,7 +105,7 @@ export class Account {
         {
             this.address = accounts[0];
             this.token = verifySignature.token;
-            this.eip6963.provider = getProvider;
+            this.provider = getProvider;
         }
 
         // update localstorage
@@ -126,7 +126,7 @@ export class Account {
     }
 
     async eventListener(): Promise<void> {
-        const getProvider = this.eip6963.provider;
+        const getProvider = this.provider;
 
         if (!getProvider) {
             return this.disconnect(); // not found meaning you need login again
@@ -142,7 +142,7 @@ export class Account {
         window.addEventListener("eip6963:announceProvider", event => {
             const values = event["detail" as keyof Event] as unknown as Provider6963Props;
 
-            this.eip6963.providers.push(values);
+            this.providers.push(values);
         });
 
         window.dispatchEvent(new Event("eip6963:requestProvider"));
