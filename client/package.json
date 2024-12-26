@@ -29,6 +29,7 @@
     "postcss": "^8.4.47",
     "postcss-import": "^16.1.0",
     "postcss-loader": "^8.1.1",
+    "buffer": "^6.0.3",
     "postcss-preset-env": "^10.0.5",
     "sass": "^1.79.4",
     "sirv-cli": "^2.0.2",
