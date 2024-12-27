@@ -252,20 +252,20 @@ export class Game implements GameData {
 
         if (Config.addBot) {
             const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
-        
+
             const zombieCount = randomInRange(15, 20);
             const ninjaCount = randomInRange(5, 10);
             const assassinCount = randomInRange(3, 5);
-        
+
             this.activeZombie(zombieCount);
             this.activeNinja(ninjaCount);
             this.activeAssassin(assassinCount);
-        
+
             this.totalBots = zombieCount + ninjaCount + assassinCount;
             Logger.log(`Bots added to game: Total Bots = ${this.totalBots} (Zombies: ${zombieCount}, Ninjas: ${ninjaCount}, Assassins: ${assassinCount})`);
         }
 
-        
+
         // Start the tick loop
         this.tick();
     }
@@ -728,9 +728,8 @@ export class Game implements GameData {
         } else {
             bot = new Assassin(this, botData, spawnPosition, spawnLayer, team);
         }
-        
-        // this.livingPlayers.add(bot);
 
+        this.livingPlayers.add(bot);
         this.spectatablePlayers.push(bot);
         this.connectedPlayers.add(bot);
         this.newPlayers.push(bot);
@@ -844,7 +843,7 @@ export class Game implements GameData {
         player.sendData(this.map.buffer);
 
         this.addTimeout(() => { player.disableInvulnerability(); }, 5000);
-        
+
         if (
             (this.teamMode ? this.teams.size : this.aliveCount) > 1
             && !this._started

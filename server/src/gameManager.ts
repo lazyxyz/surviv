@@ -137,6 +137,7 @@ export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
     // Attempt to create a new game if one isn't available
     if (!eligibleGames.length) {
         gameID = await newGame(undefined, teamSize);
+
         if (gameID !== -1) {
             return { success: true, gameID };
         } else {
@@ -159,6 +160,7 @@ export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
                 : b
         )
         ?.id;
+
     return gameID !== undefined
         ? { success: true, gameID }
         : { success: false };
@@ -169,9 +171,10 @@ let creatingID = -1;
 export async function newGame(id?: number, maxTeamSize?: TeamSize): Promise<number> {
     return new Promise<number>(resolve => {
         const teamSize = maxTeamSize ? maxTeamSize : TeamSize.Solo;
-        if (creatingID !== -1) {
-            resolve(creatingID);
-        } else if (id !== undefined) {
+        // if (creatingID !== -1) {
+        //     resolve(creatingID);
+        // } else 
+        if (id !== undefined) {
             creatingID = id;
             Logger.log(`Game ${id} | Creating...`);
             const game = games[id];
@@ -192,8 +195,9 @@ export async function newGame(id?: number, maxTeamSize?: TeamSize): Promise<numb
                 startGameId = Config.squadPort;
             }
 
-            for (let i = startGameId; i < maxGames; i++) {
+            for (let i = startGameId; i < (startGameId + maxGames); i++) {
                 const game = games[i];
+
                 if (!game || game.stopped) {
                     void newGame(i).then(id => resolve(id));
                     return;
