@@ -171,40 +171,39 @@ let creatingID = -1;
 export async function newGame(id?: number, maxTeamSize?: TeamSize): Promise<number> {
     return new Promise<number>(resolve => {
         const teamSize = maxTeamSize ? maxTeamSize : TeamSize.Solo;
-        // if (creatingID !== -1) {
-        //     resolve(creatingID);
-        // } else 
-        if (id !== undefined) {
-            creatingID = id;
-            Logger.log(`Game ${id} | Creating...`);
-            const game = games[id];
-            if (!game) {
-                games[id] = new GameContainer(id, teamSize, resolve);
-            } else if (game.stopped) {
-                game.resolve = resolve;
-                game.sendMessage({ type: WorkerMessages.Reset, maxTeamSize: teamSize });
-            } else {
-                Logger.warn(`Game ${id} | Already exists`);
-                resolve(id);
-            }
-        } else {
-            let startGameId = Config.soloPort;
-            const maxGames = Config.maxGames + startGameId;
-
-            if (maxTeamSize == TeamSize.Squad) {
-                startGameId = Config.squadPort;
-            }
-
-            for (let i = startGameId; i < (startGameId + maxGames); i++) {
-                const game = games[i];
-
-                if (!game || game.stopped) {
-                    void newGame(i).then(id => resolve(id));
-                    return;
+        if (creatingID !== -1) {
+            resolve(creatingID);
+        } else
+            if (id !== undefined) {
+                creatingID = id;
+                Logger.log(`Game ${id} | Creating...`);
+                const game = games[id];
+                if (!game) {
+                    games[id] = new GameContainer(id, teamSize, resolve);
+                } else if (game.stopped) {
+                    game.resolve = resolve;
+                    game.sendMessage({ type: WorkerMessages.Reset, maxTeamSize: teamSize });
+                } else {
+                    Logger.warn(`Game ${id} | Already exists`);
+                    resolve(id);
                 }
+            } else {
+                let startGameId = Config.soloPort;
+                if (maxTeamSize == TeamSize.Squad) {
+                    startGameId = Config.squadPort;
+                }
+                const maxGames = Config.maxGames + startGameId;
+
+                for (let i = startGameId; i < maxGames; i++) {
+                    const game = games[i];
+
+                    if (!game || game.stopped) {
+                        void newGame(i).then(id => resolve(id));
+                        return;
+                    }
+                }
+                resolve(-1);
             }
-            resolve(-1);
-        }
     });
 }
 
