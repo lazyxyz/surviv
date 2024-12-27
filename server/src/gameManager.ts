@@ -198,7 +198,7 @@ export async function newGame(id?: number, maxTeamSize?: TeamSize): Promise<numb
                     const game = games[i];
 
                     if (!game || game.stopped) {
-                        void newGame(i).then(id => resolve(id));
+                        void newGame(i, maxTeamSize).then(id => resolve(id));
                         return;
                     }
                 }
