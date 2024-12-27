@@ -466,7 +466,8 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
                 useAngle: 10,
                 lootScale: 0.5,
                 animated: true
-            }
+            },
+            noDrop: true,
         }
     ]
 );
