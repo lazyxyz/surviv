@@ -104,7 +104,6 @@ export class Bot extends Player {
 
         // Move towards the nearest loot if it's within range
         if (nearestLoot) {
-            // console.log("nearestLoot: ", nearestLoot.itemData);
             const directionToLoot = Vec.normalize(Vec.sub(nearestLoot.position, this.position));
 
             movement = {

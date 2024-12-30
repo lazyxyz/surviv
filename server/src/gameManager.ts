@@ -3,7 +3,6 @@ import { type GetGameResponse } from "@common/typings";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
 import { Config } from "./config";
 import { Game } from "./game";
-import { Logger } from "./utils/misc";
 import { createServer } from "./utils/serverHelpers";
 import { initPlayRoutes } from "./api/play";
 
@@ -17,8 +16,7 @@ export enum WorkerMessages {
     IPAllowed,
     UpdateGameData,
     UpdateMaxTeamSize,
-    CreateNewGame,
-    Reset
+    CreateNewGame
 }
 
 export type WorkerMessage =
@@ -37,7 +35,6 @@ export type WorkerMessage =
     | {
         readonly type:
         | WorkerMessages.CreateNewGame
-        | WorkerMessages.Reset
         readonly maxTeamSize: TeamSize
     };
 
@@ -97,7 +94,7 @@ export class GameContainer {
                 }
                 case WorkerMessages.CreateNewGame: {
                     const teamSize = message.maxTeamSize;
-                    void newGame(undefined, teamSize);
+                    void newGame(teamSize);
                     break;
                 }
                 case WorkerMessages.IPAllowed: {
@@ -136,13 +133,12 @@ export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
 
     // Attempt to create a new game if one isn't available
     if (!eligibleGames.length) {
-        gameID = await newGame(undefined, teamSize);
+        gameID = await newGame(teamSize);
 
         if (gameID !== -1) {
             return { success: true, gameID };
-        } else {
-            eligibleGames = games.filter((g?: GameContainer): g is GameContainer => !!g && !g.over);
         }
+       
     }
 
     if (!eligibleGames.length) {
@@ -168,42 +164,26 @@ export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
 
 let creatingID = -1;
 
-export async function newGame(id?: number, maxTeamSize?: TeamSize): Promise<number> {
+export async function newGame(maxTeamSize?: TeamSize): Promise<number> {
     return new Promise<number>(resolve => {
         const teamSize = maxTeamSize ? maxTeamSize : TeamSize.Solo;
         if (creatingID !== -1) {
             resolve(creatingID);
-        } else
-            if (id !== undefined) {
-                creatingID = id;
-                Logger.log(`Game ${id} | Creating...`);
-                const game = games[id];
-                if (!game) {
-                    games[id] = new GameContainer(id, teamSize, resolve);
-                } else if (game.stopped) {
-                    game.resolve = resolve;
-                    game.sendMessage({ type: WorkerMessages.Reset, maxTeamSize: teamSize });
-                } else {
-                    Logger.warn(`Game ${id} | Already exists`);
-                    resolve(id);
-                }
-            } else {
-                let startGameId = Config.soloPort;
-                if (maxTeamSize == TeamSize.Squad) {
-                    startGameId = Config.squadPort;
-                }
-                const maxGames = Config.maxGames + startGameId;
-
-                for (let i = startGameId; i < maxGames; i++) {
-                    const game = games[i];
-
-                    if (!game || game.stopped) {
-                        void newGame(i, maxTeamSize).then(id => resolve(id));
-                        return;
-                    }
-                }
-                resolve(-1);
+        } else {
+            let startGameId = Config.soloPort;
+            if (maxTeamSize == TeamSize.Squad) {
+                startGameId = Config.squadPort;
             }
+            const maxGames = Config.maxGames + startGameId;
+            for (let i = startGameId; i < maxGames; i++) {
+                const game = games[i];
+                if (!game || game.stopped) {
+                    games[i] = new GameContainer(i, teamSize, resolve);
+                    return;
+                }
+            }
+            resolve(-1);
+        }
     });
 }
 
@@ -227,10 +207,6 @@ if (!isMainThread) {
                     type: WorkerMessages.IPAllowed,
                     ip: message.ip
                 });
-                break;
-            }
-            case WorkerMessages.Reset: {
-                game = new Game(id, maxTeamSize);
                 break;
             }
             case WorkerMessages.UpdateMaxTeamSize: {

@@ -793,6 +793,11 @@ export class Game implements GameData {
         }
     }
 
+    postGameStarted(): void {
+        this.gas.advanceGasStage();
+        this.setGameData({ allowJoin: false })
+    }
+
     // Called when a JoinPacket is sent by the client
     activatePlayer(player: Gamer, packet: JoinPacketData): void {
         // // DEV
@@ -852,9 +857,7 @@ export class Game implements GameData {
             this.startTimeout = this.addTimeout(() => {
                 this._started = true;
                 this.setGameData({ startedTime: this.now });
-                this.gas.advanceGasStage();
-
-                this.addTimeout(this.createNewGame.bind(this), Config.gameJoinTime * 1000);
+                this.addTimeout(this.postGameStarted.bind(this), Config.gameJoinTime * 1000);
             }, 3000);
         }
 
