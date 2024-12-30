@@ -87,7 +87,6 @@ export class GameContainer {
                     this._data = { ...this._data, ...message.data };
 
                     if (message.data.allowJoin === true) { // This means the game was just created
-                        creatingID = -1;
                         this.resolve(this.id);
                     }
                     break;
@@ -137,12 +136,11 @@ export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
 
         if (gameID !== -1) {
             return { success: true, gameID };
+        } else {
+            return gameID !== undefined
+                ? { success: true, gameID }
+                : { success: false };
         }
-       
-    }
-
-    if (!eligibleGames.length) {
-        return { success: false };
     }
 
     gameID = eligibleGames
@@ -162,28 +160,24 @@ export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
         : { success: false };
 }
 
-let creatingID = -1;
-
 export async function newGame(maxTeamSize?: TeamSize): Promise<number> {
     return new Promise<number>(resolve => {
         const teamSize = maxTeamSize ? maxTeamSize : TeamSize.Solo;
-        if (creatingID !== -1) {
-            resolve(creatingID);
-        } else {
-            let startGameId = Config.soloPort;
-            if (maxTeamSize == TeamSize.Squad) {
-                startGameId = Config.squadPort;
-            }
-            const maxGames = Config.maxGames + startGameId;
-            for (let i = startGameId; i < maxGames; i++) {
-                const game = games[i];
-                if (!game || game.stopped) {
-                    games[i] = new GameContainer(i, teamSize, resolve);
-                    return;
-                }
-            }
-            resolve(-1);
+
+        let startGameId = Config.soloPort;
+        if (maxTeamSize == TeamSize.Squad) {
+            startGameId = Config.squadPort;
         }
+        const maxGames = Config.maxGames + startGameId;
+        for (let i = startGameId; i < maxGames; i++) {
+            const game = games[i];
+            if (!game || game.stopped) {
+                games[i] = new GameContainer(i, teamSize, resolve);
+                resolve(i);
+                return;
+            }
+        }
+        resolve(-1);
     });
 }
 
