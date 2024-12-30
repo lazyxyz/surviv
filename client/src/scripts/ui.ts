@@ -470,7 +470,7 @@ export async function setUpUI(game: Game): Promise<void> {
                     // const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
                     // if (weaponPreset) params.set("weaponPreset", ""weaponPreset);
                     
-                    params.set("weaponPreset", "mg5 negev chainsaw"); // TEST ADD ITEMS
+                    params.set("weaponPreset", "radio mg5 chainsaw"); // TEST ADD ITEMS
 
                     const nameColor = game.console.getBuiltInCVar("dv_name_color");
                     if (nameColor) {

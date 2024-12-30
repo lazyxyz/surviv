@@ -49,7 +49,6 @@ import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
 import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
-import { Armors } from "@common/definitions/armors";
 
 /*
     eslint-disable
@@ -794,6 +793,8 @@ export class Game implements GameData {
     }
 
     postGameStarted(): void {
+        this._started = true;
+        this.setGameData({ startedTime: this.now });
         this.gas.advanceGasStage();
         this.setGameData({ allowJoin: false })
     }
@@ -855,8 +856,6 @@ export class Game implements GameData {
             && this.startTimeout === undefined
         ) {
             this.startTimeout = this.addTimeout(() => {
-                this._started = true;
-                this.setGameData({ startedTime: this.now });
                 this.addTimeout(this.postGameStarted.bind(this), Config.gameJoinTime * 1000);
             }, 3000);
         }
