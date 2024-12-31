@@ -1,3 +1,4 @@
+import { DeepPartial } from "../utils/misc";
 import { ItemType, ObjectDefinitions, type ItemDefinition } from "../utils/objectDefinitions";
 
 /*
@@ -19,16 +20,22 @@ export interface SkinDefinition extends ItemDefinition {
     readonly noSwap?: boolean
 }
 
+export const freeSkin: string[] = [
+    "openmark", "chill_guy", "hazel_jumpsuit", "the_amateur", "the_pro"
+];
+
+const defaultSkin = {
+    itemType: ItemType.Skin,
+    noDrop: false,
+    hideFromLoadout: false,
+    grassTint: false,
+    hideEquipment: false,
+    hideBlood: false
+} satisfies DeepPartial<SkinDefinition> as DeepPartial<SkinDefinition>; ;
+
 export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
     "Skins",
-    {
-        itemType: ItemType.Skin,
-        noDrop: false,
-        hideFromLoadout: false,
-        grassTint: false,
-        hideEquipment: false,
-        hideBlood: false
-    },
+    defaultSkin,
     ([derive, , createTemplate]) => {
         const skin = derive((name: string, backpackTint?: number) => ({
             idString: name.toLowerCase().replace(/'/g, "").replace(/ /g, "_"),

@@ -368,6 +368,61 @@ const defaultCustomize: Array<ObjectDefinition & Partial<{
     }
 ];
 
+export const freeGuns = [
+    {
+        key: "ak47",
+        children: [
+            {
+                idString: "ak47-blue-ice",
+                name: "Blue Ice"
+            },
+            {
+                idString: "ak47-dragon",
+                name: "Dragon"
+            }
+        ]
+    },
+    {
+        key: "chainsaw",
+        children: [
+            {
+                idString: "chainsaw-blue-ice",
+                name: "Blue Ice"
+            },
+            {
+                idString: "chainsaw-dragon",
+                name: "Dragon"
+            }
+        ]
+    },
+    {
+        key: "mg5",
+        children: [
+            {
+                idString: "mg5-blue-ice",
+                name: "Blue Ice"
+            },
+            {
+                idString: "mg5-dragon",
+                name: "Dragon"
+            }
+        ]
+    },
+    {
+        key: "negev",
+        children: [
+            {
+                idString: "negev-blue-ice",
+                name: "Blue Ice"
+            },
+            {
+                idString: "negev-dragon",
+                name: "Dragon"
+            }
+        ]
+    }
+];
+
 const defaultGun = {
     itemType: ItemType.Gun,
     noDrop: false,
@@ -870,12 +925,6 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                     ...defaultCustomize.find(argument => argument.idString === "ak47")!,
                     idString: "ak47-blue-ice",
                     name: "AK-47 Blue Ice"
-                },
-                {
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    ...defaultCustomize.find(argument => argument.idString === "ak47")!,
-                    idString: "ak47-rainbow",
-                    name: "AK-47 Rainbow"
                 }
             ],
             {

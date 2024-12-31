@@ -21,6 +21,11 @@ const emote = createTemplate<EmoteDefinition>()((name: string, category: EmoteCa
     category
 }));
 
+export const freeEmotes: string[] = [
+    "happy_face", "sad_face", "thumbs_up", "thumbs_down", "wave",
+    "disappointed_face", "sobbing_face", "angry_face", "heart_face", "joyful_face"
+];
+
 export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
     ...[
         "Happy Face",

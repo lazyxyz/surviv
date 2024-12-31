@@ -1,12 +1,12 @@
 import { GameConstants, InputActions, ObjectCategory, SpectateActions, TeamSize } from "@common/constants";
 import { Ammos, type AmmoDefinition } from "@common/definitions/ammos";
 import { type ArmorDefinition } from "@common/definitions/armors";
-import { Badges, type BadgeDefinition } from "@common/definitions/badges";
-import { EmoteCategory, Emotes, type EmoteDefinition } from "@common/definitions/emotes";
+import { Badges, freeBadges, type BadgeDefinition } from "@common/definitions/badges";
+import { EmoteCategory, Emotes, freeEmotes, type EmoteDefinition } from "@common/definitions/emotes";
 import { HealType, HealingItems, type HealingItemDefinition } from "@common/definitions/healingItems";
 import { PerkIds, Perks } from "@common/definitions/perks";
 import { Scopes, type ScopeDefinition } from "@common/definitions/scopes";
-import { Skins, type SkinDefinition } from "@common/definitions/skins";
+import { freeSkin, Skins, type SkinDefinition } from "@common/definitions/skins";
 import { SpectatePacket } from "@common/packets/spectatePacket";
 import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, type GetGameResponse } from "@common/typings";
 import { ExtendedMap } from "@common/utils/misc";
@@ -25,7 +25,7 @@ import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaul
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
-import { Guns } from "@common/definitions/guns";
+import { freeGuns, Guns } from "@common/definitions/guns";
 import { Melees } from "@common/definitions/melees";
 import { Throwables } from "@common/definitions/throwables";
 
@@ -479,10 +479,8 @@ export async function setUpUI(game: Game): Promise<void> {
                     const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
                     if (lobbyClearing) params.set("lobbyClearing", "true");
 
-                    // const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
-                    // if (weaponPreset) params.set("weaponPreset", ""weaponPreset);
-
-                    params.set("weaponPreset", "mg5-dragon negev-blue-ice chainsaw-blue-ice"); // TEST ADD ITEMS
+                    const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
+                    if (weaponPreset) params.set("weaponPreset", weaponPreset);
 
                     const nameColor = game.console.getBuiltInCVar("dv_name_color");
                     if (nameColor) {
@@ -999,6 +997,9 @@ export async function setUpUI(game: Game): Promise<void> {
     const fists = $<HTMLDivElement>("#skin-left-fist, #skin-right-fist");
 
     const updateSplashCustomize = (skinID: string): void => {
+        $(".assets-fist").attr("href", `./img/game/shared/skins/${skinID}_fist.svg`);
+        $(".assets-base").attr("href", `./img/game/shared/skins/${skinID}_base.svg`);
+
         base.css(
             "background-image",
             `url("./img/game/shared/skins/${skinID}_base.svg")`
@@ -1024,7 +1025,11 @@ export async function setUpUI(game: Game): Promise<void> {
         updateSplashCustomize(idString);
     }
 
-    for (const { idString, hideFromLoadout, rolesRequired } of Skins) {
+    const SkinsIntance = Skins.definitions.filter(argument =>
+        freeSkin.some(argument_child => argument_child === argument.idString)
+    );
+
+    for (const { idString, hideFromLoadout, rolesRequired } of SkinsIntance) {
         if (hideFromLoadout || !(rolesRequired ?? [role]).includes(role)) continue;
 
         // noinspection CssUnknownTarget
@@ -1082,7 +1087,11 @@ export async function setUpUI(game: Game): Promise<void> {
     function updateEmotesList(): void {
         emoteList.empty();
 
-        const emotes = [...Emotes.definitions].sort((a, b) => {
+        const EmotesInstance = Emotes.definitions.filter(argument =>
+            freeEmotes.some(argument_child => argument_child === argument.idString)
+        );
+
+        const emotes = EmotesInstance.sort((a, b) => {
             return a.category - b.category;
         });
 
@@ -1325,60 +1334,62 @@ export async function setUpUI(game: Game): Promise<void> {
     }
 
     // Load badges
-    const allowedBadges = Badges.definitions.filter(({ roles }) => !roles?.length || roles.includes(role));
+    const allowedBadges = Badges.definitions
+    .filter(argument =>
+        freeBadges.some(argument_child => argument_child === argument.idString)
+    )
+    .filter(({ roles }) => !roles?.length || roles.includes(role));
 
-    if (allowedBadges.length > 0) {
-        $("#tab-badges").show();
+    $("#tab-badges").show();
 
-        const noBadgeItem = $<HTMLDivElement>(
-            html`<div id="badge-" class="badges-list-item-container">\
-                <div class="badges-list-item"> </div>\
-                <span class="badge-name">${getTranslatedString("none")}</span>\
-            </div>`
-        );
+    const noBadgeItem = $<HTMLDivElement>(
+        html`<div id="badge-" class="badges-list-item-container">\
+            <div class="badges-list-item"> </div>\
+            <span class="badge-name">${getTranslatedString("none")}</span>\
+        </div>`
+    );
 
-        noBadgeItem.on("click", () => {
-            game.console.setBuiltInCVar("cv_loadout_badge", "");
-            noBadgeItem.addClass("selected").siblings().removeClass("selected");
-        });
+    noBadgeItem.on("click", () => {
+        game.console.setBuiltInCVar("cv_loadout_badge", "");
+        noBadgeItem.addClass("selected").siblings().removeClass("selected");
+    });
 
-        const activeBadge = game.console.getBuiltInCVar("cv_loadout_badge");
+    const activeBadge = game.console.getBuiltInCVar("cv_loadout_badge");
 
-        const badgeUiCache: Record<ReferenceTo<BadgeDefinition>, JQuery<HTMLDivElement>> = { [""]: noBadgeItem };
+    const badgeUiCache: Record<ReferenceTo<BadgeDefinition>, JQuery<HTMLDivElement>> = { [""]: noBadgeItem };
 
-        function selectBadge(idString: ReferenceTo<BadgeDefinition>): void {
-            badgeUiCache[idString].addClass("selected")
-                .siblings()
-                .removeClass("selected");
-        }
-
-        $("#badges-list").append(
-            noBadgeItem,
-            ...allowedBadges.map(({ idString }) => {
-                // noinspection CssUnknownTarget
-                const badgeItem = badgeUiCache[idString] = $<HTMLDivElement>(
-                    `<div id="badge-${idString}" class="badges-list-item-container${idString === activeBadge ? " selected" : ""}">\
-                        <div class="badges-list-item">\
-                            <div style="background-image: url('./img/game/shared/badges/${idString}.svg')"></div>\
-                        </div>\
-                        <span class="badge-name">${getTranslatedString(`badge_${idString}` as TranslationKeys)}</span>\
-                    </div>`
-                );
-
-                badgeItem.on("click", () => {
-                    game.console.setBuiltInCVar("cv_loadout_badge", idString);
-                    selectBadge(idString);
-                });
-
-                return badgeItem;
-            })
-        );
-
-        game.console.variables.addChangeListener(
-            "cv_loadout_badge",
-            (_, newBadge) => { selectBadge(newBadge); }
-        );
+    function selectBadge(idString: ReferenceTo<BadgeDefinition>): void {
+        badgeUiCache[idString].addClass("selected")
+            .siblings()
+            .removeClass("selected");
     }
+
+    $("#badges-list").append(
+        noBadgeItem,
+        ...allowedBadges.map(({ idString }) => {
+            // noinspection CssUnknownTarget
+            const badgeItem = badgeUiCache[idString] = $<HTMLDivElement>(
+                `<div id="badge-${idString}" class="badges-list-item-container${idString === activeBadge ? " selected" : ""}">\
+                    <div class="badges-list-item">\
+                        <div style="background-image: url('./img/game/shared/badges/${idString}.svg')"></div>\
+                    </div>\
+                    <span class="badge-name">${getTranslatedString(`badge_${idString}` as TranslationKeys)}</span>\
+                </div>`
+            );
+
+            badgeItem.on("click", () => {
+                game.console.setBuiltInCVar("cv_loadout_badge", idString);
+                selectBadge(idString);
+            });
+
+            return badgeItem;
+        })
+    );
+
+    game.console.variables.addChangeListener(
+        "cv_loadout_badge",
+        (_, newBadge) => { selectBadge(newBadge); }
+    );
 
     // load all weapons
     {
@@ -1426,63 +1437,6 @@ export async function setUpUI(game: Game): Promise<void> {
 
             // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
             const instanceAssets = await new Promise<ObjectDefinition[]>(async resolve => {
-                const mockAPI = [
-                    {
-                        key: "ak47",
-                        children: [
-                            {
-                                idString: "ak47-blue-ice",
-                                name: "Blue Ice"
-                            },
-                            {
-                                idString: "ak47-dragon",
-                                name: "Dragon"
-                            }
-                        ]
-                    },
-                    {
-                        key: "chainsaw",
-                        children: [
-                            {
-                                idString: "chainsaw-blue-ice",
-                                name: "Blue Ice"
-                            },
-                            {
-                                idString: "chainsaw-dragon",
-                                name: "Dragon"
-                            }
-                        ]
-                    },
-                    {
-                        key: "mg5",
-                        children: [
-                            {
-                                idString: "mg5-blue-ice",
-                                name: "Blue Ice"
-                            },
-                            {
-                                idString: "mg5-dragon",
-                                name: "Dragon"
-                            }
-                        ]
-                    },
-                    {
-                        key: "negev",
-                        children: [
-                            {
-                                idString: "negev-blue-ice",
-                                name: "Blue Ice"
-                            },
-                            {
-                                idString: "negev-dragon",
-                                name: "Dragon"
-                            }
-                        ]
-                    }
-                ];
-
-                const requestAPI = mockAPI.find(argument => argument.key === weaponName);
-
                 // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 setTimeout(async() => {
                     const instanceAssets = [
@@ -1491,7 +1445,7 @@ export async function setUpUI(game: Game): Promise<void> {
                             name: "Default"
                         },
 
-                        ...(requestAPI?.children || [])
+                        ...(freeGuns.find(argument => argument.key === weaponName)?.children || [])
                     ];
 
                     return resolve(instanceAssets);
@@ -1523,6 +1477,7 @@ export async function setUpUI(game: Game): Promise<void> {
             zIndex: number
             rotate?: number
             url: string
+            class: string
             x: number
             y: number
         }>): JQuery<Partial<HTMLElement>> => {
@@ -1544,6 +1499,7 @@ export async function setUpUI(game: Game): Promise<void> {
                 });
 
                 $(iVector).attr({
+                    class: argument.class,
                     href: argument.url
                 });
 
@@ -1555,295 +1511,344 @@ export async function setUpUI(game: Game): Promise<void> {
             return asideElement;
         };
 
-        for (const gunField of Guns.definitions) {
-            const key = "Gun";
-            const isExisted = lastCategory.some(category => category === key);
+        {
+            const GunsInstance = Guns.definitions.filter((argument, index, self) => {
+                return !self.some((argument_child, i) =>
+                    // ensures that only earlier elements in the self (argument_child) are checked against the current element (argument). This prevents checking duplicates twice
+                    i < index
+                    // not twice similar startsWith E.g: ['ak47', 'ak47-dragon', 'ak4-blue-ice]
+                    && argument.idString.startsWith(argument_child.idString));
+            });
 
-            $(".weapons-container-list").append(html`
-                ${!isExisted ? `<h2>${key}</h2>` : ""}
+            for (const gunField of GunsInstance) {
+                const key = "Gun";
+                const isExisted = lastCategory.some(category => category === key);
 
-                <div class="weapons-container-card" id="weapons-list-${gunField.idString}">
-                    <img src="./img/game/shared/weapons/${gunField.idString}.svg" alt=${gunField.name} width="72px" height="72px" />
+                $(".weapons-container-list").append(html`
+                    ${!isExisted ? `<h2>${key}</h2>` : ""}
+    
+                    <div class="weapons-container-card" id="weapons-list-${gunField.idString}">
+                        <img src="./img/game/shared/weapons/${gunField.idString}.svg" alt=${gunField.name} width="72px" height="72px" />
+    
+                        <p class="weapons-container-paragraph">${gunField.name}</p>
+                    </div>
+                `);
 
-                    <p class="weapons-container-paragraph">${gunField.name}</p>
-                </div>
-            `);
+                if (!isExisted) lastCategory.push(key);
 
-            if (!isExisted) lastCategory.push(key);
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                $(`#weapons-list-${gunField.idString}`).on("click", async({ currentTarget }) => {
+                    toggleSelect(currentTarget, ".weapons-container-list");
 
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            $(`#weapons-list-${gunField.idString}`).on("click", async({ currentTarget }) => {
-                toggleSelect(currentTarget, ".weapons-container-list");
+                    await appendAsset(gunField.idString);
 
-                await appendAsset(gunField.idString);
+                    $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
+                        toggleSelect(currentTarget, ".weapons-container-aside-assets");
 
-                $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
-                    toggleSelect(currentTarget, ".weapons-container-aside-assets");
+                        // handler preview
+                        {
+                            const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
 
-                    // handler preview
-                    {
-                        const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
+                            game.console.setBuiltInCVar("dv_weapon_preset", getTargetSelect);
 
-                        // console.log(JSON.parse(game.console.getBuiltInCVar("cv_loadout_weapon")));
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                            const getGun = GunsInstance.find(g => g.idString === gunField.idString)!;
 
-                        game.console.setBuiltInCVar("cv_loadout_weapon", JSON.stringify({
-                            chainsaw: getTargetSelect
-                        }));
+                            const singleVariant = GunsInstance.find(g =>
+                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                // @ts-ignore
+                                g.idString === getGun?.singleVariant
+                            );
 
-                        console.log(game.console.getBuiltInCVar("cv_loadout_weapon"));
+                            const image = [
+                                {
+                                    class: "assets-base",
+                                    url: `./img/game/shared/skins/${currentSkin}_base.svg`,
+                                    x: 0,
+                                    y: 0,
+                                    zIndex: 3
+                                }
+                            ];
 
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        const getGun = Guns.definitions.find(g => g.idString === gunField.idString)!;
+                            if (singleVariant && !singleVariant?.isDual) {
+                                // Left
+                                {
+                                    image.push({
+                                        class: "assets-world",
 
-                        const singleVariant = Guns.definitions.find(g =>
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-ignore
-                            g.idString === getGun?.singleVariant
-                        );
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        url: `./img/game/shared/weapons/${getTargetSelect.replace("dual_", "")}_world.svg`,
 
-                        const image = [
-                            {
-                                url: `./img/game/shared/skins/${currentSkin}_base.svg`,
-                                x: 0,
-                                y: 0,
-                                zIndex: 3
-                            }
-                        ];
+                                        x: singleVariant.image.position.x,
 
-                        if (singleVariant && !singleVariant?.isDual) {
-                            // Left
-                            {
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        y: getGun.leftRightOffset * -20,
+
+                                        zIndex: 2
+                                    });
+
+                                    image.push({
+                                        class: "assets-fist",
+
+                                        url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                        x: singleVariant.fists.left.x,
+
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        y: getGun.leftRightOffset * -20,
+
+                                        zIndex: singleVariant.fists.leftZIndex ?? 1
+                                    });
+                                }
+
+                                // Right
+                                {
+                                    image.push({
+                                        class: "assets-world",
+
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        url: `./img/game/shared/weapons/${getTargetSelect.replace("dual_", "")}_world.svg`,
+
+                                        x: singleVariant.image.position.x,
+
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        y: getGun.leftRightOffset * 20,
+
+                                        zIndex: 2
+                                    });
+
+                                    image.push({
+                                        class: "assets-fist",
+
+                                        url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                        x: singleVariant.fists.right.x,
+
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        y: getGun.leftRightOffset * 20,
+
+                                        zIndex: singleVariant.fists.rightZIndex
+                                    });
+                                }
+                            } else {
                                 image.push({
+                                    class: "assets-world",
+
+                                    url: `./img/game/shared/weapons/${getTargetSelect}_world.svg`,
                                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                                     // @ts-ignore
-                                    url: `./img/game/shared/weapons/${getTargetSelect.replace("dual_", "")}_world.svg`,
-
-                                    x: singleVariant.image.position.x,
+                                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                                    x: getGun.image.position.x,
 
                                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                                     // @ts-ignore
-                                    y: getGun.leftRightOffset * -20,
-
+                                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                                    y: getGun.image.position.y,
                                     zIndex: 2
                                 });
 
                                 image.push({
+                                    class: "assets-fist",
                                     url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
-                                    x: singleVariant.fists.left.x,
-
-                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                    // @ts-ignore
-                                    y: getGun.leftRightOffset * -20,
-
-                                    zIndex: singleVariant.fists.leftZIndex ?? 1
-                                });
-                            }
-
-                            // Right
-                            {
-                                image.push({
-                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                    // @ts-ignore
-                                    url: `./img/game/shared/weapons/${getTargetSelect.replace("dual_", "")}_world.svg`,
-
-                                    x: singleVariant.image.position.x,
-
-                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                    // @ts-ignore
-                                    y: getGun.leftRightOffset * 20,
-
-                                    zIndex: 2
+                                    x: getGun.fists.right.x,
+                                    y: getGun.fists.right.y,
+                                    zIndex: getGun.fists.rightZIndex
                                 });
 
                                 image.push({
+                                    class: "assets-fist",
                                     url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
-                                    x: singleVariant.fists.right.x,
-
-                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                    // @ts-ignore
-                                    y: getGun.leftRightOffset * 20,
-
-                                    zIndex: singleVariant.fists.rightZIndex
+                                    x: getGun.fists.left.x,
+                                    y: getGun.fists.left.y,
+                                    zIndex: getGun.fists.leftZIndex
                                 });
                             }
-                        } else {
-                            image.push({
-                                url: `./img/game/shared/weapons/${getTargetSelect}_world.svg`,
-                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                // @ts-ignore
-                                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                                x: getGun.image.position.x,
 
-                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                // @ts-ignore
-                                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                                y: getGun.image.position.y,
-                                zIndex: 2
-                            });
+                            const getPreview = appendPreview(image);
 
-                            image.push({
-                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
-                                x: getGun.fists.right.x,
-                                y: getGun.fists.right.y,
-                                zIndex: getGun.fists.rightZIndex
-                            });
-
-                            image.push({
-                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
-                                x: getGun.fists.left.x,
-                                y: getGun.fists.left.y,
-                                zIndex: getGun.fists.leftZIndex
-                            });
+                            getPreview.attr("viewBox", "-45 -45 250 90");
                         }
-
-                        const getPreview = appendPreview(image);
-
-                        getPreview.attr("viewBox", "-45 -45 250 90");
-                    }
+                    });
                 });
-            });
+            }
         }
 
-        for (const melessField of Melees.definitions) {
-            const key = "Meless";
-            const isExisted = lastCategory.some(category => category === key);
-
-            $(".weapons-container-list").append(html`
-                ${!isExisted ? `<h2>${key}</h2>` : ""}
-
-                <div class="weapons-container-card" id="weapons-list-${melessField.idString}">
-                    <img src="./img/game/shared/weapons/${melessField.idString}.svg" alt=${melessField.name} width="72px" height="72px" />
-
-                    <p class="weapons-container-paragraph">${melessField.name}</p>
-                </div>
-            `);
-
-            if (!isExisted) lastCategory.push(key);
-
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            $(`#weapons-list-${melessField.idString}`).on("click", async({ currentTarget }) => {
-                toggleSelect(currentTarget, ".weapons-container-list");
-
-                await appendAsset(melessField.idString);
-
-                $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
-                    toggleSelect(currentTarget, ".weapons-container-aside-assets");
-
-                    // handler preview
-                    {
-                        const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
-
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        const getMeless = Melees.definitions.find(g => g.idString === melessField.idString)!;
-
-                        const image = [
-                            {
-                                url: `./img/game/shared/skins/${currentSkin}_base.svg`,
-                                x: 0,
-                                y: 0,
-                                zIndex: 2,
-                                rotate: 0
-                            },
-                            {
-                                url: `./img/game/shared/weapons/${getTargetSelect}.svg`,
-                                x: getMeless.image?.position.x ?? 0,
-                                y: getMeless.image?.position.y ?? 0,
-                                rotate: getMeless.image?.angle ?? 0,
-                                zIndex: 1
-                            },
-                            {
-                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
-                                x: getMeless.fists.right.x,
-                                y: getMeless.fists.right.y,
-                                zIndex: 4,
-                                rotate: 0
-                            },
-                            {
-                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
-                                x: getMeless.fists.left.x,
-                                y: getMeless.fists.left.y,
-                                zIndex: 3,
-                                rotate: 0
-                            }
-                        ];
-
-                        const getPreview = appendPreview(image);
-
-                        getPreview.attr("viewBox", "-100 -120 300 300");
-                    }
-                });
+        {
+            const MelessInstance = Melees.definitions.filter((argument, index, self) => {
+                return !self.some((argument_child, i) =>
+                    // ensures that only earlier elements in the self (argument_child) are checked against the current element (argument). This prevents checking duplicates twice
+                    i < index
+                    // not twice similar startsWith E.g: ['ak47', 'ak47-dragon', 'ak4-blue-ice]
+                    && argument.idString.startsWith(argument_child.idString));
             });
+
+            for (const melessField of MelessInstance) {
+                const key = "Meless";
+                const isExisted = lastCategory.some(category => category === key);
+
+                $(".weapons-container-list").append(html`
+                    ${!isExisted ? `<h2>${key}</h2>` : ""}
+    
+                    <div class="weapons-container-card" id="weapons-list-${melessField.idString}">
+                        <img src="./img/game/shared/weapons/${melessField.idString}.svg" alt=${melessField.name} width="72px" height="72px" />
+    
+                        <p class="weapons-container-paragraph">${melessField.name}</p>
+                    </div>
+                `);
+
+                if (!isExisted) lastCategory.push(key);
+
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                $(`#weapons-list-${melessField.idString}`).on("click", async({ currentTarget }) => {
+                    toggleSelect(currentTarget, ".weapons-container-list");
+
+                    await appendAsset(melessField.idString);
+
+                    $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
+                        toggleSelect(currentTarget, ".weapons-container-aside-assets");
+
+                        // handler preview
+                        {
+                            const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
+
+                            game.console.setBuiltInCVar("dv_weapon_preset", getTargetSelect);
+
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                            const getMeless = MelessInstance.find(g => g.idString === melessField.idString)!;
+
+                            const image = [
+                                {
+                                    class: "assets-base",
+                                    url: `./img/game/shared/skins/${currentSkin}_base.svg`,
+                                    x: 0,
+                                    y: 0,
+                                    zIndex: 2,
+                                    rotate: 0
+                                },
+                                {
+                                    class: "assets-world",
+                                    url: `./img/game/shared/weapons/${getTargetSelect}.svg`,
+                                    x: getMeless.image?.position.x ?? 0,
+                                    y: getMeless.image?.position.y ?? 0,
+                                    rotate: getMeless.image?.angle ?? 0,
+                                    zIndex: 1
+                                },
+                                {
+                                    class: "assets-fist",
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: getMeless.fists.right.x,
+                                    y: getMeless.fists.right.y,
+                                    zIndex: 4,
+                                    rotate: 0
+                                },
+                                {
+                                    class: "assets-fist",
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: getMeless.fists.left.x,
+                                    y: getMeless.fists.left.y,
+                                    zIndex: 3,
+                                    rotate: 0
+                                }
+                            ];
+
+                            const getPreview = appendPreview(image);
+
+                            getPreview.attr("viewBox", "-100 -120 300 300");
+                        }
+                    });
+                });
+            }
         }
 
-        for (const throwableField of Throwables.definitions) {
-            const key = "Throwables";
-            const isExisted = lastCategory.some(category => category === key);
-
-            $(".weapons-container-list").append(html`
-                ${!isExisted ? `<h2>${key}</h2>` : ""}
-                
-                <div class="weapons-container-card" id="weapons-list-${throwableField.idString}">
-                    <img src="./img/game/shared/weapons/${throwableField.idString}.svg" alt=${throwableField.name} width="72px" height="72px" />
-
-                    <p class="weapons-container-paragraph">${throwableField.name}</p>
-                </div>
-            `);
-
-            if (!isExisted) lastCategory.push(key);
-
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            $(`#weapons-list-${throwableField.idString}`).on("click", async({ currentTarget }) => {
-                toggleSelect(currentTarget, ".weapons-container-list");
-
-                await appendAsset(throwableField.idString);
-
-                $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
-                    toggleSelect(currentTarget, ".weapons-container-aside-assets");
-
-                    // handler preview
-                    {
-                        const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
-
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        const getThrowable = Throwables.definitions.find(g => g.idString === throwableField.idString)!;
-
-                        const image = [
-                            {
-                                url: `./img/game/shared/skins/${currentSkin}_base.svg`,
-                                x: 0,
-                                y: 0,
-                                zIndex: 2,
-                                rotate: 0
-                            },
-                            {
-                                url: `./img/game/shared/weapons/${getTargetSelect}.svg`,
-                                x: getThrowable.image?.position.x ?? 0,
-                                y: getThrowable.image?.position.y ?? 0,
-                                rotate: getThrowable.image?.angle ?? 0,
-                                zIndex: 5
-                            },
-                            {
-                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
-                                x: 38,
-                                y: -35,
-                                zIndex: 4,
-                                rotate: 0
-                            },
-                            {
-                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
-                                x: 38,
-                                y: 35,
-                                zIndex: 3,
-                                rotate: 0
-                            }
-                        ];
-
-                        const getPreview = appendPreview(image);
-
-                        getPreview.attr("viewBox", "-45 -45 250 90");
-                    }
-                });
+        {
+            const ThrowableInstance = Throwables.definitions.filter((argument, index, self) => {
+                return !self.some((argument_child, i) =>
+                    // ensures that only earlier elements in the self (argument_child) are checked against the current element (argument). This prevents checking duplicates twice
+                    i < index
+                    // not twice similar startsWith E.g: ['ak47', 'ak47-dragon', 'ak4-blue-ice]
+                    && argument.idString.startsWith(argument_child.idString));
             });
+
+            for (const throwableField of ThrowableInstance) {
+                const key = "Throwables";
+                const isExisted = lastCategory.some(category => category === key);
+
+                $(".weapons-container-list").append(html`
+                    ${!isExisted ? `<h2>${key}</h2>` : ""}
+                    
+                    <div class="weapons-container-card" id="weapons-list-${throwableField.idString}">
+                        <img src="./img/game/shared/weapons/${throwableField.idString}.svg" alt=${throwableField.name} width="72px" height="72px" />
+    
+                        <p class="weapons-container-paragraph">${throwableField.name}</p>
+                    </div>
+                `);
+
+                if (!isExisted) lastCategory.push(key);
+
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                $(`#weapons-list-${throwableField.idString}`).on("click", async({ currentTarget }) => {
+                    toggleSelect(currentTarget, ".weapons-container-list");
+
+                    await appendAsset(throwableField.idString);
+
+                    $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
+                        toggleSelect(currentTarget, ".weapons-container-aside-assets");
+
+                        // handler preview
+                        {
+                            const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
+
+                            game.console.setBuiltInCVar("dv_weapon_preset", getTargetSelect);
+
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                            const getThrowable = ThrowableInstance.find(g => g.idString === throwableField.idString)!;
+
+                            const image = [
+                                {
+                                    class: "assets-base",
+                                    url: `./img/game/shared/skins/${currentSkin}_base.svg`,
+                                    x: 0,
+                                    y: 0,
+                                    zIndex: 2,
+                                    rotate: 0
+                                },
+                                {
+                                    class: "assets-world",
+                                    url: `./img/game/shared/weapons/${getTargetSelect}.svg`,
+                                    x: getThrowable.image?.position.x ?? 0,
+                                    y: getThrowable.image?.position.y ?? 0,
+                                    rotate: getThrowable.image?.angle ?? 0,
+                                    zIndex: 5
+                                },
+                                {
+                                    class: "assets-fist",
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: 38,
+                                    y: -35,
+                                    zIndex: 4,
+                                    rotate: 0
+                                },
+                                {
+                                    class: "assets-fist",
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: 38,
+                                    y: 35,
+                                    zIndex: 3,
+                                    rotate: 0
+                                }
+                            ];
+
+                            const getPreview = appendPreview(image);
+
+                            getPreview.attr("viewBox", "-45 -45 250 90");
+                        }
+                    });
+                });
+            }
         }
     }
 

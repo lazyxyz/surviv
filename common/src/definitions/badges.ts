@@ -10,6 +10,8 @@ const badge = createTemplate<BadgeDefinition>()((name: string, roles: string[] =
     roles
 }));
 
+export const freeBadges: string[] = [];
+
 export const Badges = ObjectDefinitions.create<BadgeDefinition>("Badges", [
     // Roles
     badge(["Developr", ["developr", "pap", "error", "limenade"]]),
