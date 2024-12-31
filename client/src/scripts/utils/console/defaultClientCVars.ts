@@ -22,6 +22,7 @@ export interface JSONCVar<Value extends Stringable> {
 export const CVarCasters = Object.freeze({
     cv_player_name: Casters.toString,
 
+    cv_loadout_weapon: Casters.toString,
     cv_loadout_skin: Casters.toString,
     cv_loadout_badge: Casters.toString,
     cv_loadout_crosshair: Casters.toInt,
@@ -132,6 +133,7 @@ type SimpleCVarMapping = {
 export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
     cv_player_name: "",
 
+    cv_loadout_weapon: "",
     cv_loadout_skin: GameConstants.player.defaultSkin,
     cv_loadout_badge: "",
     cv_loadout_crosshair: 0,

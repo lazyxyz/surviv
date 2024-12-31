@@ -10,7 +10,7 @@ import { Skins, type SkinDefinition } from "@common/definitions/skins";
 import { SpectatePacket } from "@common/packets/spectatePacket";
 import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, type GetGameResponse } from "@common/typings";
 import { ExtendedMap } from "@common/utils/misc";
-import { ItemType, type ReferenceTo } from "@common/utils/objectDefinitions";
+import { ItemType, type ObjectDefinition, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound } from "@pixi/sound";
 import $ from "jquery";
@@ -25,6 +25,9 @@ import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaul
 import { EMOTE_SLOTS, MODE, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
+import { Guns } from "@common/definitions/guns";
+import { Melees } from "@common/definitions/melees";
+import { Throwables } from "@common/definitions/throwables";
 
 /*
     eslint-disable
@@ -469,8 +472,8 @@ export async function setUpUI(game: Game): Promise<void> {
 
                     // const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
                     // if (weaponPreset) params.set("weaponPreset", ""weaponPreset);
-                    
-                    params.set("weaponPreset", "radio mg5 chainsaw"); // TEST ADD ITEMS
+
+                    params.set("weaponPreset", "mg5-dragon negev-blue-ice chainsaw-blue-ice"); // TEST ADD ITEMS
 
                     const nameColor = game.console.getBuiltInCVar("dv_name_color");
                     if (nameColor) {
@@ -572,6 +575,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
         params.set("name", game.console.getBuiltInCVar("cv_player_name"));
         params.set("skin", game.console.getBuiltInCVar("cv_loadout_skin"));
+        // params.set("weapon", game.console.getBuiltInCVar("cv_loadout_weapon"));
 
         const badge = game.console.getBuiltInCVar("cv_loadout_badge");
         if (badge) params.set("badge", badge);
@@ -1015,6 +1019,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
         skinItem.on("click", () => {
             game.console.setBuiltInCVar("cv_loadout_skin", idString);
+
             selectSkin(idString);
         });
 
@@ -1351,6 +1356,473 @@ export async function setUpUI(game: Game): Promise<void> {
             "cv_loadout_badge",
             (_, newBadge) => { selectBadge(newBadge); }
         );
+    }
+
+    // load all weapons
+    {
+        $("#tab-weapons").show();
+
+        const lastCategory: string[] = [];
+
+        const toggleSelect = (currentTarget: HTMLElement, className: string): void => {
+            /*
+                1. selected but users selecting same previous
+                2. remove selected previous
+                3. append new select
+            */
+            const activedElement = $(className).find(".selected");
+
+            if (activedElement.text() === currentTarget.textContent) return;
+
+            if (activedElement.length) activedElement.removeClass("selected");
+
+            currentTarget.classList.toggle("selected");
+        };
+
+        const appendAsset = async(weaponName: string): Promise<void> => {
+            const rootAssetsElement = $(".weapons-container-aside-assets");
+            const rootListElement = $(".weapons-container-list");
+            const loadingElement = document.createElement("div");
+
+            // if existed you need empty (remove all nodes) and append new
+            rootAssetsElement.empty();
+
+            // prevent spamming call API
+            rootListElement.css("pointer-events", "none");
+
+            // append loading ICON
+            {
+                loadingElement.className = "loading-icon";
+                loadingElement.style.gridColumn = "span 3";
+                loadingElement.style.display = "flex";
+                loadingElement.style.alignItems = "center";
+                loadingElement.style.justifyContent = "center";
+                loadingElement.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
+
+                rootAssetsElement.prepend(loadingElement);
+            }
+
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
+            const instanceAssets = await new Promise<ObjectDefinition[]>(async resolve => {
+                const mockAPI = [
+                    {
+                        key: "ak47",
+                        children: [
+                            {
+                                idString: "ak47-blue-ice",
+                                name: "Blue Ice"
+                            },
+                            {
+                                idString: "ak47-dragon",
+                                name: "Dragon"
+                            }
+                        ]
+                    },
+                    {
+                        key: "chainsaw",
+                        children: [
+                            {
+                                idString: "chainsaw-blue-ice",
+                                name: "Blue Ice"
+                            },
+                            {
+                                idString: "chainsaw-dragon",
+                                name: "Dragon"
+                            }
+                        ]
+                    },
+                    {
+                        key: "mg5",
+                        children: [
+                            {
+                                idString: "mg5-blue-ice",
+                                name: "Blue Ice"
+                            },
+                            {
+                                idString: "mg5-dragon",
+                                name: "Dragon"
+                            }
+                        ]
+                    },
+                    {
+                        key: "negev",
+                        children: [
+                            {
+                                idString: "negev-blue-ice",
+                                name: "Blue Ice"
+                            },
+                            {
+                                idString: "negev-dragon",
+                                name: "Dragon"
+                            }
+                        ]
+                    }
+                ];
+
+                const requestAPI = mockAPI.find(argument => argument.key === weaponName);
+
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                setTimeout(async() => {
+                    const instanceAssets = [
+                        {
+                            idString: weaponName,
+                            name: "Default"
+                        },
+
+                        ...(requestAPI?.children || [])
+                    ];
+
+                    return resolve(instanceAssets);
+                }, 500);
+            });
+
+            for (const assetsField of instanceAssets) {
+                rootAssetsElement.append(html`<div class="weapons-container-card" id="weapons-assets-${assetsField.idString}">
+                    <img src="./img/game/shared/weapons/${assetsField.idString}.svg" alt=${assetsField.name} width="72px" height="72px" />
+
+                    <p class="weapons-container-paragraph">${assetsField.name}</p>
+                    </div>`
+                );
+            }
+
+            // reset states
+            {
+                loadingElement.remove();
+                rootListElement.css("pointer-events", "unset");
+
+                // handler select default
+                setTimeout(() => {
+                    $(`#weapons-assets-${weaponName}`).trigger("click");
+                }, 0);
+            }
+        };
+
+        const appendPreview = (images: Array<{
+            zIndex: number
+            rotate?: number
+            url: string
+            x: number
+            y: number
+        }>): JQuery<Partial<HTMLElement>> => {
+            const asideElement = $(".weapons-container-aside-preview");
+
+            // clear previous
+            asideElement.empty();
+
+            // append new
+            images.sort((a, b) => a.zIndex - b.zIndex).map(argument => {
+                const gVector = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                const iVector = document.createElementNS("http://www.w3.org/2000/svg", "image");
+
+                $(gVector).css({
+                    transformBox: "fill-box",
+                    translate: `calc(${argument.x}px - 50%) calc(${argument.y}px - 50%)`,
+                    transformOrigin: "center",
+                    rotate: `${argument.rotate}deg`
+                });
+
+                $(iVector).attr({
+                    href: argument.url
+                });
+
+                gVector.append(iVector);
+
+                asideElement.append(gVector);
+            });
+
+            return asideElement;
+        };
+
+        for (const gunField of Guns.definitions) {
+            const key = "Gun";
+            const isExisted = lastCategory.some(category => category === key);
+
+            $(".weapons-container-list").append(html`
+                ${!isExisted ? `<h2>${key}</h2>` : ""}
+
+                <div class="weapons-container-card" id="weapons-list-${gunField.idString}">
+                    <img src="./img/game/shared/weapons/${gunField.idString}.svg" alt=${gunField.name} width="72px" height="72px" />
+
+                    <p class="weapons-container-paragraph">${gunField.name}</p>
+                </div>
+            `);
+
+            if (!isExisted) lastCategory.push(key);
+
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            $(`#weapons-list-${gunField.idString}`).on("click", async({ currentTarget }) => {
+                toggleSelect(currentTarget, ".weapons-container-list");
+
+                await appendAsset(gunField.idString);
+
+                $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
+                    toggleSelect(currentTarget, ".weapons-container-aside-assets");
+
+                    // handler preview
+                    {
+                        const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
+
+                        // console.log(JSON.parse(game.console.getBuiltInCVar("cv_loadout_weapon")));
+
+                        game.console.setBuiltInCVar("cv_loadout_weapon", JSON.stringify({
+                            chainsaw: getTargetSelect
+                        }));
+
+                        console.log(game.console.getBuiltInCVar("cv_loadout_weapon"));
+
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        const getGun = Guns.definitions.find(g => g.idString === gunField.idString)!;
+
+                        const singleVariant = Guns.definitions.find(g =>
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-ignore
+                            g.idString === getGun?.singleVariant
+                        );
+
+                        const image = [
+                            {
+                                url: `./img/game/shared/skins/${currentSkin}_base.svg`,
+                                x: 0,
+                                y: 0,
+                                zIndex: 3
+                            }
+                        ];
+
+                        if (singleVariant && !singleVariant?.isDual) {
+                            // Left
+                            {
+                                image.push({
+                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                    // @ts-ignore
+                                    url: `./img/game/shared/weapons/${getTargetSelect.replace("dual_", "")}_world.svg`,
+
+                                    x: singleVariant.image.position.x,
+
+                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                    // @ts-ignore
+                                    y: getGun.leftRightOffset * -20,
+
+                                    zIndex: 2
+                                });
+
+                                image.push({
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: singleVariant.fists.left.x,
+
+                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                    // @ts-ignore
+                                    y: getGun.leftRightOffset * -20,
+
+                                    zIndex: singleVariant.fists.leftZIndex ?? 1
+                                });
+                            }
+
+                            // Right
+                            {
+                                image.push({
+                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                    // @ts-ignore
+                                    url: `./img/game/shared/weapons/${getTargetSelect.replace("dual_", "")}_world.svg`,
+
+                                    x: singleVariant.image.position.x,
+
+                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                    // @ts-ignore
+                                    y: getGun.leftRightOffset * 20,
+
+                                    zIndex: 2
+                                });
+
+                                image.push({
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: singleVariant.fists.right.x,
+
+                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                    // @ts-ignore
+                                    y: getGun.leftRightOffset * 20,
+
+                                    zIndex: singleVariant.fists.rightZIndex
+                                });
+                            }
+                        } else {
+                            image.push({
+                                url: `./img/game/shared/weapons/${getTargetSelect}_world.svg`,
+                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                // @ts-ignore
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                                x: getGun.image.position.x,
+
+                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                // @ts-ignore
+                                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                                y: getGun.image.position.y,
+                                zIndex: 2
+                            });
+
+                            image.push({
+                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                x: getGun.fists.right.x,
+                                y: getGun.fists.right.y,
+                                zIndex: getGun.fists.rightZIndex
+                            });
+
+                            image.push({
+                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                x: getGun.fists.left.x,
+                                y: getGun.fists.left.y,
+                                zIndex: getGun.fists.leftZIndex
+                            });
+                        }
+
+                        const getPreview = appendPreview(image);
+
+                        getPreview.attr("viewBox", "-45 -45 250 90");
+                    }
+                });
+            });
+        }
+
+        for (const melessField of Melees.definitions) {
+            const key = "Meless";
+            const isExisted = lastCategory.some(category => category === key);
+
+            $(".weapons-container-list").append(html`
+                ${!isExisted ? `<h2>${key}</h2>` : ""}
+
+                <div class="weapons-container-card" id="weapons-list-${melessField.idString}">
+                    <img src="./img/game/shared/weapons/${melessField.idString}.svg" alt=${melessField.name} width="72px" height="72px" />
+
+                    <p class="weapons-container-paragraph">${melessField.name}</p>
+                </div>
+            `);
+
+            if (!isExisted) lastCategory.push(key);
+
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            $(`#weapons-list-${melessField.idString}`).on("click", async({ currentTarget }) => {
+                toggleSelect(currentTarget, ".weapons-container-list");
+
+                await appendAsset(melessField.idString);
+
+                $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
+                    toggleSelect(currentTarget, ".weapons-container-aside-assets");
+
+                    // handler preview
+                    {
+                        const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
+
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        const getMeless = Melees.definitions.find(g => g.idString === melessField.idString)!;
+
+                        const image = [
+                            {
+                                url: `./img/game/shared/skins/${currentSkin}_base.svg`,
+                                x: 0,
+                                y: 0,
+                                zIndex: 2,
+                                rotate: 0
+                            },
+                            {
+                                url: `./img/game/shared/weapons/${getTargetSelect}.svg`,
+                                x: getMeless.image?.position.x ?? 0,
+                                y: getMeless.image?.position.y ?? 0,
+                                rotate: getMeless.image?.angle ?? 0,
+                                zIndex: 1
+                            },
+                            {
+                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                x: getMeless.fists.right.x,
+                                y: getMeless.fists.right.y,
+                                zIndex: 4,
+                                rotate: 0
+                            },
+                            {
+                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                x: getMeless.fists.left.x,
+                                y: getMeless.fists.left.y,
+                                zIndex: 3,
+                                rotate: 0
+                            }
+                        ];
+
+                        const getPreview = appendPreview(image);
+
+                        getPreview.attr("viewBox", "-100 -120 300 300");
+                    }
+                });
+            });
+        }
+
+        for (const throwableField of Throwables.definitions) {
+            const key = "Throwables";
+            const isExisted = lastCategory.some(category => category === key);
+
+            $(".weapons-container-list").append(html`
+                ${!isExisted ? `<h2>${key}</h2>` : ""}
+                
+                <div class="weapons-container-card" id="weapons-list-${throwableField.idString}">
+                    <img src="./img/game/shared/weapons/${throwableField.idString}.svg" alt=${throwableField.name} width="72px" height="72px" />
+
+                    <p class="weapons-container-paragraph">${throwableField.name}</p>
+                </div>
+            `);
+
+            if (!isExisted) lastCategory.push(key);
+
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            $(`#weapons-list-${throwableField.idString}`).on("click", async({ currentTarget }) => {
+                toggleSelect(currentTarget, ".weapons-container-list");
+
+                await appendAsset(throwableField.idString);
+
+                $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
+                    toggleSelect(currentTarget, ".weapons-container-aside-assets");
+
+                    // handler preview
+                    {
+                        const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
+
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        const getThrowable = Throwables.definitions.find(g => g.idString === throwableField.idString)!;
+
+                        const image = [
+                            {
+                                url: `./img/game/shared/skins/${currentSkin}_base.svg`,
+                                x: 0,
+                                y: 0,
+                                zIndex: 2,
+                                rotate: 0
+                            },
+                            {
+                                url: `./img/game/shared/weapons/${getTargetSelect}.svg`,
+                                x: getThrowable.image?.position.x ?? 0,
+                                y: getThrowable.image?.position.y ?? 0,
+                                rotate: getThrowable.image?.angle ?? 0,
+                                zIndex: 5
+                            },
+                            {
+                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                x: 38,
+                                y: -35,
+                                zIndex: 4,
+                                rotate: 0
+                            },
+                            {
+                                url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                x: 38,
+                                y: 35,
+                                zIndex: 3,
+                                rotate: 0
+                            }
+                        ];
+
+                        const getPreview = appendPreview(image);
+
+                        getPreview.attr("viewBox", "-45 -45 250 90");
+                    }
+                });
+            });
+        }
     }
 
     function addSliderListener(
@@ -1862,7 +2334,6 @@ export async function setUpUI(game: Game): Promise<void> {
                 );
 
                 const isGrenadeSlot = inventorySlotTypings[slot] === ItemType.Throwable;
-
                 const element = ele[0];
 
                 element.addEventListener("pointerup", () => clearTimeout(dropTimer));

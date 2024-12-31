@@ -634,6 +634,92 @@
         }
     }
 
+    .weapons-container {
+        display: flex;
+        gap: 12px;
+        height: 100%;
+
+        &-card {
+            background: #16161626;
+            padding: 8px;
+            border-radius: 8px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            align-items: center;
+            text-align: center;
+            border: 3px solid transparent;
+
+            cursor: pointer;
+            width: 100px;
+
+            &.selected {
+                border-color: #F2770F;
+            }
+        }
+
+        &-paragraph {
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            margin: unset;
+        }
+
+        // left
+        &-aside {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+
+            overflow-y: auto;
+            flex: 1;
+
+            &-preview {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                background: #16161626;
+                border-radius: 8px;
+                height: 100%;
+                padding: 24px;
+            }
+
+            &-assets {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+
+                height: 50%;
+            }
+        }
+
+        // right
+        &-list {
+            display: flex;
+            flex-wrap: wrap;
+            overflow-y: auto;
+
+            flex: 1;
+            gap: 8px;
+
+            h2 {
+                margin: unset;
+                color: white;
+
+                font-weight: 600;
+                width: 100%;
+                font-size: 16px;
+
+                &:not(:first-child) {
+                    margin-top: 4px;
+                }
+            }
+        }
+    }
+
     @media screen and (max-width: 654px) {
         #emotes-list {
             gap: 5px;

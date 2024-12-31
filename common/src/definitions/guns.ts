@@ -1,6 +1,6 @@
 import { defaultBulletTemplate, FireMode } from "../constants";
 import { mergeDeep, type DeepPartial } from "../utils/misc";
-import { inheritFrom, ItemType, ObjectDefinitions, type BaseBulletDefinition, type InventoryItemDefinition, type RawDefinition, type ReferenceTo } from "../utils/objectDefinitions";
+import { inheritFrom, ItemType, ObjectDefinition, ObjectDefinitions, type BaseBulletDefinition, type InventoryItemDefinition, type RawDefinition, type ReferenceTo } from "../utils/objectDefinitions";
 import { Vec, type Vector } from "../utils/vector";
 import { type AmmoDefinition } from "./ammos";
 
@@ -194,6 +194,179 @@ type RawGunDefinition = BaseGunDefinition & {
         ]?: DualGunNarrowing[K]
     }
 };
+
+const defaultCustomize: Array<ObjectDefinition & Partial<{
+    readonly ammoType: ReferenceTo<AmmoDefinition>
+    readonly ammoSpawnAmount: number
+    readonly capacity: number
+    readonly extendedCapacity: number
+    readonly reloadTime: number
+    readonly fireDelay: number
+    readonly switchDelay: number
+    readonly speedMultiplier: number
+    readonly recoilMultiplier: number
+    readonly recoilDuration: number
+    readonly fireMode: number
+    readonly shotSpread: number
+    readonly moveSpread: number
+    readonly length: number
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly fists: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly image: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly casingParticles: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly gasParticles: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly ballistics: any
+}>> = [
+    {
+        idString: "mg5",
+        name: "MG5",
+        ammoType: "762mm",
+        ammoSpawnAmount: 240,
+        capacity: 120,
+        extendedCapacity: 160,
+        reloadTime: 5.2,
+        fireDelay: 95,
+        switchDelay: 400,
+        speedMultiplier: 0.8,
+        recoilMultiplier: 0.65,
+        recoilDuration: 200,
+        fireMode: FireMode.Auto,
+        shotSpread: 2,
+        moveSpread: 4.5,
+        length: 8.45,
+        fists: {
+            left: Vec.create(105, -3),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: { position: Vec.create(90, 0) },
+        casingParticles: [
+            {
+                position: Vec.create(4, 0.6)
+            },
+            {
+                position: Vec.create(4.2, 0.6),
+                frame: "m13_link",
+                velocity: {
+                    x: {
+                        min: -6,
+                        max: 8
+                    },
+                    y: {
+                        min: 10,
+                        max: 25
+                    }
+                }
+            }
+        ],
+        gasParticles: gasParticlePresets.automatic,
+        ballistics: {
+            damage: 16.5,
+            obstacleMultiplier: 1.5,
+            speed: 0.26,
+            range: 180,
+            tracer: {
+                width: 1.1,
+                length: 1.4
+            }
+        }
+    },
+    {
+        idString: "negev",
+        name: "Negev",
+        ammoType: "556mm",
+        ammoSpawnAmount: 200,
+        capacity: 200,
+        extendedCapacity: 250,
+        reloadTime: 5.8,
+        fireDelay: 70,
+        switchDelay: 400,
+        speedMultiplier: 0.8,
+        recoilMultiplier: 0.65,
+        recoilDuration: 200,
+        fireMode: FireMode.Auto,
+        shotSpread: 3,
+        moveSpread: 8,
+        length: 8.1,
+        fists: {
+            left: Vec.create(121, -18),
+            right: Vec.create(40, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: { position: Vec.create(90, -2) },
+        casingParticles: [
+            {
+                position: Vec.create(4.2, 0.6)
+            },
+            {
+                position: Vec.create(4.4, 0.6),
+                frame: "m13_link",
+                velocity: {
+                    x: {
+                        min: -6,
+                        max: 8
+                    },
+                    y: {
+                        min: 10,
+                        max: 25
+                    }
+                }
+            }
+        ],
+        gasParticles: gasParticlePresets.automatic,
+        ballistics: {
+            damage: 12.5,
+            obstacleMultiplier: 1.5,
+            speed: 0.28,
+            range: 180,
+            tracer: {
+                width: 1.1,
+                length: 1.4
+            }
+        }
+    },
+    {
+        idString: "ak47",
+        name: "AK-47",
+        ammoType: "762mm",
+        ammoSpawnAmount: 90,
+        capacity: 30,
+        extendedCapacity: 40,
+        reloadTime: 2.5,
+        fireDelay: 100,
+        switchDelay: 400,
+        recoilMultiplier: 0.75,
+        recoilDuration: 150,
+        fireMode: FireMode.Auto,
+        shotSpread: 2,
+        moveSpread: 6,
+        length: 7.55,
+        fists: {
+            left: Vec.create(120, -2),
+            right: Vec.create(45, 0),
+            rightZIndex: 4,
+            animationDuration: 100
+        },
+        image: { position: Vec.create(90, 2) },
+        casingParticles: [{
+            frame: "casing_762x39mm",
+            position: Vec.create(4, 0.4)
+        }],
+        gasParticles: gasParticlePresets.automatic,
+        ballistics: {
+            damage: 14,
+            obstacleMultiplier: 1.5,
+            speed: 0.26,
+            range: 160
+        }
+    }
+];
 
 const defaultGun = {
     itemType: ItemType.Gun,
@@ -681,41 +854,30 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 }
             },
             // assult rifles
-            {
-                idString: "ak47",
-                name: "AK-47",
-                ammoType: "762mm",
-                ammoSpawnAmount: 90,
-                capacity: 30,
-                extendedCapacity: 40,
-                reloadTime: 2.5,
-                fireDelay: 100,
-                switchDelay: 400,
-                recoilMultiplier: 0.75,
-                recoilDuration: 150,
-                fireMode: FireMode.Auto,
-                shotSpread: 2,
-                moveSpread: 6,
-                length: 7.55,
-                fists: {
-                    left: Vec.create(120, -2),
-                    right: Vec.create(45, 0),
-                    rightZIndex: 4,
-                    animationDuration: 100
+            ...[
+                {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    ...defaultCustomize.find(argument => argument.idString === "ak47")!
                 },
-                image: { position: Vec.create(90, 2) },
-                casingParticles: [{
-                    frame: "casing_762x39mm",
-                    position: Vec.create(4, 0.4)
-                }],
-                gasParticles: gasParticlePresets.automatic,
-                ballistics: {
-                    damage: 14,
-                    obstacleMultiplier: 1.5,
-                    speed: 0.26,
-                    range: 160
+                {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    ...defaultCustomize.find(argument => argument.idString === "ak47")!,
+                    idString: "ak47-dragon",
+                    name: "AK-47 Dragon"
+                },
+                {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    ...defaultCustomize.find(argument => argument.idString === "ak47")!,
+                    idString: "ak47-blue-ice",
+                    name: "AK-47 Blue Ice"
+                },
+                {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    ...defaultCustomize.find(argument => argument.idString === "ak47")!,
+                    idString: "ak47-rainbow",
+                    name: "AK-47 Rainbow"
                 }
-            },
+            ],
             {
                 idString: "mcx_spear",
                 name: "MCX Spear",
@@ -999,116 +1161,41 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                     }
                 }
             },
-            {
-                idString: "mg5",
-                name: "MG5",
-                ammoType: "762mm",
-                ammoSpawnAmount: 240,
-                capacity: 120,
-                extendedCapacity: 160,
-                reloadTime: 5.2,
-                fireDelay: 95,
-                switchDelay: 400,
-                speedMultiplier: 0.8,
-                recoilMultiplier: 0.65,
-                recoilDuration: 200,
-                fireMode: FireMode.Auto,
-                shotSpread: 2,
-                moveSpread: 4.5,
-                length: 8.45,
-                fists: {
-                    left: Vec.create(105, -3),
-                    right: Vec.create(40, 0),
-                    rightZIndex: 4,
-                    animationDuration: 100
+            ...[
+                {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    ...defaultCustomize.find(argument => argument.idString === "mg5")!
                 },
-                image: { position: Vec.create(90, 0) },
-                casingParticles: [
-                    {
-                        position: Vec.create(4, 0.6)
-                    },
-                    {
-                        position: Vec.create(4.2, 0.6),
-                        frame: "m13_link",
-                        velocity: {
-                            x: {
-                                min: -6,
-                                max: 8
-                            },
-                            y: {
-                                min: 10,
-                                max: 25
-                            }
-                        }
-                    }
-                ] as NonNullable<SingleGunNarrowing["casingParticles"]>,
-                gasParticles: gasParticlePresets.automatic,
-                ballistics: {
-                    damage: 16.5,
-                    obstacleMultiplier: 1.5,
-                    speed: 0.26,
-                    range: 180,
-                    tracer: {
-                        width: 1.1,
-                        length: 1.4
-                    }
-                }
-            },
-            {
-                idString: "negev",
-                name: "Negev",
-                ammoType: "556mm",
-                ammoSpawnAmount: 200,
-                capacity: 200,
-                extendedCapacity: 250,
-                reloadTime: 5.8,
-                fireDelay: 70,
-                switchDelay: 400,
-                speedMultiplier: 0.8,
-                recoilMultiplier: 0.65,
-                recoilDuration: 200,
-                fireMode: FireMode.Auto,
-                shotSpread: 3,
-                moveSpread: 8,
-                length: 8.1,
-                fists: {
-                    left: Vec.create(121, -18),
-                    right: Vec.create(40, 0),
-                    rightZIndex: 4,
-                    animationDuration: 100
+                {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    ...defaultCustomize.find(argument => argument.idString === "mg5")!,
+                    idString: "mg5-dragon",
+                    name: "MG5 Dragon"
                 },
-                image: { position: Vec.create(90, -2) },
-                casingParticles: [
-                    {
-                        position: Vec.create(4.2, 0.6)
-                    },
-                    {
-                        position: Vec.create(4.4, 0.6),
-                        frame: "m13_link",
-                        velocity: {
-                            x: {
-                                min: -6,
-                                max: 8
-                            },
-                            y: {
-                                min: 10,
-                                max: 25
-                            }
-                        }
-                    }
-                ] as NonNullable<SingleGunNarrowing["casingParticles"]>,
-                gasParticles: gasParticlePresets.automatic,
-                ballistics: {
-                    damage: 12.5,
-                    obstacleMultiplier: 1.5,
-                    speed: 0.28,
-                    range: 180,
-                    tracer: {
-                        width: 1.1,
-                        length: 1.4
-                    }
+                {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    ...defaultCustomize.find(argument => argument.idString === "mg5")!,
+                    idString: "mg5-blue-ice",
+                    name: "MG5 Blue Ice"
                 }
-            },
+            ],
+            ...[
+                {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    ...defaultCustomize.find(argument => argument.idString === "negev")!
+
+                }, {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    ...defaultCustomize.find(argument => argument.idString === "negev")!,
+                    idString: "negev-dragon",
+                    name: "Negev Dragon"
+                }, {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    ...defaultCustomize.find(argument => argument.idString === "negev")!,
+                    idString: "negev-blue-ice",
+                    name: "Negev Blue Ice"
+                }
+            ],
             {
                 idString: "mg36",
                 name: "MG36",
