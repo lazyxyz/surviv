@@ -5,12 +5,12 @@ import { Config } from "../config";
 import { Game } from "../game";
 import { PlayerContainer } from "../objects/gamer";
 import { Logger } from "../utils/misc";
-import {  forbidden, getIP } from "../utils/serverHelpers"
-import {validateJWT} from "@api/auth";
+import { forbidden, getIP } from "../utils/serverHelpers"
+import { validateJWT } from "@api/auth";
 
 const simultaneousConnections: Record<string, number> = {};
 
-export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs:  Map<string, number>, joinAttempts: Record<string, number>) {
+export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<string, number>, joinAttempts: Record<string, number>) {
     app.ws("/play", {
         idleTimeout: 30,
 
@@ -47,7 +47,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs:  Map<s
                 }
             }
 
-             // Extract token from Authorization header
+            // Extract token from Authorization header
             const searchParams = new URLSearchParams(req.getQuery());
             const token = searchParams.get('token');
 
@@ -77,7 +77,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs:  Map<s
             //
 
             let nameColor = 0xffffff;
-            
+
             //
             // Upgrade the connection
             //

@@ -42,7 +42,7 @@ var wallet = ethers_1.ethers.Wallet.fromPhrase("first front resource can satisfy
 console.log("Wallet Address:", wallet.address);
 console.log("Private Key:", wallet.privateKey);
 // Step 2: Message to be signed (Nonce)
-var nonce = "9149fe82-a609-4d29-9832-010cc1ff7af7";
+var nonce = "83c6eb5d-8ac0-4c93-943c-c220e62b7703";
 console.log("Nonce:", nonce);
 // Step 3: Sign the message
 (function () { return __awaiter(void 0, void 0, void 0, function () {

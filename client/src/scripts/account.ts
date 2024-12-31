@@ -73,11 +73,8 @@ export class Account extends EIP6963 {
             nonce: string
             success: boolean
         } = await $.ajax({
-            type: "POST",
-            url: `${selectedRegion.mainAddress}/api/requestNonce`,
-            data: JSON.stringify({
-                walletAddress: accounts[0]
-            })
+            type: "GET",
+            url: `${selectedRegion.mainAddress}/api/requestNonce`
         });
 
         const verifySignature: {
@@ -94,7 +91,8 @@ export class Account extends EIP6963 {
                         ethers.hexlify(ethers.toUtf8Bytes((requestNonce.nonce))),
                         accounts[0]
                     ]
-                })
+                }),
+                nonce: requestNonce.nonce
             })
         });
 
@@ -136,6 +134,12 @@ export class Account extends EIP6963 {
         getProvider.provider.on("accountsChanged", () => {
             return this.disconnect();
         });
+    }
+
+    sessionExpired(): void {
+        $("#loading-text").text("Session expired. Please log in.");
+
+        setTimeout(() => this.disconnect(), 1000);
     }
 
     requestProvider(): void {

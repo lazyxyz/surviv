@@ -6,9 +6,10 @@ import { URLSearchParams } from "node:url";
 import { TemplatedApp, type WebSocket } from "uWebSockets.js";
 import { Config } from "../config";
 import { CustomTeam, CustomTeamPlayer, type CustomTeamPlayerContainer } from "../team";
-import { cleanUsername } from "../utils/misc";
+import { Logger, cleanUsername } from "../utils/misc";
 import { forbidden, getIP, textDecoder } from "../utils/serverHelpers";
 import { customTeams, maxTeamSize, teamsCreated } from "../server";
+import { validateJWT } from "@api/auth";
 
 export function initTeamRoutes(app: TemplatedApp) {
     app.ws("/team", {
@@ -30,8 +31,26 @@ export function initTeamRoutes(app: TemplatedApp) {
             }
 
             const searchParams = new URLSearchParams(req.getQuery());
-
             const teamID = searchParams.get("teamID");
+
+             // Extract token from Authorization header
+             {
+                const token = searchParams.get('token');
+
+                if (!token) {
+                    Logger.log(`Team ${teamID} | Missing JWT: ${ip}`);
+                    forbidden(res);
+                    return;
+                }
+
+                const decoded = validateJWT(token);
+                if (!decoded) {
+                    Logger.log(`Game ${teamID} | Invalid JWT: ${ip}`);
+                    forbidden(res);
+                    return;
+                }
+
+            }
 
             let team!: CustomTeam;
             const noTeamIdGiven = teamID !== null;

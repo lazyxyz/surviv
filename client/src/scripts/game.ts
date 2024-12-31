@@ -285,10 +285,7 @@ export class Game {
             const { exp } = parseJWT(this.account.token);
 
             if (new Date().getTime() >= (exp * 1000)) {
-                $("#loading-text").text("Session expired. Please log in.");
-
-                setTimeout(() => this.account.disconnect(), 1000);
-                return;
+                return this.account.sessionExpired();
             }
         }
 

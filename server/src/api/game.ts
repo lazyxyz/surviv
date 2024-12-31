@@ -3,9 +3,11 @@ import { type GetGameResponse } from "@common/typings";
 import { URLSearchParams } from "node:url";
 import { Config } from "../config";
 import { findGame, games } from "../gameManager";
-import { cors, getIP } from "../utils/serverHelpers";
+import { cors, forbidden, getIP } from "../utils/serverHelpers";
 import { TemplatedApp } from "uWebSockets.js";
 import { customTeams } from "../server";
+import { Logger } from "../utils/misc";
+import { validateJWT } from "@api/auth";
 
 export function initGameRoutes(app: TemplatedApp) {
     app
@@ -25,6 +27,23 @@ export function initGameRoutes(app: TemplatedApp) {
 
             const ip = getIP(res, req);
             const searchParams = new URLSearchParams(req.getQuery());
+
+            // Extract token from Authorization header
+            const token = searchParams.get('token');
+            if (!token) {
+                Logger.log(`Missing JWT: ${ip}`);
+                forbidden(res);
+                return;
+            }
+
+            // Validate JWT
+            const decoded = validateJWT(token);
+            if (!decoded) {
+                Logger.log(`Invalid JWT: ${ip}`);
+                forbidden(res);
+                return;
+            }
+
             let teamSize = Number(searchParams.get("teamSize"));
 
             if (!teamSize) teamSize = TeamSize.Solo;

@@ -22,7 +22,7 @@ import { type Game } from "./game";
 import { news } from "./news/newsPosts";
 import { body, createDropdown } from "./uiHelpers";
 import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaultClientCVars";
-import { EMOTE_SLOTS, MODE, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
+import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import { Guns } from "@common/definitions/guns";
@@ -448,12 +448,21 @@ export async function setUpUI(game: Game): Promise<void> {
         ui.loadingText.text(getTranslatedString("loading_finding_game"));
         // ui.cancelFindingGame.css("display", "");
         // shouldn't happen
-        if (selectedRegion === undefined) return;
+        if (selectedRegion === undefined || !game.account.token?.length) return;
+
+        // token is expired
+        {
+            const { exp } = parseJWT(game.account.token);
+
+            if (new Date().getTime() >= (exp * 1000)) {
+                return game.account.sessionExpired();
+            }
+        }
 
         const target = selectedRegion;
 
         void $.get(
-            `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}`,
+            `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}&token=${game.account.token}`,
             (data: GetGameResponse) => {
                 if (data.success) {
                     const params = new URLSearchParams();
@@ -538,7 +547,18 @@ export async function setUpUI(game: Game): Promise<void> {
     const createTeamMenu = $("#create-team-menu");
     $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function() {
         const now = Date.now();
-        if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined) return;
+
+        if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined || !game.account.token?.length) return;
+
+        // token is expired
+        {
+            const { exp } = parseJWT(game.account.token);
+
+            if (new Date().getTime() >= (exp * 1000)) {
+                return game.account.sessionExpired();
+            }
+        }
+
         lastPlayButtonClickTime = now;
 
         ui.splashOptions.addClass("loading");
@@ -595,7 +615,9 @@ export async function setUpUI(game: Game): Promise<void> {
                 console.error(e);
             }
         }
-        // const teamURL = `${selectedRegion.mainAddress.replace("http", "ws")}/team?${params.toString()}`;
+
+        params.set("token", game.account.token);
+
         const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
         console.log("teamURL: ", teamURL);
 
