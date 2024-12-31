@@ -21,7 +21,7 @@ export interface SkinDefinition extends ItemDefinition {
 }
 
 export const freeSkin: string[] = [
-    "openmark", "chill_guy", "hazel_jumpsuit", "the_amateur", "the_pro"
+    "openmark", "chill_guy", "nibiru", "the_amateur", "the_pro"
 ];
 
 const defaultSkin = {
@@ -66,6 +66,7 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
             ...([
                 ["OpenMark",  0x2563EB],
                 ["Chill guy",  0x8a9074],
+                ["Nibiru",  0xF29AC4],
                 ["HAZEL Jumpsuit",  0xb4a894],
                 ["The Amateur",     0x9b8767],
                 ["The Pro",         0x9d732c],
