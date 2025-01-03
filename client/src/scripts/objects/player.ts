@@ -570,6 +570,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             // this.layer = data.layer; - why assign again?
 
             this.teamID = teamID;
+<<<<<<< HEAD
 
             const teammateIDs = [];
             for (const teammate of uiManager.teammates) teammateIDs.push(teammate.id);
@@ -580,6 +581,13 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     && !this.dead
                     && this.teamID === game.teamID)
                 || (this.game.spectating && !this.dead && this.teamID === game.teamID && !this.teammateName))
+=======
+            if (
+                !this.isActivePlayer
+                && !this.teammateName
+                && !this.dead
+                && this.teamID === game.teamID
+>>>>>>> grindy/main
             ) {
                 const name = game.playerNames.get(this.id);
                 this.teammateName = {
@@ -819,7 +827,11 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     {
                         falloff: 0.6,
                         maxRange: 48,
+<<<<<<< HEAD
                         speed: game.uiManager.perks.hasItem(PerkIds.FieldMedic) && actionSoundName === action.item?.idString ? PerkData[PerkIds.FieldMedic].usageMod : 1
+=======
+                        speed: game.uiManager.perks.hasPerk(PerkIds.FieldMedic) && actionSoundName === action.item?.idString ? PerkData[PerkIds.FieldMedic].usageMod : 1
+>>>>>>> grindy/main
                     }
                 );
             }
@@ -848,7 +860,11 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
         ) {
             // prediction for impact point is basically just done by yoinking sever
             // code and plopping it client-side lol
+<<<<<<< HEAD
             if (this.game.uiManager.perks.hasItem(PerkIds.DemoExpert)) {
+=======
+            if (this.game.uiManager.perks.hasPerk(PerkIds.DemoExpert)) {
+>>>>>>> grindy/main
                 if (this.grenadeImpactPreview === undefined) {
                     this.grenadeImpactPreview = new Graphics();
                     this.grenadeImpactPreview.zIndex = 999;
@@ -1291,6 +1307,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     }
 
     showEmote(type: AllowedEmoteSources): void {
+<<<<<<< HEAD
         if (this.game.inputManager.isMobile) {
             this.game.inputManager.emoteWheelActive = false;
             this.game.uiManager.ui.emoteButton
@@ -1298,6 +1315,8 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 .addClass("btn-primary");
         }
 
+=======
+>>>>>>> grindy/main
         this.anims.emote?.kill();
         this.anims.emoteHide?.kill();
         this._emoteHideTimeout?.kill();

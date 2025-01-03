@@ -31,7 +31,12 @@
     margin-left: 5px;
 }
 
+<<<<<<< HEAD
 #report-modal-content, #warning-modal-content {
+=======
+#report-modal-content,
+#warning-modal-content {
+>>>>>>> grindy/main
     padding: 1rem;
 
     p {
@@ -195,6 +200,10 @@
                     }
                 }
             }
+<<<<<<< HEAD
+=======
+
+>>>>>>> grindy/main
             #btn-start-game {
                 margin-left: auto;
             }
@@ -206,6 +215,11 @@
     position: absolute;
     right: 20px;
     top: 1rem;
+<<<<<<< HEAD
+=======
+    z-index: 10;
+
+>>>>>>> grindy/main
 
     img {
         vertical-align: middle;
@@ -258,6 +272,10 @@
         }
     }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> grindy/main
 // TODO Refactor this, make classes
 .dialog {
     user-select: none;
@@ -317,7 +335,11 @@
             left: 6px;
             width: 90px;
             height: 90px;
+<<<<<<< HEAD
             transform: rotate(90deg);
+=======
+            // transform: rotate(90deg);
+>>>>>>> grindy/main
         }
 
         .skin-left-fist,
@@ -385,10 +407,18 @@
             z-index: 10;
         }
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> grindy/main
     #emote-wheel-bottom {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+<<<<<<< HEAD
+=======
+
+>>>>>>> grindy/main
         .emote-win,
         .emote-death {
             display: flex;
@@ -411,6 +441,10 @@
                 margin-left: calc(104px - calc(24px + 2px + 5px));
                 margin-top: calc(-2px - 1px);
             }
+<<<<<<< HEAD
+=======
+
+>>>>>>> grindy/main
             &.selected {
                 border-color: palette.$orange;
             }
@@ -426,6 +460,10 @@
                 height: 1em;
                 padding: 2px;
                 transform-origin: center;
+<<<<<<< HEAD
+=======
+
+>>>>>>> grindy/main
                 &:hover {
                     transform: scale(1.1)
                 }
@@ -462,6 +500,10 @@
             &.selected {
                 border-color: palette.$orange;
             }
+<<<<<<< HEAD
+=======
+
+>>>>>>> grindy/main
             .emote-name {
                 margin-top: auto;
             }
@@ -622,7 +664,97 @@
             @include variables.text-shadow;
             text-align: center;
         }
+<<<<<<< HEAD
       }
+=======
+    }
+
+    .weapons-container {
+        display: flex;
+        gap: 12px;
+        height: 100%;
+
+        &-card {
+            background: #16161626;
+            padding: 8px;
+            border-radius: 8px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            align-items: center;
+            text-align: center;
+            border: 3px solid transparent;
+
+            cursor: pointer;
+            width: 100px;
+
+            &.selected {
+                border-color: #F2770F;
+            }
+        }
+
+        &-paragraph {
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            margin: unset;
+        }
+
+        // left
+        &-aside {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+
+            overflow-y: auto;
+            flex: 1;
+
+            &-preview {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                background: #16161626;
+                border-radius: 8px;
+                height: 100%;
+                padding: 24px;
+            }
+
+            &-assets {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+
+                height: 50%;
+            }
+        }
+
+        // right
+        &-list {
+            display: flex;
+            flex-wrap: wrap;
+            overflow-y: auto;
+
+            flex: 1;
+            gap: 8px;
+
+            h2 {
+                margin: unset;
+                color: white;
+
+                font-weight: 600;
+                width: 100%;
+                font-size: 16px;
+
+                &:not(:first-child) {
+                    margin-top: 4px;
+                }
+            }
+        }
+    }
+>>>>>>> grindy/main
 
     @media screen and (max-width: 654px) {
         #emotes-list {
@@ -826,6 +958,7 @@
 }
 
 .text-field {
+<<<<<<< HEAD
   color: black;
   font-size: 18px;
   width: 350px;
@@ -834,3 +967,13 @@
   border: none;
   border-radius: 8px;
 }
+=======
+    color: black;
+    font-size: 18px;
+    width: 350px;
+    padding: 4px 8px;
+    outline: none;
+    border: none;
+    border-radius: 8px;
+}
+>>>>>>> grindy/main

@@ -16,14 +16,20 @@ import { DEFAULT_SCOPE, Scopes, type ScopeDefinition } from "@common/definitions
 import { type SkinDefinition } from "@common/definitions/skins";
 import { SyncedParticles, type SyncedParticleDefinition } from "@common/definitions/syncedParticles";
 import { Throwables, type ThrowableDefinition } from "@common/definitions/throwables";
+<<<<<<< HEAD
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
+=======
+>>>>>>> grindy/main
 import { GameOverPacket, type GameOverData } from "@common/packets/gameOverPacket";
 import { type AllowedEmoteSources, type NoMobile, type PlayerInputData } from "@common/packets/inputPacket";
 import { createKillfeedMessage, KillFeedPacket, type ForEventType } from "@common/packets/killFeedPacket";
 import { type InputPacket } from "@common/packets/packet";
+<<<<<<< HEAD
 import { PacketStream } from "@common/packets/packetStream";
 import { ReportPacket } from "@common/packets/reportPacket";
 import { type SpectatePacketData } from "@common/packets/spectatePacket";
+=======
+>>>>>>> grindy/main
 import { UpdatePacket, type PlayerData, type UpdatePacketDataCommon, type UpdatePacketDataIn } from "@common/packets/updatePacket";
 import { CircleHitbox, RectangleHitbox, type Hitbox } from "@common/utils/hitbox";
 import { adjacentOrEqualLayer, isVisibleFromLayer } from "@common/utils/layer";
@@ -32,11 +38,16 @@ import { ExtendedMap, type SDeepMutable, type SMutable, type Timeout } from "@co
 import { defaultModifiers, ItemType, type EventModifiers, type ExtendedWearerAttributes, type PlayerModifiers, type ReferenceTo, type ReifiableDef, type WearerAttributes } from "@common/utils/objectDefinitions";
 import { type FullData } from "@common/utils/objectsSerializations";
 import { pickRandomInArray, randomPointInsideCircle, weightedRandom } from "@common/utils/random";
+<<<<<<< HEAD
 import { SuroiByteStream } from "@common/utils/suroiByteStream";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
 import { randomBytes } from "crypto";
 import { type WebSocket } from "uWebSockets.js";
+=======
+import { FloorNames, FloorTypes } from "@common/utils/terrain";
+import { Vec, type Vector } from "@common/utils/vector";
+>>>>>>> grindy/main
 import { Config } from "../config";
 import { SpawnableLoots } from "../data/lootTables";
 import { type Game } from "../game";
@@ -58,6 +69,7 @@ import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
 
+<<<<<<< HEAD
 export interface PlayerContainer {
     readonly teamID?: string
     readonly autoFill: boolean
@@ -66,6 +78,12 @@ export interface PlayerContainer {
     readonly role?: string
 
     readonly isDev: boolean
+=======
+export interface ActorContainer {
+    readonly teamID?: string
+    readonly autoFill: boolean
+    readonly ip: string | undefined
+>>>>>>> grindy/main
     readonly nameColor?: number
     readonly lobbyClearing: boolean
     readonly weaponPreset: string
@@ -105,10 +123,17 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     joined = false;
     disconnected = false;
 
+<<<<<<< HEAD
     private _team?: Team;
     get team(): Team | undefined { return this._team; }
 
     set team(value: Team | undefined) {
+=======
+    protected _team?: Team;
+    get team(): Team | undefined { return this._team; }
+
+    set team(value: Team) {
+>>>>>>> grindy/main
         if (!this.game.teamMode) {
             console.warn("Trying to set a player's team while the game isn't in team mode");
             return;
@@ -260,8 +285,12 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         zoom: true,
         layer: true,
         activeC4s: true,
+<<<<<<< HEAD
         perks: true,
         teamID: true
+=======
+        perks: true
+>>>>>>> grindy/main
     };
 
     readonly inventory = new Inventory(this);
@@ -322,7 +351,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     get zoom(): number { return this._scope.zoomLevel; }
 
+<<<<<<< HEAD
     readonly socket: WebSocket<PlayerContainer>;
+=======
+    // readonly socket: WebSocket<PlayerContainer>;
+>>>>>>> grindy/main
 
     private readonly _action: { type?: Action, dirty: boolean } = {
         type: undefined,
@@ -357,8 +390,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     lastSpectateActionTime = 0;
     lastPingTime = 0;
 
+<<<<<<< HEAD
     readonly role?: string;
     readonly isDev: boolean;
+=======
+>>>>>>> grindy/main
     readonly hasColor: boolean;
     readonly nameColor: number;
 
@@ -412,7 +448,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     readonly perks = new ServerPerkManager(this, Perks.defaults);
     perkUpdateMap?: Map<UpdatablePerkDefinition, number>; // key = perk, value = last updated
 
+<<<<<<< HEAD
     constructor(game: Game, socket: WebSocket<PlayerContainer>, position: Vector, layer?: Layer, team?: Team) {
+=======
+    constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team) {
+>>>>>>> grindy/main
         super(game, position);
 
         if (layer !== undefined) {
@@ -428,12 +468,19 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             team.setDirty();
         }
 
+<<<<<<< HEAD
         const userData = socket.getUserData();
         this.socket = socket;
         this.name = GameConstants.player.defaultName;
         this.ip = userData.ip;
         this.role = userData.role;
         this.isDev = userData.isDev;
+=======
+        // const userData = socket.getUserData();
+        // this.socket = socket;
+        this.name = GameConstants.player.defaultName;
+        this.ip = userData.ip;
+>>>>>>> grindy/main
         this.nameColor = userData.nameColor ?? 0;
         this.hasColor = userData.nameColor !== undefined;
 
@@ -464,19 +511,29 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         }
         this.effectiveScope = DEFAULT_SCOPE;
 
+<<<<<<< HEAD
         const specialFunnies = this.isDev && userData.lobbyClearing && !Config.disableLobbyClearing;
         // Inventory preset
         if (specialFunnies) {
             const [
                 weaponA, weaponB, melee,
                 killsA, killB, killsM
+=======
+        // Inventory preset
+        {
+            const [
+                weaponA, weaponB, melee
+>>>>>>> grindy/main
             ] = userData.weaponPreset.split(" ");
 
             const backpack = this.inventory.backpack;
             const determinePreset = (
                 slot: 0 | 1 | 2,
                 weaponName: ReferenceTo<GunDefinition | MeleeDefinition>,
+<<<<<<< HEAD
                 kills?: string
+=======
+>>>>>>> grindy/main
             ): void => {
                 const weaponDef = Loots.fromStringSafe<GunDefinition | MeleeDefinition>(weaponName);
                 let itemType: ItemType;
@@ -490,6 +547,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 this.inventory.addOrReplaceWeapon(slot, weaponDef);
                 const weapon = this.inventory.getWeapon(slot) as GunItem | MeleeItem;
 
+<<<<<<< HEAD
                 let killCount: number;
                 if (!Number.isNaN(killCount = parseInt(kills ?? "", 10))) {
                     weapon.stats.kills = killCount;
@@ -498,6 +556,9 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
                 if (!(weapon instanceof GunItem)) return;
 
+=======
+                if (!(weapon instanceof GunItem)) return;
+>>>>>>> grindy/main
                 weapon.ammo = (weaponDef as GunDefinition).capacity;
                 const ammoPtr = (weaponDef as GunDefinition).ammoType;
                 const ammoType = Ammos.fromString(ammoPtr);
@@ -506,6 +567,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 this.inventory.items.setItem(ammoPtr, backpack.maxCapacity[ammoPtr]);
             };
 
+<<<<<<< HEAD
             this.inventory.backpack = Loots.fromString("tactical_pack");
             this.inventory.vest = Loots.fromString("developr_vest");
             this.inventory.helmet = Loots.fromString("tactical_helmet");
@@ -537,6 +599,19 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this.dirty.weapons = true;
 
         this.updateAndApplyModifiers();
+=======
+            determinePreset(0, weaponA);
+            determinePreset(1, weaponB);
+            determinePreset(2, melee);
+
+            if (this.maxAdrenaline !== GameConstants.player.maxAdrenaline) {
+                this.adrenaline = this.maxAdrenaline;
+            }
+
+            this.dirty.weapons = true;
+            this.updateAndApplyModifiers();
+        }
+>>>>>>> grindy/main
     }
 
     giveGun(idString: ReferenceTo<GunDefinition>): void {
@@ -565,7 +640,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     swapWeaponRandomly(itemOrSlot: InventoryItem | number = this.activeItem, force = false): void {
+<<<<<<< HEAD
         if (this.perks.hasItem(PerkIds.Lycanthropy)) return; // womp womp
+=======
+        if (this.perks.hasPerk(PerkIds.Lycanthropy)) return; // womp womp
+>>>>>>> grindy/main
 
         let slot = itemOrSlot === this.activeItem
             ? this.activeItemIndex
@@ -839,6 +918,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         }
 
         // Perks
+<<<<<<< HEAD
         if (this.perkUpdateMap !== undefined) {
             for (const [perk, lastUpdated] of this.perkUpdateMap.entries()) {
                 if (this.game.now - lastUpdated <= perk.updateInterval) continue;
@@ -900,6 +980,69 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                     }
                 }
                 // ! evil ends here
+=======
+        if (this.perkUpdateMap) {
+            for (const [perk, lastUpdated] of this.perkUpdateMap.entries()) {
+                if (this.game.now - lastUpdated > perk.updateInterval) {
+                    this.perkUpdateMap.set(perk, this.game.now);
+                    // ! evil starts here
+                    switch (perk.idString) {
+                        case PerkIds.Bloodthirst: {
+                            this.piercingDamage({
+                                amount: perk.healthLoss
+                            });
+                            break;
+                        }
+                        case PerkIds.BabyPlumpkinPie: {
+                            this.swapWeaponRandomly(undefined, true);
+                            break;
+                        }
+                        case PerkIds.TornPockets: {
+                            const items = this.inventory.items;
+                            const candidates = new Set(Ammos.definitions.filter(({ ephemeral }) => !ephemeral).map(({ idString }) => idString));
+
+                            const counts = Object.entries(items.asRecord()).filter(
+                                ([str, count]) => Ammos.hasString(str) && candidates.has(str) && count !== 0
+                            );
+
+                            // no ammo at all
+                            if (counts.length === 0) break;
+
+                            const chosenAmmo = Ammos.fromString(
+                                weightedRandom(
+                                    counts.map(([str]) => str),
+                                    counts.map(([, cnt]) => cnt)
+                                )
+                            );
+
+                            const amountToDrop = Numeric.min(
+                                this.inventory.items.getItem(chosenAmmo.idString),
+                                perk.dropCount
+                            );
+
+                            this.game.addLoot(chosenAmmo, this.position, this.layer, { count: amountToDrop })
+                                ?.push(this.rotation + Math.PI, 0.025);
+                            items.decrementItem(chosenAmmo.idString, amountToDrop);
+                            this.dirty.items = true;
+                            break;
+                        }
+                        case PerkIds.RottenPlumpkin: {
+                            this.sendEmote(Emotes.fromStringSafe(perk.emote));
+                            this.piercingDamage({
+                                amount: perk.healthLoss
+                            });
+                            this.adrenaline -= this.adrenaline * (perk.adrenLoss / 100);
+                            break;
+                        }
+                        case PerkIds.Shrouded: {
+                            this.game.addSyncedParticle(SyncedParticles.fromString("shrouded_particle"), this.position, this.layer, this.id)
+                                .setTarget(randomPointInsideCircle(this.position, 5), 1000, EaseFunctions.circOut);
+                            break;
+                        }
+                    }
+                    // ! evil ends here
+                }
+>>>>>>> grindy/main
             }
         }
 
@@ -1059,6 +1202,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         // Shoot gun/use item
         if (this.startedAttacking) {
+<<<<<<< HEAD
             if (this.game.pluginManager.emit("player_start_attacking", this) === undefined) {
                 this.startedAttacking = false;
                 this.disableInvulnerability();
@@ -1071,6 +1215,18 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 this.stoppedAttacking = false;
                 this.activeItem.stopUse();
             }
+=======
+            this.game.pluginManager.emit("player_start_attacking", this);
+            this.startedAttacking = false;
+            this.disableInvulnerability();
+            this.activeItem.useItem();
+        }
+
+        if (this.stoppedAttacking) {
+            this.game.pluginManager.emit("player_stop_attacking", this);
+            this.stoppedAttacking = false;
+            this.activeItem.stopUse();
+>>>>>>> grindy/main
         }
 
         // Gas damage
@@ -1119,7 +1275,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 this.piercingDamage({
                     amount: depletion.health * dt,
                     source: KillfeedEventType.Gas
+<<<<<<< HEAD
                 //          ^^^^^^^^^^^^^^^^^^^^^ dubious
+=======
+                    //          ^^^^^^^^^^^^^^^^^^^^^ dubious
+>>>>>>> grindy/main
                 });
             }
 
@@ -1138,8 +1298,12 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         for (const door of this.game.grid.intersectsHitbox(new CircleHitbox(10, this.position), this.layer)) {
             if (
+<<<<<<< HEAD
                 door.dead
                 || !door?.isObstacle
+=======
+                !door?.isObstacle
+>>>>>>> grindy/main
                 || !door.definition.isDoor
                 || !door.definition.automatic
                 || door.door?.isOpen
@@ -1164,9 +1328,13 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         const closeDoors = (): void => {
             if (openedDoors.every(obj => Geometry.distanceSquared(obj.position, this.position) >= 100)) {
+<<<<<<< HEAD
                 for (const door of openedDoors) {
                     if (!door.dead) door.interact();
                 }
+=======
+                for (const door of openedDoors) door.interact();
+>>>>>>> grindy/main
             } else {
                 this.game.addTimeout(closeDoors, 1000);
             }
@@ -1179,7 +1347,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     private _firstPacket = true;
 
+<<<<<<< HEAD
     private readonly _packetStream = new PacketStream(new SuroiByteStream(new ArrayBuffer(1 << 16)));
+=======
+    // private readonly _packetStream = new PacketStream(new SuroiByteStream(new ArrayBuffer(1 << 16)));
+>>>>>>> grindy/main
 
     /**
      * Calculate visible objects, check team, and send packets
@@ -1265,11 +1437,21 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         packet.playerData = {
             ...(
                 player.dirty.maxMinStats || forceInclude
+<<<<<<< HEAD
                     ? { minMax: {
                         maxHealth: player.maxHealth,
                         minAdrenaline: player.minAdrenaline,
                         maxAdrenaline: player.maxAdrenaline
                     } }
+=======
+                    ? {
+                        minMax: {
+                            maxHealth: player.maxHealth,
+                            minAdrenaline: player.minAdrenaline,
+                            maxAdrenaline: player.maxAdrenaline
+                        }
+                    }
+>>>>>>> grindy/main
                     : {}
             ),
             ...(
@@ -1289,10 +1471,19 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             ),
             ...(
                 player.dirty.id || forceInclude
+<<<<<<< HEAD
                     ? { id: {
                         id: player.id,
                         spectating: this.spectating !== undefined
                     } }
+=======
+                    ? {
+                        id: {
+                            id: player.id,
+                            spectating: this.spectating !== undefined
+                        }
+                    }
+>>>>>>> grindy/main
                     : {}
             ),
             ...(
@@ -1302,6 +1493,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             ),
             ...(
                 player.dirty.weapons || forceInclude
+<<<<<<< HEAD
                     ? { inventory: {
                         activeWeaponIndex: inventory.activeWeaponIndex,
                         weapons: inventory.weapons.map(slot => {
@@ -1318,6 +1510,26 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                             }) satisfies ((PlayerData["inventory"] & object)["weapons"] & object)[number];
                         })
                     } }
+=======
+                    ? {
+                        inventory: {
+                            activeWeaponIndex: inventory.activeWeaponIndex,
+                            weapons: inventory.weapons.map(slot => {
+                                const item = slot;
+
+                                return (item && {
+                                    definition: item.definition,
+                                    count: item instanceof GunItem
+                                        ? item.ammo
+                                        : item instanceof CountableInventoryItem
+                                            ? item.count
+                                            : undefined,
+                                    stats: item.stats
+                                }) satisfies ((PlayerData["inventory"] & object)["weapons"] & object)[number];
+                            })
+                        }
+                    }
+>>>>>>> grindy/main
                     : {}
             ),
             ...(
@@ -1327,10 +1539,19 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             ),
             ...(
                 player.dirty.items || forceInclude
+<<<<<<< HEAD
                     ? { items: {
                         items: inventory.items.asRecord(),
                         scope: inventory.scope
                     } }
+=======
+                    ? {
+                        items: {
+                            items: inventory.items.asRecord(),
+                            scope: inventory.scope
+                        }
+                    }
+>>>>>>> grindy/main
                     : {}
             ),
             ...(
@@ -1347,11 +1568,14 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 player.dirty.perks || forceInclude
                     ? { perks: this.perks }
                     : {}
+<<<<<<< HEAD
             ),
             ...(
                 player.dirty.teamID || forceInclude
                     ? { teamID: player.teamID }
                     : {}
+=======
+>>>>>>> grindy/main
             )
         };
 
@@ -1444,6 +1668,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         this._firstPacket = false;
 
+<<<<<<< HEAD
         this._packetStream.stream.index = 0;
         for (const packet of this._packets) {
             this._packetStream.serializeServerPacket(packet);
@@ -1455,6 +1680,19 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         this._packets.length = 0;
         this.sendData(this._packetStream.getBuffer());
+=======
+        // this._packetStream.stream.index = 0;
+        // for (const packet of this._packets) {
+        //     this._packetStream.serializeServerPacket(packet);
+        // }
+
+        // for (const packet of this.game.packets) {
+        //     this._packetStream.serializeServerPacket(packet);
+        // }
+
+        // this._packets.length = 0;
+        // this.sendData(this._packetStream.getBuffer());
+>>>>>>> grindy/main
     }
 
     /**
@@ -1472,7 +1710,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     hasPerk(perk: PerkNames | PerkDefinition): boolean {
+<<<<<<< HEAD
         return this.perks.hasItem(perk);
+=======
+        return this.perks.hasPerk(perk);
+>>>>>>> grindy/main
     }
 
     ifPerkPresent<Name extends PerkNames>(
@@ -1497,6 +1739,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         return this.perks.mapOrDefault<Name, U>(perk, mapper, defaultValue);
     }
 
+<<<<<<< HEAD
     spectate(packet: SpectatePacketData): void {
         if (!this.dead) return;
         const game = this.game;
@@ -1617,6 +1860,123 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this.spectating = toSpectate;
         toSpectate.spectators.add(this);
     }
+=======
+    // spectate(packet: SpectatePacketData): void {
+    //     if (!this.dead) return;
+    //     const game = this.game;
+    //     if (game.now - this.lastSpectateActionTime < 200) return;
+    //     this.lastSpectateActionTime = game.now;
+
+    //     let toSpectate: Player | undefined;
+
+    //     const { spectatablePlayers } = game;
+    //     switch (packet.spectateAction) {
+    //         case SpectateActions.BeginSpectating: {
+    //             if (this.game.teamMode && this._team?.hasLivingPlayers()) {
+    //                 // Find closest teammate
+    //                 toSpectate = this._team.getLivingPlayers()
+    //                     .reduce((a, b) => Geometry.distanceSquared(a.position, this.position) < Geometry.distanceSquared(b.position, this.position) ? a : b);
+    //             } else if (this.killedBy !== undefined && !this.killedBy.dead) {
+    //                 toSpectate = this.killedBy;
+    //             } else if (spectatablePlayers.length > 1) {
+    //                 toSpectate = pickRandomInArray(spectatablePlayers);
+    //             }
+    //             break;
+    //         }
+    //         case SpectateActions.SpectatePrevious:
+    //             if (this.spectating !== undefined) {
+    //                 toSpectate = spectatablePlayers[
+    //                     Numeric.absMod(spectatablePlayers.indexOf(this.spectating) - 1, spectatablePlayers.length)
+    //                 ];
+    //             }
+    //             break;
+    //         case SpectateActions.SpectateNext:
+    //             if (this.spectating !== undefined) {
+    //                 toSpectate = spectatablePlayers[
+    //                     Numeric.absMod(spectatablePlayers.indexOf(this.spectating) + 1, spectatablePlayers.length)
+    //                 ];
+    //             }
+    //             break;
+    //         case SpectateActions.SpectateSpecific: {
+    //             toSpectate = spectatablePlayers.find(player => player.id === packet.playerID);
+    //             break;
+    //         }
+    //         case SpectateActions.SpectateKillLeader: {
+    //             toSpectate = game.killLeader;
+    //             break;
+    //         }
+    //         case SpectateActions.Report: {
+    //             const reportID = randomBytes(4).toString("hex");
+    //             // SERVER HOSTERS assign your custom server an ID somewhere then pass it into the report body region: region
+    //             const reportJson = {
+    //                 id: reportID,
+    //                 reporterName: this.name,
+    //                 suspectName: this.spectating?.name,
+    //                 suspectIP: this.spectating?.ip,
+    //                 reporterIP: this.ip
+    //             };
+
+    //             this.sendPacket(ReportPacket.create({
+    //                 playerName: this.spectating?.name ?? "",
+    //                 reportID: reportID
+    //             }));
+    //             if (Config.protection) {
+    //                 const reportURL = String(Config.protection?.ipChecker?.logURL);
+    //                 const reportData = {
+    //                     embeds: [
+    //                         {
+    //                             title: "Report Received",
+    //                             description: `Report ID: \`${reportID}\``,
+    //                             color: 16711680,
+    //                             fields: [
+    //                                 {
+    //                                     name: "Username",
+    //                                     value: `\`${this.spectating?.name}\``
+    //                                 },
+    //                                 {
+    //                                     name: "Time reported",
+    //                                     value: this.game.now
+    //                                 },
+    //                                 {
+    //                                     name: "Reporter",
+    //                                     value: this.name
+    //                                 }
+
+    //                             ]
+    //                         }
+    //                     ]
+    //                 };
+
+    //                 // Send report to Discord
+    //                 fetch(reportURL, {
+    //                     method: "POST",
+    //                     headers: { "Content-Type": "application/json" },
+    //                     body: JSON.stringify(reportData)
+    //                 }).catch(error => {
+    //                     console.error("Error: ", error);
+    //                 });
+
+    //                 // Post the report to the server
+    //                 fetch(`${Config.protection?.punishments?.url}/reports`, {
+    //                     method: "POST",
+    //                     headers: { "Content-Type": "application/json", "api-key": Config?.protection?.punishments?.password || "" },
+    //                     body: JSON.stringify(reportJson)
+    //                 }).then(response => response.json())
+    //                     .then(console.log)
+    //                     .catch((e: unknown) => console.error(e));
+    //             }
+    //         }
+    //     }
+
+    //     if (toSpectate === undefined) return;
+
+    //     this.spectating?.spectators.delete(this);
+    //     this.updateObjects = true;
+    //     this.startedSpectating = true;
+    //     this.spectating = toSpectate;
+    //     toSpectate.spectators.add(this);
+    // }
+>>>>>>> grindy/main
 
     disableInvulnerability(): void {
         if (this.invulnerable) {
@@ -1625,12 +1985,17 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         }
     }
 
+<<<<<<< HEAD
     private readonly _packets: InputPacket[] = [];
+=======
+    protected readonly _packets: InputPacket[] = [];
+>>>>>>> grindy/main
 
     sendPacket(packet: InputPacket): void {
         this._packets.push(packet);
     }
 
+<<<<<<< HEAD
     disconnect(reason: string): void {
         const stream = new PacketStream(new ArrayBuffer(128));
         stream.serializeServerPacket(
@@ -1640,6 +2005,17 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         );
 
         this.sendData(stream.getBuffer());
+=======
+    disconnect(reason?: string): void {
+        // const stream = new PacketStream(new ArrayBuffer(128));
+        // stream.serializeServerPacket(
+        //     DisconnectPacket.create({
+        //         reason
+        //     })
+        // );
+
+        // this.sendData(stream.getBuffer());
+>>>>>>> grindy/main
         this.disconnected = true;
         // timeout to make sure disconnect packet is sent
         setTimeout(() => {
@@ -1647,6 +2023,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         }, 10);
     }
 
+<<<<<<< HEAD
     sendData(buffer: ArrayBuffer): void {
         try {
             this.socket.send(buffer, true, false);
@@ -1654,6 +2031,15 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             console.warn("Error sending packet. Details:", e);
         }
     }
+=======
+    // sendData(buffer: ArrayBuffer): void {
+    //     try {
+    //         this.socket.send(buffer, true, false);
+    //     } catch (e) {
+    //         console.warn("Error sending packet. Details:", e);
+    //     }
+    // }
+>>>>>>> grindy/main
 
     private _clampDamageAmount(amount: number): number {
         if (this.health - amount > this.maxHealth) {
@@ -1844,12 +2230,20 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         for (const perk of this.perks) {
             switch (perk.idString) {
                 case PerkIds.PlumpkinGamble: { // AW DANG IT
+<<<<<<< HEAD
                     this.perks.removeItem(perk);
+=======
+                    this.perks.removePerk(perk);
+>>>>>>> grindy/main
 
                     const halloweenPerks = Perks.definitions.filter(perkDef => {
                         return !perkDef.plumpkinGambleIgnore && perkDef.category === PerkCategories.Halloween;
                     });
+<<<<<<< HEAD
                     this.perks.addItem(pickRandomInArray(halloweenPerks));
+=======
+                    this.perks.addPerk(pickRandomInArray(halloweenPerks));
+>>>>>>> grindy/main
                     break;
                 }
                 case PerkIds.Lycanthropy: {
@@ -2454,7 +2848,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                             (isLoot || (type === InputActions.Interact && isInteractable))
                             && object.hitbox?.collidesWith(detectionHitbox)
                             && adjacentOrEqualLayer(this.layer, object.layer)
+<<<<<<< HEAD
                             && !(isLoot && [ItemType.Throwable, ItemType.Gun].includes(object.definition.itemType) && this.perks.hasItem(PerkIds.Lycanthropy))
+=======
+                            && !(isLoot && [ItemType.Throwable, ItemType.Gun].includes(object.definition.itemType) && this.perks.hasPerk(PerkIds.Lycanthropy))
+>>>>>>> grindy/main
                         ) {
                             const dist = Geometry.distanceSquared(object.position, this.position);
                             if (isInteractable) {

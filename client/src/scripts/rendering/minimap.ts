@@ -700,6 +700,7 @@ export class Minimap {
     }
 
     addMapPing(data: PingSerialization): void {
+<<<<<<< HEAD
         if (this.game.inputManager.isMobile) {
             this.game.inputManager.emoteWheelActive = false;
             this.game.uiManager.ui.emoteButton
@@ -707,6 +708,8 @@ export class Minimap {
                 .addClass("btn-primary");
         }
 
+=======
+>>>>>>> grindy/main
         const { position, definition } = data;
         const playerId = definition.isPlayerPing ? (data as PlayerPingSerialization).playerId : undefined;
 

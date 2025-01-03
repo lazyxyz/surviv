@@ -28,12 +28,21 @@ export const TRANSLATIONS: {
         hp18: {
             name: "HP-18",
             flag: "<img height=\"20\" src=\"./img/game/shared/weapons/hp18.svg\" />",
+<<<<<<< HEAD
             percentage: "HP-18%",
             no_resize: true
+=======
+            percentage: "HP-18%"
+>>>>>>> grindy/main
         }
     }
 };
 
+<<<<<<< HEAD
+=======
+export const NO_SPACE_LANGUAGES = ["zh", "tw", "hk_mo", "jp"];
+
+>>>>>>> grindy/main
 let setup = false;
 export async function initTranslation(game: Game): Promise<void> {
     if (setup) {
@@ -164,7 +173,11 @@ function translateCurrentDOM(): void {
         if (
             (element.classList.contains("btn") || element.parentElement?.classList.contains("btn") || element.parentElement?.classList.contains("tab"))
             && translatedString.length >= 10
+<<<<<<< HEAD
             && !TRANSLATIONS.translations[selectedLanguage].no_resize
+=======
+            && !["en", "hp18"].includes(selectedLanguage) // <- why? (because we do not want text measurements on English or HP-18)
+>>>>>>> grindy/main
         ) {
             adjustFontSize(element);
         }

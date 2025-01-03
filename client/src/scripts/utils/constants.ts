@@ -61,3 +61,52 @@ export const SHOCKWAVE_EXPLOSION_MULTIPLIERS = Object.freeze({
 });
 
 export const BULLET_WHIZ_SCALE = 5;
+<<<<<<< HEAD
+=======
+
+export const SELECTOR_WALLET = "SELECTOR_WALLET";
+export const PUBLIC_KEY = "PUBLIC_KEY";
+export const ACCESS_TOKEN = "ACCESS_TOKEN";
+
+export enum WalletType {
+    METAMASK = "MetaMask",
+    TRUSTWALLET = "Trust Wallet",
+    COINBASEWALLET = "Coinbase Wallet",
+    SUBWALLET = "SubWallet"
+}
+
+/**
+  @function shorten(hash: string, length: number)
+    - Ex: hash = 6 (123n to 6)
+          length = 2
+
+    - summary:
+      get length of input (hash)
+      slice hash point start 0 that number will reviced 12 by input (hash)
+      identifying where middle it needs "..." string now we've 12...
+      step end slice at point last with recipe "123456".slice(-length) result should to be 56,
+      right now, compound we will have result equal 12..56
+*/
+export const shorten = (hash: string, length = 6): string => {
+    const prefix = hash.slice(0, length);
+    const middle = "...";
+    const suffixed = hash.slice(-length);
+
+    return prefix + middle + suffixed;
+};
+
+export const parseJWT = (token: string | undefined): {
+    address: string
+    exp: number
+    iat: number
+    roles: []
+    sub: string
+} => {
+    const arr = token?.split(".");
+    const base64Payload = (arr?.length || 0) > 1 ? arr?.[1] : undefined;
+
+    const payload = base64Payload ? Buffer.from(base64Payload, "base64") : "{}";
+
+    return JSON.parse(payload.toString()) as ReturnType<typeof parseJWT>;
+};
+>>>>>>> grindy/main

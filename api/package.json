@@ -1,0 +1,27 @@
+{
+  "name": "@surviv/api",
+  "description": "",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "helper": "npx tsc helpers/generateSignature.ts"
+  },
+  "keywords": [],
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.7.5",
+    "@types/ws": "^8.5.12"
+  },
+  "dependencies": {
+    "croner": "^8.1.2",
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.4",
+    "jsonwebtoken": "^9.0.2",
+    "ts-node": "^10.9.2",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.48.0",
+    "uuid": "^11.0.3",
+    "ws": "^8.18.0"
+  }
+}

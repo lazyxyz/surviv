@@ -1,6 +1,7 @@
 import { GameConstants, InputActions, ObjectCategory, SpectateActions, TeamSize } from "@common/constants";
 import { Ammos, type AmmoDefinition } from "@common/definitions/ammos";
 import { type ArmorDefinition } from "@common/definitions/armors";
+<<<<<<< HEAD
 import { Badges, type BadgeDefinition } from "@common/definitions/badges";
 import { EmoteCategory, Emotes, type EmoteDefinition } from "@common/definitions/emotes";
 import { HealType, HealingItems, type HealingItemDefinition } from "@common/definitions/healingItems";
@@ -12,20 +13,45 @@ import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, 
 import { ExtendedMap } from "@common/utils/misc";
 import { ItemType, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { pickRandomInArray } from "@common/utils/random";
+=======
+import { Badges, freeBadges, type BadgeDefinition } from "@common/definitions/badges";
+import { EmoteCategory, Emotes, freeEmotes, type EmoteDefinition } from "@common/definitions/emotes";
+import { HealType, HealingItems, type HealingItemDefinition } from "@common/definitions/healingItems";
+import { PerkIds, Perks } from "@common/definitions/perks";
+import { Scopes, type ScopeDefinition } from "@common/definitions/scopes";
+import { freeSkin, Skins, type SkinDefinition } from "@common/definitions/skins";
+import { SpectatePacket } from "@common/packets/spectatePacket";
+import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, type GetGameResponse } from "@common/typings";
+import { ExtendedMap } from "@common/utils/misc";
+import { ItemType, type ObjectDefinition, type ReferenceTo } from "@common/utils/objectDefinitions";
+>>>>>>> grindy/main
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound } from "@pixi/sound";
 import $ from "jquery";
 import { Color, isMobile, isWebGPUSupported } from "pixi.js";
 import { TRANSLATIONS, getTranslatedString } from "../translations";
+<<<<<<< HEAD
+=======
+import type { TranslationKeys } from "../typings/translations";
+>>>>>>> grindy/main
 import { Config, type ServerInfo } from "./config";
 import { type Game } from "./game";
 import { news } from "./news/newsPosts";
 import { body, createDropdown } from "./uiHelpers";
 import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaultClientCVars";
+<<<<<<< HEAD
 import { EMOTE_SLOTS, MODE, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
+=======
+import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
+import { Crosshairs, getCrosshair } from "./utils/crosshairs";
+import { html, requestFullscreen } from "./utils/misc";
+import { freeGuns, Guns } from "@common/definitions/guns";
+import { Melees } from "@common/definitions/melees";
+import { Throwables } from "@common/definitions/throwables";
+>>>>>>> grindy/main
 
 /*
     eslint-disable
@@ -37,10 +63,18 @@ import type { TranslationKeys } from "../typings/translations";
     `@stylistic/indent`: can eslint stop [expletive redacted] at indenting stuff
 */
 
+<<<<<<< HEAD
 interface RegionInfo {
     readonly name: string
     readonly mainAddress: string
     readonly gameAddress: string
+=======
+export interface RegionInfo {
+    readonly name: string
+    readonly mainAddress: string
+    readonly gameAddress: string
+    readonly teamAddress: string
+>>>>>>> grindy/main
     readonly playerCount?: number
     readonly maxTeamSize?: number
     readonly nextSwitchTime?: number
@@ -65,12 +99,16 @@ export function unlockPlayButtons(): void { buttonsLocked = false; }
 let lastDisconnectTime: number | undefined;
 export function updateDisconnectTime(): void { lastDisconnectTime = Date.now(); }
 
+<<<<<<< HEAD
 let btnMap: ReadonlyArray<readonly [TeamSize, JQuery<HTMLButtonElement>]>;
+=======
+>>>>>>> grindy/main
 export function resetPlayButtons(): void {
     if (buttonsLocked) return;
 
     $("#splash-options").removeClass("loading");
     $("#loading-text").text(getTranslatedString("loading_connecting"));
+<<<<<<< HEAD
    // $("#btn-cancel-finding-game").css("display", "none");
 
     const { maxTeamSize } = selectedRegion ?? regionInfo[Config.defaultRegion];
@@ -91,6 +129,148 @@ export function resetPlayButtons(): void {
 
     $("#team-option-btns").toggleClass("locked", isSolo);
     $("#locked-msg").css("top", isSolo ? "225px" : "153px").toggle(maxTeamSize !== undefined);
+=======
+    $("#btn-cancel-finding-game").css("display", "none");
+}
+
+export function visibleConnectWallet(game: Game): void {
+    // handler what conditions to open modal?
+    if (!localStorage.getItem(SELECTOR_WALLET)?.length) {
+        $(".connect-wallet-portal").css("display", "block");
+    }
+
+    // handler click to login...
+    for (const elements of $(".connect-wallet-item")) {
+      const paragraphElement = elements.children[1];
+      const logoElement = elements.children[0];
+
+      const isExisted = game.eip6963.providers?.find(
+        argument => argument?.info?.name === paragraphElement?.textContent
+      );
+
+      if (isExisted) {
+        elements.onclick = async() => {
+            try {
+                // hidden to show loading ICON
+                $(logoElement).css("display", "none");
+
+                // append loading ICON
+                {
+                    const newNode = document.createElement("div");
+
+                    newNode.className = "loading-icon";
+                    newNode.style.width = "36px";
+                    newNode.style.height = "36px";
+                    newNode.style.display = "flex";
+                    newNode.style.alignItems = "center";
+                    newNode.style.justifyContent = "center";
+                    newNode.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
+
+                    logoElement.after(newNode);
+                }
+
+                return await game.account.connect(isExisted);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                $(".loading-icon").css("display", "none");
+                $(logoElement).css("display", "block");
+            }
+        };
+      }
+
+      if (!isExisted) {
+        $(paragraphElement).css({ color: "#93C5FD" });
+
+        paragraphElement.insertAdjacentText("afterbegin", "Install ");
+
+        elements.onclick = () => {
+          if (paragraphElement?.textContent?.includes(WalletType.METAMASK)) {
+            return window.open("https://metamask.io/download/", "_blank");
+          }
+
+          if (paragraphElement?.textContent?.includes(WalletType.SUBWALLET)) {
+            return window.open("https://www.subwallet.app/download", "_blank");
+          }
+
+          if (paragraphElement?.textContent?.includes(WalletType.COINBASEWALLET)) {
+            return window.open(
+              "https://www.coinbase.com/wallet/downloads",
+              "_blank"
+            );
+          }
+
+          if (paragraphElement?.textContent?.includes(WalletType.TRUSTWALLET)) {
+            return window.open("https://trustwallet.com/download", "_blank");
+          }
+        };
+      }
+    }
+}
+
+export function visibleWallet(game: Game): void {
+    if (game?.eip6963.provider?.provider && game.account.address?.length) {
+        // handler first time you need visible container
+        {
+            $(".account-wallet-container").css("display", "block");
+        }
+
+        // handler placeholder for button
+        {
+            $(".account-wallet-placeholder").append(shorten(game.account.address));
+        }
+    }
+
+    // handler append children to fieldSet
+    {
+        const ListFieldSet = [
+            {
+                key: "address",
+                fieldName: "Copy Address",
+                icon: "./img/line/copy.svg",
+                onClick: () => {
+                    // https://dev.to/0shuvo0/copy-text-to-clipboard-in-jstwo-ways-1pn1
+                    if (navigator.clipboard) {
+                        return navigator.clipboard.writeText(String(game.account.address));
+                    }
+
+                    const textArea = document.createElement("textarea");
+                    textArea.value = String(game.account.address);
+
+                    document.body.appendChild(textArea);
+
+                    textArea.focus();
+                    textArea.select();
+
+                    // eslint-disable-next-line @typescript-eslint/no-deprecated
+                    document.execCommand("copy");
+                    document.body.removeChild(textArea);
+                }
+            },
+            {
+                key: "disconnect",
+                fieldName: "Disconnect",
+                icon: "./img/line/log-out.svg",
+                onClick: () => game.account.disconnect()
+            }
+        ];
+
+        for (const fields of ListFieldSet) {
+            $("#account-wallet-fieldset").append(`
+                <a id="account-wallet-btn-${fields.key}">
+                    <img width="20px" height="20px" src=${fields.icon} />
+                    ${fields.fieldName}
+                </a>
+            `);
+
+            $(`#account-wallet-btn-${fields.key}`).on("click", () => {
+                fields.onClick();
+            });
+        }
+    }
+
+    createDropdown(".account-wallet-container");
+>>>>>>> grindy/main
 }
 
 export async function setUpUI(game: Game): Promise<void> {
@@ -99,7 +279,12 @@ export async function setUpUI(game: Game): Promise<void> {
     // Change the menu based on the mode.
     if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/suroi_beta_${MODE.idString}.svg`);
     if (MODE.specialPlayButtons) {
+<<<<<<< HEAD
         const playButtons = [$("#btn-play-solo"), $("#btn-play-duo"), $("#btn-play-squad")];
+=======
+        const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
+        // const playButtons = [$("#btn-play-solo"), $("#btn-play-duo"), $("#btn-play-squad")];
+>>>>>>> grindy/main
         for (let buttonIndex = 0; buttonIndex < playButtons.length; buttonIndex++) {
             const button = playButtons[buttonIndex];
 
@@ -107,7 +292,11 @@ export async function setUpUI(game: Game): Promise<void> {
 
             // Mode Logo
             if (MODE.modeLogoImage) {
+<<<<<<< HEAD
                 const translationString = `play_${["solo", "duo", "squad"][buttonIndex]}`;
+=======
+                const translationString = `play_${["solo", "squad"][buttonIndex]}`;
+>>>>>>> grindy/main
 
                 button.html(`
                     <img class="btn-icon" width="26" height="26" src=${MODE.modeLogoImage}>
@@ -287,7 +476,10 @@ export async function setUpUI(game: Game): Promise<void> {
             selectedRegion = regionInfo[Config.defaultRegion];
             game.console.setBuiltInCVar("cv_region", "");
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> grindy/main
         const region = getTranslatedString(`region_${game.console.getBuiltInCVar("cv_region")}` as TranslationKeys);
         if (region === "region_") {
             serverName.text(selectedRegion.name); // this for now until we find a way to selectedRegion.id
@@ -321,17 +513,38 @@ export async function setUpUI(game: Game): Promise<void> {
         updateServerSelectors();
     });
 
+<<<<<<< HEAD
     const joinGame = (): void => {
+=======
+    const joinGame = (teamSize: number): void => {
+>>>>>>> grindy/main
         ui.splashOptions.addClass("loading");
         ui.loadingText.text(getTranslatedString("loading_finding_game"));
         // ui.cancelFindingGame.css("display", "");
         // shouldn't happen
+<<<<<<< HEAD
         if (selectedRegion === undefined) return;
+=======
+        if (selectedRegion === undefined || !game.account.token?.length) return;
+
+        // token is expired
+        {
+            const { exp } = parseJWT(game.account.token);
+
+            if (new Date().getTime() >= (exp * 1000)) {
+                return game.account.sessionExpired();
+            }
+        }
+>>>>>>> grindy/main
 
         const target = selectedRegion;
 
         void $.get(
+<<<<<<< HEAD
             `${target.mainAddress}/api/getGame${teamID ? `?teamID=${teamID}` : ""}`,
+=======
+            `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}&token=${game.account.token}`,
+>>>>>>> grindy/main
             (data: GetGameResponse) => {
                 if (data.success) {
                     const params = new URLSearchParams();
@@ -339,11 +552,19 @@ export async function setUpUI(game: Game): Promise<void> {
                     if (teamID) params.set("teamID", teamID);
                     if (autoFill) params.set("autoFill", String(autoFill));
 
+<<<<<<< HEAD
                     const devPass = game.console.getBuiltInCVar("dv_password");
                     if (devPass) params.set("password", devPass);
 
                     const role = game.console.getBuiltInCVar("dv_role");
                     if (role) params.set("role", role);
+=======
+                    // const devPass = game.console.getBuiltInCVar("dv_password");
+                    // if (devPass) params.set("password", devPass);
+
+                    // const role = game.console.getBuiltInCVar("dv_role");
+                    // if (role) params.set("role", role);
+>>>>>>> grindy/main
 
                     const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
                     if (lobbyClearing) params.set("lobbyClearing", "true");
@@ -360,8 +581,12 @@ export async function setUpUI(game: Game): Promise<void> {
                             console.error(e);
                         }
                     }
+<<<<<<< HEAD
 
                     game.connect(`${target.gameAddress.replace("<ID>", (data.gameID + 1).toString())}/play?${params.toString()}`);
+=======
+                    game.connect(`${target.gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`);
+>>>>>>> grindy/main
                     ui.splashMsg.hide();
 
                     // Check again because there is a small chance that the create-team-menu element won't hide.
@@ -403,17 +628,42 @@ export async function setUpUI(game: Game): Promise<void> {
     let lastPlayButtonClickTime = 0;
 
     // Join server when play buttons are clicked
+<<<<<<< HEAD
     $("#btn-play-solo, #btn-play-duo, #btn-play-squad").on("click", () => {
         const now = Date.now();
         if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit
         lastPlayButtonClickTime = now;
         joinGame();
+=======
+    $("#btn-play-solo, #btn-play-squad").on("click", event => {
+        const now = Date.now();
+        if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit
+        lastPlayButtonClickTime = now;
+
+        const teamSize = event.target.id === "btn-play-solo" ? TeamSize.Solo : TeamSize.Squad;
+        joinGame(teamSize);
+>>>>>>> grindy/main
     });
 
     const createTeamMenu = $("#create-team-menu");
     $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function() {
         const now = Date.now();
+<<<<<<< HEAD
         if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined) return;
+=======
+
+        if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined || !game.account.token?.length) return;
+
+        // token is expired
+        {
+            const { exp } = parseJWT(game.account.token);
+
+            if (new Date().getTime() >= (exp * 1000)) {
+                return game.account.sessionExpired();
+            }
+        }
+
+>>>>>>> grindy/main
         lastPlayButtonClickTime = now;
 
         ui.splashOptions.addClass("loading");
@@ -450,6 +700,10 @@ export async function setUpUI(game: Game): Promise<void> {
 
         params.set("name", game.console.getBuiltInCVar("cv_player_name"));
         params.set("skin", game.console.getBuiltInCVar("cv_loadout_skin"));
+<<<<<<< HEAD
+=======
+        // params.set("weapon", game.console.getBuiltInCVar("cv_loadout_weapon"));
+>>>>>>> grindy/main
 
         const badge = game.console.getBuiltInCVar("cv_loadout_badge");
         if (badge) params.set("badge", badge);
@@ -470,7 +724,16 @@ export async function setUpUI(game: Game): Promise<void> {
             }
         }
 
+<<<<<<< HEAD
         teamSocket = new WebSocket(`${selectedRegion.mainAddress.replace("http", "ws")}/team?${params.toString()}`);
+=======
+        params.set("token", game.account.token);
+
+        const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
+        console.log("teamURL: ", teamURL);
+
+        teamSocket = new WebSocket(teamURL);
+>>>>>>> grindy/main
 
         teamSocket.onmessage = (message: MessageEvent<string>): void => {
             const data = JSON.parse(message.data) as CustomTeamMessage;
@@ -527,7 +790,11 @@ export async function setUpUI(game: Game): Promise<void> {
                 }
                 case CustomTeamMessages.Started: {
                     createTeamMenu.hide();
+<<<<<<< HEAD
                     joinGame();
+=======
+                    joinGame(TeamSize.Squad);
+>>>>>>> grindy/main
                     break;
                 }
             }
@@ -692,6 +959,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
     const usernameField = $<HTMLInputElement>("#username-input");
 
+<<<<<<< HEAD
     const youtubers = [
         {
             name: "123OP",
@@ -788,6 +1056,8 @@ export async function setUpUI(game: Game): Promise<void> {
     $("#twitch-featured-name").text(streamer.name);
     $("#twitch-featured-content").attr("href", streamer.link).removeAttr("target");
 
+=======
+>>>>>>> grindy/main
     const toggleRotateMessage = (): JQuery =>
         $("#splash-rotate-message").toggle(
             window.innerWidth < window.innerHeight
@@ -860,7 +1130,11 @@ export async function setUpUI(game: Game): Promise<void> {
     $("#btn-play-again, #btn-spectate-replay").on("click", async() => {
         await game.endGame();
         if (teamSocket) teamSocket.send(JSON.stringify({ type: CustomTeamMessages.Start })); // TODO Check if player is team leader
+<<<<<<< HEAD
         else joinGame();
+=======
+        else joinGame(game.teamSize);
+>>>>>>> grindy/main
     });
 
     const sendSpectatePacket = (action: Exclude<SpectateActions, SpectateActions.SpectateSpecific>): void => {
@@ -944,6 +1218,12 @@ export async function setUpUI(game: Game): Promise<void> {
     const fists = $<HTMLDivElement>("#skin-left-fist, #skin-right-fist");
 
     const updateSplashCustomize = (skinID: string): void => {
+<<<<<<< HEAD
+=======
+        $(".assets-fist").attr("href", `./img/game/shared/skins/${skinID}_fist.svg`);
+        $(".assets-base").attr("href", `./img/game/shared/skins/${skinID}_base.svg`);
+
+>>>>>>> grindy/main
         base.css(
             "background-image",
             `url("./img/game/shared/skins/${skinID}_base.svg")`
@@ -969,7 +1249,15 @@ export async function setUpUI(game: Game): Promise<void> {
         updateSplashCustomize(idString);
     }
 
+<<<<<<< HEAD
     for (const { idString, hideFromLoadout, rolesRequired } of Skins) {
+=======
+    const SkinsIntance = Skins.definitions.filter(argument =>
+        freeSkin.some(argument_child => argument_child === argument.idString)
+    );
+
+    for (const { idString, hideFromLoadout, rolesRequired } of SkinsIntance) {
+>>>>>>> grindy/main
         if (hideFromLoadout || !(rolesRequired ?? [role]).includes(role)) continue;
 
         // noinspection CssUnknownTarget
@@ -986,6 +1274,10 @@ export async function setUpUI(game: Game): Promise<void> {
 
         skinItem.on("click", () => {
             game.console.setBuiltInCVar("cv_loadout_skin", idString);
+<<<<<<< HEAD
+=======
+
+>>>>>>> grindy/main
             selectSkin(idString);
         });
 
@@ -1026,7 +1318,15 @@ export async function setUpUI(game: Game): Promise<void> {
     function updateEmotesList(): void {
         emoteList.empty();
 
+<<<<<<< HEAD
         const emotes = [...Emotes.definitions].sort((a, b) => {
+=======
+        const EmotesInstance = Emotes.definitions.filter(argument =>
+            freeEmotes.some(argument_child => argument_child === argument.idString)
+        );
+
+        const emotes = EmotesInstance.sort((a, b) => {
+>>>>>>> grindy/main
             return a.category - b.category;
         });
 
@@ -1269,6 +1569,7 @@ export async function setUpUI(game: Game): Promise<void> {
     }
 
     // Load badges
+<<<<<<< HEAD
     const allowedBadges = Badges.definitions.filter(({ roles }) => !roles?.length || roles.includes(role));
 
     if (allowedBadges.length > 0) {
@@ -1322,6 +1623,524 @@ export async function setUpUI(game: Game): Promise<void> {
             "cv_loadout_badge",
             (_, newBadge) => { selectBadge(newBadge); }
         );
+=======
+    const allowedBadges = Badges.definitions
+    .filter(argument =>
+        freeBadges.some(argument_child => argument_child === argument.idString)
+    )
+    .filter(({ roles }) => !roles?.length || roles.includes(role));
+
+    $("#tab-badges").show();
+
+    const noBadgeItem = $<HTMLDivElement>(
+        html`<div id="badge-" class="badges-list-item-container">\
+            <div class="badges-list-item"> </div>\
+            <span class="badge-name">${getTranslatedString("none")}</span>\
+        </div>`
+    );
+
+    noBadgeItem.on("click", () => {
+        game.console.setBuiltInCVar("cv_loadout_badge", "");
+        noBadgeItem.addClass("selected").siblings().removeClass("selected");
+    });
+
+    const activeBadge = game.console.getBuiltInCVar("cv_loadout_badge");
+
+    const badgeUiCache: Record<ReferenceTo<BadgeDefinition>, JQuery<HTMLDivElement>> = { [""]: noBadgeItem };
+
+    function selectBadge(idString: ReferenceTo<BadgeDefinition>): void {
+        badgeUiCache[idString].addClass("selected")
+            .siblings()
+            .removeClass("selected");
+    }
+
+    $("#badges-list").append(
+        noBadgeItem,
+        ...allowedBadges.map(({ idString }) => {
+            // noinspection CssUnknownTarget
+            const badgeItem = badgeUiCache[idString] = $<HTMLDivElement>(
+                `<div id="badge-${idString}" class="badges-list-item-container${idString === activeBadge ? " selected" : ""}">\
+                    <div class="badges-list-item">\
+                        <div style="background-image: url('./img/game/shared/badges/${idString}.svg')"></div>\
+                    </div>\
+                    <span class="badge-name">${getTranslatedString(`badge_${idString}` as TranslationKeys)}</span>\
+                </div>`
+            );
+
+            badgeItem.on("click", () => {
+                game.console.setBuiltInCVar("cv_loadout_badge", idString);
+                selectBadge(idString);
+            });
+
+            return badgeItem;
+        })
+    );
+
+    game.console.variables.addChangeListener(
+        "cv_loadout_badge",
+        (_, newBadge) => { selectBadge(newBadge); }
+    );
+
+    // load all weapons
+    {
+        $("#tab-weapons").show();
+
+        const lastCategory: string[] = [];
+
+        const toggleSelect = (currentTarget: HTMLElement, className: string): void => {
+            /*
+                1. selected but users selecting same previous
+                2. remove selected previous
+                3. append new select
+            */
+            const activedElement = $(className).find(".selected");
+
+            if (activedElement.text() === currentTarget.textContent) return;
+
+            if (activedElement.length) activedElement.removeClass("selected");
+
+            currentTarget.classList.toggle("selected");
+        };
+
+        const appendAsset = async(weaponName: string): Promise<void> => {
+            const rootAssetsElement = $(".weapons-container-aside-assets");
+            const rootListElement = $(".weapons-container-list");
+            const loadingElement = document.createElement("div");
+
+            // if existed you need empty (remove all nodes) and append new
+            rootAssetsElement.empty();
+
+            // prevent spamming call API
+            rootListElement.css("pointer-events", "none");
+
+            // append loading ICON
+            {
+                loadingElement.className = "loading-icon";
+                loadingElement.style.gridColumn = "span 3";
+                loadingElement.style.display = "flex";
+                loadingElement.style.alignItems = "center";
+                loadingElement.style.justifyContent = "center";
+                loadingElement.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
+
+                rootAssetsElement.prepend(loadingElement);
+            }
+
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
+            const instanceAssets = await new Promise<ObjectDefinition[]>(async resolve => {
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                setTimeout(async() => {
+                    const instanceAssets = [
+                        {
+                            idString: weaponName,
+                            name: "Default"
+                        },
+
+                        ...(freeGuns.find(argument => argument.key === weaponName)?.children || [])
+                    ];
+
+                    return resolve(instanceAssets);
+                }, 500);
+            });
+
+            for (const assetsField of instanceAssets) {
+                rootAssetsElement.append(html`<div class="weapons-container-card" id="weapons-assets-${assetsField.idString}">
+                    <img src="./img/game/shared/weapons/${assetsField.idString}.svg" alt=${assetsField.name} width="72px" height="72px" />
+
+                    <p class="weapons-container-paragraph">${assetsField.name}</p>
+                    </div>`
+                );
+            }
+
+            // reset states
+            {
+                loadingElement.remove();
+                rootListElement.css("pointer-events", "unset");
+
+                // handler select default
+                setTimeout(() => {
+                    $(`#weapons-assets-${weaponName}`).trigger("click");
+                }, 0);
+            }
+        };
+
+        const appendPreview = (images: Array<{
+            zIndex: number
+            rotate?: number
+            url: string
+            class: string
+            x: number
+            y: number
+        }>): JQuery<Partial<HTMLElement>> => {
+            const asideElement = $(".weapons-container-aside-preview");
+
+            // clear previous
+            asideElement.empty();
+
+            // append new
+            images.sort((a, b) => a.zIndex - b.zIndex).map(argument => {
+                const gVector = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                const iVector = document.createElementNS("http://www.w3.org/2000/svg", "image");
+
+                $(gVector).css({
+                    transformBox: "fill-box",
+                    translate: `calc(${argument.x}px - 50%) calc(${argument.y}px - 50%)`,
+                    transformOrigin: "center",
+                    rotate: `${argument.rotate}deg`
+                });
+
+                $(iVector).attr({
+                    class: argument.class,
+                    href: argument.url
+                });
+
+                gVector.append(iVector);
+
+                asideElement.append(gVector);
+            });
+
+            return asideElement;
+        };
+
+        {
+            const GunsInstance = Guns.definitions.filter((argument, index, self) => {
+                return !self.some((argument_child, i) =>
+                    // ensures that only earlier elements in the self (argument_child) are checked against the current element (argument). This prevents checking duplicates twice
+                    i < index
+                    // not twice similar startsWith E.g: ['ak47', 'ak47-dragon', 'ak4-blue-ice]
+                    && argument.idString.startsWith(argument_child.idString));
+            });
+
+            for (const gunField of GunsInstance) {
+                const key = "Gun";
+                const isExisted = lastCategory.some(category => category === key);
+
+                $(".weapons-container-list").append(html`
+                    ${!isExisted ? `<h2>${key}</h2>` : ""}
+    
+                    <div class="weapons-container-card" id="weapons-list-${gunField.idString}">
+                        <img src="./img/game/shared/weapons/${gunField.idString}.svg" alt=${gunField.name} width="72px" height="72px" />
+    
+                        <p class="weapons-container-paragraph">${gunField.name}</p>
+                    </div>
+                `);
+
+                if (!isExisted) lastCategory.push(key);
+
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                $(`#weapons-list-${gunField.idString}`).on("click", async({ currentTarget }) => {
+                    toggleSelect(currentTarget, ".weapons-container-list");
+
+                    await appendAsset(gunField.idString);
+
+                    $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
+                        toggleSelect(currentTarget, ".weapons-container-aside-assets");
+
+                        // handler preview
+                        {
+                            const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
+
+                            game.console.setBuiltInCVar("dv_weapon_preset", getTargetSelect);
+
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                            const getGun = GunsInstance.find(g => g.idString === gunField.idString)!;
+
+                            const singleVariant = GunsInstance.find(g =>
+                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                // @ts-ignore
+                                g.idString === getGun?.singleVariant
+                            );
+
+                            const image = [
+                                {
+                                    class: "assets-base",
+                                    url: `./img/game/shared/skins/${currentSkin}_base.svg`,
+                                    x: 0,
+                                    y: 0,
+                                    zIndex: 3
+                                }
+                            ];
+
+                            if (singleVariant && !singleVariant?.isDual) {
+                                // Left
+                                {
+                                    image.push({
+                                        class: "assets-world",
+
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        url: `./img/game/shared/weapons/${getTargetSelect.replace("dual_", "")}_world.svg`,
+
+                                        x: singleVariant.image.position.x,
+
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        y: getGun.leftRightOffset * -20,
+
+                                        zIndex: 2
+                                    });
+
+                                    image.push({
+                                        class: "assets-fist",
+
+                                        url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                        x: singleVariant.fists.left.x,
+
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        y: getGun.leftRightOffset * -20,
+
+                                        zIndex: singleVariant.fists.leftZIndex ?? 1
+                                    });
+                                }
+
+                                // Right
+                                {
+                                    image.push({
+                                        class: "assets-world",
+
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        url: `./img/game/shared/weapons/${getTargetSelect.replace("dual_", "")}_world.svg`,
+
+                                        x: singleVariant.image.position.x,
+
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        y: getGun.leftRightOffset * 20,
+
+                                        zIndex: 2
+                                    });
+
+                                    image.push({
+                                        class: "assets-fist",
+
+                                        url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                        x: singleVariant.fists.right.x,
+
+                                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                        // @ts-ignore
+                                        y: getGun.leftRightOffset * 20,
+
+                                        zIndex: singleVariant.fists.rightZIndex
+                                    });
+                                }
+                            } else {
+                                image.push({
+                                    class: "assets-world",
+
+                                    url: `./img/game/shared/weapons/${getTargetSelect}_world.svg`,
+                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                    // @ts-ignore
+                                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                                    x: getGun.image.position.x,
+
+                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                    // @ts-ignore
+                                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                                    y: getGun.image.position.y,
+                                    zIndex: 2
+                                });
+
+                                image.push({
+                                    class: "assets-fist",
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: getGun.fists.right.x,
+                                    y: getGun.fists.right.y,
+                                    zIndex: getGun.fists.rightZIndex
+                                });
+
+                                image.push({
+                                    class: "assets-fist",
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: getGun.fists.left.x,
+                                    y: getGun.fists.left.y,
+                                    zIndex: getGun.fists.leftZIndex
+                                });
+                            }
+
+                            const getPreview = appendPreview(image);
+
+                            getPreview.attr("viewBox", "-45 -45 250 90");
+                        }
+                    });
+                });
+            }
+        }
+
+        {
+            const MelessInstance = Melees.definitions.filter((argument, index, self) => {
+                return !self.some((argument_child, i) =>
+                    // ensures that only earlier elements in the self (argument_child) are checked against the current element (argument). This prevents checking duplicates twice
+                    i < index
+                    // not twice similar startsWith E.g: ['ak47', 'ak47-dragon', 'ak4-blue-ice]
+                    && argument.idString.startsWith(argument_child.idString));
+            });
+
+            for (const melessField of MelessInstance) {
+                const key = "Meless";
+                const isExisted = lastCategory.some(category => category === key);
+
+                $(".weapons-container-list").append(html`
+                    ${!isExisted ? `<h2>${key}</h2>` : ""}
+    
+                    <div class="weapons-container-card" id="weapons-list-${melessField.idString}">
+                        <img src="./img/game/shared/weapons/${melessField.idString}.svg" alt=${melessField.name} width="72px" height="72px" />
+    
+                        <p class="weapons-container-paragraph">${melessField.name}</p>
+                    </div>
+                `);
+
+                if (!isExisted) lastCategory.push(key);
+
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                $(`#weapons-list-${melessField.idString}`).on("click", async({ currentTarget }) => {
+                    toggleSelect(currentTarget, ".weapons-container-list");
+
+                    await appendAsset(melessField.idString);
+
+                    $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
+                        toggleSelect(currentTarget, ".weapons-container-aside-assets");
+
+                        // handler preview
+                        {
+                            const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
+
+                            game.console.setBuiltInCVar("dv_weapon_preset", getTargetSelect);
+
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                            const getMeless = MelessInstance.find(g => g.idString === melessField.idString)!;
+
+                            const image = [
+                                {
+                                    class: "assets-base",
+                                    url: `./img/game/shared/skins/${currentSkin}_base.svg`,
+                                    x: 0,
+                                    y: 0,
+                                    zIndex: 2,
+                                    rotate: 0
+                                },
+                                {
+                                    class: "assets-world",
+                                    url: `./img/game/shared/weapons/${getTargetSelect}.svg`,
+                                    x: getMeless.image?.position.x ?? 0,
+                                    y: getMeless.image?.position.y ?? 0,
+                                    rotate: getMeless.image?.angle ?? 0,
+                                    zIndex: 1
+                                },
+                                {
+                                    class: "assets-fist",
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: getMeless.fists.right.x,
+                                    y: getMeless.fists.right.y,
+                                    zIndex: 4,
+                                    rotate: 0
+                                },
+                                {
+                                    class: "assets-fist",
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: getMeless.fists.left.x,
+                                    y: getMeless.fists.left.y,
+                                    zIndex: 3,
+                                    rotate: 0
+                                }
+                            ];
+
+                            const getPreview = appendPreview(image);
+
+                            getPreview.attr("viewBox", "-100 -120 300 300");
+                        }
+                    });
+                });
+            }
+        }
+
+        {
+            const ThrowableInstance = Throwables.definitions.filter((argument, index, self) => {
+                return !self.some((argument_child, i) =>
+                    // ensures that only earlier elements in the self (argument_child) are checked against the current element (argument). This prevents checking duplicates twice
+                    i < index
+                    // not twice similar startsWith E.g: ['ak47', 'ak47-dragon', 'ak4-blue-ice]
+                    && argument.idString.startsWith(argument_child.idString));
+            });
+
+            for (const throwableField of ThrowableInstance) {
+                const key = "Throwables";
+                const isExisted = lastCategory.some(category => category === key);
+
+                $(".weapons-container-list").append(html`
+                    ${!isExisted ? `<h2>${key}</h2>` : ""}
+                    
+                    <div class="weapons-container-card" id="weapons-list-${throwableField.idString}">
+                        <img src="./img/game/shared/weapons/${throwableField.idString}.svg" alt=${throwableField.name} width="72px" height="72px" />
+    
+                        <p class="weapons-container-paragraph">${throwableField.name}</p>
+                    </div>
+                `);
+
+                if (!isExisted) lastCategory.push(key);
+
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                $(`#weapons-list-${throwableField.idString}`).on("click", async({ currentTarget }) => {
+                    toggleSelect(currentTarget, ".weapons-container-list");
+
+                    await appendAsset(throwableField.idString);
+
+                    $('.weapons-container-card[id*="weapons-assets-"]').on("click", ({ currentTarget }) => {
+                        toggleSelect(currentTarget, ".weapons-container-aside-assets");
+
+                        // handler preview
+                        {
+                            const getTargetSelect = String((currentTarget.id.split("weapons-assets-")).pop());
+
+                            game.console.setBuiltInCVar("dv_weapon_preset", getTargetSelect);
+
+                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                            const getThrowable = ThrowableInstance.find(g => g.idString === throwableField.idString)!;
+
+                            const image = [
+                                {
+                                    class: "assets-base",
+                                    url: `./img/game/shared/skins/${currentSkin}_base.svg`,
+                                    x: 0,
+                                    y: 0,
+                                    zIndex: 2,
+                                    rotate: 0
+                                },
+                                {
+                                    class: "assets-world",
+                                    url: `./img/game/shared/weapons/${getTargetSelect}.svg`,
+                                    x: getThrowable.image?.position.x ?? 0,
+                                    y: getThrowable.image?.position.y ?? 0,
+                                    rotate: getThrowable.image?.angle ?? 0,
+                                    zIndex: 5
+                                },
+                                {
+                                    class: "assets-fist",
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: 38,
+                                    y: -35,
+                                    zIndex: 4,
+                                    rotate: 0
+                                },
+                                {
+                                    class: "assets-fist",
+                                    url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
+                                    x: 38,
+                                    y: 35,
+                                    zIndex: 3,
+                                    rotate: 0
+                                }
+                            ];
+
+                            const getPreview = appendPreview(image);
+
+                            getPreview.attr("viewBox", "-45 -45 250 90");
+                        }
+                    });
+                });
+            }
+        }
+>>>>>>> grindy/main
     }
 
     function addSliderListener(
@@ -1629,8 +2448,11 @@ export async function setUpUI(game: Game): Promise<void> {
     addCheckboxListener("#toggle-mobile-controls", "mb_controls_enabled");
     addSliderListener("#slider-joystick-size", "mb_joystick_size");
     addSliderListener("#slider-joystick-transparency", "mb_joystick_transparency");
+<<<<<<< HEAD
     addSliderListener("#slider-gyro-angle", "mb_gyro_angle");
     addCheckboxListener("#toggle-haptics", "mb_haptics");
+=======
+>>>>>>> grindy/main
     addCheckboxListener("#toggle-high-res-mobile", "mb_high_res_textures");
 
     function updateUiScale(): void {
@@ -1835,7 +2657,10 @@ export async function setUpUI(game: Game): Promise<void> {
                 );
 
                 const isGrenadeSlot = inventorySlotTypings[slot] === ItemType.Throwable;
+<<<<<<< HEAD
 
+=======
+>>>>>>> grindy/main
                 const element = ele[0];
 
                 element.addEventListener("pointerup", () => clearTimeout(dropTimer));
@@ -2063,7 +2888,11 @@ export async function setUpUI(game: Game): Promise<void> {
         ui.spectatingContainer.css({
             width: "150px",
             position: "fixed",
+<<<<<<< HEAD
             top: "15%",
+=======
+            top: "10%",
+>>>>>>> grindy/main
             left: "5rem"
         });
 
@@ -2173,6 +3002,7 @@ export async function setUpUI(game: Game): Promise<void> {
         $("#mobile-options").show();
 
         ui.menuButton.on("click", () => ui.gameMenu.toggle());
+<<<<<<< HEAD
 
         ui.emoteButton.on("click", () => {
             const { emoteWheelActive } = inputManager;
@@ -2185,6 +3015,9 @@ export async function setUpUI(game: Game): Promise<void> {
 
             game.uiManager.ui.emoteWheel.show();
         });
+=======
+        ui.emoteButton.on("click", () => ui.emoteWheel.show());
+>>>>>>> grindy/main
 
         ui.pingToggle.on("click", () => {
             inputManager.pingWheelActive = !inputManager.pingWheelActive;
@@ -2220,7 +3053,11 @@ export async function setUpUI(game: Game): Promise<void> {
             )
             .siblings(".range-input-value")
             .text(
+<<<<<<< HEAD
                 element.id !== "slider-joystick-size" && element.id !== "slider-gyro-angle"
+=======
+                element.id !== "slider-joystick-size"
+>>>>>>> grindy/main
                     ? `${Math.round(value * 100)}%`
                     : value
             );

@@ -11,13 +11,15 @@
     "strictNullChecks": true,
     "strict": true,
     "paths": {
-      "@common/*": ["../common/src/*"]
+      "@common/*": ["../common/src/*"],
+      "@api/*": ["../api/src/*"]
     }
   },
   "exclude": ["node_modules"],
   "include": [
     "src",
-    "../common/src"
+    "../common/src",
+    "../api/src"
   ],
   "ts-node": {
     "swc": true

@@ -17,7 +17,11 @@ import { ItemType, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { Vec, type Vector } from "@common/utils/vector";
 import $ from "jquery";
 import { Color } from "pixi.js";
+<<<<<<< HEAD
 import { getTranslatedString, TRANSLATIONS } from "../../translations";
+=======
+import { getTranslatedString, NO_SPACE_LANGUAGES } from "../../translations";
+>>>>>>> grindy/main
 import { type TranslationKeys } from "../../typings/translations";
 import { type Game } from "../game";
 import { type GameObject } from "../objects/gameObject";
@@ -734,7 +738,11 @@ export class UIManager {
             let showReserve = false;
             if (activeWeapon.definition.itemType === ItemType.Gun) {
                 const ammoType = activeWeapon.definition.ammoType;
+<<<<<<< HEAD
                 let totalAmmo: number | string = this.perks.hasItem(PerkIds.InfiniteAmmo)
+=======
+                let totalAmmo: number | string = this.perks.hasPerk(PerkIds.InfiniteAmmo)
+>>>>>>> grindy/main
                     ? "∞"
                     : this.inventory.items[ammoType];
 
@@ -852,7 +860,11 @@ export class UIManager {
                 const oldSrc = itemImage.attr("src");
 
                 let frame = definition.idString;
+<<<<<<< HEAD
                 if (this.perks.hasItem(PerkIds.PlumpkinBomb) && definition.itemType === ItemType.Throwable && !definition.noSkin) {
+=======
+                if (this.perks.hasPerk(PerkIds.PlumpkinBomb) && definition.itemType === ItemType.Throwable && !definition.noSkin) {
+>>>>>>> grindy/main
                     frame += "_halloween";
                 }
 
@@ -923,7 +935,11 @@ export class UIManager {
         container.attr("data-idString", perkDef.idString);
         container.children(".item-tooltip").html(`<strong>${perkDef.name}</strong><br>${perkDef.description}`);
         container.children(".item-image").attr("src", `./img/game/${perkDef.category === PerkCategories.Halloween ? "halloween" : "fall"}/perks/${perkDef.idString}.svg`);
+<<<<<<< HEAD
         container.css("visibility", this.perks.hasItem(perkDef.idString) ? "visible" : "hidden");
+=======
+        container.css("visibility", this.perks.hasPerk(perkDef.idString) ? "visible" : "hidden");
+>>>>>>> grindy/main
 
         container.css("outline", !perkDef.noDrop ? "" : "none");
 
@@ -1255,7 +1271,11 @@ export class UIManager {
                         let useSpecialSentence = false;
 
                         // Remove spaces if chinese/japanese language.
+<<<<<<< HEAD
                         if (TRANSLATIONS.translations[language].no_space && messageText) {
+=======
+                        if (NO_SPACE_LANGUAGES.includes(language) && messageText) {
+>>>>>>> grindy/main
                             messageText = messageText.replaceAll("<span>", "<span style=\"display:contents;\">");
                         }
 
@@ -1614,7 +1634,11 @@ export class UIManager {
         }
 
         // Disable spaces in chinese languages.
+<<<<<<< HEAD
         if (TRANSLATIONS.translations[(this.game.console.getBuiltInCVar("cv_language"))].no_space) {
+=======
+        if (NO_SPACE_LANGUAGES.includes(this.game.console.getBuiltInCVar("cv_language"))) {
+>>>>>>> grindy/main
             classes.push("no-spaces");
         }
 

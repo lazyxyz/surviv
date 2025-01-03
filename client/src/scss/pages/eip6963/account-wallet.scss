@@ -1,0 +1,42 @@
+@use "../../palette.scss";
+@use "../../variables.scss";
+
+
+.account-wallet-container {
+  position: absolute;
+  right: calc(220px + 12px); // position : padding
+  top: 1rem;
+  z-index: 10;
+
+  .dropdown-content {
+    background: palette.$grey;
+    width: 100%;
+    top: 34px;
+
+    a {
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+  }
+
+  // For mobile
+  @media screen and (max-width: variables.$screen_large) {
+
+    transform: scale(55%);
+    top: 0;
+    right: calc(74px + 12px); // position : padding
+  }
+}
+
+.account-wallet-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  height: 40px;
+}
+
+.account-wallet-placeholder {
+  margin: unset;
+}

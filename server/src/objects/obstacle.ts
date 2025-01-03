@@ -214,7 +214,11 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
             if (
                 source instanceof BaseGameObject
                 && source.isPlayer
+<<<<<<< HEAD
                 && source.perks.hasItem(PerkIds.PlumpkinBomb)
+=======
+                && source.perks.hasPerk(PerkIds.PlumpkinBomb)
+>>>>>>> grindy/main
                 && definition.material === "pumpkin"
             ) {
                 this.playMaterialDestroyedSound = false;
@@ -290,7 +294,11 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
                 )
             ) || (
                 this.definition.isActivatable === true
+<<<<<<< HEAD
                 && (this.definition.requiredItem === undefined || player?.activeItemDefinition.idString === this.definition.requiredItem)
+=======
+                && (player?.activeItemDefinition.idString === this.definition.requiredItem || !this.definition.requiredItem)
+>>>>>>> grindy/main
                 && !this.activated
             )
         );
@@ -316,12 +324,21 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
 
     interact(player?: Player): void {
         if (
+<<<<<<< HEAD
             (player !== undefined && !this.canInteract(player))
             || this.door?.locked === true
             || this.game.pluginManager.emit("obstacle_will_interact", {
                 obstacle: this,
                 player
             }) !== undefined
+=======
+            (player && !this.canInteract(player))
+            && !this.door?.locked
+            && !this.game.pluginManager.emit("obstacle_will_interact", {
+                obstacle: this,
+                player
+            })
+>>>>>>> grindy/main
         ) return;
 
         const definition = this.definition;
@@ -329,7 +346,11 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
         switch (definition.role) {
             case ObstacleSpecialRoles.Door: {
                 // optional chaining not required but makes both eslint and tsc happy
+<<<<<<< HEAD
                 if (!(this.door?.isOpen && definition.openOnce)) {
+=======
+                if (!(this.door?.isOpen && definition.openOnce) && !this.door?.locked) {
+>>>>>>> grindy/main
                     this.toggleDoor(player);
                 }
                 break;
@@ -367,11 +388,19 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
             }
         }
 
+<<<<<<< HEAD
         this.setDirty();
         this.game.pluginManager.emit("obstacle_did_interact", {
             obstacle: this,
             player
         });
+=======
+        this.game.pluginManager.emit("obstacle_will_interact", {
+            obstacle: this,
+            player
+        });
+        this.setDirty();
+>>>>>>> grindy/main
     }
 
     toggleDoor(player?: Player): void {

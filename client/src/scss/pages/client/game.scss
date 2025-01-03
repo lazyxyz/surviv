@@ -980,7 +980,10 @@
         align-items: center;
         justify-content: center;
         width: 40px !important;
+<<<<<<< HEAD
         height: 40px !important;
+=======
+>>>>>>> grindy/main
     }
 }
 
@@ -2015,6 +2018,7 @@
         width: 50px;
     }
 
+<<<<<<< HEAD
     #btn-game-menu,
     #btn-toggle-ping,
     #btn-emotes {
@@ -2036,6 +2040,29 @@
             vertical-align: middle;
         }
     }
+=======
+    #btn-game-menu {
+        font-size: 16px;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    #btn-emotes {
+        border-radius: 0;
+        height: 34px;
+        img {
+            width: 18px;
+            position: relative;
+            bottom: 5px;
+        }
+    }
+
+    #btn-toggle-ping {
+        font-size: 16px;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+>>>>>>> grindy/main
 }
 
 .pickup-pulse {

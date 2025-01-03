@@ -90,8 +90,11 @@ export const CVarCasters = Object.freeze({
     mb_controls_enabled: Casters.toBoolean,
     mb_joystick_size: Casters.toNumber,
     mb_joystick_transparency: Casters.toNumber,
+<<<<<<< HEAD
     mb_gyro_angle: Casters.toNumber,
     mb_haptics: Casters.toBoolean,
+=======
+>>>>>>> grindy/main
     mb_high_res_textures: Casters.toBoolean,
 
     dv_password: Casters.toString,
@@ -137,10 +140,17 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
     cv_loadout_skin: GameConstants.player.defaultSkin,
     cv_loadout_badge: "",
     cv_loadout_crosshair: 0,
+<<<<<<< HEAD
     cv_loadout_top_emote: "happy_face",
     cv_loadout_right_emote: "thumbs_up",
     cv_loadout_bottom_emote: "suroi_logo",
     cv_loadout_left_emote: "sad_face",
+=======
+    cv_loadout_top_emote: "",
+    cv_loadout_right_emote: "",
+    cv_loadout_bottom_emote: "",
+    cv_loadout_left_emote: "",
+>>>>>>> grindy/main
     cv_loadout_death_emote: "",
     cv_loadout_win_emote: "",
     cv_master_volume: 1,
@@ -219,8 +229,11 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
     mb_controls_enabled: true,
     mb_joystick_size: 150,
     mb_joystick_transparency: 0.8,
+<<<<<<< HEAD
     mb_gyro_angle: 0,
     mb_haptics: true,
+=======
+>>>>>>> grindy/main
     mb_high_res_textures: false,
 
     dv_password: "",

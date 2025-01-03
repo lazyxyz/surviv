@@ -19,15 +19,21 @@ export const enum GasMode {
 export const Config = {
     host: "127.0.0.1",
     port: 8000,
+    soloPort: 8001,
+    squadPort: 9001,
+    addBot: true,
 
     map: "fall",
 
     spawn: { mode: SpawnMode.Normal },
 
-    maxTeamSize: TeamSize.Solo,
+    maxTeamSize: {
+        rotation: [TeamSize.Solo, TeamSize.Squad],
+        switchSchedule: 'all' // open all
+    },
 
-    maxPlayersPerGame: 80,
-    maxGames: 5,
+    maxPlayersPerGame: 100,
+    maxGames: 10,
     gameJoinTime: 60,
 
     gas: { mode: GasMode.Normal },
@@ -35,28 +41,7 @@ export const Config = {
     tps: 40,
 
     plugins: [],
-
     disableLobbyClearing: true,
-
-    roles: {
-        developr: { password: "developr", isDev: true },
-        designr: { password: "designr" },
-        lead_designr: { password: "lead_designr" },
-        vip_designr: { password: "vip_designr" },
-        lead_composr: { password: "lead_composr" },
-        composr: { password: "composr" },
-        sound_designr: { password: "sound_designr" },
-        moderatr: { password: "moderatr" },
-        administratr: { password: "administratr" },
-        content_creatr: { password: "content_creatr" },
-        donatr: { password: "donatr" },
-
-        hasanger: { password: "hasanger", isDev: true },
-        pap: { password: "pap", isDev: true },
-        error: { password: "error", isDev: true },
-        limenade: { password: "limenade", isDev: true },
-        solstice: { password: "solstice", isDev: true }
-    },
 
     authServer: {
         address: "http://localhost:8080"
@@ -76,6 +61,10 @@ export interface ConfigType {
      */
     readonly port: number
 
+    readonly soloPort: number;
+    readonly squadPort: number;
+    readonly addBot: boolean;
+    
     /**
      * HTTPS/SSL options. Not used if running locally or with nginx.
      */
@@ -206,7 +195,7 @@ export interface ConfigType {
 
         /**
          * If this option is present, a list of punishments will be loaded, either from a local file or from a remote source.
-         * If `url` is specified, the list is loaded from the specified URL (e.g. https://suroi.io). Trailing slash not allowed.
+         * If `url` is specified, the list is loaded from the specified URL (e.g. https://surviv.fun). Trailing slash not allowed.
          * The specified `password` is sent in the `Password` header.
          * If `url` is not specified, the list is loaded from `punishments.json`, and it's accessible from `/api/punishments`.
          * To access the list, the specified `password` must be provided in the `Password` header.
@@ -248,17 +237,6 @@ export interface ConfigType {
      */
     readonly ipHeader?: string
 
-    /**
-     * Roles. Each role has a different password and can give exclusive skins and cheats.
-     * If `isDev` is set to `true` for a role, cheats will be enabled for that role.
-     * To use roles, add `?password=PASSWORD&role=ROLE` to the URL, for example: `http://127.0.0.1:3000/?password=dev&role=dev`
-     * Dev cheats can be enabled using the `lobbyClearing` option (`http://127.0.0.1:3000/?password=dev&role=dev&lobbyClearing=true`),
-     * but the server must also have it enabled (thru {@link ConfigType.disableLobbyClearing})
-     */
-    readonly roles: Record<string, {
-        readonly password: string
-        readonly isDev?: boolean
-    }>
 
     /**
      * Disables the lobbyClearing option if set to `true`

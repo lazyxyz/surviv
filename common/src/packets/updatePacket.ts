@@ -477,6 +477,11 @@ export type EmoteSerialization = {
     readonly playerID: number
 };
 
+export interface PerkCollection {
+    asBitfield(): number
+    asList(): PerkDefinition[]
+}
+
 export type PlayerData = {
     readonly minMax?: {
         readonly maxHealth: number

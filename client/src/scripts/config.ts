@@ -5,6 +5,7 @@ export const Config = {
         dev: {
             name: "Local Server",
             mainAddress: "http://127.0.0.1:8000",
+<<<<<<< HEAD
             gameAddress: "ws://127.0.0.1:800<ID>"
         },
         na: {
@@ -29,6 +30,19 @@ export const Config = {
         }
     },
     defaultRegion: "na"
+=======
+            gameAddress: "ws://127.0.0.1:<ID>",
+            teamAddress: "ws://127.0.0.1:8000"
+        },
+        as: {
+            name: "Asia",
+            mainAddress: "https://as.surviv.fun",
+            gameAddress: "wss://<ID>.as.surviv.fun",
+            teamAddress: "wss://team.as.surviv.fun"
+        }
+    },
+    defaultRegion: "dev"
+>>>>>>> grindy/main
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {
@@ -53,6 +67,11 @@ export interface Region {
      * For example, if gameID is 0, and gameAddress is "ws://127.0.0.1:800<ID>", the resulting address will be ws://127.0.0.1:8001.
      */
     readonly gameAddress: string
+<<<<<<< HEAD
+=======
+
+    readonly teamAddress: string
+>>>>>>> grindy/main
 }
 
 export interface ServerInfo {
