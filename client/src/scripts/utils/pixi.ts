@@ -20,11 +20,7 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean):
     }
 
     // we pray
-<<<<<<< HEAD
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-=======
-
->>>>>>> grindy/main
     const spritesheets: SpritesheetData[] = highResolution
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         ? (await import("virtual:spritesheets-jsons-high-res")).atlases

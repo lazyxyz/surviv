@@ -33,11 +33,7 @@ export const rules: RulesPost[] = [
           <li>3rd offense: 7 day ban</li>
           <li>4th offense: Permanent ban</li>
         </ul>
-<<<<<<< HEAD
         Teaming as a hacker will result in a permanent ban.
-=======
-        Teaming with a hacker will result in a permanent ban.
->>>>>>> grindy/main
 
         <br><br>
 

@@ -93,11 +93,8 @@ export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
         "Fire",
         "RIP",
         "Leosmug",
-<<<<<<< HEAD
-=======
         "Socks",
         "Archimedes",
->>>>>>> grindy/main
         "awhhmahgawd",
         "Boykisser"
     ].map(name => emote([name, EmoteCategory.Memes])),
@@ -112,9 +109,6 @@ export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
         "real",
         "fake",
         "Colon Three"
-<<<<<<< HEAD
-    ].map(name => emote([name, EmoteCategory.Text]))
-=======
     ].map(name => emote([name, EmoteCategory.Text])),
     ...[
         "Monkey",
@@ -124,5 +118,4 @@ export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
         "Squid",
         "Penguin"
     ].map(name => emote([name, EmoteCategory.Misc]))
->>>>>>> grindy/main
 ]);

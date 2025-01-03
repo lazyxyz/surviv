@@ -61,8 +61,6 @@ export const SHOCKWAVE_EXPLOSION_MULTIPLIERS = Object.freeze({
 });
 
 export const BULLET_WHIZ_SCALE = 5;
-<<<<<<< HEAD
-=======
 
 export const SELECTOR_WALLET = "SELECTOR_WALLET";
 export const PUBLIC_KEY = "PUBLIC_KEY";
@@ -109,4 +107,3 @@ export const parseJWT = (token: string | undefined): {
 
     return JSON.parse(payload.toString()) as ReturnType<typeof parseJWT>;
 };
->>>>>>> grindy/main

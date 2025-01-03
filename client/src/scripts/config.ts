@@ -5,32 +5,6 @@ export const Config = {
         dev: {
             name: "Local Server",
             mainAddress: "http://127.0.0.1:8000",
-<<<<<<< HEAD
-            gameAddress: "ws://127.0.0.1:800<ID>"
-        },
-        na: {
-            name: "North America",
-            mainAddress: "https://na.suroi.io",
-            gameAddress: "wss://<ID>.na.suroi.io"
-        },
-        eu: {
-            name: "Europe",
-            mainAddress: "https://eu.suroi.io",
-            gameAddress: "wss://<ID>.eu.suroi.io"
-        },
-        sa: {
-            name: "South America",
-            mainAddress: "https://sa.suroi.io",
-            gameAddress: "wss://<ID>.sa.suroi.io"
-        },
-        as: {
-            name: "Asia",
-            mainAddress: "https://as.suroi.io",
-            gameAddress: "wss://<ID>.as.suroi.io"
-        }
-    },
-    defaultRegion: "na"
-=======
             gameAddress: "ws://127.0.0.1:<ID>",
             teamAddress: "ws://127.0.0.1:8000"
         },
@@ -42,7 +16,6 @@ export const Config = {
         }
     },
     defaultRegion: "dev"
->>>>>>> grindy/main
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {
@@ -67,11 +40,8 @@ export interface Region {
      * For example, if gameID is 0, and gameAddress is "ws://127.0.0.1:800<ID>", the resulting address will be ws://127.0.0.1:8001.
      */
     readonly gameAddress: string
-<<<<<<< HEAD
-=======
 
     readonly teamAddress: string
->>>>>>> grindy/main
 }
 
 export interface ServerInfo {

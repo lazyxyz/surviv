@@ -6,12 +6,9 @@
 @use "client/console.scss";
 @use "dialog.scss";
 
-<<<<<<< HEAD
-=======
 @use "eip6963/account-wallet.scss";
 @use "eip6963/connect-wallet.scss";
 
->>>>>>> grindy/main
 body {
   background: palette.$grass_bg;
   display: flex;
@@ -21,18 +18,11 @@ body {
   margin: 0;
   padding: 0;
 
-<<<<<<< HEAD
-  & > :not(#loading-logo) {
-    opacity: 1;
-  }
-  & > .loading-logo {
-=======
   &> :not(#loading-logo) {
     opacity: 1;
   }
 
   &>.loading-logo {
->>>>>>> grindy/main
     display: none;
     animation: none;
   }
@@ -59,26 +49,15 @@ body {
     margin: 0.7rem 0;
   }
 
-<<<<<<< HEAD
-  .modal-item > button {
-=======
   .modal-item>button {
->>>>>>> grindy/main
     margin: 0.2rem 0;
     width: 100%;
     display: inline-block;
   }
 }
 
-<<<<<<< HEAD
-.modal-locked { // temporary
-  opacity: .25;
-  pointer-events: none;
-}
-=======
 .modal-locked {
   // temporary
   opacity: 0.25;
   pointer-events: none;
 }
->>>>>>> grindy/main

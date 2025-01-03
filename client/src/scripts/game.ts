@@ -52,15 +52,6 @@ import { ThrowableProjectile } from "./objects/throwableProj";
 import { Camera } from "./rendering/camera";
 import { Gas, GasRender } from "./rendering/gas";
 import { Minimap } from "./rendering/minimap";
-<<<<<<< HEAD
-import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime } from "./ui";
-import { setUpCommands } from "./utils/console/commands";
-import { defaultClientCVars } from "./utils/console/defaultClientCVars";
-import { GameConsole } from "./utils/console/gameConsole";
-import { COLORS, EMOTE_SLOTS, LAYER_TRANSITION_DELAY, MODE, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
-import { loadTextures, SuroiSprite } from "./utils/pixi";
-import { Tween } from "./utils/tween";
-=======
 import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime, visibleConnectWallet, visibleWallet } from "./ui";
 import { setUpCommands } from "./utils/console/commands";
 import { defaultClientCVars } from "./utils/console/defaultClientCVars";
@@ -70,7 +61,6 @@ import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 import { EIP6963 } from "./eip6963";
 import { Account } from "./account";
->>>>>>> grindy/main
 
 /* eslint-disable @stylistic/indent */
 
@@ -126,10 +116,7 @@ export class Game {
     teamID = -1;
 
     teamMode = false;
-<<<<<<< HEAD
-=======
     teamSize = TeamSize.Solo;
->>>>>>> grindy/main
 
     /**
      * proxy for `activePlayer`'s layer
@@ -162,11 +149,8 @@ export class Game {
 
     readonly gasRender = new GasRender(PIXI_SCALE);
     readonly gas = new Gas(this);
-<<<<<<< HEAD
-=======
     readonly eip6963 = new EIP6963();
     readonly account = new Account();
->>>>>>> grindy/main
 
     music!: Sound;
 
@@ -266,11 +250,8 @@ export class Game {
         ]).then(() => {
             unlockPlayButtons();
             resetPlayButtons();
-<<<<<<< HEAD
-=======
             visibleConnectWallet(game);
             visibleWallet(game);
->>>>>>> grindy/main
         });
 
         setUpCommands(game);
@@ -292,13 +273,6 @@ export class Game {
     }
 
     connect(address: string): void {
-<<<<<<< HEAD
-        this.error = false;
-
-        if (this.gameStarted) return;
-
-        this._socket = new WebSocket(address);
-=======
         const url = new URL(address);
         const ui = this.uiManager.ui;
 
@@ -325,7 +299,6 @@ export class Game {
         }
 
         this._socket = new WebSocket(url.toString());
->>>>>>> grindy/main
         this._socket.binaryType = "arraybuffer";
 
         this._socket.onopen = (): void => {
@@ -428,11 +401,6 @@ export class Game {
             }
         };
 
-<<<<<<< HEAD
-        const ui = this.uiManager.ui;
-
-=======
->>>>>>> grindy/main
         this._socket.onerror = (): void => {
             this.error = true;
             ui.splashMsgText.html(getTranslatedString("msg_err_joining"));
@@ -757,13 +725,10 @@ export class Game {
         if (playerData) {
             this.uiManager.updateUI(playerData);
             this.uiManager.updateWeaponSlots(); // to load reskins
-<<<<<<< HEAD
 
             if (this.spectating && playerData.teamID !== undefined && playerData.id !== undefined) {
                 this.teamID = playerData.teamID;
             }
-=======
->>>>>>> grindy/main
         }
 
         for (const deletedPlayerId of updateData.deletedPlayers ?? []) {
@@ -1169,7 +1134,6 @@ export class Game {
                             ) || (
                                 type === ItemType.Gun
                                 && weapons?.some(
-<<<<<<< HEAD
                                         weapon => {
                                             const definition = weapon?.definition;
 
@@ -1190,28 +1154,6 @@ export class Game {
                                                 );
                                         }
                                     )
-=======
-                                    weapon => {
-                                        const definition = weapon?.definition;
-
-                                        return definition?.itemType === ItemType.Gun
-                                            && (
-                                                (
-                                                    object?.definition === definition
-                                                    && !definition.isDual
-                                                    && definition.dualVariant
-                                                ) // Picking up a single pistol when inventory has single pistol
-                                                || (
-                                                    (
-                                                        object.definition as DualGunNarrowing | undefined
-                                                    )?.singleVariant === definition.idString
-                                                )
-                                                // Picking up dual pistols when inventory has a pistol
-                                                // TODO implement splitting of dual guns to not lost reload later
-                                            );
-                                    }
-                                )
->>>>>>> grindy/main
                             )
                         )
                     ) {

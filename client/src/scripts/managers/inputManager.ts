@@ -212,12 +212,6 @@ export class InputManager {
 
         $("#emote-wheel > .button-center").on("click", () => {
             this.emoteWheelActive = false;
-<<<<<<< HEAD
-            this.game.uiManager.ui.emoteButton
-                .removeClass("btn-alert")
-                .addClass("btn-primary");
-=======
->>>>>>> grindy/main
             this.selectedEmote = undefined;
             this.pingWheelMinimap = false;
             $("#emote-wheel").hide();
@@ -348,7 +342,6 @@ export class InputManager {
                 shootOnRelease = false;
             });
         }
-<<<<<<< HEAD
         // Gyro stuff
         const gyroAngle = game.console.getBuiltInCVar("mb_gyro_angle");
         if (gyroAngle > 0) {
@@ -382,8 +375,6 @@ export class InputManager {
                     : false;
             });
         }
-=======
->>>>>>> grindy/main
     }
 
     private handleInputEvent(down: boolean, event: KeyboardEvent | MouseEvent | WheelEvent): void {

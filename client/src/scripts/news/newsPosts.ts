@@ -2,7 +2,6 @@ import { type NewsPost } from "./newsHelper";
 
 export const news: NewsPost[] = [
     {
-<<<<<<< HEAD
         date: 1735793234000,
         author: "HAZEL",
         title: "Out With The Old",
@@ -11,8 +10,6 @@ export const news: NewsPost[] = [
         We're looking to address every aspect of the game going forward this year, including rebalances to adrenaline, armor, weapon damage, movement speed, the gas, reworked locations, and much more as we work towards the eventual full release of the game. `
     },
     {
-=======
->>>>>>> grindy/main
         date: 1733881464000,
         author: "HAZEL",
         title: "Cold Steel",

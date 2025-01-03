@@ -1,7 +1,6 @@
 import { GameConstants, InputActions, ObjectCategory, SpectateActions, TeamSize } from "@common/constants";
 import { Ammos, type AmmoDefinition } from "@common/definitions/ammos";
 import { type ArmorDefinition } from "@common/definitions/armors";
-<<<<<<< HEAD
 import { Badges, type BadgeDefinition } from "@common/definitions/badges";
 import { EmoteCategory, Emotes, type EmoteDefinition } from "@common/definitions/emotes";
 import { HealType, HealingItems, type HealingItemDefinition } from "@common/definitions/healingItems";
@@ -13,45 +12,25 @@ import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, 
 import { ExtendedMap } from "@common/utils/misc";
 import { ItemType, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { pickRandomInArray } from "@common/utils/random";
-=======
-import { Badges, freeBadges, type BadgeDefinition } from "@common/definitions/badges";
-import { EmoteCategory, Emotes, freeEmotes, type EmoteDefinition } from "@common/definitions/emotes";
-import { HealType, HealingItems, type HealingItemDefinition } from "@common/definitions/healingItems";
-import { PerkIds, Perks } from "@common/definitions/perks";
-import { Scopes, type ScopeDefinition } from "@common/definitions/scopes";
-import { freeSkin, Skins, type SkinDefinition } from "@common/definitions/skins";
-import { SpectatePacket } from "@common/packets/spectatePacket";
-import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, type GetGameResponse } from "@common/typings";
-import { ExtendedMap } from "@common/utils/misc";
-import { ItemType, type ObjectDefinition, type ReferenceTo } from "@common/utils/objectDefinitions";
->>>>>>> grindy/main
+import { freeBadges } from "@common/definitions/badges";
+import { freeEmotes } from "@common/definitions/emotes";
+import { freeSkin } from "@common/definitions/skins";
+import {  type ObjectDefinition } from "@common/utils/objectDefinitions";
 import { Vec, type Vector } from "@common/utils/vector";
-import { sound } from "@pixi/sound";
-import $ from "jquery";
-import { Color, isMobile, isWebGPUSupported } from "pixi.js";
 import { TRANSLATIONS, getTranslatedString } from "../translations";
-<<<<<<< HEAD
-=======
+
 import type { TranslationKeys } from "../typings/translations";
->>>>>>> grindy/main
 import { Config, type ServerInfo } from "./config";
 import { type Game } from "./game";
 import { news } from "./news/newsPosts";
 import { body, createDropdown } from "./uiHelpers";
 import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaultClientCVars";
-<<<<<<< HEAD
 import { EMOTE_SLOTS, MODE, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
-import { Crosshairs, getCrosshair } from "./utils/crosshairs";
-import { html, requestFullscreen } from "./utils/misc";
-import type { TranslationKeys } from "../typings/translations";
-=======
-import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import { freeGuns, Guns } from "@common/definitions/guns";
 import { Melees } from "@common/definitions/melees";
 import { Throwables } from "@common/definitions/throwables";
->>>>>>> grindy/main
 
 /*
     eslint-disable
@@ -63,18 +42,11 @@ import { Throwables } from "@common/definitions/throwables";
     `@stylistic/indent`: can eslint stop [expletive redacted] at indenting stuff
 */
 
-<<<<<<< HEAD
-interface RegionInfo {
-    readonly name: string
-    readonly mainAddress: string
-    readonly gameAddress: string
-=======
 export interface RegionInfo {
     readonly name: string
     readonly mainAddress: string
     readonly gameAddress: string
     readonly teamAddress: string
->>>>>>> grindy/main
     readonly playerCount?: number
     readonly maxTeamSize?: number
     readonly nextSwitchTime?: number
@@ -99,37 +71,11 @@ export function unlockPlayButtons(): void { buttonsLocked = false; }
 let lastDisconnectTime: number | undefined;
 export function updateDisconnectTime(): void { lastDisconnectTime = Date.now(); }
 
-<<<<<<< HEAD
-let btnMap: ReadonlyArray<readonly [TeamSize, JQuery<HTMLButtonElement>]>;
-=======
->>>>>>> grindy/main
 export function resetPlayButtons(): void {
     if (buttonsLocked) return;
 
     $("#splash-options").removeClass("loading");
     $("#loading-text").text(getTranslatedString("loading_connecting"));
-<<<<<<< HEAD
-   // $("#btn-cancel-finding-game").css("display", "none");
-
-    const { maxTeamSize } = selectedRegion ?? regionInfo[Config.defaultRegion];
-
-    const isSolo = maxTeamSize === TeamSize.Solo;
-
-    for (
-        const [size, btn] of (
-            btnMap ??= [
-                [TeamSize.Solo, $("#btn-play-solo")],
-                [TeamSize.Duo, $("#btn-play-duo")],
-                [TeamSize.Squad, $("#btn-play-squad")]
-            ]
-        )
-    // stfu
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-    ) btn.toggleClass("locked", maxTeamSize !== undefined && maxTeamSize !== size);
-
-    $("#team-option-btns").toggleClass("locked", isSolo);
-    $("#locked-msg").css("top", isSolo ? "225px" : "153px").toggle(maxTeamSize !== undefined);
-=======
     $("#btn-cancel-finding-game").css("display", "none");
 }
 
@@ -270,7 +216,6 @@ export function visibleWallet(game: Game): void {
     }
 
     createDropdown(".account-wallet-container");
->>>>>>> grindy/main
 }
 
 export async function setUpUI(game: Game): Promise<void> {
@@ -279,12 +224,8 @@ export async function setUpUI(game: Game): Promise<void> {
     // Change the menu based on the mode.
     if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/suroi_beta_${MODE.idString}.svg`);
     if (MODE.specialPlayButtons) {
-<<<<<<< HEAD
-        const playButtons = [$("#btn-play-solo"), $("#btn-play-duo"), $("#btn-play-squad")];
-=======
         const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
         // const playButtons = [$("#btn-play-solo"), $("#btn-play-duo"), $("#btn-play-squad")];
->>>>>>> grindy/main
         for (let buttonIndex = 0; buttonIndex < playButtons.length; buttonIndex++) {
             const button = playButtons[buttonIndex];
 
@@ -292,11 +233,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
             // Mode Logo
             if (MODE.modeLogoImage) {
-<<<<<<< HEAD
-                const translationString = `play_${["solo", "duo", "squad"][buttonIndex]}`;
-=======
                 const translationString = `play_${["solo", "squad"][buttonIndex]}`;
->>>>>>> grindy/main
 
                 button.html(`
                     <img class="btn-icon" width="26" height="26" src=${MODE.modeLogoImage}>
@@ -476,10 +413,6 @@ export async function setUpUI(game: Game): Promise<void> {
             selectedRegion = regionInfo[Config.defaultRegion];
             game.console.setBuiltInCVar("cv_region", "");
         }
-<<<<<<< HEAD
-
-=======
->>>>>>> grindy/main
         const region = getTranslatedString(`region_${game.console.getBuiltInCVar("cv_region")}` as TranslationKeys);
         if (region === "region_") {
             serverName.text(selectedRegion.name); // this for now until we find a way to selectedRegion.id
@@ -513,18 +446,11 @@ export async function setUpUI(game: Game): Promise<void> {
         updateServerSelectors();
     });
 
-<<<<<<< HEAD
-    const joinGame = (): void => {
-=======
     const joinGame = (teamSize: number): void => {
->>>>>>> grindy/main
         ui.splashOptions.addClass("loading");
         ui.loadingText.text(getTranslatedString("loading_finding_game"));
         // ui.cancelFindingGame.css("display", "");
         // shouldn't happen
-<<<<<<< HEAD
-        if (selectedRegion === undefined) return;
-=======
         if (selectedRegion === undefined || !game.account.token?.length) return;
 
         // token is expired
@@ -535,16 +461,11 @@ export async function setUpUI(game: Game): Promise<void> {
                 return game.account.sessionExpired();
             }
         }
->>>>>>> grindy/main
 
         const target = selectedRegion;
 
         void $.get(
-<<<<<<< HEAD
-            `${target.mainAddress}/api/getGame${teamID ? `?teamID=${teamID}` : ""}`,
-=======
             `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}&token=${game.account.token}`,
->>>>>>> grindy/main
             (data: GetGameResponse) => {
                 if (data.success) {
                     const params = new URLSearchParams();
@@ -552,19 +473,11 @@ export async function setUpUI(game: Game): Promise<void> {
                     if (teamID) params.set("teamID", teamID);
                     if (autoFill) params.set("autoFill", String(autoFill));
 
-<<<<<<< HEAD
-                    const devPass = game.console.getBuiltInCVar("dv_password");
-                    if (devPass) params.set("password", devPass);
-
-                    const role = game.console.getBuiltInCVar("dv_role");
-                    if (role) params.set("role", role);
-=======
                     // const devPass = game.console.getBuiltInCVar("dv_password");
                     // if (devPass) params.set("password", devPass);
 
                     // const role = game.console.getBuiltInCVar("dv_role");
                     // if (role) params.set("role", role);
->>>>>>> grindy/main
 
                     const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
                     if (lobbyClearing) params.set("lobbyClearing", "true");
@@ -581,12 +494,7 @@ export async function setUpUI(game: Game): Promise<void> {
                             console.error(e);
                         }
                     }
-<<<<<<< HEAD
-
-                    game.connect(`${target.gameAddress.replace("<ID>", (data.gameID + 1).toString())}/play?${params.toString()}`);
-=======
                     game.connect(`${target.gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`);
->>>>>>> grindy/main
                     ui.splashMsg.hide();
 
                     // Check again because there is a small chance that the create-team-menu element won't hide.
@@ -628,13 +536,6 @@ export async function setUpUI(game: Game): Promise<void> {
     let lastPlayButtonClickTime = 0;
 
     // Join server when play buttons are clicked
-<<<<<<< HEAD
-    $("#btn-play-solo, #btn-play-duo, #btn-play-squad").on("click", () => {
-        const now = Date.now();
-        if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit
-        lastPlayButtonClickTime = now;
-        joinGame();
-=======
     $("#btn-play-solo, #btn-play-squad").on("click", event => {
         const now = Date.now();
         if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit
@@ -642,15 +543,11 @@ export async function setUpUI(game: Game): Promise<void> {
 
         const teamSize = event.target.id === "btn-play-solo" ? TeamSize.Solo : TeamSize.Squad;
         joinGame(teamSize);
->>>>>>> grindy/main
     });
 
     const createTeamMenu = $("#create-team-menu");
     $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function() {
         const now = Date.now();
-<<<<<<< HEAD
-        if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined) return;
-=======
 
         if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined || !game.account.token?.length) return;
 
@@ -663,7 +560,6 @@ export async function setUpUI(game: Game): Promise<void> {
             }
         }
 
->>>>>>> grindy/main
         lastPlayButtonClickTime = now;
 
         ui.splashOptions.addClass("loading");
@@ -700,10 +596,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
         params.set("name", game.console.getBuiltInCVar("cv_player_name"));
         params.set("skin", game.console.getBuiltInCVar("cv_loadout_skin"));
-<<<<<<< HEAD
-=======
         // params.set("weapon", game.console.getBuiltInCVar("cv_loadout_weapon"));
->>>>>>> grindy/main
 
         const badge = game.console.getBuiltInCVar("cv_loadout_badge");
         if (badge) params.set("badge", badge);
@@ -724,16 +617,12 @@ export async function setUpUI(game: Game): Promise<void> {
             }
         }
 
-<<<<<<< HEAD
-        teamSocket = new WebSocket(`${selectedRegion.mainAddress.replace("http", "ws")}/team?${params.toString()}`);
-=======
         params.set("token", game.account.token);
 
         const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
         console.log("teamURL: ", teamURL);
 
         teamSocket = new WebSocket(teamURL);
->>>>>>> grindy/main
 
         teamSocket.onmessage = (message: MessageEvent<string>): void => {
             const data = JSON.parse(message.data) as CustomTeamMessage;
@@ -790,11 +679,7 @@ export async function setUpUI(game: Game): Promise<void> {
                 }
                 case CustomTeamMessages.Started: {
                     createTeamMenu.hide();
-<<<<<<< HEAD
-                    joinGame();
-=======
                     joinGame(TeamSize.Squad);
->>>>>>> grindy/main
                     break;
                 }
             }
@@ -959,105 +844,6 @@ export async function setUpUI(game: Game): Promise<void> {
 
     const usernameField = $<HTMLInputElement>("#username-input");
 
-<<<<<<< HEAD
-    const youtubers = [
-        {
-            name: "123OP",
-            link: "https://www.youtube.com/@123op."
-        },
-        {
-            name: "bruh button official",
-            link: "https://www.youtube.com/@bruhbuttonofficial4658"
-        },
-        {
-            name: "viper",
-            link: "https://www.youtube.com/channel/UCey8-fJfkF7UFYdWBcegzWA"
-        },
-        {
-            name: "IoSilverAway",
-            link: "https://www.youtube.com/@iosilveraway_19"
-        },
-        {
-            name: "Ukraines dude",
-            link: "https://www.youtube.com/@Ukrainesdude"
-        },
-        {
-            name: "Ash",
-            link: "https://www.youtube.com/@AshMyBoi"
-        },
-        {
-            name: "Tuncres",
-            link: "https://www.youtube.com/@Tuncres2022"
-        },
-        {
-            name: "Данзан animations",
-            link: "https://www.youtube.com/@danzananimYT/videos"
-        },
-        {
-            name: "Pablo_Fan_",
-            link: "https://www.youtube.com/@Pablo_Fan_"
-        },
-        {
-            name: "g0dak",
-            link: "https://www.youtube.com/@g0dak"
-        },
-        {
-            name: "GAMERIO",
-            link: "https://www.youtube.com/@GAMERIO1"
-        },
-        {
-            name: "N00B.I0",
-            link: "https://www.youtube.com/@N00B.I0"
-        },
-        {
-            name: "Dablitter",
-            link: "https://www.youtube.com/@dablitter5719"
-        },
-        {
-            name: "DESTROYER [IHY]",
-            link: "https://www.youtube.com/@DESTROYERIHY"
-        },
-        {
-            name: "[ATMOS]Bl00D",
-            link: "https://www.youtube.com/@TheRealATMOS"
-        },
-        {
-            name: "Tuncres",
-            link: "https://www.youtube.com/@Tuncres2022"
-        },
-        {
-            name: "this.is.gls_",
-            link: "https://www.youtube.com/@this.is.gls_"
-        },
-        {
-            name: "LeeMinHaiz",
-            link: "https://www.youtube.com/@LeeMinHaiz"
-        }
-    ];
-    const youtuber = pickRandomInArray(youtubers);
-    $("#youtube-featured-name").text(youtuber.name);
-    $("#youtube-featured-content").attr("href", youtuber.link).removeAttr("target");
-
-    const streamers = [
-        {
-            name: "ikou",
-            link: "https://www.twitch.tv/ikou_yt"
-        },
-        {
-            name: "seth_mayo",
-            link: "https://www.twitch.tv/seth_mayo"
-        },
-        {
-            name: "PatchesSC",
-            link: "https://www.twitch.tv/patchessc"
-        }
-    ];
-    const streamer = pickRandomInArray(streamers);
-    $("#twitch-featured-name").text(streamer.name);
-    $("#twitch-featured-content").attr("href", streamer.link).removeAttr("target");
-
-=======
->>>>>>> grindy/main
     const toggleRotateMessage = (): JQuery =>
         $("#splash-rotate-message").toggle(
             window.innerWidth < window.innerHeight
@@ -1130,11 +916,7 @@ export async function setUpUI(game: Game): Promise<void> {
     $("#btn-play-again, #btn-spectate-replay").on("click", async() => {
         await game.endGame();
         if (teamSocket) teamSocket.send(JSON.stringify({ type: CustomTeamMessages.Start })); // TODO Check if player is team leader
-<<<<<<< HEAD
-        else joinGame();
-=======
         else joinGame(game.teamSize);
->>>>>>> grindy/main
     });
 
     const sendSpectatePacket = (action: Exclude<SpectateActions, SpectateActions.SpectateSpecific>): void => {
@@ -1218,12 +1000,9 @@ export async function setUpUI(game: Game): Promise<void> {
     const fists = $<HTMLDivElement>("#skin-left-fist, #skin-right-fist");
 
     const updateSplashCustomize = (skinID: string): void => {
-<<<<<<< HEAD
-=======
         $(".assets-fist").attr("href", `./img/game/shared/skins/${skinID}_fist.svg`);
         $(".assets-base").attr("href", `./img/game/shared/skins/${skinID}_base.svg`);
 
->>>>>>> grindy/main
         base.css(
             "background-image",
             `url("./img/game/shared/skins/${skinID}_base.svg")`
@@ -1249,15 +1028,11 @@ export async function setUpUI(game: Game): Promise<void> {
         updateSplashCustomize(idString);
     }
 
-<<<<<<< HEAD
-    for (const { idString, hideFromLoadout, rolesRequired } of Skins) {
-=======
     const SkinsIntance = Skins.definitions.filter(argument =>
         freeSkin.some(argument_child => argument_child === argument.idString)
     );
 
     for (const { idString, hideFromLoadout, rolesRequired } of SkinsIntance) {
->>>>>>> grindy/main
         if (hideFromLoadout || !(rolesRequired ?? [role]).includes(role)) continue;
 
         // noinspection CssUnknownTarget
@@ -1274,10 +1049,6 @@ export async function setUpUI(game: Game): Promise<void> {
 
         skinItem.on("click", () => {
             game.console.setBuiltInCVar("cv_loadout_skin", idString);
-<<<<<<< HEAD
-=======
-
->>>>>>> grindy/main
             selectSkin(idString);
         });
 
@@ -1318,15 +1089,11 @@ export async function setUpUI(game: Game): Promise<void> {
     function updateEmotesList(): void {
         emoteList.empty();
 
-<<<<<<< HEAD
-        const emotes = [...Emotes.definitions].sort((a, b) => {
-=======
         const EmotesInstance = Emotes.definitions.filter(argument =>
             freeEmotes.some(argument_child => argument_child === argument.idString)
         );
 
         const emotes = EmotesInstance.sort((a, b) => {
->>>>>>> grindy/main
             return a.category - b.category;
         });
 
@@ -1569,61 +1336,6 @@ export async function setUpUI(game: Game): Promise<void> {
     }
 
     // Load badges
-<<<<<<< HEAD
-    const allowedBadges = Badges.definitions.filter(({ roles }) => !roles?.length || roles.includes(role));
-
-    if (allowedBadges.length > 0) {
-        $("#tab-badges").show();
-
-        const noBadgeItem = $<HTMLDivElement>(
-            html`<div id="badge-" class="badges-list-item-container">\
-                <div class="badges-list-item"> </div>\
-                <span class="badge-name">${getTranslatedString("none")}</span>\
-            </div>`
-        );
-
-        noBadgeItem.on("click", () => {
-            game.console.setBuiltInCVar("cv_loadout_badge", "");
-            noBadgeItem.addClass("selected").siblings().removeClass("selected");
-        });
-
-        const activeBadge = game.console.getBuiltInCVar("cv_loadout_badge");
-
-        const badgeUiCache: Record<ReferenceTo<BadgeDefinition>, JQuery<HTMLDivElement>> = { [""]: noBadgeItem };
-
-        function selectBadge(idString: ReferenceTo<BadgeDefinition>): void {
-            badgeUiCache[idString].addClass("selected")
-                .siblings()
-                .removeClass("selected");
-        }
-
-        $("#badges-list").append(
-            noBadgeItem,
-            ...allowedBadges.map(({ idString }) => {
-                // noinspection CssUnknownTarget
-                const badgeItem = badgeUiCache[idString] = $<HTMLDivElement>(
-                    `<div id="badge-${idString}" class="badges-list-item-container${idString === activeBadge ? " selected" : ""}">\
-                        <div class="badges-list-item">\
-                            <div style="background-image: url('./img/game/shared/badges/${idString}.svg')"></div>\
-                        </div>\
-                        <span class="badge-name">${getTranslatedString(`badge_${idString}` as TranslationKeys)}</span>\
-                    </div>`
-                );
-
-                badgeItem.on("click", () => {
-                    game.console.setBuiltInCVar("cv_loadout_badge", idString);
-                    selectBadge(idString);
-                });
-
-                return badgeItem;
-            })
-        );
-
-        game.console.variables.addChangeListener(
-            "cv_loadout_badge",
-            (_, newBadge) => { selectBadge(newBadge); }
-        );
-=======
     const allowedBadges = Badges.definitions
     .filter(argument =>
         freeBadges.some(argument_child => argument_child === argument.idString)
@@ -2140,7 +1852,6 @@ export async function setUpUI(game: Game): Promise<void> {
                 });
             }
         }
->>>>>>> grindy/main
     }
 
     function addSliderListener(
@@ -2448,11 +2159,6 @@ export async function setUpUI(game: Game): Promise<void> {
     addCheckboxListener("#toggle-mobile-controls", "mb_controls_enabled");
     addSliderListener("#slider-joystick-size", "mb_joystick_size");
     addSliderListener("#slider-joystick-transparency", "mb_joystick_transparency");
-<<<<<<< HEAD
-    addSliderListener("#slider-gyro-angle", "mb_gyro_angle");
-    addCheckboxListener("#toggle-haptics", "mb_haptics");
-=======
->>>>>>> grindy/main
     addCheckboxListener("#toggle-high-res-mobile", "mb_high_res_textures");
 
     function updateUiScale(): void {
@@ -2657,10 +2363,6 @@ export async function setUpUI(game: Game): Promise<void> {
                 );
 
                 const isGrenadeSlot = inventorySlotTypings[slot] === ItemType.Throwable;
-<<<<<<< HEAD
-
-=======
->>>>>>> grindy/main
                 const element = ele[0];
 
                 element.addEventListener("pointerup", () => clearTimeout(dropTimer));
@@ -2888,11 +2590,7 @@ export async function setUpUI(game: Game): Promise<void> {
         ui.spectatingContainer.css({
             width: "150px",
             position: "fixed",
-<<<<<<< HEAD
-            top: "15%",
-=======
             top: "10%",
->>>>>>> grindy/main
             left: "5rem"
         });
 
@@ -3002,22 +2700,7 @@ export async function setUpUI(game: Game): Promise<void> {
         $("#mobile-options").show();
 
         ui.menuButton.on("click", () => ui.gameMenu.toggle());
-<<<<<<< HEAD
-
-        ui.emoteButton.on("click", () => {
-            const { emoteWheelActive } = inputManager;
-
-            inputManager.emoteWheelActive = !emoteWheelActive;
-
-            ui.emoteButton
-                .toggleClass("btn-alert", !emoteWheelActive)
-                .toggleClass("btn-primary", emoteWheelActive);
-
-            game.uiManager.ui.emoteWheel.show();
-        });
-=======
         ui.emoteButton.on("click", () => ui.emoteWheel.show());
->>>>>>> grindy/main
 
         ui.pingToggle.on("click", () => {
             inputManager.pingWheelActive = !inputManager.pingWheelActive;
@@ -3053,11 +2736,7 @@ export async function setUpUI(game: Game): Promise<void> {
             )
             .siblings(".range-input-value")
             .text(
-<<<<<<< HEAD
-                element.id !== "slider-joystick-size" && element.id !== "slider-gyro-angle"
-=======
                 element.id !== "slider-joystick-size"
->>>>>>> grindy/main
                     ? `${Math.round(value * 100)}%`
                     : value
             );
