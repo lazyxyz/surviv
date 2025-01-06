@@ -1,33 +1,33 @@
 import { GameConstants, InputActions, ObjectCategory, SpectateActions, TeamSize } from "@common/constants";
 import { Ammos, type AmmoDefinition } from "@common/definitions/ammos";
 import { type ArmorDefinition } from "@common/definitions/armors";
-import { Badges, type BadgeDefinition } from "@common/definitions/badges";
-import { EmoteCategory, Emotes, type EmoteDefinition } from "@common/definitions/emotes";
 import { HealType, HealingItems, type HealingItemDefinition } from "@common/definitions/healingItems";
 import { PerkIds, Perks } from "@common/definitions/perks";
 import { Scopes, type ScopeDefinition } from "@common/definitions/scopes";
-import { Skins, type SkinDefinition } from "@common/definitions/skins";
 import { SpectatePacket } from "@common/packets/spectatePacket";
 import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, type GetGameResponse } from "@common/typings";
 import { ExtendedMap } from "@common/utils/misc";
-import { ItemType, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { pickRandomInArray } from "@common/utils/random";
-import { freeBadges } from "@common/definitions/badges";
-import { freeEmotes } from "@common/definitions/emotes";
-import { freeSkin } from "@common/definitions/skins";
-import {  type ObjectDefinition } from "@common/utils/objectDefinitions";
+import { Badges, freeBadges, type BadgeDefinition } from "@common/definitions/badges";
+import { EmoteCategory, Emotes, freeEmotes, type EmoteDefinition } from "@common/definitions/emotes";
+import { freeSkin, Skins, type SkinDefinition } from "@common/definitions/skins";
+import { ItemType, type ObjectDefinition, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { Vec, type Vector } from "@common/utils/vector";
+import { sound } from "@pixi/sound";
+import $ from "jquery";
+import { Color, isMobile, isWebGPUSupported } from "pixi.js";
 import { TRANSLATIONS, getTranslatedString } from "../translations";
 
-import type { TranslationKeys } from "../typings/translations";
 import { Config, type ServerInfo } from "./config";
 import { type Game } from "./game";
 import { news } from "./news/newsPosts";
 import { body, createDropdown } from "./uiHelpers";
 import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaultClientCVars";
-import { EMOTE_SLOTS, MODE, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
+
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
+import type { TranslationKeys } from "../typings/translations";
+import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { freeGuns, Guns } from "@common/definitions/guns";
 import { Melees } from "@common/definitions/melees";
 import { Throwables } from "@common/definitions/throwables";
@@ -2159,6 +2159,8 @@ export async function setUpUI(game: Game): Promise<void> {
     addCheckboxListener("#toggle-mobile-controls", "mb_controls_enabled");
     addSliderListener("#slider-joystick-size", "mb_joystick_size");
     addSliderListener("#slider-joystick-transparency", "mb_joystick_transparency");
+    addSliderListener("#slider-gyro-angle", "mb_gyro_angle");
+    addCheckboxListener("#toggle-haptics", "mb_haptics");
     addCheckboxListener("#toggle-high-res-mobile", "mb_high_res_textures");
 
     function updateUiScale(): void {
@@ -2590,7 +2592,7 @@ export async function setUpUI(game: Game): Promise<void> {
         ui.spectatingContainer.css({
             width: "150px",
             position: "fixed",
-            top: "10%",
+            top: "15%",
             left: "5rem"
         });
 
@@ -2736,7 +2738,7 @@ export async function setUpUI(game: Game): Promise<void> {
             )
             .siblings(".range-input-value")
             .text(
-                element.id !== "slider-joystick-size"
+                element.id !== "slider-joystick-size" && element.id !== "slider-gyro-angle"
                     ? `${Math.round(value * 100)}%`
                     : value
             );
