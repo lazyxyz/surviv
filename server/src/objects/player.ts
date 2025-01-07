@@ -520,7 +520,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     swapWeaponRandomly(itemOrSlot: InventoryItem | number = this.activeItem, force = false): void {
-        if (this.perks.hasPerk(PerkIds.Lycanthropy)) return; // womp womp
+        if (this.perks.hasItem(PerkIds.Lycanthropy)) return; // womp womp
 
         let slot = itemOrSlot === this.activeItem
             ? this.activeItemIndex
@@ -1575,7 +1575,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         }
     }
 
-    private readonly _packets: InputPacket[] = [];
+    protected readonly _packets: InputPacket[] = [];
 
     sendPacket(packet: InputPacket): void {
         this._packets.push(packet);
