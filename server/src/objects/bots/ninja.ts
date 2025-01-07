@@ -117,6 +117,9 @@ export class Ninja extends Player {
         if (nearestHideSpot) {
             this.baseSpeed = GameConstants.player.baseSpeed;
             this.moveToTarget(nearestHideSpot.position, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
+        } else {
+            this.baseSpeed = GameConstants.player.baseSpeed;
+            this.moveToTarget(this.game.gas.newPosition, 0, false);
         }
     }
 

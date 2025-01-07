@@ -173,6 +173,9 @@ export class Assassin extends Player {
         if (nearestHideSpot) {
             this.baseSpeed = GameConstants.player.baseSpeed;
             this.moveToTarget(nearestHideSpot.position, Assassin.SAFE_DISTANCE_HIDE_SPOT, false);
+        } else {
+            this.baseSpeed = GameConstants.player.baseSpeed;
+            this.moveToTarget(this.game.gas.newPosition, 0, false);
         }
     }
 
@@ -228,11 +231,9 @@ export class Assassin extends Player {
         this.processInputs(packet);
     }
 
-
     private moveToSafePosition(): void {
         this.inventory.setActiveWeaponIndex(2);
         const moveSpot = this.game.gas.newPosition;
         this.moveToTarget(moveSpot, Assassin.SAFE_DISTANCE_HIDE_SPOT, !this.attacking);
     }
-
 }
