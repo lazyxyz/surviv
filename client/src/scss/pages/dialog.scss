@@ -196,6 +196,7 @@
                     }
                 }
             }
+
             #btn-start-game {
                 margin-left: auto;
             }
@@ -261,6 +262,7 @@
         }
     }
 }
+
 // TODO Refactor this, make classes
 .dialog {
     user-select: none;
@@ -320,7 +322,7 @@
             left: 6px;
             width: 90px;
             height: 90px;
-            // transform: rotate(90deg);
+            transform: rotate(90deg);
         }
 
         .skin-left-fist,
@@ -388,10 +390,12 @@
             z-index: 10;
         }
     }
+
     #emote-wheel-bottom {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+
         .emote-win,
         .emote-death {
             display: flex;
@@ -414,6 +418,7 @@
                 margin-left: calc(104px - calc(24px + 2px + 5px));
                 margin-top: calc(-2px - 1px);
             }
+
             &.selected {
                 border-color: palette.$orange;
             }
@@ -429,6 +434,7 @@
                 height: 1em;
                 padding: 2px;
                 transform-origin: center;
+
                 &:hover {
                     transform: scale(1.1)
                 }
@@ -465,6 +471,7 @@
             &.selected {
                 border-color: palette.$orange;
             }
+
             .emote-name {
                 margin-top: auto;
             }
