@@ -11,7 +11,8 @@
     "strictNullChecks": true,
     "strict": true,
     "paths": {
-      "@common/*": [ "./common/src/*" ]
+      "@common/*": [ "./common/src/*" ],
+      "@api/*": [ "./api/src/*" ],
     }
   },
   "include": [
@@ -24,6 +25,7 @@
     "client/svelte.config.js",
     "server/src/**/*.ts",
     "tests/src/**/*.ts",
-    "eslint.config.mjs"
+    "eslint.config.mjs",
+    "api/src/**/*.ts"
   ]
 }

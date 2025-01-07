@@ -1,15 +1,10 @@
 import { TeamSize } from "@common/constants";
 import { type GetGameResponse } from "@common/typings";
-import { Numeric } from "@common/utils/math";
-import { SuroiByteStream } from "@common/utils/suroiByteStream";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
-import { WebSocket } from "uWebSockets.js";
 import { Config } from "./config";
 import { Game } from "./game";
-import { PlayerContainer } from "./objects/player";
-import { maxTeamSize } from "./server";
-import { Logger } from "./utils/misc";
-import { createServer, forbidden, getIP } from "./utils/serverHelpers";
+import { createServer } from "./utils/serverHelpers";
+import { initPlayRoutes } from "./api/play";
 
 export interface WorkerInitData {
     readonly id: number
@@ -21,8 +16,7 @@ export enum WorkerMessages {
     IPAllowed,
     UpdateGameData,
     UpdateMaxTeamSize,
-    CreateNewGame,
-    Reset
+    CreateNewGame
 }
 
 export type WorkerMessage =
@@ -40,8 +34,8 @@ export type WorkerMessage =
     }
     | {
         readonly type:
-            | WorkerMessages.CreateNewGame
-            | WorkerMessages.Reset
+        | WorkerMessages.CreateNewGame
+        readonly maxTeamSize: TeamSize
     };
 
 export interface GameData {
@@ -56,6 +50,7 @@ export class GameContainer {
     readonly worker: Worker;
 
     resolve: (id: number) => void;
+    maxTeamSize: TeamSize;
 
     private _data: GameData = {
         aliveCount: 0,
@@ -73,8 +68,9 @@ export class GameContainer {
 
     private readonly _ipPromiseMap = new Map<string, Array<() => void>>();
 
-    constructor(readonly id: number, resolve: (id: number) => void) {
+    constructor(readonly id: number, maxTeamSize: TeamSize, resolve: (id: number) => void) {
         this.resolve = resolve;
+        this.maxTeamSize = maxTeamSize;
         (
             this.worker = new Worker(
                 __filename,
@@ -91,13 +87,13 @@ export class GameContainer {
                     this._data = { ...this._data, ...message.data };
 
                     if (message.data.allowJoin === true) { // This means the game was just created
-                        creatingID = -1;
                         this.resolve(this.id);
                     }
                     break;
                 }
                 case WorkerMessages.CreateNewGame: {
-                    void newGame();
+                    const teamSize = message.maxTeamSize;
+                    void newGame(teamSize);
                     break;
                 }
                 case WorkerMessages.IPAllowed: {
@@ -129,22 +125,22 @@ export class GameContainer {
     }
 }
 
-export async function findGame(): Promise<GetGameResponse> {
+export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
     let gameID: number;
-    let eligibleGames = games.filter((g?: GameContainer): g is GameContainer => !!g && g.allowJoin && !g.over);
+    let eligibleGames = games.filter((g?: GameContainer): g is GameContainer =>
+        !!g && g.maxTeamSize == teamSize && g.allowJoin && !g.over);
 
     // Attempt to create a new game if one isn't available
     if (!eligibleGames.length) {
-        gameID = await newGame();
+        gameID = await newGame(teamSize);
+
         if (gameID !== -1) {
             return { success: true, gameID };
         } else {
-            eligibleGames = games.filter((g?: GameContainer): g is GameContainer => !!g && !g.over);
+            return gameID !== undefined
+                ? { success: true, gameID }
+                : { success: false };
         }
-    }
-
-    if (!eligibleGames.length) {
-        return { success: false };
     }
 
     gameID = eligibleGames
@@ -163,36 +159,24 @@ export async function findGame(): Promise<GetGameResponse> {
         : { success: false };
 }
 
-let creatingID = -1;
-
-export async function newGame(id?: number): Promise<number> {
+export async function newGame(maxTeamSize?: TeamSize): Promise<number> {
     return new Promise<number>(resolve => {
-        if (creatingID !== -1) {
-            resolve(creatingID);
-        } else if (id !== undefined) {
-            creatingID = id;
-            Logger.log(`Game ${id} | Creating...`);
-            const game = games[id];
-            if (!game) {
-                games[id] = new GameContainer(id, resolve);
-            } else if (game.stopped) {
-                game.resolve = resolve;
-                game.sendMessage({ type: WorkerMessages.Reset });
-            } else {
-                Logger.warn(`Game ${id} | Already exists`);
-                resolve(id);
-            }
-        } else {
-            const maxGames = Config.maxGames;
-            for (let i = 0; i < maxGames; i++) {
-                const game = games[i];
-                if (!game || game.stopped) {
-                    void newGame(i).then(id => resolve(id));
-                    return;
-                }
-            }
-            resolve(-1);
+        const teamSize = maxTeamSize ? maxTeamSize : TeamSize.Solo;
+
+        let startGameId = Config.soloPort;
+        if (maxTeamSize == TeamSize.Squad) {
+            startGameId = Config.squadPort;
         }
+        const maxGames = Config.maxGames + startGameId;
+        for (let i = startGameId; i < maxGames; i++) {
+            const game = games[i];
+            if (!game || game.stopped) {
+                games[i] = new GameContainer(i, teamSize, resolve);
+                resolve(i);
+                return;
+            }
+        }
+        resolve(-1);
     });
 }
 
@@ -206,8 +190,6 @@ if (!isMainThread) {
 
     // string = ip, number = expire time
     const allowedIPs = new Map<string, number>();
-
-    const simultaneousConnections: Record<string, number> = {};
     let joinAttempts: Record<string, number> = {};
 
     parentPort?.on("message", (message: WorkerMessage) => {
@@ -220,10 +202,6 @@ if (!isMainThread) {
                 });
                 break;
             }
-            case WorkerMessages.Reset: {
-                game = new Game(id, maxTeamSize);
-                break;
-            }
             case WorkerMessages.UpdateMaxTeamSize: {
                 maxTeamSize = message.maxTeamSize;
                 break;
@@ -231,147 +209,8 @@ if (!isMainThread) {
         }
     });
 
-    createServer().ws("/play", {
-        idleTimeout: 30,
-
-        /**
-         * Upgrade the connection to WebSocket.
-         */
-        upgrade(res, req, context) {
-            res.onAborted((): void => { /* Handle errors in WS connection */ });
-
-            const ip = getIP(res, req);
-
-            //
-            // Rate limits
-            //
-            if (Config.protection) {
-                const { maxSimultaneousConnections, maxJoinAttempts } = Config.protection;
-
-                if (
-                    (simultaneousConnections[ip] >= (maxSimultaneousConnections ?? Infinity))
-                    || (joinAttempts[ip] >= (maxJoinAttempts?.count ?? Infinity))
-                ) {
-                    Logger.log(`Game ${id} | Rate limited: ${ip}`);
-                    forbidden(res);
-                    return;
-                } else {
-                    if (maxSimultaneousConnections) {
-                        simultaneousConnections[ip] = (simultaneousConnections[ip] ?? 0) + 1;
-                        Logger.log(`Game ${id} | ${simultaneousConnections[ip]}/${maxSimultaneousConnections} simultaneous connections: ${ip}`);
-                    }
-                    if (maxJoinAttempts) {
-                        joinAttempts[ip] = (joinAttempts[ip] ?? 0) + 1;
-                        Logger.log(`Game ${id} | ${joinAttempts[ip]}/${maxJoinAttempts.count} join attempts in the last ${maxJoinAttempts.duration} ms: ${ip}`);
-                    }
-                }
-            }
-
-            const searchParams = new URLSearchParams(req.getQuery());
-
-            //
-            // Ensure IP is allowed
-            //
-            if ((allowedIPs.get(ip) ?? 0) < game.now) {
-                forbidden(res);
-                return;
-            }
-
-            //
-            // Validate and parse role and name color
-            //
-            const password = searchParams.get("password");
-            const givenRole = searchParams.get("role");
-            let role: string | undefined;
-            let isDev = false;
-
-            let nameColor: number | undefined;
-            if (
-                password !== null
-                && givenRole !== null
-                && givenRole in Config.roles
-                && Config.roles[givenRole].password === password
-            ) {
-                role = givenRole;
-                isDev = Config.roles[givenRole].isDev ?? false;
-
-                if (isDev) {
-                    try {
-                        const colorString = searchParams.get("nameColor");
-                        if (colorString) nameColor = Numeric.clamp(parseInt(colorString), 0, 0xffffff);
-                    } catch { /* guess your color sucks lol */ }
-                }
-            }
-
-            //
-            // Upgrade the connection
-            //
-            res.upgrade(
-                {
-                    teamID: searchParams.get("teamID") ?? undefined,
-                    autoFill: Boolean(searchParams.get("autoFill")),
-                    player: undefined,
-                    ip,
-                    role,
-                    isDev,
-                    nameColor,
-                    lobbyClearing: searchParams.get("lobbyClearing") === "true",
-                    weaponPreset: searchParams.get("weaponPreset") ?? ""
-                },
-                req.getHeader("sec-websocket-key"),
-                req.getHeader("sec-websocket-protocol"),
-                req.getHeader("sec-websocket-extensions"),
-                context
-            );
-        },
-
-        /**
-         * Handle opening of the socket.
-         * @param socket The socket being opened.
-         */
-        open(socket: WebSocket<PlayerContainer>) {
-            const data = socket.getUserData();
-            if ((data.player = game.addPlayer(socket)) === undefined) {
-                socket.close();
-            }
-
-            // data.player.sendGameOverPacket(false); // uncomment to test game over screen
-        },
-
-        /**
-         * Handle messages coming from the socket.
-         * @param socket The socket in question.
-         * @param message The message to handle.
-         */
-        message(socket: WebSocket<PlayerContainer>, message) {
-            const stream = new SuroiByteStream(message);
-            try {
-                const player = socket.getUserData().player;
-                if (player === undefined) return;
-                game.onMessage(stream, player);
-            } catch (e) {
-                console.warn("Error parsing message:", e);
-            }
-        },
-
-        /**
-         * Handle closing of the socket.
-         * @param socket The socket being closed.
-         */
-        close(socket: WebSocket<PlayerContainer>) {
-            const { player, ip } = socket.getUserData();
-
-            // this should never be null-ish, but will leave it here for any potential race conditions (i.e. TFO? (verification required))
-            if (Config.protection && ip !== undefined) simultaneousConnections[ip]--;
-
-            if (!player) return;
-
-            Logger.log(`Game ${id} | "${player.name}" left`);
-            game.removePlayer(player);
-        }
-    }).listen(Config.host, Config.port + id + 1, (): void => {
-        Logger.log(`Game ${id} | Listening on ${Config.host}:${Config.port + id + 1}`);
-    });
+    const app = createServer();
+    initPlayRoutes(app, game, allowedIPs, joinAttempts);
 
     if (Config.protection?.maxJoinAttempts) {
         setInterval((): void => {

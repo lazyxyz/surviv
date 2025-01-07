@@ -12,7 +12,7 @@ import { Vec, type Vector } from "@common/utils/vector";
 import { type WebSocket } from "uWebSockets.js";
 import { type GunItem } from "../inventory/gunItem";
 import { GameMap } from "../map";
-import { Player, type PlayerContainer } from "../objects/player";
+import { Gamer, type PlayerContainer } from "../objects/gamer";
 import { getLootFromTable, LootTables } from "./lootTables";
 import { PerkCategories } from "@common/definitions/perks";
 
@@ -874,7 +874,7 @@ const maps = {
             oceanSize: 8,
             onGenerate(map) {
                 for (let i = 0, l = Guns.length; i < l; i++) {
-                    const player = new Player(
+                    const player = new Gamer(
                         map.game,
                         { getUserData: () => { return {}; } } as unknown as WebSocket<PlayerContainer>,
                         Vec.create(32, 32 + (16 * i))

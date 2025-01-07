@@ -23,7 +23,6 @@ import { type SuroiByteStream } from "@common/utils/suroiByteStream";
 import { Vec, type Vector } from "@common/utils/vector";
 import { type WebSocket } from "uWebSockets.js";
 import { parentPort } from "worker_threads";
-
 import { Config, SpawnMode } from "./config";
 import { MapName, Maps } from "./data/maps";
 import { WorkerMessages, type GameData, type WorkerMessage } from "./gameManager";
@@ -39,7 +38,8 @@ import { type BaseGameObject, type GameObject } from "./objects/gameObject";
 import { Loot, type ItemData } from "./objects/loot";
 import { Obstacle } from "./objects/obstacle";
 import { Parachute } from "./objects/parachute";
-import { Player, type PlayerContainer } from "./objects/player";
+import { Player, type ActorContainer } from "./objects/player";
+import { Gamer, type PlayerContainer } from "./objects/gamer";
 import { SyncedParticle } from "./objects/syncedParticle";
 import { ThrowableProjectile } from "./objects/throwableProj";
 import { PluginManager } from "./pluginManager";
@@ -47,6 +47,8 @@ import { Team } from "./team";
 import { Grid } from "./utils/grid";
 import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
+import { Assassin, BotType, Zombie } from "./objects/bots";
+import { Ninja } from "./objects/bots/ninja";
 
 /*
     eslint-disable
@@ -210,6 +212,8 @@ export class Game implements GameData {
     private readonly _start = this._now;
     get start(): number { return this._start; }
 
+    private totalBots: number = 0;
+
     /**
      * **Warning**: This is a getter _with side effects_! Make
      * sure to either use the id returned by this getter or
@@ -243,11 +247,27 @@ export class Game implements GameData {
         this.pluginManager.emit("game_created", this);
         Logger.log(`Game ${this.id} | Created in ${Date.now() - this._start} ms`);
 
+        if (Config.addBot) {
+            const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+            const zombieCount = randomInRange(15, 20);
+            const ninjaCount = randomInRange(5, 10);
+            const assassinCount = randomInRange(3, 5);
+
+            this.activeZombie(zombieCount);
+            this.activeNinja(ninjaCount);
+            this.activeAssassin(assassinCount);
+
+            this.totalBots = zombieCount + ninjaCount + assassinCount;
+            Logger.log(`Bots added to game: Total Bots = ${this.totalBots} (Zombies: ${zombieCount}, Ninjas: ${ninjaCount}, Assassins: ${assassinCount})`);
+        }
+
+
         // Start the tick loop
         this.tick();
     }
 
-    onMessage(stream: SuroiByteStream, player: Player): void {
+    onMessage(stream: SuroiByteStream, player: Gamer): void {
         const packetStream = new PacketStream(stream);
         while (true) {
             const packet = packetStream.deserializeClientPacket();
@@ -256,7 +276,7 @@ export class Game implements GameData {
         }
     }
 
-    onPacket(packet: OutputPacket, player: Player): void {
+    onPacket(packet: OutputPacket, player: Gamer): void {
         switch (true) {
             case packet instanceof JoinPacket:
                 this.activatePlayer(player, packet.output);
@@ -487,7 +507,7 @@ export class Game implements GameData {
     createNewGame(): void {
         if (!this.allowJoin) return; // means a new game has already been created by this game
 
-        parentPort?.postMessage({ type: WorkerMessages.CreateNewGame });
+        parentPort?.postMessage({ type: WorkerMessages.CreateNewGame, maxTeamSize: this.maxTeamSize });
         Logger.log(`Game ${this.id} | Attempting to create new game`);
         this.setGameData({ allowJoin: false });
     }
@@ -557,7 +577,7 @@ export class Game implements GameData {
         );
     }
 
-    addPlayer(socket: WebSocket<PlayerContainer>): Player | undefined {
+    addPlayer(socket: WebSocket<PlayerContainer>): Gamer | undefined {
         if (this.pluginManager.emit("player_will_connect")) {
             return undefined;
         }
@@ -571,7 +591,6 @@ export class Game implements GameData {
 
             if (teamID) {
                 team = this.customTeams.get(teamID);
-
                 if (
                     !team // team doesn't exist
                     || (team.players.length && !team.hasLivingPlayers()) // team isn't empty but has no living players
@@ -664,14 +683,127 @@ export class Game implements GameData {
         }
 
         // Player is added to the players array when a JoinPacket is received from the client
-        const player = new Player(this, socket, spawnPosition, spawnLayer, team);
+        const player = new Gamer(this, socket, spawnPosition, spawnLayer, team);
         this.connectingPlayers.add(player);
         this.pluginManager.emit("player_did_connect", player);
         return player;
     }
 
+    createBot(botType: BotType, botData: ActorContainer): Player {
+        let spawnPosition = Vec.create(this.map.width / 2, this.map.height / 2);
+        let spawnLayer;
+
+        let team: Team | undefined;
+        if (this.teamMode) {
+            this.teams.add(team = new Team(this.nextTeamID, false));
+        }
+
+        const hitbox = new CircleHitbox(5);
+        const gasPosition = this.gas.newPosition;
+        const gasRadius = this.gas.newRadius ** 2;
+
+        let foundPosition = false;
+        for (let tries = 0; !foundPosition && tries < 200; tries++) {
+            const position = this.map.getRandomPosition(
+                hitbox,
+                {
+                    maxAttempts: 500,
+                    spawnMode: MapObjectSpawnMode.GrassAndSand,
+                    getPosition: undefined,
+                    collides: position => Geometry.distanceSquared(position, gasPosition) >= gasRadius
+                }
+            );
+
+            if (!position) break;
+            else spawnPosition = position;
+        }
+
+        let bot: Player;
+        if (botType == BotType.Zombie) {
+            bot = new Zombie(this, botData, spawnPosition, spawnLayer, team);
+        } else if (botType == BotType.Ninja) {
+            bot = new Ninja(this, botData, spawnPosition, spawnLayer, team);
+        } else {
+            bot = new Assassin(this, botData, spawnPosition, spawnLayer, team);
+        }
+
+        this.livingPlayers.add(bot);
+        this.spectatablePlayers.push(bot);
+        this.connectedPlayers.add(bot);
+        this.newPlayers.push(bot);
+        this.grid.addObject(bot);
+        bot.setDirty();
+        this.aliveCountDirty = true;
+        this.updateObjects = true;
+        this.updateGameData({ aliveCount: this.aliveCount });
+        bot.joined = true;
+
+        bot.sendPacket(
+            JoinedPacket.create(
+                {
+                    maxTeamSize: this.maxTeamSize,
+                    teamID: bot.teamID ?? 0,
+                    emotes: bot.loadout.emotes
+                }
+            )
+        );
+
+        this.addTimeout(() => { bot.disableInvulnerability(); }, 5000);
+        return bot;
+    }
+
+    activeNinja(botCount: number): void {
+        const botData: ActorContainer = {
+            autoFill: false,
+            lobbyClearing: true,
+            weaponPreset: "falchion",
+            ip: undefined
+        };
+
+        for (let i = 0; i < botCount; i++) {
+            this.createBot(BotType.Ninja, botData);
+        }
+    }
+
+    activeZombie(botCount: number): void {
+        const botData: ActorContainer = {
+            autoFill: false,
+            lobbyClearing: true,
+            weaponPreset: "falchion",
+            ip: undefined
+        };
+
+        for (let i = 0; i < botCount; i++) {
+            this.createBot(BotType.Zombie, botData);
+        }
+    }
+
+    activeAssassin(botCount: number): void {
+        const botData: ActorContainer = {
+            autoFill: false,
+            lobbyClearing: true,
+            weaponPreset: "falchion",
+            ip: undefined
+        };
+
+        for (let i = 0; i < botCount; i++) {
+            this.createBot(BotType.Assassin, botData);
+        }
+    }
+
+    postGameStarted(): void {
+        this._started = true;
+        this.setGameData({ startedTime: this.now });
+        this.gas.advanceGasStage();
+        this.setGameData({ allowJoin: false })
+    }
+
     // Called when a JoinPacket is sent by the client
-    activatePlayer(player: Player, packet: JoinPacketData): void {
+    activatePlayer(player: Gamer, packet: JoinPacketData): void {
+        // // DEV
+        // player.inventory.vest = Armors.fromString("developr_vest");
+        // player.inventory.helmet = Armors.fromString("tactical_helmet");
+
         const rejectedBy = this.pluginManager.emit("player_will_join", { player, joinPacket: packet });
         if (rejectedBy) {
             player.disconnect(`Connection rejected by server plugin '${rejectedBy.constructor.name}'`);
@@ -686,19 +818,8 @@ export class Game implements GameData {
         player.name = cleanUsername(packet.name);
 
         player.isMobile = packet.isMobile;
-        const skin = packet.skin;
-        if (
-            skin.itemType === ItemType.Skin
-            && !skin.hideFromLoadout
-            && ((skin.rolesRequired ?? [player.role]).includes(player.role))
-        ) {
-            player.loadout.skin = skin;
-        }
-
-        const badge = packet.badge;
-        if (!badge?.roles?.length || (player.role !== undefined && badge.roles.includes(player.role))) {
-            player.loadout.badge = badge;
-        }
+        player.loadout.skin = packet.skin;
+        player.loadout.badge = packet.badge;
         player.loadout.emotes = packet.emotes;
 
         this.livingPlayers.add(player);
@@ -734,11 +855,7 @@ export class Game implements GameData {
             && this.startTimeout === undefined
         ) {
             this.startTimeout = this.addTimeout(() => {
-                this._started = true;
-                this.setGameData({ startedTime: this.now });
-                this.gas.advanceGasStage();
-
-                this.addTimeout(this.createNewGame.bind(this), Config.gameJoinTime * 1000);
+                this.addTimeout(this.postGameStarted.bind(this), Config.gameJoinTime * 1000);
             }, 3000);
         }
 
@@ -810,13 +927,16 @@ export class Game implements GameData {
             this.startTimeout = undefined;
         }
 
-        try {
-            player.socket.close();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_) {
-            /* not a really big deal if we can't close the socket */
-            // when does this ever fail?
+        if (player instanceof Gamer) {
+            try {
+                player.socket.close();
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (_) {
+                /* not a really big deal if we can't close the socket */
+                // when does this ever fail?
+            }
         }
+
         this.pluginManager.emit("player_disconnect", player);
     }
 

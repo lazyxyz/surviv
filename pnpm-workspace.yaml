@@ -2,6 +2,7 @@ packages:
   - 'server/'
   - 'common/'
   - 'client/'
+  - 'api/'
   - 'tests/'
   - 'translations/'
   - '!**dist/**'

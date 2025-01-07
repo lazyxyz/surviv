@@ -52,13 +52,15 @@ import { ThrowableProjectile } from "./objects/throwableProj";
 import { Camera } from "./rendering/camera";
 import { Gas, GasRender } from "./rendering/gas";
 import { Minimap } from "./rendering/minimap";
-import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime } from "./ui";
+import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime, visibleConnectWallet, visibleWallet } from "./ui";
 import { setUpCommands } from "./utils/console/commands";
 import { defaultClientCVars } from "./utils/console/defaultClientCVars";
 import { GameConsole } from "./utils/console/gameConsole";
-import { COLORS, EMOTE_SLOTS, LAYER_TRANSITION_DELAY, MODE, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
+import { COLORS, EMOTE_SLOTS, LAYER_TRANSITION_DELAY, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
+import { EIP6963 } from "./eip6963";
+import { Account } from "./account";
 
 /* eslint-disable @stylistic/indent */
 
@@ -114,6 +116,7 @@ export class Game {
     teamID = -1;
 
     teamMode = false;
+    teamSize = TeamSize.Solo;
 
     /**
      * proxy for `activePlayer`'s layer
@@ -146,6 +149,8 @@ export class Game {
 
     readonly gasRender = new GasRender(PIXI_SCALE);
     readonly gas = new Gas(this);
+    readonly eip6963 = new EIP6963();
+    readonly account = new Account();
 
     music!: Sound;
 
@@ -245,6 +250,8 @@ export class Game {
         ]).then(() => {
             unlockPlayButtons();
             resetPlayButtons();
+            visibleConnectWallet(game);
+            visibleWallet(game);
         });
 
         setUpCommands(game);
@@ -266,11 +273,32 @@ export class Game {
     }
 
     connect(address: string): void {
+        const url = new URL(address);
+        const ui = this.uiManager.ui;
+
         this.error = false;
 
-        if (this.gameStarted) return;
+        if (this.gameStarted || !this.account.token?.length) return;
 
-        this._socket = new WebSocket(address);
+        // token is expired
+        {
+            const { exp } = parseJWT(this.account.token);
+
+            if (new Date().getTime() >= (exp * 1000)) {
+                return this.account.sessionExpired();
+            }
+        }
+
+        // append token intro params
+        {
+            if (url.search) {
+                url.searchParams.append("token", this.account.token);
+            } else {
+                url.searchParams.set("token", this.account.token);
+            }
+        }
+
+        this._socket = new WebSocket(url.toString());
         this._socket.binaryType = "arraybuffer";
 
         this._socket.onopen = (): void => {
@@ -372,8 +400,6 @@ export class Game {
                 this.onPacket(packet);
             }
         };
-
-        const ui = this.uiManager.ui;
 
         this._socket.onerror = (): void => {
             this.error = true;

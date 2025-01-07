@@ -2015,26 +2015,26 @@
         width: 50px;
     }
 
-    #btn-game-menu,
-    #btn-toggle-ping,
+    #btn-game-menu {
+        font-size: 16px;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
     #btn-emotes {
-        font-size: 20px;
-        height: auto;
-        width: 37px;
-
-        border-radius: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        margin: 5px;
-        border: none;
-
+        border-radius: 0;
+        height: 34px;
         img {
-            width: 21px;
-            pointer-events: none;
-            vertical-align: middle;
+            width: 18px;
+            position: relative;
+            bottom: 5px;
         }
+    }
+
+    #btn-toggle-ping {
+        font-size: 16px;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
     }
 }
 

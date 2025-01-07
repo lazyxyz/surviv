@@ -21,6 +21,11 @@ const emote = createTemplate<EmoteDefinition>()((name: string, category: EmoteCa
     category
 }));
 
+export const freeEmotes: string[] = [
+    "happy_face", "sad_face", "thumbs_up", "thumbs_down", "wave",
+    "disappointed_face", "sobbing_face", "angry_face", "heart_face", "joyful_face"
+];
+
 export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
     ...[
         "Happy Face",
@@ -88,6 +93,8 @@ export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
         "Fire",
         "RIP",
         "Leosmug",
+        "Socks",
+        "Archimedes",
         "awhhmahgawd",
         "Boykisser"
     ].map(name => emote([name, EmoteCategory.Memes])),
@@ -102,5 +109,13 @@ export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
         "real",
         "fake",
         "Colon Three"
-    ].map(name => emote([name, EmoteCategory.Text]))
+    ].map(name => emote([name, EmoteCategory.Text])),
+    ...[
+        "Monkey",
+        "Carrot",
+        "Tomato",
+        "Egg",
+        "Squid",
+        "Penguin"
+    ].map(name => emote([name, EmoteCategory.Misc]))
 ]);

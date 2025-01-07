@@ -31,7 +31,8 @@
     margin-left: 5px;
 }
 
-#report-modal-content, #warning-modal-content {
+#report-modal-content,
+#warning-modal-content {
     padding: 1rem;
 
     p {
@@ -206,6 +207,8 @@
     position: absolute;
     right: 20px;
     top: 1rem;
+    z-index: 10;
+
 
     img {
         vertical-align: middle;
@@ -317,7 +320,7 @@
             left: 6px;
             width: 90px;
             height: 90px;
-            transform: rotate(90deg);
+            // transform: rotate(90deg);
         }
 
         .skin-left-fist,
@@ -622,7 +625,93 @@
             @include variables.text-shadow;
             text-align: center;
         }
-      }
+    }
+
+    .weapons-container {
+        display: flex;
+        gap: 12px;
+        height: 100%;
+
+        &-card {
+            background: #16161626;
+            padding: 8px;
+            border-radius: 8px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            align-items: center;
+            text-align: center;
+            border: 3px solid transparent;
+
+            cursor: pointer;
+            width: 100px;
+
+            &.selected {
+                border-color: #F2770F;
+            }
+        }
+
+        &-paragraph {
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            margin: unset;
+        }
+
+        // left
+        &-aside {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+
+            overflow-y: auto;
+            flex: 1;
+
+            &-preview {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                background: #16161626;
+                border-radius: 8px;
+                height: 100%;
+                padding: 24px;
+            }
+
+            &-assets {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+
+                height: 50%;
+            }
+        }
+
+        // right
+        &-list {
+            display: flex;
+            flex-wrap: wrap;
+            overflow-y: auto;
+
+            flex: 1;
+            gap: 8px;
+
+            h2 {
+                margin: unset;
+                color: white;
+
+                font-weight: 600;
+                width: 100%;
+                font-size: 16px;
+
+                &:not(:first-child) {
+                    margin-top: 4px;
+                }
+            }
+        }
+    }
 
     @media screen and (max-width: 654px) {
         #emotes-list {
@@ -826,11 +915,11 @@
 }
 
 .text-field {
-  color: black;
-  font-size: 18px;
-  width: 350px;
-  padding: 4px 8px;
-  outline: none;
-  border: none;
-  border-radius: 8px;
+    color: black;
+    font-size: 18px;
+    width: 350px;
+    padding: 4px 8px;
+    outline: none;
+    border: none;
+    border-radius: 8px;
 }

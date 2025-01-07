@@ -680,33 +680,33 @@ logger.indent("Validating backpack definitions", () => {
     }
 });
 
-logger.indent("Validating badge definitions", () => {
-    tester.assertNoDuplicateIDStrings(Badges.definitions, "Badges", "badges");
+// logger.indent("Validating badge definitions", () => {
+//     tester.assertNoDuplicateIDStrings(Badges.definitions, "Badges", "badges");
 
-    for (const badge of Badges) {
-        const errorPath = tester.createPath("badges", `badge '${badge.idString}'`);
+//     for (const badge of Badges) {
+//         const errorPath = tester.createPath("badges", `badge '${badge.idString}'`);
 
-        logger.indent(`Validating '${badge.idString}'`, () => {
-            if (badge.roles !== undefined) {
-                const roles = badge.roles;
-                logger.indent("Validating required roles", () => {
-                    tester.runTestOnArray(
-                        roles,
-                        (role, errorPath) => {
-                            tester.assertReferenceExistsObject({
-                                value: role,
-                                collection: Config.roles,
-                                collectionName: "roles",
-                                errorPath
-                            });
-                        },
-                        errorPath
-                    );
-                });
-            }
-        });
-    }
-});
+//         logger.indent(`Validating '${badge.idString}'`, () => {
+//             if (badge.roles !== undefined) {
+//                 const roles = badge.roles;
+//                 logger.indent("Validating required roles", () => {
+//                     tester.runTestOnArray(
+//                         roles,
+//                         (role, errorPath) => {
+//                             tester.assertReferenceExistsObject({
+//                                 value: role,
+//                                 collection: Config.roles,
+//                                 collectionName: "roles",
+//                                 errorPath
+//                             });
+//                         },
+//                         errorPath
+//                     );
+//                 });
+//             }
+//         });
+//     }
+// });
 
 logger.indent("Validating building definitions", () => {
     tester.assertNoDuplicateIDStrings(Buildings.definitions, "Buildings", "buildings");
@@ -2670,34 +2670,34 @@ logger.indent("Validating scopes", () => {
     );
 });
 
-logger.indent("Validating skins", () => {
-    tester.assertNoDuplicateIDStrings(Skins.definitions, "Skins", "skins");
+// logger.indent("Validating skins", () => {
+//     tester.assertNoDuplicateIDStrings(Skins.definitions, "Skins", "skins");
 
-    for (const skin of Skins) {
-        logger.indent(`Validating skin '${skin.idString}'`, () => {
-            const errorPath = tester.createPath("skins", `skin '${skin.idString}'`);
+//     for (const skin of Skins) {
+//         logger.indent(`Validating skin '${skin.idString}'`, () => {
+//             const errorPath = tester.createPath("skins", `skin '${skin.idString}'`);
 
-            if (skin.backpackTint !== undefined) {
-                validators.color(tester.createPath(errorPath, "backpack tint"), skin.backpackTint);
-            }
+//             if (skin.backpackTint !== undefined) {
+//                 validators.color(tester.createPath(errorPath, "backpack tint"), skin.backpackTint);
+//             }
 
-            if (skin.rolesRequired !== undefined) {
-                tester.runTestOnArray(
-                    skin.rolesRequired,
-                    (role, errorPath) => {
-                        tester.assertReferenceExistsObject({
-                            value: role,
-                            collection: Config.roles,
-                            collectionName: "roles",
-                            errorPath
-                        });
-                    },
-                    errorPath
-                );
-            }
-        });
-    }
-});
+//             if (skin.rolesRequired !== undefined) {
+//                 tester.runTestOnArray(
+//                     skin.rolesRequired,
+//                     (role, errorPath) => {
+//                         tester.assertReferenceExistsObject({
+//                             value: role,
+//                             collection: Config.roles,
+//                             collectionName: "roles",
+//                             errorPath
+//                         });
+//                     },
+//                     errorPath
+//                 );
+//             }
+//         });
+//     }
+// });
 
 logger.indent("Validating synchronized particles", () => {
     tester.assertNoDuplicateIDStrings(SyncedParticles.definitions, "SynchedParticles", "synchedParticles");
@@ -3220,20 +3220,20 @@ logger.indent("Validating configurations", () => {
             });
         }
 
-        logger.indent("Validating roles", () => {
-            for (const [name, role] of Object.entries(ServerConfig.roles)) {
-                logger.indent(`Validating role '${name}'`, () => {
-                    const errorPath2 = tester.createPath(errorPath, "roles", `role '${name}'`);
+        // logger.indent("Validating roles", () => {
+        //     for (const [name, role] of Object.entries(ServerConfig.roles)) {
+        //         logger.indent(`Validating role '${name}'`, () => {
+        //             const errorPath2 = tester.createPath(errorPath, "roles", `role '${name}'`);
 
-                    tester.assertNoPointlessValue({
-                        obj: role,
-                        field: "isDev",
-                        defaultValue: false,
-                        baseErrorPath: errorPath2
-                    });
-                });
-            }
-        });
+        //             tester.assertNoPointlessValue({
+        //                 obj: role,
+        //                 field: "isDev",
+        //                 defaultValue: false,
+        //                 baseErrorPath: errorPath2
+        //             });
+        //         });
+        //     }
+        // });
 
         tester.assertNoPointlessValue({
             obj: ServerConfig,

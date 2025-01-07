@@ -5,6 +5,7 @@ import { findGame } from "./gameManager";
 import { type Player } from "./objects/player";
 import { customTeams } from "./server";
 import { removeFrom } from "./utils/misc";
+import { TeamSize } from "@common/constants";
 
 export class Team {
     readonly id: number;
@@ -191,7 +192,7 @@ export class CustomTeam {
             }
             case CustomTeamMessages.Start: {
                 if (player.isLeader) {
-                    const result = await findGame();
+                    const result = await findGame(TeamSize.Squad);
                     if (result.success) {
                         this.gameID = result.gameID;
                         clearTimeout(this.resetTimeout);
