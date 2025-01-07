@@ -9,7 +9,7 @@ import { BaseBullet, type BulletOptions } from "../utils/baseBullet";
 import { GlobalRegistrar } from "../utils/definitionRegistry";
 import { type Mutable, type SDeepMutable } from "../utils/misc";
 import { ObjectSerializations, type FullData, type ObjectsNetData } from "../utils/objectsSerializations";
-import type { PerkCollection } from "../utils/perkManager";
+// import type { PerkCollection } from "../utils/perkManager";
 import { type SuroiByteStream } from "../utils/suroiByteStream";
 import { Vec, type Vector } from "../utils/vector";
 import type { AllowedEmoteSources } from "./inputPacket";
