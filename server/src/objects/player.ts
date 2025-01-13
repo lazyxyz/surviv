@@ -50,6 +50,7 @@ import { type Loot } from "./loot";
 import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
+import * as fs from 'fs';
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -1075,7 +1076,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 this.piercingDamage({
                     amount: depletion.health * dt,
                     source: KillfeedEventType.Gas
-                //          ^^^^^^^^^^^^^^^^^^^^^ dubious
+                    //          ^^^^^^^^^^^^^^^^^^^^^ dubious
                 });
             }
 
@@ -1221,11 +1222,13 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         packet.playerData = {
             ...(
                 player.dirty.maxMinStats || forceInclude
-                    ? { minMax: {
-                        maxHealth: player.maxHealth,
-                        minAdrenaline: player.minAdrenaline,
-                        maxAdrenaline: player.maxAdrenaline
-                    } }
+                    ? {
+                        minMax: {
+                            maxHealth: player.maxHealth,
+                            minAdrenaline: player.minAdrenaline,
+                            maxAdrenaline: player.maxAdrenaline
+                        }
+                    }
                     : {}
             ),
             ...(
@@ -1245,10 +1248,12 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             ),
             ...(
                 player.dirty.id || forceInclude
-                    ? { id: {
-                        id: player.id,
-                        spectating: this.spectating !== undefined
-                    } }
+                    ? {
+                        id: {
+                            id: player.id,
+                            spectating: this.spectating !== undefined
+                        }
+                    }
                     : {}
             ),
             ...(
@@ -1258,22 +1263,24 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             ),
             ...(
                 player.dirty.weapons || forceInclude
-                    ? { inventory: {
-                        activeWeaponIndex: inventory.activeWeaponIndex,
-                        weapons: inventory.weapons.map(slot => {
-                            const item = slot;
+                    ? {
+                        inventory: {
+                            activeWeaponIndex: inventory.activeWeaponIndex,
+                            weapons: inventory.weapons.map(slot => {
+                                const item = slot;
 
-                            return (item && {
-                                definition: item.definition,
-                                count: item instanceof GunItem
-                                    ? item.ammo
-                                    : item instanceof CountableInventoryItem
-                                        ? item.count
-                                        : undefined,
-                                stats: item.stats
-                            }) satisfies ((PlayerData["inventory"] & object)["weapons"] & object)[number];
-                        })
-                    } }
+                                return (item && {
+                                    definition: item.definition,
+                                    count: item instanceof GunItem
+                                        ? item.ammo
+                                        : item instanceof CountableInventoryItem
+                                            ? item.count
+                                            : undefined,
+                                    stats: item.stats
+                                }) satisfies ((PlayerData["inventory"] & object)["weapons"] & object)[number];
+                            })
+                        }
+                    }
                     : {}
             ),
             ...(
@@ -1283,10 +1290,12 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             ),
             ...(
                 player.dirty.items || forceInclude
-                    ? { items: {
-                        items: inventory.items.asRecord(),
-                        scope: inventory.scope
-                    } }
+                    ? {
+                        items: {
+                            items: inventory.items.asRecord(),
+                            scope: inventory.scope
+                        }
+                    }
                     : {}
             ),
             ...(
@@ -2280,6 +2289,30 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     sendGameOverPacket(won = false): void {
+        const rank = won ? 1 as const : this.game.aliveCount + 1;
+
+        if (this.address && ((rank <= 3 && this.game.teamMode) || (rank <= 5 && !this.game.teamMode))) {
+            // Define the data to save
+            const record = {
+                time: new Date().toISOString(),
+                gameId: this.game.id, // Assuming `this.game.id` exists
+                address: this.address, // Assuming `this.address` exists
+                rank,
+            };
+
+            // Convert the record to CSV format
+            const csvRow = `${record.time},${record.gameId},${record.address},${record.rank}\n`;
+
+            // Append to the 'cvg' file
+            fs.appendFile('rankings', csvRow, (err) => {
+                if (err) {
+                    console.error('Error writing to file:', err);
+                } else {
+                    console.log('Record saved:', csvRow.trim());
+                }
+            });
+        }
+
         const packet = GameOverPacket.create({
             won,
             playerID: this.id,
@@ -2287,7 +2320,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             damageDone: this.damageDone,
             damageTaken: this.damageTaken,
             timeAlive: (this.game.now - this.joinTime) / 1000,
-            rank: won ? 1 as const : this.game.aliveCount + 1
+            rank,
         } as GameOverData);
 
         this.sendPacket(packet);

@@ -453,7 +453,9 @@ export class Game implements GameData {
                 movement.up = movement.down = movement.left = movement.right = false;
                 player.attacking = false;
                 player.sendEmote(player.loadout.emotes[4]);
-                player.sendGameOverPacket(true);
+                if (player instanceof Gamer) {
+                    player.sendGameOverPacket(true);
+                }
                 this.pluginManager.emit("player_did_win", player);
             }
 
