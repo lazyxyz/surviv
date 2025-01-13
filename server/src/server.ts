@@ -57,7 +57,7 @@ if (isMainThread) {
         if (typeof teamSize === "object") {
             for (const size of teamSize.rotation) {
                 maxTeamSize = size;
-                const humanReadableTeamSizes = [undefined, "solos", "duos", "trios", "squads"];
+                const humanReadableTeamSizes = [undefined, "solos", "squads"];
                 Logger.log(`Switching to ${humanReadableTeamSizes[maxTeamSize] ?? `team size ${maxTeamSize}`}`);
             }
         }

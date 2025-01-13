@@ -8,6 +8,7 @@ import { createPacket } from "./packet";
 export type JoinPacketData = {
     readonly protocolVersion: number
     readonly name: string
+    readonly address: string
     readonly isMobile: boolean
 
     readonly skin: SkinDefinition
@@ -37,6 +38,7 @@ export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, JoinPac
 
         stream.writeUint16(GameConstants.protocolVersion);
         stream.writePlayerName(data.name);
+        stream.writePlayerAddress(data.address);
 
         Loots.writeToStream(stream, data.skin);
 
@@ -62,6 +64,7 @@ export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, JoinPac
         return {
             protocolVersion: stream.readUint16(),
             name: stream.readPlayerName().replaceAll(/<[^>]+>/g, "").trim(), // Regex strips out HTML
+            address: stream.readPlayerAddress().replaceAll(/<[^>]+>/g, "").trim(), // Regex strips out HTML
             isMobile,
 
             skin: Loots.readFromStream(stream),

@@ -71,6 +71,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     override get hitbox(): CircleHitbox { return this._hitbox; }
 
     name: string;
+    address: string = "";
     readonly ip?: string;
 
     halloweenThrowableSkin = false;

@@ -58,6 +58,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
             }
 
             const decoded = validateJWT(token);
+
             if (!decoded) {
                 Logger.log(`Game ${game.id} | Invalid JWT: ${ip}`);
                 forbidden(res);
@@ -85,7 +86,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                 {
                     teamID: searchParams.get("teamID") ?? undefined,
                     autoFill: Boolean(searchParams.get("autoFill")),
-                    player: decoded.walletAddress,
+                    address: decoded.walletAddress,
                     ip,
                     nameColor,
                     lobbyClearing: searchParams.get("lobbyClearing") === "true",

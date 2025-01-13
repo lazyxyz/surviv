@@ -817,6 +817,7 @@ export class Game implements GameData {
 
         player.name = cleanUsername(packet.name);
 
+        player.address = packet.address;
         player.isMobile = packet.isMobile;
         player.loadout.skin = packet.skin;
         player.loadout.badge = packet.badge;
