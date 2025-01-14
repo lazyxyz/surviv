@@ -249,8 +249,46 @@ export class SuroiByteStream extends ByteStream {
             }
 
             chars[i++] = c;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
         } while (i < Constants.PLAYER_NAME_MAX_LENGTH);
+
+        return new TextDecoder().decode(new Uint8Array(chars));
+    }
+
+    /**
+     * Writes a player's address to the stream, as if by `address => writeString(42, address)`
+     */
+    writePlayerAddress(address: string): this {
+        const byteArray = ByteStream.encoder.encode(address);
+
+        // you fuckin stupid or something?
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+        for (let i = 0; i < Constants.PLAYER_ADDRESS_MAX_LENGTH; i++) {
+            const val = byteArray[i] ?? 0;
+            this.writeUint8(val);
+
+            if (val === 0) { break; }
+        }
+
+        return this;
+    }
+
+    /**
+     * Reads a player's address to the stream, as if by `() => readString(42, address)`
+     */
+    readPlayerAddress(): string {
+        const chars = [];
+        let c: number;
+        let i = 0;
+
+        do {
+            if ((c = this.readUint8()) === 0) {
+                break;
+            }
+
+            chars[i++] = c;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+        } while (i < Constants.PLAYER_ADDRESS_MAX_LENGTH);
 
         return new TextDecoder().decode(new Uint8Array(chars));
     }

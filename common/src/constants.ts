@@ -10,7 +10,8 @@ export const enum Constants {
     MAX_POSITION = 1924,
     MIN_OBJECT_SCALE = 0.15,
     MAX_OBJECT_SCALE = 3,
-    PLAYER_NAME_MAX_LENGTH = 16
+    PLAYER_NAME_MAX_LENGTH = 16,
+    PLAYER_ADDRESS_MAX_LENGTH = 42,
 }
 
 /* eslint-disable @typescript-eslint/prefer-literal-enum-member */

@@ -178,7 +178,7 @@ export class Game {
         await initTranslation(game);
         game.inputManager.setupInputs();
 
-        const initPixi = async(): Promise<void> => {
+        const initPixi = async (): Promise<void> => {
             const renderMode = game.console.getBuiltInCVar("cv_renderer");
             const renderRes = game.console.getBuiltInCVar("cv_renderer_res");
 
@@ -326,9 +326,11 @@ export class Game {
             this.lastPingDate = Date.now();
 
             let skin: typeof defaultClientCVars["cv_loadout_skin"];
+
             const joinPacket: JoinPacketCreation = {
                 isMobile: this.inputManager.isMobile,
                 name: this.console.getBuiltInCVar("cv_player_name"),
+                address: this.account.address ? this.account.address : "",
                 skin: Loots.fromStringSafe(
                     this.console.getBuiltInCVar("cv_loadout_skin")
                 ) ?? Loots.fromString(
@@ -1134,26 +1136,26 @@ export class Game {
                             ) || (
                                 type === ItemType.Gun
                                 && weapons?.some(
-                                        weapon => {
-                                            const definition = weapon?.definition;
+                                    weapon => {
+                                        const definition = weapon?.definition;
 
-                                            return definition?.itemType === ItemType.Gun
-                                                && (
+                                        return definition?.itemType === ItemType.Gun
+                                            && (
+                                                (
+                                                    object?.definition === definition
+                                                    && !definition.isDual
+                                                    && definition.dualVariant
+                                                ) // Picking up a single pistol when inventory has single pistol
+                                                || (
                                                     (
-                                                        object?.definition === definition
-                                                        && !definition.isDual
-                                                        && definition.dualVariant
-                                                    ) // Picking up a single pistol when inventory has single pistol
-                                                    || (
-                                                        (
-                                                            object.definition as DualGunNarrowing | undefined
-                                                        )?.singleVariant === definition.idString
-                                                    )
-                                                    // Picking up dual pistols when inventory has a pistol
-                                                    // TODO implement splitting of dual guns to not lost reload later
-                                                );
-                                        }
-                                    )
+                                                        object.definition as DualGunNarrowing | undefined
+                                                    )?.singleVariant === definition.idString
+                                                )
+                                                // Picking up dual pistols when inventory has a pistol
+                                                // TODO implement splitting of dual guns to not lost reload later
+                                            );
+                                    }
+                                )
                             )
                         )
                     ) {

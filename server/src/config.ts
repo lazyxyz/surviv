@@ -10,6 +10,7 @@ export const enum SpawnMode {
     Fixed,
     Center
 }
+
 export const enum GasMode {
     Normal,
     Debug,
@@ -34,7 +35,7 @@ export const Config = {
 
     maxPlayersPerGame: 100,
     maxGames: 10,
-    gameJoinTime: 60,
+    gameJoinTime: 90,
 
     gas: { mode: GasMode.Normal },
 
