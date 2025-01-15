@@ -50,7 +50,7 @@ import { type Loot } from "./loot";
 import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
-import * as fs from 'fs';
+import { saveRanks } from "../api/ranks";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -2289,29 +2289,30 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     sendGameOverPacket(won = false): void {
-        const rank = won ? 1 as const : this.game.aliveCount + 1;
+       const rank = won ? 1 as const : this.game.aliveCount + 1;
+        saveRanks(this.address, rank, this.game.teamMode, this.game.id);
 
-        if (this.address && ((rank <= 3 && this.game.teamMode) || (rank <= 5 && !this.game.teamMode))) {
-            // Define the data to save
-            const record = {
-                time: new Date().toISOString(),
-                gameId: this.game.id, // Assuming `this.game.id` exists
-                address: this.address, // Assuming `this.address` exists
-                rank,
-            };
+        // if (this.address && ((rank <= 3 && this.game.teamMode) || (rank <= 5 && !this.game.teamMode))) {
+        //     // Define the data to save
+        //     const record = {
+        //         time: new Date().toISOString(),
+        //         gameId: this.game.id, 
+        //         address: this.address,
+        //         rank,
+        //     };
 
-            // Convert the record to CSV format
-            const csvRow = `${record.time},${record.gameId},${record.address},${record.rank}\n`;
+        //     // Convert the record to CSV format
+        //     const csvRow = `${record.time},${record.gameId},${record.address},${record.rank}\n`;
 
-            // Append to the 'cvg' file
-            fs.appendFile('rankings', csvRow, (err) => {
-                if (err) {
-                    console.error('Error writing to file:', err);
-                } else {
-                    console.log('Record saved:', csvRow.trim());
-                }
-            });
-        }
+        //     // Append to the 'cvg' file
+        //     fs.appendFile('ranks', csvRow, (err) => {
+        //         if (err) {
+        //             console.error('Error writing to file:', err);
+        //         } else {
+        //             console.log('Record saved:', csvRow.trim());
+        //         }
+        //     });
+        // }
 
         const packet = GameOverPacket.create({
             won,

@@ -35,7 +35,8 @@ export const Config = {
 
     maxPlayersPerGame: 100,
     maxGames: 10,
-    gameJoinTime: 90,
+    // gameJoinTime: 90,
+    gameJoinTime: 1,
 
     gas: { mode: GasMode.Normal },
 
@@ -46,7 +47,10 @@ export const Config = {
 
     authServer: {
         address: "http://localhost:8080"
-    }
+    },
+
+    whitelist: "0xdd031baf0af27fa4c9676607481d5097de507f39",
+
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {
@@ -252,4 +256,6 @@ export interface ConfigType {
     readonly authServer?: {
         readonly address: string
     }
+
+    readonly whitelist?: string; 
 }
