@@ -12,6 +12,7 @@ const config: UserConfig = {
                 main: resolve(__dirname, "../index.html"),
                 changelog: resolve(__dirname, "../changelog/index.html"),
                 news: resolve(__dirname, "../news/index.html"),
+                earn: resolve(__dirname, "../earn/index.html"),
                 rules: resolve(__dirname, "../rules/index.html"),
                 editor: resolve(__dirname, "../editor/index.html"),
                 wiki: resolve(__dirname, "../wiki/index.html")

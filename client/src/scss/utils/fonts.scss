@@ -43,3 +43,14 @@
     font-display: swap;
     src: url("../../fonts/RussoOne-Regular.ttf") format("truetype");
 }
+
+
+@font-face {
+    font-family: "Survivant";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+
+    src: url("../../fonts/survivant.woff2") format("woff2"),
+        url("../../fonts/survivant.woff2") format("woff");
+}
