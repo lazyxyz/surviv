@@ -196,7 +196,7 @@ export class CustomTeam {
                     if (result.success) {
                         this.gameID = result.gameID;
                         clearTimeout(this.resetTimeout);
-                        this.resetTimeout = setTimeout(() => this.gameID = undefined, 10000);
+                        // this.resetTimeout = setTimeout(() => this.gameID = undefined, 10000);
 
                         for (const player of this.players) {
                             player.ready = false;
