@@ -1,4 +1,4 @@
-import { DEFAULT_INVENTORY, GameConstants, KillfeedEventSeverity, KillfeedEventType, KillfeedMessageType } from "@common/constants";
+import { DEFAULT_INVENTORY, GameConstants, KillfeedEventSeverity, KillfeedEventType, KillfeedMessageType, ObjectCategory } from "@common/constants";
 import { Ammos } from "@common/definitions/ammos";
 import { type BadgeDefinition } from "@common/definitions/badges";
 import { type EmoteDefinition } from "@common/definitions/emotes";
@@ -22,7 +22,7 @@ import { type TranslationKeys } from "../../typings/translations";
 import { type Game } from "../game";
 import { type GameObject } from "../objects/gameObject";
 import { Player } from "../objects/player";
-import { GHILLIE_TINT, MODE, TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/constants";
+import { TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/constants";
 import { formatDate, html } from "../utils/misc";
 import { SuroiSprite } from "../utils/pixi";
 import { ClientPerkManager } from "./perkManager";
@@ -62,12 +62,6 @@ export class UIManager {
     teammates: PlayerData["teammates"] & object = [];
 
     readonly perks: ClientPerkManager;
-
-    readonly debugReadouts = Object.freeze({
-        fps: $<HTMLSpanElement>("#fps-counter"),
-        ping: $<HTMLSpanElement>("#ping-counter"),
-        pos: $<HTMLSpanElement>("#coordinates-hud")
-    });
 
     public hasC4s = false;
 
@@ -157,8 +151,9 @@ export class UIManager {
     }
 
     readonly ui = Object.freeze({
-        loadingText: $<HTMLDivElement>("#loading-text"),
-        // cancelFindingGame: $<HTMLButtonElement>("#btn-cancel-finding-game"),
+        loaderText: $<HTMLDivElement>("#loader-text"),
+
+        serverList: $<HTMLUListElement>("#server-list"),
 
         ammoCounterContainer: $<HTMLDivElement>("#weapon-ammo-container"),
         activeAmmo: $<HTMLSpanElement>("#weapon-clip-ammo-count"),
@@ -220,13 +215,16 @@ export class UIManager {
         joystickContainer: $<HTMLDivElement>("#joysticks-containers"),
 
         gameOverOverlay: $<HTMLDivElement>("#game-over-overlay"),
+        gameOverPlayerCards: $<HTMLDivElement>("#player-game-over-cards"),
         gameOverText: $<HTMLHeadingElement>("#game-over-text"),
-        gameOverPlayerName: $<HTMLHeadingElement>("#game-over-player-name"),
+        /* gameOverPlayerName: $<HTMLHeadingElement>("#game-over-player-name"),
         gameOverKills: $<HTMLSpanElement>("#game-over-kills"),
         gameOverDamageDone: $<HTMLSpanElement>("#game-over-damage-done"),
         gameOverDamageTaken: $<HTMLSpanElement>("#game-over-damage-taken"),
-        gameOverTime: $<HTMLSpanElement>("#game-over-time"),
+        gameOverTime: $<HTMLSpanElement>("#game-over-time"), */
         gameOverRank: $<HTMLSpanElement>("#game-over-rank"),
+        gameOverTeamKillsContainer: $<HTMLDivElement>("#game-over-team-kills-container"),
+        gameOverTeamKills: $<HTMLSpanElement>("#game-over-team-kills"),
         chickenDinner: $<HTMLImageElement>("#chicken-dinner"),
 
         killMsgModal: $<HTMLDivElement>("#kill-msg"),
@@ -259,7 +257,20 @@ export class UIManager {
 
         lockedInfo: $<HTMLButtonElement>("#locked-info"),
         lockedTooltip: $<HTMLDivElement>("#locked-tooltip"),
-        lockedTime: $<HTMLSpanElement>("#locked-time"),
+        teamSizeSwitchTime: $<HTMLSpanElement>("#next-team-size-msg .next-switch-time"),
+        modeSwitchTime: $<HTMLSpanElement>("#next-mode-msg .next-switch-time"),
+
+        playSoloBtn: $<HTMLDivElement>("#btn-play-solo"),
+        playDuoBtn: $<HTMLDivElement>("#btn-play-duo"),
+        playSquadBtn: $<HTMLDivElement>("#btn-play-squad"),
+
+        teamOptionBtns: $<HTMLDivElement>("#team-option-btns"),
+
+        switchMessages: $<HTMLDivElement>("#next-switch-messages"),
+        nextTeamSizeMsg: $<HTMLDivElement>("#next-team-size-msg"),
+        nextTeamSizeIcon: $<HTMLDivElement>("#next-team-size-msg .next-switch-icon"),
+        nextModeMsg: $<HTMLDivElement>("#next-mode-msg"),
+        nextModeIcon: $<HTMLDivElement>("#next-mode-msg .next-switch-icon"),
 
         warningTitle: $<HTMLHeadingElement>("#warning-modal-title"),
         warningText: $<HTMLParagraphElement>("#warning-modal-text"),
@@ -279,7 +290,9 @@ export class UIManager {
         c4Button: $<HTMLButtonElement>("#c4-detonate-btn"),
         detonateKey: $<HTMLDivElement>("#detonate-key"),
 
-        inventoryMsg: $<HTMLSpanElement>("#inventory-message")
+        inventoryMsg: $<HTMLSpanElement>("#inventory-message"),
+
+        debugPos: $<HTMLSpanElement>("#coordinates-hud")
     });
 
     private readonly _weaponSlotCache = new ExtendedMap<
@@ -369,9 +382,11 @@ export class UIManager {
     }
 
     cancelAction(): void {
-        this.ui.actionContainer
-            .hide()
-            .stop();
+        if (!UI_DEBUG_MODE) {
+            this.ui.actionContainer
+                .hide()
+                .stop();
+        }
         this.action.active = false;
     }
 
@@ -382,6 +397,7 @@ export class UIManager {
 
         this.ui.interactMsg.hide();
         this.ui.spectatingContainer.hide();
+        this.ui.gameOverPlayerCards.empty();
 
         game.activePlayer?.actionSound?.stop();
 
@@ -392,14 +408,17 @@ export class UIManager {
 
         const {
             gameOverOverlay,
+            gameOverPlayerCards,
             chickenDinner,
             gameOverText,
             gameOverRank,
-            gameOverPlayerName,
+            gameOverTeamKills,
+            gameOverTeamKillsContainer
+            /* gameOverPlayerName,
             gameOverKills,
             gameOverDamageDone,
             gameOverDamageTaken,
-            gameOverTime
+            gameOverTime */
         } = this.ui;
 
         game.gameOver = true;
@@ -413,30 +432,152 @@ export class UIManager {
 
         chickenDinner.toggle(packet.won);
 
-        const playerName = this.getPlayerData(packet.playerID).name;
-        const playerBadge = this.getPlayerData(packet.playerID).badge;
-        const playerBadgeText = playerBadge
-            ? html`<img class="badge-icon" src="./img/game/shared/badges/${playerBadge.idString}.svg" alt="${playerBadge.name} badge">`
-            : "";
+        const medals = {
+            kills: {
+                id: "kills",
+                assigned: false
+            },
+            damageDone: {
+                id: "skull",
+                assigned: false
+            },
+            damageTaken: {
+                id: "shield",
+                assigned: false
+            },
+            youdidit: {
+                id: "youdidit"
+                //  assigned: false
+            }
+        };
 
-        gameOverText.html(
-            packet.won
-                ? getTranslatedString("msg_win")
-                : (this.game.spectating
-                    ? getTranslatedString("msg_player_died", {
-                        player: playerName
-                    })
-                    : getTranslatedString("msg_you_died"))
-        );
+        let bestKills = packet.teammates[0].kills,
+            totalKills = 0,
+            bestDamageDone = packet.teammates[0].damageDone,
+            bestDamageTaken = packet.teammates[0].damageTaken,
+            wonMedal = false,
+            medal = "",
+            medalType = "";
 
-        gameOverPlayerName.html(playerName + playerBadgeText);
+        if (this.game.teamMode) {
+            for (let i = 0; i < packet.numberTeammates; i++) {
+                if (bestKills < packet.teammates[i].kills) {
+                    bestKills = packet.teammates[i].kills;
+                }
 
-        gameOverKills.text(packet.kills);
-        gameOverDamageDone.text(packet.damageDone);
-        gameOverDamageTaken.text(packet.damageTaken);
-        gameOverTime.text(formatDate(packet.timeAlive));
+                if (bestDamageDone < packet.teammates[i].damageDone) {
+                    bestDamageDone = packet.teammates[i].damageDone;
+                }
 
-        if (packet.won) void game.music.play();
+                if (bestDamageTaken < packet.teammates[i].damageTaken) {
+                    bestDamageTaken = packet.teammates[i].damageTaken;
+                }
+            }
+        }
+
+        for (let i = 0; i < packet.numberTeammates; i++) {
+            const teammateID = packet.teammates[i].playerID;
+
+            if (this.game.teamMode) {
+                const killsMedal = bestKills === packet.teammates[i].kills && bestKills >= 10 && !medals.kills.assigned;
+                const damageDoneMedal = bestDamageDone === packet.teammates[i].damageDone && bestDamageDone >= 1000 && !medals.damageDone.assigned;
+                const damageTakenMedal = bestDamageTaken === packet.teammates[i].damageTaken && bestDamageTaken >= 1000 && !medals.damageTaken.assigned;
+                const wellDone = packet.teammates[i].kills === 0 && packet.teammates[i].damageDone === 0;
+
+                wonMedal = (
+                    // Kills (More than 10 kills + most kills on team)
+                    killsMedal
+                    // Damage Dealt/Done (Must be more than 1000)
+                    || damageDoneMedal
+                    // Damage Taken (Must be more than 1000)
+                    || damageTakenMedal
+                    // you did it
+                    || wellDone
+                );
+
+                if (wonMedal) {
+                    switch (true) {
+                        case wellDone: {
+                            medalType = medals.youdidit.id;
+                            break;
+                        }
+                        case killsMedal: {
+                            medalType = medals.kills.id;
+                            medals.kills.assigned = true;
+                            break;
+                        }
+                        case damageDoneMedal: {
+                            medalType = medals.damageDone.id;
+                            medals.damageDone.assigned = true;
+                            break;
+                        }
+                        case damageTakenMedal: {
+                            medalType = medals.damageTaken.id;
+                            medals.damageTaken.assigned = true;
+                            break;
+                        }
+                    }
+
+                    medal = `<img class="medal" src="./img/misc/medal_${medalType}.svg"/>`;
+                }
+
+                totalKills += packet.teammates[i].kills;
+            }
+
+            gameOverText.html(
+                packet.won
+                    ? getTranslatedString("msg_win")
+                    : (this.game.spectating
+                        ? packet.numberTeammates > 1
+                            ? getTranslatedString("msg_the_team_eliminated")
+                            : getTranslatedString("msg_player_died", {
+                                player: this.getPlayerData(packet.teammates[i].playerID).name
+                            })
+                        : packet.numberTeammates > 1 ? getTranslatedString("msg_your_team_eliminated") : getTranslatedString("msg_you_died"))
+            );
+
+            const teammateName = this.getPlayerData(teammateID).name;
+            const teammateBadge = this.getPlayerData(teammateID).badge;
+            const teammateBadgeText = teammateBadge
+                ? html`<img class="badge-icon" src="./img/game/shared/badges/${teammateBadge.idString}.svg" alt="${teammateBadge.name} badge">`
+                : "";
+
+            const card = html` <div class="game-over-screen">
+                <h1 class="game-over-player-name" class="modal-item">${(wonMedal ? medal : "") + teammateName + teammateBadgeText}</h1>
+                <div class="modal-item game-over-stats">
+                  <div class="stat">
+                    <span class="stat-name" translation="go_kills">Kills:</span>
+                    <span class="stat-value">${packet.teammates[i].kills}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-name" translation="go_damage_done">Damage done:</span>
+                    <span class="stat-value">${packet.teammates[i].damageDone}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-name" translation="go_damage_taken">Damage taken:</span>
+                    <span class="stat-value">${packet.teammates[i].damageTaken}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-name" translation="go_time_alive">Time alive:</span>
+                    <span class="stat-value">${formatDate(packet.teammates[i].timeAlive)}</span>
+                  </div>
+                </div>
+              </div>`;
+
+            gameOverPlayerCards.append(card);
+        }
+
+        if (packet.won) {
+            void game.music.play();
+            if (this.game.teamMode && packet.numberTeammates > 1) {
+                gameOverTeamKills.text(getTranslatedString("msg_kills", { kills: JSON.stringify(totalKills) }));
+                gameOverTeamKillsContainer.toggle(true);
+            } else {
+                gameOverTeamKillsContainer.toggle(false);
+            }
+        } else {
+            gameOverTeamKillsContainer.toggle(false);
+        }
 
         this.gameOverScreenTimeout = window.setTimeout(() => gameOverOverlay.fadeIn(500), 500);
 
@@ -486,6 +627,7 @@ export class UIManager {
 
     updateUI(data: PlayerData): void {
         const {
+            pingSeq,
             minMax,
             health,
             adrenaline,
@@ -499,7 +641,22 @@ export class UIManager {
             perks
         } = data;
 
-        if (id !== undefined) this.game.activePlayerID = id.id;
+        const sentTime = this.game.seqsSent[pingSeq];
+        if (sentTime !== undefined) {
+            const ping = Date.now() - sentTime;
+            this.game.netGraph.ping.addEntry(ping);
+            this.game.seqsSent[pingSeq] = undefined;
+        }
+
+        if (id !== undefined) {
+            const oldID = this.game.activePlayerID;
+            this.game.activePlayerID = id.id;
+            if (oldID !== id.id) {
+                for (const player of this.game.objects.getCategory(ObjectCategory.Player)) {
+                    player.updateTeammateName();
+                }
+            }
+        }
 
         if (id) {
             const spectating = id.spectating;
@@ -722,7 +879,7 @@ export class UIManager {
         const activeWeapon = inventory.weapons[activeIndex];
         const count = activeWeapon?.count;
 
-        if (activeWeapon === undefined || count === undefined || UI_DEBUG_MODE) {
+        if (activeWeapon === undefined || count === undefined) {
             this.ui.ammoCounterContainer.hide();
         } else {
             this.ui.ammoCounterContainer.show();
@@ -783,6 +940,8 @@ export class UIManager {
             ), i++
         );
     }
+
+    private _ghillieFistImage: string | undefined;
 
     /*
       TODO proper caching would require keeping a copy of the inventory currently being shown,
@@ -856,7 +1015,7 @@ export class UIManager {
                     frame += "_halloween";
                 }
 
-                const location = definition.itemType === ItemType.Melee && definition.reskins?.includes(MODE.idString) ? MODE.idString : "shared";
+                const location = definition.itemType === ItemType.Melee && definition.reskins?.includes(this.game.modeName) ? this.game.modeName : "shared";
                 const newSrc = `./img/game/${location}/weapons/${frame}.svg`;
                 if (oldSrc !== newSrc) {
                     this._playSlotAnimation(container);
@@ -866,7 +1025,7 @@ export class UIManager {
                 const backgroundImage
                     = isFists
                         ? this.skinID !== undefined && Skins.fromStringSafe(this.skinID)?.grassTint
-                            ? `url("data:image/svg+xml,${encodeURIComponent(`<svg width="34" height="34" viewBox="0 0 8.996 8.996" xmlns="http://www.w3.org/2000/svg"><circle fill="${GHILLIE_TINT.toHex()}" stroke="${new Color(GHILLIE_TINT).multiply("#111").toHex()}" stroke-width="1.05833" cx="4.498" cy="4.498" r="3.969"/></svg>`)}")`
+                            ? this._ghillieFistImage ??= `url("data:image/svg+xml,${encodeURIComponent(`<svg width="34" height="34" viewBox="0 0 8.996 8.996" xmlns="http://www.w3.org/2000/svg"><circle fill="${this.game.colors.ghillie.toHex()}" stroke="${new Color(this.game.colors.ghillie).multiply("#111").toHex()}" stroke-width="1.05833" cx="4.498" cy="4.498" r="3.969"/></svg>`)}")`
                             : `url(./img/game/shared/skins/${this.skinID ?? this.game.console.getBuiltInCVar("cv_loadout_skin")}_fist.svg)`
                         : "none";
 
@@ -1021,7 +1180,10 @@ export class UIManager {
             }
         }
 
-        let killModalMessage = UIManager._killModalEventDescription[type][severity]($<HTMLSpanElement>(victimName).addClass("kill-msg-player-name")[0].outerHTML, weaponUsed !== undefined ? weaponUsed : "");
+        let killModalMessage = UIManager._killModalEventDescription[type][severity](
+            $<HTMLSpanElement>(victimName).addClass("kill-msg-player-name")[0].outerHTML,
+            weaponUsed ?? ""
+        );
 
         // special case for languages like hungarian and greek
         if (getTranslatedString("you") === "") {
@@ -1133,39 +1295,39 @@ export class UIManager {
 
     private static readonly _killModalEventDescription = freezeDeep<Record<KillfeedEventType, Record<KillfeedEventSeverity, (victim: string, weaponUsed: string) => string>>>({
         [KillfeedEventType.Suicide]: {
-            [KillfeedEventSeverity.Kill]: (_, weapon_) => getTranslatedString("km_message", {
+            [KillfeedEventSeverity.Kill]: (_, weapon) => getTranslatedString("km_message", {
                 you: getTranslatedString("you"),
                 finally: "",
                 event: getTranslatedString("kf_suicide_kill", { player: "" }),
                 victim: "",
-                with: weapon_ === "" ? "" : getTranslatedString("with"),
-                weapon: weapon_
+                with: weapon && getTranslatedString("with"),
+                weapon
             }),
-            [KillfeedEventSeverity.Down]: (_, weapon_) => getTranslatedString("km_message", {
+            [KillfeedEventSeverity.Down]: (_, weapon) => getTranslatedString("km_message", {
                 you: getTranslatedString("you"),
                 finally: "",
                 event: getTranslatedString("km_knocked"),
                 victim: getTranslatedString("yourself"),
-                with: weapon_ === "" ? "" : getTranslatedString("with"),
-                weapon: weapon_
+                with: weapon && getTranslatedString("with"),
+                weapon
             })
         },
         [KillfeedEventType.NormalTwoParty]: {
-            [KillfeedEventSeverity.Kill]: (name, weapon_) => getTranslatedString("km_message", {
+            [KillfeedEventSeverity.Kill]: (name, weapon) => getTranslatedString("km_message", {
                 you: getTranslatedString("you"),
                 finally: "",
                 event: getTranslatedString("km_killed"),
                 victim: name,
-                with: weapon_ === "" ? "" : getTranslatedString("with"),
-                weapon: weapon_
+                with: weapon && getTranslatedString("with"),
+                weapon
             }),
-            [KillfeedEventSeverity.Down]: (name, weapon_) => getTranslatedString("km_message", {
+            [KillfeedEventSeverity.Down]: (name, weapon) => getTranslatedString("km_message", {
                 you: getTranslatedString("you"),
                 finally: "",
                 event: getTranslatedString("km_knocked"),
                 victim: name,
-                with: weapon_ === "" ? "" : getTranslatedString("with"),
-                weapon: weapon_
+                with: weapon && getTranslatedString("with"),
+                weapon
             })
         },
         [KillfeedEventType.BleedOut]: {
@@ -1173,13 +1335,13 @@ export class UIManager {
             [KillfeedEventSeverity.Down]: name => getTranslatedString("kf_bleed_out_down", { player: name }) // should be impossible
         },
         [KillfeedEventType.FinishedOff]: {
-            [KillfeedEventSeverity.Kill]: (name, weapon_) => getTranslatedString("km_message", {
+            [KillfeedEventSeverity.Kill]: (name, weapon) => getTranslatedString("km_message", {
                 you: getTranslatedString("you"),
-                finally: getTranslatedString("finally"),
-                event: getTranslatedString("km_killed"),
+                finally: "",
+                event: getTranslatedString("kf_finished_off"),
                 victim: name,
-                with: weapon_ === "" ? "" : getTranslatedString("with"),
-                weapon: weapon_
+                with: weapon && getTranslatedString("with"),
+                weapon: weapon
             }),
             [KillfeedEventSeverity.Down]: name => `${name} was gently finished off` // should be impossible
         },
@@ -1271,7 +1433,6 @@ export class UIManager {
                             victimText = victimText.replace("<span>", "<span style=\"display:contents;\">");
                         }
 
-                        outer:
                         switch (eventType) {
                             case KillfeedEventType.FinallyKilled:
                                 switch (attackerId) {
@@ -1283,7 +1444,7 @@ export class UIManager {
                                         */
                                         killMessage = getTranslatedString("kf_finally_died", { player: victimText });
 
-                                        break outer;
+                                        break;
                                     case victimId:
                                         /*
                                             usually, a case where attacker and victim are the same would be
@@ -1294,16 +1455,16 @@ export class UIManager {
                                         */
                                         killMessage = getTranslatedString("kf_finally_ended_themselves", { player: victimText });
 
-                                        break outer;
+                                        break;
                                 }
-                                // fallthrough
+                                break;
                             case KillfeedEventType.NormalTwoParty:
                                 killMessage = getTranslatedString("kf_message", {
                                     player: attackerText,
                                     finally: "",
                                     event: getTranslatedString(`kf_${severity === KillfeedEventSeverity.Down ? "knocked" : "killed"}`),
                                     victim: victimText,
-                                    with: fullyQualifiedName === "" ? "" : getTranslatedString("with"),
+                                    with: fullyQualifiedName && getTranslatedString("with"),
                                     weapon: fullyQualifiedName
                                 });
                                 useSpecialSentence = true;
@@ -1314,7 +1475,7 @@ export class UIManager {
                                     finally: "",
                                     event: getTranslatedString("kf_finished_off"),
                                     victim: victimText,
-                                    with: fullyQualifiedName === "" ? "" : getTranslatedString("with"),
+                                    with: fullyQualifiedName && getTranslatedString("with"),
                                     weapon: fullyQualifiedName
                                 });
                                 useSpecialSentence = true;
@@ -1326,7 +1487,7 @@ export class UIManager {
                                     finally: "",
                                     event: getTranslatedString(`kf_suicide_${severity === KillfeedEventSeverity.Down ? "down" : "kill"}`, { player: "" }),
                                     victim: "",
-                                    with: fullyQualifiedName === "" ? "" : getTranslatedString("with"),
+                                    with: fullyQualifiedName && getTranslatedString("with"),
                                     weapon: fullyQualifiedName
                                 });
 
@@ -1395,7 +1556,7 @@ export class UIManager {
                                 iconName = "airdrop";
                                 break;
                             default:
-                                iconName = weaponUsed?.idString ?? "";
+                                iconName = weaponUsed?.killfeedFrame ?? "";
                                 break;
                         }
                         const altText = weaponUsed ? weaponUsed.name : iconName;

@@ -1,16 +1,20 @@
+import { type Mode } from "@common/definitions/modes";
 import { Obstacles } from "@common/definitions/obstacles";
 import { HitboxType, RectangleHitbox, type Hitbox } from "@common/utils/hitbox";
 import { Vec, type Vector } from "@common/utils/vector";
-import $ from "jquery";
 import { Assets, Container, Graphics, RendererType, RenderTexture, Sprite, Spritesheet, Texture, type ColorSource, type Renderer, type SpritesheetData, type WebGLRenderer } from "pixi.js";
-import { getTranslatedString } from "../../translations";
 import { PIXI_SCALE, WALL_STROKE_WIDTH } from "./constants";
 
-const textures: Record<string, Texture> = {};
+export let spritesheetsLoaded = false;
 
-const loadingText = $("#loading-text");
+let onSpritesheetsLoaded: ((value: unknown) => void) | undefined;
+export function setOnSpritesheetsLoaded(callback: (value: unknown) => void): void {
+    onSpritesheetsLoaded = callback;
+}
 
-export async function loadTextures(renderer: Renderer, highResolution: boolean): Promise<void> {
+export let unloadedSprites: Map<SuroiSprite, string> | undefined;
+
+export async function loadTextures(modeName: Mode, renderer: Renderer, highResolution: boolean): Promise<void> {
     // If device doesn't support 4096x4096 textures, force low resolution textures since they are 2048x2048
     if (renderer.type as RendererType === RendererType.WEBGL) {
         const gl = (renderer as WebGLRenderer).gl;
@@ -21,11 +25,13 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean):
 
     // we pray
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const spritesheets: SpritesheetData[] = highResolution
+    const atlases: Record<string, SpritesheetData[]> = highResolution
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         ? (await import("virtual:spritesheets-jsons-high-res")).atlases
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         : (await import("virtual:spritesheets-jsons-low-res")).atlases;
+
+    const spritesheets = atlases[modeName];
 
     let resolved = 0;
     const count = spritesheets.length;
@@ -42,22 +48,41 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean):
             console.log(`Loading spritesheet ${location.origin}/${image}`);
 
             try {
-                const texture = await Assets.load<Texture>(image);
-                await renderer.prepare.upload(texture);
-                Object.assign(textures, await new Spritesheet(texture, spritesheet).parse());
+                const sheetTexture = await Assets.load<Texture>(image);
+                await renderer.prepare.upload(sheetTexture);
+                const textures = await new Spritesheet(sheetTexture, spritesheet).parse();
+                for (const [key, texture] of Object.entries(textures)) {
+                    Assets.cache.set(key, texture);
+                }
 
                 const resolvedCount = ++resolved;
                 const progress = `(${resolvedCount} / ${count})`;
 
                 console.log(`Atlas ${image} loaded ${progress}`);
-                loadingText.text(getTranslatedString("loading_spritesheets", {
-                    progress
-                }));
+
+                if (unloadedSprites) {
+                    for (const [sprite, frame] of unloadedSprites.entries()) {
+                        if (!Assets.cache.has(frame)) continue;
+
+                        if (!sprite.destroyed) sprite.setFrame(frame, true);
+                        unloadedSprites.delete(sprite);
+                    }
+                    if (!unloadedSprites.size) unloadedSprites = undefined;
+                }
+
+                if (resolvedCount === count) {
+                    spritesheetsLoaded = true;
+                    onSpritesheetsLoaded?.(undefined);
+                }
             } catch (e) {
                 ++resolved;
                 console.error(`Atlas ${image} failed to load. Details:`, e);
             }
         }),
+
+        //
+        // Walls
+        //
         ...Obstacles.definitions
             .filter(obj => obj.wall)
             .map(def => new Promise<void>(resolve => {
@@ -78,21 +103,14 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean):
                             .fill({ color })
                     });
 
-                    textures[def.idString] = wallTexture;
+                    Assets.cache.set(def.idString, wallTexture);
                 }
                 resolve();
             })),
-        new Promise<void>(resolve => {
-            const vestTexture = RenderTexture.create({ width: 102, height: 102, antialias: true });
-            renderer.render({
-                target: vestTexture,
-                container: new Graphics()
-                    .arc(51, 51, 51, 0, Math.PI * 2)
-                    .fill({ color: 0xffffff })
-            });
-            textures.vest_world = vestTexture;
-            resolve();
-        }),
+
+        //
+        // Gun mounts
+        //
         ...Obstacles.definitions
             .filter(obj => obj.gunMount)
             .map(def => new Promise<void>(resolve => {
@@ -179,29 +197,51 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean):
                     target: mountTexture,
                     container: container
                 });
-                textures[def.idString] = mountTexture;
+                Assets.cache.set(def.idString, mountTexture);
                 resolve();
             }))
     ]);
+
+    // Apply the missing texture to any sprites whose textures can't be found after loading spritesheets
+    if (unloadedSprites) {
+        for (const [sprite, frame] of unloadedSprites.entries()) {
+            if (sprite.destroyed) continue;
+
+            console.warn(`Texture not found: "${frame}"`);
+            sprite.setFrame("_missing_texture", true);
+            unloadedSprites.delete(sprite);
+        }
+        unloadedSprites = undefined;
+    }
 }
 
 export class SuroiSprite extends Sprite {
     static getTexture(frame: string): Texture {
-        if (!(frame in textures)) {
+        if (!Assets.cache.has(frame)) {
             console.warn(`Texture not found: "${frame}"`);
-            return textures._missing_texture;
+            frame = "_missing_texture";
         }
-        return textures[frame];
+        return Texture.from(frame);
     }
 
     constructor(frame?: string) {
-        super(frame ? SuroiSprite.getTexture(frame) : undefined);
+        super(spritesheetsLoaded && frame ? SuroiSprite.getTexture(frame) : undefined);
+        if (!spritesheetsLoaded && frame) {
+            (unloadedSprites ??= new Map<SuroiSprite, string>()).set(this, frame);
+        }
 
         this.anchor.set(0.5);
         this.setPos(0, 0);
     }
 
-    setFrame(frame: string): this {
+    setFrame(frame: string, force?: boolean): this {
+        if (!spritesheetsLoaded && !force) {
+            // @ts-expect-error technically this shouldn't be undefined, but there isn't a way around it so
+            this.texture = undefined;
+            (unloadedSprites ??= new Map<SuroiSprite, string>()).set(this, frame);
+            return this;
+        }
+
         this.texture = SuroiSprite.getTexture(frame);
         return this;
     }
@@ -294,16 +334,7 @@ export function drawGroundGraphics(hitbox: Hitbox, graphics: Graphics, scale = P
     }
 };
 
-export function drawHitbox<T extends Graphics>(hitbox: Hitbox, color: ColorSource, graphics: T, alpha = 1): T {
-    if (alpha === 0) return graphics;
-
-    graphics.setStrokeStyle({
-        color,
-        width: 2,
-        alpha
-    });
-    graphics.beginPath();
-
+export function traceHitbox<T extends Graphics>(hitbox: Hitbox, graphics: T): T {
     switch (hitbox.type) {
         case HitboxType.Rect: {
             const min = toPixiCoords(hitbox.min);
@@ -321,12 +352,29 @@ export function drawHitbox<T extends Graphics>(hitbox: Hitbox, color: ColorSourc
             graphics.arc(pos.x, pos.y, hitbox.radius * PIXI_SCALE, 0, Math.PI * 2);
             break;
         }
-        case HitboxType.Group:
-            for (const h of hitbox.hitboxes) drawHitbox(h, color, graphics, alpha);
-            break;
         case HitboxType.Polygon:
             graphics.poly(hitbox.points.map(point => toPixiCoords(point)));
             break;
+    }
+    return graphics;
+}
+
+export function drawHitbox<T extends Graphics>(hitbox: Hitbox, color: ColorSource, graphics: T, alpha = 1): T {
+    if (alpha === 0) return graphics;
+
+    graphics.setStrokeStyle({
+        color,
+        width: 2,
+        alpha
+    });
+    graphics.beginPath();
+
+    if (hitbox.type === HitboxType.Group) {
+        for (const h of hitbox.hitboxes) {
+            drawHitbox(h, color, graphics, alpha);
+        }
+    } else {
+        traceHitbox(hitbox, graphics);
     }
 
     graphics.closePath();

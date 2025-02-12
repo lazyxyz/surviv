@@ -6,10 +6,11 @@ import { URLSearchParams } from "node:url";
 import { TemplatedApp, type WebSocket } from "uWebSockets.js";
 import { Config } from "../config";
 import { CustomTeam, CustomTeamPlayer, type CustomTeamPlayerContainer } from "../team";
-import { Logger, cleanUsername } from "../utils/misc";
+import { cleanUsername } from "../utils/misc";
 import { forbidden, getIP, textDecoder } from "../utils/serverHelpers";
 import { customTeams, maxTeamSize, teamsCreated } from "../server";
 import { validateJWT } from "@api/auth";
+import { Logger } from "@common/utils/logging";
 
 export function initTeamRoutes(app: TemplatedApp) {
     app.ws("/team", {

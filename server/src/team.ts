@@ -134,7 +134,7 @@ export class Team {
 }
 
 export class CustomTeam {
-    private static readonly _idChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static readonly _idChars = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ0123456789";
     private static readonly _idCharMax = this._idChars.length - 1;
 
     readonly id: string;
@@ -176,6 +176,8 @@ export class CustomTeam {
     }
 
     async onMessage(player: CustomTeamPlayer, message: CustomTeamMessage): Promise<void> {
+        if (!message) return;
+
         switch (message.type) {
             case CustomTeamMessages.Settings: {
                 if (!player.isLeader) break; // Only leader can change settings

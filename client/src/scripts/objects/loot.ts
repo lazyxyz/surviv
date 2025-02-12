@@ -9,11 +9,12 @@ import { ItemType, LootRadius } from "@common/utils/objectDefinitions";
 import { type ObjectsNetData } from "@common/utils/objectsSerializations";
 import { type Vector } from "@common/utils/vector";
 import { type Game } from "../game";
-import { DIFF_LAYER_HITBOX_OPACITY, GHILLIE_TINT, HITBOX_COLORS, HITBOX_DEBUG_MODE } from "../utils/constants";
-import { SuroiSprite, drawHitbox, toPixiCoords } from "../utils/pixi";
+import { DIFF_LAYER_HITBOX_OPACITY, HITBOX_COLORS } from "../utils/constants";
+import { SuroiSprite, toPixiCoords } from "../utils/pixi";
 import { type Tween } from "../utils/tween";
 import { GameObject } from "./gameObject";
 import { type Player } from "./player";
+import type { DebugRenderer } from "../utils/debugRenderer";
 
 export class Loot extends GameObject.derive(ObjectCategory.Loot) {
     definition!: LootDefinition;
@@ -74,9 +75,10 @@ export class Loot extends GameObject.derive(ObjectCategory.Loot) {
                     .setAngle(90);
 
                 if (definition.grassTint) {
-                    this.images.item.setTint(GHILLIE_TINT);
-                    this.images.skinFistLeft.setTint(GHILLIE_TINT);
-                    this.images.skinFistRight.setTint(GHILLIE_TINT);
+                    const ghillieTint = this.game.colors.ghillie;
+                    this.images.item.setTint(ghillieTint);
+                    this.images.skinFistLeft.setTint(ghillieTint);
+                    this.images.skinFistRight.setTint(ghillieTint);
                 }
 
                 this.container.addChild(this.images.skinFistLeft, this.images.skinFistRight);
@@ -166,24 +168,25 @@ export class Loot extends GameObject.derive(ObjectCategory.Loot) {
         if (!this.game.console.getBuiltInCVar("cv_movement_smoothing") || isNew) {
             this.container.position = toPixiCoords(this.position);
         }
-
-        this.updateDebugGraphics();
     }
 
     override updateZIndex(): void {
         this.container.zIndex = getEffectiveZIndex(this.doOverlay() ? ZIndexes.UnderWaterLoot : ZIndexes.Loot, this.layer, this.game.layer);
     }
 
-    override updateDebugGraphics(): void {
-        if (!HITBOX_DEBUG_MODE) return;
+    override updateDebugGraphics(debugRenderer: DebugRenderer): void {
+        if (!DEBUG_CLIENT) return;
 
-        this.debugGraphics.clear();
-        drawHitbox(
+        debugRenderer.addHitbox(
             this.hitbox,
             HITBOX_COLORS.loot,
-            this.debugGraphics,
-            this.layer === this.game.activePlayer?.layer as number | undefined ? 1 : DIFF_LAYER_HITBOX_OPACITY
+            this.layer === this.game.activePlayer?.layer ? 1 : DIFF_LAYER_HITBOX_OPACITY
         );
+    }
+
+    override update(): void { /* bleh */ }
+    override updateInterpolation(): void {
+        this.updateContainerPosition();
     }
 
     destroy(): void {

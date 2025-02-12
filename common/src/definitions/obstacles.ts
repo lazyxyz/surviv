@@ -1,7 +1,7 @@
-import { GameConstants, Layers, TentTints, ZIndexes } from "../constants";
+import { Layers, TentTints, ZIndexes } from "../constants";
 import { type Variation } from "../typings";
 import { CircleHitbox, GroupHitbox, RectangleHitbox, type Hitbox } from "../utils/hitbox";
-import { type DeepPartial, type GetEnumMemberName, type Mutable } from "../utils/misc";
+import { type DeepPartial, type Mutable, type PredicateFor } from "../utils/misc";
 import { MapObjectSpawnMode, ObjectDefinitions, ObstacleSpecialRoles, type ObjectDefinition, type RawDefinition, type ReferenceOrRandom, type ReferenceTo } from "../utils/objectDefinitions";
 import { Vec, type Vector } from "../utils/vector";
 import { type GunDefinition } from "./guns";
@@ -43,25 +43,7 @@ export enum FlyoverPref {
     Never
 }
 
-// yes these two types are mostly copied from ./utils/gameObject.ts
-// when ts adds hkt's and better enum type support, i'll rewrite it to reduce repetition
-
-type PredicateFor<Role extends ObstacleSpecialRoles | undefined = ObstacleSpecialRoles | undefined> = ObstacleSpecialRoles extends Role
-    ? {
-        // if Cat === ObstacleSpecialRoles, then they should all be boolean | undefined; if not, narrow as appropriate
-        // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-        readonly [K in (keyof typeof ObstacleSpecialRoles & string) as `is${K}`]?: boolean | undefined
-    }
-    : Role extends undefined
-        ? {
-            // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-            readonly [K in (keyof typeof ObstacleSpecialRoles & string) as `is${K}`]?: false | undefined
-        }
-        : Readonly<Record<`is${GetName<NonNullable<Role>>}`, true>> & {
-            readonly [K in Exclude<ObstacleSpecialRoles, Role> as `is${GetName<K>}`]?: K extends GetName<NonNullable<Role>> ? never : false
-        };
-
-type GetName<Member extends number> = GetEnumMemberName<typeof ObstacleSpecialRoles, Member>;
+type PredicateForRole<Role extends ObstacleSpecialRoles | undefined = ObstacleSpecialRoles | undefined> = PredicateFor<typeof ObstacleSpecialRoles, Role>;
 
 type RawObstacleDefinition = ObjectDefinition & {
     readonly material: typeof Materials[number]
@@ -227,9 +209,9 @@ export type ObstacleRoleMixin = (
 
 export type ObstacleDefinition = RawObstacleDefinition & (
     {
-        [K in ObstacleSpecialRoles]: PredicateFor<K> & { readonly role: K }
+        [K in ObstacleSpecialRoles]: PredicateForRole<K> & { readonly role: K }
     }[ObstacleSpecialRoles]
-    | ({ readonly role?: undefined } & PredicateFor<undefined>)
+    | ({ readonly role?: undefined } & PredicateForRole<undefined>)
 );
 
 export enum RotationMode {
@@ -281,7 +263,8 @@ export const MaterialSounds: Record<string, { hit?: string, destroyed?: string }
     trash_bag: { hit: "sand" }
 };
 
-const aidrTint = GameConstants.modeName as string === "winter" ? 0xb94646 : 0x4059bf;
+// TODO Detect mode somehow
+const aidrTint = 0x4059bf; // GameConstants.modeName as string === "winter" ? 0xb94646 : 0x4059bf;
 
 /* eslint-disable @stylistic/key-spacing, @stylistic/no-multi-spaces */
 export const TintedParticles: Record<string, { readonly base: string, readonly tint: number, readonly variants?: number }> = {
@@ -365,6 +348,8 @@ export const TintedParticles: Record<string, { readonly base: string, readonly t
     metal_auto_door_particle:      { base: "metal_particle_1", tint: 0x404040 },
     red_metal_auto_door_particle:  { base: "metal_particle_1", tint: 0x401a1a },
     blue_metal_auto_door_particle: { base: "metal_particle_1", tint: 0x1a1a40 },
+    rsh_case_particle:             { base: "wood_particle",    tint: 0x583928 },
+    river_hut_wall_particle:       { base: "wood_particle",    tint: 0x736758 },
 
     red_gift_particle:             { base: "toilet_particle",  tint: 0x962626 },
     green_gift_particle:           { base: "toilet_particle",  tint: 0x377130 },
@@ -1081,7 +1066,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 spawnMode: MapObjectSpawnMode.River,
                 zIndex: ZIndexes.UnderwaterPlayers - 1,
                 hitbox: new CircleHitbox(8),
-                spawnHitbox: new CircleHitbox(9),
+                spawnHitbox: new CircleHitbox(10),
                 rotationMode: RotationMode.Full,
                 variations: 5,
                 particleVariations: 2
@@ -1742,14 +1727,14 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 idString: "propane_tank",
                 name: "Propane Tank",
                 material: "metal_light",
-                health: 80,
+                health: 60,
                 scale: {
                     spawnMin: 1,
                     spawnMax: 1,
                     destroy: 0.95
                 },
                 reflectBullets: true,
-                hitbox: new CircleHitbox(2.5),
+                hitbox: new CircleHitbox(1.9),
                 rotationMode: RotationMode.Full,
                 allowFlyover: FlyoverPref.Always,
                 explosion: "propane_tank_explosion",
@@ -1971,6 +1956,34 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 { hitbox: RectangleHitbox.fromRect(9, 2) }
             ),
 
+            // blue house basement shit
+            houseWall(
+                [18, { color: 0x74858b, border: 0x23282a, particle: "hq_tp_wall_particle" }],
+                { hitbox: RectangleHitbox.fromRect(5.25, 2) }
+            ),
+            houseWall(
+                [19, { color: 0x74858b, border: 0x23282a, particle: "hq_tp_wall_particle" }],
+                { hitbox: RectangleHitbox.fromRect(19.55, 2) }
+            ),
+
+            // river hut
+            houseWall(
+                [20, { color: 0x736758, border: 0x383127, particle: "river_hut_wall_particle" }],
+                { hitbox: RectangleHitbox.fromRect(32.7, 2) }
+            ),
+            houseWall(
+                [21, { color: 0x736758, border: 0x383127, particle: "river_hut_wall_particle" }],
+                { hitbox: RectangleHitbox.fromRect(23.15, 2) }
+            ),
+            houseWall(
+                [22, { color: 0x736758, border: 0x383127, particle: "river_hut_wall_particle" }],
+                { hitbox: RectangleHitbox.fromRect(30.8, 2) }
+            ),
+            houseWall(
+                [23, { color: 0x736758, border: 0x383127, particle: "river_hut_wall_particle" }],
+                { hitbox: RectangleHitbox.fromRect(25.4, 2) }
+            ),
+
             // HQ walls (headquarters)
             hqWall(
                 [1],
@@ -2145,6 +2158,47 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     residue: "stove_residue"
                 },
                 reflectBullets: true
+            },
+            {
+                idString: "pan_stove",
+                name: "Pan Stove",
+                material: "metal_light",
+                health: 140,
+                scale: {
+                    spawnMin: 1,
+                    spawnMax: 1,
+                    destroy: 0.8
+                },
+                hitbox: RectangleHitbox.fromRect(9.1, 6.45, Vec.create(0, -0.2)),
+                rotationMode: RotationMode.Limited,
+                explosion: "stove_explosion",
+                frames: {
+                    particle: "metal_particle",
+                    residue: "stove_residue"
+                },
+                reflectBullets: true,
+                hasLoot: true
+            },
+            {
+                idString: "small_pan_stove",
+                name: "Small Pan Stove",
+                material: "metal_light",
+                health: 140,
+                scale: {
+                    spawnMin: 1,
+                    spawnMax: 1,
+                    destroy: 0.8
+                },
+                hideOnMap: true,
+                hitbox: RectangleHitbox.fromRect(6.9, 6.64, Vec.create(0, -0.3)),
+                rotationMode: RotationMode.Limited,
+                explosion: "stove_explosion",
+                frames: {
+                    particle: "metal_particle",
+                    residue: "stove_residue"
+                },
+                reflectBullets: true,
+                hasLoot: true
             },
             {
                 idString: "fireplace",
@@ -2595,6 +2649,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 hitbox: RectangleHitbox.fromRect(12.83, 1.9, Vec.create(0, -0.4)),
                 rotationMode: RotationMode.Limited,
                 zIndex: ZIndexes.ObstaclesLayer3,
+                allowFlyover: FlyoverPref.Never, // LMAO no
                 frames: {
                     particle: "metal_particle"
                 }
@@ -2637,7 +2692,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 idString: "sink",
                 name: "Sink",
                 material: "wood",
-                health: 100,
+                health: 80,
                 scale: {
                     spawnMin: 1,
                     spawnMax: 1,
@@ -3706,6 +3761,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 zIndex: ZIndexes.ObstaclesLayer4,
                 rotationMode: RotationMode.Limited,
                 allowFlyover: FlyoverPref.Always,
+                noMeleeCollision: true,
                 noCollisions: true
             },
             // --------------------------------------------
@@ -3845,7 +3901,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 idString: "trash_can",
                 name: "Trash Can",
                 material: "appliance",
-                health: 105,
+                health: 90,
                 scale: {
                     spawnMin: 1,
                     spawnMax: 1,
@@ -4287,7 +4343,8 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 1,
                     destroy: 0.7
                 },
-                hitbox: RectangleHitbox.fromRect(12, 7, Vec.create(0, -0.1)),
+                hitbox: RectangleHitbox.fromRect(12, 7),
+                spawnHitbox: RectangleHitbox.fromRect(14, 9),
                 rotationMode: RotationMode.None,
                 zIndex: ZIndexes.UnderwaterPlayers - 1,
                 hasLoot: true,
@@ -4329,10 +4386,23 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 },
                 rotationMode: RotationMode.Limited
             },
-            /*   {
+            {
+                idString: "blue_house_stair_walls",
+                name: "Blue House Stair Walls",
+                material: "metal_heavy",
+                health: 1000,
+                indestructible: true,
+                invisible: true,
+                hitbox: RectangleHitbox.fromRect(13, 4),
+                frames: {
+                    particle: "metal_particle"
+                },
+                rotationMode: RotationMode.Limited
+            },
+            {
                 idString: "blue_house_stair",
                 name: "Blue House Stair",
-                material: "metal_light",
+                material: "metal_heavy",
                 health: 1000,
                 indestructible: true,
                 role: ObstacleSpecialRoles.Stair,
@@ -4341,32 +4411,13 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     low: 3
                 },
                 invisible: true,
-                hitbox: RectangleHitbox.fromRect(9, 11),
+                hitbox: RectangleHitbox.fromRect(9, 10),
                 frames: {
                     particle: "metal_particle"
                 },
-                rotationMode: RotationMode.Limited
+                rotationMode: RotationMode.Limited,
+                zIndex: ZIndexes.BuildingsFloor
             },
-            {
-                idString: "blue_house_stair_walls", // to block -1 layer collision funnies
-                name: "Blue House Stair",
-                material: "metal_light",
-                health: 1000,
-                indestructible: true,
-                activeEdges: {
-                    high: 1,
-                    low: 3
-                },
-                invisible: true,
-                hitbox: new GroupHitbox(
-                    RectangleHitbox.fromRect(10, 1.7, Vec.create(0, -6)),
-                    RectangleHitbox.fromRect(10, 1.7, Vec.create(0, 6))
-                ),
-                frames: {
-                    particle: "metal_particle"
-                },
-                rotationMode: RotationMode.Limited
-            }, */
             {
                 idString: "hq_stair",
                 name: "HQ Stair",
@@ -4418,24 +4469,6 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     low: 0
                 },
                 hitbox: RectangleHitbox.fromRect(11.55, 25.5),
-                frames: {
-                    particle: "metal_particle"
-                },
-                rotationMode: RotationMode.Limited,
-                zIndex: ZIndexes.BuildingsFloor
-            },
-            {
-                idString: "fire_exit_stair",
-                name: "Fire Exit Stair",
-                material: "metal_heavy",
-                health: 1000,
-                indestructible: true,
-                role: ObstacleSpecialRoles.Stair,
-                activeEdges: {
-                    high: 0,
-                    low: 2
-                },
-                hitbox: RectangleHitbox.fromRect(13.8, 27.8),
                 frames: {
                     particle: "metal_particle"
                 },
@@ -4843,6 +4876,32 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 frames: {
                     particle: "metal_particle"
                 }
+            },
+            {
+                idString: "rsh_case_single",
+                name: "RSh-12 Case",
+                material: "crate",
+                health: 200,
+                hitbox: new GroupHitbox(
+                    RectangleHitbox.fromRect(8.5, 5.5),
+                    RectangleHitbox.fromRect(1.3, 6, Vec.create(-2.7, 0)),
+                    RectangleHitbox.fromRect(1.3, 6, Vec.create(2.7, 0))
+                ),
+                scale: {
+                    spawnMax: 1,
+                    spawnMin: 1,
+                    destroy: 0.8
+                },
+                rotationMode: RotationMode.Limited,
+                hasLoot: true,
+                frames: {
+                    particle: "rsh_case_particle",
+                    residue: "rsh_case_residue"
+                }
+            },
+            {
+                [inheritFrom]: "rsh_case_single",
+                idString: "rsh_case_dual"
             }
             /* {
                 idString: "humvee",
@@ -4866,13 +4925,13 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     particle: "metal_particle"
                 }
             }, */
-        ] satisfies readonly Missing[]).map(
+        ] satisfies ReadonlyArray<RawDefinition<Missing>>).map(
             o => {
                 const obj = o as Mutable<ObstacleDefinition>;
                 if (o.role !== undefined) obj[`is${ObstacleSpecialRoles[o.role] as keyof typeof ObstacleSpecialRoles}`] = true;
                 if (o.variations !== undefined) obj.variationBits = Math.ceil(Math.log2(o.variations));
                 return o;
             }
-        ) as readonly Missing[];
+        ) satisfies ReadonlyArray<RawDefinition<Missing>>;
     }
 );

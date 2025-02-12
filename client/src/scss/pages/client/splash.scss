@@ -14,11 +14,17 @@
   height: 100%;
   z-index: 100;
 
+<<<<<<< HEAD
   //noinspection CssUnknownTarget
   background-image: url("/img/backgrounds/background.png");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
+=======
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+>>>>>>> upstream/master
 }
 
 #splash-logo {
@@ -53,6 +59,7 @@
 
   font-size: 20px;
 
+<<<<<<< HEAD
   @media screen and (max-width: variables.$screen_large) {
     flex-direction: column;
     align-items: center;
@@ -63,6 +70,54 @@
 
     #splash-options {
       order: 1;
+=======
+    @media screen and (max-width: variables.$screen_large) {
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 5px;
+        max-height: unset;
+        margin-bottom: 1rem;
+
+        #splash-options,
+        #splash-customize,
+        #splash-socials,
+        #splash-rotate-message,
+        #splash-news {
+            max-width: 300px;
+        }
+
+        #splash-news {
+            height: 250px;
+            #news-posts {
+                height: 80%;
+            }
+        }
+
+        #splash-socials {
+            height: 90px;
+            display: flex;
+
+            div {
+                flex-direction: column !important;
+
+                .btn-wiki, .btn-kofi, .btn-github {
+                    display: none;
+                }
+            }
+        }
+
+        #splash-customize {
+            height: 250px;
+
+            #skin-container {
+                transform: scale(90%);
+            }
+
+            button {
+                font-size: 16px;
+            }
+        }
+>>>>>>> upstream/master
     }
 
     #splash-news {
@@ -182,13 +237,21 @@
   }
 }
 
+
 #splash-news,
 #splash-options,
 #splash-customize,
 #splash-server-message,
+<<<<<<< HEAD
 #splash-rotate-message {
   background: palette.$transparent_bg;
   width: 370px;
+=======
+#splash-rotate-message,
+#splash-hw-acceleration-warning {
+    background: palette.$transparent_bg;
+    width: 370px;
+>>>>>>> upstream/master
 
   padding: 20px;
   border-radius: 20px;
@@ -198,6 +261,24 @@
 }
 
 .blur {
+<<<<<<< HEAD
+=======
+    #splash-news,
+    #splash-options,
+    #splash-customize,
+    #splash-server-message,
+    #splash-rotate-message,
+    #splash-socials,
+    #splash-hw-acceleration-warning,
+    .featured-container,
+    .server-list-item {
+        backdrop-filter: blur(8px);
+    }
+    .create-team-server-list-item {
+        backdrop-filter: blur(8px);
+    }
+}
+>>>>>>> upstream/master
 
   #splash-news,
   #splash-options,
@@ -221,6 +302,12 @@
 #splash-server-message,
 #btn-server-select {
   text-shadow: 3px 3px 8px #00000064;
+}
+
+#splash-hw-acceleration-warning {
+    text-align: center;
+    justify-content: center;
+    margin: 5px auto 5px auto;
 }
 
 #splash-rotate-message {
@@ -441,6 +528,7 @@
   &.loading {
     pointer-events: none;
 
+<<<<<<< HEAD
     .loading-logo,
     #loading-text {
       opacity: 1;
@@ -448,6 +536,23 @@
 
     #splash-options-wrapper {
       filter: blur(3px);
+=======
+    #loader-container {
+        opacity: 0;
+        transition: opacity 0.5s;
+    }
+
+    &.loading {
+        pointer-events: none;
+
+        #loader-container {
+            opacity: 1;
+        }
+
+        #splash-options-wrapper {
+            filter: blur(3px);
+        }
+>>>>>>> upstream/master
     }
   }
 
@@ -481,7 +586,115 @@
     font-size: 18px;
   }
 
+<<<<<<< HEAD
   #btn-server-select {
+=======
+    #btn-server-select {
+        background: transparent;
+        color: white;
+
+        width: 100%;
+        height: 50px;
+
+        padding: 0.375rem 1rem 0.375rem 1rem;
+
+        margin-top: 10px;
+        margin-bottom: 10px;
+
+        border: 3px solid palette.$orange;
+        border-radius: 10px;
+
+        transition: 0.15s box-shadow;
+
+        font-size: 18px;
+        text-align-last: center;
+        line-height: 1.5;
+
+        display: flex;
+        align-items: center;
+
+        i {
+            // caret
+            margin-left: 10px;
+            margin-top: -2px;
+        }
+    }
+
+    .btn {
+        font-size: 18px;
+        width: 100%;
+    }
+
+    #btn-play-solo, #btn-play-duo {
+        margin-bottom: 5px;
+    }
+
+    .team-btns-container {
+        display: flex;
+        gap: 5px;
+    }
+
+    .locked {
+        filter: brightness(70%) blur(2px);
+        pointer-events: none;
+        animation: none;
+
+        & .btn, &.btn {
+            color: transparent;
+            text-shadow: none;
+            img {
+                display: none;
+            }
+        }
+    }
+
+    #next-switch-messages {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        pointer-events: none;
+        display: flex;
+        gap: 20px;
+    }
+
+    .next-switch-msg {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .next-switch-time {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 18px;
+        @include variables.text-shadow;
+    }
+
+    .next-switch-icon {
+        width: 28px;
+        height: 28px;
+        background-size: contain;
+        background-position: center;
+        background-repeat: no-repeat;
+        @include variables.drop-shadow;
+    }
+
+    #locked-tooltip {
+        position: absolute;
+        top: calc(50% + 60px);
+        left: 50%;
+        transform: translate(-50%, -50%);
+        @include variables.text-shadow;
+
+        background-color: palette.$bg;
+        padding: 8px;
+        border-radius: 16px;
+        width: 330px;
+        font-size: 16px;
+    }
+}
+
+#btn-create-team-server-select {
+>>>>>>> upstream/master
     background: transparent;
     color: white;
 
@@ -712,10 +925,83 @@
 }
 
 #splash-customize {
+<<<<<<< HEAD
   display: flex;
   justify-content: center;
   align-items: center;
   color: #ffffff91;
+=======
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff91;
+}
+
+#splash-featured-people {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+
+    @media screen and (max-width: variables.$screen_large) {
+        width: 200px;
+    }
+
+    @media screen and (max-width: 800px) {
+        position: static;
+        flex-direction: row;
+    }
+
+    .featured-container {
+        background: palette.$transparent_bg;
+        border-radius: 10px;
+        padding: 10px 20px 10px 20px;
+        height: fit-content;
+
+        @media screen and (max-width: 1200px) {
+            padding: 5px 10px 5px 10px;
+        }
+    }
+
+    .featured-heading {
+        font-weight: bold;
+        font-size: 18px;
+        margin-top: 5px;
+        margin-bottom: 12px;
+
+        @media screen and (max-width: 1200px) {
+            font-size: 16px;
+        }
+    }
+
+    .featured-logo {
+        height: 30px;
+
+        @media screen and (max-width: 1200px) {
+            height: 25px;
+        }
+    }
+
+    .featured-content {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #ffc800;
+        text-shadow: 3px 3px 8px #00000064;
+        text-decoration: none;
+    }
+
+    .featured-name {
+        font-size: 16px;
+
+        @media screen and (max-width: 1200px) {
+            font-size: 14px;
+        }
+    }
+>>>>>>> upstream/master
 }
 
 #splash-more {
@@ -769,6 +1055,7 @@
   animation: mode-halloween-color 4s linear infinite;
 }
 
+<<<<<<< HEAD
 .event-fall {
   background-color: #72742f;
   border-bottom: 2px solid #535421;
@@ -776,6 +1063,8 @@
   animation: mode-fall-color 4s linear infinite;
 }
 
+=======
+>>>>>>> upstream/master
 @keyframes mode-winter-color {
   0% {
     background-color: #dcdcdc;

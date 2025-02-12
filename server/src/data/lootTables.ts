@@ -1,137 +1,9 @@
-import { GameConstants } from "@common/constants";
-import { Ammos } from "@common/definitions/ammos";
-import { Armors } from "@common/definitions/armors";
-import { Backpacks } from "@common/definitions/backpacks";
-import { Buildings, type BuildingDefinition } from "@common/definitions/buildings";
-import { Guns } from "@common/definitions/guns";
-import { HealingItems } from "@common/definitions/healingItems";
-import { Loots, type LootDefForType, type LootDefinition } from "@common/definitions/loots";
-import { Melees } from "@common/definitions/melees";
-import { ObstacleDefinition, Obstacles } from "@common/definitions/obstacles";
-import { PerkIds, Perks } from "@common/definitions/perks";
-import { Scopes } from "@common/definitions/scopes";
-import { Skins } from "@common/definitions/skins";
-import { Throwables } from "@common/definitions/throwables";
-import { isArray } from "@common/utils/misc";
-import { ItemType, NullString, type ObjectDefinition, type ObjectDefinitions, type ReferenceOrRandom, type ReferenceTo } from "@common/utils/objectDefinitions";
-import { random, weightedRandom } from "@common/utils/random";
-import { Maps } from "./maps";
+import { Mode } from "@common/definitions/modes";
+import { PerkIds } from "@common/definitions/perks";
+import { NullString } from "@common/utils/objectDefinitions";
+import { LootTable } from "../utils/lootHelpers";
 
-export type WeightedItem =
-    (
-        | { readonly item: ReferenceTo<LootDefinition> | typeof NullString }
-        | { readonly table: string }
-    )
-    & { readonly weight: number }
-    & (
-        | { readonly spawnSeparately?: false, readonly count?: number }
-        | { readonly spawnSeparately: true, readonly count: number }
-    );
-
-export type SimpleLootTable = readonly WeightedItem[] | ReadonlyArray<readonly WeightedItem[]>;
-
-export type FullLootTable = {
-    readonly min: number
-    readonly max: number
-    /**
-     * Ensures no duplicate drops. Only applies to items in the table, not tables.
-     */
-    readonly noDuplicates?: boolean
-    readonly loot: readonly WeightedItem[]
-};
-
-export type LootTable = SimpleLootTable | FullLootTable;
-
-export class LootItem {
-    constructor(
-        public readonly idString: ReferenceTo<LootDefinition>,
-        public readonly count: number
-    ) { }
-}
-
-export function getLootFromTable(tableID: string): LootItem[] {
-    const lootTable = resolveTable(tableID);
-    if (lootTable === undefined) {
-        throw new ReferenceError(`Unknown loot table: ${tableID}`);
-    }
-
-    const isSimple = isArray(lootTable);
-    const { min, max, noDuplicates, loot } = isSimple
-        ? {
-            min: 1,
-            max: 1,
-            noDuplicates: false,
-            loot: lootTable
-        }
-        : lootTable.noDuplicates
-            ? { ...lootTable, loot: [...lootTable.loot] } // cloning the array is necessary because noDuplicates mutates it
-            : lootTable;
-
-    return (
-        isSimple && isArray(loot[0])
-            ? (loot as readonly WeightedItem[][]).map(innerTable => getLoot(innerTable))
-            : min === 1 && max === 1
-                ? getLoot(loot as WeightedItem[], noDuplicates)
-                : Array.from(
-                    { length: random(min, max) },
-                    () => getLoot(loot as WeightedItem[], noDuplicates)
-                )
-    ).flat();
-}
-
-export function resolveTable(tableID: string): LootTable {
-    return LootTables[GameConstants.modeName]?.[tableID] ?? LootTables.normal[tableID];
-}
-
-function getLoot(items: WeightedItem[], noDuplicates?: boolean): LootItem[] {
-    const selection = items.length === 1
-        ? items[0]
-        : weightedRandom(items, items.map(({ weight }) => weight));
-
-    if ("table" in selection) {
-        return getLootFromTable(selection.table);
-    }
-
-    const item = selection.item;
-    if (item === NullString) return [];
-
-    const loot: LootItem[] = selection.spawnSeparately
-        ? Array.from({ length: selection.count }, () => new LootItem(item, 1))
-        : [new LootItem(item, selection.count ?? 1)];
-
-    const definition = Loots.fromStringSafe(item);
-    if (definition === undefined) {
-        throw new ReferenceError(`Unknown loot item: ${item}`);
-    }
-
-    if ("ammoType" in definition && definition.ammoSpawnAmount) {
-        // eslint-disable-next-line prefer-const
-        let { ammoType, ammoSpawnAmount } = definition;
-
-        if (selection.spawnSeparately) {
-            ammoSpawnAmount *= selection.count;
-        }
-
-        if (ammoSpawnAmount > 1) {
-            const halfAmount = ammoSpawnAmount / 2;
-            loot.push(
-                new LootItem(ammoType, Math.floor(halfAmount)),
-                new LootItem(ammoType, Math.ceil(halfAmount))
-            );
-        } else {
-            loot.push(new LootItem(ammoType, ammoSpawnAmount));
-        }
-    }
-
-    if (noDuplicates) {
-        const index = items.findIndex(entry => "item" in entry && entry.item === selection.item);
-        if (index !== -1) items.splice(index, 1);
-    }
-
-    return loot;
-}
-
-export const LootTables: Record<string, Record<string, LootTable>> = {
+export const LootTables: Record<Mode, Record<string, LootTable>> = {
     normal: {
         ground_loot: [
             { table: "equipment", weight: 1 },
@@ -404,7 +276,8 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "flamingo", weight: 1 },
             { item: "verified", weight: 0.5 },
             { item: "no_kil_pls", weight: 0.5 },
-            { item: "basic_outfit", weight: 0.001 }
+            { item: "ghillie_suit", weight: 0.15 },
+            { item: "basic_outfit", weight: 0.05 }
         ],
         toilet: {
             min: 2,
@@ -470,6 +343,12 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ],
         bombed_armory_skin: [
             { item: "one_at_nsd", weight: 1 }
+        ],
+        rsh_case_single: [
+            { item: "rsh12", weight: 1 }
+        ],
+        rsh_case_dual: [
+            { item: "dual_rsh12", weight: 1 }
         ],
         airdrop_crate: [
             [{ table: "airdrop_equipment", weight: 1 }],
@@ -564,9 +443,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ],
         aegis_golden_case: [
             { item: "deagle", weight: 1 },
-            { item: "rsh12", weight: 0.5 },
             { item: "dual_deagle", weight: 0.05 },
-            { item: "dual_rsh12", weight: 0.025 },
             { item: "g19", weight: 0.0005 }
         ],
         fire_hatchet_case: [
@@ -774,8 +651,9 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ],
         melee: [
             { item: "baseball_bat", weight: 3 },
+            { item: "kbar", weight: 2 },
             { item: "sickle", weight: 0.5 },
-            { item: "kbar", weight: 2 }
+            { item: "pan", weight: 0.1 }
         ],
         airdrop_equipment: [
             { item: "tactical_helmet", weight: 1 },
@@ -806,7 +684,8 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "crowbar", weight: 0.1 },
             { item: "hatchet", weight: 0.1 },
             { item: "sickle", weight: 0.1 },
-            { item: "kbar", weight: 0.1 }
+            { item: "kbar", weight: 0.1 },
+            { item: "pan", weight: 0.075 }
         ],
         airdrop_guns: [
             { item: "mg36", weight: 1 },
@@ -992,7 +871,9 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "coal", weight: 1 },
                 { item: NullString, weight: 1 }
             ]
-        ]
+        ],
+        pan_stove: [{ item: "pan", weight: 1 }],
+        small_pan_stove: [{ item: "pan", weight: 1 }]
     },
 
     halloween: {
@@ -1394,10 +1275,11 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             [{ item: "frag_grenade", count: 3, weight: 1 }]
         ],
         briefcase: [
-            { item: "usas12", weight: 1 },
+            { item: "usas12", weight: 0.5 },
+            { item: "m1_garand", weight: 0.5 },
             { item: "mk18", weight: 0.2 },
             { item: "l115a1", weight: 0.2 },
-            { item: "g19", weight: 0.0001 }
+            { item: "g19", weight: 0.01 }
         ],
         ammo_crate: [
             [{ table: "ammo", weight: 1 }],
@@ -1542,7 +1424,6 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "m1_garand", weight: 0.002 }
         ],
         airdrop_guns: [
-            { item: "sr25", weight: 1.5 },
             { item: "m590m", weight: 1 },
             { item: "rsh12", weight: 1 },
             { item: "vepr12", weight: 1 },
@@ -1573,11 +1454,11 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ],
         gold_airdrop_guns: [
             { item: "dual_rsh12", weight: 1 },
-            { item: "usas12", weight: 1 },
+            { item: "m1_garand", weight: 1 },
             { item: "l115a1", weight: 1 },
             { item: "mk18", weight: 1 },
-            { item: "m1_garand", weight: 0.5 },
-            { item: "g19", weight: 0.0001 }
+            { item: "usas12", weight: 0.5 },
+            { item: "g19", weight: 0.02 }
         ],
         viking_chest_guns: [
             // 35% chance for one of these
@@ -1680,127 +1561,6 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "baseball_bat", weight: 2 },
             { item: "gas_can", weight: 0 } // somewhat hack in order to make the gas can obtainable through mini plumpkins
         ]
-    }
+    },
+    birthday: {}
 };
-
-// either return a reference as-is, or take all the non-null string references
-const referenceOrRandomOptions = <T extends ObjectDefinition>(obj: ReferenceOrRandom<T>): Array<ReferenceTo<T>> => {
-    return typeof obj === "string"
-        ? [obj]
-        // well, Object.keys already filters out symbols so…
-        : Object.keys(obj)/* .filter(k => k !== NullString) */;
-};
-
-type SpawnableItemRegistry = ReadonlySet<ReferenceTo<LootDefinition>> & {
-    forType<K extends ItemType>(type: K): ReadonlyArray<LootDefForType<K>>
-};
-
-const itemTypeToCollection: {
-    [K in ItemType]: ObjectDefinitions<LootDefForType<K>>
-} = {
-    [ItemType.Gun]: Guns,
-    [ItemType.Ammo]: Ammos,
-    [ItemType.Melee]: Melees,
-    [ItemType.Throwable]: Throwables,
-    [ItemType.Healing]: HealingItems,
-    [ItemType.Armor]: Armors,
-    [ItemType.Backpack]: Backpacks,
-    [ItemType.Scope]: Scopes,
-    [ItemType.Skin]: Skins,
-    [ItemType.Perk]: Perks
-};
-
-type Cache = {
-    [K in ItemType]?: Array<LootDefForType<K>> | undefined;
-};
-
-// an array is just an object with numeric keys
-const spawnableItemTypeCache = [] as Cache;
-
-// has to lazy-loaded to avoid circular dependency issues
-let spawnableLoots: SpawnableItemRegistry | undefined = undefined;
-export const SpawnableLoots = (): SpawnableItemRegistry => spawnableLoots ??= (() => {
-    /*
-        we have a collection of loot tables, but not all of them are necessarily reachable
-        for example, if loot table A belongs to obstacle A, but said obstacle is never spawned,
-        then we mustn't take loot table A into account
-    */
-
-    const mainMap = Maps[GameConstants.modeName as keyof typeof Maps];
-
-    // first, get all the reachable buildings
-    // to do this, we get all the buildings in the map def, then for each one, include itself and any subbuildings
-    // flatten that array, and that's the reachable buildings
-    // and for good measure, we exclude duplicates by using a set
-    const reachableBuildings = [
-        ...new Set(
-            Object.keys(mainMap.buildings ?? {}).map(building => {
-                const b = Buildings.fromString(building);
-
-                // for each subbuilding, we either take it as-is, or take all possible spawn options
-                return b.subBuildings.map(
-                    ({ idString }) => referenceOrRandomOptions(idString).map(s => Buildings.fromString(s))
-                ).concat([b]);
-            }).flat(2)
-        )
-    ] satisfies readonly BuildingDefinition[];
-
-    // now obstacles
-    // for this, we take the list of obstacles from the map def, and append to that alllllll the obstacles from the
-    // reachable buildings, which again involves flattening some arrays
-    const reachableObstacles = [
-        ...new Set(
-            Object.keys(mainMap.obstacles ?? {}).map(o => Obstacles.fromString(o)).concat(
-                reachableBuildings.map(
-                    ({ obstacles }) => obstacles.map(
-                        ({ idString }) => referenceOrRandomOptions(idString).map(o => Obstacles.fromString(o))
-                    )
-                ).flat(2)
-            )
-        )
-    ] satisfies readonly ObstacleDefinition[];
-
-    // and now, we generate the list of reachable tables, by taking those from map def, and adding those from
-    // both the obstacles and the buildings
-    const reachableLootTables = [
-        ...new Set(
-            Object.keys(mainMap.loots ?? {}).map(t => resolveTable(t)).concat(
-                reachableObstacles.filter(({ hasLoot }) => hasLoot).map(
-                    ({ lootTable, idString }) => resolveTable(lootTable ?? idString)
-                )
-            ).concat(
-                reachableBuildings.map(
-                    ({ lootSpawners }) => lootSpawners.map(({ table }) => resolveTable(table))
-                ).flat()
-            )
-        )
-    ] satisfies readonly LootTable[];
-
-    const getAllItemsFromTable = (table: LootTable): Array<ReferenceTo<LootDefinition>> =>
-        (
-            Array.isArray(table)
-                ? table as SimpleLootTable
-                : (table as FullLootTable).loot
-        )
-            .flat()
-            .map(entry => "item" in entry ? entry.item : getAllItemsFromTable(resolveTable(entry.table)))
-            .filter(item => item !== NullString)
-            .flat();
-
-    // and now we go get the spawnable loots
-    const spawnableLoots: ReadonlySet<ReferenceTo<LootDefinition>> = new Set<ReferenceTo<LootDefinition>>(
-        reachableLootTables.map(getAllItemsFromTable).flat()
-    );
-
-    (spawnableLoots as SpawnableItemRegistry).forType = <K extends ItemType>(type: K): ReadonlyArray<LootDefForType<K>> => {
-        return (
-            (
-                // without this seemingly useless assertion, assignability errors occur
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-                spawnableItemTypeCache[type] as Array<LootDefForType<K>> | undefined
-            ) ??= itemTypeToCollection[type].definitions.filter(({ idString }) => spawnableLoots.has(idString))
-        );
-    };
-
-    return spawnableLoots as SpawnableItemRegistry;
-})();

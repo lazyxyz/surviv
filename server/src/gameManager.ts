@@ -1,14 +1,18 @@
 import { TeamSize } from "@common/constants";
 import { type GetGameResponse } from "@common/typings";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
-import { Config } from "./config";
 import { Game } from "./game";
-import { createServer } from "./utils/serverHelpers";
 import { initPlayRoutes } from "./api/play";
+import { WebSocket } from "uWebSockets.js";
+import { Config, MapWithParams } from "./config";
+import { PlayerContainer } from "./objects/gamer";
+import { map, maxTeamSize, serverLog, serverWarn } from "./server";
+import { createServer, forbidden, getIP } from "./utils/serverHelpers";
 
 export interface WorkerInitData {
     readonly id: number
     readonly maxTeamSize: number
+    readonly map: MapWithParams
 }
 
 export enum WorkerMessages {
@@ -16,7 +20,9 @@ export enum WorkerMessages {
     IPAllowed,
     UpdateGameData,
     UpdateMaxTeamSize,
-    CreateNewGame
+    CreateNewGame,
+    UpdateMap,
+    Reset,
 }
 
 export type WorkerMessage =
@@ -33,9 +39,14 @@ export type WorkerMessage =
         readonly maxTeamSize: TeamSize
     }
     | {
-        readonly type:
-        | WorkerMessages.CreateNewGame
+        readonly type: WorkerMessages.CreateNewGame
         readonly maxTeamSize: TeamSize
+    }|{
+        readonly type: WorkerMessages.UpdateMap
+        readonly map: MapWithParams
+    }
+    | {
+        readonly type: WorkerMessages.Reset
     };
 
 export interface GameData {
@@ -75,7 +86,7 @@ export class GameContainer {
             this.worker = new Worker(
                 __filename,
                 {
-                    workerData: { id, maxTeamSize } satisfies WorkerInitData,
+                    workerData: { id, maxTeamSize, map } satisfies WorkerInitData,
                     execArgv: __filename.endsWith(".ts")
                         ? ["-r", "ts-node/register", "-r", "tsconfig-paths/register"]
                         : undefined
@@ -185,8 +196,11 @@ export const games: Array<GameContainer | undefined> = [];
 if (!isMainThread) {
     const id = (workerData as WorkerInitData).id;
     let maxTeamSize = (workerData as WorkerInitData).maxTeamSize;
+    let map = (workerData as WorkerInitData).map;
 
-    let game = new Game(id, maxTeamSize);
+    let game = new Game(id, maxTeamSize, map);
+
+    process.on("uncaughtException", e => game.error("An unhandled error occurred. Details:", e));
 
     // string = ip, number = expire time
     const allowedIPs = new Map<string, number>();
@@ -200,6 +214,14 @@ if (!isMainThread) {
                     type: WorkerMessages.IPAllowed,
                     ip: message.ip
                 });
+                break;
+            }
+            case WorkerMessages.UpdateMap:
+                map = message.map;
+                game.kill();
+            // eslint-disable-next-line no-fallthrough
+            case WorkerMessages.Reset: {
+                game = new Game(id, maxTeamSize, map);
                 break;
             }
             case WorkerMessages.UpdateMaxTeamSize: {

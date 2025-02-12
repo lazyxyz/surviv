@@ -1,18 +1,25 @@
+
 import { TeamSize } from "@common/constants";
+import { ColorStyles, Logger, styleText } from "@common/utils/logging";
 import os from "os";
 import { isMainThread } from "worker_threads";
 import { version } from "../../package.json";
 import { Config } from "./config";
-import { newGame } from "./gameManager";
+import { WorkerMessages, games, newGame } from "./gameManager";
 import { CustomTeam } from "./team";
-import { Logger } from "./utils/misc";
 import { createServer } from "./utils/serverHelpers";
 import { initGameRoutes } from "./api/game";
 import { initAuthRoutes } from "@api/index";
 import { initTeamRoutes } from "./api/team";
+import { modeFromMap } from "./utils/misc";
+import { Cron } from "croner";
+
+export let map = typeof Config.map === "string" ? Config.map : Config.map.rotation[0];
+let mapSwitchCron: Cron | undefined;
+let mapRotationIndex = 0;
+
 
 export let teamsCreated: Record<string, number> = {};
-
 export const customTeams: Map<string, CustomTeam> = new Map<string, CustomTeam>();
 export let maxTeamSize = typeof Config.maxTeamSize === "number" ? Config.maxTeamSize : Config.maxTeamSize.rotation[0];
 
@@ -42,15 +49,15 @@ if (isMainThread) {
         setInterval(() => {
             const memoryUsage = process.memoryUsage().rss;
 
-            let perfString = `Server | Memory usage: ${Math.round(memoryUsage / 1024 / 1024 * 100) / 100} MB`;
+            let perfString = `RAM usage: ${Math.round(memoryUsage / 1024 / 1024 * 100) / 100} MB`;
 
             // windows L
             if (os.platform() !== "win32") {
                 const load = os.loadavg().join("%, ");
-                perfString += ` | Load (1m, 5m, 15m): ${load}%`;
+                perfString += ` | CPU usage (1m, 5m, 15m): ${load}%`;
             }
 
-            Logger.log(perfString);
+            serverLog(perfString);
         }, 60000);
 
         const teamSize = Config.maxTeamSize;
@@ -61,7 +68,33 @@ if (isMainThread) {
                 Logger.log(`Switching to ${humanReadableTeamSizes[maxTeamSize] ?? `team size ${maxTeamSize}`}`);
             }
         }
+
+        const _map = Config.map;
+        if (typeof _map === "object") {
+            mapSwitchCron = Cron(_map.switchSchedule, () => {
+                map = _map.rotation[++mapRotationIndex % _map.rotation.length];
+
+                for (const game of games) {
+                    game?.worker.postMessage({ type: WorkerMessages.UpdateMap, map });
+                }
+
+                serverLog(`Switching to "${map}" map`);
+            });
+        }
     });
 
 }
+
+export function serverLog(...message: unknown[]): void {
+    Logger.log(styleText("[Server]", ColorStyles.foreground.magenta.normal), ...message);
+}
+
+export function serverWarn(...message: unknown[]): void {
+    Logger.warn(styleText("[Server] [WARNING]", ColorStyles.foreground.yellow.normal), ...message);
+}
+
+export function serverError(...message: unknown[]): void {
+    Logger.warn(styleText("[Server] [ERROR]", ColorStyles.foreground.red.normal), ...message);
+}
+
 

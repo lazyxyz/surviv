@@ -11,19 +11,20 @@ import { JoinedPacket } from "@common/packets/joinedPacket";
 import { KillFeedPacket, type KillFeedPacketData } from "@common/packets/killFeedPacket";
 import { type InputPacket, type OutputPacket } from "@common/packets/packet";
 import { PacketStream } from "@common/packets/packetStream";
-import { PingPacket } from "@common/packets/pingPacket";
 import { SpectatePacket } from "@common/packets/spectatePacket";
 import { type PingSerialization } from "@common/packets/updatePacket";
 import { CircleHitbox, type Hitbox } from "@common/utils/hitbox";
 import { EaseFunctions, Geometry, Numeric, Statistics } from "@common/utils/math";
 import { Timeout } from "@common/utils/misc";
-import { ItemType, MapObjectSpawnMode, type ReifiableDef } from "@common/utils/objectDefinitions";
+import { ItemType, MapObjectSpawnMode, type ReferenceTo, type ReifiableDef } from "@common/utils/objectDefinitions";
 import { pickRandomInArray, randomFloat, randomPointInsideCircle, randomRotation } from "@common/utils/random";
 import { type SuroiByteStream } from "@common/utils/suroiByteStream";
 import { Vec, type Vector } from "@common/utils/vector";
 import { type WebSocket } from "uWebSockets.js";
 import { parentPort } from "worker_threads";
-import { Config, SpawnMode } from "./config";
+import { Mode, ModeDefinition, Modes } from "@common/definitions/modes";
+import { ColorStyles, Logger, styleText } from "@common/utils/logging";
+import { Config, MapWithParams, SpawnMode } from "./config";
 import { MapName, Maps } from "./data/maps";
 import { WorkerMessages, type GameData, type WorkerMessage } from "./gameManager";
 import { Gas } from "./gas";
@@ -36,7 +37,6 @@ import { type Emote } from "./objects/emote";
 import { Explosion } from "./objects/explosion";
 import { type BaseGameObject, type GameObject } from "./objects/gameObject";
 import { Loot, type ItemData } from "./objects/loot";
-import { Obstacle } from "./objects/obstacle";
 import { Parachute } from "./objects/parachute";
 import { Player, type ActorContainer } from "./objects/player";
 import { Gamer, type PlayerContainer } from "./objects/gamer";
@@ -46,9 +46,10 @@ import { PluginManager } from "./pluginManager";
 import { Team } from "./team";
 import { Grid } from "./utils/grid";
 import { IDAllocator } from "./utils/idAllocator";
-import { cleanUsername, Logger, removeFrom } from "./utils/misc";
+import { cleanUsername, modeFromMap, removeFrom } from "./utils/misc";
 import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
+import { Cache, getSpawnableLoots, SpawnableItemRegistry } from "./utils/lootHelpers";
 
 /*
     eslint-disable
@@ -67,16 +68,15 @@ export class Game implements GameData {
     readonly grid: Grid;
     readonly pluginManager = new PluginManager(this);
 
+    readonly modeName: Mode;
+    readonly mode: ModeDefinition;
+
     readonly partialDirtyObjects = new Set<BaseGameObject>();
     readonly fullDirtyObjects = new Set<BaseGameObject>();
 
     updateObjects = false;
 
     readonly livingPlayers = new Set<Player>();
-    /**
-     * Players that have connected but haven't sent a JoinPacket yet
-     */
-    readonly connectingPlayers = new Set<Player>();
     readonly connectedPlayers = new Set<Player>();
     readonly spectatablePlayers: Player[] = [];
     /**
@@ -158,12 +158,17 @@ export class Game implements GameData {
         readonly direction: number
     }> = [];
 
-    readonly detectors: Obstacle[] = [];
-
     /**
      * All map pings this tick
      */
     readonly mapPings: PingSerialization[] = [];
+
+    private readonly _spawnableItemTypeCache = [] as Cache;
+
+    private _spawnableLoots: SpawnableItemRegistry | undefined;
+    get spawnableLoots(): SpawnableItemRegistry {
+        return this._spawnableLoots ??= getSpawnableLoots(this.modeName, this.map.mapDef, this._spawnableItemTypeCache);
+    }
 
     private readonly _timeouts = new Set<Timeout>();
 
@@ -223,7 +228,7 @@ export class Game implements GameData {
         return this._idAllocator.takeNext();
     }
 
-    constructor(id: number, maxTeamSize: TeamSize) {
+    constructor(id: number, maxTeamSize: TeamSize, map: MapWithParams) {
         this.id = id;
         this.maxTeamSize = maxTeamSize;
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
@@ -235,17 +240,19 @@ export class Game implements GameData {
             startedTime: -1
         });
 
+        this.mode = Modes[this.modeName = modeFromMap(map)];
+
         this.pluginManager.loadPlugins();
 
-        const { width, height } = Maps[Config.map.split(":")[0] as MapName];
+        const { width, height } = Maps[map.split(":")[0] as MapName];
         this.grid = new Grid(this, width, height);
-        this.map = new GameMap(this, Config.map);
+        this.map = new GameMap(this, map);
         this.gas = new Gas(this);
 
         this.setGameData({ allowJoin: true });
 
         this.pluginManager.emit("game_created", this);
-        Logger.log(`Game ${this.id} | Created in ${Date.now() - this._start} ms`);
+        this.log(`Created in ${Date.now() - this._start} ms`);
 
         if (Config.addBot) {
             const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -267,6 +274,18 @@ export class Game implements GameData {
         this.tick();
     }
 
+    log(...message: unknown[]): void {
+        Logger.log(styleText(`[Game ${this.id}]`, ColorStyles.foreground.green.normal), ...message);
+    }
+
+    warn(...message: unknown[]): void {
+        Logger.log(styleText(`[Game ${this.id}] [WARNING]`, ColorStyles.foreground.yellow.normal), ...message);
+    }
+
+    error(...message: unknown[]): void {
+        Logger.log(styleText(`[Game ${this.id}] [ERROR]`, ColorStyles.foreground.red.normal), ...message);
+    }
+
     onMessage(stream: SuroiByteStream, player: Gamer): void {
         const packetStream = new PacketStream(stream);
         while (true) {
@@ -282,21 +301,13 @@ export class Game implements GameData {
                 this.activatePlayer(player, packet.output);
                 break;
             case packet instanceof PlayerInputPacket:
-                // Ignore input packets from players that haven't finished joining, dead players, and if the game is over
+                // Ignore input packets from players that haven't finished joining, dead players, or if the game is over
                 if (!player.joined || player.dead || player.game.over) return;
                 player.processInputs(packet.output);
                 break;
             case packet instanceof SpectatePacket:
                 player.spectate(packet.output);
                 break;
-            case packet instanceof PingPacket: {
-                if (Date.now() - player.lastPingTime < 4000) return;
-                player.lastPingTime = Date.now();
-                const stream = new PacketStream(new ArrayBuffer(8));
-                stream.serializeServerPacket(PingPacket.create());
-                player.sendData(stream.getBuffer());
-                break;
-            }
         }
     }
 
@@ -378,20 +389,8 @@ export class Game implements GameData {
             explosion.explode();
         }
 
-        // Update detectors
-        for (const detector of this.detectors) {
-            detector.updateDetector();
-        }
-
         // Update gas
         this.gas.tick();
-
-        // Delete players that haven't sent a JoinPacket after 5 seconds
-        for (const player of this.connectingPlayers) {
-            if (this.now - player.joinTime > 5000) {
-                player.disconnect("JoinPacket not received after 5 seconds");
-            }
-        }
 
         // First loop over players: movement, animations, & actions
         for (const player of this.grid.pool.getCategory(ObjectCategory.Player)) {
@@ -466,12 +465,12 @@ export class Game implements GameData {
             // End the game in 1 second
             this.addTimeout(() => {
                 this.setGameData({ stopped: true });
-                Logger.log(`Game ${this.id} | Ended`);
+                this.log("Ended");
             }, 1000);
         }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {
-            this.createNewGame();
+            this.preventJoin();
         }
 
         // Record performance and start the next tick
@@ -483,7 +482,7 @@ export class Game implements GameData {
         if (this._tickTimes.length >= 200) {
             const mspt = Statistics.average(this._tickTimes);
             const stddev = Statistics.stddev(this._tickTimes);
-            Logger.log(`Game ${this.id} | ms/tick: ${mspt.toFixed(2)} ± ${stddev.toFixed(2)} | Load: ${((mspt / this.idealDt) * 100).toFixed(1)}%`);
+            this.log(`ms/tick: ${mspt.toFixed(2)} ± ${stddev.toFixed(2)} | Load: ${((mspt / this.idealDt) * 100).toFixed(1)}%`);
             this._tickTimes.length = 0;
         }
 
@@ -506,12 +505,25 @@ export class Game implements GameData {
         parentPort?.postMessage({ type: WorkerMessages.UpdateGameData, data } satisfies WorkerMessage);
     }
 
-    createNewGame(): void {
-        if (!this.allowJoin) return; // means a new game has already been created by this game
+    preventJoin(): void {
+        if (!this.allowJoin) return;
 
-        parentPort?.postMessage({ type: WorkerMessages.CreateNewGame, maxTeamSize: this.maxTeamSize });
-        Logger.log(`Game ${this.id} | Attempting to create new game`);
+        this.log("Preventing new players from joining");
         this.setGameData({ allowJoin: false });
+    }
+
+    kill(): void {
+        for (const player of this.connectedPlayers) {
+            player.disconnect("Server killed");
+        }
+
+        this.setGameData({
+            allowJoin: false,
+            over: true,
+            stopped: true
+        });
+
+        this.log("Killed");
     }
 
     private _killLeader: Player | undefined;
@@ -560,9 +572,9 @@ export class Game implements GameData {
 
     private _sendKillLeaderKFPacket<
         Message extends
-            | KillfeedMessageType.KillLeaderAssigned
-            | KillfeedMessageType.KillLeaderDeadOrDisconnected
-            | KillfeedMessageType.KillLeaderUpdated
+        | KillfeedMessageType.KillLeaderAssigned
+        | KillfeedMessageType.KillLeaderDeadOrDisconnected
+        | KillfeedMessageType.KillLeaderUpdated
     >(
         messageType: Message,
         options?: Partial<Omit<KillFeedPacketData & { readonly messageType: NoInfer<Message> }, "messageType" | "playerID" | "attackerKills">>
@@ -616,7 +628,10 @@ export class Game implements GameData {
             }
         }
 
-        switch (Config.spawn.mode) {
+        const spawnOptions = Config.spawn.mode === SpawnMode.Default
+            ? this.map.mapDef.spawn ?? { mode: SpawnMode.Normal }
+            : Config.spawn;
+        switch (spawnOptions.mode) {
             case SpawnMode.Normal: {
                 const hitbox = new CircleHitbox(5);
                 const gasPosition = this.gas.currentPosition;
@@ -665,17 +680,18 @@ export class Game implements GameData {
                 break;
             }
             case SpawnMode.Radius: {
-                const { x, y } = Config.spawn.position;
+                const [x, y, layer] = spawnOptions.position;
                 spawnPosition = randomPointInsideCircle(
                     Vec.create(x, y),
-                    Config.spawn.radius
+                    spawnOptions.radius
                 );
+                spawnLayer = layer ?? Layer.Ground;
                 break;
             }
             case SpawnMode.Fixed: {
-                const { x, y } = Config.spawn.position;
+                const [x, y, layer] = spawnOptions.position;
                 spawnPosition = Vec.create(x, y);
-                spawnLayer = Config.spawn.layer ?? Layer.Ground;
+                spawnLayer = layer ?? Layer.Ground;
                 break;
             }
             case SpawnMode.Center: {
@@ -686,7 +702,8 @@ export class Game implements GameData {
 
         // Player is added to the players array when a JoinPacket is received from the client
         const player = new Gamer(this, socket, spawnPosition, spawnLayer, team);
-        this.connectingPlayers.add(player);
+        // this.connectingPlayers.add(player);
+
         this.pluginManager.emit("player_did_connect", player);
         return player;
     }
@@ -806,6 +823,7 @@ export class Game implements GameData {
         // player.inventory.vest = Armors.fromString("developr_vest");
         // player.inventory.helmet = Armors.fromString("tactical_helmet");
 
+        if (player.joined) return;
         const rejectedBy = this.pluginManager.emit("player_will_join", { player, joinPacket: packet });
         if (rejectedBy) {
             player.disconnect(`Connection rejected by server plugin '${rejectedBy.constructor.name}'`);
@@ -827,7 +845,6 @@ export class Game implements GameData {
 
         this.livingPlayers.add(player);
         this.spectatablePlayers.push(player);
-        this.connectingPlayers.delete(player);
         this.connectedPlayers.add(player);
         this.newPlayers.push(player);
         this.grid.addObject(player);
@@ -862,7 +879,7 @@ export class Game implements GameData {
             }, 3000);
         }
 
-        Logger.log(`Game ${this.id} | "${player.name}" joined`);
+        this.log(`"${player.name}" joined`);
         // AccessLog to store usernames for this connection
         if (Config.protection?.punishments) {
             const username = player.name;
@@ -884,13 +901,14 @@ export class Game implements GameData {
     }
 
     removePlayer(player: Player): void {
+        this.log(`"${player.name}" left`);
+
         if (player === this.killLeader) {
             this.killLeaderDisconnected(player);
         }
 
         player.disconnected = true;
         this.aliveCountDirty = true;
-        this.connectingPlayers.delete(player);
         this.connectedPlayers.delete(player);
 
         if (player.canDespawn) {
@@ -943,6 +961,41 @@ export class Game implements GameData {
         this.pluginManager.emit("player_disconnect", player);
     }
 
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // ! The implementation signature is the correct signature, but due to some TS strangeness,
+    // ! ReifiableDef<Def> has been expanded out into Def | ReferenceTo<Def> (as per its definition),
+    // ! and each constituent of the union has been given an overload. This doesn't actually change
+    // ! which calls succeed and which ones don't, but without it, the inference for Def breaks.
+    // ! Indeed, for some reason, directly using the implementation signature causes TS to infer
+    // ! the generic Def as never for calls resembling addLoot(SomeSchema.fromString("some_string"), …)
+    // !
+    // ! For anyone reading this, try removing the two overloads, and test if the code
+    // ! this.addLoot(HealingItems.fromString("cola"), Vec.create(0, 0), Layer.Ground) does two things:
+    // ! a) it does not raise type errors
+    // ! b) Def is inferred as HealingItemDefinition
+    addLoot<Def extends LootDefinition = LootDefinition>(
+        definition: Def,
+        position: Vector,
+        layer: Layer,
+        opts?: { readonly count?: number, readonly pushVel?: number, readonly jitterSpawn?: boolean, readonly data?: ItemData<Def> }
+    ): Loot<Def> | undefined;
+    addLoot<Def extends LootDefinition = LootDefinition>(
+        // eslint-disable-next-line @typescript-eslint/unified-signatures
+        definition: ReferenceTo<Def>,
+        position: Vector,
+        layer: Layer,
+        opts?: { readonly count?: number, readonly pushVel?: number, readonly jitterSpawn?: boolean, readonly data?: ItemData<Def> }
+    ): Loot<Def> | undefined;
+    // ! and for any calling code using ReifiableDef, we gotta support that too
+    // ! yes, this is a duplicate of the implementation signature
+    addLoot<Def extends LootDefinition = LootDefinition>(
+        // eslint-disable-next-line @typescript-eslint/unified-signatures
+        definition: ReifiableDef<Def>,
+        position: Vector,
+        layer: Layer,
+        opts?: { readonly count?: number, readonly pushVel?: number, readonly jitterSpawn?: boolean, readonly data?: ItemData<Def> }
+    ): Loot<Def> | undefined;
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     /**
      * Adds a `Loot` item to the game world
      * @param definition The type of loot to add. Prefer passing `LootDefinition` if possible

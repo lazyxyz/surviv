@@ -44,13 +44,13 @@ const inventorySlotTypings = Object.freeze([ItemType.Gun, ItemType.Gun, ItemType
 export const GameConstants = freezeDeep({
     // !!!!! NOTE: Increase this every time a bit stream change is made between latest release and master
     // or a new item is added to a definition list
-    protocolVersion: 43,
+    protocolVersion: 48,
     gridSize: 32,
     maxPosition: Constants.MAX_POSITION,
-    modeName: "fall" satisfies Mode as Mode,
+    defaultMode: "normal" satisfies Mode as Mode,
     player: {
         radius: 2.25,
-        baseSpeed: 0.02655,
+        baseSpeed: 0.0272,
         defaultHealth: 100,
         maxAdrenaline: 100,
         inventorySlotTypings,
@@ -76,10 +76,12 @@ export const GameConstants = freezeDeep({
     airdrop: {
         fallTime: 8000,
         flyTime: 30000,
-        damage: 300
+        damage: 300,
+        callerLimit: 3
     },
     riverPadding: 64,
-    trailPadding: 384
+    trailPadding: 384,
+    explosionRayDistance: 2
 });
 
 export enum ZIndexes {

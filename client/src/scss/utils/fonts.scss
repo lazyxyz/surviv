@@ -44,6 +44,7 @@
     src: url("../../fonts/RussoOne-Regular.ttf") format("truetype");
 }
 
+<<<<<<< HEAD
 
 @font-face {
     font-family: "Survivant";
@@ -54,3 +55,36 @@
     src: url("../../fonts/survivant.woff2") format("woff2"),
         url("../../fonts/survivant.woff2") format("woff");
 }
+=======
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-weight: normal;
+    font-display: swap;
+    src: url("../../fonts/JetBrainsMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: italic;
+    font-weight: normal;
+    font-display: swap;
+    src: url("../../fonts/JetBrainsMono-Italic.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-weight: bold;
+    font-display: swap;
+    src: url("../../fonts/JetBrainsMono-ExtraBold.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: italic;
+    font-weight: bold;
+    font-display: swap;
+    src: url("../../fonts/JetBrainsMono-ExtraBoldItalic.woff2") format("woff2");
+}
+>>>>>>> upstream/master

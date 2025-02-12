@@ -1,4 +1,4 @@
-import { AnimationType, FireMode, InventoryMessages } from "@common/constants";
+import { AnimationType, FireMode, GameConstants, InventoryMessages } from "@common/constants";
 import { type GunDefinition } from "@common/definitions/guns";
 import { PerkData, PerkIds } from "@common/definitions/perks";
 import { PickupPacket } from "@common/packets/pickupPacket";
@@ -15,14 +15,12 @@ import { type ItemData } from "../objects/loot";
 import { type Player } from "../objects/player";
 import { getPatterningShape } from "../utils/misc";
 import { ReloadAction } from "./action";
-import { InventoryItem } from "./inventoryItem";
+import { InventoryItemBase } from "./inventoryItem";
 
 /**
  * A class representing a firearm
  */
-export class GunItem extends InventoryItem<GunDefinition> {
-    declare readonly category: ItemType.Gun;
-
+export class GunItem extends InventoryItemBase.derive(ItemType.Gun) {
     ammo = 0;
 
     private _consecutiveShots = 0;
@@ -319,13 +317,7 @@ export class GunItem extends InventoryItem<GunDefinition> {
         if (definition.summonAirdrop) {
             owner.game.summonAirdrop(owner.position);
 
-            if (
-                this.owner.mapPerkOrDefault(
-                    PerkIds.InfiniteAmmo,
-                    ({ airdropCallerLimit }) => this._shots >= airdropCallerLimit,
-                    false
-                )
-            ) {
+            if (this._shots >= GameConstants.airdrop.callerLimit) {
                 owner.sendPacket(PickupPacket.create({ message: InventoryMessages.RadioOverused }));
                 this.owner.inventory.destroyWeapon(this.owner.inventory.activeWeaponIndex);
                 return;

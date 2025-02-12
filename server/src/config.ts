@@ -1,21 +1,7 @@
-import { Layer, TeamSize } from "@common/constants";
-import { type Vector } from "@common/utils/vector";
+import { TeamSize } from "@common/constants";
 import { type Maps } from "./data/maps";
 import { type Game } from "./game";
 import { type GamePlugin } from "./pluginManager";
-
-export const enum SpawnMode {
-    Normal,
-    Radius,
-    Fixed,
-    Center
-}
-
-export const enum GasMode {
-    Normal,
-    Debug,
-    Disabled
-}
 
 export const Config = {
     host: "127.0.0.1",
@@ -24,9 +10,9 @@ export const Config = {
     squadPort: 9001,
     addBot: true,
 
-    map: "fall",
+    map: "normal",
 
-    spawn: { mode: SpawnMode.Normal },
+    spawn: { mode: SpawnMode.Default },
 
     maxTeamSize: {
         rotation: [TeamSize.Solo, TeamSize.Squad],
@@ -35,8 +21,8 @@ export const Config = {
 
     maxPlayersPerGame: 100,
     maxGames: 10,
-    // gameJoinTime: 90,
-    gameJoinTime: 1,
+    gameJoinTime: 90,
+    // gameJoinTime: 1,
 
     gas: { mode: GasMode.Normal },
 
@@ -52,6 +38,36 @@ export const Config = {
     whitelist: "0xdd031baf0af27fa4c9676607481d5097de507f39",
 
 } satisfies ConfigType as ConfigType;
+
+export type MapWithParams = `${keyof typeof Maps}${string}`;
+
+export const enum SpawnMode {
+    Normal,
+    Radius,
+    Fixed,
+    Center,
+    Default
+}
+
+export type SpawnOptions =
+    | {
+        readonly mode: SpawnMode.Normal | SpawnMode.Center
+    }
+    | {
+        readonly mode: SpawnMode.Radius
+        readonly position: readonly [x: number, y: number, z?: number]
+        readonly radius: number
+    }
+    | {
+        readonly mode: SpawnMode.Fixed
+        readonly position: readonly [x: number, y: number, z?: number]
+    };
+
+export const enum GasMode {
+    Normal,
+    Debug,
+    Disabled
+}
 
 export interface ConfigType {
     /**
@@ -83,28 +99,26 @@ export interface ConfigType {
      * Example: `"main"` for the main map or `"debug"` for the debug map.
      * Parameters can also be specified for certain maps, separated by colons (e.g. `singleObstacle:rock`)
      */
-    readonly map: `${keyof typeof Maps}${string}`
+    readonly map: MapWithParams | {
+        /**
+        * The duration between switches. Must be a cron pattern.
+        */
+        readonly switchSchedule: string
+        /**
+        * The modes to switch between.
+        */
+        readonly rotation: readonly MapWithParams[]
+    }
 
     /**
-     * There are 4 spawn modes: `Normal`, `Radius`, `Fixed`, and `Center`.
+     * There are 5 spawn modes: `Normal`, `Radius`, `Fixed`, `Center`, and `Default`.
      * - `SpawnMode.Normal` spawns the player at a random location that is at least 50 units away from other players.
      * - `SpawnMode.Radius` spawns the player at a random location within the circle with the given position and radius.
      * - `SpawnMode.Fixed` always spawns the player at the exact position given.
      * - `SpawnMode.Center` always spawns the player in the center of the map.
+     * - `SpawnMode.Default` uses the spawn options specified in the map definition, or `SpawnMode.Normal` if none are specified.
      */
-    readonly spawn:
-        | { readonly mode: SpawnMode.Normal }
-        | {
-            readonly mode: SpawnMode.Radius
-            readonly position: Vector
-            readonly radius: number
-        }
-        | {
-            readonly mode: SpawnMode.Fixed
-            readonly position: Vector
-            readonly layer?: Layer
-        }
-        | { readonly mode: SpawnMode.Center }
+    readonly spawn: SpawnOptions | { readonly mode: SpawnMode.Default }
 
     /**
      * The maximum number of players allowed to join a team.
@@ -122,7 +136,7 @@ export interface ConfigType {
         /**
          * The team sizes to switch between.
          */
-        readonly rotation: TeamSize[]
+        readonly rotation: readonly TeamSize[]
     }
 
     /**
@@ -140,10 +154,7 @@ export interface ConfigType {
      */
     readonly maxGames: number
 
-    /**
-     * The number of seconds after which players are prevented from joining a game.
-     */
-    readonly gameJoinTime: number
+    readonly gameJoinTime: number;
 
     /**
      * There are 3 gas modes: GasMode.Normal, GasMode.Debug, and GasMode.Disabled.
@@ -168,7 +179,7 @@ export interface ConfigType {
     /**
      * List of plugin classes to load.
      */
-    readonly plugins: Array<new (game: Game) => GamePlugin>
+    readonly plugins: ReadonlyArray<new (game: Game) => GamePlugin>
 
     /**
      * Allows scopes and radios to work in buildings.

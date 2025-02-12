@@ -5,6 +5,7 @@ import { Buildings, type BuildingDefinition } from "../definitions/buildings";
 import { Decals, type DecalDefinition } from "../definitions/decals";
 import { type HealingItemDefinition } from "../definitions/healingItems";
 import { Loots, type LootDefinition, type WeaponDefinition } from "../definitions/loots";
+import { type MeleeDefinition, Melees } from "../definitions/melees";
 import { Obstacles, RotationMode, type ObstacleDefinition } from "../definitions/obstacles";
 import { Skins, type SkinDefinition } from "../definitions/skins";
 import { SyncedParticles, type SyncedParticleDefinition } from "../definitions/syncedParticles";
@@ -56,6 +57,7 @@ export interface ObjectsNetData extends BaseObjectsNetData {
             readonly halloweenThrowableSkin: boolean
             readonly activeDisguise?: ObstacleDefinition
             readonly blockEmoting: boolean
+            readonly backEquippedMelee?: MeleeDefinition
         }
     }
     //
@@ -75,7 +77,6 @@ export interface ObjectsNetData extends BaseObjectsNetData {
             }
             readonly variation?: Variation
             readonly activated?: boolean
-            readonly detectedMetal?: boolean
             readonly door?: {
                 readonly offset: number
                 readonly locked: boolean
@@ -235,7 +236,8 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 backpack,
                 halloweenThrowableSkin,
                 activeDisguise,
-                blockEmoting
+                blockEmoting,
+                backEquippedMelee
             } }
         ): void {
             stream.writeLayer(layer);
@@ -243,6 +245,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
             const hasHelmet = helmet !== undefined;
             const hasVest = vest !== undefined;
             const hasDisguise = activeDisguise !== undefined;
+            const hasBackEquippedMelee = backEquippedMelee !== undefined;
 
             stream.writeBooleanGroup2(
                 dead,
@@ -254,7 +257,8 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 hasHelmet,
                 hasVest,
                 hasDisguise,
-                blockEmoting
+                blockEmoting,
+                hasBackEquippedMelee
             );
             stream.writeUint8(teamID);
             Loots.writeToStream(stream, activeItem);
@@ -270,6 +274,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
             Backpacks.writeToStream(stream, backpack);
 
             if (hasDisguise) Obstacles.writeToStream(stream, activeDisguise);
+            if (hasBackEquippedMelee) Melees.writeToStream(stream, backEquippedMelee);
         },
         deserializePartial(stream) {
             const data: Mutable<ObjectsNetData[ObjectCategory.Player]> = {
@@ -311,7 +316,8 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 hasHelmet,
                 hasVest,
                 hasDisguise,
-                blockEmoting
+                blockEmoting,
+                hasBackEquippedMelee
             ] = stream.readBooleanGroup2();
 
             return {
@@ -329,7 +335,8 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 vest: hasVest ? Armors.readFromStream(stream) : undefined,
                 backpack: Backpacks.readFromStream(stream),
                 activeDisguise: hasDisguise ? Obstacles.readFromStream(stream) : undefined,
-                blockEmoting
+                blockEmoting,
+                backEquippedMelee: hasBackEquippedMelee ? Melees.readFromStream(stream) : undefined
             };
         }
     },
@@ -353,7 +360,6 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                     rotation,
                     door,
                     activated,
-                    detectedMetal,
                     variation,
                     layer
                 }
@@ -373,7 +379,6 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 possibly one of:
                     - door stuff
                     - activation stuff
-                    - detector stuff stuff
             */
 
             // variations leave at least 5 vacant bits, which is enough for the rest of our data
@@ -400,10 +405,6 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
             } else if (definition.isActivatable) {
                 // 1 bit
                 obstacleData += activated ? 1 : 0;
-                // will result in something like xxx0000x
-            } else if (definition.detector) {
-                // 1 bit
-                obstacleData += detectedMetal ? 1 : 0;
                 // will result in something like xxx0000x
             }
 
@@ -514,8 +515,6 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 };
             } else if (definition.isActivatable) {
                 data.activated = stream.readUint8() !== 0;
-            } else if (definition.detector) {
-                data.detectedMetal = stream.readUint8() !== 0;
             }
             */
             const obstacleData = stream.readUint8();
@@ -532,8 +531,6 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 };
             } else if (definition.isActivatable) {
                 data.activated = (obstacleData & 1) === 1;
-            } else if (definition.detector) {
-                data.detectedMetal = (obstacleData & 1) === 1;
             }
 
             switch (definition.rotationMode) {

@@ -3,14 +3,13 @@ import { Obstacles, RotationMode, type ObstacleDefinition } from "@common/defini
 import { PerkIds } from "@common/definitions/perks";
 import { type Orientation, type Variation } from "@common/typings";
 import { CircleHitbox, RectangleHitbox, type Hitbox } from "@common/utils/hitbox";
-import { equalLayer } from "@common/utils/layer";
 import { Angle, calculateDoorHitboxes, resolveStairInteraction } from "@common/utils/math";
 import { ItemType, NullString, ObstacleSpecialRoles, type ReferenceTo, type ReifiableDef } from "@common/utils/objectDefinitions";
 import { type FullData } from "@common/utils/objectsSerializations";
 import { Vec, type Vector } from "@common/utils/vector";
-import { getLootFromTable, LootItem } from "../data/lootTables";
 import { type Game } from "../game";
-import { InventoryItem } from "../inventory/inventoryItem";
+import { InventoryItemBase } from "../inventory/inventoryItem";
+import { getLootFromTable, LootItem } from "../utils/lootHelpers";
 import { getRandomIDString } from "../utils/misc";
 import { type Building } from "./building";
 import { type Bullet } from "./bullet";
@@ -60,8 +59,6 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
 
     puzzlePiece?: string | boolean;
 
-    detectedMetal?: boolean;
-
     constructor(
         game: Game,
         type: ReifiableDef<ObstacleDefinition>,
@@ -102,11 +99,11 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
         this.collidable = !definition.noCollisions;
 
         if (definition.hasLoot) {
-            this.loot = getLootFromTable(definition.lootTable ?? definition.idString);
+            this.loot = getLootFromTable(this.game.modeName, definition.lootTable ?? definition.idString);
         }
 
         if (definition.spawnWithLoot) {
-            for (const item of getLootFromTable(definition.lootTable ?? definition.idString)) {
+            for (const item of getLootFromTable(this.game.modeName, definition.lootTable ?? definition.idString)) {
                 this.game.addLoot(
                     item.idString,
                     this.position,
@@ -135,8 +132,6 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
         if (puzzlePiece) {
             this.parentBuilding?.puzzlePieces.push(this);
         }
-
-        if (this.definition.detector) game.detectors.push(this);
     }
 
     damage(params: DamageParams & { position?: Vector }): void {
@@ -144,7 +139,7 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
         const { amount, source, weaponUsed, position } = params;
         if (this.health === 0 || definition.indestructible) return;
 
-        const weaponIsItem = weaponUsed instanceof InventoryItem;
+        const weaponIsItem = weaponUsed instanceof InventoryItemBase;
         const weaponDef = weaponIsItem ? weaponUsed.definition : undefined;
         if (
             (
@@ -436,18 +431,6 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
         this.game.grid.updateObject(this);
     }
 
-    updateDetector(): void {
-        for (const object of this.game.grid.intersectsHitbox(this.spawnHitbox)) {
-            if (object.isPlayer) {
-                const player = object;
-
-                this.detectedMetal = this.hitbox.collidesWith(player.hitbox) && equalLayer(this.layer, player.layer);
-
-                this.setDirty();
-            }
-        }
-    }
-
     override get data(): FullData<ObjectCategory.Obstacle> {
         return {
             scale: this.scale,
@@ -463,8 +446,7 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
                 rotation: {
                     rotation: this.rotation,
                     orientation: this.rotation as Orientation
-                },
-                detectedMetal: this.detectedMetal
+                }
             }
         };
     }

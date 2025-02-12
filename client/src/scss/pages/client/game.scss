@@ -85,7 +85,7 @@
         @media screen and (max-width: variables.$screen_large) {
             width: auto;
             height: auto;
-            bottom: 216px;
+            bottom: 220px;
             right: 5px;
 
             #detonate-key {
@@ -105,6 +105,18 @@
 
         @media screen and (max-width: 460px) {
             bottom: 245px;
+        }
+
+        @media screen and (max-height: 465px) and (max-width: variables.$screen_large) {
+            right: 100px;
+            width: auto;
+            border-radius: 5px;
+            padding: 0;
+            bottom: 218px;
+        }
+
+        @media screen and (min-width: variables.$screen_large) and (max-height: 720px) {
+            justify-content: center;
         }
     }
 }
@@ -163,7 +175,7 @@
 #debug-hud {
     // margin-top: -10px;
     text-shadow: 1px 1px 2px black;
-    font-family: monospace;
+    font-family: "JetBrains Mono", monospace;
 
     @media screen and (max-width: variables.$screen_large) {
         font-size: 14px;
@@ -243,30 +255,24 @@
     width: max-content;
 
     position: absolute;
-    left: 5px;
-    top: 50%;
-    transform: translateY(-50%);
+    transform: scale(60%);
+    transform-origin: 0% 0%;
+    left: 240px;
+    top: 10px;
 
-    @media screen and (max-width: variables.$screen_medium) {
-        transform: scale(55%);
-    }
 
-    @media screen and (max-height: 800px) {
+    @media screen and (max-height: variables.$screen-large) and (max-width: variables.$screen_large) {
         flex-direction: column;
-        top: 160px;
+        left: 5px;
+        top: 145px;
         transform: scale(55%);
         transform-origin: 0% 0%;
-        @media screen and (min-width: variables.$screen_large) {
-            flex-direction: column;
-            left: 240px;
-            top: 20px;
-        }
     }
 
     @media screen and (max-height: 465px) and (max-width: variables.$screen-large) {
         flex-direction: row;
-        left: 145px;
-        top: 106px;
+        left: 5px;
+        top: 145px;
         transform: scale(55%);
         transform-origin: 0% 0%;
     }
@@ -351,7 +357,7 @@
     display: flex;
     position: absolute;
     top: 15px;
-    right: 185px;
+    right: 150px;
     margin-left: auto;
     width: max-content;
     background: palette.$transparent_bg;
@@ -359,16 +365,12 @@
     padding: 8px 12px 8px 12px;
     gap: 10px;
     @media screen and (max-width: variables.$screen_large) {
-        top: 7px;
-        right: 90px;
+        top: 0;
+        right: 95px;
         padding: 4px 5px 4px 8px;
         gap: 5px;
         height: 26px;
         border-radius: 4px;
-    }
-
-    @media screen and (max-width: variables.$screen_medium) {
-        display: none;
     }
 
     #kill-leader-leader-container {
@@ -388,6 +390,18 @@
             .badge-icon {
                 width: 12px;
             }
+        }
+    }
+
+    @media screen and (max-width: variables.$screen_medium) {
+        padding: 0 12px 0 10px;
+        right: 75px;
+
+        #kill-leader-leader-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
         }
     }
 }
@@ -460,21 +474,33 @@
                 font-size: 25px;
             }
         }
+
+        @media screen and (min-width: variables.$screen_large) and (max-height: 720px) {
+            width: auto;
+            height: auto;
+            padding: 0 5px 0 10px;
+
+            .counter-text {
+                font-size: 45px;
+            }
+        }
     }
 
     #kill-feed {
-        margin-right: 185px;
+        margin-right: 150px;
         margin-top: -10px;
         @media screen and (max-width: variables.$screen_large) {
-            margin-right: 90px;
-            margin-top: 0px;
+            margin-right: 20px;
+            margin-top: -12px;
+            transform: scale(70%);
+            transform-origin: 0% 0%;
         }
         @media screen and (max-width: variables.$screen_medium) {
-            margin-right: 5px;
+            margin-right: 0;
         }
         @media screen and (max-width: variables.$screen_medium) and (max-height: 500px) {
             margin-top: -40px;
-            margin-right: 80px;
+            margin-right: 0;
         }
         .kill-feed-item {
             max-width: fit-content;
@@ -551,7 +577,7 @@
 
     #action-timer {
         position: relative;
-        top: -10%;
+        top: 25px;
         text-align: center;
         justify-content: center;
         @include variables.drop-shadow;
@@ -583,6 +609,25 @@
 
         font-size: 20px;
     }
+
+    @media screen and (max-width: variables.$screen-large) {
+        display: flex;
+        flex-direction: row;
+
+        #action-timer {
+            transform: scale(50%);
+            top: 20px;
+        }
+
+        #action-name {
+            font-size: 15px;
+            padding: 5px;
+            position: relative;
+            right: 50px;
+            top: 85px;
+            height: 30px;
+        }
+    }
 }
 
 #interact-message {
@@ -595,6 +640,10 @@
     background-color: palette.$transparent_bg;
     padding: 8px;
     border-radius: 5px;
+
+    @media screen and (max-height: variables.$screen_small) {
+        padding: 3px 5px 3px 5px;
+    }
 }
 
 #interact-key {
@@ -616,16 +665,41 @@
     padding: 2px 4px;
     margin-right: 3px;
     white-space: nowrap;
+
+    @media screen and (max-width: variables.$screen-large) {
+        width: 20px;
+        height: 20px;
+
+        img {
+            width: 15px;
+            height: 15px;
+        }
+    }
 }
 
 #interact-text {
     font-size: 20px;
+    position: relative;
+    top: 2.5px;
     @include variables.text-shadow;
+
+    @media screen and (max-width: variables.$screen-large) {
+        font-size: 15px;
+        top: 0;
+    }
+
+    @media screen and (min-width: variables.$screen_large) and (max-height: 720px) {
+        top: 0;
+    }
 }
 
 #interact-key.active + #interact-text {
     position: relative;
     top: 3px;
+
+    @media screen and (max-width: variables.$screen-large) {
+        top: 0.95px;
+    }
 }
 
 #weapon-ammo-container {
@@ -1004,7 +1078,7 @@
 
     @media screen and (max-width: variables.$screen_large) {
         width: 220px;
-        bottom: 60px;
+        bottom: 105px;
         font-size: 12px;
 
         .badge-icon {
@@ -1030,6 +1104,18 @@
             font-size: 22px;
         }
     }
+
+    @media screen and (max-width: variables.$screen_large) and (max-height: variables.$screen_large) {
+        bottom: 102px;
+
+        #kill-msg-cont {
+            font-size: 10px;
+        }
+
+        #kill-msg-kills {
+            font-size: 15px;;
+        }
+    }
 }
 
 #gas-and-debug {
@@ -1045,7 +1131,8 @@
 
     #gas-msg-info {
         font-weight: bold;
-        font-size: 36px;
+        font-size: 33px;
+        width: 600px;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
 
         @media screen and (max-width: variables.$screen_large) {
@@ -1159,6 +1246,44 @@
                     width: 15px;
                 }
             }
+
+            @media screen and (max-width: variables.$screen_large) and (max-width: variables.$screen_large) {
+                position: relative;
+                left: 5px;
+                width: auto;
+                height: 25px;
+                padding: 2px;
+                flex-direction: row;
+
+                span {
+                    font-size: 12px;
+                }
+                
+                img {
+                    width: 20px;
+                }
+            }
+
+            @media screen and (min-width: variables.$screen_large) and (max-height: 720px) {
+                position: relative;
+                left: 5px;
+                width: auto;
+                height: auto;
+                gap: 1px;
+                padding: 5px;
+                flex-direction: row;
+                margin: 0.5px;
+
+                span {
+                    font-weight: bold;
+                    font-size: 18px;
+                }
+
+                img {
+                    vertical-align: middle;
+                    width: 35px;
+                }
+            }
         }
 
         &:hover {
@@ -1187,6 +1312,11 @@
             font-size: 14px;
             pointer-events: none;
             max-width: 200px;
+
+            @media screen and (max-width: variables.$screen_large) {
+                margin: 0;
+                font-size: 10px;
+            }
         }
 
         &:hover .item-tooltip {
@@ -1477,7 +1607,7 @@
     gap: 5px;
 
     @media screen and (min-width: variables.$screen_large) and (max-height: 720px) {
-        bottom: 370px;
+        bottom: 415px;
     }
 
     @media screen and (max-width: variables.$screen_large) {
@@ -1492,6 +1622,11 @@
 
     @media screen and (max-width: 460px) {
         bottom: 300px;
+    }
+
+    @media screen and (max-height: 465px) and (max-width: variables.$screen_large) {
+        bottom: 215px;
+        right: 5px;
     }
 }
 
@@ -1716,8 +1851,8 @@
             transition-duration: 0.25s;
 
             @media screen and (max-width: variables.$screen_large) {
-                width: 25px;
-                height: 25px;
+                width: 20px;
+                height: 20px;
             }
 
         }
@@ -1735,18 +1870,22 @@
                 height: 60px;
 
                 @media screen and (max-width: variables.$screen_large) {
-                    width: 50px;
-                    height: 50px;
+                    width: 25px;
+                    height: 25px;
                 }
 
                 @media screen and (max-width: variables.$screen_medium) {
-                    width: 35px;
-                    height: 35px;
+                    width: 25px;
+                    height: 25px;
                 }
             }
 
             .item-tooltip {
                 margin-top: 110px;
+
+                @media screen and (max-width: variables.$screen_large) {
+                    margin-top: 80px;
+                }
             }
         }
     }
@@ -1839,6 +1978,12 @@
     height: 100%;
     z-index: 1003;
 
+    #btn-menu,
+    #btn-play-again,
+    #btn-spectate {
+        width: 150px;
+    }
+
     background: rgba(0, 0, 0, 0.4);
     @include variables.text-shadow;
 
@@ -1874,36 +2019,103 @@
         }
     }
 
-    #game-over-rank-container {
-        font-size: 30px;
-        text-align: center;
-        font-weight: bold;
-        padding: 5px 15px 5px 15px;
-        border-bottom: 2px solid rgba(255, 255, 255, 0.5);
-        width: max-content;
-        margin: 5px auto 15px auto;
+    #game-over-rank-and-team-kills-holder {
+        display: flex;
 
-        @media screen and (max-width: variables.$screen_large) {
-            margin: 0 auto 10px auto;
-            font-size: 15px;
-        }
-
-        #game-over-rank {
-            margin-left: 10px;
-            font-size: 35px;
-
-            &.won {
-                color: palette.$orange;
-            }
+        #game-over-rank-container,
+        #game-over-team-kills-container {
+            font-size: 30px;
+            text-align: center;
+            font-weight: bold;
+            padding: 5px 15px 5px 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+            width: max-content;
+            margin: 5px auto 15px auto;
 
             @media screen and (max-width: variables.$screen_large) {
-                font-size: 17px;
+                margin: 0 auto 10px auto;
+                font-size: 15px;
+            }
+
+            #game-over-rank {
+                margin-left: 10px;
+                font-size: 35px;
+
+                &.won {
+                    color: palette.$orange;
+                }
+
+                @media screen and (max-width: variables.$screen_large) {
+                    font-size: 17px;
+                }
             }
         }
     }
 }
 
-#game-over-screen {
+#game-over-buttons-holder {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+
+    @media screen and (max-width: variables.$screen_large) {
+        transform: scale(0.6);
+        position: relative;
+        bottom: 50px;
+    }
+}
+
+#player-game-over-cards {
+    display: flex;
+    gap: 20px;
+
+    .game-over-player-name {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 25px;
+        gap: 5px;
+
+        .medal {
+            pointer-events: none;
+            transform: translate(0%, 50%) rotate(15deg);
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            z-index: -1;
+            opacity: 0.95;
+
+            @media screen and (max-width: variables.$screen-large) {
+                @media screen and (max-height: variables.$screen_medium) {
+                    transform: translate(0%, 45%) rotate(15deg);
+                    width: 150px;
+                    height: 150px;
+                    position: absolute;
+                }
+            }
+        }
+
+        img {
+            vertical-align: middle;
+            width: 22px;
+            height: 22px;
+            margin: 0;
+        }
+    }
+
+    @media screen and (max-width: variables.$screen_large) {
+        transform: scale(0.6);
+        padding: 0;
+        position: relative;
+        bottom: 20px;
+
+        .game-over-player-name {
+            font-size: 20px;
+        }
+    }
+}
+
+.game-over-screen {
     text-align: center;
 
     background: rgba(0, 0, 0, 0.6);
@@ -1926,7 +2138,7 @@
         margin-bottom: 5px;
     }
 
-    #game-over-stats {
+    .game-over-stats {
         width: 250px;
         margin: auto;
         padding: 16px 20px 16px 20px;

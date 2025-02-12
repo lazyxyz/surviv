@@ -118,7 +118,6 @@ export class InputManager {
     private _inputPacketTimer = 0;
 
     update(): void {
-        if (this.game.gameOver) return;
         const packet = {
             movement: { ...this.movement },
             attacking: this.attacking,
@@ -142,7 +141,8 @@ export class InputManager {
                     }
                     : {}
             ),
-            actions: this.actions
+            actions: this.actions,
+            pingSeq: this.game.takePingSeq() + (this.game.gameOver ? 128 : 0) // MSB = "seq only?"
         } as PlayerInputData;
 
         this.turning = false;
@@ -155,7 +155,7 @@ export class InputManager {
         this._inputPacketTimer += this.game.serverDt;
 
         if (
-            !this._lastInputPacket
+            this._lastInputPacket === undefined
             || areDifferent(this._lastInputPacket, packet)
             || this._inputPacketTimer >= 100
         ) {
@@ -289,13 +289,12 @@ export class InputManager {
             let shootOnRelease = false;
 
             leftJoyStick.on("move", (_, data: JoystickOutputData) => {
-                const movementAngle = -Math.atan2(data.vector.y, data.vector.x);
-
-                this.movementAngle = movementAngle;
+                const angle = -data.angle.radian;
+                this.movementAngle = angle;
                 this.movement.moving = true;
 
                 if (!rightJoyStickUsed && !shootOnRelease) {
-                    this.rotation = movementAngle;
+                    this.rotation = angle;
                     this.turning = true;
                     if (game.console.getBuiltInCVar("cv_responsive_rotation") && !game.gameOver && game.activePlayer) {
                         game.activePlayer.container.rotation = this.rotation;
@@ -309,7 +308,7 @@ export class InputManager {
 
             rightJoyStick.on("move", (_, data) => {
                 rightJoyStickUsed = true;
-                this.rotation = -Math.atan2(data.vector.y, data.vector.x);
+                this.rotation = -data.angle.radian;
                 this.turning = true;
                 const activePlayer = game.activePlayer;
                 if (game.console.getBuiltInCVar("cv_responsive_rotation") && !game.gameOver && activePlayer) {
@@ -364,9 +363,8 @@ export class InputManager {
             let a = false;
             let b = false;
             window.addEventListener("deviceorientation", gyro => {
-                // It would be impossible to send the DeviceOrientation event but lack the beta property
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                const angle = gyro.beta!;
+                const angle = gyro.beta;
+                if (angle === null) return;
                 a = (angle <= -gyroAngle)
                     ? (a ? a : swap(-1), true)
                     : false;
@@ -402,13 +400,13 @@ export class InputManager {
 
             This only applies to keyboard events
 
-            Also we allow shift and alt to be used normally, because keyboard shortcuts usually involve
+            Also, we allow shift and alt to be used normally, because keyboard shortcuts usually involve
             the meta or control key
         */
 
         if (event instanceof KeyboardEvent) {
             const { key } = event;
-            // This statement cross references and updates focus checks for key presses.
+            // This statement cross-references and updates focus checks for key presses.
             if (down) {
                 this._focusController.add(key);
             } else {

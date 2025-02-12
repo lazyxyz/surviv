@@ -62,7 +62,7 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
             // Role skins
             withRole([[["developr", "pap", "error", "limenade"]],                ["Developr Swag", 0x007a7f]]),
             withRole([[["designr", "solstice", "vip_designr", "lead_designr"]],  ["Designr Swag",  0x67cf00]]),
-            withRole([[["composr", "lead_composr"]],                             ["Composr Swag",  0xffd101]]),
+            withRole([[["sound_designr"]],                                       ["Sound Designr Swag",  0x3e8476]]),
             ...([
                 ["OpenMark",  0x2563EB],
                 ["Chill guy",  0x8a9074],
