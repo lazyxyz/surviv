@@ -4,9 +4,9 @@ import { TemplatedApp, WebSocket } from "uWebSockets.js";
 import { Config } from "../config";
 import { Game } from "../game";
 import { PlayerContainer } from "../objects/gamer";
-import { Logger } from "../utils/misc";
 import { forbidden, getIP } from "../utils/serverHelpers"
 import { validateJWT } from "@api/auth";
+import { Logger } from "@common/utils/logging";
 
 const simultaneousConnections: Record<string, number> = {};
 
