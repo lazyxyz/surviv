@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as https from 'https';
 import { Config } from '../config';
+import { getERC721Balance } from "@api/erc721";
 
 export async function saveRanks(address: string, rank: number, teamMode: boolean, gameId: number) {
     if (!address || (!teamMode && rank > 5) || (teamMode && rank > 3)) {
@@ -9,40 +10,11 @@ export async function saveRanks(address: string, rank: number, teamMode: boolean
     }
 
     try {
-        // Function to make the whitelist API request
-        const checkWhitelist = (whitelist: string): Promise<number> => {
-            const apiUrl = `https://test-api.openmark.io/market/api/nft/nft-count/amount?owner=${address}&collections=${whitelist}`;
-
-            return new Promise((resolve, reject) => {
-                https.get(apiUrl, { headers: { accept: 'application/json' } }, (res) => {
-                    let data = '';
-                    res.on('data', (chunk) => {
-                        data += chunk;
-                    });
-
-                    res.on('end', () => {
-                        try {
-                            const jsonResponse = JSON.parse(data);
-                            if (jsonResponse.success && typeof jsonResponse.data === 'number') {
-                                resolve(jsonResponse.data); // Extract `data` field
-                            } else {
-                                reject(new Error('Invalid API response structure'));
-                            }
-                        } catch (err) {
-                            reject(new Error('Failed to parse JSON response'));
-                        }
-                    });
-                }).on('error', (err) => {
-                    reject(err);
-                });
-            });
-
-        };
 
         // Perform the whitelist check
-        if (Config.whitelist) {
-            const whitelistCount = await checkWhitelist(Config.whitelist);
-            if (whitelistCount < 1) {
+        if (Config.blockchainConfig?.card) {
+            const cardBalance = await getERC721Balance(Config.blockchainConfig?.rpc, Config.blockchainConfig.card, address);
+            if (BigInt(cardBalance.balance) == 0n) {
                 console.log('Whitelist check failed. Address does not meet the criteria.');
                 return;
             }

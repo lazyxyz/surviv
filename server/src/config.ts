@@ -49,7 +49,12 @@ export const Config = {
         address: "http://localhost:8080"
     },
 
-    whitelist: "0xdd031baf0af27fa4c9676607481d5097de507f39",
+    blockchainConfig: {
+        rpc: "https://evm-rpc.archive.testnet-2.nibiru.fi/",
+        card: "0x227ea87740b1a3ea5452598f44fed8c345119473",
+        melee: "0xfe2cfd8c98add2c63b41dc19e353707f5e8238e9",
+        skin: "0x9a91e7b132eeadf35c07c12355355aecd5ef4a21"
+    },
 
 } satisfies ConfigType as ConfigType;
 
@@ -257,5 +262,10 @@ export interface ConfigType {
         readonly address: string
     }
 
-    readonly whitelist?: string; 
+    readonly blockchainConfig?: {
+        readonly rpc: string,
+        readonly card: string,
+        readonly skin: string,
+        readonly melee: string,
+    }; 
 }
