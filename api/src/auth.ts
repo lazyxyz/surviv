@@ -5,8 +5,8 @@ import { HttpResponse, TemplatedApp } from "uWebSockets.js";
 
 import dotenv from "dotenv";
 import { resolve } from "path";
-
-dotenv.config({ path: resolve(__dirname, "../../.env") });
+const envPath = resolve(__dirname, "../.env");
+dotenv.config({ path: envPath });
 
 const JWT_SECRET = process.env.JWT_SECRET || "SURVIV.FUN";
 const TOKEN_DURATION = "7d";
