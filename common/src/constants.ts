@@ -2,6 +2,7 @@ import { Ammos } from "./definitions/ammos";
 import { HealingItems } from "./definitions/healingItems";
 import { type Mode } from "./definitions/modes";
 import { Scopes } from "./definitions/scopes";
+import { freeSkin } from "./definitions/skins";
 import { Throwables } from "./definitions/throwables";
 import { freezeDeep } from "./utils/misc";
 import { ItemType } from "./utils/objectDefinitions";
@@ -11,7 +12,7 @@ export const enum Constants {
     MIN_OBJECT_SCALE = 0.15,
     MAX_OBJECT_SCALE = 3,
     PLAYER_NAME_MAX_LENGTH = 16,
-    PLAYER_ADDRESS_MAX_LENGTH = 42,
+    PLAYER_ADDRESS_MAX_LENGTH = 42
 }
 
 /* eslint-disable @typescript-eslint/prefer-literal-enum-member */
@@ -57,7 +58,7 @@ export const GameConstants = freezeDeep({
         maxWeapons: inventorySlotTypings.length,
         nameMaxLength: Constants.PLAYER_NAME_MAX_LENGTH,
         defaultName: "Player",
-        defaultSkin: "hazel_jumpsuit",
+        defaultSkin: freeSkin[0],
         killLeaderMinKills: 3,
         maxMouseDist: 256,
         reviveTime: 8,

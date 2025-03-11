@@ -3,8 +3,9 @@ import $ from "jquery";
 import { ACCESS_TOKEN, PUBLIC_KEY, SELECTOR_WALLET, shorten } from "./utils/constants";
 import { EIP6963, type Provider6963Props } from "./eip6963";
 import { ethers } from "ethers";
-import { resetPlayButtons, type RegionInfo } from "./ui";
+import { resetPlayButtons, visibleSkin, type RegionInfo } from "./ui";
 import { Config } from "./config";
+import type { Game } from "./game";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
@@ -64,7 +65,7 @@ export class Account extends EIP6963 {
         }
     }
 
-    async connect(getProvider: Provider6963Props): Promise<void> {
+    async connect(getProvider: Provider6963Props, game: Game): Promise<void> {
         const accounts = await getProvider.provider.request({
             method: "eth_requestAccounts"
         }) as string[];
@@ -98,6 +99,12 @@ export class Account extends EIP6963 {
 
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.eventListener();
+
+        // call skin
+        {
+            this.address = accounts[0];
+            await visibleSkin(game);
+        }
 
         // update field
         {
