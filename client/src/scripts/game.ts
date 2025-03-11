@@ -63,6 +63,7 @@ import { Tween } from "./utils/tween";
 import { EIP6963 } from "./eip6963";
 import { Account } from "./account";
 import { visibleSkin } from "./skin";
+import { visibleMeless } from "./weapons/weapons_meless";
 
 /* eslint-disable @stylistic/indent */
 
@@ -249,7 +250,8 @@ export class Game {
         void Promise.all([
             initPixi(),
             setUpUI(game),
-            visibleSkin(game)
+            visibleSkin(game),
+            visibleMeless(game)
         ]).then(() => {
             unlockPlayButtons();
             resetPlayButtons();

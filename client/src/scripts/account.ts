@@ -7,6 +7,7 @@ import { resetPlayButtons, type RegionInfo } from "./ui";
 import { Config } from "./config";
 import type { Game } from "./game";
 import { visibleSkin } from "./skin";
+import { visibleMeless } from "./weapons/weapons_meless";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
@@ -101,10 +102,11 @@ export class Account extends EIP6963 {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.eventListener();
 
-        // call skin
+        // call assets
         {
             this.address = accounts[0];
             await visibleSkin(game);
+            await visibleMeless(game);
         }
 
         // update field

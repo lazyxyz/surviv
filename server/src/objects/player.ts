@@ -51,6 +51,7 @@ import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
 import { saveRanks } from "../api/ranks";
+import { weaponPresentType } from "@common/typings";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -453,14 +454,15 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         // Inventory preset
         {
-            const [
-                weaponA, weaponB, melee
-            ] = userData.weaponPreset.split(" ");
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const getWeapon: weaponPresentType = userData?.weaponPreset.startsWith("{")
+                ? JSON.parse(userData.weaponPreset)
+                : undefined;
 
             const backpack = this.inventory.backpack;
             const determinePreset = (
                 slot: 0 | 1 | 2,
-                weaponName: ReferenceTo<GunDefinition | MeleeDefinition>,
+                weaponName: ReferenceTo<GunDefinition | MeleeDefinition>
             ): void => {
                 const weaponDef = Loots.fromStringSafe<GunDefinition | MeleeDefinition>(weaponName);
                 let itemType: ItemType;
@@ -483,9 +485,9 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 this.inventory.items.setItem(ammoPtr, backpack.maxCapacity[ammoPtr]);
             };
 
-            determinePreset(0, weaponA);
-            determinePreset(1, weaponB);
-            determinePreset(2, melee);
+            if (getWeapon?.gun) determinePreset(0, getWeapon.gun);
+            if (getWeapon?.throwable) determinePreset(1, getWeapon.throwable);
+            if (getWeapon?.meless) determinePreset(2, getWeapon.meless);
 
             if (this.maxAdrenaline !== GameConstants.player.maxAdrenaline) {
                 this.adrenaline = this.maxAdrenaline;
@@ -2289,14 +2291,14 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     sendGameOverPacket(won = false): void {
-       const rank = won ? 1 as const : this.game.aliveCount + 1;
+        const rank = won ? 1 as const : this.game.aliveCount + 1;
         saveRanks(this.address, rank, this.game.teamMode, this.game.id);
 
         // if (this.address && ((rank <= 3 && this.game.teamMode) || (rank <= 5 && !this.game.teamMode))) {
         //     // Define the data to save
         //     const record = {
         //         time: new Date().toISOString(),
-        //         gameId: this.game.id, 
+        //         gameId: this.game.id,
         //         address: this.address,
         //         rank,
         //     };
@@ -2321,7 +2323,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             damageDone: this.damageDone,
             damageTaken: this.damageTaken,
             timeAlive: (this.game.now - this.joinTime) / 1000,
-            rank,
+            rank
         } as GameOverData);
 
         this.sendPacket(packet);
