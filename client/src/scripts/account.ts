@@ -3,9 +3,10 @@ import $ from "jquery";
 import { ACCESS_TOKEN, PUBLIC_KEY, SELECTOR_WALLET, shorten } from "./utils/constants";
 import { EIP6963, type Provider6963Props } from "./eip6963";
 import { ethers } from "ethers";
-import { resetPlayButtons, visibleSkin, type RegionInfo } from "./ui";
+import { resetPlayButtons, type RegionInfo } from "./ui";
 import { Config } from "./config";
 import type { Game } from "./game";
+import { visibleSkin } from "./skin";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];

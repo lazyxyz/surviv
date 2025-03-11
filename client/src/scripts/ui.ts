@@ -9,7 +9,6 @@ import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, 
 import { ExtendedMap } from "@common/utils/misc";
 import { Badges, freeBadges, type BadgeDefinition } from "@common/definitions/badges";
 import { EmoteCategory, Emotes, freeEmotes, type EmoteDefinition } from "@common/definitions/emotes";
-import { freeSkin, Skins, type SkinDefinition } from "@common/definitions/skins";
 import { ItemType, type ObjectDefinition, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound } from "@pixi/sound";
@@ -21,15 +20,15 @@ import { Config, type ServerInfo } from "./config";
 import { type Game } from "./game";
 import { news } from "./news/newsPosts";
 import { body, createDropdown } from "./uiHelpers";
-import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaultClientCVars";
+import { type CVarTypeMapping } from "./utils/console/defaultClientCVars";
 
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { freeGuns, Guns } from "@common/definitions/guns";
-import { Melees } from "@common/definitions/melees";
 import { Throwables } from "@common/definitions/throwables";
+import { Melees } from "@common/definitions/melees";
 
 /*
     eslint-disable
@@ -216,127 +215,6 @@ export function visibleWallet(game: Game): void {
 
     createDropdown(".account-wallet-container");
 }
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function visibleSkin(game: Game) {
-    if (!game?.account?.address) return;
-
-    const role = game.console.getBuiltInCVar("dv_role");
-    const skinList = $<HTMLDivElement>("#skins-list");
-    const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
-
-    // handler display change preview
-    const updateSplashCustomize = (skinID: string): void => {
-      for (const key of ["fist", "base"]) {
-        $(`.assets-${key}`).attr(
-          "href",
-          `./img/game/shared/skins/${skinID}_${key}.svg`
-        );
-      }
-
-      $<HTMLDivElement>("#skin-base").css(
-        "background-image",
-        `url("./img/game/shared/skins/${skinID}_base.svg")`
-      );
-
-      $<HTMLDivElement>("#skin-left-fist, #skin-right-fist").css(
-        "background-image",
-        `url("./img/game/shared/skins/${skinID}_fist.svg")`
-      );
-    };
-
-    function selectSkin(idString: ReferenceTo<SkinDefinition>): void {
-      // remove previous selected
-      $(".skins-list-item-container").removeClass("selected");
-
-      // wait for dom and append new selected
-      setTimeout(() => {
-        $(`#skin-${idString}`).addClass("selected");
-      }, 0);
-
-      game.console.setBuiltInCVar("cv_loadout_skin", idString);
-      updateSplashCustomize(idString);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
-    const mySkins = await new Promise<string[]>(async(resolve, reject) => {
-      try {
-        const request: {
-          data: { items: Array<{ name: string }> }
-        } = await $.ajax({
-          url: "https://test-api.openmark.io/market/api/nft",
-          type: "POST",
-          data: {
-            nftContract: "0x3b1cbe9791eb789e081006df913bbb10166f171a",
-            owner: game.account.address
-          }
-        });
-
-        resolve(
-          request.data.items.map(meta => {
-            // should be ['Monad', '#20']
-            const separate = meta.name.split(" ");
-
-            return separate[0].toLowerCase();
-          })
-        );
-      } catch (error) {
-        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-        reject(error);
-      }
-    });
-
-    const SkinsIntance = Skins.definitions.filter(argument =>
-      [...freeSkin, ...(mySkins || [])].some(
-        argument_child => argument_child === argument.idString
-      )
-    );
-
-    // should be set or reset skin
-    {
-      const avaliableSkin = SkinsIntance.find(
-        meta =>
-          meta.idString === game.console.getBuiltInCVar("cv_loadout_skin")
-      );
-
-      if (avaliableSkin) {
-        updateSplashCustomize(avaliableSkin.idString);
-      }
-
-      if (!avaliableSkin) {
-        // selectSkin(freeSkin[0]);
-        selectSkin(defaultClientCVars.cv_loadout_skin as string);
-      }
-    }
-
-    // reset items before render new
-    skinList.empty();
-
-    // display to preview and select
-    for (const { idString, hideFromLoadout, rolesRequired } of SkinsIntance) {
-      if (hideFromLoadout || !(rolesRequired ?? [role]).includes(role)) {
-        continue;
-      }
-
-      // noinspection CssUnknownTarget
-      const skinItem = $<HTMLDivElement>(
-        `<div id="skin-${idString}" class="skins-list-item-container${idString === currentSkin ? " selected" : ""}">
-            <div class="skin">
-                <div class="skin-base" style="background-image: url('./img/game/shared/skins/${idString}_base.svg')"></div>
-                <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
-                <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
-            </div>
-            <span class="skin-name">${getTranslatedString(idString as TranslationKeys)}</span>
-        </div>`
-      );
-
-      skinItem.on("click", () => {
-        selectSkin(idString);
-      });
-
-      skinList.append(skinItem);
-    }
-  }
 
 export async function setUpUI(game: Game): Promise<void> {
     const { inputManager, uiManager: { ui } } = game;
@@ -1579,10 +1457,10 @@ export async function setUpUI(game: Game): Promise<void> {
 
                 $(".weapons-container-list").append(html`
                     ${!isExisted ? `<h2>${key}</h2>` : ""}
-    
+
                     <div class="weapons-container-card" id="weapons-list-${gunField.idString}">
                         <img src="./img/game/shared/weapons/${gunField.idString}.svg" alt=${gunField.name} width="72px" height="72px" />
-    
+
                         <p class="weapons-container-paragraph">${gunField.name}</p>
                     </div>
                 `);
@@ -1746,10 +1624,10 @@ export async function setUpUI(game: Game): Promise<void> {
 
                 $(".weapons-container-list").append(html`
                     ${!isExisted ? `<h2>${key}</h2>` : ""}
-    
+
                     <div class="weapons-container-card" id="weapons-list-${melessField.idString}">
                         <img src="./img/game/shared/weapons/${melessField.idString}.svg" alt=${melessField.name} width="72px" height="72px" />
-    
+
                         <p class="weapons-container-paragraph">${melessField.name}</p>
                     </div>
                 `);
@@ -1834,10 +1712,10 @@ export async function setUpUI(game: Game): Promise<void> {
 
                 $(".weapons-container-list").append(html`
                     ${!isExisted ? `<h2>${key}</h2>` : ""}
-                    
+
                     <div class="weapons-container-card" id="weapons-list-${throwableField.idString}">
                         <img src="./img/game/shared/weapons/${throwableField.idString}.svg" alt=${throwableField.name} width="72px" height="72px" />
-    
+
                         <p class="weapons-container-paragraph">${throwableField.name}</p>
                     </div>
                 `);
