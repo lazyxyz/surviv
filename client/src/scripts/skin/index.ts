@@ -59,7 +59,8 @@ export async function visibleSkin(game: Game) {
                 type: "POST",
                 data: {
                     nftContract: "0x3b1cbe9791eb789e081006df913bbb10166f171a",
-                    owner: game.account.address
+                    owner: game.account.address,
+                    size: 100
                 }
             });
 
