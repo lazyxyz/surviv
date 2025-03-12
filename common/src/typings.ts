@@ -52,3 +52,9 @@ export type CustomTeamMessage =
     | {
         type: CustomTeamMessages.Start | CustomTeamMessages.Started
     };
+
+export type weaponPresentType = {
+    gun?: string
+    throwable?: string
+    meless?: string
+};

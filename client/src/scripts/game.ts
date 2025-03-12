@@ -52,6 +52,7 @@ import { ThrowableProjectile } from "./objects/throwableProj";
 import { Camera } from "./rendering/camera";
 import { Gas, GasRender } from "./rendering/gas";
 import { Minimap } from "./rendering/minimap";
+
 import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime, visibleConnectWallet, visibleWallet } from "./ui";
 import { setUpCommands } from "./utils/console/commands";
 import { defaultClientCVars } from "./utils/console/defaultClientCVars";
@@ -61,6 +62,8 @@ import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 import { EIP6963 } from "./eip6963";
 import { Account } from "./account";
+import { visibleSkin } from "./skin";
+import { visibleMeless } from "./weapons/weapons_meless";
 
 /* eslint-disable @stylistic/indent */
 
@@ -178,7 +181,7 @@ export class Game {
         await initTranslation(game);
         game.inputManager.setupInputs();
 
-        const initPixi = async (): Promise<void> => {
+        const initPixi = async(): Promise<void> => {
             const renderMode = game.console.getBuiltInCVar("cv_renderer");
             const renderRes = game.console.getBuiltInCVar("cv_renderer_res");
 
@@ -246,7 +249,9 @@ export class Game {
 
         void Promise.all([
             initPixi(),
-            setUpUI(game)
+            setUpUI(game),
+            visibleSkin(game),
+            visibleMeless(game)
         ]).then(() => {
             unlockPlayButtons();
             resetPlayButtons();

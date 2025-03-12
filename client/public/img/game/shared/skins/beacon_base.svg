@@ -1,76 +1,19 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-
-<svg
-   width="90"
-   height="90"
-   viewBox="0 0 23.812499 23.8125"
-   version="1.1"
-   id="svg1"
-   inkscape:version="1.3.2 (1:1.3.2+202311252150+091e20ef0f)"
-   sodipodi:docname="new_beacon_base.svg"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview1"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="px"
-     inkscape:zoom="8.4359982"
-     inkscape:cx="47.475117"
-     inkscape:cy="44.748706"
-     inkscape:window-width="2560"
-     inkscape:window-height="1368"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
-  <defs
-     id="defs1">
-    <filter
-       inkscape:collect="always"
-       style="color-interpolation-filters:sRGB"
-       id="filter45"
-       x="-0.19637796"
-       y="-0.19637796"
-       width="1.3927559"
-       height="1.3927559">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.91534098"
-         id="feGaussianBlur45" />
-    </filter>
-  </defs>
-  <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     transform="translate(-95.514582,-126.73542)">
-    <circle
-       style="fill:#373240;fill-opacity:1;stroke:none;stroke-width:0.260903;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
-       id="path846-1"
-       cx="170.50549"
-       cy="41.09288"
-       r="11.90625"
-       transform="rotate(38.680917)" />
-    <circle
-       id="path44"
-       style="fill:none;fill-opacity:1;stroke:#dedede;stroke-width:1.44859;stroke-dasharray:none;stroke-opacity:1"
-       cx="107.42084"
-       cy="138.64166"
-       r="7.639142" />
-    <circle
-       id="circle45"
-       style="opacity:0.926282;fill:none;fill-opacity:1;stroke:#69d5e6;stroke-width:1.607;stroke-dasharray:none;stroke-opacity:1;filter:url(#filter45)"
-       cx="107.42084"
-       cy="138.64166"
-       r="7.639142" />
-  </g>
+<svg width="90" height="90" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_394_1182)">
+<path d="M80.1278 73.1236C95.6604 53.7225 92.5243 25.4032 73.1233 9.87065C53.7222 -5.66193 25.4029 -2.5259 9.87032 16.8752C-5.66226 36.2762 -2.52623 64.5955 16.8748 80.1281C36.2759 95.6607 64.5952 92.5247 80.1278 73.1236Z" fill="#373240"/>
+<path d="M73.8697 45.0027C73.8697 29.0569 60.9431 16.1303 44.9974 16.1303C29.0516 16.1303 16.125 29.0569 16.125 45.0027C16.125 60.9484 29.0516 73.875 44.9974 73.875C60.9431 73.875 73.8697 60.9484 73.8697 45.0027Z" stroke="#DEDEDE" stroke-width="5.47499"/>
+<g opacity="0.926282" filter="url(#filter0_f_394_1182)">
+<path d="M73.8697 45.0027C73.8697 29.0569 60.9431 16.1303 44.9974 16.1303C29.0516 16.1303 16.125 29.0569 16.125 45.0027C16.125 60.9484 29.0516 73.875 44.9974 73.875C60.9431 73.875 73.8697 60.9484 73.8697 45.0027Z" stroke="#69D5E6" stroke-width="6.0737"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_394_1182" x="6.17073" y="6.17464" width="77.6546" height="77.6546" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="3.45956" result="effect1_foregroundBlur_394_1182"/>
+</filter>
+<clipPath id="clip0_394_1182">
+<rect width="90" height="90" fill="white" transform="matrix(0 -1 1 0 0 90)"/>
+</clipPath>
+</defs>
 </svg>
