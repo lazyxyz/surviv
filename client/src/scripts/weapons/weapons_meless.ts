@@ -3,6 +3,7 @@ import { freeMeless, Melees } from "@common/definitions/melees";
 import type { Game } from "../game";
 import type { weaponPresentType } from "@common/typings";
 import weapons from ".";
+import type { ObjectDefinition } from "@common/utils/objectDefinitions";
 
 const selectMeless = (game: Game, weapon: string) => {
     // store weapon
@@ -64,8 +65,52 @@ export async function visibleMeless(game: Game) {
     // reset items before render new
     weapons.resetAll();
 
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
+    const myMeless = await new Promise<ObjectDefinition[]>(async(resolve, reject) => {
+        try {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const request: {
+                data: { items: Array<{ name: string }> }
+            } = await $.ajax({
+                url: "https://test-api.openmark.io/market/api/nft",
+                type: "POST",
+                data: {
+                    nftContract: "0x4f8530e94a14c1facb50c199ae6e0f854aee78b8",
+                    owner: game.account.address,
+                    size: 100
+                }
+            });
+
+            return resolve(request.data.items.map(meta => {
+                /*
+                    for example: baseball bat dragon #1
+                    indexOf should be 20 and - 1 mean space
+                    result: baseball bat dragon
+                */
+                const separate = meta.name.slice(0, meta.name.indexOf("#") - 1);
+
+                return {
+                    idString: separate.replaceAll(" ", "_").toLowerCase(),
+                    name: separate
+                };
+            }));
+        } catch (error) {
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+            reject(error);
+        }
+    });
+
     const MelessIntance = Melees.definitions.filter(argument =>
-        [...freeMeless].some(
+        [
+            ...freeMeless,
+            /*
+                in here don't allow show skins just default
+                you wanna select skin attention to assets preview !
+            */
+            ...(myMeless
+                ?.filter(meta => meta?.idString === argument.idString && argument?.default)
+                ?.map(meta => meta?.idString) || [])
+        ].some(
             argument_child => argument_child === argument.idString
         )
     );
@@ -94,19 +139,7 @@ export async function visibleMeless(game: Game) {
 
                 const getAssets = await weapons.appendAsset(
                     idString,
-                    async() => {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-                        return await $.ajax({
-                            url: "https://test-api.openmark.io/market/api/nft",
-                            type: "POST",
-                            data: {
-                                nftContract: "0x671795fe5F0DCA4bf4fe57024bc4b138b8316961",
-                                owner: game.account.address,
-                                size: 100,
-                                search: name
-                            }
-                        });
-                    }
+                    myMeless
                 );
 
                 // should be set or reset weapon

@@ -58,7 +58,7 @@ export async function visibleSkin(game: Game) {
                 url: "https://test-api.openmark.io/market/api/nft",
                 type: "POST",
                 data: {
-                    nftContract: "0x3b1cbe9791eb789e081006df913bbb10166f171a",
+                    nftContract: "0xe39c159175ca527ff467114a03048142db23ea20",
                     owner: game.account.address,
                     size: 100
                 }

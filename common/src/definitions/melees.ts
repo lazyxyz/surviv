@@ -84,16 +84,7 @@ export const DEFAULT_HAND_RIGGING = Object.freeze({
 }) as InventoryItemDefinition["fists"] & object;
 
 export const freeMeless = [
-    "fists",
-    "baseball_bat",
-    "hatchet",
-    "steelfang",
-    "maul",
-    "seax",
-    "crowbar",
-    "gas_can",
-    "kbar",
-    "sickle"
+    "fists"
 ];
 
 export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
@@ -135,6 +126,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             idString: "baseball_bat",
             name: "Baseball Bat",
             swingSound: "heavy_swing",
+            default: true,
             damage: 34,
             obstacleMultiplier: 1.5,
             radius: 3.8,

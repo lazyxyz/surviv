@@ -58,9 +58,7 @@ const appendPreview = (images: Array<{
 
 const appendAsset = async(
     idString: string,
-    callback: () => Promise<{
-        data: { items: Array<{ name: string }> }
-    }>
+    definition: ObjectDefinition[]
 ): Promise<ObjectDefinition[] | undefined> => {
     const rootAssetsElement = $(".weapons-container-aside-assets");
     const rootListElement = $(".weapons-container-list");
@@ -84,36 +82,17 @@ const appendAsset = async(
         rootAssetsElement.prepend(loadingElement);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
-    const myWeapons = await new Promise<ObjectDefinition[]>(async(resolve, reject) => {
-        try {
-            const request = await callback();
-
-            return resolve(request.data.items.map(meta => {
-                /*
-                    for example: baseball bat dragon #1
-                    indexOf should be 20 and - 1 mean space
-                    result: baseball bat dragon
-                */
-                const separate = meta.name.slice(0, meta.name.indexOf("#") - 1);
-
-                return {
-                    idString: separate.replaceAll(" ", "_").toLowerCase(),
-                    name: separate
-                };
-            }).filter(meta => meta.idString !== idString));
-        } catch (error) {
-            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-            reject(error);
-        }
-    });
-
     const weaponsInstance = [
         {
             idString,
             name: "Default"
         },
-        ...myWeapons || []
+        ...(definition
+            // should be get related item
+            ?.filter(meta => meta?.idString?.startsWith(idString))
+            // change from orignal to 'Default' at weaponsInstance[0].name
+            ?.filter(meta => meta?.idString !== idString)
+            || [])
     ];
 
     for (const { idString, name } of weaponsInstance) {

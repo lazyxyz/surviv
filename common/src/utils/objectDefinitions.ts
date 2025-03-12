@@ -532,6 +532,8 @@ export const NullString = Symbol("null idString");
 export interface ObjectDefinition {
     readonly idString: string
     readonly name: string
+    readonly default?: boolean
+
 }
 
 /**
