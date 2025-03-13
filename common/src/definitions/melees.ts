@@ -491,64 +491,28 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "pan",
             name: "Pan",
-            itemType: ItemType.Melee,
+            swingSound: "pan_hit",
             default: true,
             damage: 65,
-            swingSound: "heavy_swing",
-            hitSound: "pan_hit",
-            speedMultiplier: 1,
             obstacleMultiplier: 1.5,
             radius: 2.7,
             offset: Vec.create(5.5, 2),
-            cooldown: 800,
-            reflectiveSurface: {
-                pointA: Vec.create(3.55, -2),
-                pointB: Vec.create(2.6, 0.66)
-            },
-            onBack: {
-                angle: 35,
-                position: Vec.create(-45, 30),
-                reflectiveSurface: {
-                    pointA: Vec.create(-2.83, 0.96),
-                    pointB: Vec.create(-0.35, 2.62)
-                }
-            },
+            cooldown: 450,
             fists: {
-                animationDuration: 200,
-                left: Vec.create(38, -35),
-                right: Vec.create(45, 35)
+                animationDuration: 150,
+                left: Vec.create(55, -15),
+                right: Vec.create(45, 0),
+                useLeft: Vec.create(28, -15),
+                useRight: Vec.create(50, -15)
             },
             image: {
-                separateWorldImage: true,
-                angle: -70,
-                position: Vec.create(60, 4),
-                lootScale: 0.9
-            },
-            animation: [
+                position: Vec.create(35, 45),
+                usePosition: Vec.create(115, -14),
+                angle: 155,
+                useAngle: 45,
+                lootScale: 0.55
+            }
 
-                {
-                    duration: 200,
-                    fists: {
-                        left: Vec.create(38, -35),
-                        right: Vec.create(65, 55)
-                    },
-                    image: {
-                        angle: 15,
-                        position: Vec.create(105, 65)
-                    }
-                },
-                {
-                    duration: 200,
-                    fists: {
-                        left: Vec.create(38, -35),
-                        right: Vec.create(45, 35)
-                    },
-                    image: {
-                        angle: -70,
-                        position: Vec.create(60, 4)
-                    }
-                }
-            ]
         }
     ]
 );
