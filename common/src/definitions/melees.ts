@@ -45,39 +45,6 @@ export type MeleeDefinition = InventoryItemDefinition & {
     }
 });
 
-const defaultCustomize = [
-    {
-        idString: "chainsaw",
-        name: "Chain Saw",
-        devItem: true,
-        damage: 25,
-        fireMode: FireMode.Auto,
-        obstacleMultiplier: 2,
-        piercingMultiplier: 2,
-        radius: 2.7,
-        swingSound: "chainsaw",
-        stopSound: "chainsaw_stop",
-        offset: Vec.create(6.8, 0.5),
-        cooldown: 0,
-        fists: {
-            animationDuration: 0,
-            left: Vec.create(61, 10),
-            right: Vec.create(35, 70),
-            useLeft: Vec.create(57, 10),
-            useRight: Vec.create(31, 70)
-        },
-        image: {
-            position: Vec.create(106, 27),
-            usePosition: Vec.create(106, 27),
-            angle: 10,
-            useAngle: 10,
-            lootScale: 0.5,
-            animated: true
-        },
-        noDrop: true
-    }
-];
-
 export const DEFAULT_HAND_RIGGING = Object.freeze({
     left: Vec.create(38, -35),
     right: Vec.create(38, 35)
@@ -106,6 +73,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "fists",
             name: "Fists",
+            default: true,
             damage: 20,
             obstacleMultiplier: 1,
             iceMultiplier: 0.01,
@@ -150,6 +118,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "feral_claws",
             name: "Feral Claws",
+            default: true,
             damage: 20,
             obstacleMultiplier: 1,
             radius: 1.75,
@@ -175,6 +144,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "hatchet",
             name: "Hatchet",
+            default: true,
             damage: 45,
             rotationalAnimation: true,
             obstacleMultiplier: 2,
@@ -198,6 +168,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "fire_hatchet",
             name: "Fire Hatchet",
+            default: true,
             damage: 50,
             rotationalAnimation: true,
             obstacleMultiplier: 2,
@@ -223,6 +194,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             idString: "crowbar",
             name: "Crowbar",
             swingSound: "heavy_swing",
+            default: true,
             damage: 40,
             obstacleMultiplier: 2.2,
             piercingMultiplier: 2,
@@ -249,6 +221,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             idString: "kbar",
             name: "K-bar",
             swingSound: "soft_swing",
+            default: true,
             damage: 25,
             obstacleMultiplier: 1.25,
             radius: 2.7,
@@ -273,6 +246,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "sickle",
             name: "Sickle",
+            default: true,
             damage: 24,
             swingSound: "soft_swing",
             obstacleMultiplier: 1.3,
@@ -299,6 +273,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "maul",
             name: "Maul",
+            default: true,
             damage: 54,
             iceMultiplier: 5,
             rotationalAnimation: true,
@@ -325,6 +300,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             idString: "steelfang",
             name: "Steelfang",
             devItem: true,
+            default: true,
             damage: 40,
             noDrop: true,
             stonePiercing: true,
@@ -356,6 +332,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "gas_can",
             name: "Gas Can",
+            default: true,
             damage: 22,
             obstacleMultiplier: 1,
             radius: 1.75,
@@ -380,6 +357,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             idString: "heap_sword",
             name: "HE-AP sword",
             devItem: true,
+            default: true,
             damage: 75,
             obstacleMultiplier: 2.5,
             piercingMultiplier: 1,
@@ -408,6 +386,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             idString: "ice_pick",
             name: "Ice Pick",
             swingSound: "heavy_swing",
+            default: true,
             damage: 35,
             obstacleMultiplier: 1.9,
             piercingMultiplier: 1,
@@ -431,6 +410,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "seax",
             name: "Seax",
+            default: true,
             damage: 45,
             swingSound: "heavy_swing",
             obstacleMultiplier: 1.5,
@@ -455,6 +435,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
         {
             idString: "falchion",
             name: "Falchion",
+            default: true,
             damage: 41,
             swingSound: "soft_swing",
             obstacleMultiplier: 1.1,
@@ -481,6 +462,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             idString: "chainsaw",
             name: "Chain Saw",
             devItem: true,
+            default: true,
             damage: 25,
             fireMode: FireMode.Auto,
             obstacleMultiplier: 2,
@@ -505,6 +487,129 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
                 lootScale: 0.5,
                 animated: true
             }
+        },
+        {
+            idString: "pan",
+            name: "Pan",
+            itemType: ItemType.Melee,
+            default: true,
+            damage: 65,
+            swingSound: "heavy_swing",
+            hitSound: "pan_hit",
+            speedMultiplier: 1,
+            obstacleMultiplier: 1.5,
+            radius: 2.7,
+            offset: Vec.create(5.5, 2),
+            cooldown: 800,
+            reflectiveSurface: {
+                pointA: Vec.create(3.55, -2),
+                pointB: Vec.create(2.6, 0.66)
+            },
+            onBack: {
+                angle: 35,
+                position: Vec.create(-45, 30),
+                reflectiveSurface: {
+                    pointA: Vec.create(-2.83, 0.96),
+                    pointB: Vec.create(-0.35, 2.62)
+                }
+            },
+            fists: {
+                animationDuration: 200,
+                left: Vec.create(38, -35),
+                right: Vec.create(45, 35)
+            },
+            image: {
+                separateWorldImage: true,
+                angle: -70,
+                position: Vec.create(60, 4),
+                lootScale: 0.9
+            },
+            animation: [
+
+                {
+                    duration: 200,
+                    fists: {
+                        left: Vec.create(38, -35),
+                        right: Vec.create(65, 55)
+                    },
+                    image: {
+                        angle: 15,
+                        position: Vec.create(105, 65)
+                    }
+                },
+                {
+                    duration: 200,
+                    fists: {
+                        left: Vec.create(38, -35),
+                        right: Vec.create(45, 35)
+                    },
+                    image: {
+                        angle: -70,
+                        position: Vec.create(60, 4)
+                    }
+                }
+            ]
+        },
+        {
+            idString: "kukri",
+            name: "Kukri",
+            itemType: ItemType.Melee,
+            swingSound: "soft_swing",
+            hitSound: "kukri_stab",
+            default: true,
+            damage: 40,
+            speedMultiplier: 1,
+            obstacleMultiplier: 1,
+            radius: 2.5,
+            iceMultiplier: 0.1,
+            offset: Vec.create(4.25, -0.8),
+            cooldown: 350,
+            fists: {
+                animationDuration: 150,
+                left: Vec.create(38, -35),
+                right: Vec.create(0, 45)
+            },
+            image: {
+                position: Vec.create(45, 45),
+                angle: 50,
+                lootScale: 0.75
+            },
+            hitDelay: 100,
+            animation: [
+                { // warmup
+                    duration: 100,
+                    fists: {
+                        left: Vec.create(38, -35),
+                        right: Vec.create(-5, 48)
+                    },
+                    image: {
+                        position: Vec.create(24, 76),
+                        angle: 95
+                    }
+                },
+                {
+                    duration: 95,
+                    fists: {
+                        left: Vec.create(38, -35),
+                        right: Vec.create(60, 10)
+                    },
+                    image: {
+                        position: Vec.create(85, -25),
+                        angle: -5
+                    }
+                },
+                {
+                    duration: 95,
+                    fists: {
+                        left: Vec.create(38, -35),
+                        right: Vec.create(0, 45)
+                    },
+                    image: {
+                        position: Vec.create(45, 45),
+                        angle: 50
+                    }
+                }
+            ]
         }
     ]
 );
