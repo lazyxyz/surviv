@@ -26,10 +26,6 @@ import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
-import { freeGuns, Guns } from "@common/definitions/guns";
-import { Throwables } from "@common/definitions/throwables";
-import { Melees } from "@common/definitions/melees";
-
 /*
     eslint-disable
 
@@ -444,6 +440,63 @@ export async function setUpUI(game: Game): Promise<void> {
         updateServerSelectors();
     });
 
+    const readyConnect = (data: GetGameResponse, gameAddress: string) => {
+        if (data.success) {
+            const params = new URLSearchParams();
+
+            if (teamID) params.set("teamID", teamID);
+            if (autoFill) params.set("autoFill", String(autoFill));
+
+            // const devPass = game.console.getBuiltInCVar("dv_password");
+            // if (devPass) params.set("password", devPass);
+
+            // const role = game.console.getBuiltInCVar("dv_role");
+            // if (role) params.set("role", role);
+
+            const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
+            if (lobbyClearing) params.set("lobbyClearing", "true");
+
+            const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
+            if (weaponPreset) params.set("weaponPreset", weaponPreset);
+
+            const nameColor = game.console.getBuiltInCVar("dv_name_color");
+            if (nameColor) {
+                try {
+                    params.set("nameColor", new Color(nameColor).toNumber().toString());
+                } catch (e) {
+                    game.console.setBuiltInCVar("dv_name_color", "");
+                    console.error(e);
+                }
+            }
+            game.connect(`${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`);
+            ui.splashMsg.hide();
+
+            // Check again because there is a small chance that the create-team-menu element won't hide.
+            if (createTeamMenu.css("display") !== "none") createTeamMenu.hide(); // what the if condition doin
+        } else {
+            if (data.message !== undefined) {
+                const reportID = data.reportID || "No report ID provided.";
+                const message = getTranslatedString(`msg_punishment_${data.message}_reason`, { reason: data.reason ?? getTranslatedString("msg_no_reason") });
+
+                ui.warningTitle.text(getTranslatedString(`msg_punishment_${data.message}`));
+                ui.warningText.html(`${data.message !== "vpn" ? `<span class="case-id">Case ID: ${reportID}</span><br><br><br>` : ""}${message}`);
+                ui.warningAgreeOpts.toggle(data.message === "warn");
+                ui.warningAgreeCheckbox.prop("checked", false);
+                ui.warningModal.show();
+                ui.splashOptions.addClass("loading");
+            } else {
+                ui.splashMsgText.html(html`
+                    ${getTranslatedString("msg_err_joining")}
+                    <br>
+                    ${getTranslatedString("msg_try_again")}
+                `);
+                ui.splashMsg.show();
+            }
+
+            resetPlayButtons();
+        }
+    };
+
     const joinGame = (teamSize: number): void => {
         ui.splashOptions.addClass("loading");
         ui.loadingText.text(getTranslatedString("loading_finding_game"));
@@ -465,60 +518,7 @@ export async function setUpUI(game: Game): Promise<void> {
         void $.get(
             `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}&token=${game.account.token}`,
             (data: GetGameResponse) => {
-                if (data.success) {
-                    const params = new URLSearchParams();
-
-                    if (teamID) params.set("teamID", teamID);
-                    if (autoFill) params.set("autoFill", String(autoFill));
-
-                    // const devPass = game.console.getBuiltInCVar("dv_password");
-                    // if (devPass) params.set("password", devPass);
-
-                    // const role = game.console.getBuiltInCVar("dv_role");
-                    // if (role) params.set("role", role);
-
-                    const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
-                    if (lobbyClearing) params.set("lobbyClearing", "true");
-
-                    const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
-                    if (weaponPreset) params.set("weaponPreset", weaponPreset);
-
-                    const nameColor = game.console.getBuiltInCVar("dv_name_color");
-                    if (nameColor) {
-                        try {
-                            params.set("nameColor", new Color(nameColor).toNumber().toString());
-                        } catch (e) {
-                            game.console.setBuiltInCVar("dv_name_color", "");
-                            console.error(e);
-                        }
-                    }
-                    game.connect(`${target.gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`);
-                    ui.splashMsg.hide();
-
-                    // Check again because there is a small chance that the create-team-menu element won't hide.
-                    if (createTeamMenu.css("display") !== "none") createTeamMenu.hide(); // what the if condition doin
-                } else {
-                    if (data.message !== undefined) {
-                        const reportID = data.reportID || "No report ID provided.";
-                        const message = getTranslatedString(`msg_punishment_${data.message}_reason`, { reason: data.reason ?? getTranslatedString("msg_no_reason") });
-
-                        ui.warningTitle.text(getTranslatedString(`msg_punishment_${data.message}`));
-                        ui.warningText.html(`${data.message !== "vpn" ? `<span class="case-id">Case ID: ${reportID}</span><br><br><br>` : ""}${message}`);
-                        ui.warningAgreeOpts.toggle(data.message === "warn");
-                        ui.warningAgreeCheckbox.prop("checked", false);
-                        ui.warningModal.show();
-                        ui.splashOptions.addClass("loading");
-                    } else {
-                        ui.splashMsgText.html(html`
-                            ${getTranslatedString("msg_err_joining")}
-                            <br>
-                            ${getTranslatedString("msg_try_again")}
-                        `);
-                        ui.splashMsg.show();
-                    }
-
-                    resetPlayButtons();
-                }
+                return readyConnect(data, target.gameAddress);
             }
         ).fail(() => {
             ui.splashMsgText.html(html`
@@ -815,7 +815,15 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     ui.btnStartGame.on("click", () => {
-        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Start }));
+        $.get(`${selectedRegion?.mainAddress}/api/getGame?teamSize=${TeamSize.Squad}&teamID=${teamID}&token=${game.account.token}`,
+            (data: GetGameResponse) => {
+                if (data.success) {
+                    readyConnect(data, String(selectedRegion?.gameAddress));
+                } else {
+                    teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Start }));
+                }
+            }
+        );
     });
 
     const nameColor = params.get("nameColor");
