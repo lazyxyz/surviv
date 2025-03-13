@@ -549,67 +549,6 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
                     }
                 }
             ]
-        },
-        {
-            idString: "kukri",
-            name: "Kukri",
-            itemType: ItemType.Melee,
-            swingSound: "soft_swing",
-            hitSound: "kukri_stab",
-            default: true,
-            damage: 40,
-            speedMultiplier: 1,
-            obstacleMultiplier: 1,
-            radius: 2.5,
-            iceMultiplier: 0.1,
-            offset: Vec.create(4.25, -0.8),
-            cooldown: 350,
-            fists: {
-                animationDuration: 150,
-                left: Vec.create(38, -35),
-                right: Vec.create(0, 45)
-            },
-            image: {
-                position: Vec.create(45, 45),
-                angle: 50,
-                lootScale: 0.75
-            },
-            hitDelay: 100,
-            animation: [
-                { // warmup
-                    duration: 100,
-                    fists: {
-                        left: Vec.create(38, -35),
-                        right: Vec.create(-5, 48)
-                    },
-                    image: {
-                        position: Vec.create(24, 76),
-                        angle: 95
-                    }
-                },
-                {
-                    duration: 95,
-                    fists: {
-                        left: Vec.create(38, -35),
-                        right: Vec.create(60, 10)
-                    },
-                    image: {
-                        position: Vec.create(85, -25),
-                        angle: -5
-                    }
-                },
-                {
-                    duration: 95,
-                    fists: {
-                        left: Vec.create(38, -35),
-                        right: Vec.create(0, 45)
-                    },
-                    image: {
-                        position: Vec.create(45, 45),
-                        angle: 50
-                    }
-                }
-            ]
         }
     ]
 );
