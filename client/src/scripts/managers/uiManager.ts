@@ -100,7 +100,7 @@ export class UIManager {
         return this.getRawPlayerNameNullish(id) ?? "[Unknown Player]";
     }
 
-    getPlayerData(id: number): { name: string, badge: BadgeDefinition | undefined } {
+    getPlayerData(id: number): { name: string, badge: string | undefined } {
         // Name
         const element = $<HTMLSpanElement>("<span>");
         const player = this.game.playerNames.get(id) ?? this._teammateDataCache.get(id);
@@ -117,11 +117,11 @@ export class UIManager {
         const playerName = element.prop("outerHTML") as string;
 
         // Badge
-        let playerBadge: BadgeDefinition | undefined = undefined;
+        let playerBadge: string | undefined = undefined;
 
         if (!this.game.console.getBuiltInCVar("cv_anonymize_player_names")) {
             if (player !== undefined) {
-                playerBadge = player.badge;
+                playerBadge = this.game.console.getBuiltInCVar("cv_loadout_badge");
             } else {
                 console.warn(`Unknown player name with id ${id}`);
             }
@@ -415,8 +415,9 @@ export class UIManager {
 
         const playerName = this.getPlayerData(packet.playerID).name;
         const playerBadge = this.getPlayerData(packet.playerID).badge;
+
         const playerBadgeText = playerBadge
-            ? html`<img class="badge-icon" src="./img/game/shared/badges/${playerBadge.idString}.svg" alt="${playerBadge.name} badge">`
+            ? html`<img class="badge-icon" src="${playerBadge}">`
             : "";
 
         gameOverText.html(
@@ -1207,7 +1208,7 @@ export class UIManager {
             return {
                 name: hasId ? this.getPlayerData(id).name : "",
                 badgeText: badge
-                    ? html`<img class="badge-icon" src="./img/game/shared/badges/${badge.idString}.svg" alt="${badge.name} badge">`
+                    ? html`<img class="badge-icon" src="${badge}">`
                     : ""
             };
         };
@@ -1867,7 +1868,7 @@ class PlayerHealthUI {
             const teammate = this.game.playerNames.get(id);
 
             if (teammate?.badge) {
-                const src = `./img/game/shared/badges/${teammate.badge.idString}.svg`;
+                const src = teammate.badge.idString;
 
                 if (this.badgeImage.attr("src") !== src) {
                     this.badgeImage

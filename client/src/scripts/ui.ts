@@ -995,8 +995,6 @@ export async function setUpUI(game: Game): Promise<void> {
 
     $<HTMLButtonElement>("#close-report").on("click", () => ui.reportingModal.fadeOut(250));
 
-    const role = game.console.getBuiltInCVar("dv_role");
-
     // Load emotes
     function handleEmote(slot: "win" | "death"): void { // eipi can you improve this so that it uses `emoteSlots` items with index >3
         const emote = $(`#emote-wheel-bottom .emote-${slot} .fa-xmark`);
@@ -1270,64 +1268,8 @@ export async function setUpUI(game: Game): Promise<void> {
             });
     }
 
-    // Load badges
-    const allowedBadges = Badges.definitions
-    .filter(argument =>
-        freeBadges.some(argument_child => argument_child === argument.idString)
-    )
-    .filter(({ roles }) => !roles?.length || roles.includes(role));
-
+    // load tabs
     $("#tab-badges").show();
-
-    const noBadgeItem = $<HTMLDivElement>(
-        html`<div id="badge-" class="badges-list-item-container">\
-            <div class="badges-list-item"> </div>\
-            <span class="badge-name">${getTranslatedString("none")}</span>\
-        </div>`
-    );
-
-    noBadgeItem.on("click", () => {
-        game.console.setBuiltInCVar("cv_loadout_badge", "");
-        noBadgeItem.addClass("selected").siblings().removeClass("selected");
-    });
-
-    const activeBadge = game.console.getBuiltInCVar("cv_loadout_badge");
-
-    const badgeUiCache: Record<ReferenceTo<BadgeDefinition>, JQuery<HTMLDivElement>> = { [""]: noBadgeItem };
-
-    function selectBadge(idString: ReferenceTo<BadgeDefinition>): void {
-        badgeUiCache[idString].addClass("selected")
-            .siblings()
-            .removeClass("selected");
-    }
-
-    $("#badges-list").append(
-        noBadgeItem,
-        ...allowedBadges.map(({ idString }) => {
-            // noinspection CssUnknownTarget
-            const badgeItem = badgeUiCache[idString] = $<HTMLDivElement>(
-                `<div id="badge-${idString}" class="badges-list-item-container${idString === activeBadge ? " selected" : ""}">\
-                    <div class="badges-list-item">\
-                        <div style="background-image: url('./img/game/shared/badges/${idString}.svg')"></div>\
-                    </div>\
-                    <span class="badge-name">${getTranslatedString(`badge_${idString}` as TranslationKeys)}</span>\
-                </div>`
-            );
-
-            badgeItem.on("click", () => {
-                game.console.setBuiltInCVar("cv_loadout_badge", idString);
-                selectBadge(idString);
-            });
-
-            return badgeItem;
-        })
-    );
-
-    game.console.variables.addChangeListener(
-        "cv_loadout_badge",
-        (_, newBadge) => { selectBadge(newBadge); }
-    );
-
     $("#tab-weapons").show();
 
     function addSliderListener(
