@@ -1,7 +1,4 @@
 import { GameConstants, TeamSize } from "@common/constants";
-import { Badges } from "@common/definitions/badges";
-import { Skins } from "@common/definitions/skins";
-import { Numeric } from "@common/utils/math";
 import { URLSearchParams } from "node:url";
 import { TemplatedApp, type WebSocket } from "uWebSockets.js";
 import { Config } from "../config";
@@ -33,9 +30,9 @@ export function initTeamRoutes(app: TemplatedApp) {
             const searchParams = new URLSearchParams(req.getQuery());
             const teamID = searchParams.get("teamID");
 
-             // Extract token from Authorization header
-             {
-                const token = searchParams.get('token');
+            // Extract token from Authorization header
+            {
+                const token = searchParams.get("token");
 
                 if (!token) {
                     Logger.log(`Team ${teamID} | Missing JWT: ${ip}`);
@@ -49,7 +46,6 @@ export function initTeamRoutes(app: TemplatedApp) {
                     forbidden(res);
                     return;
                 }
-
             }
 
             let team!: CustomTeam;
@@ -78,20 +74,9 @@ export function initTeamRoutes(app: TemplatedApp) {
             }
 
             const name = cleanUsername(searchParams.get("name"));
-            let skin = searchParams.get("skin") ?? GameConstants.player.defaultSkin;
-            let badge = searchParams.get("badge") ?? undefined;
-
-            //
-            // Role
-            //
-            let nameColor: number = 0xffffff;
-
-
-            // Validate skin
-            skin = GameConstants.player.defaultSkin;
-
-            // Validate badge
-            badge = undefined;
+            const skin = searchParams.get("skin") ?? GameConstants.player.defaultSkin;
+            const badge = searchParams.get("badge") ?? undefined;
+            const nameColor = 0xffffff;
 
             res.upgrade(
                 {
@@ -141,5 +126,5 @@ export function initTeamRoutes(app: TemplatedApp) {
             const player = socket.getUserData().player;
             player.team.removePlayer(player);
         }
-    })
+    });
 }

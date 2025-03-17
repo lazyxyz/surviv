@@ -1,4 +1,5 @@
 // project/api/src/items.ts
+import { IPFS_GATEWAY_URL } from "@common/constants";
 import { ethers } from "ethers";
 import * as https from "https";
 
@@ -7,8 +8,6 @@ const ERC1155_ABI = [
     "function uri(uint256 _id) view returns (string)",
     "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[] balances)"
 ];
-
-const IPFS_GATEWAY_URL = process.env.IPFS_GATEWAY_URL || "https://ipfs-gw.openmark.io/ipfs/";
 
 interface TokenMetadata {
     id: number;

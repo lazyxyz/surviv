@@ -272,3 +272,5 @@ export const TentTints = {
     orange: 0xc67438,
     purple: 0x994cb2
 };
+
+export const IPFS_GATEWAY_URL = "https://ipfs-gw.openmark.io/ipfs/"; // process.env.IPFS_GATEWAY_URL || "https://ipfs-gw.openmark.io/ipfs/";
