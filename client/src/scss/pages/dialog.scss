@@ -593,7 +593,7 @@
 
         .badges-list-item-container {
             width: 140px;
-            height: 170px;
+            min-height: 170px;
             padding: 8px;
             margin: 8px;
             border: 5px solid transparent;

@@ -64,6 +64,7 @@ import { EIP6963 } from "./eip6963";
 import { Account } from "./account";
 import { visibleSkin } from "./skin";
 import { visibleMeless } from "./weapons/weapons_meless";
+import { visibleBadges } from "./badges";
 
 /* eslint-disable @stylistic/indent */
 
@@ -251,7 +252,8 @@ export class Game {
             initPixi(),
             setUpUI(game),
             visibleSkin(game),
-            visibleMeless(game)
+            visibleMeless(game),
+            visibleBadges(game)
         ]).then(() => {
             unlockPlayButtons();
             resetPlayButtons();

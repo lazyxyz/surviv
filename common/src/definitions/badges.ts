@@ -37,5 +37,8 @@ export const Badges = ObjectDefinitions.create<BadgeDefinition>("Badges", [
     badge(["Suroi Logo"]),
     badge(["Fire"]),
     badge(["Colon Three"]),
-    badge(["Suroi General Chat"])
+    badge(["Suroi General Chat"]),
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    ...[...Array(100)].map((_, index) => badge([`Khan’s American Steed ${index}`]))
 ]);

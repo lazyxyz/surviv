@@ -8,6 +8,7 @@ import { Config } from "./config";
 import type { Game } from "./game";
 import { visibleSkin } from "./skin";
 import { visibleMeless } from "./weapons/weapons_meless";
+import { visibleBadges } from "./badges";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
@@ -107,6 +108,7 @@ export class Account extends EIP6963 {
             this.address = accounts[0];
             await visibleSkin(game);
             await visibleMeless(game);
+            await visibleBadges(game);
         }
 
         // update field
