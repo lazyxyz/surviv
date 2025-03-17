@@ -7,9 +7,8 @@ import { Scopes, type ScopeDefinition } from "@common/definitions/scopes";
 import { SpectatePacket } from "@common/packets/spectatePacket";
 import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, type GetGameResponse } from "@common/typings";
 import { ExtendedMap } from "@common/utils/misc";
-import { Badges, freeBadges, type BadgeDefinition } from "@common/definitions/badges";
 import { EmoteCategory, Emotes, freeEmotes, type EmoteDefinition } from "@common/definitions/emotes";
-import { ItemType, type ObjectDefinition, type ReferenceTo } from "@common/utils/objectDefinitions";
+import { ItemType, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound } from "@pixi/sound";
 import $ from "jquery";
@@ -26,6 +25,7 @@ import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
+import { getBadgeImage } from "./badges";
 /*
     eslint-disable
 
@@ -450,8 +450,8 @@ export async function setUpUI(game: Game): Promise<void> {
             // const devPass = game.console.getBuiltInCVar("dv_password");
             // if (devPass) params.set("password", devPass);
 
-            // const role = game.console.getBuiltInCVar("dv_role");
-            // if (role) params.set("role", role);
+            const badge = game.console.getBuiltInCVar("cv_loadout_badge");
+            if (badge) params.set("badge", badge);
 
             const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
             if (lobbyClearing) params.set("lobbyClearing", "true");
@@ -658,7 +658,7 @@ export async function setUpUI(game: Game): Promise<void> {
                                     </div>
                                     <div class="create-team-player-name-container">
                                         <span class="create-team-player-name"${nameColor ? ` style="color: ${new Color(nameColor).toHex()}"` : ""};>${name}</span>
-                                        ${![undefined, "bdg_"].includes(badge) ? `<img class="create-team-player-badge" draggable="false" src="./img/game/shared/badges/${badge}.svg" />` : ""}
+                                        ${badge?.length ? `<img class="create-team-player-badge" draggable="false" src="${getBadgeImage(badge)}" />` : ""}
                                     </div>
                                 </div>
                                 `
@@ -995,8 +995,6 @@ export async function setUpUI(game: Game): Promise<void> {
 
     $<HTMLButtonElement>("#close-report").on("click", () => ui.reportingModal.fadeOut(250));
 
-    const role = game.console.getBuiltInCVar("dv_role");
-
     // Load emotes
     function handleEmote(slot: "win" | "death"): void { // eipi can you improve this so that it uses `emoteSlots` items with index >3
         const emote = $(`#emote-wheel-bottom .emote-${slot} .fa-xmark`);
@@ -1270,64 +1268,8 @@ export async function setUpUI(game: Game): Promise<void> {
             });
     }
 
-    // Load badges
-    const allowedBadges = Badges.definitions
-    .filter(argument =>
-        freeBadges.some(argument_child => argument_child === argument.idString)
-    )
-    .filter(({ roles }) => !roles?.length || roles.includes(role));
-
+    // load tabs
     $("#tab-badges").show();
-
-    const noBadgeItem = $<HTMLDivElement>(
-        html`<div id="badge-" class="badges-list-item-container">\
-            <div class="badges-list-item"> </div>\
-            <span class="badge-name">${getTranslatedString("none")}</span>\
-        </div>`
-    );
-
-    noBadgeItem.on("click", () => {
-        game.console.setBuiltInCVar("cv_loadout_badge", "");
-        noBadgeItem.addClass("selected").siblings().removeClass("selected");
-    });
-
-    const activeBadge = game.console.getBuiltInCVar("cv_loadout_badge");
-
-    const badgeUiCache: Record<ReferenceTo<BadgeDefinition>, JQuery<HTMLDivElement>> = { [""]: noBadgeItem };
-
-    function selectBadge(idString: ReferenceTo<BadgeDefinition>): void {
-        badgeUiCache[idString].addClass("selected")
-            .siblings()
-            .removeClass("selected");
-    }
-
-    $("#badges-list").append(
-        noBadgeItem,
-        ...allowedBadges.map(({ idString }) => {
-            // noinspection CssUnknownTarget
-            const badgeItem = badgeUiCache[idString] = $<HTMLDivElement>(
-                `<div id="badge-${idString}" class="badges-list-item-container${idString === activeBadge ? " selected" : ""}">\
-                    <div class="badges-list-item">\
-                        <div style="background-image: url('./img/game/shared/badges/${idString}.svg')"></div>\
-                    </div>\
-                    <span class="badge-name">${getTranslatedString(`badge_${idString}` as TranslationKeys)}</span>\
-                </div>`
-            );
-
-            badgeItem.on("click", () => {
-                game.console.setBuiltInCVar("cv_loadout_badge", idString);
-                selectBadge(idString);
-            });
-
-            return badgeItem;
-        })
-    );
-
-    game.console.variables.addChangeListener(
-        "cv_loadout_badge",
-        (_, newBadge) => { selectBadge(newBadge); }
-    );
-
     $("#tab-weapons").show();
 
     function addSliderListener(

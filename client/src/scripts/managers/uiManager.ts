@@ -26,6 +26,7 @@ import { GHILLIE_TINT, MODE, TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/con
 import { formatDate, html } from "../utils/misc";
 import { SuroiSprite } from "../utils/pixi";
 import { ClientPerkManager } from "./perkManager";
+import { getBadgeImage } from "../badges";
 
 function safeRound(value: number): number {
     if (0 < value && value <= 1) return 1;
@@ -100,7 +101,7 @@ export class UIManager {
         return this.getRawPlayerNameNullish(id) ?? "[Unknown Player]";
     }
 
-    getPlayerData(id: number): { name: string, badge: BadgeDefinition | undefined } {
+    getPlayerData(id: number): { name: string, badge: string } {
         // Name
         const element = $<HTMLSpanElement>("<span>");
         const player = this.game.playerNames.get(id) ?? this._teammateDataCache.get(id);
@@ -117,11 +118,13 @@ export class UIManager {
         const playerName = element.prop("outerHTML") as string;
 
         // Badge
-        let playerBadge: BadgeDefinition | undefined = undefined;
+        let playerBadge = "";
 
         if (!this.game.console.getBuiltInCVar("cv_anonymize_player_names")) {
             if (player !== undefined) {
-                playerBadge = player.badge;
+                playerBadge = player.badge
+                    ? html`<img class="badge-icon" src="${getBadgeImage(player.badge.idString)}" badge">`
+                    : "";
             } else {
                 console.warn(`Unknown player name with id ${id}`);
             }
@@ -415,9 +418,7 @@ export class UIManager {
 
         const playerName = this.getPlayerData(packet.playerID).name;
         const playerBadge = this.getPlayerData(packet.playerID).badge;
-        const playerBadgeText = playerBadge
-            ? html`<img class="badge-icon" src="./img/game/shared/badges/${playerBadge.idString}.svg" alt="${playerBadge.name} badge">`
-            : "";
+        const playerBadgeText = playerBadge;
 
         gameOverText.html(
             packet.won
@@ -508,10 +509,9 @@ export class UIManager {
             if (spectating) {
                 const playerName = this.getPlayerData(id.id).name;
                 const badge = this.getPlayerData(id.id).badge;
-                const badgeText = badge ? html`<img class="badge-icon" src="./img/game/shared/badges/${badge.idString}.svg" alt="${badge.name} badge">` : "";
 
                 this.ui.gameOverOverlay.fadeOut();
-                this.ui.spectatingMsgPlayer.html(playerName + badgeText);
+                this.ui.spectatingMsgPlayer.html(playerName + badge);
             }
             this.ui.spectatingContainer.toggle(spectating && this.ui.spectatingOptions.hasClass("fa-eye-slash"));
             this.ui.spectatingMsg.toggle(spectating);
@@ -1202,13 +1202,10 @@ export class UIManager {
 
         const getNameAndBadge = (id?: number): { readonly name: string, readonly badgeText: string } => {
             const hasId = id !== undefined;
-            const badge = hasId ? this.getPlayerData(id).badge : undefined;
 
             return {
                 name: hasId ? this.getPlayerData(id).name : "",
-                badgeText: badge
-                    ? html`<img class="badge-icon" src="./img/game/shared/badges/${badge.idString}.svg" alt="${badge.name} badge">`
-                    : ""
+                badgeText: hasId ? this.getPlayerData(id).badge : ""
             };
         };
 
@@ -1867,7 +1864,7 @@ class PlayerHealthUI {
             const teammate = this.game.playerNames.get(id);
 
             if (teammate?.badge) {
-                const src = `./img/game/shared/badges/${teammate.badge.idString}.svg`;
+                const src = getBadgeImage(teammate.badge.idString);
 
                 if (this.badgeImage.attr("src") !== src) {
                     this.badgeImage

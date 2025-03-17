@@ -22,7 +22,7 @@ import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
 import $ from "jquery";
 import { DashLine } from "pixi-dashed-line";
-import { Container, Graphics, Text, TilingSprite } from "pixi.js";
+import { Container, Graphics, Text, TilingSprite, Assets, Texture } from "pixi.js";
 import { getTranslatedString } from "../../translations";
 import { type TranslationKeys } from "../../typings/translations";
 import { type Game } from "../game";
@@ -34,6 +34,7 @@ import { GameObject } from "./gameObject";
 import { Obstacle } from "./obstacle";
 import { type Particle, type ParticleEmitter } from "./particles";
 import type { AllowedEmoteSources } from "@common/packets/inputPacket";
+import { getBadgeImage } from "../badges";
 
 export class Player extends GameObject.derive(ObjectCategory.Player) {
     teamID!: number;
@@ -606,16 +607,30 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 text.anchor.set(0.5);
                 container.addChild(this.teammateName.text);
 
-                if (badge) {
-                    const oldWidth = badge.width;
-                    badge.width = text.height / 1.25;
-                    badge.height *= badge.width / oldWidth;
-                    badge.position = Vec.create(
-                        text.width / 2 + 20,
-                        0
-                    );
-                    container.addChild(badge);
-                }
+                void (async() => {
+                    if (badge && name?.badge) {
+                        // Load the badge texture from the idString (assuming it’s a URL)
+                        const texture: Texture = await Assets.load({
+                            src: getBadgeImage(name.badge.idString),
+                            loadParser: getBadgeImage(name.badge.idString).includes(".svg")
+                                ? undefined
+                                : "loadTextures"
+                        });
+
+                        // Assign the loaded texture to the badge sprite
+                        badge.texture = texture;
+
+                        // Size and position the badge
+                        const oldWidth = badge.width;
+                        badge.width = text.height / 1.25;
+                        badge.height *= badge.width / oldWidth;
+                        badge.position = Vec.create(
+                            text.width / 2 + 20,
+                            0
+                        );
+                        container.addChild(badge);
+                    }
+                })();
 
                 container.zIndex = getEffectiveZIndex(ZIndexes.DeathMarkers, game.layer, game.layer);
                 game.camera.addObject(container);
