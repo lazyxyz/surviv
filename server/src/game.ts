@@ -49,6 +49,7 @@ import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
 import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
+import { Armors } from "@common/definitions/armors";
 
 /*
     eslint-disable
@@ -560,9 +561,9 @@ export class Game implements GameData {
 
     private _sendKillLeaderKFPacket<
         Message extends
-            | KillfeedMessageType.KillLeaderAssigned
-            | KillfeedMessageType.KillLeaderDeadOrDisconnected
-            | KillfeedMessageType.KillLeaderUpdated
+        | KillfeedMessageType.KillLeaderAssigned
+        | KillfeedMessageType.KillLeaderDeadOrDisconnected
+        | KillfeedMessageType.KillLeaderUpdated
     >(
         messageType: Message,
         options?: Partial<Omit<KillFeedPacketData & { readonly messageType: NoInfer<Message> }, "messageType" | "playerID" | "attackerKills">>
@@ -802,9 +803,11 @@ export class Game implements GameData {
 
     // Called when a JoinPacket is sent by the client
     activatePlayer(player: Gamer, packet: JoinPacketData): void {
-        // // DEV
-        // player.inventory.vest = Armors.fromString("developr_vest");
-        // player.inventory.helmet = Armors.fromString("tactical_helmet");
+        // // DEV MODE
+        // {
+        //     player.inventory.vest = Armors.fromString("developr_vest");
+        //     player.inventory.helmet = Armors.fromString("tactical_helmet");
+        // }
 
         const rejectedBy = this.pluginManager.emit("player_will_join", { player, joinPacket: packet });
         if (rejectedBy) {

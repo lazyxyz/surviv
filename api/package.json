@@ -19,9 +19,10 @@
     "dotenv": "^16.4.5",
     "ethers": "^6.13.4",
     "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.15.2",
     "ts-node": "^10.9.2",
     "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.48.0",
-    "uuid": "^11.0.3",
+    "uuid": "11.1.0",
     "ws": "^8.18.0"
   }
 }

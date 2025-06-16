@@ -7,13 +7,13 @@ import { PlayerContainer } from "../objects/gamer";
 import { Logger } from "../utils/misc";
 import { forbidden, getIP } from "../utils/serverHelpers"
 import { validateJWT } from "@api/auth";
+import {  saveCrateClaim } from "@api/crate";
 
 const simultaneousConnections: Record<string, number> = {};
 
 export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<string, number>, joinAttempts: Record<string, number>) {
     app.ws("/play", {
         idleTimeout: 30,
-
         /**
          * Upgrade the connection to WebSocket.
          */
