@@ -81,24 +81,33 @@ export class Account extends EIP6963 {
             url: `${selectedRegion.apiAddress}/api/requestNonce`
         });
 
-        const verifySignature: {
-            token: string
-            success: boolean
-        } = await $.ajax({
-            type: "POST",
-            url: `${selectedRegion.apiAddress}/api/verifySignature`,
-            data: JSON.stringify({
-                walletAddress: accounts[0],
-                signature: await getProvider.provider.request({
-                    method: "personal_sign",
-                    params: [
-                        ethers.hexlify(ethers.toUtf8Bytes((requestNonce.nonce))),
-                        accounts[0]
-                    ]
-                }),
-                nonce: requestNonce.nonce
-            })
+        const signature = await getProvider.provider.request({
+            method: "personal_sign",
+            params: [
+                ethers.hexlify(ethers.toUtf8Bytes((requestNonce.nonce))),
+                accounts[0]
+            ]
         });
+
+        // Send POST request to /api/verifySignature
+        const response = await fetch(`${selectedRegion.apiAddress}/api/verifySignature`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                walletAddress: accounts[0],
+                signature,
+                nonce: requestNonce.nonce,
+            }),
+        });
+
+        // Parse response
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error(data.error || 'Signature verification failed');
+        }
 
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.eventListener();
@@ -114,14 +123,14 @@ export class Account extends EIP6963 {
         // update field
         {
             this.address = accounts[0];
-            this.token = verifySignature.token;
+            this.token = data.token;
             this.provider = getProvider;
         }
 
         // update localstorage
         {
             localStorage.setItem(PUBLIC_KEY, accounts[0]);
-            localStorage.setItem(ACCESS_TOKEN, verifySignature.token);
+            localStorage.setItem(ACCESS_TOKEN, data.token);
             localStorage.setItem(SELECTOR_WALLET, getProvider.info.name);
         }
 
