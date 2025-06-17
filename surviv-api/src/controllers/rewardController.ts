@@ -4,7 +4,6 @@ import { ethers } from "ethers";
 import * as dotenv from 'dotenv';
 import { saveCrateClaim } from "./crateController";
 import path from "path";
-// dotenv.config();
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const CrateTier = { Drop: 0, Tactical: 1, Immortal: 2 };
@@ -23,9 +22,9 @@ const AMOUNT_PROBABILITIES = {
 
 export async function saveRanks(address: string, rank: number, teamMode: boolean, gameId: number) {
   // Only process for top 1 player
-  if (rank !== 1) {
-    throw new Error("Only top 1 player receives crates");
-  }
+  // if (rank !== 1) {
+  //   throw new Error("Only top 1 player receives crates");
+  // }
 
   // Validate address
   if (!ethers.isAddress(address)) {
