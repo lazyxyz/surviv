@@ -1,9 +1,11 @@
 import { randomBytes } from "crypto";
 import { ethers } from "ethers";
-import { saveCrateClaim } from "@api/controllers/crateController";
 
 import * as dotenv from 'dotenv';
-dotenv.config();
+import { saveCrateClaim } from "./crateController";
+import path from "path";
+// dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const CrateTier = { Drop: 0, Tactical: 1, Immortal: 2 };
 

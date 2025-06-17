@@ -50,8 +50,8 @@ import { type Loot } from "./loot";
 import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
-import { saveRanks } from "../api/ranks";
 import { weaponPresentType } from "@common/typings";
+import {saveRanks} from "@api/controllers/rewardController";
 
 export interface ActorContainer {
     readonly teamID?: string

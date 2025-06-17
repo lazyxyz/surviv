@@ -39,6 +39,7 @@ import { getBadgeImage } from "./badges";
 export interface RegionInfo {
     readonly name: string
     readonly mainAddress: string
+    readonly apiAddress: string
     readonly gameAddress: string
     readonly teamAddress: string
     readonly playerCount?: number

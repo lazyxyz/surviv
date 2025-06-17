@@ -6,13 +6,15 @@ export const Config = {
             name: "Local Server",
             mainAddress: "http://127.0.0.1:8000",
             gameAddress: "ws://127.0.0.1:<ID>",
-            teamAddress: "ws://127.0.0.1:8000"
+            teamAddress: "ws://127.0.0.1:8000",
+            apiAddress: "http://127.0.0.1:3001",
         },
         as: {
             name: "Asia",
             mainAddress: "https://as.surviv.fun",
             gameAddress: "wss://<ID>.as.surviv.fun",
-            teamAddress: "wss://team.as.surviv.fun"
+            teamAddress: "wss://team.as.surviv.fun",
+            apiAddress: "https://api.surviv.fun",
         }
     },
     defaultRegion: "dev"
@@ -42,6 +44,9 @@ export interface Region {
     readonly gameAddress: string
 
     readonly teamAddress: string
+
+    // public api get game assets
+    readonly apiAddress: string
 }
 
 export interface ServerInfo {

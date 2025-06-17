@@ -8,7 +8,7 @@
     "start": "node dist/server/src/server.js",
     "moderation": "node dist/server/src/moderation.js",
     "validateDefinitions": "node dist/server/src/validateDefinitions.js",
-    "dev": "nodemon -r ts-node/register -r tsconfig-paths/register --watch ./src --watch ../common --watch ../api src/server.ts"
+    "dev": "nodemon -r ts-node/register -r tsconfig-paths/register --watch ./src --watch ../common --watch ../surviv-api src/server.ts"
   },
   "keywords": [],
   "license": "GPL-3.0",

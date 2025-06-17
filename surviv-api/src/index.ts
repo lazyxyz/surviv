@@ -2,7 +2,6 @@ import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import crateRoutes from './routes/crateRoutes';
-
 dotenv.config();
 
 const app = express();
