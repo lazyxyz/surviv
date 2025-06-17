@@ -2,6 +2,6 @@ packages:
   - 'server/'
   - 'common/'
   - 'client/'
-  - 'api/'
   - 'translations/'
+  - 'surviv-api/'
   - '!**dist/**'

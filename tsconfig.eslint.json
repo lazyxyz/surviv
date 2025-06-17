@@ -12,7 +12,7 @@
     "strict": true,
     "paths": {
       "@common/*": [ "./common/src/*" ],
-      "@api/*": [ "./api/src/*" ],
+      "@api/*": [ "./surviv-api/src/*" ],
     }
   },
   "include": [
@@ -26,6 +26,6 @@
     "server/src/**/*.ts",
     "tests/src/**/*.ts",
     "eslint.config.mjs",
-    "api/src/**/*.ts"
+    "surviv-api/src/**/*.ts"
   ]
 }

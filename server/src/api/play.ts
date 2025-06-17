@@ -6,8 +6,7 @@ import { Game } from "../game";
 import { PlayerContainer } from "../objects/gamer";
 import { Logger } from "../utils/misc";
 import { forbidden, getIP } from "../utils/serverHelpers"
-import { validateJWT } from "@api/auth";
-import {  saveCrateClaim } from "@api/crate";
+import { validateJWT } from "@api/controllers/authController";
 
 const simultaneousConnections: Record<string, number> = {};
 

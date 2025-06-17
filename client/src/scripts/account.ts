@@ -78,7 +78,7 @@ export class Account extends EIP6963 {
             success: boolean
         } = await $.ajax({
             type: "GET",
-            url: `${selectedRegion.mainAddress}/api/requestNonce`
+            url: `${selectedRegion.apiAddress}/api/requestNonce`
         });
 
         const verifySignature: {
@@ -86,7 +86,7 @@ export class Account extends EIP6963 {
             success: boolean
         } = await $.ajax({
             type: "POST",
-            url: `${selectedRegion.mainAddress}/api/verifySignature`,
+            url: `${selectedRegion.apiAddress}/api/verifySignature`,
             data: JSON.stringify({
                 walletAddress: accounts[0],
                 signature: await getProvider.provider.request({
