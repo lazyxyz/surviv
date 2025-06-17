@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import { ethers } from "ethers";
-import { saveCrateClaim } from "@api/crate";
+import { saveCrateClaim } from "@api/controllers/crateController";
 
 import * as dotenv from 'dotenv';
 dotenv.config();

@@ -1,12 +1,17 @@
 module.exports = {
     apps: [
         {
-            name: 'game', // Name for the game server app
+            name: 'surviv',
             script: 'pnpm',
-            args: 'start', // Command to start the game server
-            watch: false, // Set to true if you want PM2 to restart on file changes
+            args: 'start',
+            watch: false,
             env: {
-                NODE_ENV: 'production', // Set environment variables for production
+                NODE_ENV: 'production',
+            },
+            env_development: {
+                NODE_ENV: 'development',
+                watch: true,
+                args: 'dev', // Use nodemon for development
             },
         },
     ],

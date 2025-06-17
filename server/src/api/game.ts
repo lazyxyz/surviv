@@ -7,7 +7,7 @@ import { cors, forbidden, getIP } from "../utils/serverHelpers";
 import { TemplatedApp } from "uWebSockets.js";
 import { customTeams } from "../server";
 import { Logger } from "../utils/misc";
-import { validateJWT } from "@api/auth";
+import { validateJWT } from "@api/controllers/authController";
 
 export function initGameRoutes(app: TemplatedApp) {
     app

@@ -6,7 +6,7 @@ import { CustomTeam, CustomTeamPlayer, type CustomTeamPlayerContainer } from "..
 import { Logger, cleanUsername } from "../utils/misc";
 import { forbidden, getIP, textDecoder } from "../utils/serverHelpers";
 import { customTeams, maxTeamSize, teamsCreated } from "../server";
-import { validateJWT } from "@api/auth";
+import { validateJWT } from "@api/controllers/authController";
 
 export function initTeamRoutes(app: TemplatedApp) {
     app.ws("/team", {
