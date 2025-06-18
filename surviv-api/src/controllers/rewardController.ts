@@ -2,7 +2,7 @@ import { randomBytes } from "crypto";
 import { ethers } from "ethers";
 
 import * as dotenv from 'dotenv';
-import { saveCrateClaim } from "./crateController";
+import { CRATE_DURATION, saveCrateClaim } from "./crateController";
 import path from "path";
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -76,7 +76,7 @@ export async function saveRanks(address: string, rank: number, teamMode: boolean
   // Generate random number for amount selection
   const randomAmount = Math.floor(Math.random() * TOTAL_WEIGHT);
   const amount = randomAmount < AMOUNT_PROBABILITIES.One ? 1 : 2;
-  const expiry = Math.floor(Date.now() / 1000) + 86400; // 24 hours from now
+  const expiry = Math.floor(Date.now() / 1000) + CRATE_DURATION;
 
   // Generate salt
   const salt = "0x" + randomBytes(32).toString("hex");

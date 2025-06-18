@@ -7,6 +7,8 @@ import { Crate, CrateClaim } from '../types';
 
 dotenv.config();
 
+export const CRATE_DURATION = 604800; // 7 days
+
 const CrateClaimSchema = new Schema<CrateClaim>({
     crate: {
         to: { type: String, required: true, lowercase: true, index: true },
@@ -19,7 +21,7 @@ const CrateClaimSchema = new Schema<CrateClaim>({
     rank: { type: Number, required: true },
     teamMode: { type: Boolean, required: true },
     gameId: { type: Number, required: true },
-    createdAt: { type: Date, default: Date.now, expires: 86400 },
+    createdAt: { type: Date, default: Date.now, expires: CRATE_DURATION },
 });
 
 const CrateClaimModel = mongoose.models.CrateClaim || model<CrateClaim>('CrateClaim', CrateClaimSchema);
@@ -66,6 +68,39 @@ export const getCrates = async (req: Request, res: Response): Promise<void> => {
     try {
         await connectToMongoDB();
         const claims = await CrateClaimModel.find({ 'crate.to': payload.walletAddress }).exec();
+
+        const formattedClaims = claims.map((claim) => ({
+            crate: claim.crate,
+            signature: claim.signature,
+            rank: claim.rank,
+            teamMode: claim.teamMode,
+            gameId: claim.gameId,
+            createdAt: claim.createdAt,
+        }));
+
+        res.json({ success: true, claims: formattedClaims });
+    } catch (err) {
+        res.status(500).json({ success: false, error: 'Failed to fetch crates' });
+    }
+};
+
+// Test version: getCratesByAddress (no JWT, address via query)
+export const getCratesByAddress = async (req: Request, res: Response): Promise<void> => {
+    const { walletAddress } = req.query;
+
+    if (!walletAddress || typeof walletAddress !== 'string') {
+        res.status(400).json({ success: false, error: 'Wallet address missing in query' });
+        return;
+    }
+
+    if (!ethers.isAddress(walletAddress)) {
+        res.status(400).json({ success: false, error: 'Invalid wallet address' });
+        return;
+    }
+
+    try {
+        await connectToMongoDB();
+        const claims = await CrateClaimModel.find({ 'crate.to': walletAddress }).exec();
 
         const formattedClaims = claims.map((claim) => ({
             crate: claim.crate,
