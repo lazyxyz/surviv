@@ -82,70 +82,70 @@ export function visibleConnectWallet(game: Game): void {
 
     // handler click to login...
     for (const elements of $(".connect-wallet-item")) {
-      const paragraphElement = elements.children[1];
-      const logoElement = elements.children[0];
+        const paragraphElement = elements.children[1];
+        const logoElement = elements.children[0];
 
-      const isExisted = game.eip6963.providers?.find(
-        argument => argument?.info?.name === paragraphElement?.textContent
-      );
+        const isExisted = game.eip6963.providers?.find(
+            argument => argument?.info?.name === paragraphElement?.textContent
+        );
 
-      if (isExisted) {
-        elements.onclick = async() => {
-            try {
-                // hidden to show loading ICON
-                $(logoElement).css("display", "none");
+        if (isExisted) {
+            elements.onclick = async () => {
+                try {
+                    // hidden to show loading ICON
+                    $(logoElement).css("display", "none");
 
-                // append loading ICON
-                {
-                    const newNode = document.createElement("div");
+                    // append loading ICON
+                    {
+                        const newNode = document.createElement("div");
 
-                    newNode.className = "loading-icon";
-                    newNode.style.width = "36px";
-                    newNode.style.height = "36px";
-                    newNode.style.display = "flex";
-                    newNode.style.alignItems = "center";
-                    newNode.style.justifyContent = "center";
-                    newNode.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
+                        newNode.className = "loading-icon";
+                        newNode.style.width = "36px";
+                        newNode.style.height = "36px";
+                        newNode.style.display = "flex";
+                        newNode.style.alignItems = "center";
+                        newNode.style.justifyContent = "center";
+                        newNode.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
 
-                    logoElement.after(newNode);
+                        logoElement.after(newNode);
+                    }
+
+                    return await game.account.connect(isExisted, game);
+                } catch (error) {
+                    console.log(error);
+                } finally {
+                    $(".loading-icon").css("display", "none");
+                    $(logoElement).css("display", "block");
+                }
+            };
+        }
+
+        if (!isExisted) {
+            $(paragraphElement).css({ color: "#93C5FD" });
+
+            paragraphElement.insertAdjacentText("afterbegin", "Install ");
+
+            elements.onclick = () => {
+                if (paragraphElement?.textContent?.includes(WalletType.METAMASK)) {
+                    return window.open("https://metamask.io/download/", "_blank");
                 }
 
-                return await game.account.connect(isExisted, game);
-            } catch (error) {
-                console.log(error);
-            } finally {
-                $(".loading-icon").css("display", "none");
-                $(logoElement).css("display", "block");
-            }
-        };
-      }
+                if (paragraphElement?.textContent?.includes(WalletType.SUBWALLET)) {
+                    return window.open("https://www.subwallet.app/download", "_blank");
+                }
 
-      if (!isExisted) {
-        $(paragraphElement).css({ color: "#93C5FD" });
+                if (paragraphElement?.textContent?.includes(WalletType.COINBASEWALLET)) {
+                    return window.open(
+                        "https://www.coinbase.com/wallet/downloads",
+                        "_blank"
+                    );
+                }
 
-        paragraphElement.insertAdjacentText("afterbegin", "Install ");
-
-        elements.onclick = () => {
-          if (paragraphElement?.textContent?.includes(WalletType.METAMASK)) {
-            return window.open("https://metamask.io/download/", "_blank");
-          }
-
-          if (paragraphElement?.textContent?.includes(WalletType.SUBWALLET)) {
-            return window.open("https://www.subwallet.app/download", "_blank");
-          }
-
-          if (paragraphElement?.textContent?.includes(WalletType.COINBASEWALLET)) {
-            return window.open(
-              "https://www.coinbase.com/wallet/downloads",
-              "_blank"
-            );
-          }
-
-          if (paragraphElement?.textContent?.includes(WalletType.TRUSTWALLET)) {
-            return window.open("https://trustwallet.com/download", "_blank");
-          }
-        };
-      }
+                if (paragraphElement?.textContent?.includes(WalletType.TRUSTWALLET)) {
+                    return window.open("https://trustwallet.com/download", "_blank");
+                }
+            };
+        }
     }
 }
 
@@ -278,9 +278,9 @@ export async function setUpUI(game: Game): Promise<void> {
            </a>
         `);
 
-      $(`#language-${language}`).on("click", () => {
-        game.console.setBuiltInCVar("cv_language", language);
-    });
+        $(`#language-${language}`).on("click", () => {
+            game.console.setBuiltInCVar("cv_language", language);
+        });
     }
 
     game.console.variables.addChangeListener("cv_language", () => location.reload());
@@ -359,7 +359,7 @@ export async function setUpUI(game: Game): Promise<void> {
     }
 
     ui.loadingText.text(getTranslatedString("loading_fetching_data"));
-    const regionPromises = Object.entries(regionMap).map(async([_, [regionID, region]]) => {
+    const regionPromises = Object.entries(regionMap).map(async ([_, [regionID, region]]) => {
         const listItem = regionUICache[regionID];
 
         const pingStartTime = Date.now();
@@ -424,7 +424,7 @@ export async function setUpUI(game: Game): Promise<void> {
     updateServerSelectors();
 
     // eslint-disable-next-line @typescript-eslint/no-deprecated
-    serverList.children("li.server-list-item").on("click", function(this: HTMLLIElement) {
+    serverList.children("li.server-list-item").on("click", function (this: HTMLLIElement) {
         const region = this.getAttribute("data-region");
 
         if (region === null) return;
@@ -545,7 +545,7 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     const createTeamMenu = $("#create-team-menu");
-    $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function() {
+    $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function () {
         const now = Date.now();
 
         if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined || !game.account.token?.length) return;
@@ -732,9 +732,9 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     // TODO
-   /* ui.cancelFindingGame.on("click", () => {
-        game.disconnect();
-    }); */
+    /* ui.cancelFindingGame.on("click", () => {
+         game.disconnect();
+     }); */
 
     const copyUrl = $<HTMLButtonElement>("#btn-copy-team-url");
     const hideUrl = $<HTMLButtonElement>("#btn-hide-team-url");
@@ -800,7 +800,7 @@ export async function setUpUI(game: Game): Promise<void> {
             });
     });
 
-    $<HTMLInputElement>("#create-team-toggle-auto-fill").on("click", function() {
+    $<HTMLInputElement>("#create-team-toggle-auto-fill").on("click", function () {
         autoFill = this.checked;
         teamSocket?.send(JSON.stringify({
             type: CustomTeamMessages.Settings,
@@ -808,7 +808,7 @@ export async function setUpUI(game: Game): Promise<void> {
         }));
     });
 
-    $<HTMLInputElement>("#create-team-toggle-lock").on("click", function() {
+    $<HTMLInputElement>("#create-team-toggle-lock").on("click", function () {
         teamSocket?.send(JSON.stringify({
             type: CustomTeamMessages.Settings,
             locked: this.checked
@@ -868,7 +868,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
     usernameField.val(game.console.getBuiltInCVar("cv_player_name"));
 
-    usernameField.on("input", function() {
+    usernameField.on("input", function () {
         // Replace fancy quotes & dashes, so they don't get stripped out
 
         game.console.setBuiltInCVar(
@@ -920,7 +920,7 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    $("#btn-play-again, #btn-spectate-replay").on("click", async() => {
+    $("#btn-play-again, #btn-spectate-replay").on("click", async () => {
         await game.endGame();
         if (teamSocket) teamSocket.send(JSON.stringify({ type: CustomTeamMessages.Start })); // TODO Check if player is team leader
         else joinGame(game.teamSize);
@@ -949,7 +949,7 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     ui.btnReport.on("click", () => {
-            sendSpectatePacket(SpectateActions.Report);
+        sendSpectatePacket(SpectateActions.Report);
     });
     ui.spectateNext.on("click", () => {
         sendSpectatePacket(SpectateActions.SpectateNext);
@@ -1037,8 +1037,7 @@ export async function setUpUI(game: Game): Promise<void> {
             if (emote.category !== lastCategory) {
                 emoteList.append(
                     $<HTMLDivElement>(
-                        `<div class="emote-list-header">${
-                            getTranslatedString(`emotes_category_${EmoteCategory[emote.category]}` as TranslationKeys)
+                        `<div class="emote-list-header">${getTranslatedString(`emotes_category_${EmoteCategory[emote.category]}` as TranslationKeys)
                         }</div>`
                     )
                 );
@@ -1360,7 +1359,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
     const crosshairColor = $<HTMLInputElement>("#crosshair-color-picker");
 
-    crosshairColor.on("input", function() {
+    crosshairColor.on("input", function () {
         game.console.setBuiltInCVar("cv_crosshair_color", this.value);
         loadCrosshair();
     });
@@ -1374,7 +1373,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
     const crosshairStrokeColor = $<HTMLInputElement>("#crosshair-stroke-picker");
 
-    crosshairStrokeColor.on("input", function() {
+    crosshairStrokeColor.on("input", function () {
         game.console.setBuiltInCVar("cv_crosshair_stroke_color", this.value);
         loadCrosshair();
     });
@@ -1516,7 +1515,7 @@ export async function setUpUI(game: Game): Promise<void> {
     });
     renderSelect.value = game.console.getBuiltInCVar("cv_renderer");
 
-    void (async() => {
+    void (async () => {
         $("#webgpu-option").toggle(await isWebGPUSupported());
     })();
 
@@ -1695,7 +1694,7 @@ export async function setUpUI(game: Game): Promise<void> {
             localStorage.setItem("suroi_config", input);
             alert("Settings loaded successfully.");
             window.location.reload();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_) {
             error();
         }
@@ -1861,12 +1860,12 @@ export async function setUpUI(game: Game): Promise<void> {
                     <span class="item-count" id="${item.idString}-count">0</span>
                     <div class="item-tooltip">
                         ${getTranslatedString("tt_restores", {
-                            item: `<b>${getTranslatedString(item.idString as TranslationKeys)}</b><br>`,
-                            amount: item.restoreAmount.toString(),
-                            type: item.healType === HealType.Adrenaline
-                                ? getTranslatedString("adrenaline")
-                                : getTranslatedString("health")
-                        })}
+                    item: `<b>${getTranslatedString(item.idString as TranslationKeys)}</b><br>`,
+                    amount: item.restoreAmount.toString(),
+                    type: item.healType === HealType.Adrenaline
+                        ? getTranslatedString("adrenaline")
+                        : getTranslatedString("health")
+                })}
                     </div>
                 </div>`
             );
@@ -1991,7 +1990,7 @@ export async function setUpUI(game: Game): Promise<void> {
     }
 
     for (const perkSlot of ["#perk-slot-0", "#perk-slot-1", "#perk-slot-2"]) {
-        $(perkSlot)[0].addEventListener("pointerdown", function(e: PointerEvent): void {
+        $(perkSlot)[0].addEventListener("pointerdown", function (e: PointerEvent): void {
             e.stopImmediatePropagation();
             if (e.button !== 2) return;
 
@@ -2187,7 +2186,7 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     const soloButtons = $<HTMLButtonElement>("#warning-btn-play-solo, #btn-play-solo");
-    $<HTMLInputElement>("#warning-modal-agree-checkbox").on("click", function() {
+    $<HTMLInputElement>("#warning-modal-agree-checkbox").on("click", function () {
         soloButtons.toggleClass("btn-disabled", !this.checked);
     });
 

@@ -235,7 +235,7 @@
         <div style="display: flex; flex-direction: row; gap: 15px">
           <button class="btn btn-lg btn-darken btn-primary" id="btn-customize">
             <i class="fa-solid fa-shirt"></i>
-            <span translation="loadout"></span>
+            <span translation="Inventory"></span>
           </button>
           <button class="btn btn-lg btn-darken btn-secondary" id="btn-settings">
             <i class="fa-solid fa-gear"></i>
@@ -890,13 +890,19 @@
   </div>
   <div class="modal dialog persistent-scrollbar" id="customize-menu" style="display: none">
     <div class="dialog-header">
-      <h3 translation="loadout"></h3>
+      <!-- Inventory -->
+      <!-- <h3 translation="loadout"></h3> -->
+      <h3 translation="Inventory"></h3>
       <span class="dialog-close-btn fa-solid fa-xmark" id="close-customize"></span>
     </div>
     <div id="customize-tabs-container">
       <div class="tab-bar" id="customize-tab-bar">
         <button class="tab active" id="tab-skins">
           <i class="fa-solid fa-shirt"></i><span translation="loadout_skins"></span>
+        </button>
+        <!-- Crates button -->
+        <button class="tab" id="tab-crates">
+          <img src="./img/misc/crates_icon.svg" /><span translation="loadout_crates"></span>
         </button>
         <button class="tab" id="tab-emotes">
           <img src="./img/misc/emotes_icon.svg" /><span translation="loadout_emotes"></span>
@@ -921,6 +927,10 @@
       </div>
       <div id="customize-tabs">
         <div class="tab-content active" id="tab-skins-content">
+          <div id="skins-list"></div>
+        </div>
+        <!-- Crate tab -->
+        <div class="tab-content active" id="tab-crates-content">
           <div id="skins-list"></div>
         </div>
         <div class="tab-content" id="tab-emotes-content" style="display: none">
