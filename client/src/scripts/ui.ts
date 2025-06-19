@@ -76,9 +76,14 @@ export function resetPlayButtons(): void {
 
 export function visibleConnectWallet(game: Game): void {
     // handler what conditions to open modal?
-    if (!localStorage.getItem(SELECTOR_WALLET)?.length) {
-        $(".connect-wallet-portal").css("display", "block");
-    }
+    // if (!localStorage.getItem(SELECTOR_WALLET)?.length) {
+    //     $(".connect-wallet-portal").css("display", "block");
+    // }
+    $("#connect-wallet-btn").on("click", () => {
+        if (!localStorage.getItem(SELECTOR_WALLET)?.length) {
+            $(".connect-wallet-portal").css("display", "block");
+        }
+    });
 
     // handler click to login...
     for (const elements of $(".connect-wallet-item")) {
