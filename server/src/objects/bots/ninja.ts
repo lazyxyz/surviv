@@ -39,9 +39,7 @@ export class Ninja extends Player {
      * Setup the initial loadout for the Ninja. 
      */
     private initializeLoadout(): void {
-        this.loadout.skin = Skins.fromString("gold_tie_event");
-        this.loadout.badge = Badges.fromString("bdg_bleh");
-        this.loadout.emotes = [Emotes.fromString("happy_face")];
+        this.loadout.skin = Skins.fromString("ninja");
     }
 
     /** 

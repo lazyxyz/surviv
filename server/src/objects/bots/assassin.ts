@@ -42,9 +42,7 @@ export class Assassin extends Player {
     }
 
     private initializeLoadout(): void {
-        this.loadout.skin = Skins.fromString("gold_tie_event");
-        this.loadout.badge = Badges.fromString("bdg_bleh");
-        this.loadout.emotes = [Emotes.fromString("happy_face")];
+        this.loadout.skin = Skins.fromString("nerdy");
     }
 
     private initializeInventory(): void {

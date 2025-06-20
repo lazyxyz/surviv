@@ -5,8 +5,6 @@ import { Team } from "../../team";
 import { Player, ActorContainer } from "../player";
 import { PlayerInputData } from "@common/packets/inputPacket";
 import { Skins } from "@common/definitions/skins";
-import { Badges } from "@common/definitions/badges";
-import { Emotes } from "@common/definitions/emotes";
 import { Gamer } from "../gamer";
 import { Scopes } from "@common/definitions/scopes";
 
@@ -18,9 +16,7 @@ export class Zombie extends Player {
         this.health = this.health * 0.5;
         this.isMobile = true;
         this.name = `Zombie`;
-        this.loadout.skin = Skins.fromString("bloodlust");
-        this.loadout.badge = Badges.fromString('bdg_bleh');
-        this.loadout.emotes = [Emotes.fromString("happy_face")];
+        this.loadout.skin = Skins.fromString("zombie");
         this.inventory.scope = Scopes.definitions[0];
 
         const randomCola = Math.random() < 0.3 ? 1 : 0; // 30% chance for 1, 90% chance for 0
