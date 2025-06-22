@@ -3,932 +3,1034 @@
 @use "../palette.scss";
 @use "../variables";
 
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 #settings-menu,
 #report-modal,
 #warning-modal {
-    background-color: palette.$bg;
-    max-width: 500px;
+  background-color: palette.$bg;
+  max-width: 500px;
 }
 
 #warning-modal {
+  text-align: center;
+  border: 2.5px solid rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 0 black;
+
+  #warning-modal-title {
+    color: rgb(236, 57, 57);
     text-align: center;
-    border: 2.5px solid rgba(0, 0, 0, 0.3);
-    text-shadow: 2px 2px 0 black;
+    margin-top: 0;
+  }
 
-    #warning-modal-title {
-        color: rgb(236, 57, 57);
-        text-align: center;
-        margin-top: 0;
-    }
-
-    .case-id {
-        font-size: 20px;
-        margin-bottom: 10px;
-    }
+  .case-id {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
 }
 
 #reporting-name {
-    margin-left: 5px;
+  margin-left: 5px;
 }
 
 #report-modal-content,
 #warning-modal-content {
-    padding: 1rem;
+  padding: 1rem;
 
-    p {
-        margin-top: 13px;
-        margin-bottom: -5px;
-    }
+  p {
+    margin-top: 13px;
+    margin-bottom: -5px;
+  }
 
-    h4 {
-        margin-bottom: 10px;
-    }
+  h4 {
+    margin-bottom: 10px;
+  }
 
-    ol {
-        margin-top: 0;
-    }
+  ol {
+    margin-top: 0;
+  }
 }
 
 #report-id-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
 }
 
 #report-id {
-    font-size: 50px;
-    font-family: monospace;
+  font-size: 50px;
+  font-family: monospace;
 }
 
 #customize-menu {
-    background-color: #4c722f;
-    max-width: 850px;
+  background-color: #4c722f;
+  max-width: 850px;
 }
 
 #create-team-menu {
-    background-color: palette.$bg;
-    width: fit-content;
-    max-width: unset;
-    display: flex;
+  background-color: palette.$bg;
+  width: fit-content;
+  max-width: unset;
+  display: flex;
 
-    #create-team-container {
+  #create-team-container {
+    display: flex;
+    flex-direction: column;
+
+    width: inherit;
+    min-width: 644px;
+    padding: 10px;
+
+    #create-team-players {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+      margin-right: auto;
+
+      .create-team-player-container {
+        min-width: 150px;
+        height: 150px;
+        background-color: #545663;
+        border-radius: 8px;
+
+        position: relative;
+
         display: flex;
         flex-direction: column;
+        justify-content: center;
+        align-items: center;
 
-        width: inherit;
-        min-width: 644px;
-        padding: 10px;
-
-        #create-team-players {
-            display: flex;
-            gap: 8px;
-            margin-left: auto;
-            margin-right: auto;
-
-            .create-team-player-container {
-                min-width: 150px;
-                height: 150px;
-                background-color: #545663;
-                border-radius: 8px;
-
-                position: relative;
-
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-
-                // leader indicator
-                .fa-crown {
-                    position: absolute;
-                    font-size: 24px;
-                    top: 5px;
-                    left: 5px;
-                }
-
-                // ready indicator
-                .fa-circle-check {
-                    position: absolute;
-                    font-size: 24px;
-                    color: limegreen;
-                    top: 5px;
-                    right: 5px;
-                }
-
-                .create-team-player-name-container {
-                    display: flex;
-                    justify-content: center;
-                    margin: 10px 5px 0 5px;
-
-                    .create-team-player-name {
-                        font-size: 20px;
-                        font-weight: bold;
-                        @include variables.text-shadow;
-                    }
-
-                    .create-team-player-badge {
-                        display: inline-block;
-                        height: 24px;
-                        margin-left: 5px;
-                    }
-                }
-            }
+        // leader indicator
+        .fa-crown {
+          position: absolute;
+          font-size: 24px;
+          top: 5px;
+          left: 5px;
         }
 
-        #create-team-url {
-            display: flex;
-            padding-top: 10px;
-            justify-content: center;
-
-            #create-team-url-field {
-                color: black;
-                user-select: all;
-                font-size: 18px;
-                width: 350px;
-                padding: 4px 8px;
-                outline: none;
-                border: none;
-                border-bottom: 2px solid rgb(209, 207, 207);
-                box-shadow: inset 0 -2px rgb(209, 207, 207);
-            }
-
-            #btn-copy-team-url {
-                border-top-left-radius: 0;
-                border-bottom-left-radius: 0;
-            }
-
-            #btn-hide-team-url {
-                border-top-right-radius: 0;
-                border-bottom-right-radius: 0;
-                width: 4rem;
-            }
+        // ready indicator
+        .fa-circle-check {
+          position: absolute;
+          font-size: 24px;
+          color: limegreen;
+          top: 5px;
+          right: 5px;
         }
 
-        #create-team-options {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            padding-top: 12px;
+        .create-team-player-name-container {
+          display: flex;
+          justify-content: center;
+          margin: 10px 5px 0 5px;
 
-            #create-team-toggles {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                gap: 12px;
+          .create-team-player-name {
+            font-size: 20px;
+            font-weight: bold;
+            @include variables.text-shadow;
+          }
 
-                &.disabled {
-                    pointer-events: none;
-                    filter: brightness(80%);
-                }
-
-                label {
-                    display: flex;
-
-                    span {
-                        margin-right: 10px;
-                    }
-
-                    input {
-                        margin-left: auto;
-                        font-family: monospace;
-                    }
-                }
-            }
-
-            #btn-start-game {
-                margin-left: auto;
-            }
+          .create-team-player-badge {
+            display: inline-block;
+            height: 24px;
+            margin-left: 5px;
+          }
         }
+      }
     }
+
+    #create-team-url {
+      display: flex;
+      padding-top: 10px;
+      justify-content: center;
+
+      #create-team-url-field {
+        color: black;
+        user-select: all;
+        font-size: 18px;
+        width: 350px;
+        padding: 4px 8px;
+        outline: none;
+        border: none;
+        border-bottom: 2px solid rgb(209, 207, 207);
+        box-shadow: inset 0 -2px rgb(209, 207, 207);
+      }
+
+      #btn-copy-team-url {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      #btn-hide-team-url {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        width: 4rem;
+      }
+    }
+
+    #create-team-options {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      padding-top: 12px;
+
+      #create-team-toggles {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 12px;
+
+        &.disabled {
+          pointer-events: none;
+          filter: brightness(80%);
+        }
+
+        label {
+          display: flex;
+
+          span {
+            margin-right: 10px;
+          }
+
+          input {
+            margin-left: auto;
+            font-family: monospace;
+          }
+        }
+      }
+
+      #btn-start-game {
+        margin-left: auto;
+      }
+    }
+  }
 }
 
 #language-dropdown {
-    position: absolute;
-    right: 20px;
-    top: 1rem;
-    z-index: 10;
+  position: absolute;
+  right: 20px;
+  top: 1rem;
+  z-index: 10;
 
+  img {
+    vertical-align: middle;
+  }
 
-    img {
-        vertical-align: middle;
+  #btn-language {
+    width: 200px;
+    display: flex;
+    gap: 1rem;
+    position: fixed;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    top: 0;
+    left: 0;
+  }
+
+  .dropdown-content {
+    background: palette.$grey;
+    top: 34px;
+    overflow-x: none;
+    overflow-y: scroll;
+    height: 600px;
+
+    a {
+      cursor: pointer;
+      text-align: center;
+      display: inline-block;
     }
 
-    #btn-language {
-        width: 200px;
-        display: flex;
-        gap: 1rem;
-        position: fixed;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        top: 0;
-        left: 0;
+    .selected {
+      background-color: palette.$orange;
+      pointer-events: none;
     }
+  }
+
+  // For mobile
+  @media screen and (max-width: variables.$screen_large) {
+    transform: scale(55%);
+    top: 0;
+    right: -20px;
 
     .dropdown-content {
-        background: palette.$grey;
-        top: 34px;
-        overflow-x: none;
-        overflow-y: scroll;
-        height: 600px;
-
-        a {
-            cursor: pointer;
-            text-align: center;
-            display: inline-block;
-        }
-
-        .selected {
-            background-color: palette.$orange;
-            pointer-events: none;
-        }
+      height: 300px;
     }
 
-    // For mobile
-    @media screen and (max-width: variables.$screen_large) {
-
-        transform: scale(55%);
-        top: 0;
-        right: -20px;
-
-        .dropdown-content {
-            height: 300px;
-        }
-
-        @media screen and (max-height: variables.$screen_large) {
-            right: -40px;
-        }
+    @media screen and (max-height: variables.$screen_large) {
+      right: -40px;
     }
+  }
 }
 
 // TODO Refactor this, make classes
 .dialog {
-    user-select: none;
-    box-shadow: 0 0 10px #000000c8;
-    padding: 0 !important;
-    border-radius: 10px !important;
-    overflow: hidden;
-    z-index: 101;
+  user-select: none;
+  box-shadow: 0 0 10px #000000c8;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+  z-index: 101;
 
-    .dialog-header {
-        $headerHeight: 45px;
-        display: flex;
-        height: $headerHeight;
-        align-items: center;
+  .dialog-header {
+    $headerHeight: 45px;
+    display: flex;
+    height: $headerHeight;
+    align-items: center;
 
-        h3 {
-            margin-left: 15px;
-            display: flex;
-            @include variables.text-shadow;
-        }
-
-        .dialog-close-btn {
-            margin-left: auto;
-            text-align: center;
-            line-height: $headerHeight;
-            width: $headerHeight;
-            height: $headerHeight;
-            cursor: pointer;
-        }
+    h3 {
+      margin-left: 15px;
+      display: flex;
+      @include variables.text-shadow;
     }
 
-    #settings-tabs-container,
-    #customize-tabs-container {
-        display: flex;
+    .dialog-close-btn {
+      margin-left: auto;
+      text-align: center;
+      line-height: $headerHeight;
+      width: $headerHeight;
+      height: $headerHeight;
+      cursor: pointer;
+    }
+  }
+
+  #settings-tabs-container,
+  #customize-tabs-container {
+    display: flex;
+  }
+
+  #skin-name {
+    position: absolute;
+    bottom: 0;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    z-index: 1000;
+    background-color: #5b8939;
+    width: 100%;
+    font-size: 35px;
+    font-weight: bold;
+  }
+
+  .skin {
+    position: relative;
+    width: 102px;
+    height: 98px;
+
+    .skin-base {
+      position: relative;
+      top: 0;
+      left: 6px;
+      width: 90px;
+      height: 90px;
+      transform: rotate(90deg);
     }
 
-    #skin-name {
-        position: absolute;
-        bottom: 0;
-        padding-bottom: 10px;
-        padding-top: 10px;
-        z-index: 1000;
-        background-color: #5b8939;
-        width: 100%;
-        font-size: 35px;
-        font-weight: bold;
+    .skin-left-fist,
+    .skin-right-fist {
+      position: absolute;
+      top: 64px;
+      width: 34px;
+      height: 34px;
+      transform: rotate(90deg);
     }
 
-    .skin {
-        position: relative;
-        width: 102px;
-        height: 98px;
+    .skin-right-fist {
+      left: 68px;
+    }
+  }
 
-        .skin-base {
-            position: relative;
-            top: 0;
-            left: 6px;
-            width: 90px;
-            height: 90px;
-            transform: rotate(90deg);
-        }
+  #skins-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    height: 100%;
 
-        .skin-left-fist,
-        .skin-right-fist {
-            position: absolute;
-            top: 64px;
-            width: 34px;
-            height: 34px;
-            transform: rotate(90deg);
-        }
+    .skins-list-item-container {
+      width: 140px;
+      height: 170px;
+      padding: 8px;
+      margin: 8px;
+      border: 5px solid transparent;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
 
-        .skin-right-fist {
-            left: 68px;
-        }
+      &.selected {
+        border-color: palette.$orange;
+      }
     }
 
-    #skins-list {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        height: 100%;
-
-        .skins-list-item-container {
-            width: 140px;
-            height: 170px;
-            padding: 8px;
-            margin: 8px;
-            border: 5px solid transparent;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-
-            &.selected {
-                border-color: palette.$orange;
-            }
-        }
-
-        .skin-name {
-            font-weight: bold;
-            @include variables.text-shadow;
-            text-align: center;
-        }
+    .skin-name {
+      font-weight: bold;
+      @include variables.text-shadow;
+      text-align: center;
     }
+  }
 
-    #tab-emotes-content {
-        display: flex;
-        gap: 10px;
-        height: 100%;
-    }
+  // Crate styles
+  .crates-tab-child {
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: #50722f;
+    color: white;
+    border-radius: 8px;
+    border: none;
+  }
 
-    #emote-customize-wheel {
-        position: relative;
-        align-self: center;
-        flex-shrink: 0;
-        transform: none;
+  #buy-crates-tab {
+    border: 2px solid #f2770f;
+  }
+  .crates-customize-child {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
 
-        .emote-top,
-        .emote-right,
-        .emote-bottom,
-        .emote-left {
-            cursor: pointer;
-            z-index: 10;
-        }
-    }
+    width: 100%;
+    .crates-card {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
 
-    #emote-wheel-bottom {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-
-        .emote-win,
-        .emote-death {
-            display: flex;
-            padding: 2px;
-            width: 104px;
-            height: 104px;
-            background-size: 84px 84px;
-            flex-shrink: 0;
-            background-color: palette.$transparent_bg;
-            border-radius: 10px;
-            border: 5px solid transparent;
-            background-repeat: no-repeat;
-            background-position: center;
-            cursor: pointer;
-
-            .fa-xmark {
-                color: red;
-                font-size: 24px;
-                position: absolute;
-                margin-left: calc(104px - calc(24px + 2px + 5px));
-                margin-top: calc(-2px - 1px);
-            }
-
-            &.selected {
-                border-color: palette.$orange;
-            }
-
-            img {
-                width: 1em;
-                height: 1em;
-                margin: 2px;
-            }
-
-            .remove-emote-btn {
-                margin-left: auto;
-                height: 1em;
-                padding: 2px;
-                transform-origin: center;
-
-                &:hover {
-                    transform: scale(1.1)
-                }
-            }
-        }
-    }
-
-    #emotes-list {
-        overflow-y: scroll;
-        flex-grow: 1;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-
-        .emote-list-header {
-            font-size: 2em;
-            font-weight: bold;
-            width: 100%;
-            @include variables.text-shadow;
-        }
-
-        .emotes-list-item-container {
-            display: flex;
-            flex-direction: column;
-            width: 120px;
-            height: 150px;
-            align-items: center;
-            border: 5px solid transparent;
-            border-radius: 10px;
-            padding: 5px;
-            background-color: palette.$transparent_bg;
-            justify-content: center;
-
-            &.selected {
-                border-color: palette.$orange;
-            }
-
-            .emote-name {
-                margin-top: auto;
-            }
-        }
-
-        .emotes-list-item {
-            margin-top: auto;
-            width: 84px;
-            height: 84px;
-            flex-shrink: 0;
-        }
-
-        .emote-name {
-            text-align: center;
-            font-weight: bold;
-            @include variables.text-shadow;
-        }
-
-        #emote- {
-            justify-content: flex-end;
-        }
-    }
-
-    #tab-crosshairs-content {
-        display: flex;
-        gap: 10px;
-        height: 100%;
-    }
-
-    #crosshair-customize {
+      gap: 8px;
+      padding: 16px;
+      border-radius: 10px;
+      background: #73a246;
+      .crates-image {
+        width: 90px;
+        height: 90px;
+      }
+      .crates-information {
         display: flex;
         flex-direction: column;
-    }
-
-    #crosshair-controls {
-        display: flex;
-        flex-direction: column;
-        width: 320px;
-        position: relative;
-
-        &.disabled {
-            .modal-item {
-                pointer-events: none;
-                filter: blur(5px);
-            }
-
-            #crosshair-controls-disabled {
-                display: block !important;
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-
-                font-size: 22px;
-                @include variables.text-shadow;
-            }
-        }
-
-        .modal-item {
-            margin-top: 0 !important;
-        }
-    }
-
-    #crosshair-preview {
-        display: flex;
-        flex-grow: 1;
         justify-content: center;
         align-items: center;
-    }
+        gap: 4px;
+        margin-top: 8px;
+        p {
+          margin: unset;
+          color: white;
+          font-size: 14px;
+          font-weight: 500;
+        }
 
-    #crosshair-image {
-        background-size: contain;
-        background-repeat: no-repeat;
-    }
+        h3 {
+          margin: unset;
+          color: white;
+          font-size: 18px;
+          font-weight: 700;
+        }
+      }
 
-    #crosshairs-list {
-        overflow-y: auto;
+      .crates-supply {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: flex-start;
-        align-content: flex-start;
+        gap: 4px;
 
-        .crosshairs-list-item-container {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid transparent;
-            border-radius: 10px;
-            padding: 5px;
-            background-color: palette.$transparent_bg;
-
-            width: 100px;
-            height: 100px;
-
-            &.selected {
-                border-color: palette.$orange;
-            }
+        // width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+        button {
+          height: 32px;
+          width: 32px;
+          background: #608939;
+          font-style: 14px;
+          font-weight: 500;
+          border: none;
+          opacity: 1;
+          font-size: 18px;
+          &:hover {
+            opacity: 0.8;
+          }
         }
 
-        .crosshairs-list-item {
-            height: 80px;
-            width: 80px;
-        }
+        input {
+          justify-content: center;
+          text-align: center;
 
-        .crosshair-name {
-            font-weight: bold;
-            @include variables.text-shadow;
-            text-align: center;
-        }
-    }
-
-    #badges-list {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        height: 100%;
-
-        .badges-list-item-container {
-            width: 140px;
-            min-height: 170px;
-            padding: 8px;
-            margin: 8px;
-            border: 5px solid transparent;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-
-            &.selected {
-                border-color: palette.$orange;
-            }
-        }
-
-        .badges-list-item {
-            position: relative;
-            width: 102px;
-            height: 102px;
-            font-size: 72px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            div {
-                position: relative;
-                align-items: center;
-                width: 84px;
-                height: 84px;
-                background-size: cover;
-            }
-        }
-
-        .badge-name {
-            font-weight: bold;
-            @include variables.text-shadow;
-            text-align: center;
-        }
-    }
-
-    .weapons-container {
-        display: flex;
-        gap: 12px;
-        height: 100%;
-
-        &-card {
-            background: #16161626;
-            padding: 8px;
-            border-radius: 8px;
-
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-
-            align-items: center;
-            text-align: center;
-            border: 3px solid transparent;
-
-            cursor: pointer;
-            width: 100px;
-            height: fit-content;
-
-            &.selected {
-                border-color: #F2770F;
-            }
-        }
-
-        &-paragraph {
+          height: 32px;
+          width: 80px;
+          background: #608939;
+          font-style: 14px;
+          font-weight: 500;
+          border: none;
+          &::placeholder {
             color: white;
-            font-size: 12px;
-            font-weight: bold;
-            margin: unset;
+          }
         }
+      }
+    }
+  }
 
-        // left
-        &-aside {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+  #tab-emotes-content {
+    display: flex;
+    gap: 10px;
+    height: 100%;
+  }
 
-            overflow-y: auto;
-            flex: 1;
+  #emote-customize-wheel {
+    position: relative;
+    align-self: center;
+    flex-shrink: 0;
+    transform: none;
 
-            &-preview {
-                display: flex;
-                align-items: center;
-                justify-content: center;
+    .emote-top,
+    .emote-right,
+    .emote-bottom,
+    .emote-left {
+      cursor: pointer;
+      z-index: 10;
+    }
+  }
 
-                background: #16161626;
-                border-radius: 8px;
-                height: 100%;
-                padding: 24px;
-            }
+  #emote-wheel-bottom {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 
-            &-assets {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
+    .emote-win,
+    .emote-death {
+      display: flex;
+      padding: 2px;
+      width: 104px;
+      height: 104px;
+      background-size: 84px 84px;
+      flex-shrink: 0;
+      background-color: palette.$transparent_bg;
+      border-radius: 10px;
+      border: 5px solid transparent;
+      background-repeat: no-repeat;
+      background-position: center;
+      cursor: pointer;
 
-                height: 50%;
-            }
+      .fa-xmark {
+        color: red;
+        font-size: 24px;
+        position: absolute;
+        margin-left: calc(104px - calc(24px + 2px + 5px));
+        margin-top: calc(-2px - 1px);
+      }
+
+      &.selected {
+        border-color: palette.$orange;
+      }
+
+      img {
+        width: 1em;
+        height: 1em;
+        margin: 2px;
+      }
+
+      .remove-emote-btn {
+        margin-left: auto;
+        height: 1em;
+        padding: 2px;
+        transform-origin: center;
+
+        &:hover {
+          transform: scale(1.1);
         }
+      }
+    }
+  }
 
-        // right
-        &-list {
-            display: flex;
-            flex-wrap: wrap;
-            overflow-y: auto;
+  #emotes-list {
+    overflow-y: scroll;
+    flex-grow: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 
-            align-content: flex-start;
-            flex: 1;
-            gap: 8px;
-
-            h2 {
-                margin: unset;
-                color: white;
-
-                font-weight: 600;
-                width: 100%;
-                font-size: 16px;
-
-                &:not(:first-child) {
-                    margin-top: 4px;
-                }
-            }
-        }
+    .emote-list-header {
+      font-size: 2em;
+      font-weight: bold;
+      width: 100%;
+      @include variables.text-shadow;
     }
 
-    @media screen and (max-width: 654px) {
-        #emotes-list {
-            gap: 5px;
+    .emotes-list-item-container {
+      display: flex;
+      flex-direction: column;
+      width: 120px;
+      height: 150px;
+      align-items: center;
+      border: 5px solid transparent;
+      border-radius: 10px;
+      padding: 5px;
+      background-color: palette.$transparent_bg;
+      justify-content: center;
 
-            .emotes-list-item-container {
-                border-width: 3px;
-            }
+      &.selected {
+        border-color: palette.$orange;
+      }
 
-            .emotes-list-item {
-                width: 42px;
-                height: 42px;
-                background-size: contain;
-            }
-        }
-
-        #emote-customize-wheel {
-            width: 191px;
-            height: 191px;
-            background-size: contain;
-
-            &>div {
-                width: 56px;
-                height: 56px;
-                background-size: contain;
-            }
-
-            .emote-top {
-                top: 9px;
-                left: 67px;
-            }
-
-            .emote-right {
-                right: 9px;
-                top: 67px;
-            }
-
-            .emote-bottom {
-                bottom: 9px;
-                left: 67px;
-            }
-
-            .emote-left {
-                left: 9px;
-                top: 67px;
-            }
-        }
+      .emote-name {
+        margin-top: auto;
+      }
     }
 
-    @media screen and (max-width: 530px) {
-        #emote-customize-wheel {
-            width: 143px;
-            height: 143px;
-
-            &>div {
-                width: 42px;
-                height: 42px;
-            }
-
-            .emote-top {
-                top: 7px;
-                left: 51px;
-            }
-
-            .emote-right {
-                right: 7px;
-                top: 51px;
-            }
-
-            .emote-bottom {
-                bottom: 7px;
-                left: 51px;
-            }
-
-            .emote-left {
-                left: 7px;
-                top: 51px;
-            }
-        }
+    .emotes-list-item {
+      margin-top: auto;
+      width: 84px;
+      height: 84px;
+      flex-shrink: 0;
     }
 
-    @media screen and (max-width: 475px) {
-        #tab-emotes-content {
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        #tab-crosshairs-content {
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        #emotes-list {
-            padding-bottom: 16px;
-        }
-
-        #crosshairs-list {
-            padding-bottom: 16px;
-        }
+    .emote-name {
+      text-align: center;
+      font-weight: bold;
+      @include variables.text-shadow;
     }
 
-    #settings-tabs,
-    #customize-tabs {
-        width: 100%;
-        height: 410px;
-        max-height: 80vh;
-        overflow-y: auto;
+    #emote- {
+      justify-content: flex-end;
     }
+  }
 
-    #settings-tabs {
-        background: palette.$transparent_bg;
+  #tab-crosshairs-content {
+    display: flex;
+    gap: 10px;
+    height: 100%;
+  }
 
-        #tab-keybinds-content {
-            #keybind-clear-tooltip {
-                border: 2px solid gray;
-                border-radius: 10px;
-                padding: 7px;
-                background-color: color.adjust(palette.$transparent_bg, $lightness: 30%);
-            }
+  #crosshair-customize {
+    display: flex;
+    flex-direction: column;
+  }
 
-            .modal-item:not(:last-child) {
-                div.settings-title {
-                    width: 100%;
-                }
+  #crosshair-controls {
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+    position: relative;
 
-                button.btn-bind {
-                    width: 45%;
-                    margin-inline: 2.5%;
-                }
-            }
-        }
-    }
+    &.disabled {
+      .modal-item {
+        pointer-events: none;
+        filter: blur(5px);
+      }
 
-    #customize-tabs {
-        background: #5b8939;
-    }
+      #crosshair-controls-disabled {
+        display: block !important;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
 
-    #customize-tab-bar .tab {
+        font-size: 22px;
         @include variables.text-shadow;
-        padding-top: 7px;
-
-        &.active {
-            background: #5b8939;
-        }
-
-        &>img {
-            position: relative;
-            top: 3px;
-            margin-right: 5px;
-            @include variables.drop-shadow;
-        }
-    }
-
-    .tab-content {
-        width: 100%;
-        border-radius: 0;
-    }
-
-    .setting-title {
-        margin: 0.2em;
-        font-weight: bold;
-        font-size: 16px;
-        @include variables.text-shadow;
-
-        i {
-            color: red;
-        }
+      }
     }
 
     .modal-item {
+      margin-top: 0 !important;
+    }
+  }
 
-        &.checkbox-setting {
-            line-height: 20px;
-        }
+  #crosshair-preview {
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+  }
 
-        &.select-setting {
-            line-height: 25px;
-        }
+  #crosshair-image {
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  #crosshairs-list {
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+    align-content: flex-start;
+
+    .crosshairs-list-item-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid transparent;
+      border-radius: 10px;
+      padding: 5px;
+      background-color: palette.$transparent_bg;
+
+      width: 100px;
+      height: 100px;
+
+      &.selected {
+        border-color: palette.$orange;
+      }
+    }
+
+    .crosshairs-list-item {
+      height: 80px;
+      width: 80px;
+    }
+
+    .crosshair-name {
+      font-weight: bold;
+      @include variables.text-shadow;
+      text-align: center;
+    }
+  }
+
+  #badges-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    height: 100%;
+
+    .badges-list-item-container {
+      width: 140px;
+      min-height: 170px;
+      padding: 8px;
+      margin: 8px;
+      border: 5px solid transparent;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+
+      &.selected {
+        border-color: palette.$orange;
+      }
+    }
+
+    .badges-list-item {
+      position: relative;
+      width: 102px;
+      height: 102px;
+      font-size: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      div {
+        position: relative;
+        align-items: center;
+        width: 84px;
+        height: 84px;
+        background-size: cover;
+      }
+    }
+
+    .badge-name {
+      font-weight: bold;
+      @include variables.text-shadow;
+      text-align: center;
+    }
+  }
+
+  .weapons-container {
+    display: flex;
+    gap: 12px;
+    height: 100%;
+
+    &-card {
+      background: #16161626;
+      padding: 8px;
+      border-radius: 8px;
+
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      align-items: center;
+      text-align: center;
+      border: 3px solid transparent;
+
+      cursor: pointer;
+      width: 100px;
+      height: fit-content;
+
+      &.selected {
+        border-color: #f2770f;
+      }
+    }
+
+    &-paragraph {
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      margin: unset;
+    }
+
+    // left
+    &-aside {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      overflow-y: auto;
+      flex: 1;
+
+      &-preview {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: #16161626;
+        border-radius: 8px;
+        height: 100%;
+        padding: 24px;
+      }
+
+      &-assets {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+
+        height: 50%;
+      }
+    }
+
+    // right
+    &-list {
+      display: flex;
+      flex-wrap: wrap;
+      overflow-y: auto;
+
+      align-content: flex-start;
+      flex: 1;
+      gap: 8px;
+
+      h2 {
+        margin: unset;
+        color: white;
+
+        font-weight: 600;
+        width: 100%;
+        font-size: 16px;
 
         &:not(:first-child) {
-            margin-top: 1em;
+          margin-top: 4px;
         }
+      }
+    }
+  }
 
-        input[type="checkbox"],
-        input[type="color"],
-        select {
-            float: right;
-        }
+  @media screen and (max-width: 654px) {
+    #emotes-list {
+      gap: 5px;
 
-        .range-input-value {
-            @include variables.text-shadow;
-            float: right;
-        }
+      .emotes-list-item-container {
+        border-width: 3px;
+      }
 
+      .emotes-list-item {
+        width: 42px;
+        height: 42px;
+        background-size: contain;
+      }
     }
 
-    &.in-game {
-        background-color: palette.$transparent_bg;
-        box-shadow: none;
+    #emote-customize-wheel {
+      width: 191px;
+      height: 191px;
+      background-size: contain;
+
+      & > div {
+        width: 56px;
+        height: 56px;
+        background-size: contain;
+      }
+
+      .emote-top {
+        top: 9px;
+        left: 67px;
+      }
+
+      .emote-right {
+        right: 9px;
+        top: 67px;
+      }
+
+      .emote-bottom {
+        bottom: 9px;
+        left: 67px;
+      }
+
+      .emote-left {
+        left: 9px;
+        top: 67px;
+      }
     }
+  }
+
+  @media screen and (max-width: 530px) {
+    #emote-customize-wheel {
+      width: 143px;
+      height: 143px;
+
+      & > div {
+        width: 42px;
+        height: 42px;
+      }
+
+      .emote-top {
+        top: 7px;
+        left: 51px;
+      }
+
+      .emote-right {
+        right: 7px;
+        top: 51px;
+      }
+
+      .emote-bottom {
+        bottom: 7px;
+        left: 51px;
+      }
+
+      .emote-left {
+        left: 7px;
+        top: 51px;
+      }
+    }
+  }
+
+  @media screen and (max-width: 475px) {
+    #tab-emotes-content {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    #tab-crosshairs-content {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    #emotes-list {
+      padding-bottom: 16px;
+    }
+
+    #crosshairs-list {
+      padding-bottom: 16px;
+    }
+  }
+
+  #settings-tabs,
+  #customize-tabs {
+    width: 100%;
+    height: 410px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  #settings-tabs {
+    background: palette.$transparent_bg;
+
+    #tab-keybinds-content {
+      #keybind-clear-tooltip {
+        border: 2px solid gray;
+        border-radius: 10px;
+        padding: 7px;
+        background-color: color.adjust(
+          palette.$transparent_bg,
+          $lightness: 30%
+        );
+      }
+
+      .modal-item:not(:last-child) {
+        div.settings-title {
+          width: 100%;
+        }
+
+        button.btn-bind {
+          width: 45%;
+          margin-inline: 2.5%;
+        }
+      }
+    }
+  }
+
+  #customize-tabs {
+    background: #5b8939;
+  }
+
+  #customize-tab-bar .tab {
+    @include variables.text-shadow;
+    padding-top: 7px;
+
+    &.active {
+      background: #5b8939;
+    }
+
+    & > img {
+      position: relative;
+      top: 3px;
+      margin-right: 5px;
+      @include variables.drop-shadow;
+    }
+  }
+
+  .tab-content {
+    width: 100%;
+    border-radius: 0;
+  }
+
+  .setting-title {
+    margin: 0.2em;
+    font-weight: bold;
+    font-size: 16px;
+    @include variables.text-shadow;
+
+    i {
+      color: red;
+    }
+  }
+
+  .modal-item {
+    &.checkbox-setting {
+      line-height: 20px;
+    }
+
+    &.select-setting {
+      line-height: 25px;
+    }
+
+    &:not(:first-child) {
+      margin-top: 1em;
+    }
+
+    input[type="checkbox"],
+    input[type="color"],
+    select {
+      float: right;
+    }
+
+    .range-input-value {
+      @include variables.text-shadow;
+      float: right;
+    }
+  }
+
+  &.in-game {
+    background-color: palette.$transparent_bg;
+    box-shadow: none;
+  }
 }
 
 .text-field {
-    color: black;
-    font-size: 18px;
-    width: 350px;
-    padding: 4px 8px;
-    outline: none;
-    border: none;
-    border-radius: 8px;
+  color: black;
+  font-size: 18px;
+  width: 350px;
+  padding: 4px 8px;
+  outline: none;
+  border: none;
+  border-radius: 8px;
 }
