@@ -64,7 +64,15 @@ export class Account extends EIP6963 {
         // visible elements
         {
             $(".account-wallet-container").css("display", "none");
-            $(".connect-wallet-portal").css("display", "block");
+            $(".connect-wallet-portal").css("display", "none");
+            $("#connect-wallet-btn").css("display", "block");
+        }
+
+        // Check condition button
+        {
+            $("#buy-now-btn").on("click", () => {
+                $(".connect-wallet-portal").css("display", "block");
+            });
         }
     }
 
@@ -139,6 +147,7 @@ export class Account extends EIP6963 {
             $(".account-wallet-placeholder").text(shorten(accounts[0]));
             $(".connect-wallet-portal").css("display", "none");
             $(".account-wallet-container ").css("display", "block");
+            $("#connect-wallet-btn").css("display", "none");
 
             resetPlayButtons();
         }

@@ -134,7 +134,7 @@
           <img src="./img/earn/thumbnail.png" width="100%" />
 
           <a href="./earn/">
-            <button id="splash-earn-btn" class="btn btn-alert">Learn more</button>
+            <button id="splash-earn-btn" class="btn btn-alert btn-darken">Learn more</button>
           </a>
         </div>
       </div>
@@ -903,12 +903,12 @@
     </div>
     <div id="customize-tabs-container">
       <div class="tab-bar" id="customize-tab-bar">
-        <button class="tab active" id="tab-skins">
-          <i class="fa-solid fa-shirt"></i><span translation="loadout_skins"></span>
-        </button>
         <!-- Add crate menu -->
-        <button class="tab" id="tab-crates">
+        <button class="tab active" id="tab-crates">
           <img src="./img/misc/crates_icon.svg" /><span translation="loadout_crates"></span>
+        </button>
+        <button class="tab" id="tab-skins">
+          <i class="fa-solid fa-shirt"></i><span translation="loadout_skins"></span>
         </button>
         <button class="tab" id="tab-emotes">
           <img src="./img/misc/emotes_icon.svg" /><span translation="loadout_emotes"></span>
@@ -932,20 +932,18 @@
         </button>
       </div>
       <div id="customize-tabs">
-        <div class="tab-content active" id="tab-skins-content">
-          <div id="skins-list"></div>
-        </div>
         <!-- Add tab crates -->
-        <div class="tab-content" id="tab-crates-content" style="display: none">
+        <div class="tab-content" id="tab-crates-content">
           <div id="crates-tab">
-            <button class="crates-tab-child" id="buy-crates-tab" translate="">Buy Crates</button>
-            <button class="crates-tab-child" id="my-crates-tab" translate="">My Crates</button>
-            <button class="crates-tab-child" id="rewards-tab" translate="">Rewards</button>
+            <button class="crates-tab-child active" id="buy-crates-tab" data-tab="buy-customize-items" translate="">Buy
+              Crates</button>
+            <button class="crates-tab-child" id="my-crates-tab" data-tab="my-crates-customize-items" translate="">My
+              Crates</button>
+            <button class="crates-tab-child" id="rewards-tab" data-tab="rewards-customize-items"
+              translate="">Rewards</button>
           </div>
           <div class="crates-customize">
             <!-- Buy crates -->
-
-            <!--  -->
             <div class="crates-customize-child" id="buy-customize-items">
               <div class="crates-card">
                 <img src="public/img/misc/Drop_crate.png" class="crates-image"></img>
@@ -958,7 +956,7 @@
                   <input type="text" class="crates-input" placeholder="0">
                   <button class="crates-remove">-</button>
                 </div>
-                <button class="btn btn-alert btn-darken">
+                <button class="btn btn-alert btn-darken" id="buy-now-btn">
                   Buy now
                 </button>
               </div>
@@ -995,15 +993,20 @@
               </div>
             </div>
             <!-- My crates -->
-            <!-- <div class="crates-customize-child" id="my-crates-customize-items">
+            <div class="crates-customize-child" id="my-crates-customize-items" style="display: none;">
               <p>Total 10 crates</p>
               <div class="my-crates-customize">
 
               </div>
-            </div> -->
+            </div>
             <!-- Rewards -->
-            <div class="crates-customize-child" id="rewards-customize-items"></div>
+            <div class="crates-customize-child" id="rewards-customize-items" style="display: none;">
+              <p>Total 15 rewards</p>
+            </div>
           </div>
+        </div>
+        <div class="tab-content " id="tab-skins-content">
+          <div id="skins-list"></div>
         </div>
         <div class="tab-content" id="tab-emotes-content" style="display: none">
           <div id="emote-wheel-container">
@@ -1175,7 +1178,7 @@
 
     <div class="connect-wallet-container">
       <div class="connect-wallet-body">
-        <span class="dialog-close-btn fa-solid fa-xmark" id="close-wallet-model"></span>
+        <span class="dialog-close-btn fa-solid fa-xmark" id="close-connect-wallet"></span>
 
         <div class="connect-wallet-radial"></div>
 

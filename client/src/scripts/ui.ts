@@ -24,7 +24,8 @@ import { type CVarTypeMapping } from "./utils/console/defaultClientCVars";
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
-import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
+// import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
+import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { getBadgeImage } from "./badges";
 /*
     eslint-disable
@@ -74,6 +75,9 @@ export function resetPlayButtons(): void {
     $("#btn-cancel-finding-game").css("display", "none");
 }
 
+// export function buyCrates(): void {
+// }
+
 export function visibleConnectWallet(game: Game): void {
     // handler what conditions to open modal?
     // if (!localStorage.getItem(SELECTOR_WALLET)?.length) {
@@ -86,9 +90,7 @@ export function visibleConnectWallet(game: Game): void {
     // $("#btn-create-team").attr("disabled", "true").css("opacity", "0.5");
 
     $("#connect-wallet-btn").on("click", () => {
-        if (!localStorage.getItem(SELECTOR_WALLET)?.length) {
-            $(".connect-wallet-portal").css("display", "block");
-        }
+        $(".connect-wallet-portal").css("display", "block");
     });
 
     // Close connect wallet modal
@@ -227,6 +229,36 @@ export function visibleWallet(game: Game): void {
     }
 
     createDropdown(".account-wallet-container");
+}
+
+// Buy crates
+{
+    const tabButton = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
+    const tabCrates = document.querySelectorAll<HTMLElement>(".crates-customize-child");
+
+    tabButton.forEach((button) => {
+        button.addEventListener("click", () => {
+            const tabButtonId = button.getAttribute("data-tab");
+            if (!tabButtonId) return;
+
+            // Remove active button
+            tabButton.forEach((button) => {
+                button.classList.remove("active");
+            });
+
+            // Hide all tab contents
+            tabCrates.forEach((content) => {
+                content.style.display = "none";
+            });
+
+            // Show the selected tab
+            const targetTab = document.getElementById(tabButtonId);
+            if (targetTab) {
+                targetTab.style.display = "flex";
+                button.classList.add("active");
+            };
+        });
+    });
 }
 
 export async function setUpUI(game: Game): Promise<void> {

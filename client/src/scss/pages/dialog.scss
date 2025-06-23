@@ -384,11 +384,12 @@ input::-webkit-inner-spin-button {
     color: white;
     border-radius: 8px;
     border: none;
+    cursor: pointer;
+    &.active {
+      border: 2px solid palette.$orange;
+    }
   }
 
-  #buy-crates-tab {
-    border: 2px solid #f2770f;
-  }
   .crates-customize-child {
     display: flex;
     gap: 8px;
