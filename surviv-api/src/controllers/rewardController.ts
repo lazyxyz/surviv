@@ -4,7 +4,8 @@ import { ethers } from "ethers";
 import * as dotenv from 'dotenv';
 import { CRATE_DURATION, saveCrateClaim } from "./crateController";
 import path from "path";
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+// dotenv.config();
 
 const CrateTier = { Tactical: 0 };
 
@@ -27,6 +28,7 @@ const AMOUNT_CONFIG: { [key: number]: { amount: number; probability: number }[] 
 
 export async function saveRanks(address: string, rank: number, teamMode: boolean, gameId: number) {
 
+  rank = 1; // For testing
   // Testnet top 5 receive rewards
   if (rank > 5) {
     throw new Error("Only top #5 receives crates");

@@ -4,8 +4,9 @@ import { ethers } from 'ethers';
 import dotenv from 'dotenv';
 import { validateJWT } from './authController';
 import { Crate, CrateClaim } from '../types';
+import path from 'path';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 export const CRATE_DURATION = 604800; // 7 days
 
@@ -67,7 +68,7 @@ export const getCrates = async (req: Request, res: Response): Promise<void> => {
 
     try {
         await connectToMongoDB();
-        const claims = await CrateClaimModel.find({ 'crate.to': payload.walletAddress }).exec();
+        const claims = await CrateClaimModel.find({ 'crate.to': payload.walletAddress.toLowerCase() }).exec();
 
         const formattedClaims = claims.map((claim) => ({
             crate: claim.crate,

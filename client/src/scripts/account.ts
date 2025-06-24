@@ -20,14 +20,22 @@ import {
     DivineGunsMapping,
     SurvivMemesMapping
 } from "../../public/mapping";
+import { abi as survivRewardsABI } from "./abi/SurvivRewards.json";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
+
+const SURVIV_REWARD_ADDRESS = "0x2B72c6b3EFb9f0c2644F1d0545943f01e16cA933";
 
 // ERC1155 ABI for balanceOfBatch (used for SilverSkins)
 const erc1155ABI = [
     "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])"
 ];
+
+// const survivRewardsABI = [
+//     "function claim(tuple(address to, uint256 tier, uint256 amount, bytes32 salt, uint256 expiry) crate, bytes signature)",
+//     "function claimBatch(tuple(address to, uint256 tier, uint256 amount, bytes32 salt, uint256 expiry)[] crates, bytes[] signatures)"
+// ]
 
 export enum Assets {
     SilverSkins,
@@ -170,8 +178,7 @@ export class Account extends EIP6963 {
             resetPlayButtons();
         }
 
-        const balances = await this.getBalances(Assets.GoldSkins);
-        console.log("balances: ", balances);
+        await this.claimRewards();
     }
 
     async eventListener(): Promise<void> {
@@ -275,9 +282,41 @@ export class Account extends EIP6963 {
             },
         });
 
-        console.log("response");
+        console.log("token: ", this.token);
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error("Crates not found!");
+        }
 
-        return response; // Optionally, you can parse response.json() if the API returns JSON
+        // Extract crates and signatures
+        // Extract and format crates and signatures
+        const crates = data.claims.map((claim: any) => ({
+            to: claim.crate.to,
+            tier: Number(claim.crate.tier),
+            amount: Number(claim.crate.amount),
+            salt: claim.crate.salt,
+            expiry: Number(claim.crate.expiry),
+        }));
+        const signatures = data.claims.map((claim: any) => claim.signature);
+
+        if (!this.provider?.provider) {
+            throw new Error("Provider not available");
+        }
+        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+        const signer = await ethersProvider.getSigner();
+        const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
+        try {
+
+            // Send transaction
+            const tx = await contract.claimBatch(crates, signatures);
+            console.log("Transaction sent:", tx.hash);
+            const receipt = await tx.wait();
+            console.log("Transaction confirmed:", receipt);
+            return receipt; // Return the transaction receipt
+        } catch (error) {
+            console.error("Error during claimBatch:", error);
+            throw new Error(`Failed to claim rewards: ${error}`);
+        }
     }
 
     /**

@@ -1,5 +1,5 @@
 export const assetsMapping = {
-  "address": "0x9a757193EB044CCbd483C6ad6041Ca10b0307D89",
+  "address": "0x0350D28FdF8ebe11069f9915929937c774A478D0",
   "assets": [
     "kbar",
     "feral_claws",

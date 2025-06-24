@@ -1,5 +1,5 @@
 export const assetsMapping = {
-  "address": "0xB9D0b1aA5f8e65FeA6A759F10f1f49A52b39652D",
+  "address": "0x06e5E22d681F2bbE71D6A7a01af09686734BA43C",
   "assets": [
     "algeria",
     "america",
