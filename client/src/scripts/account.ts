@@ -10,8 +10,35 @@ import { visibleSkin } from "./skin";
 import { visibleMeless } from "./weapons/weapons_meless";
 import { visibleBadges } from "./badges";
 
+import {
+    SilverSkinsMapping,
+    GoldSkinsMapping,
+    DivineSkinsMapping,
+    SilverArmsMapping,
+    GoldArmsMapping,
+    DivineArmsMapping,
+    DivineGunsMapping,
+    SurvivMemesMapping
+} from "../../public/mapping";
+
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
+
+// ERC1155 ABI for balanceOfBatch (used for SilverSkins)
+const erc1155ABI = [
+    "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])"
+];
+
+export enum Assets {
+    SilverSkins,
+    GoldSkins,
+    DivineSkins,
+    SilverArms,
+    GoldArms,
+    DivineArms,
+    DivineGuns,
+    SurvivMemes
+}
 
 export class Account extends EIP6963 {
     address: string | null | undefined;
@@ -142,6 +169,9 @@ export class Account extends EIP6963 {
 
             resetPlayButtons();
         }
+
+        const balances = await this.getBalances(Assets.GoldSkins);
+        console.log("balances: ", balances);
     }
 
     async eventListener(): Promise<void> {
@@ -171,5 +201,54 @@ export class Account extends EIP6963 {
         });
 
         window.dispatchEvent(new Event("eip6963:requestProvider"));
+    }
+
+    async getBalances(assetType: Assets, pagination: number = 10, page: number = 0, returnAll: boolean = false): Promise<Record<string, number>> {
+        const assetMappings = {
+            [Assets.SilverSkins]: SilverSkinsMapping,
+            [Assets.GoldSkins]: GoldSkinsMapping,
+            [Assets.DivineSkins]: DivineSkinsMapping,
+            [Assets.SilverArms]: SilverArmsMapping,
+            [Assets.GoldArms]: GoldArmsMapping,
+            [Assets.DivineArms]: DivineArmsMapping,
+            [Assets.DivineGuns]: DivineGunsMapping,
+            [Assets.SurvivMemes]: SurvivMemesMapping
+        };
+
+        const selectedMapping = assetMappings[assetType];
+
+        if (!ethers.isAddress(selectedMapping.address)) {
+            throw new Error(`Invalid contract address: ${selectedMapping.address}`);
+        }
+
+        if (!this.provider?.provider) {
+            throw new Error("Provider not available");
+        }
+
+        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+        const signer = await ethersProvider.getSigner();
+        const contract = new ethers.Contract(selectedMapping.address, erc1155ABI, signer);
+
+        const maxTokenId = selectedMapping.assets.length;
+        const startIndex = page * pagination;
+        const endIndex = Math.min(startIndex + pagination, maxTokenId);
+        const tokenIds = Array.from({ length: endIndex - startIndex }, (_, i) => startIndex + i);
+        const accounts = Array(tokenIds.length).fill(this.address);
+
+        const balances = await contract.balanceOfBatch(accounts, tokenIds);
+
+        // Map token IDs to asset names with balances
+        const result: Record<string, number> = {};
+        for (let i = 0; i < tokenIds.length; i++) {
+            const balance = Number(balances[i]); // Convert BigNumber to number
+            if (returnAll || balance > 0) {
+                const assetName = selectedMapping.assets[tokenIds[i]];
+                if (assetName) {
+                    result[assetName] = balance;
+                }
+            }
+        }
+
+        return result;
     }
 }
