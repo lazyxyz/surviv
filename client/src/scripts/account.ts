@@ -203,6 +203,15 @@ export class Account extends EIP6963 {
         window.dispatchEvent(new Event("eip6963:requestProvider"));
     }
 
+    /**
+ * Retrieves balances for a specific asset type, mapping token IDs to asset names.
+ * @param assetType - The type of asset to query (e.g., SilverSkins, DivineArms).
+ * @param pagination - Number of token IDs to query per page (default: 10).
+ * @param page - The page number to query (default: 0, first page).
+ * @param returnAll - If true, includes assets with zero balances; if false, only includes assets with balance > 0 (default: false).
+ * @returns A promise resolving to an object mapping asset names to their balances.
+ * @throws Error if the contract address is invalid or provider is unavailable.
+ */
     async getBalances(assetType: Assets, pagination: number = 10, page: number = 0, returnAll: boolean = false): Promise<Record<string, number>> {
         const assetMappings = {
             [Assets.SilverSkins]: SilverSkinsMapping,
@@ -250,5 +259,55 @@ export class Account extends EIP6963 {
         }
 
         return result;
+    }
+
+    /**
+ * Claims all available rewards (crates) for the authenticated user.
+ * @returns A promise resolving to the API response.
+ * @throws Error if the API request fails or authentication is invalid.
+ */
+    async claimRewards(): Promise<any> {
+        const response = await fetch(`${selectedRegion.apiAddress}/api/getCrates`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.token}`, // Add JWT token to Authorization header
+            },
+        });
+
+        console.log("response");
+
+        return response; // Optionally, you can parse response.json() if the API returns JSON
+    }
+
+    /**
+ * Requests to open a specified number of crates.
+ * @param amount - The number of crates to request opening.
+ * @returns A promise resolving to the API response.
+ * @throws Error if the API request fails or authentication is invalid.
+ */
+    async requestOpenCrates(amount: number): Promise<any> {
+
+    }
+
+    /**
+     * Claims all items from previously requested crate openings.
+     * @returns A promise resolving to the API response.
+     * @throws Error if the API request fails or authentication is invalid.
+     */
+    async claimItems(): Promise<any> {
+
+    }
+
+    /**
+     * Purchases a specified item with a given payment token.
+     * @param item - The name or ID of the item to purchase.
+     * @param amount - The quantity of the item to purchase.
+     * @param paymentToken - The token used for payment (e.g., ERC-20 token address or symbol).
+     * @returns A promise resolving to the API response.
+     * @throws Error if the API request fails, authentication is invalid, or payment fails.
+     */
+    async buyItems(item: string, amount: number, paymentToken: string): Promise<any> {
+
     }
 }
