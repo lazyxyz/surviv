@@ -5,10 +5,11 @@ import { EIP6963, type Provider6963Props } from "./eip6963";
 import { ethers } from "ethers";
 import { resetPlayButtons, type RegionInfo } from "./ui";
 import { Config } from "./config";
-import type { Game } from "./game";
+import { Game } from "./game";
 import { visibleSkin } from "./skin";
 import { visibleMeless } from "./weapons/weapons_meless";
 import { visibleBadges } from "./badges";
+import { removeItems } from "pixi.js";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
@@ -31,7 +32,9 @@ export class Account extends EIP6963 {
             {
                 $(".account-wallet-placeholder").text(shorten(getAddressFromStorage));
                 $(".connect-wallet-portal").css("display", "none");
-                $(".account-wallet-container ").css("display", "block");
+                // $(".account-wallet-container ").css("display", "block");
+                $("#wallet-active ").css("display", "block");
+                $("#wallet-inactive").css("display", "none");
             }
         }
 
@@ -55,7 +58,7 @@ export class Account extends EIP6963 {
             localStorage.removeItem(SELECTOR_WALLET);
         }
 
-        // clear fields
+        // clear fields & delete assets
         {
             this.address = null;
             this.token = null;
@@ -63,17 +66,12 @@ export class Account extends EIP6963 {
 
         // visible elements
         {
-            $(".account-wallet-container").css("display", "none");
+            $("#wallet-active").css("display", "none");
             $(".connect-wallet-portal").css("display", "none");
-            $("#connect-wallet-btn").css("display", "block");
+            $("#wallet-inactive").css("display", "block");
         }
 
         // Check condition button
-        {
-            $("#buy-now-btn").on("click", () => {
-                $(".connect-wallet-portal").css("display", "block");
-            });
-        }
     }
 
     async connect(getProvider: Provider6963Props, game: Game): Promise<void> {
@@ -146,9 +144,9 @@ export class Account extends EIP6963 {
         {
             $(".account-wallet-placeholder").text(shorten(accounts[0]));
             $(".connect-wallet-portal").css("display", "none");
-            $(".account-wallet-container ").css("display", "block");
-            $("#connect-wallet-btn").css("display", "none");
-
+            // $(".account-wallet-container ").css("display", "block");
+            $("#wallet-active").css("display", "block");
+            $("#wallet-inactive").css("display", "none");
             resetPlayButtons();
         }
     }

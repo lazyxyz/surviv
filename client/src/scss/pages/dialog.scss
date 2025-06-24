@@ -375,6 +375,11 @@ input::-webkit-inner-spin-button {
     }
   }
 
+  // Market link
+  .market-link {
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+  }
+
   // Crate styles
   .crates-tab-child {
     padding: 8px 12px;
@@ -386,14 +391,18 @@ input::-webkit-inner-spin-button {
     border: none;
     cursor: pointer;
     &.active {
-      border: 2px solid palette.$orange;
+      box-shadow: inset 0px 0px 0px 2px palette.$orange;
     }
   }
 
   .crates-customize-child {
     display: flex;
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 12px;
+
+    p {
+      margin: 0px;
+    }
 
     width: 100%;
     .crates-card {
@@ -408,6 +417,7 @@ input::-webkit-inner-spin-button {
       border-radius: 10px;
       background: #73a246;
       .crates-image {
+        border-radius: 12px;
         width: 90px;
         height: 90px;
       }
@@ -437,7 +447,6 @@ input::-webkit-inner-spin-button {
         display: flex;
         gap: 4px;
 
-        // width: 100%;
         border-radius: 8px;
         overflow: hidden;
         button {
@@ -468,6 +477,99 @@ input::-webkit-inner-spin-button {
             color: white;
           }
         }
+      }
+    }
+  }
+
+  // My crates
+  #my-crates-customize-items {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    p {
+      align-self: flex-start;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .my-crates-select {
+      position: fixed;
+      bottom: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+
+      padding: 8px 8px 4px 16px;
+      background-color: #50722f;
+      border-radius: 10px;
+      h3 {
+        margin: 0px;
+        font-size: 16px;
+        font-weight: 500;
+      }
+      button {
+        margin-top: 0px;
+        scale: 0.8;
+      }
+    }
+    .my-crates-customize {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      .my-crates-child {
+        justify-content: center;
+        align-items: center;
+
+        background-color: #73a246;
+        padding: 12px;
+        border-radius: 12px;
+        &.active {
+          box-shadow: inset 0px 0px 0px 2px white;
+        }
+        img {
+          width: 80px;
+          height: 80px;
+        }
+      }
+    }
+  }
+
+  // Rewards style
+  #rewards-customize-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    p {
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+
+  .rewards-grid-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px;
+    .reward-child {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+
+      padding: 12px;
+      background-color: #73a246;
+      border-radius: 14px;
+      img {
+        width: 72px;
+        height: 72px;
+      }
+      h3 {
+        margin: 0px;
+        font-size: 12px;
+        font-weight: 500;
       }
     }
   }

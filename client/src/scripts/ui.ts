@@ -231,38 +231,127 @@ export function visibleWallet(game: Game): void {
     createDropdown(".account-wallet-container");
 }
 
-// Buy crates
-{
-    const tabButton = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
-    const tabCrates = document.querySelectorAll<HTMLElement>(".crates-customize-child");
-
-    tabButton.forEach((button) => {
-        button.addEventListener("click", () => {
-            const tabButtonId = button.getAttribute("data-tab");
-            if (!tabButtonId) return;
-
-            // Remove active button
-            tabButton.forEach((button) => {
-                button.classList.remove("active");
-            });
-
-            // Hide all tab contents
-            tabCrates.forEach((content) => {
-                content.style.display = "none";
-            });
-
-            // Show the selected tab
-            const targetTab = document.getElementById(tabButtonId);
-            if (targetTab) {
-                targetTab.style.display = "flex";
-                button.classList.add("active");
-            };
-        });
-    });
-}
-
 export async function setUpUI(game: Game): Promise<void> {
     const { inputManager, uiManager: { ui } } = game;
+
+    // Buy Keys
+    {
+        const tabButton = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
+        const tabCrates = document.querySelectorAll<HTMLElement>(".crates-customize-child");
+        // const cardCrates = document.querySelector("#buy-customize-items");
+
+        const crateLists = [
+            {
+                name: "Immortal key",
+                image: `public/img/misc/Keys.png `,
+                price: "$19"
+            }
+        ];
+        crateLists.forEach((key) => {
+            $("#buy-customize-items").append(`
+            <div class="crates-card">
+                <img src="${key.image}" class="crates-image"></img>
+                <div class="crates-information">
+                  <p>${key.name}</p>
+                  <h3>${key.price}</h3>
+                </div>
+                <div class="crates-supply">
+                  <button class="crates-add">+</button>
+                  <input type="text" class="crates-input" placeholder="0">
+                  <button class="crates-remove">-</button>
+                </div>
+                <button class="btn btn-alert btn-darken" id="buy-now-btn">
+                  Buy now
+                </button>
+              </div>
+            `);
+        });
+
+        tabButton.forEach((button) => {
+            button.addEventListener("click", () => {
+                const tabButtonId = button.getAttribute("data-tab");
+                if (!tabButtonId) return;
+
+                // Remove active button
+                tabButton.forEach((button) => {
+                    button.classList.remove("active");
+                });
+
+                // Hide all tab contents
+                tabCrates.forEach((content) => {
+                    content.style.display = "none";
+                });
+
+                // Show the selected tab
+                const targetTab = document.getElementById(tabButtonId);
+                if (targetTab) {
+                    targetTab.style.display = "flex";
+                    button.classList.add("active");
+                };
+            });
+        });
+    }
+
+    // My crates
+    {
+        const myCrate = [
+            {
+                image: `public/img/misc/Immotal_crate.png`
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`
+            }
+        ];
+
+        myCrate.forEach((key) => {
+            $(".my-crates-customize").append(
+                `
+                <div class="my-crates-child">
+                  <img src="${key.image}" alt="">
+                </div>
+                `
+            );
+        });
+    }
+
+    // Claim rewards
+    {
+        const rewardLists = [
+            {
+                image: `public/img/misc/Immotal_crate.png`,
+                time: "Expired in 3 days"
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`,
+                time: "Expired in 5 days"
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`,
+                time: "Expired in 7 days"
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`,
+                time: "Expired in 7 days"
+            }
+        ];
+
+        rewardLists.forEach((key) => {
+            $(".rewards-grid-group").append(
+                `
+                <div class="reward-child">
+                  <img src="${key.image}" alt="Crates">
+                  <h3>${key.time}</h3>
+                  <button class="btn btn-purple btn-darken" id="claim-btn">Claim</button>
+                </div>
+                `
+            );
+
+            // Claim crate event
+        });
+    }
 
     // Change the menu based on the mode.
     if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/suroi_beta_${MODE.idString}.svg`);
@@ -2218,6 +2307,7 @@ export async function setUpUI(game: Game): Promise<void> {
             updateRangeInput(element);
         });
 
+    // Inventory tab fucntion
     $(".tab").on("click", ({ target }) => {
         const tab = wrapperCache.getAndGetDefaultIfAbsent(target, () => $(target));
 
