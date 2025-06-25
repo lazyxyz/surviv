@@ -6,7 +6,7 @@ import { validateJWT } from './authController';
 import { Crate, CrateClaim } from '../types';
 import path from 'path';
 
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export const CRATE_DURATION = 604800; // 7 days
 

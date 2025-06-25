@@ -4,8 +4,7 @@ import { ethers } from "ethers";
 import * as dotenv from 'dotenv';
 import { CRATE_DURATION, saveCrateClaim } from "./crateController";
 import path from "path";
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
-// dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const CrateTier = { Tactical: 0 };
 

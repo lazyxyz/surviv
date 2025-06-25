@@ -4,7 +4,9 @@ import { ethers } from 'ethers';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 
-dotenv.config();
+import path from 'path';
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'SURVIV.FUN';
 const TOKEN_DURATION = '2d'; // JWT expires in 2 days
