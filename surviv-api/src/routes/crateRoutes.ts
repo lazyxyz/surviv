@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { getCrates, getCratesByAddress} from '../controllers/crateController';
+import { getCrates, removeCrates} from '../controllers/crateController';
 
 const router = Router();
 
 router.get('/getCrates', getCrates);
-router.get('/testGetCrates', getCratesByAddress);
+router.post('/removeCrates', removeCrates);
 
 export default router;

@@ -4,8 +4,9 @@ import { ethers } from 'ethers';
 import dotenv from 'dotenv';
 import { validateJWT } from './authController';
 import { Crate, CrateClaim } from '../types';
+import path from 'path';
 
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 export const CRATE_DURATION = 604800; // 7 days
 
@@ -67,7 +68,7 @@ export const getCrates = async (req: Request, res: Response): Promise<void> => {
 
     try {
         await connectToMongoDB();
-        const claims = await CrateClaimModel.find({ 'crate.to': payload.walletAddress }).exec();
+        const claims = await CrateClaimModel.find({ 'crate.to': payload.walletAddress.toLowerCase() }).exec();
 
         const formattedClaims = claims.map((claim) => ({
             crate: claim.crate,
@@ -84,35 +85,40 @@ export const getCrates = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
-// Test version: getCratesByAddress (no JWT, address via query)
-export const getCratesByAddress = async (req: Request, res: Response): Promise<void> => {
-    const { walletAddress } = req.query;
-
-    if (!walletAddress || typeof walletAddress !== 'string') {
-        res.status(400).json({ success: false, error: 'Wallet address missing in query' });
+export const removeCrates = async (req: Request, res: Response): Promise<void> => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        res.status(401).json({ success: false, error: 'Authorization header missing or invalid' });
         return;
     }
 
-    if (!ethers.isAddress(walletAddress)) {
-        res.status(400).json({ success: false, error: 'Invalid wallet address' });
+    const token = authHeader.substring(7);
+    const payload = validateJWT(token);
+    if (!payload || !ethers.isAddress(payload.walletAddress)) {
+        res.status(401).json({ success: false, error: 'Invalid or expired JWT' });
+        return;
+    }
+
+    const { signatures } = req.body;
+    if (!signatures || !Array.isArray(signatures) || signatures.length === 0 || !signatures.every(sig => typeof sig === 'string')) {
+        res.status(400).json({ success: false, error: 'Signatures must be a non-empty array of strings' });
         return;
     }
 
     try {
         await connectToMongoDB();
-        const claims = await CrateClaimModel.find({ 'crate.to': walletAddress }).exec();
+        const result = await CrateClaimModel.deleteMany({
+            signature: { $in: signatures },
+            'crate.to': payload.walletAddress.toLowerCase()
+        }).exec();
 
-        const formattedClaims = claims.map((claim) => ({
-            crate: claim.crate,
-            signature: claim.signature,
-            rank: claim.rank,
-            teamMode: claim.teamMode,
-            gameId: claim.gameId,
-            createdAt: claim.createdAt,
-        }));
+        if (result.deletedCount === 0) {
+            res.status(404).json({ success: false, error: 'No crates found or not owned by user' });
+            return;
+        }
 
-        res.json({ success: true, claims: formattedClaims });
+        res.json({ success: true, message: `${result.deletedCount} crate(s) removed successfully` });
     } catch (err) {
-        res.status(500).json({ success: false, error: 'Failed to fetch crates' });
+        res.status(500).json({ success: false, error: 'Failed to remove crates' });
     }
 };

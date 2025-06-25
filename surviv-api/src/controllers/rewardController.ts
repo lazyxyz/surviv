@@ -4,27 +4,35 @@ import { ethers } from "ethers";
 import * as dotenv from 'dotenv';
 import { CRATE_DURATION, saveCrateClaim } from "./crateController";
 import path from "path";
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+// dotenv.config();
 
-const CrateTier = { Drop: 0, Tactical: 1, Immortal: 2 };
+const CrateTier = { Tactical: 0 };
 
-// Probability weights (out of 10000 for 2 decimal precision)
-const CRATE_PROBABILITIES = {
-  Drop: 6000, // 60%
-  Tactical: 3800, // 38%
-  Immortal: 200, // 2%
-};
 const TOTAL_WEIGHT = 10000;
-const AMOUNT_PROBABILITIES = {
-  One: 9000, // 90% for 1 crate
-  Two: 1000, // 10% for 2 crates
+
+// Configuration for crate amounts based on rank
+const AMOUNT_CONFIG: { [key: number]: { amount: number; probability: number }[] } = {
+  1: [
+    { amount: 3, probability: 5000 }, // 50%
+    { amount: 5, probability: 5000 }, // 50%
+  ],
+  2: [{ amount: 2, probability: 10000 }], // 100%
+  3: [
+    { amount: 1, probability: 5000 }, // 50%
+    { amount: 2, probability: 5000 }, // 50%
+  ],
+  4: [{ amount: 1, probability: 10000 }], // 100%
+  5: [{ amount: 1, probability: 5000 }], // 50%
 };
 
 export async function saveRanks(address: string, rank: number, teamMode: boolean, gameId: number) {
-  // Only process for top 1 player
-  // if (rank !== 1) {
-  //   throw new Error("Only top 1 player receives crates");
-  // }
+
+  rank = 1; // For testing
+  // Testnet top 5 receive rewards
+  if (rank > 5) {
+    throw new Error("Only top #5 receives crates");
+  }
 
   // Validate address
   if (!ethers.isAddress(address)) {
@@ -39,8 +47,8 @@ export async function saveRanks(address: string, rank: number, teamMode: boolean
   const admin = new ethers.Wallet(adminPrivateKey);
 
   // Ensure environment variables are set
-  if (!process.env.CHAIN_ID || !process.env.SURVIV_CRATE_BASE) {
-    throw new Error("CHAIN_ID or SURVIV_CRATE_BASE not set in environment variables");
+  if (!process.env.CHAIN_ID || !process.env.SURVIV_REWARDS) {
+    throw new Error("CHAIN_ID or SURVIV_REWARDS not set in environment variables");
   }
 
   const TYPES = {
@@ -57,28 +65,27 @@ export async function saveRanks(address: string, rank: number, teamMode: boolean
     name: "SurvivFun",
     version: "1",
     chainId: Number(process.env.CHAIN_ID),
-    verifyingContract: process.env.SURVIV_CRATE_BASE,
+    verifyingContract: process.env.SURVIV_REWARDS,
   };
 
-  // Generate random number for crate tier selection
-  const randomTier = Math.floor(Math.random() * TOTAL_WEIGHT);
-  let selectedTier: number;
-  let cumulative = 0;
+  // Set tier to Tactical
+  const selectedTier = CrateTier.Tactical;
 
-  if (randomTier < (cumulative += CRATE_PROBABILITIES.Drop)) {
-    selectedTier = CrateTier.Drop;
-  } else if (randomTier < (cumulative += CRATE_PROBABILITIES.Tactical)) {
-    selectedTier = CrateTier.Tactical;
-  } else {
-    selectedTier = CrateTier.Immortal;
+  // Determine amount based on rank configuration
+  const rankConfig = AMOUNT_CONFIG[rank];
+  const randomAmount = Math.floor(Math.random() * TOTAL_WEIGHT);
+  let cumulativeAmount = 0;
+  let amount = 1; // Default to 1 if no config found
+  for (let config of rankConfig) {
+    if (randomAmount < (cumulativeAmount += config.probability)) {
+      amount = config.amount;
+      break;
+    }
   }
 
-  // Generate random number for amount selection
-  const randomAmount = Math.floor(Math.random() * TOTAL_WEIGHT);
-  const amount = randomAmount < AMOUNT_PROBABILITIES.One ? 1 : 2;
   const expiry = Math.floor(Date.now() / 1000) + CRATE_DURATION;
 
-  // Generate salt
+  // Generate random salt
   const salt = "0x" + randomBytes(32).toString("hex");
 
   const crate = {
@@ -97,20 +104,3 @@ export async function saveRanks(address: string, rank: number, teamMode: boolean
 
   return { crate, signature };
 }
-
-// export async function saveRanks(address: string, rank: number, teamMode: boolean, gameId: number) {
-//   await saveCrateClaim({
-//     "to": "0x1234567890abcdef1234567890abcdef12345678",
-//     "tier": 0,
-//     "amount": 1,
-//     "salt": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-//     "expiry": 1745080080
-//   },
-//     "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f",
-//     1,
-//     false,
-//     1001,
-//   ).catch(err => {
-//     console.log("Err: ", err);
-//   })
-// };

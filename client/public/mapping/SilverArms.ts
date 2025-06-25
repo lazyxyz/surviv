@@ -1,5 +1,5 @@
 export const assetsMapping = {
-  "address": "0xb6d7B84eb4799a0DF7a5F388581e3798A2CdfC47",
+  "address": "0xfe1dB5CBb5b96f968e7F53dE0668F352E3c440d9",
   "assets": [
     "crowbar",
     "baseball_bat",

@@ -1,5 +1,5 @@
 export const assetsMapping = {
-  "address": "0x1451e2b907c993810979F8A98a7190Ad3fbaD568",
+  "address": "0xca581d8B13bD1CCf2dffcc9970A2d721a3db2dd4",
   "assets": [
     "fawkes_mask",
     "forever_alone",
