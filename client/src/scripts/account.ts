@@ -21,16 +21,16 @@ import {
     SurvivMemesMapping
 } from "../../public/mapping";
 import { abi as survivRewardsABI } from "../../public/abi/ISurvivRewards.json";
+import { abi as crateBaseABI } from "../../public/abi/ICrateBase.json";
+import { abi as erc1155ABI } from "../../public/abi/IERC1155.json";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
 
 const SURVIV_REWARD_ADDRESS = "0xb615B4ca12f58EdebA10B68Ee890f0ddd7B7e49A";
+const SURVIV_CRATES_ADDRESS = "0xD81591D94ADA5fD3c92Ed9001Fa8E541aF417df3";
+const SURVIV_CRATE_BASE_ADDRESS = "0x816DBf52724c28E415e0715B216684b152Ae25C5";
 
-// ERC1155 ABI for balanceOfBatch (used for SilverSkins)
-const erc1155ABI = [
-    "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])"
-];
 
 export enum Assets {
     SilverSkins,
@@ -204,7 +204,7 @@ export class Account extends EIP6963 {
             resetPlayButtons();
         }
 
-        await this.claimRewards();
+        await this.claimItems();
     }
 
     async eventListener(): Promise<void> {
@@ -481,7 +481,44 @@ export class Account extends EIP6963 {
  * @throws Error if the API request fails or authentication is invalid.
  */
     async requestOpenCrates(amount: number): Promise<any> {
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
 
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+
+            const crateBaseContract = new ethers.Contract(SURVIV_CRATE_BASE_ADDRESS, crateBaseABI, signer);
+            const cratesContract = new ethers.Contract(SURVIV_CRATES_ADDRESS, erc1155ABI, signer);
+
+
+            const balance = await cratesContract.balanceOf(signer.address, 0);
+            console.log("crates balance: ", balance);
+
+            if (Number(balance) > amount) {
+                // Execute claim transaction
+                const tx = await crateBaseContract.commitCrates(0, amount);
+                console.info('Transaction sent:', tx.hash);
+                const receipt = await tx.wait();
+                console.info('Transaction confirmed:', receipt);
+                clearTimeout(timeoutId);
+                return receipt;
+            } else {
+                throw new Error(`Insufficient crates balance: ${balance}`);
+            }
+
+
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            console.error('Claim rewards failed:', error);
+            throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
+        }
     }
 
     /**
@@ -490,7 +527,41 @@ export class Account extends EIP6963 {
      * @throws Error if the API request fails or authentication is invalid.
      */
     async claimItems(): Promise<any> {
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
 
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+
+            const crateBaseContract = new ethers.Contract(SURVIV_CRATE_BASE_ADDRESS, crateBaseABI, signer);
+            const remainingCommits = await crateBaseContract.getCommits(signer.address);
+            console.log("Request open: ", remainingCommits.length);
+
+            if (remainingCommits.length > 0n) {
+                // Execute claim transaction
+                const tx = await crateBaseContract.openCratesBatch();
+                console.info('Transaction sent:', tx.hash);
+                const receipt = await tx.wait();
+                console.info('Transaction confirmed:', receipt);
+                clearTimeout(timeoutId);
+                return receipt;
+            } else {
+                throw new Error(`No requests available`);
+            }
+
+
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            console.error('Claim rewards failed:', error);
+            throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
+        }
     }
 
     /**
