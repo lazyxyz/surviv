@@ -520,7 +520,7 @@ export async function setUpUI(game: Game): Promise<void> {
         const target = selectedRegion;
 
         void $.get(
-            `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}&token=${game.account.token}`,
+            `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}`,
             (data: GetGameResponse) => {
                 return readyConnect(data, target.gameAddress);
             }
@@ -619,10 +619,7 @@ export async function setUpUI(game: Game): Promise<void> {
             }
         }
 
-        params.set("token", game.account.token);
-
         const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
-        console.log("teamURL: ", teamURL);
 
         teamSocket = new WebSocket(teamURL);
 

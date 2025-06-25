@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+
 export async function validateJWT(token: string): Promise<{ walletAddress: string }> {
     const url = `${process.env.API_URL}/api/getJWTSigner`;
 
@@ -18,3 +19,28 @@ export async function validateJWT(token: string): Promise<{ walletAddress: strin
     };
 }
 
+
+export async function saveRewards(user: string, rank: number, teamMode: boolean, gameId: number): Promise<void> {
+    const url = `${process.env.API_URL}/api/saveRewards`;
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': process.env.X_API_KEY || '',
+            },
+            body: JSON.stringify({ user, rank, teamMode, gameId }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+            throw new Error(data.error || 'Failed to save rewards');
+        }
+
+        return data;
+    } catch (error: any) {
+        console.log("error: ", error);
+        throw new Error(error);
+    }
+}
