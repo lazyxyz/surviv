@@ -1,1 +1,5 @@
-sudo chown -R usernane:usernane /home/{usernane}/surviv/client/dist
+sudo mkdir -p /opt/client/dist
+sudo cp -r ./client/dist/* /opt/client/dist/
+
+# read-only to prevent accidental or malicious changes
+sudo chmod -R u-w,g-w /opt/client/dist

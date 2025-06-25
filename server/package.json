@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json && npx copyfiles .env dist",
+    "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json && npx copyfiles .env dist/server",
     "start": "node dist/server/src/server.js",
     "moderation": "node dist/server/src/moderation.js",
     "validateDefinitions": "node dist/server/src/validateDefinitions.js",

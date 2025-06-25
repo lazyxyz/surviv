@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
-dotenv.config();
-
+import path from 'path';
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export async function validateJWT(token: string): Promise<{ walletAddress: string }> {
     const url = `${process.env.API_URL}/api/getJWTSigner`;
