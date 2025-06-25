@@ -9,9 +9,11 @@ import { MapPacket } from "./mapPacket";
 import { type InputPacket, type OutputPacket, type PacketTemplate } from "./packet";
 import { PickupPacket } from "./pickupPacket";
 import { PingPacket } from "./pingPacket";
+import { ReadyPacket } from "./readyPacket";
 import { ReportPacket } from "./reportPacket";
 import { SpectatePacket } from "./spectatePacket";
 import { UpdatePacket } from "./updatePacket";
+
 
 class PacketRegister {
     private _nextTypeId = 0;
@@ -53,7 +55,8 @@ export const ServerToClientPackets = new PacketRegister(
     MapPacket,
     GameOverPacket,
     ReportPacket,
-    DisconnectPacket
+    DisconnectPacket,
+    ReadyPacket,
 );
 
 export class PacketStream {

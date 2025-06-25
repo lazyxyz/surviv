@@ -51,7 +51,7 @@ import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
 import { weaponPresentType } from "@common/typings";
-import {saveRanks} from "@api/controllers/rewardController";
+// import {saveRanks} from "@api/controllers/rewardController";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -2292,9 +2292,9 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     sendGameOverPacket(won = false): void {
         const rank = won ? 1 as const : this.game.aliveCount + 1;
-        saveRanks(this.address, rank, this.game.teamMode, this.game.id).catch(err => {
-            console.log(`Save rank failed: ${err}`);
-        });
+        // saveRanks(this.address, rank, this.game.teamMode, this.game.id).catch(err => {
+        //     console.log(`Save rank failed: ${err}`);
+        // });
 
         const packet = GameOverPacket.create({
             won,

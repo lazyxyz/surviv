@@ -7,7 +7,7 @@ import { cors, forbidden, getIP } from "../utils/serverHelpers";
 import { TemplatedApp } from "uWebSockets.js";
 import { customTeams } from "../server";
 import { Logger } from "../utils/misc";
-import { validateJWT } from "@api/controllers/authController";
+// import { validateJWT } from "@api/controllers/authController";
 
 export function initGameRoutes(app: TemplatedApp) {
     app
@@ -36,13 +36,13 @@ export function initGameRoutes(app: TemplatedApp) {
                 return;
             }
 
-            // Validate JWT
-            const decoded = validateJWT(token);
-            if (!decoded) {
-                Logger.log(`Invalid JWT: ${ip}`);
-                forbidden(res);
-                return;
-            }
+            // // Validate JWT
+            // const decoded = validateJWT(token);
+            // if (!decoded) {
+            //     Logger.log(`Invalid JWT: ${ip}`);
+            //     forbidden(res);
+            //     return;
+            // }
 
             let teamSize = Number(searchParams.get("teamSize"));
 

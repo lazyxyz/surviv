@@ -6,7 +6,7 @@ import { CustomTeam, CustomTeamPlayer, type CustomTeamPlayerContainer } from "..
 import { Logger, cleanUsername } from "../utils/misc";
 import { forbidden, getIP, textDecoder } from "../utils/serverHelpers";
 import { customTeams, maxTeamSize, teamsCreated } from "../server";
-import { validateJWT } from "@api/controllers/authController";
+// import { validateJWT } from "@api/controllers/authController";
 
 export function initTeamRoutes(app: TemplatedApp) {
     app.ws("/team", {
@@ -40,12 +40,12 @@ export function initTeamRoutes(app: TemplatedApp) {
                     return;
                 }
 
-                const decoded = validateJWT(token);
-                if (!decoded) {
-                    Logger.log(`Game ${teamID} | Invalid JWT: ${ip}`);
-                    forbidden(res);
-                    return;
-                }
+                // const decoded = validateJWT(token);
+                // if (!decoded) {
+                //     Logger.log(`Game ${teamID} | Invalid JWT: ${ip}`);
+                //     forbidden(res);
+                //     return;
+                // }
             }
 
             let team!: CustomTeam;

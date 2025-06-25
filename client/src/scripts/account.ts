@@ -203,8 +203,6 @@ export class Account extends EIP6963 {
 
             resetPlayButtons();
         }
-
-        await this.claimItems();
     }
 
     async eventListener(): Promise<void> {

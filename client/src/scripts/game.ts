@@ -65,6 +65,7 @@ import { Account } from "./account";
 import { visibleSkin } from "./skin";
 import { visibleMeless } from "./weapons/weapons_meless";
 import { visibleBadges } from "./badges";
+import { ReadyPacket } from "@common/packets/readyPacket";
 
 /* eslint-disable @stylistic/indent */
 
@@ -182,7 +183,7 @@ export class Game {
         await initTranslation(game);
         game.inputManager.setupInputs();
 
-        const initPixi = async(): Promise<void> => {
+        const initPixi = async (): Promise<void> => {
             const renderMode = game.console.getBuiltInCVar("cv_renderer");
             const renderRes = game.console.getBuiltInCVar("cv_renderer_res");
 
@@ -279,6 +280,29 @@ export class Game {
         this.camera.resize(true);
     }
 
+    ready() {
+        let skin: typeof defaultClientCVars["cv_loadout_skin"];
+
+        const joinPacket: JoinPacketCreation = {
+            isMobile: this.inputManager.isMobile,
+            name: this.console.getBuiltInCVar("cv_player_name"),
+            address: this.account.address ? this.account.address : "",
+            skin: Loots.fromStringSafe(
+                this.console.getBuiltInCVar("cv_loadout_skin")
+            ) ?? Loots.fromString(
+                typeof (skin = defaultClientCVars.cv_loadout_skin) === "object"
+                    ? skin.value
+                    : skin
+            ),
+            badge: Badges.fromStringSafe(this.console.getBuiltInCVar("cv_loadout_badge")),
+            emotes: EMOTE_SLOTS.map(
+                slot => Emotes.fromStringSafe(this.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))
+            )
+        };
+
+        this.sendPacket(JoinPacket.create(joinPacket));
+    }
+
     connect(address: string): void {
         const url = new URL(address);
         const ui = this.uiManager.ui;
@@ -332,27 +356,6 @@ export class Game {
             this.sendPacket(PingPacket.create());
             this.lastPingDate = Date.now();
 
-            let skin: typeof defaultClientCVars["cv_loadout_skin"];
-
-            const joinPacket: JoinPacketCreation = {
-                isMobile: this.inputManager.isMobile,
-                name: this.console.getBuiltInCVar("cv_player_name"),
-                address: this.account.address ? this.account.address : "",
-                skin: Loots.fromStringSafe(
-                    this.console.getBuiltInCVar("cv_loadout_skin")
-                ) ?? Loots.fromString(
-                    typeof (skin = defaultClientCVars.cv_loadout_skin) === "object"
-                        ? skin.value
-                        : skin
-                ),
-                badge: Badges.fromStringSafe(this.console.getBuiltInCVar("cv_loadout_badge")),
-                emotes: EMOTE_SLOTS.map(
-                    slot => Emotes.fromStringSafe(this.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))
-                )
-            };
-
-            this.sendPacket(JoinPacket.create(joinPacket));
-
             this.camera.addObject(this.gasRender.graphics);
             this.map.indicator.setFrame("player_indicator");
 
@@ -394,6 +397,7 @@ export class Game {
                     }
                 );
             }
+
         };
 
         // Handle incoming messages
@@ -444,6 +448,9 @@ export class Game {
 
     onPacket(packet: OutputPacket): void {
         switch (true) {
+            case packet instanceof ReadyPacket:
+                this.ready();
+                break;
             case packet instanceof JoinedPacket:
                 this.startGame(packet.output);
                 break;
@@ -537,6 +544,8 @@ export class Game {
         [InventoryMessages.CannotUseRadio]: "msg_cannot_use_radio",
         [InventoryMessages.RadioOverused]: "msg_radio_overused"
     };
+
+
 
     startGame(packet: JoinedPacketData): void {
         // Sound which notifies the player that the

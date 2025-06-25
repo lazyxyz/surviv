@@ -10,8 +10,7 @@
   ],
   "compilerOptions": {
     "paths": {
-      "@common/*": ["./common/src/*"],
-      "@api/*": ["./api/src/*"]
+      "@common/*": ["./common/src/*"]
     }
   }
 }
