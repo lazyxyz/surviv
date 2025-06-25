@@ -11,8 +11,7 @@
     "strictNullChecks": true,
     "strict": true,
     "paths": {
-      "@common/*": [ "./common/src/*" ],
-      "@api/*": [ "./surviv-api/src/*" ],
+      "@common/*": [ "./common/src/*" ]
     }
   },
   "include": [

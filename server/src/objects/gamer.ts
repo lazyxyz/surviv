@@ -20,6 +20,7 @@ export interface PlayerContainer {
     readonly autoFill: boolean
     player?: Gamer
     readonly address?: string
+    readonly token?: string
     readonly ip: string | undefined
 
     readonly nameColor?: number
