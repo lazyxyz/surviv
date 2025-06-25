@@ -20,22 +20,17 @@ import {
     DivineGunsMapping,
     SurvivMemesMapping
 } from "../../public/mapping";
-import { abi as survivRewardsABI } from "./abi/SurvivRewards.json";
+import { abi as survivRewardsABI } from "../../public/abi/ISurvivRewards.json";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
 
-const SURVIV_REWARD_ADDRESS = "0x2B72c6b3EFb9f0c2644F1d0545943f01e16cA933";
+const SURVIV_REWARD_ADDRESS = "0xb615B4ca12f58EdebA10B68Ee890f0ddd7B7e49A";
 
 // ERC1155 ABI for balanceOfBatch (used for SilverSkins)
 const erc1155ABI = [
     "function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])"
 ];
-
-// const survivRewardsABI = [
-//     "function claim(tuple(address to, uint256 tier, uint256 amount, bytes32 salt, uint256 expiry) crate, bytes signature)",
-//     "function claimBatch(tuple(address to, uint256 tier, uint256 amount, bytes32 salt, uint256 expiry)[] crates, bytes[] signatures)"
-// ]
 
 export enum Assets {
     SilverSkins,
@@ -47,6 +42,37 @@ export enum Assets {
     DivineGuns,
     SurvivMemes
 }
+
+/**
+* Interface for crate data structure
+*/
+interface Crate {
+    to: string;
+    tier: number;
+    amount: number;
+    salt: string;
+    expiry: number;
+}
+
+/**
+ * Interface for API response
+ */
+interface ClaimResponse {
+    success: boolean;
+    claims: Array<{
+        crate: Crate;
+        signature: string;
+    }>;
+}
+
+/**
+ * Interface for valid rewards return type
+ */
+interface ValidRewards {
+    validCrates: Crate[];
+    validSignatures: string[];
+}
+
 
 export class Account extends EIP6963 {
     address: string | null | undefined;
@@ -269,53 +295,182 @@ export class Account extends EIP6963 {
     }
 
     /**
- * Claims all available rewards (crates) for the authenticated user.
- * @returns A promise resolving to the API response.
- * @throws Error if the API request fails or authentication is invalid.
- */
+     * Claims all available rewards (crates) for the authenticated user.
+     * @returns A promise resolving to the transaction receipt.
+     * @throws Error if the API request fails, authentication is invalid, or transaction fails.
+     */
     async claimRewards(): Promise<any> {
-        const response = await fetch(`${selectedRegion.apiAddress}/api/getCrates`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.token}`, // Add JWT token to Authorization header
-            },
-        });
-
-        console.log("token: ", this.token);
-        const data = await response.json();
-        if (!data.success) {
-            throw new Error("Crates not found!");
+        if (!this.token) {
+            throw new Error('Authentication token is missing');
         }
-
-        // Extract crates and signatures
-        // Extract and format crates and signatures
-        const crates = data.claims.map((claim: any) => ({
-            to: claim.crate.to,
-            tier: Number(claim.crate.tier),
-            amount: Number(claim.crate.amount),
-            salt: claim.crate.salt,
-            expiry: Number(claim.crate.expiry),
-        }));
-        const signatures = data.claims.map((claim: any) => claim.signature);
 
         if (!this.provider?.provider) {
-            throw new Error("Provider not available");
+            throw new Error('Web3 provider not initialized');
         }
-        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-        const signer = await ethersProvider.getSigner();
-        const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
-        try {
 
-            // Send transaction
-            const tx = await contract.claimBatch(crates, signatures);
-            console.log("Transaction sent:", tx.hash);
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            const { validCrates, validSignatures } = await this.getValidRewards();
+
+            if (!validCrates.length || !validSignatures.length) {
+                throw new Error('No valid crates available after validation');
+            }
+
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+            const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
+
+            // Execute claim transaction
+            const tx = await contract.claimBatch(validCrates, validSignatures);
+            console.info('Transaction sent:', tx.hash);
             const receipt = await tx.wait();
-            console.log("Transaction confirmed:", receipt);
-            return receipt; // Return the transaction receipt
-        } catch (error) {
-            console.error("Error during claimBatch:", error);
-            throw new Error(`Failed to claim rewards: ${error}`);
+            console.info('Transaction confirmed:', receipt);
+
+            // Clean up used signatures
+            await this.removeRewards(validSignatures);
+
+            clearTimeout(timeoutId);
+            return receipt;
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            console.error('Claim rewards failed:', error);
+            throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
+        }
+    }
+
+    /**
+     * Fetches and validates available rewards for the authenticated user.
+     * @returns A promise resolving to valid crates and signatures.
+     * @throws Error if the API request fails or no valid rewards are found.
+     */
+    async getValidRewards(): Promise<ValidRewards> {
+        if (!this.token) {
+            throw new Error('Authentication token is missing');
+        }
+
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Fetch available crates
+            const response = await fetch(`${selectedRegion.apiAddress}/api/getCrates`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`,
+                },
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+            const data: ClaimResponse = await response.json();
+
+            if (!data.success || !data.claims?.length) {
+                throw new Error('No valid crates found');
+            }
+
+            // Validate and format claims
+            const crates: Crate[] = [];
+            const signatures: string[] = [];
+
+            for (const claim of data.claims) {
+                if (!claim.crate?.to || !ethers.isAddress(claim.crate.to) ||
+                    !Number.isInteger(claim.crate.tier) || !Number.isInteger(claim.crate.amount) ||
+                    !claim.crate.salt || !Number.isInteger(claim.crate.expiry) || !claim.signature) {
+                    console.warn('Invalid claim data, skipping:', claim);
+                    continue;
+                }
+                crates.push({
+                    to: claim.crate.to,
+                    tier: Number(claim.crate.tier),
+                    amount: Number(claim.crate.amount),
+                    salt: claim.crate.salt,
+                    expiry: Number(claim.crate.expiry),
+                });
+                signatures.push(claim.signature);
+            }
+
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+            const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
+
+            // Filter out used signatures
+            const validIndices: number[] = [];
+            for (let i = 0; i < signatures.length; i++) {
+                try {
+                    const isUsed = await contract.isUsedSignature(signatures[i]);
+                    if (!isUsed) {
+                        validIndices.push(i);
+                    }
+                } catch (error) {
+                    console.warn(`Failed to check signature ${signatures[i]}:`, error);
+                }
+            }
+
+            const validCrates = validIndices.map(i => crates[i]);
+            const validSignatures = validIndices.map(i => signatures[i]);
+
+            // Remove invalid rewards
+            if (validIndices.length < signatures.length) {
+                const invalidSignatures = signatures.filter((_, i) => !validIndices.includes(i));
+                await this.removeRewards(invalidSignatures);
+            }
+
+            return { validCrates, validSignatures };
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            console.error('Get valid rewards failed:', error);
+            throw new Error(`Failed to get valid rewards: ${error.message || 'Unknown error'}`);
+        }
+    }
+
+    /**
+     * Updates reward signatures by removing specified signatures or all signatures for the user if none provided.
+     * @param signatures Optional array of signatures to remove
+     * @returns Promise resolving when the operation is complete
+     */
+    private async removeRewards(signatures?: string[]): Promise<void> {
+        if (!this.token) {
+            throw new Error('Authentication token is missing');
+        }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            const body = signatures?.length ? { signatures } : {};
+            const response = await fetch(`${selectedRegion.apiAddress}/api/removeCrates`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`,
+                },
+                body: JSON.stringify(body),
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+            const data = await response.json();
+            if (!data.success) {
+                console.warn('Failed to update reward signatures:', data.error);
+                throw new Error(`Failed to update signatures: ${data.error}`);
+            }
+            console.info(`Successfully updated ${signatures?.length || 'all'} signatures`);
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            console.error('Error updating reward signatures:', error);
+            throw new Error(`Failed to update signatures: ${error.message || 'Unknown error'}`);
         }
     }
 
