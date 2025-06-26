@@ -129,11 +129,6 @@ export function visibleConnectWallet(game: Game): void {
                 if (paragraphElement?.textContent?.includes(WalletType.METAMASK)) {
                     return window.open("https://metamask.io/download/", "_blank");
                 }
-
-                if (paragraphElement?.textContent?.includes(WalletType.SUBWALLET)) {
-                    return window.open("https://www.subwallet.app/download", "_blank");
-                }
-
                 if (paragraphElement?.textContent?.includes(WalletType.COINBASEWALLET)) {
                     return window.open(
                         "https://www.coinbase.com/wallet/downloads",

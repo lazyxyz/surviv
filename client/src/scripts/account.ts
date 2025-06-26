@@ -19,11 +19,11 @@ import {
     DivineArmsMapping,
     DivineGunsMapping,
     SurvivMemesMapping
-} from "../../public/mapping";
-import { abi as survivRewardsABI } from "../../public/abi/ISurvivRewards.json";
-import { abi as crateBaseABI } from "../../public/abi/ICrateBase.json";
-import { abi as erc1155ABI } from "../../public/abi/IERC1155.json";
-import { abi as survivShopABI } from "../../public/abi/ISurvivShop.json";
+} from "./mapping";
+import { abi as survivRewardsABI } from "./abi/ISurvivRewards.json";
+import { abi as crateBaseABI } from "./abi/ICrateBase.json";
+import { abi as erc1155ABI } from "./abi/IERC1155.json";
+import { abi as survivShopABI } from "./abi/ISurvivShop.json";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
@@ -218,7 +218,7 @@ export class Account extends EIP6963 {
             resetPlayButtons();
         }
 
-        await this.buyItems(SaleItems.Crates, 1, PaymentTokens.NativeToken);
+        // await this.buyItems(SaleItems.Crates, 1, PaymentTokens.NativeToken);
     }
 
     async eventListener(): Promise<void> {

@@ -69,8 +69,7 @@ export const ACCESS_TOKEN = "ACCESS_TOKEN";
 export enum WalletType {
     METAMASK = "MetaMask",
     TRUSTWALLET = "Trust Wallet",
-    COINBASEWALLET = "Coinbase Wallet",
-    SUBWALLET = "SubWallet"
+    COINBASEWALLET = "Coinbase Wallet"
 }
 
 /**
