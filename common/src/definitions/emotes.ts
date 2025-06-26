@@ -98,18 +98,6 @@ export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
         "Boykisser"
     ].map(name => emote([name, EmoteCategory.Memes])),
     ...[
-        "Question Mark",
-        "Team = Ban",
-        "Hack = Ban",
-        "gg",
-        "ez",
-        "Hi5",
-        "oof",
-        "real",
-        "fake",
-        "Colon Three"
-    ].map(name => emote([name, EmoteCategory.Text])),
-    ...[
         "Monkey",
         "Carrot",
         "Tomato",
