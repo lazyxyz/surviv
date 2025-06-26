@@ -218,7 +218,7 @@ export class Account extends EIP6963 {
             resetPlayButtons();
         }
 
-        await this.buyItems(SaleItems.Crates, 1, PaymentTokens.NativeToken);
+        // await this.buyItems(SaleItems.Crates, 1, PaymentTokens.NativeToken);
     }
 
     async eventListener(): Promise<void> {
