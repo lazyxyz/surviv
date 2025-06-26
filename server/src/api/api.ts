@@ -22,6 +22,9 @@ export async function validateJWT(token: string): Promise<{ walletAddress: strin
 
 export async function saveRewards(user: string, rank: number, teamMode: boolean, gameId: number): Promise<void> {
     const url = `${process.env.API_URL}/api/saveRewards`;
+
+    console.log("url: ", url);
+    console.log("X_API_KEY: ", process.env.X_API_KEY);
     try {
         const res = await fetch(url, {
             method: 'POST',
