@@ -151,7 +151,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ],
         hazel_crate: [
             [{ item: "firework_launcher", weight: 1 }],
-            [{ item: "1st_birthday", weight: 1 }]
+            [{ item: "cookie", weight: 1 }]
         ],
         viking_chest: [
             [{ item: "seax", weight: 1 }],
@@ -309,7 +309,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         birthday_cake: [
             { table: "special_guns", weight: 0.25 },
             { table: "special_equipment", weight: 0.25 },
-            { item: "1st_birthday", weight: 0.25 },
+            { item: "cookie", weight: 0.25 },
             { item: "firework_rocket", weight: 0.2 },
             { item: "firework_launcher", weight: 0.01 }
         ],
@@ -454,18 +454,18 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         gas_can: [
             { item: "gas_can", weight: 1 }
         ],
-        // hq_skin: [
-        //     { item: "gold_tie_event", weight: 1 }
-        // ],
-        // ship_skin: [
-        //     { item: "ship_carrier", weight: 1 }
-        // ],
-        // armory_skin: [
-        //     { item: "nsd_uniform", weight: 1 }
-        // ],
-        // plumpkin_bunker_skin: [
-        //     { item: "pumpkified", weight: 1 }
-        // ],
+        hq_skin: [
+            { item: "bitcoin", weight: 1 }
+        ],
+        ship_skin: [
+            { item: "captain", weight: 1 }
+        ],
+        armory_skin: [
+            { item: "martyrs", weight: 1 }
+        ],
+        plumpkin_bunker_skin: [
+            { item: "lion", weight: 1 }
+        ],
         bombed_armory_skin: [
             { item: "devil", weight: 1 }
         ],
@@ -572,7 +572,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ],
         ice_pick_case: [
             [{ item: "ice_pick", weight: 1 }],
-            [{ item: "frosty", weight: 1 }]
+            [{ item: "fettgans", weight: 1 }]
         ],
         confetti_grenade_box: {
             min: 1,
@@ -986,7 +986,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "vks", weight: 0.25 }
             ],
             [
-                { item: "coal", weight: 1 },
+                { item: "crow", weight: 1 },
                 { item: NullString, weight: 1 }
             ]
         ]
