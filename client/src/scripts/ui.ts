@@ -380,6 +380,12 @@ export async function setUpUI(game: Game): Promise<void> {
                 `
             );
         });
+
+        if (rewardLists.length === 0) {
+            $("#claim-btn")
+                .attr("disabled", "true")
+                .css("opacity", "0.35");
+        }
     }
 
     // Change the menu based on the mode.
