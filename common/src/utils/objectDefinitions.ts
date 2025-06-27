@@ -745,7 +745,7 @@ export interface EventModifiers {
 
 export interface ItemDefinition extends ObjectDefinition {
     readonly itemType: ItemType
-    readonly noDrop: boolean
+    noDrop: boolean
     readonly devItem?: boolean
 }
 
