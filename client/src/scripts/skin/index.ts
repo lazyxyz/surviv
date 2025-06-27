@@ -51,38 +51,18 @@ export async function visibleSkin(game: Game) {
     const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
-    let skins = await game.account.getBalances(Assets.SilverSkins).catch(err => {
+    let SilverSkins = await game.account.getBalances(Assets.SilverSkins).catch(err => {
         console.log(`Get SilverSkins error: ${err}`);
     });
-    console.log("skins: ", skins);
-
-    const mySkins = await new Promise<string[]>(async(resolve, reject) => {
-        try {
-            const request: {
-                data: { items: Array<{ name: string }> }
-            } = await $.ajax({
-                url: "https://test-api.openmark.io/market/api/nft",
-                type: "POST",
-                data: {
-                    nftContract: "0xe39c159175ca527ff467114a03048142db23ea20",
-                    owner: game.account.address,
-                    size: 100
-                }
-            });
-
-            resolve(
-                request.data.items.map(meta => {
-                    // should be ['Monad', '#20']
-                    const separate = meta.name.split(" ");
-
-                    return separate[0].toLowerCase();
-                })
-            );
-        } catch (error) {
-            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-            reject(error);
-        }
+    let GoldSkins = await game.account.getBalances(Assets.GoldSkins).catch(err => {
+        console.log(`Get SilverSkins error: ${err}`);
     });
+    let DivineSkins = await game.account.getBalances(Assets.DivineSkins).catch(err => {
+        console.log(`Get SilverSkins error: ${err}`);
+    });
+    const UserSkins = {...SilverSkins, ...GoldSkins, ...DivineSkins};
+    const mySkins = Object.entries(UserSkins).map(([key, _]) => key);
+
     console.log("mySkins: ", mySkins);
 
     const SkinsIntance = Skins.definitions.filter(argument =>
