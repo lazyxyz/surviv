@@ -30,7 +30,7 @@ export async function loadInventory(game: Game) {
             {
                 balance: keyBalances,
                 name: "Surviv Keys",
-                image: `public/img/misc/Keys.png`,
+                image: `./img/misc/Keys.png`,
                 price: `${formatEther(keyPrice)} STT`
             }
         ];
@@ -129,7 +129,7 @@ export async function loadInventory(game: Game) {
         });
         let crateImages = [];
         if (userCrates && userCrates.crates) {
-            const crateImage = { image: `public/img/misc/crate.png` };
+            const crateImage = { image: `./img/misc/crate.png` };
             crateImages = new Array(Number(userCrates.crates)).fill(crateImage);
             $("#total-crates").text(`You have ${userCrates.crates} crates`);
         }
@@ -165,7 +165,7 @@ export async function loadInventory(game: Game) {
         });
 
         const now = Math.floor(Date.now() / 1000);
-        let rewardLists = [];
+        let rewardLists: any[] = [];
 
         if (userRewards && userRewards.validCrates) {
             rewardLists = userRewards.validCrates.map(item => {
@@ -173,13 +173,14 @@ export async function loadInventory(game: Game) {
                 const daysLeft = Math.max(Math.floor(secondsLeft / (60 * 60 * 24)), 0);
 
                 return {
-                    image: "public/img/misc/crate.png",
+                    image: "./img/misc/crate.png",
+                    amount: item.amount,
                     time: `Expired in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`
                 };
             });
         }
 
-        $("#total-reward").text(`You have ${rewardLists.length} crates to claim`);
+        $("#total-reward").text(`You have ${rewardLists.reduce((sum, item) => sum + item.amount, 0)} crates to claim`);
 
         // Clear existing content to prevent duplicates
         $(".rewards-grid-group").empty();
@@ -188,6 +189,7 @@ export async function loadInventory(game: Game) {
             $(".rewards-grid-group").append(`
                 <div class="reward-child">
                     <img src="${key.image}" alt="Crates">
+                    <h3> Amount: ${key.amount}</h3>
                     <h3>${key.time}</h3>
                 </div>
             `);
