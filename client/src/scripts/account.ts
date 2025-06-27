@@ -93,6 +93,7 @@ export class Account extends EIP6963 {
 
         // visible elements
         {
+            $(".account-wallet-placeholder").text("Connect Wallet");
             $("#wallet-active").css("display", "none");
             $(".connect-wallet-portal").css("display", "none");
             $("#wallet-inactive").css("display", "block");

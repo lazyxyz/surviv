@@ -449,7 +449,9 @@ input::-webkit-inner-spin-button {
 
         border-radius: 8px;
         overflow: hidden;
-        button {
+
+        .crates-remove,
+        .crates-add {
           height: 32px;
           width: 32px;
           background: #608939;
@@ -463,20 +465,31 @@ input::-webkit-inner-spin-button {
           }
         }
 
-        input {
+        .crates-input {
+          display: flex;
           justify-content: center;
-          text-align: center;
+          align-items: center;
 
           height: 32px;
           width: 80px;
           background: #608939;
           font-style: 14px;
           font-weight: 500;
-          border: none;
-          &::placeholder {
-            color: white;
-          }
         }
+        .crates-remove {
+          opacity: 0.35;
+        }
+
+        .active {
+          opacity: 1;
+        }
+      }
+
+      #buy-now-btn {
+        opacity: 0.35;
+      }
+      .active {
+        opacity: 1;
       }
     }
   }
@@ -519,6 +532,7 @@ input::-webkit-inner-spin-button {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
       gap: 8px;
+      width: 100%;
       .my-crates-child {
         justify-content: center;
         align-items: center;
@@ -552,6 +566,17 @@ input::-webkit-inner-spin-button {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 8px;
+    height: 310px;
+    overflow: hidden;
+    transition: 300ms;
+    &:hover {
+      overflow-y: auto;
+    }
+
+    #claim-btn {
+      scale: 0.8;
+    }
+
     .reward-child {
       display: flex;
       flex-direction: column;

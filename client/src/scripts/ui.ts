@@ -242,6 +242,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
         const crateLists = [
             {
+                balance: 0,
                 name: "Immortal key",
                 image: `public/img/misc/Keys.png `,
                 price: "$19"
@@ -250,6 +251,7 @@ export async function setUpUI(game: Game): Promise<void> {
         crateLists.forEach((key) => {
             $("#buy-customize-items").append(`
             <div class="crates-card">
+            <p>Balance: ${key.balance}<p>
                 <img src="${key.image}" class="crates-image"></img>
                 <div class="crates-information">
                   <p>${key.name}</p>
@@ -257,10 +259,10 @@ export async function setUpUI(game: Game): Promise<void> {
                 </div>
                 <div class="crates-supply">
                   <button class="crates-add">+</button>
-                  <input type="text" class="crates-input" placeholder="0">
-                  <button class="crates-remove">-</button>
+                  <p class="crates-input">0</p>
+                  <button class="crates-remove" disabled>-</button>
                 </div>
-                <button class="btn btn-alert btn-darken" id="buy-now-btn">
+                <button class="btn btn-alert btn-darken" id="buy-now-btn" disabled>
                   Buy now
                 </button>
               </div>
@@ -290,6 +292,37 @@ export async function setUpUI(game: Game): Promise<void> {
                 };
             });
         });
+
+        // Add supply
+        const mySupply = document.querySelectorAll(".crates-input");
+        const addBtn = document.querySelectorAll(".crates-add");
+        const removeBtn = document.querySelectorAll(".crates-remove");
+
+        let totalSupply = 0;
+        for (let i = 0; i < mySupply.length; i++) {
+            const buyNow = document.getElementById("#buy-now-btn");
+            addBtn[i].addEventListener("click", () => {
+                totalSupply++;
+                console.log(totalSupply);
+                mySupply[i].textContent = Number(totalSupply);
+                removeBtn[i].disabled = false;
+                removeBtn[i].classList.add("active");
+                buyNow.disable = false;
+                buyNow.classList.add("active");
+            });
+
+            removeBtn[i].addEventListener("click", () => {
+                totalSupply--;
+                console.log(totalSupply);
+                mySupply[i].textContent = Number(totalSupply);
+                if (mySupply[i].textContent == 0) {
+                    removeBtn[i].disabled = true;
+                    removeBtn[i].classList.remove("active");
+                    buyNow.disable = true;
+                    buyNow.classList.remove("active");
+                }
+            });
+        };
     }
 
     // My crates
@@ -335,6 +368,10 @@ export async function setUpUI(game: Game): Promise<void> {
             {
                 image: `public/img/misc/Immotal_crate.png`,
                 time: "Expired in 7 days"
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`,
+                time: "Expired in 7 days"
             }
         ];
 
@@ -348,9 +385,12 @@ export async function setUpUI(game: Game): Promise<void> {
                 </div>
                 `
             );
-
-            // Claim crate event
         });
+
+        // Claim crate event
+        // $("#claim-btn").on("click", () => {
+        //     console.log(balances);
+        // });
     }
 
     // Change the menu based on the mode.
