@@ -17,7 +17,7 @@ export const Config = {
             apiAddress: "https://api.surviv.fun",
         }
     },
-    defaultRegion: "dev"
+    defaultRegion: "as"
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {

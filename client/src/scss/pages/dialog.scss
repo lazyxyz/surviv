@@ -556,13 +556,16 @@ input::-webkit-inner-spin-button {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    align-items: center;
     p {
+      align-self: flex-start;
       font-size: 14px;
       font-weight: 500;
     }
   }
 
   .rewards-grid-group {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 8px;
@@ -571,10 +574,6 @@ input::-webkit-inner-spin-button {
     transition: 300ms;
     &:hover {
       overflow-y: auto;
-    }
-
-    #claim-btn {
-      scale: 0.8;
     }
 
     .reward-child {
@@ -593,9 +592,26 @@ input::-webkit-inner-spin-button {
       }
       h3 {
         margin: 0px;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: 500;
+        padding: 8px 12px;
+        background: #608939;
+        border-radius: 12px;
       }
+    }
+  }
+  .claim-all-btn {
+    position: fixed;
+    justify-content: center;
+    align-items: center;
+
+    bottom: 16px;
+    background-color: #50722f;
+    padding: 8px 12px;
+    border-radius: 8px;
+
+    #claim-btn {
+      margin-top: 0;
     }
   }
 
