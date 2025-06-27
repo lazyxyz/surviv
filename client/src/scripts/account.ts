@@ -355,14 +355,10 @@ export class Account extends EIP6963 {
             const receipt = await tx.wait();
             console.info('Transaction confirmed:', receipt);
 
-            // Clean up used signatures
-            await this.removeRewards(validSignatures);
-
             clearTimeout(timeoutId);
             return receipt;
         } catch (error: any) {
             clearTimeout(timeoutId);
-            console.error('Claim rewards failed:', error);
             throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
         }
     }
@@ -454,7 +450,6 @@ export class Account extends EIP6963 {
             return { validCrates, validSignatures };
         } catch (error: any) {
             clearTimeout(timeoutId);
-            console.error('Get valid rewards failed:', error);
             throw new Error(`Failed to get valid rewards: ${error.message || 'Unknown error'}`);
         }
     }
@@ -494,7 +489,6 @@ export class Account extends EIP6963 {
             console.info(`Successfully updated ${signatures?.length || 'all'} signatures`);
         } catch (error: any) {
             clearTimeout(timeoutId);
-            console.error('Error updating reward signatures:', error);
             throw new Error(`Failed to update signatures: ${error.message || 'Unknown error'}`);
         }
     }
@@ -522,7 +516,6 @@ export class Account extends EIP6963 {
             const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
             const cratesContract = new ethers.Contract(SurvivCratesMapping.address, erc1155ABI, signer);
 
-
             const balance = await cratesContract.balanceOf(signer.address, 0);
             console.log("crates balance: ", balance);
 
@@ -541,7 +534,6 @@ export class Account extends EIP6963 {
 
         } catch (error: any) {
             clearTimeout(timeoutId);
-            console.error('Claim rewards failed:', error);
             throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
         }
     }
@@ -584,7 +576,6 @@ export class Account extends EIP6963 {
 
         } catch (error: any) {
             clearTimeout(timeoutId);
-            console.error('Claim rewards failed:', error);
             throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
         }
     }
