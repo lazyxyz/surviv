@@ -240,9 +240,15 @@ export async function setUpUI(game: Game): Promise<void> {
         const userKeyBalances = await game.account.getBalances(SurvivAssets.SurvivKeys).catch(err => {
             console.log(`Failed to read keys balances: ${err}`);
         });
-        const keyPrice = await game.account.queryPrice(SaleItems.Keys, PaymentTokens.NativeToken).catch(err => {
-            console.log(`Failed to query key price: ${err}`);
-        });
+
+        let keyPrice = 0;
+        {
+            const price = await game.account.queryPrice(SaleItems.Keys, PaymentTokens.NativeToken).catch(err => {
+                console.log(`Failed to query key price: ${err}`);
+            });
+            if(price) keyPrice = price;
+        }
+
 
         let keyBalances = 0;
         if (userKeyBalances && userKeyBalances.keys) {
@@ -260,7 +266,7 @@ export async function setUpUI(game: Game): Promise<void> {
         crateLists.forEach((key) => {
             $("#buy-customize-items").append(`
             <div class="crates-card">
-            <p>Balance: ${key.balance}<p>
+            <p>You have ${key.balance} keys<p>
                 <img src="${key.image}" class="crates-image"></img>
                 <div class="crates-information">
                   <p>${key.name}</p>
@@ -340,11 +346,14 @@ export async function setUpUI(game: Game): Promise<void> {
 
     // My crates
     {
-        let userCrates = await game.account.getBalances(SurvivAssets.SurvivCrates);
+        let userCrates = await game.account.getBalances(SurvivAssets.SurvivCrates).catch(err => {
+            console.log(`Failed to get user crate balance: ${err}`);
+        });
         let crateImages = [];
         if (userCrates && userCrates.crates) {
             const crateImage = { image: `public/img/misc/crate.png` };
             crateImages = new Array(Number(userCrates.crates)).fill(crateImage);
+            $("#total-crates").text(`You have ${userCrates.crates} crates`);
         }
 
         crateImages.forEach((key) => {
@@ -368,28 +377,26 @@ export async function setUpUI(game: Game): Promise<void> {
 
     // Claim rewards
     {
-        const rewardLists = [
-            {
-                image: `public/img/misc/Immotal_crate.png`,
-                time: "Expired in 3 days"
-            },
-            {
-                image: `public/img/misc/Immotal_crate.png`,
-                time: "Expired in 5 days"
-            },
-            {
-                image: `public/img/misc/Immotal_crate.png`,
-                time: "Expired in 7 days"
-            },
-            {
-                image: `public/img/misc/Immotal_crate.png`,
-                time: "Expired in 7 days"
-            },
-            {
-                image: `public/img/misc/Immotal_crate.png`,
-                time: "Expired in 7 days"
-            }
-        ];
+        let userRewards = await game.account.getValidRewards().catch(err => {
+            console.log(`Failed to get valid rewards: ${err}`);
+        });
+
+        const now = Math.floor(Date.now() / 1000); // current time in seconds
+        let rewardLists: any[] = [];
+
+        if (userRewards && userRewards.validCrates) {
+            rewardLists = userRewards.validCrates.map(item => {
+                const secondsLeft = item.expiry - now;
+                const daysLeft = Math.max(Math.floor(secondsLeft / (60 * 60 * 24)), 0); // no negative days
+
+                return {
+                    image: "public/img/misc/crate.png",
+                    time: `Expired in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`
+                };
+            });
+
+        }
+        $("#total-reward").text(`You have ${rewardLists.length} crates to claim`);
 
         rewardLists.forEach((key) => {
             $(".rewards-grid-group").append(
@@ -407,6 +414,12 @@ export async function setUpUI(game: Game): Promise<void> {
                 .attr("disabled", "true")
                 .css("opacity", "0.35");
         }
+
+        $(".claim-all-btn").on('click', async () => {
+            await game.account.claimRewards().catch(err => {
+                console.log(`Failed claim rewards: ${err}`);
+            });
+        })
     }
 
     // Change the menu based on the mode.
