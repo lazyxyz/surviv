@@ -30,6 +30,7 @@ import { getBadgeImage, visibleBadges } from "./badges";
 import {loadInventory} from "./inventory";
 import { visibleSkin } from "./skin";
 import { visibleMeless } from "./weapons/weapons_meless";
+import { visibleConnectWallet } from "./wallet";
 /*
     eslint-disable
 
@@ -104,7 +105,7 @@ export async function setUpUI(game: Game): Promise<void> {
     if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/suroi_beta_${MODE.idString}.svg`);
     if (MODE.specialPlayButtons) {
         const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
-        // const playButtons = [$("#btn-play-solo"), $("#btn-play-duo"), $("#btn-play-squad")];
+        
         for (let buttonIndex = 0; buttonIndex < playButtons.length; buttonIndex++) {
             const button = playButtons[buttonIndex];
 
@@ -421,6 +422,9 @@ export async function setUpUI(game: Game): Promise<void> {
 
     // Join server when play buttons are clicked
     $("#btn-play-solo, #btn-play-squad").on("click", event => {
+        if(!game.account.address) {
+            throw Error('Please login wallet!');
+        }
         const now = Date.now();
         if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit
         lastPlayButtonClickTime = now;

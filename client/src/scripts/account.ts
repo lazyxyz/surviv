@@ -2,14 +2,10 @@ import $ from "jquery";
 
 import { ACCESS_TOKEN, PUBLIC_KEY, SELECTOR_WALLET, shorten } from "./utils/constants";
 import { EIP6963, type Provider6963Props } from "./eip6963";
-import { ethers } from "ethers";
+import { ethers, toBeHex } from "ethers";
 import { resetPlayButtons, type RegionInfo } from "./ui";
 import { Config } from "./config";
 import { Game } from "./game";
-import { visibleSkin } from "./skin";
-import { visibleMeless } from "./weapons/weapons_meless";
-import { visibleBadges } from "./badges";
-import { removeItems } from "pixi.js";
 
 import {
     SilverSkinsMapping,
@@ -30,6 +26,8 @@ import { abi as survivShopABI } from "./abi/ISurvivShop.json";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
+
+const CHAIN_ID = 50312;
 
 // Surviv Utility
 const SURVIV_REWARD_ADDRESS = "0xb615B4ca12f58EdebA10B68Ee890f0ddd7B7e49A";
@@ -153,7 +151,51 @@ export class Account extends EIP6963 {
         // Check condition button
     }
 
-    async connect(getProvider: Provider6963Props, game: Game): Promise<void> {
+    async connect(getProvider: Provider6963Props): Promise<void> {
+        // Check and switch network if necessary
+        {
+            const targetChainId = toBeHex(CHAIN_ID);
+            const currentChainId = await getProvider.provider.request({
+                method: "eth_chainId"
+            }) as string;
+
+            if (currentChainId !== targetChainId) {
+                try {
+                    // Attempt to switch to the target chain
+                    await getProvider.provider.request({
+                        method: "wallet_switchEthereumChain",
+                        params: [{ chainId: targetChainId }]
+                    });
+                } catch (switchError: any) {
+                    // If the chain is not added (e.g., error code 4902), add it
+                    if (switchError.code === 4902) {
+                        try {
+                            await getProvider.provider.request({
+                                method: "wallet_addEthereumChain",
+                                params: [{
+                                    chainId: targetChainId,
+                                    chainName: "Somnia Testnet",
+                                    rpcUrls: ["https://dream-rpc.somnia.network/"],
+                                    nativeCurrency: {
+                                        name: "Somnia Testnet Token",
+                                        symbol: "STT",
+                                        decimals: 18
+                                    },
+                                    blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
+                                }]
+                            });
+                        } catch (addError) {
+                            console.error(`Failed to add network: ${addError}`);
+                            // throw new Error("Failed to add the Somnia Testnet. Please add it manually in your wallet.");
+                        }
+                    } else {
+                        console.error(`Failed to switch network: ${switchError}`);
+                        throw new Error("Failed to switch to the Somnia Testnet. Please switch networks in your wallet.");
+                    }
+                }
+            }
+        }
+
         const accounts = await getProvider.provider.request({
             method: "eth_requestAccounts"
         }) as string[];
@@ -197,39 +239,29 @@ export class Account extends EIP6963 {
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.eventListener();
 
-        // call assets
-        {
-            this.address = accounts[0];
-            await visibleSkin(game);
-            await visibleMeless(game);
-            await visibleBadges(game);
-        }
-
-        // update field
+        // Update field
         {
             this.address = accounts[0];
             this.token = data.token;
             this.provider = getProvider;
         }
 
-        // update localstorage
+        // Update localStorage
         {
             localStorage.setItem(PUBLIC_KEY, accounts[0]);
             localStorage.setItem(ACCESS_TOKEN, data.token);
             localStorage.setItem(SELECTOR_WALLET, getProvider.info.name);
         }
 
-        // visible elements
+        // Visible elements
         {
             $(".account-wallet-placeholder").text(shorten(accounts[0]));
             $(".connect-wallet-portal").css("display", "none");
-            // $(".account-wallet-container ").css("display", "block");
             $("#wallet-active").css("display", "block");
             $("#wallet-inactive").css("display", "none");
             resetPlayButtons();
         }
     }
-
     async eventListener(): Promise<void> {
         const getProvider = this.provider;
 
@@ -559,7 +591,6 @@ export class Account extends EIP6963 {
 
             const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
             const remainingCommits = await crateBaseContract.getCommits(signer.address);
-            console.log("Request open: ", remainingCommits.length);
 
             if (remainingCommits.length > 0n) {
                 // Execute claim transaction
@@ -646,6 +677,29 @@ export class Account extends EIP6963 {
         } catch (error: any) {
             clearTimeout(timeoutId);
             throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
+        }
+    }
+
+     async getCommits(): Promise<any> {
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+
+            const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
+            const remainingCommits = await crateBaseContract.getCommits(signer.address);
+            return remainingCommits;
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            throw new Error(`Failed to request get commits: ${error.message || 'Unknown error'}`);
         }
     }
 }
