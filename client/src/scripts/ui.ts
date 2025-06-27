@@ -246,7 +246,7 @@ export async function setUpUI(game: Game): Promise<void> {
             const price = await game.account.queryPrice(SaleItems.Keys, PaymentTokens.NativeToken).catch(err => {
                 console.log(`Failed to query key price: ${err}`);
             });
-            if(price) keyPrice = price;
+            if (price) keyPrice = price;
         }
 
 
@@ -273,11 +273,11 @@ export async function setUpUI(game: Game): Promise<void> {
                   <h3>${key.price}</h3>
                 </div>
                 <div class="crates-supply">
-                  <button class="crates-add">+</button>
-                  <p class="crates-input">0</p>
                   <button class="crates-remove" disabled>-</button>
+                  <p class="crates-input">0</p>
+                  <button class="crates-add">+</button>
                 </div>
-                <button class="btn btn-alert btn-darken" id="buy-now-btn">
+                <button class="btn btn-alert btn-darken buy-now-btn">
                   Buy now
                 </button>
               </div>
@@ -312,18 +312,22 @@ export async function setUpUI(game: Game): Promise<void> {
         const mySupply = document.querySelectorAll(".crates-input");
         const addBtn = document.querySelectorAll(".crates-add");
         const removeBtn = document.querySelectorAll(".crates-remove");
+        const buyNow = document.querySelectorAll(".buy-now-btn");
 
         let buyAmount = 0;
         for (let i = 0; i < mySupply.length; i++) {
-            const buyNow = document.getElementById("#buy-now-btn");
+            if (mySupply[i].textContent == 0) {
+                buyNow[i].disabled = true;
+            }
+
             addBtn[i].addEventListener("click", () => {
                 buyAmount++;
                 console.log(buyAmount);
                 mySupply[i].textContent = Number(buyAmount);
                 removeBtn[i].disabled = false;
                 removeBtn[i].classList.add("active");
-                // buyNow.disable = false;
-                buyNow.classList.add("active");
+                buyNow[i].disabled = false;
+                buyNow[i].classList.add("active");
             });
 
             removeBtn[i].addEventListener("click", () => {
@@ -333,13 +337,14 @@ export async function setUpUI(game: Game): Promise<void> {
                 if (mySupply[i].textContent == 0) {
                     removeBtn[i].disabled = true;
                     removeBtn[i].classList.remove("active");
-                    // buyNow.disable = true;
-                    buyNow.classList.remove("active");
+                    buyNow[i].disabled = true;
+                    buyNow[i].classList.remove("active");
                 }
             });
         };
 
-        $("#buy-now-btn").on("click", async () => {
+
+        $(".buy-now-btn").on("click", async () => {
             await game.account.buyItems(SaleItems.Keys, buyAmount, PaymentTokens.NativeToken);
         })
     }
