@@ -3,7 +3,8 @@ import { freeMeless, Melees } from "@common/definitions/melees";
 import type { Game } from "../game";
 import type { weaponPresentType } from "@common/typings";
 import weapons from ".";
-import type { ObjectDefinition } from "@common/utils/objectDefinitions";
+import { ObjectDefinitions, type ObjectDefinition } from "@common/utils/objectDefinitions";
+import { Assets } from "../account";
 
 const selectMeless = (game: Game, weapon: string) => {
     // store weapon
@@ -66,39 +67,25 @@ export async function visibleMeless(game: Game) {
     weapons.resetAll();
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
-    const myMeless = await new Promise<ObjectDefinition[]>(async(resolve, reject) => {
-        try {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const request: {
-                data: { items: Array<{ name: string }> }
-            } = await $.ajax({
-                url: "https://test-api.openmark.io/market/api/nft",
-                type: "POST",
-                data: {
-                    nftContract: "0x4f8530e94a14c1facb50c199ae6e0f854aee78b8",
-                    owner: game.account.address,
-                    size: 100
-                }
-            });
-
-            return resolve(request.data.items.map(meta => {
-                /*
-                    for example: baseball bat dragon #1
-                    indexOf should be 20 and - 1 mean space
-                    result: baseball bat dragon
-                */
-                const separate = meta.name.slice(0, meta.name.indexOf("#") - 1);
-
-                return {
-                    idString: separate.replaceAll(" ", "_").toLowerCase(),
-                    name: separate
-                };
-            }));
-        } catch (error) {
-            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-            reject(error);
-        }
+    let SilverArms = await game.account.getBalances(Assets.SilverArms).catch(err => {
+        console.log(`Get SilverArms error: ${err}`);
     });
+    let GoldArms = await game.account.getBalances(Assets.GoldArms).catch(err => {
+        console.log(`Get GoldArms error: ${err}`);
+    });
+    let DivineArms = await game.account.getBalances(Assets.DivineArms).catch(err => {
+        console.log(`Get DivineArms error: ${err}`);
+    });
+    const userArmsBalance = { ...SilverArms, ...GoldArms, ...DivineArms };
+    const userArms = Object.entries(userArmsBalance).map(([key, _]) => key);
+    ; 
+    console.log("userArms: ", userArms);
+
+    const userMelees=  Melees.definitions.filter(argument =>
+            [...freeMeless, ...(userArms || [])].some(
+                argument_child => argument_child === argument.idString
+            )
+        );
 
     const MelessIntance = Melees.definitions.filter(argument =>
         [
@@ -107,7 +94,7 @@ export async function visibleMeless(game: Game) {
                 in here don't allow show skins just default
                 you wanna select skin attention to assets preview !
             */
-            ...(myMeless
+            ...(userMelees
                 ?.filter(meta => meta?.idString === argument.idString && argument?.default)
                 ?.map(meta => meta?.idString) || [])
         ].some(
@@ -129,7 +116,7 @@ export async function visibleMeless(game: Game) {
             `);
 
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            melessItem.on("click", async() => {
+            melessItem.on("click", async () => {
                 // handler active messItem
                 {
                     $(".weapons-container-card-meless").removeClass("selected");
@@ -139,7 +126,7 @@ export async function visibleMeless(game: Game) {
 
                 const getAssets = await weapons.appendAsset(
                     idString,
-                    myMeless
+                    userMelees
                 );
 
                 // should be set or reset weapon
