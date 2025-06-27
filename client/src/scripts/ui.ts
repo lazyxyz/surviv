@@ -273,9 +273,9 @@ export async function setUpUI(game: Game): Promise<void> {
                   <h3>${key.price}</h3>
                 </div>
                 <div class="crates-supply">
-                  <button class="crates-add">+</button>
-                  <p class="crates-input">0</p>
                   <button class="crates-remove" disabled>-</button>
+                  <p class="crates-input">0</p>
+                  <button class="crates-add">+</button>
                 </div>
                 <button class="btn btn-alert btn-darken buy-now-btn">
                   Buy now
