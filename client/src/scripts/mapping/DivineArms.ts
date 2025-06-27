@@ -1,5 +1,5 @@
 export const assetsMapping = {
-  "address": "0xA8A8eDB140c44d0AB84b7c27212789A697edd157",
+  "address": "0xD769D0d9C1C70213D69734de1610F3a4c01034b8",
   "assets": [
     "falchion",
     "fire_hatchet",

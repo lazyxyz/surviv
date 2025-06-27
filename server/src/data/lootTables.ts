@@ -151,7 +151,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ],
         hazel_crate: [
             [{ item: "firework_launcher", weight: 1 }],
-            [{ item: "1st_birthday", weight: 1 }]
+            [{ item: "cookie", weight: 1 }]
         ],
         viking_chest: [
             [{ item: "seax", weight: 1 }],
@@ -273,7 +273,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "vepr12", weight: 0.2 }
             ],
             [{ item: "hatchet", weight: 1 }],
-            [{ item: "lumberjack", weight: 1 }],
+            [{ item: "woody", weight: 1 }],
             [{ item: "basic_helmet", weight: 1 }],
             [{ item: "basic_pack", weight: 1 }],
             [{ item: "12g", count: 15, weight: 1 }]
@@ -309,7 +309,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         birthday_cake: [
             { table: "special_guns", weight: 0.25 },
             { table: "special_equipment", weight: 0.25 },
-            { item: "1st_birthday", weight: 0.25 },
+            { item: "cookie", weight: 0.25 },
             { item: "firework_rocket", weight: 0.2 },
             { item: "firework_launcher", weight: 0.01 }
         ],
@@ -401,10 +401,8 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         },
         washing_machine: [
             { item: "lemon", weight: 1 },
-            { item: "flamingo", weight: 1 },
-            { item: "verified", weight: 0.5 },
-            { item: "no_kil_pls", weight: 0.5 },
-            { item: "basic_outfit", weight: 0.001 }
+            { item: "pizza", weight: 1 },
+            { item: "cookie", weight: 1 },
         ],
         toilet: {
             min: 2,
@@ -457,19 +455,19 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "gas_can", weight: 1 }
         ],
         hq_skin: [
-            { item: "gold_tie_event", weight: 1 }
+            { item: "bitcoin", weight: 1 }
         ],
         ship_skin: [
-            { item: "ship_carrier", weight: 1 }
+            { item: "captain", weight: 1 }
         ],
         armory_skin: [
-            { item: "nsd_uniform", weight: 1 }
+            { item: "martyrs", weight: 1 }
         ],
         plumpkin_bunker_skin: [
-            { item: "pumpkified", weight: 1 }
+            { item: "lion", weight: 1 }
         ],
         bombed_armory_skin: [
-            { item: "one_at_nsd", weight: 1 }
+            { item: "devil", weight: 1 }
         ],
         airdrop_crate: [
             [{ table: "airdrop_equipment", weight: 1 }],
@@ -574,7 +572,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ],
         ice_pick_case: [
             [{ item: "ice_pick", weight: 1 }],
-            [{ item: "frosty", weight: 1 }]
+            [{ item: "fettgans", weight: 1 }]
         ],
         confetti_grenade_box: {
             min: 1,
@@ -627,10 +625,12 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "radio", weight: 1 }
         ],
         sea_traffic_control_outside: [
-            { item: "peachy_breeze", weight: 1 }
+            { item: "radio", weight: 1 }
+            // { item: "peachy_breeze", weight: 1 }
         ],
         tugboat_red_floor: [
-            { item: "deep_sea", weight: 1 }
+            // { item: "deep_sea", weight: 1 }
+            { item: "radio", weight: 1 }
         ],
         potted_plant: [
             { table: "ammo", weight: 1 },
@@ -795,11 +795,10 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ],
         airdrop_skins: [
             { item: NullString, weight: 1 },
-            { item: "stardust", weight: 0.5 },
-            { item: "aurora", weight: 0.5 },
-            { item: "nebula", weight: 0.4 },
-            { item: "ghillie_suit", weight: 0.1 },
-            { item: "basic_outfit", weight: 0.001 }
+            { item: "hulk", weight: 0.5 },
+            { item: "jack", weight: 0.5 },
+            { item: "kid", weight: 0.4 },
+            { item: "no_face", weight: 0.1 }
         ],
         airdrop_melee: [
             { item: NullString, weight: 1 },
@@ -835,17 +834,15 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "g19", weight: 0.0005 }
         ],
         winter_skins: [
-            { item: "peppermint", weight: 1 },
-            { item: "spearmint", weight: 1 },
-            { item: "coal", weight: 1 },
-            { item: "candy_cane", weight: 1 },
-            { item: "henrys_little_helper", weight: 0.25 }
+            { item: "nerdy", weight: 1 },
+            { item: "lemon", weight: 1 },
+            { item: "hippo", weight: 1 },
+            { item: "giggle", weight: 1 },
         ],
         special_winter_skins: [
-            { item: "holiday_tree", weight: 1 },
-            { item: "gingerbread", weight: 1 },
-            { item: "henrys_little_helper", weight: 1 },
-            { item: "light_choco", weight: 1 }
+            { item: "sakura", weight: 1 },
+            { item: "baller", weight: 1 },
+            { item: "fettgans", weight: 1 }
         ],
         viking_chest_guns: [
             { item: "arx160", weight: 1 },
@@ -904,7 +901,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         diseased_plumpkin: [
             [{ item: PerkIds.PlumpkinGamble, weight: 1 }],
             [
-                { item: "diseased", weight: 0.1 },
+                { item: "skeleton", weight: 0.1 },
                 { item: NullString, weight: 0.9 }
             ]
         ],
@@ -989,7 +986,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "vks", weight: 0.25 }
             ],
             [
-                { item: "coal", weight: 1 },
+                { item: "crow", weight: 1 },
                 { item: NullString, weight: 1 }
             ]
         ]
@@ -1002,7 +999,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "guns", weight: 1 },
             { table: "equipment", weight: 0.6 },
             { table: "scopes", weight: 0.3 },
-            { item: "deer_season", weight: 0.2 }
+            // { item: "deer_season", weight: 0.2 }
         ],
         regular_crate: [
             { table: "guns", weight: 1.25 },
@@ -1011,7 +1008,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "ammo", weight: 0.5 },
             { table: "scopes", weight: 0.3 },
             { table: "throwables", weight: 0.3 },
-            { item: "deer_season", weight: 0.2 },
+            // { item: "deer_season", weight: 0.2 },
             { table: "melee", weight: 0.04 }
         ],
         airdrop_crate: [
@@ -1066,7 +1063,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "usas12", weight: 0.005 }
             ],
             [{ item: "hatchet", weight: 1 }],
-            [{ item: "lumberjack", weight: 1 }],
+            [{ item: "woody", weight: 1 }],
             [{ item: "regular_helmet", weight: 1 }],
             [{ item: "regular_pack", weight: 1 }],
             [{ item: "12g", count: 15, weight: 1 }]
@@ -1197,11 +1194,11 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ],
         airdrop_skins: [
             { item: NullString, weight: 1 },
-            { item: "diseased", weight: 0.2 },
-            { item: "sky", weight: 0.7 },
-            { item: "nebula", weight: 0.6 },
-            { item: "ghillie_suit", weight: 0.1 },
-            { item: "basic_outfit", weight: 0.001 }
+            { item: "pine", weight: 0.2 },
+            { item: "root", weight: 0.7 },
+            { item: "zone", weight: 0.6 },
+            { item: "woody", weight: 0.1 },
+            { item: "yuno", weight: 0.001 }
         ],
         airdrop_scopes: [
             { item: "8x_scope", weight: 1 },
@@ -1337,12 +1334,11 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
 
         airdrop_skins: [
             { item: NullString, weight: 1 },
-            { item: "sky", weight: 0.5 },
-            { item: "light_choco", weight: 0.7 },
-            { item: "coal", weight: 1 },
-            { item: "henrys_little_helper", weight: 1 },
-            { item: "ghillie_suit", weight: 0.1 },
-            { item: "basic_outfit", weight: 0.001 }
+            { item: "unknown", weight: 0.5 },
+            { item: "turle", weight: 0.7 },
+            { item: "teddy", weight: 1 },
+            { item: "tiger", weight: 0.1 },
+            { item: "smudge", weight: 0.001 }
         ]
     },
 
@@ -1353,7 +1349,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "guns", weight: 1 },
             { table: "equipment", weight: 0.6 },
             { table: "scopes", weight: 0.3 },
-            { item: "deer_season", weight: 0.2 }
+            // { item: "deer_season", weight: 0.2 }
         ],
         regular_crate: [
             { table: "guns", weight: 1.25 },
@@ -1362,7 +1358,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "ammo", weight: 0.5 },
             { table: "scopes", weight: 0.3 },
             { table: "throwables", weight: 0.3 },
-            { item: "deer_season", weight: 0.2 },
+            // { item: "deer_season", weight: 0.2 },
             { table: "melee", weight: 0.04 }
         ],
         airdrop_crate: [
@@ -1417,7 +1413,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "usas12", weight: 0.005 }
             ],
             [{ item: "hatchet", weight: 1 }],
-            [{ item: "lumberjack", weight: 1 }],
+            [{ item: "woody", weight: 1 }],
             [{ item: "regular_helmet", weight: 1 }],
             [{ item: "regular_pack", weight: 1 }],
             [{ item: "12g", count: 15, weight: 1 }]
@@ -1555,11 +1551,11 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ],
         airdrop_skins: [
             { item: NullString, weight: 1 },
-            { item: "diseased", weight: 0.2 },
-            { item: "sky", weight: 0.7 },
-            { item: "nebula", weight: 0.6 },
-            { item: "ghillie_suit", weight: 0.1 },
-            { item: "basic_outfit", weight: 0.001 }
+            { item: "smug", weight: 0.2 },
+            { item: "slime", weight: 0.7 },
+            { item: "skeleton", weight: 0.6 },
+            { item: "shishi", weight: 0.1 },
+            { item: "roll_safe", weight: 0.001 }
         ],
         airdrop_scopes: [
             { item: "8x_scope", weight: 1 },

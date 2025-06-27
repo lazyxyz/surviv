@@ -6409,7 +6409,7 @@ export const Buildings = ObjectDefinitions.withDefault<BuildingDefinition>()(
                     delay: 1000
                 },
                 lootSpawners: [
-                    { table: "plumpkin_bunker_skin", position: Vec.create(-49.23, -110.21) }
+                    // { table: "plumpkin_bunker_skin", position: Vec.create(-49.23, -110.21) }
                 ],
                 obstacles: [
                     // security office

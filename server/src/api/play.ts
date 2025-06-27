@@ -6,7 +6,9 @@ import { Game } from "../game";
 import { PlayerContainer } from "../objects/gamer";
 import { Logger } from "../utils/misc";
 import { forbidden, getIP } from "../utils/serverHelpers"
-import { validateJWT } from "@api/controllers/authController";
+import { validateJWT } from "./api";
+import { PacketStream } from "@common/packets/packetStream";
+import { ReadyPacket } from "@common/packets/readyPacket";
 
 const simultaneousConnections: Record<string, number> = {};
 
@@ -50,20 +52,6 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
             const searchParams = new URLSearchParams(req.getQuery());
             const token = searchParams.get('token');
 
-            if (!token) {
-                Logger.log(`Game ${game.id} | Missing JWT: ${ip}`);
-                forbidden(res);
-                return;
-            }
-
-            const decoded = validateJWT(token);
-
-            if (!decoded) {
-                Logger.log(`Game ${game.id} | Invalid JWT: ${ip}`);
-                forbidden(res);
-                return;
-            }
-
             //
             // Ensure IP is allowed
             //
@@ -85,7 +73,8 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                 {
                     teamID: searchParams.get("teamID") ?? undefined,
                     autoFill: Boolean(searchParams.get("autoFill")),
-                    address: decoded.walletAddress,
+                    address: "",
+                    token: token,
                     ip,
                     nameColor,
                     lobbyClearing: searchParams.get("lobbyClearing") === "true",
@@ -102,12 +91,26 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
          * Handle opening of the socket.
          * @param socket The socket being opened.
          */
-        open(socket: WebSocket<PlayerContainer>) {
+        async open(socket: WebSocket<PlayerContainer>) {
             const data = socket.getUserData();
+
+            if (!data.token) {
+                socket.close();
+                return;
+            }
+            const token = data.token;
+            const payload = await validateJWT(token);
+            console.log("payload: ", payload);
+
             if ((data.player = game.addPlayer(socket)) === undefined) {
                 socket.close();
             }
 
+            const stream = new PacketStream(new ArrayBuffer(128));
+            stream.serializeServerPacket(
+                ReadyPacket.create()
+            );
+            socket.send(stream.getBuffer(), true, false);
             // data.player.sendGameOverPacket(false); // uncomment to test game over screen
         },
 

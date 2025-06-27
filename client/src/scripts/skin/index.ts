@@ -5,6 +5,7 @@ import { freeSkin, Skins, type SkinDefinition } from "@common/definitions/skins"
 import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
 import { defaultClientCVars } from "../utils/console/defaultClientCVars";
+import { Assets } from "../account";
 
 // handler display change preview
 const updateSplashCustomize = (skinID: string): void => {
@@ -50,6 +51,11 @@ export async function visibleSkin(game: Game) {
     const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
+    let skins = await game.account.getBalances(Assets.SilverSkins).catch(err => {
+        console.log(`Get SilverSkins error: ${err}`);
+    });
+    console.log("skins: ", skins);
+
     const mySkins = await new Promise<string[]>(async(resolve, reject) => {
         try {
             const request: {
@@ -77,6 +83,7 @@ export async function visibleSkin(game: Game) {
             reject(error);
         }
     });
+    console.log("mySkins: ", mySkins);
 
     const SkinsIntance = Skins.definitions.filter(argument =>
         [...freeSkin, ...(mySkins || [])].some(

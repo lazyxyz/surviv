@@ -147,11 +147,6 @@ export function visibleConnectWallet(game: Game): void {
                 if (paragraphElement?.textContent?.includes(WalletType.METAMASK)) {
                     return window.open("https://metamask.io/download/", "_blank");
                 }
-
-                if (paragraphElement?.textContent?.includes(WalletType.SUBWALLET)) {
-                    return window.open("https://www.subwallet.app/download", "_blank");
-                }
-
                 if (paragraphElement?.textContent?.includes(WalletType.COINBASEWALLET)) {
                     return window.open(
                         "https://www.coinbase.com/wallet/downloads",
@@ -635,7 +630,9 @@ export async function setUpUI(game: Game): Promise<void> {
             if (lobbyClearing) params.set("lobbyClearing", "true");
 
             const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
-            if (weaponPreset) params.set("weaponPreset", weaponPreset);
+            // if (weaponPreset) params.set("weaponPreset", weaponPreset);
+            // FOR TESTING
+            if (weaponPreset) params.set("weaponPreset", "{\"gun\":\"ak47\",\"meless\":\"chainsaw\"}");
 
             const nameColor = game.console.getBuiltInCVar("dv_name_color");
             if (nameColor) {
@@ -646,6 +643,7 @@ export async function setUpUI(game: Game): Promise<void> {
                     console.error(e);
                 }
             }
+
             game.connect(`${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`);
             ui.splashMsg.hide();
 
@@ -694,7 +692,7 @@ export async function setUpUI(game: Game): Promise<void> {
         const target = selectedRegion;
 
         void $.get(
-            `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}&token=${game.account.token}`,
+            `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}`,
             (data: GetGameResponse) => {
                 return readyConnect(data, target.gameAddress);
             }
@@ -793,10 +791,7 @@ export async function setUpUI(game: Game): Promise<void> {
             }
         }
 
-        params.set("token", game.account.token);
-
         const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
-        console.log("teamURL: ", teamURL);
 
         teamSocket = new WebSocket(teamURL);
 

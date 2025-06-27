@@ -337,8 +337,8 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                                 start: initialRotation,
                                 end: initialRotation + (
                                     Math.sign(displacement.y) || (randomSign() * randomFloat(0, 0.3))
-                                //  ^^^^^^^^^ make casings spin clockwise or counterclockwise
-                                //            depending on which way they're flying
+                                    //  ^^^^^^^^^ make casings spin clockwise or counterclockwise
+                                    //            depending on which way they're flying
                                 ) * spinAmount
                             },
                             speed: Vec.rotate(
@@ -607,7 +607,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 text.anchor.set(0.5);
                 container.addChild(this.teammateName.text);
 
-                void (async() => {
+                void (async () => {
                     if (badge && name?.badge) {
                         // Load the badge texture from the idString (assuming it’s a URL)
                         const texture: Texture = await Assets.load({
@@ -1122,11 +1122,10 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
         const imagePresent = image !== undefined;
         if (imagePresent) {
-            let frame = `${reference.idString}${
-                weaponDef.itemType === ItemType.Gun || (image as NonNullable<MeleeDefinition["image"]>).separateWorldImage
+            let frame = `${reference.idString}${weaponDef.itemType === ItemType.Gun || (image as NonNullable<MeleeDefinition["image"]>).separateWorldImage
                     ? "_world"
                     : ""
-            }`;
+                }`;
 
             if (weaponDef.itemType === ItemType.Throwable && this.halloweenThrowableSkin && !weaponDef.noSkin) {
                 frame += "_halloween";
@@ -1222,12 +1221,15 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
         ) {
             if (type !== "vest") {
                 image.setFrame(`${def.idString}_world`).setVisible(true);
-
                 if (type === "helmet") {
+                    image.alpha = 0.7;
                     image.setPos(
-                        this.downed ? 10 : -8,
+                        this.downed ? 10 : -15,
                         0
                     );
+                } else {
+                    // backpack
+                    image.alpha = 0.5;
                 }
             } else {
                 let color: number | undefined;

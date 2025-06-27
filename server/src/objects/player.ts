@@ -51,7 +51,7 @@ import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
 import { weaponPresentType } from "@common/typings";
-import {saveRanks} from "@api/controllers/rewardController";
+import { saveRewards } from "../api/api";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -426,12 +426,12 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this.hasColor = userData.nameColor !== undefined;
 
         this.loadout = {
-            skin: Loots.fromString("hazel_jumpsuit"),
+            skin: Loots.fromString("unknown"),
             emotes: [
                 Emotes.fromStringSafe("happy_face"),
                 Emotes.fromStringSafe("thumbs_up"),
-                Emotes.fromStringSafe("suroi_logo"),
-                Emotes.fromStringSafe("sad_face"),
+                undefined,
+                undefined,
                 undefined,
                 undefined
             ]
@@ -2292,9 +2292,12 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     sendGameOverPacket(won = false): void {
         const rank = won ? 1 as const : this.game.aliveCount + 1;
-        saveRanks(this.address, rank, this.game.teamMode, this.game.id).catch(err => {
-            console.log(`Save rank failed: ${err}`);
-        });
+
+        if (this.address) {
+            saveRewards(this.address, rank, this.game.teamMode, this.game.id).catch(err => {
+                console.log(`Save rewards failed: ${err}`);
+            });
+        }
 
         const packet = GameOverPacket.create({
             won,

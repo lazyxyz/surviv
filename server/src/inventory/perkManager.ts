@@ -124,7 +124,7 @@ export class ServerPerkManager extends PerkManager {
             // some perks need to perform cleanup on removal
             switch (idString) {
                 case PerkIds.Lycanthropy: {
-                    owner.loadout.skin = Skins.fromStringSafe(this._selfData["Lycanthropy::old_skin"] as string) ?? Skins.fromString("hazel_jumpsuit");
+                    owner.loadout.skin = Skins.fromStringSafe(this._selfData["Lycanthropy::old_skin"] as string) ?? Skins.fromString("unknown");
                     owner.inventory.unlockAllSlots();
                     owner.setDirty();
                     break;
