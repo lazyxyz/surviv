@@ -27,6 +27,8 @@ import type { TranslationKeys } from "../typings/translations";
 // import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { getBadgeImage } from "./badges";
+import { PaymentTokens, SaleItems, SurvivAssets } from "./account";
+import { ethers, formatEther } from "ethers";
 /*
     eslint-disable
 
@@ -235,12 +237,24 @@ export async function setUpUI(game: Game): Promise<void> {
         const tabCrates = document.querySelectorAll<HTMLElement>(".crates-customize-child");
         // const cardCrates = document.querySelector("#buy-customize-items");
 
+        const userKeyBalances = await game.account.getBalances(SurvivAssets.SurvivKeys).catch(err => {
+            console.log(`Failed to read keys balances: ${err}`);
+        });
+        const keyPrice = await game.account.queryPrice(SaleItems.Keys, PaymentTokens.NativeToken).catch(err => {
+            console.log(`Failed to query key price: ${err}`);
+        });
+
+        let keyBalances = 0;
+        if (userKeyBalances && userKeyBalances.keys) {
+            keyBalances = userKeyBalances.keys;
+        }
+
         const crateLists = [
             {
-                balance: 0,
-                name: "Immortal key",
+                balance: keyBalances,
+                name: "Surviv Keys",
                 image: `public/img/misc/Keys.png `,
-                price: "$19"
+                price: `${formatEther(keyPrice)} STT`
             }
         ];
         crateLists.forEach((key) => {
@@ -257,7 +271,7 @@ export async function setUpUI(game: Game): Promise<void> {
                   <p class="crates-input">0</p>
                   <button class="crates-remove" disabled>-</button>
                 </div>
-                <button class="btn btn-alert btn-darken" id="buy-now-btn" disabled>
+                <button class="btn btn-alert btn-darken" id="buy-now-btn">
                   Buy now
                 </button>
               </div>
@@ -293,48 +307,47 @@ export async function setUpUI(game: Game): Promise<void> {
         const addBtn = document.querySelectorAll(".crates-add");
         const removeBtn = document.querySelectorAll(".crates-remove");
 
-        let totalSupply = 0;
+        let buyAmount = 0;
         for (let i = 0; i < mySupply.length; i++) {
             const buyNow = document.getElementById("#buy-now-btn");
             addBtn[i].addEventListener("click", () => {
-                totalSupply++;
-                console.log(totalSupply);
-                mySupply[i].textContent = Number(totalSupply);
+                buyAmount++;
+                console.log(buyAmount);
+                mySupply[i].textContent = Number(buyAmount);
                 removeBtn[i].disabled = false;
                 removeBtn[i].classList.add("active");
-                buyNow.disable = false;
+                // buyNow.disable = false;
                 buyNow.classList.add("active");
             });
 
             removeBtn[i].addEventListener("click", () => {
-                totalSupply--;
-                console.log(totalSupply);
-                mySupply[i].textContent = Number(totalSupply);
+                buyAmount--;
+                console.log(buyAmount);
+                mySupply[i].textContent = Number(buyAmount);
                 if (mySupply[i].textContent == 0) {
                     removeBtn[i].disabled = true;
                     removeBtn[i].classList.remove("active");
-                    buyNow.disable = true;
+                    // buyNow.disable = true;
                     buyNow.classList.remove("active");
                 }
             });
         };
+
+        $("#buy-now-btn").on("click", async () => {
+            await game.account.buyItems(SaleItems.Keys, buyAmount, PaymentTokens.NativeToken);
+        })
     }
 
     // My crates
     {
-        const myCrate = [
-            {
-                image: `public/img/misc/Immotal_crate.png`
-            },
-            {
-                image: `public/img/misc/Immotal_crate.png`
-            },
-            {
-                image: `public/img/misc/Immotal_crate.png`
-            }
-        ];
+        let userCrates = await game.account.getBalances(SurvivAssets.SurvivCrates);
+        let crateImages = [];
+        if (userCrates && userCrates.crates) {
+            const crateImage = { image: `public/img/misc/crate.png` };
+            crateImages = new Array(Number(userCrates.crates)).fill(crateImage);
+        }
 
-        myCrate.forEach((key) => {
+        crateImages.forEach((key) => {
             $(".my-crates-customize").append(
                 `
                 <div class="my-crates-child">
@@ -343,6 +356,14 @@ export async function setUpUI(game: Game): Promise<void> {
                 `
             );
         });
+
+        const amount = 1;
+        $('.open-now').on("click", async () => {
+            await game.account.requestOpenCrates(amount);
+        })
+        $('.claim-items').on("click", async () => {
+            await game.account.claimItems();
+        })
     }
 
     // Claim rewards
@@ -376,6 +397,7 @@ export async function setUpUI(game: Game): Promise<void> {
                 <div class="reward-child">
                   <img src="${key.image}" alt="Crates">
                   <h3>${key.time}</h3>
+                  <button class="btn btn-purple btn-darken" id="claim-btn">Claim</button>
                 </div>
                 `
             );
