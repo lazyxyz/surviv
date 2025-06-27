@@ -53,7 +53,7 @@ import { Camera } from "./rendering/camera";
 import { Gas, GasRender } from "./rendering/gas";
 import { Minimap } from "./rendering/minimap";
 
-import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime, visibleConnectWallet, visibleWallet } from "./ui";
+import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime, visibleInventory } from "./ui";
 import { setUpCommands } from "./utils/console/commands";
 import { defaultClientCVars } from "./utils/console/defaultClientCVars";
 import { GameConsole } from "./utils/console/gameConsole";
@@ -62,10 +62,8 @@ import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 import { EIP6963 } from "./eip6963";
 import { Account } from "./account";
-import { visibleSkin } from "./skin";
-import { visibleMeless } from "./weapons/weapons_meless";
-import { visibleBadges } from "./badges";
 import { ReadyPacket } from "@common/packets/readyPacket";
+import { visibleConnectWallet, visibleWallet } from "./wallet";
 
 /* eslint-disable @stylistic/indent */
 
@@ -251,15 +249,12 @@ export class Game {
 
         void Promise.all([
             initPixi(),
-            setUpUI(game),
-            visibleSkin(game),
-            visibleMeless(game),
-            visibleBadges(game)
+            visibleWallet(game),
+            visibleConnectWallet(game),
         ]).then(() => {
+            visibleInventory(game);
             unlockPlayButtons();
             resetPlayButtons();
-            visibleConnectWallet(game);
-            visibleWallet(game);
         });
 
         setUpCommands(game);

@@ -26,9 +26,10 @@ import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
 // import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
-import { getBadgeImage } from "./badges";
-import { PaymentTokens, SaleItems, SurvivAssets } from "./account";
-import { ethers, formatEther } from "ethers";
+import { getBadgeImage, visibleBadges } from "./badges";
+import {loadInventory} from "./inventory";
+import { visibleSkin } from "./skin";
+import { visibleMeless } from "./weapons/weapons_meless";
 /*
     eslint-disable
 
@@ -77,355 +78,27 @@ export function resetPlayButtons(): void {
     $("#btn-cancel-finding-game").css("display", "none");
 }
 
-// export function buyCrates(): void {
-// }
+export async function visibleInventory(game: Game) {
+    await setUpUI(game);
+    $("#btn-customize").on('click', async () => {
+        await loadInventory(game);
+    })
 
-export function visibleConnectWallet(game: Game): void {
-    // handler what conditions to open modal?
-    // if (!localStorage.getItem(SELECTOR_WALLET)?.length) {
-    //     $(".connect-wallet-portal").css("display", "block");
-    // }
-    // check inactive state
-    // $("#btn-play-solo").attr("disabled", "true").css("opacity", "0.5");
-    // $("#btn-play-squad").attr("disabled", "true").css("opacity", "0.5");
-    // $("#btn-join-team").attr("disabled", "true").css("opacity", "0.5");
-    // $("#btn-create-team").attr("disabled", "true").css("opacity", "0.5");
-
-    $("#connect-wallet-btn").on("click", () => {
-        $(".connect-wallet-portal").css("display", "block");
-    });
-
-    // Close connect wallet modal
-    $("#close-connect-wallet").on("click", () => {
-        $(".connect-wallet-portal").css("display", "none");
-    });
-
-    // handler click to login...
-    for (const elements of $(".connect-wallet-item")) {
-        const paragraphElement = elements.children[1];
-        const logoElement = elements.children[0];
-
-        const isExisted = game.eip6963.providers?.find(
-            argument => argument?.info?.name === paragraphElement?.textContent
-        );
-
-        if (isExisted) {
-            elements.onclick = async () => {
-                try {
-                    // hidden to show loading ICON
-                    $(logoElement).css("display", "none");
-
-                    // append loading ICON
-                    {
-                        const newNode = document.createElement("div");
-
-                        newNode.className = "loading-icon";
-                        newNode.style.width = "36px";
-                        newNode.style.height = "36px";
-                        newNode.style.display = "flex";
-                        newNode.style.alignItems = "center";
-                        newNode.style.justifyContent = "center";
-                        newNode.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
-
-                        logoElement.after(newNode);
-                    }
-
-                    return await game.account.connect(isExisted, game);
-                } catch (error) {
-                    console.log(error);
-                } finally {
-                    $(".loading-icon").css("display", "none");
-                    $(logoElement).css("display", "block");
-                }
-            };
-        }
-
-        if (!isExisted) {
-            $(paragraphElement).css({ color: "#93C5FD" });
-
-            paragraphElement.insertAdjacentText("afterbegin", "Install ");
-
-            elements.onclick = () => {
-                if (paragraphElement?.textContent?.includes(WalletType.METAMASK)) {
-                    return window.open("https://metamask.io/download/", "_blank");
-                }
-                if (paragraphElement?.textContent?.includes(WalletType.COINBASEWALLET)) {
-                    return window.open(
-                        "https://www.coinbase.com/wallet/downloads",
-                        "_blank"
-                    );
-                }
-
-                if (paragraphElement?.textContent?.includes(WalletType.TRUSTWALLET)) {
-                    return window.open("https://trustwallet.com/download", "_blank");
-                }
-            };
-        }
-    }
-};
-
-export function visibleWallet(game: Game): void {
-    if (game?.eip6963.provider?.provider && game.account.address?.length) {
-        // handler first time you need visible container
-        {
-            $(".account-wallet-container").css("display", "block");
-        }
-
-        // handler placeholder for button
-        {
-            $(".account-wallet-placeholder").append(shorten(game.account.address));
-        }
-    }
-
-    // handler append children to fieldSet
-    {
-        const ListFieldSet = [
-            {
-                key: "address",
-                fieldName: "Copy Address",
-                icon: "./img/line/copy.svg",
-                onClick: () => {
-                    // https://dev.to/0shuvo0/copy-text-to-clipboard-in-jstwo-ways-1pn1
-                    if (navigator.clipboard) {
-                        return navigator.clipboard.writeText(String(game.account.address));
-                    }
-
-                    const textArea = document.createElement("textarea");
-                    textArea.value = String(game.account.address);
-
-                    document.body.appendChild(textArea);
-
-                    textArea.focus();
-                    textArea.select();
-
-                    // eslint-disable-next-line @typescript-eslint/no-deprecated
-                    document.execCommand("copy");
-                    document.body.removeChild(textArea);
-                }
-            },
-            {
-                key: "disconnect",
-                fieldName: "Disconnect",
-                icon: "./img/line/log-out.svg",
-                onClick: () => game.account.disconnect()
-            }
-        ];
-
-        for (const fields of ListFieldSet) {
-            $("#account-wallet-fieldset").append(`
-                <a id="account-wallet-btn-${fields.key}">
-                    <img width="20px" height="20px" src=${fields.icon} />
-                    ${fields.fieldName}
-                </a>
-            `);
-
-            $(`#account-wallet-btn-${fields.key}`).on("click", () => {
-                fields.onClick();
-            });
-        }
-    }
-
-    createDropdown(".account-wallet-container");
+    $('#tab-skins').on('click',() => {
+        visibleSkin(game);
+    })
+    
+    $('#tab-weapons').on('click',() => {
+        visibleMeless(game);
+    })
+    
+    $('#tab-badges').on('click',() => {
+        visibleBadges(game);
+    })
 }
 
 export async function setUpUI(game: Game): Promise<void> {
     const { inputManager, uiManager: { ui } } = game;
-
-    // Buy Keys
-    {
-        const tabButton = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
-        const tabCrates = document.querySelectorAll<HTMLElement>(".crates-customize-child");
-        // const cardCrates = document.querySelector("#buy-customize-items");
-
-        const userKeyBalances = await game.account.getBalances(SurvivAssets.SurvivKeys).catch(err => {
-            console.log(`Failed to read keys balances: ${err}`);
-        });
-
-        let keyPrice = 0;
-        {
-            const price = await game.account.queryPrice(SaleItems.Keys, PaymentTokens.NativeToken).catch(err => {
-                console.log(`Failed to query key price: ${err}`);
-            });
-            if (price) keyPrice = price;
-        }
-
-
-        let keyBalances = 0;
-        if (userKeyBalances && userKeyBalances.keys) {
-            keyBalances = userKeyBalances.keys;
-        }
-
-        const crateLists = [
-            {
-                balance: keyBalances,
-                name: "Surviv Keys",
-                image: `public/img/misc/Keys.png `,
-                price: `${formatEther(keyPrice)} STT`
-            }
-        ];
-        crateLists.forEach((key) => {
-            $("#buy-customize-items").append(`
-            <div class="crates-card">
-            <p>You have ${key.balance} keys<p>
-                <img src="${key.image}" class="crates-image"></img>
-                <div class="crates-information">
-                  <p>${key.name}</p>
-                  <h3>${key.price}</h3>
-                </div>
-                <div class="crates-supply">
-                  <button class="crates-remove" disabled>-</button>
-                  <p class="crates-input">0</p>
-                  <button class="crates-add">+</button>
-                </div>
-                <button class="btn btn-alert btn-darken buy-now-btn">
-                  Buy now
-                </button>
-              </div>
-            `);
-        });
-
-        tabButton.forEach((button) => {
-            button.addEventListener("click", () => {
-                const tabButtonId = button.getAttribute("data-tab");
-                if (!tabButtonId) return;
-
-                // Remove active button
-                tabButton.forEach((button) => {
-                    button.classList.remove("active");
-                });
-
-                // Hide all tab contents
-                tabCrates.forEach((content) => {
-                    content.style.display = "none";
-                });
-
-                // Show the selected tab
-                const targetTab = document.getElementById(tabButtonId);
-                if (targetTab) {
-                    targetTab.style.display = "flex";
-                    button.classList.add("active");
-                };
-            });
-        });
-
-        // Add supply
-        const mySupply = document.querySelectorAll(".crates-input");
-        const addBtn = document.querySelectorAll(".crates-add");
-        const removeBtn = document.querySelectorAll(".crates-remove");
-        const buyNow = document.querySelectorAll(".buy-now-btn");
-
-        let buyAmount = 0;
-        for (let i = 0; i < mySupply.length; i++) {
-            if (mySupply[i].textContent == 0) {
-                buyNow[i].disabled = true;
-            }
-
-            addBtn[i].addEventListener("click", () => {
-                buyAmount++;
-                console.log(buyAmount);
-                mySupply[i].textContent = Number(buyAmount);
-                removeBtn[i].disabled = false;
-                removeBtn[i].classList.add("active");
-                buyNow[i].disabled = false;
-                buyNow[i].classList.add("active");
-            });
-
-            removeBtn[i].addEventListener("click", () => {
-                buyAmount--;
-                console.log(buyAmount);
-                mySupply[i].textContent = Number(buyAmount);
-                if (mySupply[i].textContent == 0) {
-                    removeBtn[i].disabled = true;
-                    removeBtn[i].classList.remove("active");
-                    buyNow[i].disabled = true;
-                    buyNow[i].classList.remove("active");
-                }
-            });
-        };
-
-
-        $(".buy-now-btn").on("click", async () => {
-            await game.account.buyItems(SaleItems.Keys, buyAmount, PaymentTokens.NativeToken);
-        })
-    }
-
-    // My crates
-    {
-        let userCrates = await game.account.getBalances(SurvivAssets.SurvivCrates).catch(err => {
-            console.log(`Failed to get user crate balance: ${err}`);
-        });
-        let crateImages = [];
-        if (userCrates && userCrates.crates) {
-            const crateImage = { image: `public/img/misc/crate.png` };
-            crateImages = new Array(Number(userCrates.crates)).fill(crateImage);
-            $("#total-crates").text(`You have ${userCrates.crates} crates`);
-        }
-
-        crateImages.forEach((key) => {
-            $(".my-crates-customize").append(
-                `
-                <div class="my-crates-child">
-                  <img src="${key.image}" alt="">
-                </div>
-                `
-            );
-        });
-
-        const amount = 1;
-        $('.open-now').on("click", async () => {
-            await game.account.requestOpenCrates(amount);
-        })
-        $('.claim-items').on("click", async () => {
-            await game.account.claimItems();
-        })
-    }
-
-    // Claim rewards
-    {
-        let userRewards = await game.account.getValidRewards().catch(err => {
-            console.log(`Failed to get valid rewards: ${err}`);
-        });
-
-        const now = Math.floor(Date.now() / 1000); // current time in seconds
-        let rewardLists: any[] = [];
-
-        if (userRewards && userRewards.validCrates) {
-            rewardLists = userRewards.validCrates.map(item => {
-                const secondsLeft = item.expiry - now;
-                const daysLeft = Math.max(Math.floor(secondsLeft / (60 * 60 * 24)), 0); // no negative days
-
-                return {
-                    image: "public/img/misc/crate.png",
-                    time: `Expired in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`
-                };
-            });
-
-        }
-        $("#total-reward").text(`You have ${rewardLists.length} crates to claim`);
-
-        rewardLists.forEach((key) => {
-            $(".rewards-grid-group").append(
-                `
-                <div class="reward-child">
-                  <img src="${key.image}" alt="Crates">
-                  <h3>${key.time}</h3>
-                </div>
-                `
-            );
-        });
-
-        if (rewardLists.length === 0) {
-            $("#claim-btn")
-                .attr("disabled", "true")
-                .css("opacity", "0.35");
-        }
-
-        $(".claim-all-btn").on('click', async () => {
-            await game.account.claimRewards().catch(err => {
-                console.log(`Failed claim rewards: ${err}`);
-            });
-        })
-    }
 
     // Change the menu based on the mode.
     if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/suroi_beta_${MODE.idString}.svg`);
