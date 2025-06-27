@@ -453,9 +453,7 @@ export async function setUpUI(game: Game): Promise<void> {
             if (lobbyClearing) params.set("lobbyClearing", "true");
 
             const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
-            // if (weaponPreset) params.set("weaponPreset", weaponPreset);
-            // FOR TESTING
-            if (weaponPreset) params.set("weaponPreset", "{\"gun\":\"ak47\",\"meless\":\"chainsaw\"}");
+            if (weaponPreset) params.set("weaponPreset", weaponPreset);
 
             const nameColor = game.console.getBuiltInCVar("dv_name_color");
             if (nameColor) {
