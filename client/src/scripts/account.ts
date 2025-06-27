@@ -20,7 +20,8 @@ import {
     DivineArmsMapping,
     DivineGunsMapping,
     SurvivMemesMapping,
-    SurvivCratesMapping
+    SurvivCratesMapping,
+    SurvivKeysMapping
 } from "./mapping";
 import { abi as survivRewardsABI } from "./abi/ISurvivRewards.json";
 import { abi as crateBaseABI } from "./abi/ICrateBase.json";
@@ -32,11 +33,9 @@ const selectedRegion = regionInfo[Config.defaultRegion];
 
 // Surviv Utility
 const SURVIV_REWARD_ADDRESS = "0xb615B4ca12f58EdebA10B68Ee890f0ddd7B7e49A";
-const SURVIV_CRATES_ADDRESS = "0xD81591D94ADA5fD3c92Ed9001Fa8E541aF417df3";
 const SURVIV_BASE_ADDRESS = "0x816DBf52724c28E415e0715B216684b152Ae25C5";
 const SURVIV_SHOP_ADDRESS = "0x885141802335319dD0536a7928a6f304ECCd4Aa0";
 const SURVIV_CARD_ADDRESS = "0x5a00e80001151CA66a91cD91124Da2051a088157";
-
 const NATIVE_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export enum SurvivAssets {
@@ -49,12 +48,14 @@ export enum SurvivAssets {
     DivineGuns,
     SurvivMemes,
     SurvivCrates,
+    SurvivKeys,
 }
 
-export enum SaleItems {
-    Crates = SURVIV_CRATES_ADDRESS,
-    Cards = SURVIV_CARD_ADDRESS,
-}
+export const SaleItems = {
+    Crates: SurvivCratesMapping.address,
+    Cards: SURVIV_CARD_ADDRESS,
+    Keys: SurvivKeysMapping.address
+} as const;
 
 export enum PaymentTokens {
     NativeToken = NATIVE_TOKEN_ADDRESS,
@@ -227,8 +228,6 @@ export class Account extends EIP6963 {
             $("#wallet-inactive").css("display", "none");
             resetPlayButtons();
         }
-
-        // await this.buyItems(SaleItems.Crates, 1, PaymentTokens.NativeToken);
     }
 
     async eventListener(): Promise<void> {
@@ -280,6 +279,7 @@ export class Account extends EIP6963 {
             [SurvivAssets.DivineGuns]: DivineGunsMapping,
             [SurvivAssets.SurvivMemes]: SurvivMemesMapping,
             [SurvivAssets.SurvivCrates]: SurvivCratesMapping,
+            [SurvivAssets.SurvivKeys]: SurvivKeysMapping,
         };
 
         const selectedMapping = assetMappings[assetType];
@@ -520,7 +520,7 @@ export class Account extends EIP6963 {
             const signer = await ethersProvider.getSigner();
 
             const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
-            const cratesContract = new ethers.Contract(SURVIV_CRATES_ADDRESS, erc1155ABI, signer);
+            const cratesContract = new ethers.Contract(SurvivCratesMapping.address, erc1155ABI, signer);
 
 
             const balance = await cratesContract.balanceOf(signer.address, 0);
@@ -597,7 +597,7 @@ export class Account extends EIP6963 {
      * @returns A promise resolving to the API response.
      * @throws Error if the API request fails, authentication is invalid, or payment fails.
      */
-    async buyItems(item: SaleItems, amount: number, paymentToken: PaymentTokens): Promise<any> {
+    async buyItems(item: (typeof SaleItems)[keyof typeof SaleItems], amount: number, paymentToken: PaymentTokens): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
@@ -613,7 +613,7 @@ export class Account extends EIP6963 {
 
             const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
             const price = await survivShopContract.getPrice(paymentToken, item);
-            const totalCost = price * amount;
+            const totalCost = price * BigInt(amount);
             console.log("totalCost: ", totalCost);
 
             if (paymentToken == PaymentTokens.NativeToken) {
@@ -630,8 +630,31 @@ export class Account extends EIP6963 {
 
         } catch (error: any) {
             clearTimeout(timeoutId);
-            console.error('Claim rewards failed:', error);
             throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
+        }
+    }
+
+    async queryPrice(item: (typeof SaleItems)[keyof typeof SaleItems], paymentToken: PaymentTokens): Promise<any> {
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+
+            const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
+            const price = await survivShopContract.getPrice(paymentToken, item);
+            clearTimeout(timeoutId);
+            return price;
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
         }
     }
 }
