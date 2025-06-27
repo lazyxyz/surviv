@@ -397,7 +397,6 @@ export async function setUpUI(game: Game): Promise<void> {
                 <div class="reward-child">
                   <img src="${key.image}" alt="Crates">
                   <h3>${key.time}</h3>
-                  <button class="btn btn-purple btn-darken" id="claim-btn">Claim</button>
                 </div>
                 `
             );
