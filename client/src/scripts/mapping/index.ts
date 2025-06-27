@@ -7,3 +7,4 @@ export { assetsMapping as DivineArmsMapping } from "./DivineArms";
 export { assetsMapping as DivineGunsMapping } from "./DivineGuns";
 export { assetsMapping as SurvivMemesMapping } from "./SurvivMemes";
 export { assetsMapping as SurvivCratesMapping } from "./SurvivCrates";
+export { assetsMapping as SurvivKeysMapping } from "./SurvivKeys";
