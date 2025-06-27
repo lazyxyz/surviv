@@ -5,7 +5,7 @@ import { freeSkin, Skins, type SkinDefinition } from "@common/definitions/skins"
 import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
 import { defaultClientCVars } from "../utils/console/defaultClientCVars";
-import { Assets } from "../account";
+import { SurvivAssets } from "../account";
 
 // handler display change preview
 const updateSplashCustomize = (skinID: string): void => {
@@ -51,19 +51,17 @@ export async function visibleSkin(game: Game) {
     const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
-    let SilverSkins = await game.account.getBalances(Assets.SilverSkins).catch(err => {
+    let SilverSkins = await game.account.getBalances(SurvivAssets.SilverSkins).catch(err => {
         console.log(`Get SilverSkins error: ${err}`);
     });
-    let GoldSkins = await game.account.getBalances(Assets.GoldSkins).catch(err => {
+    let GoldSkins = await game.account.getBalances(SurvivAssets.GoldSkins).catch(err => {
         console.log(`Get SilverSkins error: ${err}`);
     });
-    let DivineSkins = await game.account.getBalances(Assets.DivineSkins).catch(err => {
+    let DivineSkins = await game.account.getBalances(SurvivAssets.DivineSkins).catch(err => {
         console.log(`Get SilverSkins error: ${err}`);
     });
     const UserSkins = {...SilverSkins, ...GoldSkins, ...DivineSkins};
     const mySkins = Object.entries(UserSkins).map(([key, _]) => key);
-
-    console.log("mySkins: ", mySkins);
 
     const SkinsIntance = Skins.definitions.filter(argument =>
         [...freeSkin, ...(mySkins || [])].some(

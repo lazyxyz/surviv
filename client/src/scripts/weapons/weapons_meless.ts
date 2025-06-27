@@ -4,7 +4,7 @@ import type { Game } from "../game";
 import type { weaponPresentType } from "@common/typings";
 import weapons from ".";
 import { ObjectDefinitions, type ObjectDefinition } from "@common/utils/objectDefinitions";
-import { Assets } from "../account";
+import { SurvivAssets } from "../account";
 
 const selectMeless = (game: Game, weapon: string) => {
     // store weapon
@@ -67,19 +67,17 @@ export async function visibleMeless(game: Game) {
     weapons.resetAll();
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
-    let SilverArms = await game.account.getBalances(Assets.SilverArms).catch(err => {
+    let SilverArms = await game.account.getBalances(SurvivAssets.SilverArms).catch(err => {
         console.log(`Get SilverArms error: ${err}`);
     });
-    let GoldArms = await game.account.getBalances(Assets.GoldArms).catch(err => {
+    let GoldArms = await game.account.getBalances(SurvivAssets.GoldArms).catch(err => {
         console.log(`Get GoldArms error: ${err}`);
     });
-    let DivineArms = await game.account.getBalances(Assets.DivineArms).catch(err => {
+    let DivineArms = await game.account.getBalances(SurvivAssets.DivineArms).catch(err => {
         console.log(`Get DivineArms error: ${err}`);
     });
     const userArmsBalance = { ...SilverArms, ...GoldArms, ...DivineArms };
     const userArms = Object.entries(userArmsBalance).map(([key, _]) => key);
-    ; 
-    console.log("userArms: ", userArms);
 
     const userMelees=  Melees.definitions.filter(argument =>
             [...freeMeless, ...(userArms || [])].some(

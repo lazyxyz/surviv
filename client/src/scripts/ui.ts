@@ -27,6 +27,7 @@ import type { TranslationKeys } from "../typings/translations";
 // import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { getBadgeImage } from "./badges";
+import { SurvivAssets } from "./account";
 /*
     eslint-disable
 
@@ -322,19 +323,14 @@ export async function setUpUI(game: Game): Promise<void> {
 
     // My crates
     {
-        const myCrate = [
-            {
-                image: `public/img/misc/Immotal_crate.png`
-            },
-            {
-                image: `public/img/misc/Immotal_crate.png`
-            },
-            {
-                image: `public/img/misc/Immotal_crate.png`
-            }
-        ];
+        let userCrates = await game.account.getBalances(SurvivAssets.SurvivCrates);
+        let crateImages = [];
+        if(userCrates && userCrates.crates) {
+            const crateImage = {image: `public/img/misc/crate.png`};
+            crateImages = new Array(Number(userCrates.crates)).fill(crateImage);
+        }
 
-        myCrate.forEach((key) => {
+        crateImages.forEach((key) => {
             $(".my-crates-customize").append(
                 `
                 <div class="my-crates-child">
@@ -343,6 +339,14 @@ export async function setUpUI(game: Game): Promise<void> {
                 `
             );
         });
+
+        const amount = 1;
+        $('.open-now').on("click" , async () => {
+            await game.account.requestOpenCrates(amount);
+        })
+        $('.claim-items').on("click" , async () => {
+            await game.account.claimItems();
+        })
     }
 
     // Claim rewards
