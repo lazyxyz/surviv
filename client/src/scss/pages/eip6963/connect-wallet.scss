@@ -5,9 +5,11 @@
   transform: rotate(180deg);
   pointer-events: none;
 
-  background: radial-gradient(50% 100% at 50% 100%,
-      rgba(149, 201, 62, 0.45) 0%,
-      rgba(149, 201, 62, 0) 100%);
+  background: radial-gradient(
+    50% 100% at 50% 100%,
+    rgba(149, 201, 62, 0.45) 0%,
+    rgba(149, 201, 62, 0) 100%
+  );
 }
 
 .connect-wallet-container {
@@ -17,6 +19,14 @@
   justify-content: center;
   align-items: center;
   z-index: 1000;
+}
+// close modal connect wallet
+#close-connect-wallet {
+  position: absolute;
+  right: 20px;
+  color: #c5da38;
+  scale: 1.2;
+  cursor: pointer;
 }
 
 .connect-wallet-body {

@@ -134,7 +134,7 @@
           <img src="./img/earn/thumbnail.png" width="100%" />
 
           <a href="./earn/">
-            <button id="splash-earn-btn" class="btn btn-alert">Learn more</button>
+            <button id="splash-earn-btn" class="btn btn-alert btn-darken">Learn more</button>
           </a>
         </div>
       </div>
@@ -229,7 +229,8 @@
         <div style="display: flex; flex-direction: row; gap: 15px">
           <button class="btn btn-lg btn-darken btn-primary" id="btn-customize">
             <i class="fa-solid fa-shirt"></i>
-            <span translation="loadout"></span>
+            <!-- change loadout > inventory -->
+            <span translation="Inventory"></span>
           </button>
           <button class="btn btn-lg btn-darken btn-secondary" id="btn-settings">
             <i class="fa-solid fa-gear"></i>
@@ -273,8 +274,14 @@
         </button>
         <div id="languages-selector" class="dropdown-content persistent-scrollbar"></div>
       </div>
+      <!-- Connect wallet button -->
+      <div id="wallet-inactive" class="account-wallet-container dropdown" style="display: block;">
+        <button id="connect-wallet-btn" class="btn btn-darken btn-primary account-wallet-button">
+          <p class="account-wallet-placeholder">Connect Wallet</p>
+        </button>
+      </div>
 
-      <div class="account-wallet-container dropdown" style="display: none;">
+      <div id="wallet-active" class="account-wallet-container dropdown" style="display: none;">
         <button class="btn btn-darken btn-primary account-wallet-button">
           <p class="account-wallet-placeholder"></p>
           <i class="fa-solid fa-caret-down"></i>
@@ -884,12 +891,17 @@
   </div>
   <div class="modal dialog persistent-scrollbar" id="customize-menu" style="display: none">
     <div class="dialog-header">
-      <h3 translation="loadout"></h3>
+      <!-- change loadout > inventory -->
+      <h3 translation="Inventory"></h3>
       <span class="dialog-close-btn fa-solid fa-xmark" id="close-customize"></span>
     </div>
     <div id="customize-tabs-container">
       <div class="tab-bar" id="customize-tab-bar">
-        <button class="tab active" id="tab-skins">
+        <!-- Add crate menu -->
+        <button class="tab active" id="tab-crates">
+          <img src="./img/misc/crates_icon.svg" /><span translation="loadout_crates"></span>
+        </button>
+        <button class="tab" id="tab-skins">
           <i class="fa-solid fa-shirt"></i><span translation="loadout_skins"></span>
         </button>
         <button class="tab" id="tab-emotes">
@@ -904,7 +916,7 @@
         <button class="tab" id="tab-weapons" style="display: none">
           <i class="fa-solid fa-gun"></i><span>Weapons</span>
         </button>
-        <a target="_blank" href="">
+        <a class="market-link" href="#">
           <div style="color: white;padding: 10px;width: 140px;">
             <i class="fa-solid fa-cart-shopping" style="margin-right: 10px;"></i><span>Store</span>
           </div>
@@ -914,7 +926,39 @@
         </button>
       </div>
       <div id="customize-tabs">
-        <div class="tab-content active" id="tab-skins-content">
+        <!-- Add tab crates -->
+        <div class="tab-content" id="tab-crates-content" style="display: block;">
+          <div id="crates-tab">
+            <button class="crates-tab-child active" id="buy-keys-tab" data-tab="buy-customize-items" translate="">Buy
+              Keys</button>
+            <button class="crates-tab-child" id="my-crates-tab" data-tab="my-crates-customize-items" translate="">My
+              Crates</button>
+            <button class="crates-tab-child" id="rewards-tab" data-tab="rewards-customize-items"
+              translate="">Rewards</button>
+          </div>
+          <div class="crates-customize">
+            <!-- Buy keys -->
+            <div class="crates-customize-child" id="buy-customize-items">
+            </div>
+            <!-- My crates -->
+            <div class="crates-customize-child" id="my-crates-customize-items" style="display: none;">
+              <p>Total 10 crates</p>
+              <div class="my-crates-customize">
+              </div>
+              <div class="my-crates-select">
+                <h3>2 selected</h3>
+                <button class="btn btn-alert btn-darken open-now">Open now</button>
+              </div>
+            </div>
+            <!-- Rewards -->
+            <div class="crates-customize-child" id="rewards-customize-items" style="display: none;">
+              <p id="total-reward">Total 15 rewards</p>
+              <div class="rewards-grid-group">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-content " id="tab-skins-content" style="display: none;">
           <div id="skins-list"></div>
         </div>
         <div class="tab-content" id="tab-emotes-content" style="display: none">
@@ -1087,6 +1131,8 @@
 
     <div class="connect-wallet-container">
       <div class="connect-wallet-body">
+        <span class="dialog-close-btn fa-solid fa-xmark" id="close-connect-wallet"></span>
+
         <div class="connect-wallet-radial"></div>
 
         <div class="connect-wallet-header">

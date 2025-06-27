@@ -6,34 +6,40 @@
 @use "utils/fonts.scss";
 
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-html, body {
-    width: 100vw;
-    height: 100vh;
+html,
+body {
+  width: 100vw;
+  height: 100vh;
 }
 
-body, p, input, button, select {
-    font-family: "Inter", sans-serif;
-    font-size: 16px;
+body,
+p,
+input,
+button,
+select {
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
 
-    color: #ffffff;
+  color: #ffffff;
 }
 
 body {
-    overscroll-behavior: none;
+  overscroll-behavior: none;
 }
 
 ::placeholder {
-    font-family: "Inter", sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
-a, a:visited {
-    color: palette.$blue;
-    text-decoration: none;
+a,
+a:visited {
+  color: palette.$blue;
+  text-decoration: none;
 }
 
-a:hover {
-    text-decoration: underline;
-}
+// a:hover {
+//     text-decoration: underline;
+// }

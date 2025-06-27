@@ -24,7 +24,8 @@ import { type CVarTypeMapping } from "./utils/console/defaultClientCVars";
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
-import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
+// import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
+import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { getBadgeImage } from "./badges";
 /*
     eslint-disable
@@ -74,11 +75,28 @@ export function resetPlayButtons(): void {
     $("#btn-cancel-finding-game").css("display", "none");
 }
 
+// export function buyCrates(): void {
+// }
+
 export function visibleConnectWallet(game: Game): void {
     // handler what conditions to open modal?
-    if (!localStorage.getItem(SELECTOR_WALLET)?.length) {
+    // if (!localStorage.getItem(SELECTOR_WALLET)?.length) {
+    //     $(".connect-wallet-portal").css("display", "block");
+    // }
+    // check inactive state
+    // $("#btn-play-solo").attr("disabled", "true").css("opacity", "0.5");
+    // $("#btn-play-squad").attr("disabled", "true").css("opacity", "0.5");
+    // $("#btn-join-team").attr("disabled", "true").css("opacity", "0.5");
+    // $("#btn-create-team").attr("disabled", "true").css("opacity", "0.5");
+
+    $("#connect-wallet-btn").on("click", () => {
         $(".connect-wallet-portal").css("display", "block");
-    }
+    });
+
+    // Close connect wallet modal
+    $("#close-connect-wallet").on("click", () => {
+        $(".connect-wallet-portal").css("display", "none");
+    });
 
     // handler click to login...
     for (const elements of $(".connect-wallet-item")) {
@@ -142,7 +160,7 @@ export function visibleConnectWallet(game: Game): void {
             };
         }
     }
-}
+};
 
 export function visibleWallet(game: Game): void {
     if (game?.eip6963.provider?.provider && game.account.address?.length) {
@@ -210,6 +228,165 @@ export function visibleWallet(game: Game): void {
 
 export async function setUpUI(game: Game): Promise<void> {
     const { inputManager, uiManager: { ui } } = game;
+
+    // Buy Keys
+    {
+        const tabButton = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
+        const tabCrates = document.querySelectorAll<HTMLElement>(".crates-customize-child");
+        // const cardCrates = document.querySelector("#buy-customize-items");
+
+        const crateLists = [
+            {
+                balance: 0,
+                name: "Immortal key",
+                image: `public/img/misc/Keys.png `,
+                price: "$19"
+            }
+        ];
+        crateLists.forEach((key) => {
+            $("#buy-customize-items").append(`
+            <div class="crates-card">
+            <p>Balance: ${key.balance}<p>
+                <img src="${key.image}" class="crates-image"></img>
+                <div class="crates-information">
+                  <p>${key.name}</p>
+                  <h3>${key.price}</h3>
+                </div>
+                <div class="crates-supply">
+                  <button class="crates-add">+</button>
+                  <p class="crates-input">0</p>
+                  <button class="crates-remove" disabled>-</button>
+                </div>
+                <button class="btn btn-alert btn-darken" id="buy-now-btn" disabled>
+                  Buy now
+                </button>
+              </div>
+            `);
+        });
+
+        tabButton.forEach((button) => {
+            button.addEventListener("click", () => {
+                const tabButtonId = button.getAttribute("data-tab");
+                if (!tabButtonId) return;
+
+                // Remove active button
+                tabButton.forEach((button) => {
+                    button.classList.remove("active");
+                });
+
+                // Hide all tab contents
+                tabCrates.forEach((content) => {
+                    content.style.display = "none";
+                });
+
+                // Show the selected tab
+                const targetTab = document.getElementById(tabButtonId);
+                if (targetTab) {
+                    targetTab.style.display = "flex";
+                    button.classList.add("active");
+                };
+            });
+        });
+
+        // Add supply
+        const mySupply = document.querySelectorAll(".crates-input");
+        const addBtn = document.querySelectorAll(".crates-add");
+        const removeBtn = document.querySelectorAll(".crates-remove");
+
+        let totalSupply = 0;
+        for (let i = 0; i < mySupply.length; i++) {
+            const buyNow = document.getElementById("#buy-now-btn");
+            addBtn[i].addEventListener("click", () => {
+                totalSupply++;
+                console.log(totalSupply);
+                mySupply[i].textContent = Number(totalSupply);
+                removeBtn[i].disabled = false;
+                removeBtn[i].classList.add("active");
+                buyNow.disable = false;
+                buyNow.classList.add("active");
+            });
+
+            removeBtn[i].addEventListener("click", () => {
+                totalSupply--;
+                console.log(totalSupply);
+                mySupply[i].textContent = Number(totalSupply);
+                if (mySupply[i].textContent == 0) {
+                    removeBtn[i].disabled = true;
+                    removeBtn[i].classList.remove("active");
+                    buyNow.disable = true;
+                    buyNow.classList.remove("active");
+                }
+            });
+        };
+    }
+
+    // My crates
+    {
+        const myCrate = [
+            {
+                image: `public/img/misc/Immotal_crate.png`
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`
+            }
+        ];
+
+        myCrate.forEach((key) => {
+            $(".my-crates-customize").append(
+                `
+                <div class="my-crates-child">
+                  <img src="${key.image}" alt="">
+                </div>
+                `
+            );
+        });
+    }
+
+    // Claim rewards
+    {
+        const rewardLists = [
+            {
+                image: `public/img/misc/Immotal_crate.png`,
+                time: "Expired in 3 days"
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`,
+                time: "Expired in 5 days"
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`,
+                time: "Expired in 7 days"
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`,
+                time: "Expired in 7 days"
+            },
+            {
+                image: `public/img/misc/Immotal_crate.png`,
+                time: "Expired in 7 days"
+            }
+        ];
+
+        rewardLists.forEach((key) => {
+            $(".rewards-grid-group").append(
+                `
+                <div class="reward-child">
+                  <img src="${key.image}" alt="Crates">
+                  <h3>${key.time}</h3>
+                  <button class="btn btn-purple btn-darken" id="claim-btn">Claim</button>
+                </div>
+                `
+            );
+        });
+
+        // Claim crate event
+        // $("#claim-btn").on("click", () => {
+        //     console.log(balances);
+        // });
+    }
 
     // Change the menu based on the mode.
     if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/suroi_beta_${MODE.idString}.svg`);
@@ -2163,6 +2340,7 @@ export async function setUpUI(game: Game): Promise<void> {
             updateRangeInput(element);
         });
 
+    // Inventory tab fucntion
     $(".tab").on("click", ({ target }) => {
         const tab = wrapperCache.getAndGetDefaultIfAbsent(target, () => $(target));
 
