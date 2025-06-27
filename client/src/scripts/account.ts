@@ -19,7 +19,8 @@ import {
     GoldArmsMapping,
     DivineArmsMapping,
     DivineGunsMapping,
-    SurvivMemesMapping
+    SurvivMemesMapping,
+    SurvivCratesMapping
 } from "./mapping";
 import { abi as survivRewardsABI } from "./abi/ISurvivRewards.json";
 import { abi as crateBaseABI } from "./abi/ICrateBase.json";
@@ -38,7 +39,7 @@ const SURVIV_CARD_ADDRESS = "0x5a00e80001151CA66a91cD91124Da2051a088157";
 
 const NATIVE_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000";
 
-export enum Assets {
+export enum SurvivAssets {
     SilverSkins,
     GoldSkins,
     DivineSkins,
@@ -46,7 +47,8 @@ export enum Assets {
     GoldArms,
     DivineArms,
     DivineGuns,
-    SurvivMemes
+    SurvivMemes,
+    SurvivCrates,
 }
 
 export enum SaleItems {
@@ -267,16 +269,17 @@ export class Account extends EIP6963 {
  * @returns A promise resolving to an object mapping asset names to their balances.
  * @throws Error if the contract address is invalid or provider is unavailable.
  */
-    async getBalances(assetType: Assets, pagination: number = 10, page: number = 0, returnAll: boolean = false): Promise<Record<string, number>> {
+    async getBalances(assetType: SurvivAssets, pagination: number = 10, page: number = 0, returnAll: boolean = false): Promise<Record<string, number>> {
         const assetMappings = {
-            [Assets.SilverSkins]: SilverSkinsMapping,
-            [Assets.GoldSkins]: GoldSkinsMapping,
-            [Assets.DivineSkins]: DivineSkinsMapping,
-            [Assets.SilverArms]: SilverArmsMapping,
-            [Assets.GoldArms]: GoldArmsMapping,
-            [Assets.DivineArms]: DivineArmsMapping,
-            [Assets.DivineGuns]: DivineGunsMapping,
-            [Assets.SurvivMemes]: SurvivMemesMapping
+            [SurvivAssets.SilverSkins]: SilverSkinsMapping,
+            [SurvivAssets.GoldSkins]: GoldSkinsMapping,
+            [SurvivAssets.DivineSkins]: DivineSkinsMapping,
+            [SurvivAssets.SilverArms]: SilverArmsMapping,
+            [SurvivAssets.GoldArms]: GoldArmsMapping,
+            [SurvivAssets.DivineArms]: DivineArmsMapping,
+            [SurvivAssets.DivineGuns]: DivineGunsMapping,
+            [SurvivAssets.SurvivMemes]: SurvivMemesMapping,
+            [SurvivAssets.SurvivCrates]: SurvivCratesMapping,
         };
 
         const selectedMapping = assetMappings[assetType];
