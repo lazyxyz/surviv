@@ -526,11 +526,13 @@ input::-webkit-inner-spin-button {
         margin-top: 0px;
         scale: 0.8;
       }
-      .open-now {
+      .open-now,
+      .claim-items {
         opacity: 0.35;
       }
       .active {
         @include variables.active;
+        display: block;
       }
     }
     .my-crates-customize {

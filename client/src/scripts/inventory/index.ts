@@ -118,6 +118,11 @@ export async function loadInventory(game: Game) {
 
             $(buyNow[i]).on("click", async () => {
                 await game.account.buyItems(SaleItems.Keys, buyAmount, PaymentTokens.NativeToken);
+                buyAmount = 0;
+                mySupply[i].textContent = 0;
+                buyNow[i].disabled = true;
+                buyNow[i].classList.remove("active");
+                alert("Successfully Purchase")
             });
         }
 
@@ -150,6 +155,7 @@ export async function loadInventory(game: Game) {
         const crateOpen = document.querySelectorAll(".my-crates-child");
         const totalSelected = document.querySelector(".total-selected");
         const openNow = document.querySelector(".open-now");
+        const claimItem = document.querySelector(".claim-items");
 
         let count = 0;
         for (const crate of crateOpen) {
@@ -160,7 +166,6 @@ export async function loadInventory(game: Game) {
             crate.addEventListener("click", () => {
                 // crate.classList.toggle("active");
                 const isActive = crate.classList.contains("active");
-                const myCrates = userCrates.crates;
 
                 if (isActive) {
                     crate.classList.remove("active");
@@ -169,11 +174,12 @@ export async function loadInventory(game: Game) {
                     if (count < keyBalances) {
                         crate.classList.add("active");
                         count++;
+                    } else {
+                        alert("Insunfficient Key or Crate")
                     }
                 }
                 if (totalSelected) {
                     totalSelected.textContent = `${count} selected`;
-                    console.log(count);
                 }
 
                 if (count > 0) {
@@ -184,19 +190,23 @@ export async function loadInventory(game: Game) {
                     openNow.disabled = true;
                 }
             });
+            // Remove existing event listeners
+            $(".open-now").off("click");
+            $(".claim-items").off("click");
+
+            // const amount = 1;
+            $(".open-now").on("click", async () => {
+                await game.account.requestOpenCrates(count);
+                // claimItem.classList.add("active");
+                // crate.classList.remove("active");
+                // openNow.classList.remove("active");
+                // openNow.disabled = true;
+            });
+
+            $(".claim-items").on("click", async () => {
+                await game.account.claimItems();
+            });
         }
-
-        // Remove existing event listeners
-        $(".open-now").off("click");
-        $(".claim-items").off("click");
-
-        // const amount = 1;
-        $(".open-now").on("click", async () => {
-            await game.account.requestOpenCrates(count);
-        });
-        $(".claim-items").on("click", async () => {
-            await game.account.claimItems();
-        });
     }
 
     // Claim Rewards
