@@ -46,3 +46,9 @@ Check with:dig @1.1.1.1 _acme-challenge.eu.surviv.fun TXT
 
 Or use: https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.eu.surviv.fun
 Confirm <random-string> appears. Press Enter in Certbot to continue.
+
+6. Add Page Rules for *.eu.surviv.fun/*
+
+SSL: Strict, Cache Level: Bypass
+
+![Screenshot 2025-06-29 at 00 23 07](https://github.com/user-attachments/assets/b9ec0d10-972a-4f62-8881-3d1f6f82fe25)
