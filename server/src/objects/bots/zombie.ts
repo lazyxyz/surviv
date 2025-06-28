@@ -22,7 +22,7 @@ export class Zombie extends Player {
     private static readonly WANDER_SPEED = GameConstants.player.baseSpeed * 0.3; // Slower speed for wandering
     private static readonly MIN_MOVE_DURATION = 1; // Minimum seconds before picking new wander target
     private static readonly MAX_MOVE_DURATION = 5; // Maximum seconds before picking new wander target
-    private static readonly CENTER_PROXIMITY = 40; // Distance to consider bot "at" the gas safe zone
+    private static readonly CENTER_PROXIMITY = 150; // Distance to consider bot "at" the gas safe zone
     private static readonly NAMES = ["Ghoul", "Walker", "Rotter", "Shambler", "Undead", "Zed", "Lurker", "Crawler"]; // Thematic names for Zombie
 
     private rotationDirection: number = 1; // Direction for idle rotation (1 or -1)

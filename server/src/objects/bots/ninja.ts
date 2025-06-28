@@ -87,7 +87,7 @@ export class Ninja extends Player {
      * Setup the Ninja's inventory.
      */
     private initializeInventory(): void {
-        this.inventory.weapons[2] = new MeleeItem("feral_claws", this);
+        this.inventory.weapons[2] = new MeleeItem("steelfang", this);
 
         const randomCola = Math.floor(Math.random() * 2) + 1;
         this.inventory.items.setItem('cola', randomCola);
@@ -185,7 +185,7 @@ export class Ninja extends Player {
                 // Move to random point on gas radius
                 this.lastHideSpot = null;
                 this.hideTimer = 0;
-                this.currentHideDuration = this.getRandomHideDuration();
+                this.currentHideDuration = 0;
                 this.baseSpeed = GameConstants.player.baseSpeed;
                 const radiusTarget = this.getRandomRadiusPosition();
                 this.moveToTarget(radiusTarget, 0, false);
@@ -213,7 +213,7 @@ export class Ninja extends Player {
                     // Move to random point on gas radius
                     this.lastHideSpot = null;
                     this.hideTimer = 0;
-                    this.currentHideDuration = this.getRandomHideDuration();
+                    this.currentHideDuration = 0;
                     this.baseSpeed = GameConstants.player.baseSpeed;
                     const radiusTarget = this.getRandomRadiusPosition();
                     this.moveToTarget(radiusTarget, 0, false);
