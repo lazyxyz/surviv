@@ -120,10 +120,9 @@ export async function loadInventory(game: Game) {
                 await game.account.buyItems(SaleItems.Keys, buyAmount, PaymentTokens.NativeToken);
             });
         }
-    }
 
-    // My Crates
-    {
+        // My Crates
+
         let userCrates = await game.account.getBalances(SurvivAssets.SurvivCrates).catch(err => {
             console.log(`Failed to get user crate balance: ${err}`);
         });
@@ -131,8 +130,10 @@ export async function loadInventory(game: Game) {
         if (userCrates && userCrates.crates) {
             const crateImage = { image: `public/img/misc/crate.png` };
             crateImages = new Array(Number(userCrates.crates)).fill(crateImage);
-            $("#total-crates").text(`You have ${userCrates.crates} crates`);
+            $("#total-crates").text(`You have: ${userCrates.crates} crates - ${keyBalances} keys`);
         }
+
+        // Check disbled
 
         // Clear existing content to prevent duplicates
         $(".my-crates-customize").empty();
@@ -145,13 +146,53 @@ export async function loadInventory(game: Game) {
             `);
         });
 
+        // Select crates to open
+        const crateOpen = document.querySelectorAll(".my-crates-child");
+        const totalSelected = document.querySelector(".total-selected");
+        const openNow = document.querySelector(".open-now");
+
+        let count = 0;
+        for (const crate of crateOpen) {
+            // if (count >= keyBalances) {
+            //     crate.classList.add("inactive");
+            // }
+
+            crate.addEventListener("click", () => {
+                // crate.classList.toggle("active");
+                const isActive = crate.classList.contains("active");
+                const myCrates = userCrates.crates;
+
+                if (isActive) {
+                    crate.classList.remove("active");
+                    count--;
+                } else {
+                    if (count < keyBalances) {
+                        crate.classList.add("active");
+                        count++;
+                    }
+                }
+                if (totalSelected) {
+                    totalSelected.textContent = `${count} selected`;
+                    console.log(count);
+                }
+
+                if (count > 0) {
+                    openNow.classList.add("active");
+                    openNow.disabled = false;
+                } else {
+                    openNow.classList.remove("active");
+                    openNow.disabled = true;
+                }
+            });
+        }
+
         // Remove existing event listeners
         $(".open-now").off("click");
         $(".claim-items").off("click");
 
-        const amount = 1;
+        // const amount = 1;
         $(".open-now").on("click", async () => {
-            await game.account.requestOpenCrates(amount);
+            await game.account.requestOpenCrates(count);
         });
         $(".claim-items").on("click", async () => {
             await game.account.claimItems();

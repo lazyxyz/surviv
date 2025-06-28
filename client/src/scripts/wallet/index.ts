@@ -5,14 +5,6 @@ import { WalletType, shorten } from "../utils/constants";
 
 export function visibleConnectWallet(game: Game): void {
     // handler what conditions to open modal?
-    // if (!localStorage.getItem(SELECTOR_WALLET)?.length) {
-    //     $(".connect-wallet-portal").css("display", "block");
-    // }
-    // check inactive state
-    // $("#btn-play-solo").attr("disabled", "true").css("opacity", "0.5");
-    // $("#btn-play-squad").attr("disabled", "true").css("opacity", "0.5");
-    // $("#btn-join-team").attr("disabled", "true").css("opacity", "0.5");
-    // $("#btn-create-team").attr("disabled", "true").css("opacity", "0.5");
 
     $("#connect-wallet-btn").on("click", () => {
         $(".connect-wallet-portal").css("display", "block");
