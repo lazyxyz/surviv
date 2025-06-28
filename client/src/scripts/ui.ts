@@ -355,6 +355,7 @@ export async function setUpUI(game: Game): Promise<void> {
                 }
             }
 
+            // game.connect(`${gameAddress.replace("<ID>", (data.gameID).toString())}/play}`);
             game.connect(`${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`);
             ui.splashMsg.hide();
 

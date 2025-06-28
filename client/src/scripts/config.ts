@@ -7,13 +7,20 @@ export const Config = {
             mainAddress: "http://127.0.0.1:8000",
             gameAddress: "ws://127.0.0.1:<ID>",
             teamAddress: "ws://127.0.0.1:8000",
-            apiAddress: "http://127.0.0.1:3001",
+            apiAddress: "https://api.surviv.fun",
         },
         as: {
             name: "Asia",
-            mainAddress: "https://as.surviv.fun",
+            mainAddress: "http://as.surviv.fun",
             gameAddress: "wss://<ID>.as.surviv.fun",
             teamAddress: "wss://team.as.surviv.fun",
+            apiAddress: "https://api.surviv.fun",
+        },
+        eu: {
+            name: "Europe",
+            mainAddress: "http://eu.surviv.fun",
+            gameAddress: "wss://<ID>.eu.surviv.fun",
+            teamAddress: "wss://team.eu.surviv.fun",
             apiAddress: "https://api.surviv.fun",
         }
     },

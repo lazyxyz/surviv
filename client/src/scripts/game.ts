@@ -323,8 +323,11 @@ export class Game {
                 url.searchParams.set("token", this.account.token);
             }
         }
-
-        this._socket = new WebSocket(url.toString());
+        try {
+            this._socket = new WebSocket(url.toString());
+        } catch (err) {
+            console.log("error: ", err);
+        }
         this._socket.binaryType = "arraybuffer";
 
         this._socket.onopen = (): void => {
