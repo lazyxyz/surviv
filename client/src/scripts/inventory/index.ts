@@ -174,25 +174,27 @@ function setupCrateOpening(game: Game, crateOpen: NodeListOf<Element>, totalSele
             isOpening = true;
             openNow.disabled = true; // Disable button during operation
             try {
-                await game.account.requestOpenCrates(count);
-                if (claimItem) {
-                    claimItem.classList.add("active");
-                    claimItem.disabled = false;
+                if (count > 0) {
+                    await game.account.requestOpenCrates(count);
+                    if (claimItem) {
+                        claimItem.classList.add("active");
+                        claimItem.disabled = false;
+                    }
+                    // Remove opened crates from UI
+                    const activeCrates = document.querySelectorAll(".my-crates-child.active");
+                    activeCrates.forEach(crate => crate.remove());
+                    // Update local balances
+                    localCrateBalance -= count;
+                    localKeyBalance -= count;
+                    // Update UI
+                    $("#total-crates").text(`You have: ${localCrateBalance} crates - ${localKeyBalance} keys`);
+                    if (totalSelected) {
+                        totalSelected.textContent = "0 selected";
+                    }
+                    openNow.classList.remove("active");
+                    count = 0;
+                    alert("Crates opened successfully!");
                 }
-                // Remove opened crates from UI
-                const activeCrates = document.querySelectorAll(".my-crates-child.active");
-                activeCrates.forEach(crate => crate.remove());
-                // Update local balances
-                localCrateBalance -= count;
-                localKeyBalance -= count;
-                // Update UI
-                $("#total-crates").text(`You have: ${localCrateBalance} crates - ${localKeyBalance} keys`);
-                if (totalSelected) {
-                    totalSelected.textContent = "0 selected";
-                }
-                openNow.classList.remove("active");
-                count = 0;
-                alert("Crates opened successfully!");
             } catch (err) {
                 console.error(`Failed to open crates: ${err}`);
                 alert("Failed to open crates. Please try again.");
