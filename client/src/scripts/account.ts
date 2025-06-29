@@ -563,7 +563,6 @@ export class Account extends EIP6963 {
                 throw new Error(`Insufficient crates balance: ${balance}`);
             }
 
-
         } catch (error: any) {
             clearTimeout(timeoutId);
             throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
