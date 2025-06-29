@@ -123,7 +123,7 @@ function setupBuyButtons(game: Game, mySupply: NodeListOf<Element>, addBtn: Node
 }
 function renderMyCrates(userCrateBalances: any, keyBalances: number) {
     const crateImages = userCrateBalances?.crates
-        ? new Array(Number(userCrateBalances.crates)).fill({ image: `public/img/misc/crate.png` })
+        ? new Array(Number(userCrateBalances.crates)).fill({ image: `./img/misc/crate.png` })
         : [];
     $("#total-crates").text(`You have: ${userCrateBalances?.crates || 0} crates - ${keyBalances} keys`);
     $(".my-crates-customize").empty();
@@ -280,7 +280,7 @@ export async function loadInventory(game: Game) {
         {
             balance: userCrateBalances?.crates || 0,
             name: "Surviv Crates",
-            image: "public/img/misc/Immotal_crate.png",
+            image: "./img/misc/crate.png",
             price: `${formatEther(cratePrice)} STT`
         }
     ];
