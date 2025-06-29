@@ -424,7 +424,8 @@ export async function setUpUI(game: Game): Promise<void> {
     // Join server when play buttons are clicked
     $("#btn-play-solo, #btn-play-squad").on("click", event => {
         if(!game.account.address) {
-            throw Error('Please login wallet!');
+            alert("Please connect your wallet to continue!")
+            return;
         }
         const now = Date.now();
         if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit

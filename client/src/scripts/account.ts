@@ -373,7 +373,7 @@ export class Account extends EIP6963 {
             const { validCrates, validSignatures } = await this.getValidRewards();
 
             if (!validCrates.length || !validSignatures.length) {
-                throw new Error('No valid crates available after validation');
+                throw new Error('No valid crates available');
             }
 
             // Initialize contract
@@ -391,7 +391,7 @@ export class Account extends EIP6963 {
             return receipt;
         } catch (error: any) {
             clearTimeout(timeoutId);
-            throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
+            throw new Error(`${error.message || 'Unknown error'}`);
         }
     }
 
@@ -549,9 +549,8 @@ export class Account extends EIP6963 {
             const cratesContract = new ethers.Contract(SurvivCratesMapping.address, erc1155ABI, signer);
 
             const balance = await cratesContract.balanceOf(signer.address, 0);
-            console.log("crates balance: ", balance);
 
-            if (Number(balance) > amount) {
+            if (Number(balance) >= amount) {
                 // Execute claim transaction
                 const tx = await crateBaseContract.commitCrates(0, amount);
                 console.info('Transaction sent:', tx.hash);

@@ -221,8 +221,7 @@ function setupCrateOpening(game: Game, crateOpen: NodeListOf<Element>, totalSele
     }
 }
 
-
-function renderRewards(userRewards: any) {
+function renderRewards(game: Game, userRewards: any) {
     const now = Math.floor(Date.now() / 1000);
     const rewardLists: RewardItem[] = userRewards?.validCrates?.map((item: any) => {
         const secondsLeft = item.expiry - now;
@@ -247,17 +246,14 @@ function renderRewards(userRewards: any) {
     });
 
     const claimBtn = $("#claim-btn");
-    claimBtn.attr("disabled", rewardLists.length === 0 ? "true" : "false")
-        .css("opacity", rewardLists.length === 0 ? "0.35" : "1");
 
-    $(".claim-all-btn").off("click").on("click", async () => {
+    claimBtn.on("click", async () => {
         try {
             await game.account.claimRewards();
             alert("Rewards claimed successfully!");
             await loadInventory(game); // Refresh inventory
         } catch (err) {
-            console.error(`Failed to claim rewards: ${err}`);
-            alert("Failed to claim rewards. Please try again.");
+            alert(`${err}`);
         }
     });
 }
@@ -311,6 +307,8 @@ export async function loadInventory(game: Game) {
     setupCrateOpening(game, crateOpen, totalSelected, openNow, claimItem, userKeyBalances?.keys || 0);
 
     // Render rewards
-    const userRewards = await fetchBalances(game, SurvivAssets.SurvivCrates);
-    renderRewards(userRewards);
+    let userRewards = await game.account.getValidRewards().catch(err => {
+        console.log(`Failed to get valid rewards: ${err}`);
+    });
+    renderRewards(game, userRewards);
 }
