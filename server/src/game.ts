@@ -49,7 +49,6 @@ import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
 import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
-import { Armors } from "@common/definitions/armors";
 
 /*
     eslint-disable
@@ -251,7 +250,7 @@ export class Game implements GameData {
         if (Config.addBot) {
             const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-            const zombieCount = randomInRange(15, 20);
+            const zombieCount = randomInRange(10, 20);
             const ninjaCount = randomInRange(5, 10);
             const assassinCount = randomInRange(3, 5);
 

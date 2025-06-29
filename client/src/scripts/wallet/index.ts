@@ -45,7 +45,7 @@ export function visibleConnectWallet(game: Game): void {
                         logoElement.after(newNode);
                     }
 
-                    return await game.account.connect(isExisted, game);
+                    return await game.account.connect(isExisted);
                 } catch (error) {
                     console.log(error);
                 } finally {
