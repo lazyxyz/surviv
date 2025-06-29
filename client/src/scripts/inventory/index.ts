@@ -4,7 +4,7 @@ import { PaymentTokens, SaleItems, SurvivAssets } from "../account";
 import type { Game } from "../game";
 
 export async function loadInventory(game: Game) {
-    // Buy Keys
+    // Buy Keys & Crates
     {
         const tabButton = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
         const tabCrates = document.querySelectorAll<HTMLElement>(".crates-customize-child");
@@ -13,6 +13,12 @@ export async function loadInventory(game: Game) {
             console.log(`Failed to read keys balances: ${err}`);
         });
 
+        // Buy crates
+        const userCrateBalances = await game.account.getBalances(SurvivAssets.SurvivCrates).catch(err => {
+            console.log(`Failed to read crates balances: ${err}`);
+        });
+
+        // Key price
         let keyPrice = 0;
         {
             const price = await game.account.queryPrice(SaleItems.Keys, PaymentTokens.NativeToken).catch(err => {
@@ -26,12 +32,32 @@ export async function loadInventory(game: Game) {
             keyBalances = userKeyBalances.keys;
         }
 
+        // Crate price
+        let cratePrice = 0;
+        {
+            const price = await game.account.queryPrice(SaleItems.Crates, PaymentTokens.NativeToken).catch(err => {
+                console.log(`Failed to query crate price: ${err}`);
+            });
+            if (price) cratePrice = price;
+        }
+
+        let crateBalances = 0;
+        if (userCrateBalances && userCrateBalances.crates) {
+            crateBalances = userCrateBalances.crates;
+        }
+
         const crateLists = [
             {
                 balance: keyBalances,
                 name: "Surviv Keys",
                 image: `public/img/misc/Keys.png`,
                 price: `${formatEther(keyPrice)} STT`
+            },
+            {
+                balance: crateBalances,
+                name: "Surviv Crates",
+                image: `public/img/misc/Immotal_crate.png`,
+                price: `${formatEther(cratePrice)} STT`
             }
         ];
 
@@ -41,7 +67,7 @@ export async function loadInventory(game: Game) {
         crateLists.forEach((key) => {
             $("#buy-customize-items").append(`
                 <div class="crates-card">
-                    <p>You have ${key.balance} keys</p>
+                    <p>You have ${key.balance}</p>
                     <img src="${key.image}" class="crates-image"></img>
                     <div class="crates-information">
                         <p>${key.name}</p>
@@ -117,6 +143,7 @@ export async function loadInventory(game: Game) {
             });
 
             $(buyNow[i]).on("click", async () => {
+                // await game.account.buyItems(SaleItems.Keys, buyAmount, PaymentTokens.NativeToken);
                 await game.account.buyItems(SaleItems.Keys, buyAmount, PaymentTokens.NativeToken);
                 buyAmount = 0;
                 mySupply[i].textContent = 0;
@@ -128,17 +155,22 @@ export async function loadInventory(game: Game) {
 
         // My Crates
 
-        let userCrates = await game.account.getBalances(SurvivAssets.SurvivCrates).catch(err => {
-            console.log(`Failed to get user crate balance: ${err}`);
-        });
         let crateImages = [];
-        if (userCrates && userCrates.crates) {
+        if (userCrateBalances && userCrateBalances.crates) {
             const crateImage = { image: `public/img/misc/crate.png` };
-            crateImages = new Array(Number(userCrates.crates)).fill(crateImage);
-            $("#total-crates").text(`You have: ${userCrates.crates} crates - ${keyBalances} keys`);
+            crateImages = new Array(Number(userCrateBalances.crates)).fill(crateImage);
+            $("#total-crates").text(`You have: ${userCrateBalances.crates} crates - ${keyBalances} keys`);
         }
 
-        // Check disbled
+        // let userCrates = await game.account.getBalances(SurvivAssets.SurvivCrates).catch(err => {
+        //     console.log(`Failed to get user crate balance: ${err}`);
+        // });
+        // let crateImages = [];
+        // if (userCrates && userCrates.crates) {
+        //     const crateImage = { image: `public/img/misc/crate.png` };
+        //     crateImages = new Array(Number(userCrates.crates)).fill(crateImage);
+        //     $("#total-crates").text(`You have: ${userCrates.crates} crates - ${keyBalances} keys`);
+        // }
 
         // Clear existing content to prevent duplicates
         $(".my-crates-customize").empty();
@@ -159,10 +191,6 @@ export async function loadInventory(game: Game) {
 
         let count = 0;
         for (const crate of crateOpen) {
-            // if (count >= keyBalances) {
-            //     crate.classList.add("inactive");
-            // }
-
             crate.addEventListener("click", () => {
                 // crate.classList.toggle("active");
                 const isActive = crate.classList.contains("active");
@@ -175,11 +203,12 @@ export async function loadInventory(game: Game) {
                         crate.classList.add("active");
                         count++;
                     } else {
-                        alert("Insunfficient Key or Crate")
+                        alert("Insunfficient Key");
                     }
                 }
                 if (totalSelected) {
                     totalSelected.textContent = `${count} selected`;
+                    console.log(count);
                 }
 
                 if (count > 0) {
@@ -190,6 +219,7 @@ export async function loadInventory(game: Game) {
                     openNow.disabled = true;
                 }
             });
+
             // Remove existing event listeners
             $(".open-now").off("click");
             $(".claim-items").off("click");
@@ -197,10 +227,11 @@ export async function loadInventory(game: Game) {
             // const amount = 1;
             $(".open-now").on("click", async () => {
                 await game.account.requestOpenCrates(count);
-                // claimItem.classList.add("active");
-                // crate.classList.remove("active");
-                // openNow.classList.remove("active");
-                // openNow.disabled = true;
+                claimItem.classList.add("active");
+                claimItem.disabled = false;
+                crateOpen.classList.remove("active");
+                openNow.classList.remove("active");
+                openNow.disabled = true;
             });
 
             $(".claim-items").on("click", async () => {

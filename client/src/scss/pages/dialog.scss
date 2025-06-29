@@ -484,7 +484,8 @@ input::-webkit-inner-spin-button {
           opacity: 1;
         }
       }
-      .buy-now-btn {
+      .buy-now-btn,
+      .buy-crate-btn {
         opacity: 0.35;
       }
       .active {
@@ -532,7 +533,6 @@ input::-webkit-inner-spin-button {
       }
       .active {
         @include variables.active;
-        display: block;
       }
     }
     .my-crates-customize {
