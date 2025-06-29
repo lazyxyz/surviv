@@ -3,293 +3,314 @@ import { formatEther } from "ethers";
 import { PaymentTokens, SaleItems, SurvivAssets } from "../account";
 import type { Game } from "../game";
 
-export async function loadInventory(game: Game) {
-    // Buy Keys & Crates
-    {
-        const tabButton = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
-        const tabCrates = document.querySelectorAll<HTMLElement>(".crates-customize-child");
+interface CrateItem {
+    balance: number;
+    name: string;
+    image: string;
+    price: string;
+}
 
-        const userKeyBalances = await game.account.getBalances(SurvivAssets.SurvivKeys).catch(err => {
-            console.log(`Failed to read keys balances: ${err}`);
-        });
+interface RewardItem {
+    image: string;
+    amount: number;
+    time: string;
+}
 
-        // Buy crates
-        const userCrateBalances = await game.account.getBalances(SurvivAssets.SurvivCrates).catch(err => {
-            console.log(`Failed to read crates balances: ${err}`);
-        });
+async function fetchBalances(game: Game, asset: SurvivAssets) {
+    try {
+        return await game.account.getBalances(asset);
+    } catch (err) {
+        console.error(`Failed to read ${asset} balances: ${err}`);
+        return null;
+    }
+}
 
-        // Key price
-        let keyPrice = 0;
-        {
-            const price = await game.account.queryPrice(SaleItems.Keys, PaymentTokens.NativeToken).catch(err => {
-                console.log(`Failed to query key price: ${err}`);
-            });
-            if (price) keyPrice = price;
-        }
+async function fetchPrice(game: Game, item: string, token: PaymentTokens) {
+    try {
+        const price = await game.account.queryPrice(item, token);
+        return price || 0;
+    } catch (err) {
+        console.error(`Failed to query ${item} price: ${err}`);
+        return 0;
+    }
+}
 
-        let keyBalances = 0;
-        if (userKeyBalances && userKeyBalances.keys) {
-            keyBalances = userKeyBalances.keys;
-        }
+function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeListOf<HTMLElement>) {
+    $(document).off("click", ".crates-tab-child");
+    tabButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            const tabId = button.getAttribute("data-tab");
+            if (!tabId) return;
 
-        // Crate price
-        let cratePrice = 0;
-        {
-            const price = await game.account.queryPrice(SaleItems.Crates, PaymentTokens.NativeToken).catch(err => {
-                console.log(`Failed to query crate price: ${err}`);
-            });
-            if (price) cratePrice = price;
-        }
+            tabButtons.forEach(btn => btn.classList.remove("active"));
+            tabContents.forEach(content => content.style.display = "none");
 
-        let crateBalances = 0;
-        if (userCrateBalances && userCrateBalances.crates) {
-            crateBalances = userCrateBalances.crates;
-        }
-
-        const crateLists = [
-            {
-                balance: keyBalances,
-                name: "Surviv Keys",
-                image: `./img/misc/Keys.png`,
-                price: `${formatEther(keyPrice)} STT`
-            },
-            {
-                balance: crateBalances,
-                name: "Surviv Crates",
-                image: `public/img/misc/Immotal_crate.png`,
-                price: `${formatEther(cratePrice)} STT`
+            const targetTab = document.getElementById(tabId);
+            if (targetTab) {
+                targetTab.style.display = "flex";
+                button.classList.add("active");
             }
-        ];
+        });
+    });
+}
 
-        // Clear existing content to prevent duplicates
-        $("#buy-customize-items").empty();
-
-        crateLists.forEach((key) => {
-            $("#buy-customize-items").append(`
-                <div class="crates-card">
-                    <p>You have ${key.balance}</p>
-                    <img src="${key.image}" class="crates-image"></img>
-                    <div class="crates-information">
-                        <p>${key.name}</p>
-                        <h3>${key.price}</h3>
-                    </div>
-                    <div class="crates-supply">
-                        <button class="crates-remove" disabled>-</button>
-                        <p class="crates-input">0</p>
-                        <button class="crates-add">+</button>
-                    </div>
-                    <button class="btn btn-alert btn-darken buy-now-btn">
-                        Buy now
-                    </button>
+function renderCrates(crateLists: CrateItem[]) {
+    $("#buy-customize-items").empty();
+    crateLists.forEach(item => {
+        $("#buy-customize-items").append(`
+            <div class="crates-card">
+                <p>You have ${item.balance}</p>
+                <img src="${item.image}" class="crates-image" alt="${item.name}">
+                <div class="crates-information">
+                    <p>${item.name}</p>
+                    <h3>${item.price}</h3>
                 </div>
-            `);
+                <div class="crates-supply">
+                    <button class="crates-remove" disabled>-</button>
+                    <p class="crates-input">0</p>
+                    <button class="crates-add">+</button>
+                </div>
+                <button class="btn btn-alert btn-darken buy-now-btn" disabled>Buy now</button>
+            </div>
+        `);
+    });
+}
+
+function setupBuyButtons(game: Game, mySupply: NodeListOf<Element>, addBtn: NodeListOf<Element>, removeBtn: NodeListOf<Element>, buyNow: NodeListOf<Element>) {
+    $(document).off("click", ".crates-add .crates-remove .buy-now-btn");
+    for (let i = 0; i < mySupply.length; i++) {
+        let buyAmount = 0;
+        addBtn[i].addEventListener("click", () => {
+            buyAmount++;
+            mySupply[i].textContent = buyAmount.toString();
+            removeBtn[i].disabled = false;
+            removeBtn[i].classList.add("active");
+            buyNow[i].disabled = false;
+            buyNow[i].classList.add("active");
         });
 
-        // Remove existing event listeners to prevent duplicates
-        $(document).off("click", ".crates-tab-child");
-        tabButton.forEach((button) => {
-            button.addEventListener("click", () => {
-                const tabButtonId = button.getAttribute("data-tab");
-                if (!tabButtonId) return;
-
-                tabButton.forEach((btn) => btn.classList.remove("active"));
-                tabCrates.forEach((content) => content.style.display = "none");
-
-                const targetTab = document.getElementById(tabButtonId);
-                if (targetTab) {
-                    targetTab.style.display = "flex";
-                    button.classList.add("active");
-                }
-            });
-        });
-
-        // Add supply
-        const mySupply = document.querySelectorAll(".crates-input");
-        const addBtn = document.querySelectorAll(".crates-add");
-        const removeBtn = document.querySelectorAll(".crates-remove");
-        const buyNow = document.querySelectorAll(".buy-now-btn");
-
-        // Remove existing event listeners for add/remove/buy buttons
-        $(document).off("click", ".crates-add").off("click", ".crates-remove").off("click", ".buy-now-btn");
-
-        for (let i = 0; i < mySupply.length; i++) {
-            let buyAmount = 0;
-            if (mySupply[i].textContent == "0") {
-                buyNow[i].disabled = true;
-            }
-
-            addBtn[i].addEventListener("click", () => {
-                buyAmount++;
-                console.log(buyAmount);
+        removeBtn[i].addEventListener("click", () => {
+            if (buyAmount > 0) {
+                buyAmount--;
                 mySupply[i].textContent = buyAmount.toString();
-                removeBtn[i].disabled = false;
-                removeBtn[i].classList.add("active");
-                buyNow[i].disabled = false;
-                buyNow[i].classList.add("active");
-            });
-
-            removeBtn[i].addEventListener("click", () => {
-                if (buyAmount > 0) {
-                    buyAmount--;
-                    console.log(buyAmount);
-                    mySupply[i].textContent = buyAmount.toString();
-                    if (buyAmount === 0) {
-                        removeBtn[i].disabled = true;
-                        removeBtn[i].classList.remove("active");
-                        buyNow[i].disabled = true;
-                        buyNow[i].classList.remove("active");
-                    }
+                if (buyAmount === 0) {
+                    removeBtn[i].disabled = true;
+                    removeBtn[i].classList.remove("active");
+                    buyNow[i].disabled = true;
+                    buyNow[i].classList.remove("active");
                 }
-            });
+            }
+        });
 
-            $(buyNow[i]).on("click", async () => {
-                // await game.account.buyItems(SaleItems.Keys, buyAmount, PaymentTokens.NativeToken);
-                await game.account.buyItems(SaleItems.Keys, buyAmount, PaymentTokens.NativeToken);
+        $(buyNow[i]).on("click", async () => {
+            try {
+                const itemType = i === 0 ? SaleItems.Keys : SaleItems.Crates;
+                await game.account.buyItems(itemType, buyAmount, PaymentTokens.NativeToken);
+                alert("Purchase successful!");
                 buyAmount = 0;
-                mySupply[i].textContent = 0;
+                mySupply[i].textContent = "0";
                 buyNow[i].disabled = true;
                 buyNow[i].classList.remove("active");
-                alert("Successfully Purchase")
-            });
-        }
-
-        // My Crates
-
-        let crateImages = [];
-        if (userCrateBalances && userCrateBalances.crates) {
-            const crateImage = { image: `public/img/misc/crate.png` };
-            crateImages = new Array(Number(userCrateBalances.crates)).fill(crateImage);
-            $("#total-crates").text(`You have: ${userCrateBalances.crates} crates - ${keyBalances} keys`);
-        }
-
-        // let userCrates = await game.account.getBalances(SurvivAssets.SurvivCrates).catch(err => {
-        //     console.log(`Failed to get user crate balance: ${err}`);
-        // });
-        // let crateImages = [];
-        // if (userCrates && userCrates.crates) {
-        //     const crateImage = { image: `public/img/misc/crate.png` };
-        //     crateImages = new Array(Number(userCrates.crates)).fill(crateImage);
-        //     $("#total-crates").text(`You have: ${userCrates.crates} crates - ${keyBalances} keys`);
-        // }
-
-        // Clear existing content to prevent duplicates
-        $(".my-crates-customize").empty();
-
-        crateImages.forEach((key) => {
-            $(".my-crates-customize").append(`
-                <div class="my-crates-child">
-                    <img src="${key.image}" alt="">
-                </div>
-            `);
+                removeBtn[i].disabled = true;
+                removeBtn[i].classList.remove("active");
+                await loadInventory(game); // Refresh inventory
+            } catch (err) {
+                console.error(`Failed to buy items: ${err}`);
+                alert("Purchase failed. Please try again.");
+            }
         });
+    }
+}
+function renderMyCrates(userCrateBalances: any, keyBalances: number) {
+    const crateImages = userCrateBalances?.crates
+        ? new Array(Number(userCrateBalances.crates)).fill({ image: `public/img/misc/crate.png` })
+        : [];
+    $("#total-crates").text(`You have: ${userCrateBalances?.crates || 0} crates - ${keyBalances} keys`);
+    $(".my-crates-customize").empty();
+    crateImages.forEach(item => {
+        $(".my-crates-customize").append(`
+            <div class="my-crates-child">
+                <img src="${item.image}" alt="Crate">
+            </div>
+        `);
+    });
+}
 
-        // Select crates to open
-        const crateOpen = document.querySelectorAll(".my-crates-child");
-        const totalSelected = document.querySelector(".total-selected");
-        const openNow = document.querySelector(".open-now");
-        const claimItem = document.querySelector(".claim-items");
+function setupCrateOpening(game: Game, crateOpen: NodeListOf<Element>, totalSelected: Element | null, openNow: HTMLButtonElement | null, claimItem: HTMLButtonElement | null, keyBalances: number) {
+    let count = 0;
+    let isOpening = false; // Prevent multiple openings
+    let localCrateBalance = crateOpen.length; // Track local crate balance
+    let localKeyBalance = keyBalances; // Track local key balance
+    $(document).off("click", ".my-crates-child .open-now .claim-items");
 
-        let count = 0;
-        for (const crate of crateOpen) {
-            crate.addEventListener("click", () => {
-                // crate.classList.toggle("active");
-                const isActive = crate.classList.contains("active");
+    crateOpen.forEach(crate => {
+        crate.addEventListener("click", () => {
+            if (isOpening) return; // Prevent interaction during opening
+            const isActive = crate.classList.contains("active");
+            if (isActive) {
+                crate.classList.remove("active");
+                count--;
+            } else if (count < localKeyBalance) {
+                crate.classList.add("active");
+                count++;
+            } else {
+                alert("Insufficient keys!");
+            }
 
-                if (isActive) {
-                    crate.classList.remove("active");
-                    count--;
-                } else {
-                    if (count < keyBalances) {
-                        crate.classList.add("active");
-                        count++;
-                    } else {
-                        alert("Insunfficient Key");
-                    }
-                }
-                if (totalSelected) {
-                    totalSelected.textContent = `${count} selected`;
-                    console.log(count);
-                }
+            if (totalSelected) {
+                totalSelected.textContent = `${count} selected`;
+            }
 
-                if (count > 0) {
-                    openNow.classList.add("active");
-                    openNow.disabled = false;
-                } else {
-                    openNow.classList.remove("active");
-                    openNow.disabled = true;
-                }
-            });
+            if (openNow) {
+                openNow.disabled = count === 0;
+                openNow.classList.toggle("active", count > 0);
+            }
+        });
+    });
 
-            // Remove existing event listeners
-            $(".open-now").off("click");
-            $(".claim-items").off("click");
-
-            // const amount = 1;
-            $(".open-now").on("click", async () => {
+    if (openNow) {
+        $(openNow).on("click", async () => {
+            if (isOpening) return; // Prevent multiple clicks
+            isOpening = true;
+            openNow.disabled = true; // Disable button during operation
+            try {
                 await game.account.requestOpenCrates(count);
-                claimItem.classList.add("active");
-                claimItem.disabled = false;
-                crateOpen.classList.remove("active");
+                if (claimItem) {
+                    claimItem.classList.add("active");
+                    claimItem.disabled = false;
+                }
+                // Remove opened crates from UI
+                const activeCrates = document.querySelectorAll(".my-crates-child.active");
+                activeCrates.forEach(crate => crate.remove());
+                // Update local balances
+                localCrateBalance -= count;
+                localKeyBalance -= count;
+                // Update UI
+                $("#total-crates").text(`You have: ${localCrateBalance} crates - ${localKeyBalance} keys`);
+                if (totalSelected) {
+                    totalSelected.textContent = "0 selected";
+                }
                 openNow.classList.remove("active");
-                openNow.disabled = true;
-            });
+                count = 0;
+                alert("Crates opened successfully!");
+            } catch (err) {
+                console.error(`Failed to open crates: ${err}`);
+                alert("Failed to open crates. Please try again.");
+            } finally {
+                isOpening = false;
+                openNow.disabled = count === 0;
+            }
+        });
+    }
 
-            $(".claim-items").on("click", async () => {
+    if (claimItem) {
+        $(claimItem).on("click", async () => {
+            if (isOpening) return;
+            isOpening = true;
+            try {
                 await game.account.claimItems();
-            });
-        }
-    }
-
-    // Claim Rewards
-    {
-        let userRewards = await game.account.getValidRewards().catch(err => {
-            console.log(`Failed to get valid rewards: ${err}`);
-        });
-
-        const now = Math.floor(Date.now() / 1000);
-        let rewardLists: any[] = [];
-
-        if (userRewards && userRewards.validCrates) {
-            rewardLists = userRewards.validCrates.map(item => {
-                const secondsLeft = item.expiry - now;
-                const daysLeft = Math.max(Math.floor(secondsLeft / (60 * 60 * 24)), 0);
-
-                return {
-                    image: "./img/misc/crate.png",
-                    amount: item.amount,
-                    time: `Expired in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}`
-                };
-            });
-        }
-
-        $("#total-reward").text(`You have ${rewardLists.reduce((sum, item) => sum + item.amount, 0)} crates to claim`);
-
-        // Clear existing content to prevent duplicates
-        $(".rewards-grid-group").empty();
-
-        rewardLists.forEach((key) => {
-            $(".rewards-grid-group").append(`
-                <div class="reward-child">
-                    <img src="${key.image}" alt="Crates">
-                    <h3> Amount: ${key.amount}</h3>
-                    <h3>${key.time}</h3>
-                </div>
-            `);
-        });
-
-        if (rewardLists.length === 0) {
-            $("#claim-btn")
-                .attr("disabled", "true")
-                .css("opacity", "0.35");
-        }
-
-        // Remove existing event listener
-        $(".claim-all-btn").off("click");
-
-        $(".claim-all-btn").on("click", async () => {
-            await game.account.claimRewards().catch(err => {
-                console.log(`Failed claim rewards: ${err}`);
-            });
+                alert("Items claimed successfully!");
+                claimItem.disabled = true;
+            } catch (err) {
+                console.error(`Failed to claim items: ${err}`);
+                alert("Failed to claim items. Please try again.");
+            } finally {
+                isOpening = false;
+            }
         });
     }
+}
+
+
+function renderRewards(userRewards: any) {
+    const now = Math.floor(Date.now() / 1000);
+    const rewardLists: RewardItem[] = userRewards?.validCrates?.map((item: any) => {
+        const secondsLeft = item.expiry - now;
+        const daysLeft = Math.max(Math.floor(secondsLeft / (60 * 60 * 24)), 0);
+        return {
+            image: "./img/misc/crate.png",
+            amount: item.amount,
+            time: `Expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`
+        };
+    }) || [];
+
+    $("#total-reward").text(`You have ${rewardLists.reduce((sum, item) => sum + item.amount, 0)} crates to claim`);
+    $(".rewards-grid-group").empty();
+    rewardLists.forEach(item => {
+        $(".rewards-grid-group").append(`
+            <div class="reward-child">
+                <img src="${item.image}" alt="Crates">
+                <h3>Amount: ${item.amount}</h3>
+                <h3>${item.time}</h3>
+            </div>
+        `);
+    });
+
+    const claimBtn = $("#claim-btn");
+    claimBtn.attr("disabled", rewardLists.length === 0 ? "true" : "false")
+        .css("opacity", rewardLists.length === 0 ? "0.35" : "1");
+
+    $(".claim-all-btn").off("click").on("click", async () => {
+        try {
+            await game.account.claimRewards();
+            alert("Rewards claimed successfully!");
+            await loadInventory(game); // Refresh inventory
+        } catch (err) {
+            console.error(`Failed to claim rewards: ${err}`);
+            alert("Failed to claim rewards. Please try again.");
+        }
+    });
+}
+
+export async function loadInventory(game: Game) {
+    // Fetch balances and prices
+    const userKeyBalances = await fetchBalances(game, SurvivAssets.SurvivKeys);
+    const userCrateBalances = await fetchBalances(game, SurvivAssets.SurvivCrates);
+    const keyPrice = await fetchPrice(game, SaleItems.Keys, PaymentTokens.NativeToken);
+    const cratePrice = await fetchPrice(game, SaleItems.Crates, PaymentTokens.NativeToken);
+
+    // Prepare crate lists
+    const crateLists: CrateItem[] = [
+        {
+            balance: userKeyBalances?.keys || 0,
+            name: "Surviv Keys",
+            image: "./img/misc/Keys.png",
+            price: `${formatEther(keyPrice)} STT`
+        },
+        {
+            balance: userCrateBalances?.crates || 0,
+            name: "Surviv Crates",
+            image: "public/img/misc/Immotal_crate.png",
+            price: `${formatEther(cratePrice)} STT`
+        }
+    ];
+
+    // Setup tabs
+    const tabButtons = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
+    const tabContents = document.querySelectorAll<HTMLElement>(".crates-customize-child");
+    setupTabs(tabButtons, tabContents);
+
+    // Render crates
+    renderCrates(crateLists);
+
+    // Setup buy buttons
+    const mySupply = document.querySelectorAll(".crates-input");
+    const addBtn = document.querySelectorAll(".crates-add");
+    const removeBtn = document.querySelectorAll(".crates-remove");
+    const buyNow = document.querySelectorAll(".buy-now-btn");
+    setupBuyButtons(game, mySupply, addBtn, removeBtn, buyNow);
+
+    // Render my crates
+    renderMyCrates(userCrateBalances, userKeyBalances?.keys || 0);
+
+    // Setup crate opening
+    const crateOpen = document.querySelectorAll(".my-crates-child");
+    const totalSelected = document.querySelector(".total-selected");
+    const openNow = document.querySelector<HTMLButtonElement>(".open-now");
+    const claimItem = document.querySelector<HTMLButtonElement>(".claim-items");
+    setupCrateOpening(game, crateOpen, totalSelected, openNow, claimItem, userKeyBalances?.keys || 0);
+
+    // Render rewards
+    const userRewards = await fetchBalances(game, SurvivAssets.SurvivCrates);
+    renderRewards(userRewards);
 }
