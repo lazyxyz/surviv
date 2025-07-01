@@ -1222,14 +1222,14 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             if (type !== "vest") {
                 image.setFrame(`${def.idString}_world`).setVisible(true);
                 if (type === "helmet") {
-                    image.alpha = 0.7;
+                    image.alpha = 0.5;
                     image.setPos(
                         this.downed ? 10 : -15,
                         0
                     );
                 } else {
                     // backpack
-                    image.alpha = 0.5;
+                    image.alpha = 0.4;
                 }
             } else {
                 let color: number | undefined;

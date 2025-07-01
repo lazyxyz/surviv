@@ -34,6 +34,7 @@ export class Ninja extends Player {
 
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team) {
         super(game, userData, position, layer, team);
+        this.health = this.health * 0.7; // Reduce health by 30%
 
         this.isMobile = true;
         this.name = this.getRandomName(); // Assign random name
@@ -89,8 +90,18 @@ export class Ninja extends Player {
     private initializeInventory(): void {
         this.inventory.weapons[2] = new MeleeItem("steelfang", this);
 
-        const randomCola = Math.floor(Math.random() * 2) + 1;
-        this.inventory.items.setItem('cola', randomCola);
+        const roll = Math.random(); // random number between 0 and 1
+
+        if (roll < 0.5) {
+            // 50% chance
+            this.inventory.items.setItem('cola', 2);
+        } else if (roll < 0.8) {
+            // 30% chance (0.5 - 0.8)
+            this.inventory.items.setItem('cola', 3);
+        } else {
+            // 20% chance (0.8 - 1.0)
+            this.inventory.items.setItem('tablets', 2);
+        }
     }
 
     update(): void {

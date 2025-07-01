@@ -37,7 +37,6 @@ export class Zombie extends Player {
         this.name = this.getRandomName(); // Assign random name
         this.loadout.skin = Skins.fromString("zombie");
         this.inventory.scope = Scopes.definitions[0];
-        // this.inventory.scope.noDrop = true;
 
         // Set initial inventory with 30% chance for cola
         const randomCola = Math.random() < 0.3 ? 1 : 0;
