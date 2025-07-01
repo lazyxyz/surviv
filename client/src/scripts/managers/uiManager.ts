@@ -101,7 +101,7 @@ export class UIManager {
         return this.getRawPlayerNameNullish(id) ?? "[Unknown Player]";
     }
 
-    getPlayerData(id: number): { name: string, badge: string } {
+    getPlayerData(id: number): { name: string, badge: string} {
         // Name
         const element = $<HTMLSpanElement>("<span>");
         const player = this.game.playerNames.get(id) ?? this._teammateDataCache.get(id);
@@ -441,8 +441,9 @@ export class UIManager {
 
         this.gameOverScreenTimeout = window.setTimeout(() => gameOverOverlay.fadeIn(500), 500);
 
-        // Player rank
-        gameOverRank.text(`#${packet.rank}`).toggleClass("won", packet.won);
+        const rewards = packet.rewards;
+        // Player rank and rewards
+        gameOverRank.text(`#${packet.rank} - Rewards: ${rewards} Crates`).toggleClass("won", packet.won);
     }
 
     // I'd rewrite this as MapPings.filter(…), but it's not really clear how

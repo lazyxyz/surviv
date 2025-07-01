@@ -456,7 +456,6 @@ export class Game {
                 this.processUpdate(packet.output);
                 break;
             case packet instanceof GameOverPacket:
-                console.log("packet: ", packet);
                 this.uiManager.showGameOverScreen(packet.output);
                 break;
             case packet instanceof KillFeedPacket:
