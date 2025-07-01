@@ -582,8 +582,8 @@ input::-webkit-inner-spin-button {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 8px;
-    height: 310px;
     overflow: hidden;
+    width: 100%;
     transition: 300ms;
     &:hover {
       overflow-y: auto;
@@ -610,6 +610,14 @@ input::-webkit-inner-spin-button {
         padding: 8px 12px;
         background: #608939;
         border-radius: 12px;
+      }
+      h5 {
+        margin: 0px;
+        font-size: 14px;
+        font-weight: 500;
+        align-self: center;
+        color: white;
+        font-size: 14px;
       }
     }
   }
