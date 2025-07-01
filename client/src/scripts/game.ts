@@ -120,6 +120,7 @@ export class Game {
 
     teamMode = false;
     teamSize = TeamSize.Solo;
+    gameId = "";
 
     /**
      * proxy for `activePlayer`'s layer
@@ -552,6 +553,7 @@ export class Game {
 
         this.uiManager.emotes = packet.emotes;
         this.uiManager.updateEmoteWheel();
+        this.gameId = packet.gameId;
 
         const ui = this.uiManager.ui;
 

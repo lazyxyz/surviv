@@ -60,7 +60,8 @@ import { Ninja } from "./objects/bots/ninja";
     `@stylistic/indent-binary-ops`: eslint sucks at indenting ts types
  */
 export class Game implements GameData {
-    public readonly id: number;
+    public readonly port: number;
+    public readonly gameId: string;
 
     readonly map: GameMap;
     readonly gas: Gas;
@@ -223,9 +224,10 @@ export class Game implements GameData {
         return this._idAllocator.takeNext();
     }
 
-    constructor(id: number, maxTeamSize: TeamSize) {
-        this.id = id;
+    constructor(port: number, maxTeamSize: TeamSize, gameId: string) {
+        this.port = port;
         this.maxTeamSize = maxTeamSize;
+        this.gameId = gameId;
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
         this.updateGameData({
             aliveCount: 0,
@@ -245,7 +247,7 @@ export class Game implements GameData {
         this.setGameData({ allowJoin: true });
 
         this.pluginManager.emit("game_created", this);
-        Logger.log(`Game ${this.id} | Created in ${Date.now() - this._start} ms`);
+        Logger.log(`Game ${this.port} | Created in ${Date.now() - this._start} ms`);
 
         if (Config.addBot) {
             const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -466,7 +468,7 @@ export class Game implements GameData {
             // End the game in 1 second
             this.addTimeout(() => {
                 this.setGameData({ stopped: true });
-                Logger.log(`Game ${this.id} | Ended`);
+                Logger.log(`Game ${this.port} | Ended`);
             }, 1000);
         }
 
@@ -483,7 +485,7 @@ export class Game implements GameData {
         if (this._tickTimes.length >= 200) {
             const mspt = Statistics.average(this._tickTimes);
             const stddev = Statistics.stddev(this._tickTimes);
-            Logger.log(`Game ${this.id} | ms/tick: ${mspt.toFixed(2)} ± ${stddev.toFixed(2)} | Load: ${((mspt / this.idealDt) * 100).toFixed(1)}%`);
+            Logger.log(`Game ${this.port} | ms/tick: ${mspt.toFixed(2)} ± ${stddev.toFixed(2)} | Load: ${((mspt / this.idealDt) * 100).toFixed(1)}%`);
             this._tickTimes.length = 0;
         }
 
@@ -510,7 +512,7 @@ export class Game implements GameData {
         if (!this.allowJoin) return; // means a new game has already been created by this game
 
         parentPort?.postMessage({ type: WorkerMessages.CreateNewGame, maxTeamSize: this.maxTeamSize });
-        Logger.log(`Game ${this.id} | Attempting to create new game`);
+        Logger.log(`Game ${this.port} | Attempting to create new game`);
         this.setGameData({ allowJoin: false });
     }
 
@@ -740,16 +742,6 @@ export class Game implements GameData {
         this.updateGameData({ aliveCount: this.aliveCount });
         bot.joined = true;
 
-        bot.sendPacket(
-            JoinedPacket.create(
-                {
-                    maxTeamSize: this.maxTeamSize,
-                    teamID: bot.teamID ?? 0,
-                    emotes: bot.loadout.emotes
-                }
-            )
-        );
-
         this.addTimeout(() => { bot.disableInvulnerability(); }, 5000);
         return bot;
     }
@@ -845,7 +837,8 @@ export class Game implements GameData {
                 {
                     maxTeamSize: this.maxTeamSize,
                     teamID: player.teamID ?? 0,
-                    emotes: player.loadout.emotes
+                    emotes: player.loadout.emotes,
+                    gameId: this.gameId,
                 }
             )
         );
@@ -864,7 +857,7 @@ export class Game implements GameData {
             }, 3000);
         }
 
-        Logger.log(`Game ${this.id} | "${player.name}" joined`);
+        Logger.log(`Game ${this.port} | "${player.name}" joined`);
         // AccessLog to store usernames for this connection
         if (Config.protection?.punishments) {
             const username = player.name;

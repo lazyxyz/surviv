@@ -96,7 +96,7 @@ export class GameMap {
 
         this.seed = packet.seed = random(0, 2 ** 31);
 
-        Logger.log(`Game ${game.id} | Map seed: ${this.seed}`);
+        Logger.log(`Game ${game.port} | Map seed: ${this.seed}`);
 
         this.width = packet.width = mapDef.width;
         this.height = packet.height = mapDef.height;
