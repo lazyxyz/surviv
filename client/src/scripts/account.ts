@@ -697,4 +697,42 @@ export class Account extends EIP6963 {
             throw new Error(`Failed to request get commits: ${error.message || 'Unknown error'}`);
         }
     }
+
+    async getCrateAmounts(gameId: string): Promise<number[]> {
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Build URL with gameId query parameter
+            const url = new URL(`${selectedRegion.apiAddress}/api/getCrates`);
+            url.searchParams.append('gameId', gameId);
+
+            // Fetch available crates
+            const response = await fetch(url.toString(), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`,
+                },
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+            const data: ClaimResponse = await response.json();
+
+            // Check if response is successful and contains claims
+            if (!data.success || !data.claims || data.claims.length === 0) {
+                throw new Error('gameId not found');
+            }
+
+            // Extract crate.amount from each claim
+            const amounts = data.claims.map((claim) => claim.crate.amount);
+
+            return amounts;
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            throw new Error(error.message === 'gameId not found' ? 'gameId not found' : `Failed to get crate amounts: ${error.message || 'Unknown error'}`);
+        }
+    }
 }

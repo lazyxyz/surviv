@@ -2294,7 +2294,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         const rank = won ? 1 as const : this.game.aliveCount + 1;
 
         if (this.address) {
-            saveRewards(this.address, rank, this.game.teamMode, this.game.id).catch(err => {
+            saveRewards(this.address, rank, this.game.teamMode, this.game.gameId).catch(err => {
                 console.log(`Save rewards failed: ${err}`);
             });
         }

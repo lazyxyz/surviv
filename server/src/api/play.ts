@@ -33,17 +33,17 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                     (simultaneousConnections[ip] >= (maxSimultaneousConnections ?? Infinity))
                     || (joinAttempts[ip] >= (maxJoinAttempts?.count ?? Infinity))
                 ) {
-                    Logger.log(`Game ${game.id} | Rate limited: ${ip}`);
+                    Logger.log(`Game ${game.port} | Rate limited: ${ip}`);
                     forbidden(res);
                     return;
                 } else {
                     if (maxSimultaneousConnections) {
                         simultaneousConnections[ip] = (simultaneousConnections[ip] ?? 0) + 1;
-                        Logger.log(`Game ${game.id} | ${simultaneousConnections[ip]}/${maxSimultaneousConnections} simultaneous connections: ${ip}`);
+                        Logger.log(`Game ${game.port} | ${simultaneousConnections[ip]}/${maxSimultaneousConnections} simultaneous connections: ${ip}`);
                     }
                     if (maxJoinAttempts) {
                         joinAttempts[ip] = (joinAttempts[ip] ?? 0) + 1;
-                        Logger.log(`Game ${game.id} | ${joinAttempts[ip]}/${maxJoinAttempts.count} join attempts in the last ${maxJoinAttempts.duration} ms: ${ip}`);
+                        Logger.log(`Game ${game.port} | ${joinAttempts[ip]}/${maxJoinAttempts.count} join attempts in the last ${maxJoinAttempts.duration} ms: ${ip}`);
                     }
                 }
             }
@@ -142,10 +142,10 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
 
             if (!player) return;
 
-            Logger.log(`Game ${game.id} | "${player.name}" left`);
+            Logger.log(`Game ${game.port} | "${player.name}" left`);
             game.removePlayer(player);
         }
-    }).listen(Config.host, game.id, (): void => {
-        Logger.log(`Game ${game.id} | Listening on ${Config.host}:${game.id}`);
+    }).listen(Config.host, game.port, (): void => {
+        Logger.log(`Game ${game.port} | Listening on ${Config.host}:${game.port}`);
     });
 }
