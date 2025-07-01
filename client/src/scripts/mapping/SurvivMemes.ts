@@ -3,7 +3,6 @@ export const assetsMapping = {
   "assets": [
     "fawkes_mask",
     "forever_alone",
-    "y_u_no",
     "fu_meme",
     "harold",
     "i_known_bro",
@@ -11,6 +10,7 @@ export const assetsMapping = {
     "mr_bean",
     "okay_guy",
     "too_small",
-    "trollface"
+    "trollface",
+    "y_u_no"
   ]
 };

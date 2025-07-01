@@ -77,6 +77,7 @@ export async function visibleMeless(game: Game) {
         console.log(`Get DivineArms error: ${err}`);
     });
     const userArmsBalance = { ...SilverArms, ...GoldArms, ...DivineArms };
+
     const userArms = Object.entries(userArmsBalance).map(([key, _]) => key);
 
     const userMelees=  Melees.definitions.filter(argument =>

@@ -17,7 +17,8 @@ import {
     DivineGunsMapping,
     SurvivMemesMapping,
     SurvivCratesMapping,
-    SurvivKeysMapping
+    SurvivKeysMapping,
+    SurvivCardsMapping
 } from "./mapping";
 import { abi as survivRewardsABI } from "./abi/ISurvivRewards.json";
 import { abi as crateBaseABI } from "./abi/ICrateBase.json";
@@ -47,6 +48,7 @@ export enum SurvivAssets {
     SurvivMemes,
     SurvivCrates,
     SurvivKeys,
+    SurvivCard
 }
 
 export const SaleItems = {
@@ -294,13 +296,11 @@ export class Account extends EIP6963 {
     /**
  * Retrieves balances for a specific asset type, mapping token IDs to asset names.
  * @param assetType - The type of asset to query (e.g., SilverSkins, DivineArms).
- * @param pagination - Number of token IDs to query per page (default: 10).
- * @param page - The page number to query (default: 0, first page).
  * @param returnAll - If true, includes assets with zero balances; if false, only includes assets with balance > 0 (default: false).
  * @returns A promise resolving to an object mapping asset names to their balances.
  * @throws Error if the contract address is invalid or provider is unavailable.
  */
-    async getBalances(assetType: SurvivAssets, pagination: number = 10, page: number = 0, returnAll: boolean = false): Promise<Record<string, number>> {
+    async getBalances(assetType: SurvivAssets, returnAll: boolean = false): Promise<Record<string, number>> {
         const assetMappings = {
             [SurvivAssets.SilverSkins]: SilverSkinsMapping,
             [SurvivAssets.GoldSkins]: GoldSkinsMapping,
@@ -312,6 +312,7 @@ export class Account extends EIP6963 {
             [SurvivAssets.SurvivMemes]: SurvivMemesMapping,
             [SurvivAssets.SurvivCrates]: SurvivCratesMapping,
             [SurvivAssets.SurvivKeys]: SurvivKeysMapping,
+            [SurvivAssets.SurvivCard]: SurvivCardsMapping,
         };
 
         const selectedMapping = assetMappings[assetType];
@@ -328,10 +329,7 @@ export class Account extends EIP6963 {
         const signer = await ethersProvider.getSigner();
         const contract = new ethers.Contract(selectedMapping.address, erc1155ABI, signer);
 
-        const maxTokenId = selectedMapping.assets.length;
-        const startIndex = page * pagination;
-        const endIndex = Math.min(startIndex + pagination, maxTokenId);
-        const tokenIds = Array.from({ length: endIndex - startIndex }, (_, i) => startIndex + i);
+        const tokenIds = Array.from({ length: selectedMapping.assets.length }, (_, i) => i);
         const accounts = Array(tokenIds.length).fill(this.address);
 
         const balances = await contract.balanceOfBatch(accounts, tokenIds);
@@ -634,7 +632,6 @@ export class Account extends EIP6963 {
             const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
             const price = await survivShopContract.getPrice(paymentToken, item);
             const totalCost = price * BigInt(amount);
-            console.log("totalCost: ", totalCost);
 
             if (paymentToken == PaymentTokens.NativeToken) {
                 const tx = await survivShopContract.buyItems(item, amount, paymentToken, { value: totalCost });
@@ -678,7 +675,7 @@ export class Account extends EIP6963 {
         }
     }
 
-     async getCommits(): Promise<any> {
+    async getCommits(): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }

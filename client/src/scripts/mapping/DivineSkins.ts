@@ -3,6 +3,14 @@ export const assetsMapping = {
   "assets": [
     "android",
     "bee",
+    "brush",
+    "catton",
+    "chill_guy",
+    "cosmo",
+    "cow",
+    "derp",
+    "fine",
+    "meow",
     "puppet",
     "rhino",
     "saita",
@@ -12,14 +20,6 @@ export const assetsMapping = {
     "troll",
     "wojax",
     "zebra",
-    "zombie",
-    "brush",
-    "catton",
-    "chill_guy",
-    "cosmo",
-    "cow",
-    "derp",
-    "fine",
-    "meow"
+    "zombie"
   ]
 };
