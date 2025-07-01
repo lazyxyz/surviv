@@ -35,8 +35,8 @@ function renderRewardList(game: Game, rewardData: RewardData): void {
         $rewardGrid.append(`
             <div class="reward-child">
                 <img src="${item.image}" alt="Crates">
+                <h5>${item.time}</h5>
                 <h3>Amount: ${item.amount}</h3>
-                <h3>${item.time}</h3>
             </div>
         `);
     });

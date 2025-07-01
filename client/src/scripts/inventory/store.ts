@@ -34,6 +34,33 @@ function renderStoreItems(storeItems: StoreItem[]): void {
     });
 }
 
+function showTimedAlert(message, duration = 3000) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.innerHTML =
+        `
+    <h1 id="done-messages">${message}</h1>
+    `;
+    alertDiv.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #5CB824;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      z-index: 9999;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+
+    document.body.appendChild(alertDiv);
+
+    // Auto-remove after specified duration
+    setTimeout(() => {
+        alertDiv.remove();
+    }, duration);
+}
+
 function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
     const $cards = $(".crates-card");
     $(document).off("click", ".crates-add, .crates-remove, .buy-now-btn");
@@ -72,7 +99,8 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
             $buyButton.prop("disabled", true);
             try {
                 await game.account.buyItems(itemType, amount, PaymentTokens.NativeToken);
-                alert("Purchase successful!");
+                // alert("Purchase successful!");
+                showTimedAlert("Purchase successful!", 3000);
                 amount = 0;
                 $purchaseAmount.text("0");
                 $buyButton.prop("disabled", true).removeClass("active");

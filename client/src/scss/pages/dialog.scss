@@ -17,6 +17,10 @@ input::-webkit-inner-spin-button {
   max-width: 500px;
 }
 
+#done-messages {
+  color: red;
+}
+
 #warning-modal {
   text-align: center;
   border: 2.5px solid rgba(0, 0, 0, 0.3);
