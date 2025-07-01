@@ -213,6 +213,7 @@ function setupCrateOpening(game: Game, crateOpen: NodeListOf<Element>, totalSele
                 await game.account.claimItems();
                 alert("Items claimed successfully!");
                 claimItem.disabled = true;
+                claimItem.classList.remove("active");
             } catch (err) {
                 console.error(`Failed to claim items: ${err}`);
                 alert("Failed to claim items. Please try again.");
