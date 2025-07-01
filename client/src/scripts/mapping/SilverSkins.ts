@@ -3,6 +3,14 @@ export const assetsMapping = {
   "assets": [
     "algeria",
     "america",
+    "argentina",
+    "australia",
+    "brazil",
+    "cambodia",
+    "canada",
+    "china",
+    "congo",
+    "croatia",
     "denmark",
     "england",
     "finland",
@@ -13,7 +21,6 @@ export const assetsMapping = {
     "israel",
     "italy",
     "japan",
-    "argentina",
     "malaysia",
     "north_korea",
     "norway",
@@ -24,7 +31,6 @@ export const assetsMapping = {
     "senegal",
     "slovakia",
     "south_africa",
-    "australia",
     "south_korea",
     "spain",
     "sudan",
@@ -35,13 +41,7 @@ export const assetsMapping = {
     "turkey",
     "ukraine",
     "vanuatu",
-    "brazil",
     "vietnam",
-    "world",
-    "cambodia",
-    "canada",
-    "china",
-    "congo",
-    "croatia"
+    "world"
   ]
 };
