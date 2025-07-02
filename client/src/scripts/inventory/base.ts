@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { SurvivAssets } from "../account";
 import type { Game } from "../game";
+import { successAlert, errorAlert, warningAlert } from "../modal";
 
 function renderCrates(userCrateBalances: any, keyBalances: number): void {
     const crateImages = userCrateBalances?.crates
@@ -22,6 +23,8 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
     let isOpening = false;
     let localCrateBalance = crates.length;
     let localKeyBalance = keyBalances;
+    const crateList = Array.from(crates);
+
     $(document).off("click", ".my-crates-child .open-now .claim-items");
 
     crates.forEach(crate => {
@@ -34,8 +37,10 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
             } else if (selectedCount < localKeyBalance) {
                 crate.classList.add("active");
                 selectedCount++;
+                console.log(crate.classList);
+
             } else {
-                alert("Insufficient keys!");
+                warningAlert("Insufficient keys!");
             }
 
             if (totalSelected) {
@@ -47,7 +52,25 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
                 openNowButton.classList.toggle("active", selectedCount > 0);
             }
         });
+
     });
+
+    $(".crates-info").on("click", (item: any, selectedCrates: any) => {
+        crates.forEach(crate => crate.classList.remove("active"));
+        selectedCount === 0
+
+        if (localCrateBalance > keyBalances) {
+            const item = crateList.slice(0, localKeyBalance);
+            item.forEach(crate => crate.classList.add("active"));
+            const selectedItems = item.map(crate => crate.textContent);
+            selectedCount += selectedItems.length;
+
+            if (totalSelected) {
+                totalSelected.textContent = `${selectedCount} selected`;
+            }
+        }
+    });
+
 
     if (openNowButton) {
         $(openNowButton).on("click", async () => {
@@ -66,11 +89,12 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
                     }
                     openNowButton.classList.remove("active");
                     selectedCount = 0;
-                    alert("Crates opened successfully!");
+                    successAlert("Crates opened successfully!");
                 }
             } catch (err) {
                 console.error(`Failed to open crates: ${err}`);
-                alert("Failed to open crates. Please try again.");
+                errorAlert("Failed to open crates. Please try again!");
+
             } finally {
                 isOpening = false;
                 await loadCrates(game);
@@ -98,12 +122,12 @@ async function updateClaimButton(game: Game): Promise<void> {
         isProcessing = true;
         try {
             await game.account.claimItems();
-            alert("Items claimed successfully!");
+            successAlert("Items claimed successfully!");
             claimButton.classList.remove("active");
             claimButton.disabled = true;
         } catch (err) {
             console.error(`Failed to claim items: ${err}`);
-            alert("Failed to claim items. Please try again.");
+            errorAlert("Failed to claim items. Please try again!");
         } finally {
             isProcessing = false;
             await updateClaimButton(game);
@@ -124,6 +148,7 @@ async function loadCrates(game: Game): Promise<void> {
     renderCrates(userCrateBalances, userKeyBalances?.keys || 0);
 
     const crates = document.querySelectorAll(".my-crates-child");
+    const selectAll = document.querySelectorAll(".crates-info");
     const totalSelected = document.querySelector(".total-selected");
     const openNowButton = document.querySelector<HTMLButtonElement>(".open-now");
     setupCrateOpening(game, crates, totalSelected, openNowButton, userKeyBalances?.keys || 0);

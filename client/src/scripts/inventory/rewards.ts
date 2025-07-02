@@ -1,5 +1,6 @@
 import $ from "jquery";
 import type { Game } from "../game";
+import { successAlert, warningAlert, errorAlert } from "../modal";
 
 interface RewardItem {
     image: string;
@@ -47,10 +48,10 @@ function renderRewardList(game: Game, rewardData: RewardData): void {
         $claimButton.prop("disabled", true);
         try {
             await game.account.claimRewards();
-            alert("Rewards claimed successfully!");
+            successAlert("Rewards claimed successfully!")
         } catch (err) {
             console.error(`Failed to claim rewards: ${err}`);
-            alert(`Failed to claim rewards: ${err}`);
+            successAlert(`Failed to claim rewards: ${err}`);
         } finally {
             isProcessing = false;
             $claimButton.prop("disabled", false);
