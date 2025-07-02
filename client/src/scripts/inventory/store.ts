@@ -2,6 +2,7 @@ import $ from "jquery";
 import { formatEther } from "ethers";
 import { PaymentTokens, SaleItems, SurvivAssets } from "../account";
 import type { Game } from "../game";
+import { successAlert } from "../modal";
 
 interface StoreItem {
     balance: number;
@@ -32,33 +33,6 @@ function renderStoreItems(storeItems: StoreItem[]): void {
             </div>
         `);
     });
-}
-
-function showTimedAlert(message, duration = 3000) {
-    // Create alert element
-    const alertDiv = document.createElement('div');
-    alertDiv.innerHTML =
-        `
-    <h1 id="done-messages">${message}</h1>
-    `;
-    alertDiv.style.cssText = `
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #5CB824;
-      color: white;
-      padding: 15px 20px;
-      border-radius: 8px;
-      z-index: 9999;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    `;
-
-    document.body.appendChild(alertDiv);
-
-    // Auto-remove after specified duration
-    setTimeout(() => {
-        alertDiv.remove();
-    }, duration);
 }
 
 function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
@@ -100,7 +74,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
             try {
                 await game.account.buyItems(itemType, amount, PaymentTokens.NativeToken);
                 // alert("Purchase successful!");
-                showTimedAlert("Purchase successful!", 3000);
+                successAlert("Purchase successful!", 3000);
                 amount = 0;
                 $purchaseAmount.text("0");
                 $buyButton.prop("disabled", true).removeClass("active");
