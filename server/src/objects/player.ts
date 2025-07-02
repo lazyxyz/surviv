@@ -51,7 +51,7 @@ import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
 import { weaponPresentType } from "@common/typings";
-import { saveRewards } from "../api/api";
+import { claimRewards } from "../api/api";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -2294,11 +2294,14 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         const rank = won ? 1 as const : this.game.aliveCount + 1;
 
         if (this.address) {
-            saveRewards(this.address, rank, this.game.teamMode, this.game.gameId).then((data: any) => {
+            claimRewards(this.address, rank, this.kills, this.game.teamMode, this.game.gameId).then((data: any) => {
                 let rewards = 0;
                 if (data.success) {
-                    rewards = data.data.crate.amount;
+                    rewards = data.amount;
+                } else {
+                    rewards = -data.amount;
                 }
+                
                 const packet = GameOverPacket.create({
                     won,
                     playerID: this.id,

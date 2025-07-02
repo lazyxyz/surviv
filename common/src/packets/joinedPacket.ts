@@ -16,7 +16,6 @@ export type JoinedPacketData =
 
 export const JoinedPacket = createPacket("JoinedPacket")<JoinedPacketData>({
     serialize(stream, data) {
-        console.log("serialize data: ", data.gameId);
         stream.writeString(36, data.gameId);
 
         stream.writeUint8(data.maxTeamSize);

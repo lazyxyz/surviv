@@ -20,7 +20,7 @@ export async function validateJWT(token: string): Promise<{ walletAddress: strin
 }
 
 
-export async function saveRewards(user: string, rank: number, teamMode: boolean, gameId: string): Promise<void> {
+export async function claimRewards(player: string, rank: number, kills: number, teamMode: boolean, gameId: string): Promise<any> {
     const url = `${process.env.API_URL}/api/saveRewards`;
     try {
         const res = await fetch(url, {
@@ -29,18 +29,13 @@ export async function saveRewards(user: string, rank: number, teamMode: boolean,
                 'Content-Type': 'application/json',
                 'x-api-key': process.env.X_API_KEY || '',
             },
-            body: JSON.stringify({ user, rank, teamMode, gameId }),
+            body: JSON.stringify({ player, rank, kills, teamMode, gameId }),
         });
 
         const data = await res.json();
 
-        if (!res.ok || !data.success) {
-            throw new Error(data.error || 'Failed to save rewards');
-        }
-
         return data;
     } catch (error: any) {
-        console.log("error: ", error);
         throw new Error(error);
     }
 }
