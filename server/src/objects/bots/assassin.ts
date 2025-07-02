@@ -105,8 +105,19 @@ export class Assassin extends Player {
         this.inventory.weapons[2] = new MeleeItem("kbar", this);
         this.inventory.setActiveWeaponIndex(0);
         this.inventory.scope = Scopes.definitions[2];
-        const randomMediKit = Math.random() < 0.5 ? 1 : 0;
-        if (randomMediKit) this.inventory.items.setItem('medikit', randomMediKit);
+
+        const roll = Math.random(); // random number between 0 and 1
+
+        if (roll < 0.5) {
+            // 50% chance
+            this.inventory.items.setItem('cola', 2);
+        } else if (roll < 0.8) {
+            // 30% chance (0.5 - 0.8)
+            this.inventory.items.setItem('cola', 3);
+        } else {
+            // 20% chance (0.8 - 1.0)
+            this.inventory.items.setItem('tablets', 2);
+        }
     }
 
     private equipWeapon(weaponName: string, ammoType: string, ammoAmount: number): void {

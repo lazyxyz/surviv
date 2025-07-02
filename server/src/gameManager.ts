@@ -5,6 +5,7 @@ import { Config } from "./config";
 import { Game } from "./game";
 import { createServer } from "./utils/serverHelpers";
 import { initPlayRoutes } from "./api/play";
+import { v4 as uuidv4 } from 'uuid';
 
 export interface WorkerInitData {
     readonly id: number
@@ -183,10 +184,11 @@ export async function newGame(maxTeamSize?: TeamSize): Promise<number> {
 export const games: Array<GameContainer | undefined> = [];
 
 if (!isMainThread) {
-    const id = (workerData as WorkerInitData).id;
+    const port = (workerData as WorkerInitData).id;
+    const gameId = uuidv4();
     let maxTeamSize = (workerData as WorkerInitData).maxTeamSize;
-
-    let game = new Game(id, maxTeamSize);
+    
+    let game = new Game(port, maxTeamSize, gameId);
 
     // string = ip, number = expire time
     const allowedIPs = new Map<string, number>();

@@ -749,7 +749,7 @@ export class PluginManager {
         try {
             const plugin = new pluginClass(this.game);
             this._plugins.add(plugin);
-            Logger.log(`Game ${this.game.id} | Plugin ${pluginClass.name} loaded`);
+            Logger.log(`Game ${this.game.port} | Plugin ${pluginClass.name} loaded`);
         } catch (error) {
             console.error(`Failed to load plugin ${pluginClass.name}, err:`, error);
         }

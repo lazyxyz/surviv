@@ -2294,25 +2294,45 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         const rank = won ? 1 as const : this.game.aliveCount + 1;
 
         if (this.address) {
-            saveRewards(this.address, rank, this.game.teamMode, this.game.id).catch(err => {
+            saveRewards(this.address, rank, this.game.teamMode, this.game.gameId).then((data: any) => {
+                let rewards = 0;
+                if (data.success) {
+                    rewards = data.data.crate.amount;
+                }
+                const packet = GameOverPacket.create({
+                    won,
+                    playerID: this.id,
+                    kills: this.kills,
+                    damageDone: this.damageDone,
+                    damageTaken: this.damageTaken,
+                    timeAlive: (this.game.now - this.joinTime) / 1000,
+                    rank,
+                    rewards,
+                } as unknown as GameOverData);
+
+                this.sendPacket(packet);
+                for (const spectator of this.spectators) {
+                    spectator.sendPacket(packet);
+                }
+
+            }).catch(err => {
                 console.log(`Save rewards failed: ${err}`);
+                const packet = GameOverPacket.create({
+                    won,
+                    playerID: this.id,
+                    kills: this.kills,
+                    damageDone: this.damageDone,
+                    damageTaken: this.damageTaken,
+                    timeAlive: (this.game.now - this.joinTime) / 1000,
+                    rank,
+                    rewards: 0,
+                } as unknown as GameOverData);
+
+                this.sendPacket(packet);
+                for (const spectator of this.spectators) {
+                    spectator.sendPacket(packet);
+                }
             });
-        }
-
-        const packet = GameOverPacket.create({
-            won,
-            playerID: this.id,
-            kills: this.kills,
-            damageDone: this.damageDone,
-            damageTaken: this.damageTaken,
-            timeAlive: (this.game.now - this.joinTime) / 1000,
-            rank
-        } as GameOverData);
-
-        this.sendPacket(packet);
-
-        for (const spectator of this.spectators) {
-            spectator.sendPacket(packet);
         }
     }
 
