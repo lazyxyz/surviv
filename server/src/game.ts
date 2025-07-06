@@ -255,7 +255,7 @@ export class Game implements GameData {
             const zombieCount = randomInRange(10, 20);
             const ninjaCount = randomInRange(5, 10);
             const assassinCount = randomInRange(3, 5);
-
+            
             this.activeZombie(zombieCount);
             this.activeNinja(ninjaCount);
             this.activeAssassin(assassinCount);
