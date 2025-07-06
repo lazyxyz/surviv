@@ -456,7 +456,7 @@ export class Game implements GameData {
                 player.attacking = false;
                 player.sendEmote(player.loadout.emotes[4]);
                 if (player instanceof Gamer) {
-                    player.sendGameOverPacket(true);
+                    player.handleGameOver(true);
                 }
                 this.pluginManager.emit("player_did_win", player);
             }
