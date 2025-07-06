@@ -52,6 +52,7 @@ import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
 import { weaponPresentType } from "@common/typings";
 import { claimRewards } from "../api/api";
+import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -2192,7 +2193,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         // Send game over to dead player
         if (!this.disconnected) {
-            this.sendGameOverPacket();
+            this.handleGameOver();
         }
 
         // Remove player from kill leader
@@ -2290,51 +2291,43 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         reviver.executeAction(new ReviveAction(reviver, this));
     }
 
-    sendGameOverPacket(won = false): void {
+    handleGameOver(won = false): void {
         const rank = won ? 1 as const : this.game.aliveCount + 1;
 
         if (this.address) {
+            const packet = GameOverPacket.create({
+                won,
+                playerID: this.id,
+                kills: this.kills,
+                damageDone: this.damageDone,
+                damageTaken: this.damageTaken,
+                timeAlive: (this.game.now - this.joinTime) / 1000,
+                rank,
+            } as unknown as GameOverData);
+
+            this.sendPacket(packet);
+            for (const spectator of this.spectators) {
+                spectator.sendPacket(packet);
+            }
+
             claimRewards(this.address, rank, this.kills, this.game.teamMode, this.game.gameId).then((data: any) => {
                 let rewards = 0;
+                let eligible = false;
                 if (data.success) {
                     rewards = data.amount;
-                } else {
-                    rewards = -data.amount;
+                    eligible = true;
                 }
-                
-                const packet = GameOverPacket.create({
-                    won,
-                    playerID: this.id,
-                    kills: this.kills,
-                    damageDone: this.damageDone,
-                    damageTaken: this.damageTaken,
-                    timeAlive: (this.game.now - this.joinTime) / 1000,
+
+                const packet = RewardsPacket.create({
+                    eligible,
                     rank,
                     rewards,
-                } as unknown as GameOverData);
+                } as unknown as RewardsData);
 
                 this.sendPacket(packet);
-                for (const spectator of this.spectators) {
-                    spectator.sendPacket(packet);
-                }
-
             }).catch(err => {
-                console.log(`Save rewards failed: ${err}`);
-                const packet = GameOverPacket.create({
-                    won,
-                    playerID: this.id,
-                    kills: this.kills,
-                    damageDone: this.damageDone,
-                    damageTaken: this.damageTaken,
-                    timeAlive: (this.game.now - this.joinTime) / 1000,
-                    rank,
-                    rewards: 0,
-                } as unknown as GameOverData);
+                console.log("Error claim rewards: ", err);
 
-                this.sendPacket(packet);
-                for (const spectator of this.spectators) {
-                    spectator.sendPacket(packet);
-                }
             });
         }
     }

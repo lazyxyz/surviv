@@ -27,6 +27,7 @@ import { formatDate, html } from "../utils/misc";
 import { SuroiSprite } from "../utils/pixi";
 import { ClientPerkManager } from "./perkManager";
 import { getBadgeImage } from "../badges";
+import type { RewardsData } from "@common/packets/rewardsPacket";
 
 function safeRound(value: number): number {
     if (0 < value && value <= 1) return 1;
@@ -440,10 +441,13 @@ export class UIManager {
         if (packet.won) void game.music.play();
 
         this.gameOverScreenTimeout = window.setTimeout(() => gameOverOverlay.fadeIn(500), 500);
+    }
 
+    showRewardsScreen(packet: RewardsData): void {
+        const game = this.game;
         const rewards = packet.rewards;
+        console.log("rewards:", packet);
         // Player rank and rewards
-        gameOverRank.text(`#${packet.rank} - Rewards: ${rewards} Crates`).toggleClass("won", packet.won);
     }
 
     // I'd rewrite this as MapPings.filter(…), but it's not really clear how

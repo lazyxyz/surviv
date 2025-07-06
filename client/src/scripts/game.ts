@@ -64,6 +64,7 @@ import { EIP6963 } from "./eip6963";
 import { Account } from "./account";
 import { ReadyPacket } from "@common/packets/readyPacket";
 import { visibleConnectWallet, visibleWallet } from "./wallet";
+import { RewardsPacket } from "@common/packets/rewardsPacket";
 
 /* eslint-disable @stylistic/indent */
 
@@ -457,6 +458,9 @@ export class Game {
                 break;
             case packet instanceof GameOverPacket:
                 this.uiManager.showGameOverScreen(packet.output);
+                break;
+            case packet instanceof RewardsPacket:
+                this.uiManager.showRewardsScreen(packet.output);
                 break;
             case packet instanceof KillFeedPacket:
                 this.uiManager.processKillFeedPacket(packet.output);

@@ -9,17 +9,14 @@ export type GameOverData = {
 } & ({
     readonly won: true
     readonly rank: 0,
-    readonly rewards: 0,
 } | {
     readonly won: false
     readonly rank: number
-    readonly rewards: number
 });
 
 export const GameOverPacket = createPacket("GameOverPacket")<GameOverData>({
     serialize(strm, data) {
         strm.writeUint8(data.rank)
-            .writeInt8(data.rewards)
             .writeObjectId(data.playerID)
             .writeUint8(data.kills)
             .writeUint16(data.damageDone)
@@ -32,7 +29,6 @@ export const GameOverPacket = createPacket("GameOverPacket")<GameOverData>({
         return {
             won: rank === 1,
             rank,
-            rewards: stream.readInt8(),
             playerID: stream.readObjectId(),
             kills: stream.readUint8(),
             damageDone: stream.readUint16(),
