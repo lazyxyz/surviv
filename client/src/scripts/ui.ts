@@ -19,7 +19,7 @@ import { Config, type ServerInfo } from "./config";
 import { type Game } from "./game";
 import { news } from "./news/newsPosts";
 import { body, createDropdown } from "./uiHelpers";
-import { type CVarTypeMapping } from "./utils/console/defaultClientCVars";
+import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaultClientCVars";
 
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
@@ -27,10 +27,12 @@ import type { TranslationKeys } from "../typings/translations";
 // import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { getBadgeImage, visibleBadges } from "./badges";
-import {loadInventory} from "./inventory";
+import { loadInventory } from "./inventory";
 import { visibleSkin } from "./skin";
 import { visibleMeless } from "./weapons/weapons_meless";
 import { visibleConnectWallet } from "./wallet";
+import { Loots } from "@common/definitions/loots";
+import { Badges } from "@common/definitions/badges";
 /*
     eslint-disable
 
@@ -85,15 +87,15 @@ export async function visibleInventory(game: Game) {
         await loadInventory(game);
     })
 
-    $('#tab-skins').on('click',() => {
+    $('#tab-skins').on('click', () => {
         visibleSkin(game);
     })
-    
-    $('#tab-weapons').on('click',() => {
+
+    $('#tab-weapons').on('click', () => {
         visibleMeless(game);
     })
-    
-    $('#tab-badges').on('click',() => {
+
+    $('#tab-badges').on('click', () => {
         visibleBadges(game);
     })
 }
@@ -105,7 +107,7 @@ export async function setUpUI(game: Game): Promise<void> {
     if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/suroi_beta_${MODE.idString}.svg`);
     if (MODE.specialPlayButtons) {
         const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
-        
+
         for (let buttonIndex = 0; buttonIndex < playButtons.length; buttonIndex++) {
             const button = playButtons[buttonIndex];
 
@@ -336,6 +338,28 @@ export async function setUpUI(game: Game): Promise<void> {
             // const devPass = game.console.getBuiltInCVar("dv_password");
             // if (devPass) params.set("password", devPass);
 
+            {
+                // const name = game.console.getBuiltInCVar("cv_player_name");
+                
+                // const address = game.account.address ? game.account.address : "";
+                
+                let skin: typeof defaultClientCVars["cv_loadout_skin"];
+                const playerSkin = Loots.fromStringSafe(
+                    game.console.getBuiltInCVar("cv_loadout_skin")
+                ) ?? Loots.fromString(
+                    typeof (skin = defaultClientCVars.cv_loadout_skin) === "object"
+                    ? skin.value
+                    : skin
+                );
+
+                if (playerSkin) params.set("skin", playerSkin.idString);
+
+                // const badge = game.console.getBuiltInCVar("cv_loadout_badge");
+                // const emotes = EMOTE_SLOTS.map(
+                //     slot => Emotes.fromStringSafe(game.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))
+                // );
+            }
+
             const badge = game.console.getBuiltInCVar("cv_loadout_badge");
             if (badge) params.set("badge", badge);
 
@@ -423,7 +447,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
     // Join server when play buttons are clicked
     $("#btn-play-solo, #btn-play-squad").on("click", event => {
-        if(!game.account.address) {
+        if (!game.account.address) {
             alert("Please connect your wallet to continue!")
             return;
         }

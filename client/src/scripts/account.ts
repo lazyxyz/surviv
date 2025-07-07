@@ -641,7 +641,6 @@ export class Account extends EIP6963 {
                 throw new Error('Not supported yet.');
             }
 
-
         } catch (error: any) {
             clearTimeout(timeoutId);
             throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);

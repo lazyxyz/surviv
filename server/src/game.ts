@@ -6,7 +6,7 @@ import { Obstacles, type ObstacleDefinition } from "@common/definitions/obstacle
 import { SyncedParticles, type SyncedParticleDefinition, type SyncedParticleSpawnerDefinition } from "@common/definitions/syncedParticles";
 import { type ThrowableDefinition } from "@common/definitions/throwables";
 import { PlayerInputPacket } from "@common/packets/inputPacket";
-import { JoinPacket, type JoinPacketData } from "@common/packets/joinPacket";
+import { JoinPacket, type GameData } from "@common/packets/joinPacket";
 import { JoinedPacket } from "@common/packets/joinedPacket";
 import { KillFeedPacket, type KillFeedPacketData } from "@common/packets/killFeedPacket";
 import { type InputPacket, type OutputPacket } from "@common/packets/packet";
@@ -793,7 +793,7 @@ export class Game implements GameData {
     }
 
     // Called when a JoinPacket is sent by the client
-    activatePlayer(player: Gamer, packet: JoinPacketData): void {
+    activatePlayer(player: Gamer, packet: GameData): void {
         // // DEV MODE
         // {
         //     player.inventory.vest = Armors.fromString("developr_vest");

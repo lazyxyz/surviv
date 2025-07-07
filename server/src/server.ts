@@ -19,7 +19,6 @@ if (isMainThread) {
     let app = createServer();
     initGameRoutes(app);
     initTeamRoutes(app);
-    // initAuthRoutes(app);
 
     app.listen(Config.host, Config.port, async (): Promise<void> => {
         console.log(

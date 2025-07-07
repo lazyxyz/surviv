@@ -1,33 +1,33 @@
 import { GameConstants } from "../constants";
-import { Badges, type BadgeDefinition } from "../definitions/badges";
-import { Emotes, type EmoteDefinition } from "../definitions/emotes";
+import { Badges } from "../definitions/badges";
+import { Emotes } from "../definitions/emotes";
 import { Loots } from "../definitions/loots";
-import { type SkinDefinition } from "../definitions/skins";
+import { Melees } from "../definitions/melees";
+import { Guns } from "../definitions/guns";
+import { Skins } from "../definitions/skins";
 import { createPacket } from "./packet";
-
-export type JoinPacketData = {
-    readonly protocolVersion: number
-    readonly name: string
-    readonly address: string
-    readonly isMobile: boolean
-
-    readonly skin: SkinDefinition
-    readonly badge?: BadgeDefinition
-
-    readonly emotes: ReadonlyArray<EmoteDefinition | undefined>
-};
+import { GameData } from "./readyPacket";
 
 // protocol version is automatically set; use this type when
 // creating an object for use by a JoinPacket
-export type JoinPacketCreation = Omit<JoinPacketData, "protocolVersion">;
+export type JoinPacketCreation = Omit<GameData, "protocolVersion">;
 
-export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, JoinPacketData>({
+export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, GameData>({
     serialize(stream, data) {
         const emotes = data.emotes;
+        const hasSkin = data.skin !== undefined;
         const hasBadge = data.badge !== undefined;
+        const hasMelee = data.melee !== undefined;
+        const hasGun = data.gun !== undefined;
+
         stream.writeBooleanGroup(
             data.isMobile,
+            hasSkin,
             hasBadge,
+            hasMelee,
+            hasGun
+        );
+        stream.writeBooleanGroup(
             emotes[0] !== undefined,
             emotes[1] !== undefined,
             emotes[2] !== undefined,
@@ -40,7 +40,9 @@ export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, JoinPac
         stream.writePlayerName(data.name);
         stream.writePlayerAddress(data.address);
 
-        Loots.writeToStream(stream, data.skin);
+        if (hasSkin) {
+            Loots.writeToStream(stream, data.skin);
+        }
 
         if (hasBadge) {
             Badges.writeToStream(stream, data.badge);
@@ -52,12 +54,26 @@ export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, JoinPac
                 Emotes.writeToStream(stream, emote);
             }
         }
+
+        if (hasMelee) {
+            Melees.writeToStream(stream, data.melee);
+        }
+
+        if (hasGun) {
+            Guns.writeToStream(stream, data.gun);
+        }
     },
 
     deserialize(stream) {
         const [
             isMobile,
+            hasSkin,
             hasBadge,
+            hasMelee,
+            hasGun
+        ] = stream.readBooleanGroup();
+
+        const [
             ...emotes
         ] = stream.readBooleanGroup();
 
@@ -67,10 +83,12 @@ export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, JoinPac
             address: stream.readPlayerAddress().replaceAll(/<[^>]+>/g, "").trim(), // Regex strips out HTML
             isMobile,
 
-            skin: Loots.readFromStream(stream),
+            skin: hasSkin ? Skins.readFromStream(stream) : undefined,
             badge: hasBadge ? Badges.readFromStream(stream) : undefined,
 
-            emotes: Array.from({ length: 6 }, (_, i) => emotes[i] ? Emotes.readFromStream(stream) : undefined)
+            emotes: Array.from({ length: 6 }, (_, i) => emotes[i] ? Emotes.readFromStream(stream) : undefined),
+            melee: hasMelee ? Melees.readFromStream(stream) : undefined,
+            gun: hasGun ? Guns.readFromStream(stream) : undefined,
         };
     }
 });

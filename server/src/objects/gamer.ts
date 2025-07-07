@@ -26,6 +26,11 @@ export interface PlayerContainer {
     readonly nameColor?: number
     readonly lobbyClearing: boolean
     readonly weaponPreset: string
+    readonly skin: string
+    readonly badge: string
+    readonly emotes: string
+    readonly melee: string
+    readonly gun: string
 }
 
 export class Gamer extends Player {

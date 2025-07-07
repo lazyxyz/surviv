@@ -9,6 +9,12 @@ import { forbidden, getIP } from "../utils/serverHelpers"
 import { validateJWT } from "./api";
 import { PacketStream } from "@common/packets/packetStream";
 import { ReadyPacket } from "@common/packets/readyPacket";
+import { Skins } from "@common/definitions/skins";
+import { Badges } from "@common/definitions/badges";
+import { EMOTE_SLOTS } from "@common/constants";
+import { Emotes } from "@common/definitions/emotes";
+import { Melees } from "@common/definitions/melees";
+import { Guns } from "@common/definitions/guns";
 
 const simultaneousConnections: Record<string, number> = {};
 
@@ -50,6 +56,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
 
             // Extract token from Authorization header
             const searchParams = new URLSearchParams(req.getQuery());
+            // console.log("searchParams: ", searchParams);
             const token = searchParams.get('token');
 
             //
@@ -78,7 +85,9 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                     ip,
                     nameColor,
                     lobbyClearing: searchParams.get("lobbyClearing") === "true",
-                    weaponPreset: searchParams.get("weaponPreset") ?? ""
+                    weaponPreset: searchParams.get("weaponPreset") ?? "",
+                    skin: searchParams.get("skin") ?? "",
+                    badge: searchParams.get("badge") ?? "",
                 },
                 req.getHeader("sec-websocket-key"),
                 req.getHeader("sec-websocket-protocol"),
@@ -94,21 +103,34 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
         async open(socket: WebSocket<PlayerContainer>) {
             const data = socket.getUserData();
 
+            console.log("data: ", data);
+
             if (!data.token) {
                 socket.close();
                 return;
             }
             const token = data.token;
             const payload = await validateJWT(token);
-            console.log("payload: ", payload);
 
             if ((data.player = game.addPlayer(socket)) === undefined) {
                 socket.close();
             }
 
+            const emotes = EMOTE_SLOTS.map(
+                slot => Emotes.fromStringSafe(data.emotes)
+            );
             const stream = new PacketStream(new ArrayBuffer(128));
             stream.serializeServerPacket(
-                ReadyPacket.create()
+                ReadyPacket.create({
+                    isMobile: false,
+                    address: data.address ? data.address : "",
+                    emotes: emotes,
+                    name: "TEST",
+                    skin: Skins.fromStringSafe(data.skin),
+                    badge: Badges.fromStringSafe(data.badge),
+                    melee: Melees.fromStringSafe(data.melee),
+                    gun: Guns.fromStringSafe(data.gun),
+                })
             );
             socket.send(stream.getBuffer(), true, false);
             // data.player.sendGameOverPacket(false); // uncomment to test game over screen
