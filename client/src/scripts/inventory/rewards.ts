@@ -51,7 +51,7 @@ function renderRewardList(game: Game, rewardData: RewardData): void {
             successAlert("Rewards claimed successfully!")
         } catch (err) {
             console.error(`Failed to claim rewards: ${err}`);
-            successAlert(`Failed to claim rewards: ${err}`);
+            errorAlert("No valid crates found");
         } finally {
             isProcessing = false;
             $claimButton.prop("disabled", false);

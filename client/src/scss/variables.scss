@@ -14,14 +14,11 @@ $screen_large: 1280px;
 }
 
 @mixin modal-basic {
-  position: fixed;
+  display: flex;
   justify-content: space-between;
   align-items: center;
+
   width: 350px;
-  top: 72px;
-  right: 24px;
-  display: flex;
-  z-index: 9999;
   border-radius: 8px;
   padding: 12px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.45);
