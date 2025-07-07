@@ -2327,7 +2327,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 this.sendPacket(packet);
             }).catch(err => {
                 console.log("Error claim rewards: ", err);
-
             });
         }
     }

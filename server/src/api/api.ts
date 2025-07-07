@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import { Config } from '../config';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export async function validateJWT(token: string): Promise<{ walletAddress: string }> {
-    const url = `${process.env.API_URL}/api/getJWTSigner`;
+    const url = `${Config.assetsConfig?.api}/api/getJWTSigner`;
 
     const res = await fetch(url, {
         method: "GET",
@@ -21,7 +22,7 @@ export async function validateJWT(token: string): Promise<{ walletAddress: strin
 
 
 export async function claimRewards(player: string, rank: number, kills: number, teamMode: boolean, gameId: string): Promise<any> {
-    const url = `${process.env.API_URL}/api/saveRewards`;
+    const url = `${Config.assetsConfig?.api}/api/saveRewards`;
     try {
         const res = await fetch(url, {
             method: 'POST',
