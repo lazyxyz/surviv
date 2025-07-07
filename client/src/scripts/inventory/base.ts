@@ -1,6 +1,7 @@
 import $ from "jquery";
 import { SurvivAssets } from "../account";
 import type { Game } from "../game";
+import { successAlert, errorAlert, warningAlert } from "../modal";
 
 function renderCrates(userCrateBalances: any, keyBalances: number): void {
     const crateImages = userCrateBalances?.crates
@@ -22,6 +23,10 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
     let isOpening = false;
     let localCrateBalance = crates.length;
     let localKeyBalance = keyBalances;
+    const crateList = Array.from(crates);
+    $(".select-all").prop("checked", false);
+
+
     $(document).off("click", ".my-crates-child .open-now .claim-items");
 
     crates.forEach(crate => {
@@ -31,11 +36,60 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
             if (isActive) {
                 crate.classList.remove("active");
                 selectedCount--;
+                $(".select-all").prop("checked", false);
+
             } else if (selectedCount < localKeyBalance) {
                 crate.classList.add("active");
                 selectedCount++;
+                console.log(selectedCount);
+
+            }
+            else {
+                warningAlert("Insufficient keys!");
+            }
+
+            if (selectedCount === localKeyBalance && localKeyBalance > 0) {
+                $(".select-all").prop("checked", true);
+
             } else {
-                alert("Insufficient keys!");
+                $(".select-all").prop("checked", false);
+
+            }
+
+            if (openNowButton) {
+                openNowButton.disabled = selectedCount === 0;
+                openNowButton.classList.toggle("active", selectedCount > 0);
+            }
+            if (totalSelected) {
+                totalSelected.textContent = `${selectedCount} selected`;
+            }
+        });
+
+        $(".select-all").on("change", (item: any, selectedItems: any) => {
+            const checkActive = $(".select-all").is(":checked");
+
+            {
+
+                if (checkActive) {
+                    crates.forEach(crate => crate.classList.remove("active"));
+                    selectedCount = 0;
+
+                    if (localCrateBalance > keyBalances || localCrateBalance == keyBalances) {
+                        const item = crateList.slice(0, localKeyBalance);
+                        item.forEach(crate => crate.classList.add("active"));
+                        const selectedItems = item.map(crate => crate.textContent);
+                        selectedCount = selectedItems.length;
+                    } else {
+                        const item = crateList.slice(0, localCrateBalance);
+                        item.forEach(crate => crate.classList.add("active"));
+                        const selectedItems = item.map(crate => crate.textContent);
+                        selectedCount = selectedItems.length;
+                    }
+                } else {
+                    crates.forEach(crate => crate.classList.remove("active"));
+                    selectedCount = 0;
+                    console.log(selectedCount);
+                }
             }
 
             if (totalSelected) {
@@ -47,7 +101,9 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
                 openNowButton.classList.toggle("active", selectedCount > 0);
             }
         });
+
     });
+
 
     if (openNowButton) {
         $(openNowButton).on("click", async () => {
@@ -66,15 +122,17 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
                     }
                     openNowButton.classList.remove("active");
                     selectedCount = 0;
-                    alert("Crates opened successfully!");
+                    successAlert("Crates opened successfully!");
                 }
             } catch (err) {
                 console.error(`Failed to open crates: ${err}`);
-                alert("Failed to open crates. Please try again.");
+                errorAlert("Failed to open crates. Please try again!");
+
             } finally {
                 isOpening = false;
                 await loadCrates(game);
                 await updateClaimButton(game);
+                const checkActive = $(".select-all").prop("checked", false);
             }
         });
     }
@@ -98,12 +156,12 @@ async function updateClaimButton(game: Game): Promise<void> {
         isProcessing = true;
         try {
             await game.account.claimItems();
-            alert("Items claimed successfully!");
+            successAlert("Items claimed successfully!");
             claimButton.classList.remove("active");
             claimButton.disabled = true;
         } catch (err) {
             console.error(`Failed to claim items: ${err}`);
-            alert("Failed to claim items. Please try again.");
+            errorAlert("Failed to claim items. Please try again!");
         } finally {
             isProcessing = false;
             await updateClaimButton(game);
@@ -124,6 +182,7 @@ async function loadCrates(game: Game): Promise<void> {
     renderCrates(userCrateBalances, userKeyBalances?.keys || 0);
 
     const crates = document.querySelectorAll(".my-crates-child");
+    const selectAll = document.querySelectorAll(".crates-info");
     const totalSelected = document.querySelector(".total-selected");
     const openNowButton = document.querySelector<HTMLButtonElement>(".open-now");
     setupCrateOpening(game, crates, totalSelected, openNowButton, userKeyBalances?.keys || 0);

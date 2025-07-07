@@ -17,6 +17,86 @@ input::-webkit-inner-spin-button {
   max-width: 500px;
 }
 
+.modal-alert {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  top: 72px;
+  right: 24px;
+  z-index: 9999;
+}
+
+.modal-success {
+  @include variables.modal-basic;
+  background: #5b8939;
+  transition: opacity 300ms ease-out;
+  &-body {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  h3,
+  p {
+    margin: 0;
+  }
+  i {
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .close-popup {
+    align-self: baseline;
+  }
+}
+
+.modal-warning {
+  @include variables.modal-basic;
+  background: #f2770f;
+  transition: opacity 300ms ease-out;
+  &-body {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  h3,
+  p {
+    margin: 0;
+  }
+  i {
+    align-items: baseline;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .close-popup {
+    align-self: baseline;
+  }
+}
+
+.modal-error {
+  @include variables.modal-basic;
+  background: #d03947;
+  transition: opacity 300ms ease-out;
+  &-body {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  h3,
+  p {
+    margin: 0;
+  }
+  i {
+    align-items: baseline;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .close-popup {
+    align-self: baseline;
+  }
+}
+
 #warning-modal {
   text-align: center;
   border: 2.5px solid rgba(0, 0, 0, 0.3);
@@ -503,9 +583,31 @@ input::-webkit-inner-spin-button {
     align-items: center;
     gap: 12px;
     p {
-      align-self: flex-start;
       font-size: 14px;
       font-weight: 500;
+    }
+    .crates-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      .crates-select {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        input {
+          width: 18px;
+          height: 18px;
+          accent-color: #f2770f;
+        }
+
+        p {
+          align-self: center;
+          font-size: 14px;
+          font-weight: 500;
+        }
+      }
     }
     .my-crates-select {
       position: fixed;
@@ -528,6 +630,7 @@ input::-webkit-inner-spin-button {
         scale: 0.8;
       }
       .open-now,
+      #claim-btn,
       .claim-items {
         opacity: 0.35;
       }
@@ -582,8 +685,8 @@ input::-webkit-inner-spin-button {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 8px;
-    height: 310px;
     overflow: hidden;
+    width: 100%;
     transition: 300ms;
     &:hover {
       overflow-y: auto;
@@ -610,6 +713,14 @@ input::-webkit-inner-spin-button {
         padding: 8px 12px;
         background: #608939;
         border-radius: 12px;
+      }
+      h5 {
+        margin: 0px;
+        font-size: 14px;
+        font-weight: 500;
+        align-self: center;
+        color: white;
+        font-size: 14px;
       }
     }
   }
