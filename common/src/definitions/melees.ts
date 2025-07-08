@@ -50,7 +50,7 @@ export const DEFAULT_HAND_RIGGING = Object.freeze({
     right: Vec.create(38, 35)
 }) as InventoryItemDefinition["fists"] & object;
 
-export const freeMeless = [
+export const freeMelees = [
     "fists"
 ];
 

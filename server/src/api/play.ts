@@ -9,6 +9,13 @@ import { forbidden, getIP } from "../utils/serverHelpers"
 import { validateJWT } from "./api";
 import { PacketStream } from "@common/packets/packetStream";
 import { ReadyPacket } from "@common/packets/readyPacket";
+import { Skins } from "@common/definitions/skins";
+import { Badges } from "@common/definitions/badges";
+import { EMOTE_SLOTS } from "@common/constants";
+import { Emotes } from "@common/definitions/emotes";
+import { Melees } from "@common/definitions/melees";
+import { Guns } from "@common/definitions/guns";
+import { verifyGun, verifyMelee, verifySkin } from "./balances";
 
 const simultaneousConnections: Record<string, number> = {};
 
@@ -71,14 +78,19 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
             //
             res.upgrade(
                 {
+                    name: searchParams.get("name") ?? "No name",
                     teamID: searchParams.get("teamID") ?? undefined,
                     autoFill: Boolean(searchParams.get("autoFill")),
-                    address: "",
+                    address: searchParams.get("address") ?? "",
                     token: token,
                     ip,
                     nameColor,
                     lobbyClearing: searchParams.get("lobbyClearing") === "true",
-                    weaponPreset: searchParams.get("weaponPreset") ?? ""
+                    weaponPreset: searchParams.get("weaponPreset") ?? "",
+                    skin: searchParams.get("skin") ?? "",
+                    badge: searchParams.get("badge") ?? "",
+                    melee: searchParams.get("melee") ?? "",
+                    gun: searchParams.get("gun") ?? "",
                 },
                 req.getHeader("sec-websocket-key"),
                 req.getHeader("sec-websocket-protocol"),
@@ -100,15 +112,57 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
             }
             const token = data.token;
             const payload = await validateJWT(token);
-            console.log("payload: ", payload);
+
+            if (payload.walletAddress != data.address?.toLowerCase()) {
+                console.log(`Invalid address jwt: ${payload.walletAddress} user: ${data.address?.toLowerCase()}`);
+                socket.close();
+                return;
+            }
 
             if ((data.player = game.addPlayer(socket)) === undefined) {
                 socket.close();
             }
 
+            const emotes = EMOTE_SLOTS.map(
+                slot => Emotes.fromStringSafe(data.emotes)
+            );
+
+            // Verify Skin
+            let skin = Skins.fromStringSafe("unknown"); // Default skins
+            await verifySkin(data.address, data.skin).then((isValid) => {
+                if (isValid) skin = Skins.fromStringSafe(data.skin);
+            }).catch(err => {
+                console.log("Verify skin failed: ", err);
+            })
+
+            // Verify Melee
+            let melee = undefined;
+            await verifyMelee(data.address, data.melee).then((isValid) => {
+                if (isValid) melee = Melees.fromStringSafe(data.melee);
+            }).catch(err => {
+                console.log("Verify melee failed: ", err);
+            })
+            
+            // Verify Gun
+            let gun = undefined;
+            await verifyGun(data.address, data.gun).then((isValid) => {
+                if (isValid) gun = Guns.fromStringSafe(data.gun);
+            }).catch(err => {
+                console.log("Verify gun failed: ", err);
+            })
+
             const stream = new PacketStream(new ArrayBuffer(128));
             stream.serializeServerPacket(
-                ReadyPacket.create()
+                ReadyPacket.create({
+                    isMobile: false,
+                    address: data.address ? data.address : "",
+                    emotes: emotes,
+                    name: data.name,
+                    skin: skin,
+                    badge: Badges.fromStringSafe(data.badge),
+                    melee: melee,
+                    gun: gun,
+                })
             );
             socket.send(stream.getBuffer(), true, false);
             // data.player.sendGameOverPacket(false); // uncomment to test game over screen

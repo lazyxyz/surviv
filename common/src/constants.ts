@@ -274,3 +274,6 @@ export const TentTints = {
 };
 
 export const IPFS_GATEWAY_URL = "https://ipfs-gw.openmark.io/ipfs/"; // process.env.IPFS_GATEWAY_URL || "https://ipfs-gw.openmark.io/ipfs/";
+
+export const EMOTE_SLOTS = ["top", "right", "bottom", "left", "win", "death"] as const;
+

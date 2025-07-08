@@ -7,7 +7,6 @@ import { Scopes, type ScopeDefinition } from "@common/definitions/scopes";
 import { SpectatePacket } from "@common/packets/spectatePacket";
 import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, type GetGameResponse } from "@common/typings";
 import { ExtendedMap } from "@common/utils/misc";
-import { EmoteCategory, Emotes, freeEmotes, type EmoteDefinition } from "@common/definitions/emotes";
 import { ItemType, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound } from "@pixi/sound";
@@ -19,18 +18,19 @@ import { Config, type ServerInfo } from "./config";
 import { type Game } from "./game";
 import { news } from "./news/newsPosts";
 import { body, createDropdown } from "./uiHelpers";
-import { type CVarTypeMapping } from "./utils/console/defaultClientCVars";
+import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaultClientCVars";
 
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
 // import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
-import { getBadgeImage, visibleBadges } from "./badges";
-import {loadInventory} from "./inventory";
-import { visibleSkin } from "./skin";
-import { visibleMeless } from "./weapons/weapons_meless";
-import { visibleConnectWallet } from "./wallet";
+import { getBadgeImage, showBadges } from "./badges";
+import { loadInventory } from "./inventory";
+import { showSkins } from "./skin";
+import { showMelees as showWeapons } from "./weapons/weapons";
+import { Loots } from "@common/definitions/loots";
+import { showEmotes } from "./emotes";
 /*
     eslint-disable
 
@@ -85,16 +85,20 @@ export async function visibleInventory(game: Game) {
         await loadInventory(game);
     })
 
-    $('#tab-skins').on('click',() => {
-        visibleSkin(game);
+    $('#tab-skins').on('click', () => {
+        showSkins(game);
     })
-    
-    $('#tab-weapons').on('click',() => {
-        visibleMeless(game);
+
+    $('#tab-weapons').on('click', () => {
+        showWeapons(game);
     })
-    
-    $('#tab-badges').on('click',() => {
-        visibleBadges(game);
+
+    $('#tab-badges').on('click', () => {
+        showBadges(game);
+    })
+ 
+    $('#tab-emotes').on('click', () => {
+        showEmotes(game);
     })
 }
 
@@ -105,7 +109,7 @@ export async function setUpUI(game: Game): Promise<void> {
     if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/suroi_beta_${MODE.idString}.svg`);
     if (MODE.specialPlayButtons) {
         const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
-        
+
         for (let buttonIndex = 0; buttonIndex < playButtons.length; buttonIndex++) {
             const button = playButtons[buttonIndex];
 
@@ -336,27 +340,50 @@ export async function setUpUI(game: Game): Promise<void> {
             // const devPass = game.console.getBuiltInCVar("dv_password");
             // if (devPass) params.set("password", devPass);
 
-            const badge = game.console.getBuiltInCVar("cv_loadout_badge");
-            if (badge) params.set("badge", badge);
+            {
+                const name = game.console.getBuiltInCVar("cv_player_name");
+                if (name) params.set("name", name);
 
-            const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
-            if (lobbyClearing) params.set("lobbyClearing", "true");
+                if (game.account.address) params.set("address", game.account.address)
 
-            const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
-            if (weaponPreset) params.set("weaponPreset", weaponPreset);
+                let skin: typeof defaultClientCVars["cv_loadout_skin"];
+                const playerSkin = Loots.fromStringSafe(
+                    game.console.getBuiltInCVar("cv_loadout_skin")
+                ) ?? Loots.fromString(
+                    typeof (skin = defaultClientCVars.cv_loadout_skin) === "object"
+                        ? skin.value
+                        : skin
+                );
 
-            const nameColor = game.console.getBuiltInCVar("dv_name_color");
-            if (nameColor) {
-                try {
-                    params.set("nameColor", new Color(nameColor).toNumber().toString());
-                } catch (e) {
-                    game.console.setBuiltInCVar("dv_name_color", "");
-                    console.error(e);
+                if (playerSkin) params.set("skin", playerSkin.idString);
+
+                const badge = game.console.getBuiltInCVar("cv_loadout_badge");
+                if (badge) params.set("badge", badge);
+
+                const weaponPreset = JSON.parse(game.console.getBuiltInCVar("dv_weapon_preset"));
+                if (weaponPreset && weaponPreset.melee) params.set("melee", weaponPreset.melee);
+                if (weaponPreset && weaponPreset.gun) params.set("gun", weaponPreset.gun);
+
+                const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
+                if (lobbyClearing) params.set("lobbyClearing", "true");
+
+                const nameColor = game.console.getBuiltInCVar("dv_name_color");
+                if (nameColor) {
+                    try {
+                        params.set("nameColor", new Color(nameColor).toNumber().toString());
+                    } catch (e) {
+                        game.console.setBuiltInCVar("dv_name_color", "");
+                        console.error(e);
+                    }
                 }
+
+                // const emotes = EMOTE_SLOTS.map(
+                //     slot => Emotes.fromStringSafe(game.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))
+                // );
             }
 
-            // game.connect(`${gameAddress.replace("<ID>", (data.gameID).toString())}/play}`);
-            game.connect(`${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`);
+            const websocketURL = `${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`;
+            game.connect(websocketURL);
             ui.splashMsg.hide();
 
             // Check again because there is a small chance that the create-team-menu element won't hide.
@@ -423,7 +450,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
     // Join server when play buttons are clicked
     $("#btn-play-solo, #btn-play-squad").on("click", event => {
-        if(!game.account.address) {
+        if (!game.account.address) {
             alert("Please connect your wallet to continue!")
             return;
         }
@@ -883,160 +910,6 @@ export async function setUpUI(game: Game): Promise<void> {
     $<HTMLButtonElement>("#close-customize").on("click", () => customizeMenu.fadeOut(250));
 
     $<HTMLButtonElement>("#close-report").on("click", () => ui.reportingModal.fadeOut(250));
-
-    // Load emotes
-    function handleEmote(slot: "win" | "death"): void { // eipi can you improve this so that it uses `emoteSlots` items with index >3
-        const emote = $(`#emote-wheel-bottom .emote-${slot} .fa-xmark`);
-        const cvar = `cv_loadout_${slot}_emote` as const;
-        const emoteSlot = $(`#emote-wheel-container .emote-${slot}`);
-
-        emote.on("click", () => {
-            game.console.setBuiltInCVar(cvar, "");
-            emoteSlot.css("background-image", "none");
-            emote.hide();
-        });
-
-        if (game.console.getBuiltInCVar(`cv_loadout_${slot}_emote`) === "") emote.hide();
-    }
-
-    handleEmote("win");
-    handleEmote("death");
-
-    let selectedEmoteSlot: typeof EMOTE_SLOTS[number] | undefined;
-    const emoteList = $<HTMLDivElement>("#emotes-list");
-
-    const bottomEmoteUiCache: Partial<Record<typeof EMOTE_SLOTS[number], JQuery<HTMLSpanElement>>> = {};
-    const emoteWheelUiCache: Partial<Record<typeof EMOTE_SLOTS[number], JQuery<HTMLDivElement>>> = {};
-
-    function updateEmotesList(): void {
-        emoteList.empty();
-
-        const EmotesInstance = Emotes.definitions.filter(argument =>
-            freeEmotes.some(argument_child => argument_child === argument.idString)
-        );
-
-        const emotes = EmotesInstance.sort((a, b) => {
-            return a.category - b.category;
-        });
-
-        let lastCategory: EmoteCategory | undefined;
-
-        for (const emote of emotes) {
-            if (emote.category !== lastCategory) {
-                emoteList.append(
-                    $<HTMLDivElement>(
-                        `<div class="emote-list-header">${getTranslatedString(`emotes_category_${EmoteCategory[emote.category]}` as TranslationKeys)
-                        }</div>`
-                    )
-                );
-                lastCategory = emote.category;
-            }
-
-            const idString = emote.idString;
-            // noinspection CssUnknownTarget
-            const emoteItem = $<HTMLDivElement>(
-                `<div id="emote-${idString}" class="emotes-list-item-container">
-                    <div class="emotes-list-item" style="background-image: url(./img/game/shared/emotes/${idString}.svg)"></div>
-                    <span class="emote-name">${getTranslatedString(`emote_${idString}` as TranslationKeys)}</span>
-                </div>`
-            );
-
-            emoteItem.on("click", () => {
-                if (selectedEmoteSlot === undefined) return;
-
-                const cvarName = selectedEmoteSlot;
-                (
-                    bottomEmoteUiCache[cvarName] ??= $((`#emote-wheel-bottom .emote-${cvarName} .fa-xmark` as const))
-                ).show();
-
-                game.console.setBuiltInCVar(`cv_loadout_${cvarName}_emote`, emote.idString);
-
-                emoteItem.addClass("selected")
-                    .siblings()
-                    .removeClass("selected");
-
-                (
-                    emoteWheelUiCache[cvarName] ??= $(`#emote-wheel-container .emote-${cvarName}`)
-                ).css(
-                    "background-image",
-                    `url("./img/game/shared/emotes/${emote.idString}.svg")`
-                );
-            });
-
-            emoteList.append(emoteItem);
-        }
-    }
-
-    updateEmotesList();
-
-    const customizeEmote = $<HTMLDivElement>("#emote-customize-wheel");
-    const emoteListItemContainer = $<HTMLDivElement>(".emotes-list-item-container");
-
-    function changeEmoteSlotImage(slot: typeof EMOTE_SLOTS[number], emote: ReferenceTo<EmoteDefinition>): JQuery<HTMLDivElement> {
-        return (
-            emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)
-        ).css("background-image", emote ? `url("./img/game/shared/emotes/${emote}.svg")` : "none");
-    }
-
-    for (const slot of EMOTE_SLOTS) {
-        const cvar = `cv_loadout_${slot}_emote` as const;
-        const emote = game.console.getBuiltInCVar(cvar);
-
-        game.console.variables.addChangeListener(
-            cvar,
-            (_, newEmote) => {
-                changeEmoteSlotImage(slot, newEmote);
-            }
-        );
-
-        changeEmoteSlotImage(slot, emote)
-            .on("click", () => {
-                if (selectedEmoteSlot === slot) return;
-
-                if (selectedEmoteSlot !== undefined) {
-                    (
-                        emoteWheelUiCache[selectedEmoteSlot] ??= $(`#emote-wheel-container .emote-${selectedEmoteSlot}`)
-                    ).removeClass("selected");
-                }
-
-                selectedEmoteSlot = slot;
-
-                updateEmotesList();
-
-                if (EMOTE_SLOTS.indexOf(slot) > 3) {
-                    // win / death emote
-                    customizeEmote.css(
-                        "background-image",
-                        "url('/img/misc/emote_wheel.svg')"
-                    );
-
-                    (
-                        emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)
-                    ).addClass("selected");
-                } else {
-                    customizeEmote.css(
-                        "background-image",
-                        `url("./img/misc/emote_wheel_highlight_${slot}.svg"), url("/img/misc/emote_wheel.svg")`
-                    );
-                }
-
-                emoteListItemContainer
-                    .removeClass("selected")
-                    .css("cursor", "pointer");
-
-                $(`#emote-${game.console.getBuiltInCVar(cvar) || "none"}`).addClass("selected");
-            });
-
-        (
-            emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)
-        ).children(".remove-emote-btn")
-            .on("click", () => {
-                game.console.setBuiltInCVar(cvar, "");
-                (
-                    emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)
-                ).css("background-image", "none");
-            });
-    }
 
     const crosshairImage = $<HTMLDivElement>("#crosshair-image");
     const crosshairControls = $<HTMLDivElement>("#crosshair-controls");
@@ -2098,30 +1971,3 @@ export async function setUpUI(game: Game): Promise<void> {
         }
     });
 }
-
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣠⣤⣤⣤⣤⣤⣤⣤⣤⣤⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣤⣶⣾⣿⣿⡿⠟⠛⠛⠛⠛⠛⠻⠿⣿⣿⣿⣿⣿⣷⣶⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣿⣿⣿⣿⠟⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⢿⣿⣿⣿⣿⣿⣿⣶⣤⣄⠀⠀⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⣠⣶⣿⣿⣿⣿⣿⠟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣷⡄⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⣼⡿⣿⣿⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣆⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⢻⣿⡟⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣿⣿⣿⣿⣿⣿⣿⣿⡟⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠘⢿⣼⡟⢻⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠳⠆⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⡟⠁⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⢈⣻⣷⣾⣿⡇⠀⠀⠀⢀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⠀⠀⠀⢻⣿⣿⣿⡿⢋⡀⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⣿⠉⠙⢿⣿⡇⠀⠀⠀⠈⢻⣿⣷⣶⣄⣠⠀⠀⠀⣀⣠⣾⣿⣿⡯⠉⠁⠀⠀⠀⢻⣿⣿⡿⠛⢿⡆⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⣟⠀⠘⢾⡿⠀⠀⠀⢀⣠⣤⣶⣿⣿⣿⠟⠀⠀⣿⣿⣿⣿⣿⣷⣦⣄⡀⠀⠀⠀⢸⣿⣯⠀⣶⡆⣿⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⣿⠈⠀⣼⠃⠀⠀⠘⠋⠁⣈⣹⣿⣿⠏⠀⠀⠀⣿⣿⣏⠀⣈⣁⣈⡝⠻⠿⡆⠀⠰⣿⣏⠈⣿⢷⡟⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠰⡇⠀⠀⠀⠀⠀⠀⠁⠀⠀⠀⠀⠀⠀⠀⢸⣽⣿⣆⠀⠀⠀⠀⠀⠀⠁⠀⢸⣿⣿⡆⣏⣿⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⢱⡀⠀⠀⠀⠀⠀⠀⠀⠀⣀⠀⠀⠀⠀⠀⠀⢿⣿⡄⠀⠀⠀⠀⠀⠀⠀⢸⣿⡟⣿⣿⡇⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⠙⣄⠀⠀⣸⡄⠀⠀⠀⠀⠀⢀⡞⠁⣤⣤⣀⣠⣤⣀⣄⣸⣿⣦⡀⠀⠀⠀⠀⠀⢸⣿⣄⠟⣼⠀⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⠷⠶⠻⡇⠀⠀⠀⠀⠀⠟⠀⠀⠀⠀⠉⠙⠿⠿⣿⠉⢀⡿⣷⡀⢸⣇⢰⠀⠸⣿⣡⡾⠃⠀⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡇⠀⠀⠀⠀⠀⣀⠀⠀⠀⠀⠐⠛⠀⠀⠁⠀⠀⢰⡟⢷⢸⣿⢀⠀⠀⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠸⡇⠀⠀⠀⠀⣼⡿⠓⠶⠒⠛⠛⠉⠙⠛⠻⠻⠿⣿⡇⠀⢸⡟⠀⠀⣠⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢘⡇⠒⠀⠀⠀⠈⠀⠀⠀⠀⠀⣶⠶⠶⠶⠶⠀⢀⣿⠁⢠⡾⠁⠀⣰⣿⠉⢇⠀⠀⠀⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢈⡷⠶⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠁⠀⠿⠃⢀⣴⡟⢹⡄⠘⣧⠀⠀⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⠞⢁⡆⠀⠐⢢⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⠀⠒⠀⠀⣠⣴⣿⡟⣰⡿⣡⡄⠈⢣⡀⠀⠀⠀⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⣀⣠⡤⠖⠒⠋⠁⠀⠘⣷⠀⠀⠀⠙⠦⣄⣀⣀⣀⣀⣀⣤⣶⣿⣦⣤⣴⣶⣿⡿⢋⣼⠟⢁⣿⠁⣠⣤⡉⠀⠀⠀⠀⠀⠀
-//  ⣠⠤⠔⠒⠚⠉⠁⠀⠀⠀⠀⠀⠀⠀⢹⡆⠀⠀⠀⠀⠉⠻⣿⣿⣿⣯⣥⣤⣤⣶⣿⣿⡿⠋⣠⡿⠁⠀⠀⠁⠲⢈⣿⣿⣷⣤⣄⠀⠀⠀
-//  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢦⡀⠤⡄⠀⠀⠀⠀⠉⡻⢿⣧⣿⣿⡟⢋⣤⡾⠋⠀⠀⠀⠀⠘⠛⢺⣿⣿⣿⣿⣿⣷⣤⣤
-//  ⡀⠀⣀⣀⣀⣀⣀⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢦⣈⣳⣦⣤⣤⣿⣿⣿⠟⢋⣡⣶⣿⠋⢀⠀⠀⠀⡀⠀⠀⢀⡌⠘⣿⣿⣿⣿⣿⣿⣿
-//

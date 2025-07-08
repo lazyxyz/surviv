@@ -1,8 +1,8 @@
-import { GameConstants, InputActions, InventoryMessages, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { EMOTE_SLOTS, GameConstants, InputActions, InventoryMessages, Layer, ObjectCategory, TeamSize } from "@common/constants";
 import { ArmorType } from "@common/definitions/armors";
 import { Badges, type BadgeDefinition } from "@common/definitions/badges";
 import { Emotes } from "@common/definitions/emotes";
-import { type DualGunNarrowing } from "@common/definitions/guns";
+import { Guns, type DualGunNarrowing } from "@common/definitions/guns";
 import { Loots } from "@common/definitions/loots";
 import { Scopes } from "@common/definitions/scopes";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
@@ -57,14 +57,15 @@ import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, u
 import { setUpCommands } from "./utils/console/commands";
 import { defaultClientCVars } from "./utils/console/defaultClientCVars";
 import { GameConsole } from "./utils/console/gameConsole";
-import { COLORS, EMOTE_SLOTS, LAYER_TRANSITION_DELAY, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
+import { COLORS, LAYER_TRANSITION_DELAY, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 import { EIP6963 } from "./eip6963";
 import { Account } from "./account";
-import { ReadyPacket } from "@common/packets/readyPacket";
+import { ReadyPacket, type PlayerData } from "@common/packets/readyPacket";
 import { visibleConnectWallet, visibleWallet } from "./wallet";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
+import { Melees } from "@common/definitions/melees";
 
 /* eslint-disable @stylistic/indent */
 
@@ -277,27 +278,8 @@ export class Game {
         this.camera.resize(true);
     }
 
-    ready() {
-        let skin: typeof defaultClientCVars["cv_loadout_skin"];
-
-        const joinPacket: JoinPacketCreation = {
-            isMobile: this.inputManager.isMobile,
-            name: this.console.getBuiltInCVar("cv_player_name"),
-            address: this.account.address ? this.account.address : "",
-            skin: Loots.fromStringSafe(
-                this.console.getBuiltInCVar("cv_loadout_skin")
-            ) ?? Loots.fromString(
-                typeof (skin = defaultClientCVars.cv_loadout_skin) === "object"
-                    ? skin.value
-                    : skin
-            ),
-            badge: Badges.fromStringSafe(this.console.getBuiltInCVar("cv_loadout_badge")),
-            emotes: EMOTE_SLOTS.map(
-                slot => Emotes.fromStringSafe(this.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))
-            )
-        };
-
-        this.sendPacket(JoinPacket.create(joinPacket));
+    ready(packet: PlayerData) {
+        this.sendPacket(JoinPacket.create(packet));
     }
 
     connect(address: string): void {
@@ -325,6 +307,7 @@ export class Game {
                 url.searchParams.set("token", this.account.token);
             }
         }
+
         this._socket = new WebSocket(url.toString());
         this._socket.binaryType = "arraybuffer";
 
@@ -445,7 +428,7 @@ export class Game {
     onPacket(packet: OutputPacket): void {
         switch (true) {
             case packet instanceof ReadyPacket:
-                this.ready();
+                this.ready(packet.output);
                 break;
             case packet instanceof JoinedPacket:
                 this.startGame(packet.output);

@@ -43,7 +43,7 @@ function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function visibleSkin(game: Game) {
+export async function showSkins(game: Game) {
     if (!game?.account?.address) return;
 
     const role = game.console.getBuiltInCVar("dv_role");
@@ -69,8 +69,6 @@ export async function visibleSkin(game: Game) {
         )
     );
 
-
-
     // should be set or reset skin
     {
         const avaliableSkin = SkinsIntance.find(
@@ -83,7 +81,6 @@ export async function visibleSkin(game: Game) {
         }
 
         if (!avaliableSkin) {
-            // selectSkin(freeSkin[0]);
             selectSkin(defaultClientCVars.cv_loadout_skin as string, game);
         }
     }
