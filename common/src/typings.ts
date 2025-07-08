@@ -56,5 +56,5 @@ export type CustomTeamMessage =
 export type weaponPresentType = {
     gun?: string
     throwable?: string
-    meless?: string
+    melee?: string
 };

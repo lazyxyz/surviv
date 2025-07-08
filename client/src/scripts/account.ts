@@ -17,24 +17,22 @@ import {
     SurvivMemesMapping,
     SurvivCratesMapping,
     SurvivKeysMapping,
-    SurvivCardsMapping
-} from "./mapping";
-import { abi as survivRewardsABI } from "./abi/ISurvivRewards.json";
-import { abi as crateBaseABI } from "./abi/ICrateBase.json";
-import { abi as erc1155ABI } from "./abi/IERC1155.json";
-import { abi as survivShopABI } from "./abi/ISurvivShop.json";
+    SurvivCardsMapping,
+    SurvivMapping
+} from "@common/mappings";
+
+import { abi as survivRewardsABI } from "@common/abis/ISurvivRewards.json";
+import { abi as crateBaseABI } from "@common/abis/ICrateBase.json";
+import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
+import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 const selectedRegion = regionInfo[Config.defaultRegion];
 
-const CHAIN_ID = 50312;
-
-// Surviv Utility
-const SURVIV_REWARD_ADDRESS = "0xb615B4ca12f58EdebA10B68Ee890f0ddd7B7e49A";
-const SURVIV_BASE_ADDRESS = "0x816DBf52724c28E415e0715B216684b152Ae25C5";
-const SURVIV_SHOP_ADDRESS = "0x885141802335319dD0536a7928a6f304ECCd4Aa0";
-const SURVIV_CARD_ADDRESS = "0x5a00e80001151CA66a91cD91124Da2051a088157";
-const NATIVE_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000";
+const CHAIN_ID = SurvivMapping.ChainId;
+const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
+const SURVIV_BASE_ADDRESS = SurvivMapping.SurvivBase.address;
+const SURVIV_SHOP_ADDRESS = SurvivMapping.SurvivShop.address;
 
 export enum SurvivAssets {
     SilverSkins,
@@ -52,13 +50,13 @@ export enum SurvivAssets {
 
 export const SaleItems = {
     Crates: SurvivCratesMapping.address,
-    Cards: SURVIV_CARD_ADDRESS,
+    Cards: SurvivCardsMapping.address,
     Keys: SurvivKeysMapping.address
 } as const;
 
-export enum PaymentTokens {
-    NativeToken = NATIVE_TOKEN_ADDRESS,
-}
+export const PaymentTokens = {
+    NativeToken: SurvivMapping.NativeToken.address,
+} as const;
 
 /**
 * Interface for crate data structure
@@ -614,7 +612,7 @@ export class Account extends EIP6963 {
      * @returns A promise resolving to the API response.
      * @throws Error if the API request fails, authentication is invalid, or payment fails.
      */
-    async buyItems(item: (typeof SaleItems)[keyof typeof SaleItems], amount: number, paymentToken: PaymentTokens): Promise<any> {
+    async buyItems(item: (typeof SaleItems)[keyof typeof SaleItems], amount: number, paymentToken: (typeof PaymentTokens)[keyof typeof PaymentTokens]): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
@@ -643,14 +641,13 @@ export class Account extends EIP6963 {
                 throw new Error('Not supported yet.');
             }
 
-
         } catch (error: any) {
             clearTimeout(timeoutId);
             throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
         }
     }
 
-    async queryPrice(item: (typeof SaleItems)[keyof typeof SaleItems], paymentToken: PaymentTokens): Promise<any> {
+    async queryPrice(item: (typeof SaleItems)[keyof typeof SaleItems], paymentToken: (typeof PaymentTokens)[keyof typeof PaymentTokens]): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }

@@ -14,7 +14,7 @@ const selectWeapon = (game: Game, value: object) => {
 const resetAll = () => {
     $(".weapons-container-list").empty();
     $(".weapons-container-aside-assets").empty();
-    $(".weapons-container-card-meless").empty();
+    $(".weapons-container-card-melee").empty();
     $(".weapons-container-aside-preview").empty();
 };
 

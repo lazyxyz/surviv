@@ -6,7 +6,7 @@ import { Obstacles, type ObstacleDefinition } from "@common/definitions/obstacle
 import { SyncedParticles, type SyncedParticleDefinition, type SyncedParticleSpawnerDefinition } from "@common/definitions/syncedParticles";
 import { type ThrowableDefinition } from "@common/definitions/throwables";
 import { PlayerInputPacket } from "@common/packets/inputPacket";
-import { JoinPacket, type JoinPacketData } from "@common/packets/joinPacket";
+import { JoinPacket } from "@common/packets/joinPacket";
 import { JoinedPacket } from "@common/packets/joinedPacket";
 import { KillFeedPacket, type KillFeedPacketData } from "@common/packets/killFeedPacket";
 import { type InputPacket, type OutputPacket } from "@common/packets/packet";
@@ -28,7 +28,7 @@ import { MapName, Maps } from "./data/maps";
 import { WorkerMessages, type GameData, type WorkerMessage } from "./gameManager";
 import { Gas } from "./gas";
 import { GunItem } from "./inventory/gunItem";
-import type { MeleeItem } from "./inventory/meleeItem";
+import { MeleeItem } from "./inventory/meleeItem";
 import { ThrowableItem } from "./inventory/throwableItem";
 import { GameMap } from "./map";
 import { Bullet, type DamageRecord, type ServerBulletOptions } from "./objects/bullet";
@@ -49,6 +49,7 @@ import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
 import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
+import { PlayerData } from "@common/packets/readyPacket";
 
 /*
     eslint-disable
@@ -255,7 +256,7 @@ export class Game implements GameData {
             const zombieCount = randomInRange(10, 20);
             const ninjaCount = randomInRange(5, 10);
             const assassinCount = randomInRange(3, 5);
-            
+
             this.activeZombie(zombieCount);
             this.activeNinja(ninjaCount);
             this.activeAssassin(assassinCount);
@@ -793,7 +794,7 @@ export class Game implements GameData {
     }
 
     // Called when a JoinPacket is sent by the client
-    activatePlayer(player: Gamer, packet: JoinPacketData): void {
+    activatePlayer(player: Gamer, packet: PlayerData): void {
         // // DEV MODE
         // {
         //     player.inventory.vest = Armors.fromString("developr_vest");
@@ -815,9 +816,16 @@ export class Game implements GameData {
 
         player.address = packet.address;
         player.isMobile = packet.isMobile;
-        player.loadout.skin = packet.skin;
+        if (packet.skin) player.loadout.skin = packet.skin;
         player.loadout.badge = packet.badge;
         player.loadout.emotes = packet.emotes;
+        if (packet.melee) {
+            player.inventory.weapons[2] = new MeleeItem(packet.melee, player);
+        }
+        
+        if (packet.gun) {
+            player.inventory.weapons[0] = new GunItem(packet.gun, player);
+        }
 
         this.livingPlayers.add(player);
         this.spectatablePlayers.push(player);

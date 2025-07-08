@@ -16,6 +16,7 @@ import { randomBytes } from "crypto";
 import { Config } from "../config";
 
 export interface PlayerContainer {
+    readonly name: string
     readonly teamID?: string
     readonly autoFill: boolean
     player?: Gamer
@@ -26,6 +27,11 @@ export interface PlayerContainer {
     readonly nameColor?: number
     readonly lobbyClearing: boolean
     readonly weaponPreset: string
+    readonly skin: string
+    readonly badge: string
+    readonly emotes: string
+    readonly melee: string
+    readonly gun: string
 }
 
 export class Gamer extends Player {

@@ -49,11 +49,9 @@ export const Config = {
         address: "http://localhost:8080"
     },
 
-    blockchainConfig: {
-        rpc: "https://evm-rpc.archive.testnet-2.nibiru.fi/",
-        card: "0x227ea87740b1a3ea5452598f44fed8c345119473",
-        melee: "0xfe2cfd8c98add2c63b41dc19e353707f5e8238e9",
-        skin: "0x9a91e7b132eeadf35c07c12355355aecd5ef4a21"
+    assetsConfig: {
+        api: "https://api.surviv.fun",
+        rpc: "https://50312.rpc.thirdweb.com/220c649e4f0e7cb8cb634464c4244808"
     },
 
 } satisfies ConfigType as ConfigType;
@@ -262,10 +260,9 @@ export interface ConfigType {
         readonly address: string
     }
 
-    readonly blockchainConfig?: {
+    
+    readonly assetsConfig?: {
+        readonly api: string,
         readonly rpc: string,
-        readonly card: string,
-        readonly skin: string,
-        readonly melee: string,
     }; 
 }

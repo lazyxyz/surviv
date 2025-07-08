@@ -1,12 +1,7 @@
 import { createTemplate, ObjectDefinitions, type ObjectDefinition } from "../utils/objectDefinitions";
 
 export enum EmoteCategory {
-    People,
-    Text,
     Memes,
-    Icons,
-    Misc,
-    TeamEmote
 }
 
 export interface EmoteDefinition extends ObjectDefinition {
@@ -22,57 +17,10 @@ const emote = createTemplate<EmoteDefinition>()((name: string, category: EmoteCa
 }));
 
 export const freeEmotes: string[] = [
-    "happy_face", "sad_face", "thumbs_up", "thumbs_down", "wave"
+    ""
 ];
 
 export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
-    ...[
-        "Happy Face",
-        "Sad Face",
-        "Thumbs Up",
-        "Thumbs Down",
-        "Wave",
-        "Disappointed Face",
-        "Sobbing Face",
-        "Angry Face",
-        "Heart Face",
-        "Joyful Face",
-        "Cool Face",
-        "Upside Down Face",
-        "Picasso Face",
-        "Alien",
-        "Headshot",
-        "Dab",
-        "Devil Face",
-        "Bandaged Face",
-        "Cold Face",
-        "Thinking Face",
-        "Nervous Face",
-        "Sweating Face",
-        "Greedy Face",
-        "Creepy Clown",
-        "Lying Face",
-        "Skull",
-        "Melting Face",
-        "Grimacing Face",
-        "Vomiting Face",
-        "Screaming Face",
-        "Pleading Face",
-        "Sad Smiling Face",
-        "Triumphant Face",
-        "Questioning Face",
-        "Smirking Face",
-        "Blushing Face",
-        "Saluting Face",
-        "Neutral Face",
-        "Relieved Face",
-        "Monocle Face",
-        "Partying Face",
-        "Shushing Face",
-        "Zipper Mouth Face",
-        "Sighing Face",
-        "Frustrated Face"
-    ].map(name => emote([name, EmoteCategory.People])),
     ...[
         "Suroi Logo",
         "AEGIS Logo",
@@ -80,29 +28,5 @@ export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
         "Duel",
         "Chicken Dinner",
         "Trophy"
-    ].map(name => emote([name, EmoteCategory.Icons])),
-    ...[
-        "Troll Face",
-        "Clueless",
-        "Pog",
-        "Froog",
-        "Bleh",
-        "Muller",
-        "Suroi General Chat",
-        "Fire",
-        "RIP",
-        "Leosmug",
-        "Socks",
-        "Archimedes",
-        "awhhmahgawd",
-        "Boykisser"
-    ].map(name => emote([name, EmoteCategory.Memes])),
-    ...[
-        "Monkey",
-        "Carrot",
-        "Tomato",
-        "Egg",
-        "Squid",
-        "Penguin"
-    ].map(name => emote([name, EmoteCategory.Misc]))
+    ].map(name => emote([name, EmoteCategory.Memes]))
 ]);
