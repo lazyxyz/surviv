@@ -339,48 +339,53 @@ export async function setUpUI(game: Game): Promise<void> {
             // if (devPass) params.set("password", devPass);
 
             {
-                // const name = game.console.getBuiltInCVar("cv_player_name");
-                
+                const name = game.console.getBuiltInCVar("cv_player_name");
+                if (name) params.set("name", name);
+
+                if (game.account.address) params.set("address", game.account.address)
                 // const address = game.account.address ? game.account.address : "";
-                
+
+
                 let skin: typeof defaultClientCVars["cv_loadout_skin"];
                 const playerSkin = Loots.fromStringSafe(
                     game.console.getBuiltInCVar("cv_loadout_skin")
                 ) ?? Loots.fromString(
                     typeof (skin = defaultClientCVars.cv_loadout_skin) === "object"
-                    ? skin.value
-                    : skin
+                        ? skin.value
+                        : skin
                 );
 
                 if (playerSkin) params.set("skin", playerSkin.idString);
 
-                // const badge = game.console.getBuiltInCVar("cv_loadout_badge");
+                const badge = game.console.getBuiltInCVar("cv_loadout_badge");
+                if (badge) params.set("badge", badge);
+
+                const weaponPreset = JSON.parse(game.console.getBuiltInCVar("dv_weapon_preset"));
+                if (weaponPreset && weaponPreset.melee) params.set("melee", weaponPreset.melee);
+                if (weaponPreset && weaponPreset.gun) params.set("gun", weaponPreset.gun);
+
+                const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
+                if (lobbyClearing) params.set("lobbyClearing", "true");
+
+                const nameColor = game.console.getBuiltInCVar("dv_name_color");
+                if (nameColor) {
+                    try {
+                        params.set("nameColor", new Color(nameColor).toNumber().toString());
+                    } catch (e) {
+                        game.console.setBuiltInCVar("dv_name_color", "");
+                        console.error(e);
+                    }
+                }
+
                 // const emotes = EMOTE_SLOTS.map(
                 //     slot => Emotes.fromStringSafe(game.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))
                 // );
             }
 
-            const badge = game.console.getBuiltInCVar("cv_loadout_badge");
-            if (badge) params.set("badge", badge);
+            const websocketURL = `${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`;
+            console.log("websocketURL: ", websocketURL);
 
-            const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
-            if (lobbyClearing) params.set("lobbyClearing", "true");
-
-            const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
-            if (weaponPreset) params.set("weaponPreset", weaponPreset);
-
-            const nameColor = game.console.getBuiltInCVar("dv_name_color");
-            if (nameColor) {
-                try {
-                    params.set("nameColor", new Color(nameColor).toNumber().toString());
-                } catch (e) {
-                    game.console.setBuiltInCVar("dv_name_color", "");
-                    console.error(e);
-                }
-            }
-
-            // game.connect(`${gameAddress.replace("<ID>", (data.gameID).toString())}/play}`);
-            game.connect(`${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`);
+            game.connect(websocketURL);
             ui.splashMsg.hide();
 
             // Check again because there is a small chance that the create-team-menu element won't hide.

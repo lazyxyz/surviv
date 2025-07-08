@@ -56,7 +56,6 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
 
             // Extract token from Authorization header
             const searchParams = new URLSearchParams(req.getQuery());
-            // console.log("searchParams: ", searchParams);
             const token = searchParams.get('token');
 
             //
@@ -78,9 +77,10 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
             //
             res.upgrade(
                 {
+                    name: searchParams.get("name") ?? "No name",
                     teamID: searchParams.get("teamID") ?? undefined,
                     autoFill: Boolean(searchParams.get("autoFill")),
-                    address: "",
+                    address: searchParams.get("address") ?? "",
                     token: token,
                     ip,
                     nameColor,
@@ -88,6 +88,8 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                     weaponPreset: searchParams.get("weaponPreset") ?? "",
                     skin: searchParams.get("skin") ?? "",
                     badge: searchParams.get("badge") ?? "",
+                    melee: searchParams.get("melee") ?? "",
+                    gun: searchParams.get("gun") ?? "",
                 },
                 req.getHeader("sec-websocket-key"),
                 req.getHeader("sec-websocket-protocol"),
@@ -102,8 +104,6 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
          */
         async open(socket: WebSocket<PlayerContainer>) {
             const data = socket.getUserData();
-
-            console.log("data: ", data);
 
             if (!data.token) {
                 socket.close();
@@ -125,7 +125,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                     isMobile: false,
                     address: data.address ? data.address : "",
                     emotes: emotes,
-                    name: "TEST",
+                    name: data.name,
                     skin: Skins.fromStringSafe(data.skin),
                     badge: Badges.fromStringSafe(data.badge),
                     melee: Melees.fromStringSafe(data.melee),

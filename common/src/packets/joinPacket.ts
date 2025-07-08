@@ -6,13 +6,13 @@ import { Melees } from "../definitions/melees";
 import { Guns } from "../definitions/guns";
 import { Skins } from "../definitions/skins";
 import { createPacket } from "./packet";
-import { GameData } from "./readyPacket";
+import { PlayerData } from "./readyPacket";
 
 // protocol version is automatically set; use this type when
 // creating an object for use by a JoinPacket
-export type JoinPacketCreation = Omit<GameData, "protocolVersion">;
+export type JoinPacketCreation = Omit<PlayerData, "protocolVersion">;
 
-export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, GameData>({
+export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, PlayerData>({
     serialize(stream, data) {
         const emotes = data.emotes;
         const hasSkin = data.skin !== undefined;

@@ -62,7 +62,7 @@ import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 import { EIP6963 } from "./eip6963";
 import { Account } from "./account";
-import { ReadyPacket } from "@common/packets/readyPacket";
+import { ReadyPacket, type PlayerData } from "@common/packets/readyPacket";
 import { visibleConnectWallet, visibleWallet } from "./wallet";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { Melees } from "@common/definitions/melees";
@@ -278,34 +278,11 @@ export class Game {
         this.camera.resize(true);
     }
 
-    ready() {
-        const emotes = EMOTE_SLOTS.map(
-            slot => Emotes.fromStringSafe(this.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))
-        );
-
-        console.log("emotes: ", emotes);
-
-        const joinPacket: JoinPacketCreation = {
-            isMobile: this.inputManager.isMobile,
-            name: this.console.getBuiltInCVar("cv_player_name"),
-            address: this.account.address ? this.account.address : "",
-            skin: Loots.fromStringSafe(
-                this.console.getBuiltInCVar("cv_loadout_skin")
-            ),
-            badge: Badges.fromStringSafe(this.console.getBuiltInCVar("cv_loadout_badge")),
-            emotes: EMOTE_SLOTS.map(
-                slot => Emotes.fromStringSafe(this.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))
-            ),
-            melee: Melees.fromStringSafe(this.console.getBuiltInCVar("dv_weapon_preset")),
-            gun: Guns.fromStringSafe(this.console.getBuiltInCVar("dv_weapon_preset")),
-        };
-
-        this.sendPacket(JoinPacket.create(joinPacket));
+    ready(packet: PlayerData) {
+        this.sendPacket(JoinPacket.create(packet));
     }
 
     connect(address: string): void {
-        console.log("address: ", address);
-
         const url = new URL(address);
         const ui = this.uiManager.ui;
 
@@ -451,7 +428,7 @@ export class Game {
     onPacket(packet: OutputPacket): void {
         switch (true) {
             case packet instanceof ReadyPacket:
-                this.ready();
+                this.ready(packet.output);
                 break;
             case packet instanceof JoinedPacket:
                 this.startGame(packet.output);

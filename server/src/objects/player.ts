@@ -488,7 +488,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
             if (getWeapon?.gun) determinePreset(0, getWeapon.gun);
             if (getWeapon?.throwable) determinePreset(1, getWeapon.throwable);
-            if (getWeapon?.meless) determinePreset(2, getWeapon.meless);
+            if (getWeapon?.melee) determinePreset(2, getWeapon.melee);
 
             if (this.maxAdrenaline !== GameConstants.player.maxAdrenaline) {
                 this.adrenaline = this.maxAdrenaline;

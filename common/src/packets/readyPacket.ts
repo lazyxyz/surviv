@@ -7,25 +7,25 @@ import { Guns, GunDefinition } from "../definitions/guns";
 import { Skins, type SkinDefinition } from "../definitions/skins";
 import { createPacket } from "./packet";
 
-export type GameData = {
+export type PlayerData = {
     readonly protocolVersion: number
     readonly name: string
     readonly address: string
     readonly isMobile: boolean
+    readonly emotes: ReadonlyArray<EmoteDefinition | undefined>
 
     readonly skin?: SkinDefinition
     readonly badge?: BadgeDefinition
 
-    readonly emotes: ReadonlyArray<EmoteDefinition | undefined>
     readonly melee?: MeleeDefinition
     readonly gun?: GunDefinition
 };
 
 // protocol version is automatically set; use this type when
 // creating an object for use by a ReadyPacket
-export type JoinPacketCreation = Omit<GameData, "protocolVersion">;
+export type JoinPacketCreation = Omit<PlayerData, "protocolVersion">;
 
-export const ReadyPacket = createPacket("ReadyPacket")<JoinPacketCreation, GameData>({
+export const ReadyPacket = createPacket("ReadyPacket")<JoinPacketCreation, PlayerData>({
     serialize(stream, data) {
         const emotes = data.emotes;
         const hasSkin = data.skin !== undefined;
@@ -53,6 +53,14 @@ export const ReadyPacket = createPacket("ReadyPacket")<JoinPacketCreation, GameD
         stream.writePlayerName(data.name);
         stream.writePlayerAddress(data.address);
 
+        for (let i = 0; i < 6; i++) {
+            const emote = emotes[i];
+            if (emote !== undefined) {
+                Emotes.writeToStream(stream, emote);
+            }
+        }
+
+
         if (hasSkin) {
             Loots.writeToStream(stream, data.skin);
         }
@@ -61,12 +69,6 @@ export const ReadyPacket = createPacket("ReadyPacket")<JoinPacketCreation, GameD
             Badges.writeToStream(stream, data.badge);
         }
 
-        for (let i = 0; i < 6; i++) {
-            const emote = emotes[i];
-            if (emote !== undefined) {
-                Emotes.writeToStream(stream, emote);
-            }
-        }
 
         if (hasMelee) {
             Melees.writeToStream(stream, data.melee);
@@ -95,11 +97,11 @@ export const ReadyPacket = createPacket("ReadyPacket")<JoinPacketCreation, GameD
             name: stream.readPlayerName().replaceAll(/<[^>]+>/g, "").trim(), // Regex strips out HTML
             address: stream.readPlayerAddress().replaceAll(/<[^>]+>/g, "").trim(), // Regex strips out HTML
             isMobile,
+            emotes: Array.from({ length: 6 }, (_, i) => emotes[i] ? Emotes.readFromStream(stream) : undefined),
 
             skin: hasSkin ? Skins.readFromStream(stream) : undefined,
             badge: hasBadge ? Badges.readFromStream(stream) : undefined,
 
-            emotes: Array.from({ length: 6 }, (_, i) => emotes[i] ? Emotes.readFromStream(stream) : undefined),
             melee: hasMelee ? Melees.readFromStream(stream) : undefined,
             gun: hasGun ? Guns.readFromStream(stream) : undefined,
         };

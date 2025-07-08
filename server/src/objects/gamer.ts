@@ -16,6 +16,7 @@ import { randomBytes } from "crypto";
 import { Config } from "../config";
 
 export interface PlayerContainer {
+    readonly name: string
     readonly teamID?: string
     readonly autoFill: boolean
     player?: Gamer

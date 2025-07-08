@@ -9,7 +9,7 @@ import { SurvivAssets } from "../account";
 const selectMeless = (game: Game, weapon: string) => {
     // store weapon
     weapons.selectWeapon(game, {
-        meless: weapon
+        melee: weapon
     });
 
     // active element
@@ -103,11 +103,11 @@ export async function visibleMeless(game: Game) {
 
     // display to preview and select
     {
-        melessList.append("<h2 class='weapons-container-card-meless'>Meless</h2>");
+        melessList.append("<h2 class='weapons-container-card-melee'>Meless</h2>");
 
         for (const { idString, name } of MelessIntance) {
             const melessItem = $<HTMLDivElement>(`
-                <div class="weapons-container-card weapons-container-card-meless" id="weapons-list-${idString}">
+                <div class="weapons-container-card weapons-container-card-melee" id="weapons-list-${idString}">
                     <img src="./img/game/shared/weapons/${idString}.svg" alt=${name} width="72px" height="72px" />
     
                     <p class="weapons-container-paragraph">${name}</p>
@@ -118,7 +118,7 @@ export async function visibleMeless(game: Game) {
             melessItem.on("click", async () => {
                 // handler active messItem
                 {
-                    $(".weapons-container-card-meless").removeClass("selected");
+                    $(".weapons-container-card-melee").removeClass("selected");
 
                     melessItem.toggleClass("selected");
                 }
@@ -134,7 +134,7 @@ export async function visibleMeless(game: Game) {
                         ? JSON.parse(game.console.getBuiltInCVar("dv_weapon_preset"))
                         : undefined)) as weaponPresentType | undefined;
 
-                    const avaliableMeless = getAssets?.find(meta => meta.idString === weaponPresent?.meless);
+                    const avaliableMeless = getAssets?.find(meta => meta.idString === weaponPresent?.melee);
 
                     if (avaliableMeless) {
                         selectMeless(game, avaliableMeless.idString);
