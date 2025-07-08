@@ -1,12 +1,11 @@
 import $ from "jquery";
-import { freeMeless, Melees } from "@common/definitions/melees";
+import { freeMelees, Melees } from "@common/definitions/melees";
 import type { Game } from "../game";
 import type { weaponPresentType } from "@common/typings";
 import weapons from ".";
-import { ObjectDefinitions, type ObjectDefinition } from "@common/utils/objectDefinitions";
 import { SurvivAssets } from "../account";
 
-const selectMeless = (game: Game, weapon: string) => {
+const selectMelees = (game: Game, weapon: string) => {
     // store weapon
     weapons.selectWeapon(game, {
         melee: weapon
@@ -18,7 +17,7 @@ const selectMeless = (game: Game, weapon: string) => {
     }, 0);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const getMeless = Melees.definitions.find(g => g.idString === weapon)!;
+    const getMelees = Melees.definitions.find(g => g.idString === weapon)!;
     const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
 
     weapons.appendPreview([
@@ -32,25 +31,25 @@ const selectMeless = (game: Game, weapon: string) => {
         },
         {
             class: "assets-world",
-            url: `./img/game/shared/weapons/${getMeless.idString}.svg`,
-            x: getMeless.image?.position.x ?? 0,
-            y: getMeless.image?.position.y ?? 0,
-            rotate: getMeless.image?.angle ?? 0,
+            url: `./img/game/shared/weapons/${getMelees.idString}.svg`,
+            x: getMelees.image?.position.x ?? 0,
+            y: getMelees.image?.position.y ?? 0,
+            rotate: getMelees.image?.angle ?? 0,
             zIndex: 1
         },
         {
             class: "assets-fist",
             url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
-            x: getMeless.fists.right.x,
-            y: getMeless.fists.right.y,
+            x: getMelees.fists.right.x,
+            y: getMelees.fists.right.y,
             zIndex: 4,
             rotate: 0
         },
         {
             class: "assets-fist",
             url: `./img/game/shared/skins/${currentSkin}_fist.svg`,
-            x: getMeless.fists.left.x,
-            y: getMeless.fists.left.y,
+            x: getMelees.fists.left.x,
+            y: getMelees.fists.left.y,
             zIndex: 3,
             rotate: 0
         }
@@ -58,10 +57,10 @@ const selectMeless = (game: Game, weapon: string) => {
 };
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function visibleMeless(game: Game) {
+export async function showMelees(game: Game) {
     if (!game?.account?.address) return;
 
-    const melessList = $<HTMLDivElement>(".weapons-container-list");
+    const meleesList = $<HTMLDivElement>(".weapons-container-list");
 
     // reset items before render new
     weapons.resetAll();
@@ -81,14 +80,14 @@ export async function visibleMeless(game: Game) {
     const userArms = Object.entries(userArmsBalance).map(([key, _]) => key);
 
     const userMelees=  Melees.definitions.filter(argument =>
-            [...freeMeless, ...(userArms || [])].some(
+            [...freeMelees, ...(userArms || [])].some(
                 argument_child => argument_child === argument.idString
             )
         );
 
-    const MelessIntance = Melees.definitions.filter(argument =>
+    const MeleesIntance = Melees.definitions.filter(argument =>
         [
-            ...freeMeless,
+            ...freeMelees,
             /*
                 in here don't allow show skins just default
                 you wanna select skin attention to assets preview !
@@ -103,10 +102,10 @@ export async function visibleMeless(game: Game) {
 
     // display to preview and select
     {
-        melessList.append("<h2 class='weapons-container-card-melee'>Meless</h2>");
+        meleesList.append("<h2 class='weapons-container-card-melee'>Melees</h2>");
 
-        for (const { idString, name } of MelessIntance) {
-            const melessItem = $<HTMLDivElement>(`
+        for (const { idString, name } of MeleesIntance) {
+            const meleesItem = $<HTMLDivElement>(`
                 <div class="weapons-container-card weapons-container-card-melee" id="weapons-list-${idString}">
                     <img src="./img/game/shared/weapons/${idString}.svg" alt=${name} width="72px" height="72px" />
     
@@ -115,12 +114,12 @@ export async function visibleMeless(game: Game) {
             `);
 
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            melessItem.on("click", async () => {
+            meleesItem.on("click", async () => {
                 // handler active messItem
                 {
                     $(".weapons-container-card-melee").removeClass("selected");
 
-                    melessItem.toggleClass("selected");
+                    meleesItem.toggleClass("selected");
                 }
 
                 const getAssets = await weapons.appendAsset(
@@ -134,26 +133,26 @@ export async function visibleMeless(game: Game) {
                         ? JSON.parse(game.console.getBuiltInCVar("dv_weapon_preset"))
                         : undefined)) as weaponPresentType | undefined;
 
-                    const avaliableMeless = getAssets?.find(meta => meta.idString === weaponPresent?.melee);
+                    const avaliableMelees = getAssets?.find(meta => meta.idString === weaponPresent?.melee);
 
-                    if (avaliableMeless) {
-                        selectMeless(game, avaliableMeless.idString);
+                    if (avaliableMelees) {
+                        selectMelees(game, avaliableMelees.idString);
                     }
 
-                    if (!avaliableMeless) {
-                        selectMeless(game, idString);
+                    if (!avaliableMelees) {
+                        selectMelees(game, idString);
                     }
                 }
 
                 // handler preview and click assets
                 $(".weapons-container-card-assets").on("click", ({ currentTarget }) => {
-                    const melessSelect = currentTarget.id.replace("weapons-assets-", "");
+                    const meleesSelect = currentTarget.id.replace("weapons-assets-", "");
 
-                    selectMeless(game, melessSelect);
+                    selectMelees(game, meleesSelect);
                 });
             });
 
-            melessList.append(melessItem);
+            meleesList.append(meleesItem);
         }
     }
 }

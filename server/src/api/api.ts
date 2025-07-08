@@ -16,7 +16,7 @@ export async function validateJWT(token: string): Promise<{ walletAddress: strin
     if (res.status !== 200) return { walletAddress: "" };
     const data = await res.json();
     return {
-        walletAddress: data.walletAddress,
+        walletAddress: data.walletAddress.toLowerCase(),
     };
 }
 

@@ -15,6 +15,7 @@ import { EMOTE_SLOTS } from "@common/constants";
 import { Emotes } from "@common/definitions/emotes";
 import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
+import { verifyGun, verifyMelee, verifySkin } from "./balances";
 
 const simultaneousConnections: Record<string, number> = {};
 
@@ -112,6 +113,12 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
             const token = data.token;
             const payload = await validateJWT(token);
 
+            if (payload.walletAddress != data.address?.toLowerCase()) {
+                console.log(`Invalid address jwt: ${payload.walletAddress} user: ${data.address?.toLowerCase()}`);
+                socket.close();
+                return;
+            }
+
             if ((data.player = game.addPlayer(socket)) === undefined) {
                 socket.close();
             }
@@ -119,6 +126,31 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
             const emotes = EMOTE_SLOTS.map(
                 slot => Emotes.fromStringSafe(data.emotes)
             );
+
+            // Verify Skin
+            let skin = Skins.fromStringSafe("unknown"); // Default skins
+            await verifySkin(data.address, data.skin).then((isValid) => {
+                if (isValid) skin = Skins.fromStringSafe(data.skin);
+            }).catch(err => {
+                console.log("Verify skin failed: ", err);
+            })
+
+            // Verify Melee
+            let melee = undefined;
+            await verifyMelee(data.address, data.melee).then((isValid) => {
+                if (isValid) melee = Melees.fromStringSafe(data.melee);
+            }).catch(err => {
+                console.log("Verify melee failed: ", err);
+            })
+            
+            // Verify Gun
+            let gun = undefined;
+            await verifyGun(data.address, data.gun).then((isValid) => {
+                if (isValid) gun = Guns.fromStringSafe(data.gun);
+            }).catch(err => {
+                console.log("Verify gun failed: ", err);
+            })
+
             const stream = new PacketStream(new ArrayBuffer(128));
             stream.serializeServerPacket(
                 ReadyPacket.create({
@@ -126,10 +158,10 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                     address: data.address ? data.address : "",
                     emotes: emotes,
                     name: data.name,
-                    skin: Skins.fromStringSafe(data.skin),
+                    skin: skin,
                     badge: Badges.fromStringSafe(data.badge),
-                    melee: Melees.fromStringSafe(data.melee),
-                    gun: Guns.fromStringSafe(data.gun),
+                    melee: melee,
+                    gun: gun,
                 })
             );
             socket.send(stream.getBuffer(), true, false);

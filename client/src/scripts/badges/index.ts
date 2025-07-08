@@ -26,7 +26,7 @@ export function getBadgeImage(badge: string) {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function visibleBadges(game: Game) {
+export async function showBadges(game: Game) {
     if (!game?.account?.address) return;
 
     const badgeList = $<HTMLDivElement>("#badges-list");

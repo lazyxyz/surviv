@@ -43,7 +43,7 @@ function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function visibleSkin(game: Game) {
+export async function showSkins(game: Game) {
     if (!game?.account?.address) return;
 
     const role = game.console.getBuiltInCVar("dv_role");
