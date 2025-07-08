@@ -7,7 +7,6 @@ import { Scopes, type ScopeDefinition } from "@common/definitions/scopes";
 import { SpectatePacket } from "@common/packets/spectatePacket";
 import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, type GetGameResponse } from "@common/typings";
 import { ExtendedMap } from "@common/utils/misc";
-import { EmoteCategory, Emotes, freeEmotes, type EmoteDefinition } from "@common/definitions/emotes";
 import { ItemType, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound } from "@pixi/sound";
@@ -29,7 +28,7 @@ import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, Wallet
 import { getBadgeImage, showBadges } from "./badges";
 import { loadInventory } from "./inventory";
 import { showSkins } from "./skin";
-import { showMelees } from "./weapons/melees";
+import { showMelees as showWeapons } from "./weapons/weapons";
 import { Loots } from "@common/definitions/loots";
 import { showEmotes } from "./emotes";
 /*
@@ -91,7 +90,7 @@ export async function visibleInventory(game: Game) {
     })
 
     $('#tab-weapons').on('click', () => {
-        showMelees(game);
+        showWeapons(game);
     })
 
     $('#tab-badges').on('click', () => {
@@ -100,8 +99,6 @@ export async function visibleInventory(game: Game) {
  
     $('#tab-emotes').on('click', () => {
         showEmotes(game);
-        console.log("EMOTES!");
-        // showBadges(game);
     })
 }
 
@@ -386,8 +383,6 @@ export async function setUpUI(game: Game): Promise<void> {
             }
 
             const websocketURL = `${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`;
-            console.log("websocketURL: ", websocketURL);
-
             game.connect(websocketURL);
             ui.splashMsg.hide();
 

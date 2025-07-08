@@ -69,8 +69,6 @@ export async function showSkins(game: Game) {
         )
     );
 
-
-
     // should be set or reset skin
     {
         const avaliableSkin = SkinsIntance.find(
@@ -83,7 +81,6 @@ export async function showSkins(game: Game) {
         }
 
         if (!avaliableSkin) {
-            // selectSkin(freeSkin[0]);
             selectSkin(defaultClientCVars.cv_loadout_skin as string, game);
         }
     }

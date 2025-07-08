@@ -822,7 +822,10 @@ export class Game implements GameData {
         if (packet.melee) {
             player.inventory.weapons[2] = new MeleeItem(packet.melee, player);
         }
-        // player.inventory.items[]
+        
+        if (packet.gun) {
+            player.inventory.weapons[0] = new GunItem(packet.gun, player);
+        }
 
         this.livingPlayers.add(player);
         this.spectatablePlayers.push(player);
