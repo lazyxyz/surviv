@@ -60,7 +60,7 @@ export async function visibleSkin(game: Game) {
     let DivineSkins = await game.account.getBalances(SurvivAssets.DivineSkins).catch(err => {
         console.log(`Get SilverSkins error: ${err}`);
     });
-    const UserSkins = {...SilverSkins, ...GoldSkins, ...DivineSkins};
+    const UserSkins = { ...SilverSkins, ...GoldSkins, ...DivineSkins };
     const mySkins = Object.entries(UserSkins).map(([key, _]) => key);
 
     const SkinsIntance = Skins.definitions.filter(argument =>
@@ -68,6 +68,8 @@ export async function visibleSkin(game: Game) {
             argument_child => argument_child === argument.idString
         )
     );
+
+
 
     // should be set or reset skin
     {

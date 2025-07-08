@@ -2,6 +2,7 @@ import $ from "jquery";
 import { formatEther } from "ethers";
 import { PaymentTokens, SaleItems, SurvivAssets } from "../account";
 import type { Game } from "../game";
+import { successAlert, errorAlert } from "../modal";
 
 interface StoreItem {
     balance: number;
@@ -72,7 +73,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
             $buyButton.prop("disabled", true);
             try {
                 await game.account.buyItems(itemType, amount, PaymentTokens.NativeToken);
-                alert("Purchase successful!");
+                successAlert("Purchase successful!");
                 amount = 0;
                 $purchaseAmount.text("0");
                 $buyButton.prop("disabled", true).removeClass("active");
@@ -80,7 +81,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
                 await loadStore(game);
             } catch (err) {
                 console.error(`Failed to buy ${itemType}: ${err}`);
-                alert("Purchase failed. Please try again.");
+                errorAlert("Purchase failed. Please try again!");
             } finally {
                 isProcessing = false;
                 $buyButton.prop("disabled", amount === 0);
