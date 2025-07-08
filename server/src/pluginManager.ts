@@ -4,7 +4,6 @@ import type { LootDefinition } from "@common/definitions/loots";
 import { type PlayerPing } from "@common/definitions/mapPings";
 import { type ObstacleDefinition } from "@common/definitions/obstacles";
 import { type AllowedEmoteSources, type PlayerInputData } from "@common/packets/inputPacket";
-import { type GameData } from "@common/packets/joinPacket";
 import { Variation, type Orientation } from "@common/typings";
 import { ExtendedMap } from "@common/utils/misc";
 import { type PlayerModifiers } from "@common/utils/objectDefinitions";
@@ -18,6 +17,7 @@ import { Loot, type ItemData } from "./objects/loot";
 import { Obstacle } from "./objects/obstacle";
 import { Player } from "./objects/player";
 import { Logger } from "./utils/misc";
+import { PlayerData } from "@common/packets/readyPacket";
 
 interface PlayerDamageEvent extends DamageParams {
     readonly player: Player
@@ -440,11 +440,11 @@ export interface EventDataMap {
 
     readonly player_will_join: {
         readonly player: Player
-        readonly joinPacket: GameData
+        readonly joinPacket: PlayerData
     }
     readonly player_did_join: {
         readonly player: Player
-        readonly joinPacket: GameData
+        readonly joinPacket: PlayerData
     }
 
     readonly player_disconnect: Player
