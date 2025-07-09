@@ -26,7 +26,7 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
     const crateList = Array.from(crates);
     $(".select-all").prop("checked", false);
 
-
+    // Remove any existing click handlers to prevent duplicates
     $(document).off("click", ".my-crates-child .open-now .claim-items");
 
     crates.forEach(crate => {
@@ -37,23 +37,17 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
                 crate.classList.remove("active");
                 selectedCount--;
                 $(".select-all").prop("checked", false);
-
             } else if (selectedCount < localKeyBalance) {
                 crate.classList.add("active");
                 selectedCount++;
-                console.log(selectedCount);
-
-            }
-            else {
+            } else {
                 warningAlert("Insufficient keys!");
             }
 
             if (selectedCount === localKeyBalance && localKeyBalance > 0) {
                 $(".select-all").prop("checked", true);
-
             } else {
                 $(".select-all").prop("checked", false);
-
             }
 
             if (openNowButton) {
@@ -64,77 +58,98 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
                 totalSelected.textContent = `${selectedCount} selected`;
             }
         });
-
-        $(".select-all").on("change", (item: any, selectedItems: any) => {
-            const checkActive = $(".select-all").is(":checked");
-
-            {
-
-                if (checkActive) {
-                    crates.forEach(crate => crate.classList.remove("active"));
-                    selectedCount = 0;
-
-                    if (localCrateBalance > keyBalances || localCrateBalance == keyBalances) {
-                        const item = crateList.slice(0, localKeyBalance);
-                        item.forEach(crate => crate.classList.add("active"));
-                        const selectedItems = item.map(crate => crate.textContent);
-                        selectedCount = selectedItems.length;
-                    } else {
-                        const item = crateList.slice(0, localCrateBalance);
-                        item.forEach(crate => crate.classList.add("active"));
-                        const selectedItems = item.map(crate => crate.textContent);
-                        selectedCount = selectedItems.length;
-                    }
-                } else {
-                    crates.forEach(crate => crate.classList.remove("active"));
-                    selectedCount = 0;
-                    console.log(selectedCount);
-                }
-            }
-
-            if (totalSelected) {
-                totalSelected.textContent = `${selectedCount} selected`;
-            }
-
-            if (openNowButton) {
-                openNowButton.disabled = selectedCount === 0;
-                openNowButton.classList.toggle("active", selectedCount > 0);
-            }
-        });
-
     });
 
+    $(".select-all").off("change").on("change", () => {
+        const checkActive = $(".select-all").is(":checked");
+        if (checkActive) {
+            crates.forEach(crate => crate.classList.remove("active"));
+            selectedCount = 0;
+
+            const maxSelectable = Math.min(localCrateBalance, localKeyBalance);
+            const items = crateList.slice(0, maxSelectable);
+            items.forEach(crate => crate.classList.add("active"));
+            selectedCount = items.length;
+        } else {
+            crates.forEach(crate => crate.classList.remove("active"));
+            selectedCount = 0;
+        }
+
+        if (totalSelected) {
+            totalSelected.textContent = `${selectedCount} selected`;
+        }
+
+        if (openNowButton) {
+            openNowButton.disabled = selectedCount === 0;
+            openNowButton.classList.toggle("active", selectedCount > 0);
+        }
+    });
 
     if (openNowButton) {
-        $(openNowButton).on("click", async () => {
+        $(openNowButton).off("click").on("click", async () => {
             if (isOpening) return;
             isOpening = true;
             openNowButton.disabled = true;
             try {
                 if (selectedCount > 0) {
+                    // Perform contract interaction
                     await game.account.requestOpenCrates(selectedCount);
-                    document.querySelectorAll(".my-crates-child.active").forEach(crate => crate.remove());
+                    // Update local balances
                     localCrateBalance -= selectedCount;
                     localKeyBalance -= selectedCount;
-                    $("#total-crates").text(`You have: ${localCrateBalance} crates - ${localKeyBalance} keys`);
-                    if (totalSelected) {
-                        totalSelected.textContent = "0 selected";
-                    }
-                    openNowButton.classList.remove("active");
-                    selectedCount = 0;
+                    // Update UI
+                    await updateUIAfterOpen(game, localCrateBalance, localKeyBalance, totalSelected, openNowButton);
                     successAlert("Crates opened successfully!");
                 }
             } catch (err) {
                 console.error(`Failed to open crates: ${err}`);
                 errorAlert("Failed to open crates. Please try again!");
-
             } finally {
                 isOpening = false;
-                await loadCrates(game);
-                await updateClaimButton(game);
-                const checkActive = $(".select-all").prop("checked", false);
+                openNowButton.disabled = selectedCount === 0;
             }
         });
+    }
+}
+
+async function updateUIAfterOpen(
+    game: Game,
+    localCrateBalance: number,
+    localKeyBalance: number,
+    totalSelected: Element | null,
+    openNowButton: HTMLButtonElement | null
+): Promise<void> {
+    // Remove opened crates
+    document.querySelectorAll(".my-crates-child.active").forEach(crate => crate.remove());
+    // Update total crates and keys display
+    $("#total-crates").text(`You have: ${localCrateBalance} crates - ${localKeyBalance} keys`);
+    // Reset selection
+    if (totalSelected) {
+        totalSelected.textContent = "0 selected";
+    }
+    if (openNowButton) {
+        openNowButton.classList.remove("active");
+        openNowButton.disabled = true;
+    }
+    $(".select-all").prop("checked", false);
+    // Re-fetch balances to ensure UI consistency
+    const userKeyBalances = await game.account.getBalances(SurvivAssets.SurvivKeys).catch(err => {
+        console.error(`Failed to load key balance: ${err}`);
+        return { keys: localKeyBalance };
+    });
+    const userCrateBalances = await game.account.getBalances(SurvivAssets.SurvivCrates).catch(err => {
+        console.error(`Failed to load crate balance: ${err}`);
+        return { crates: localCrateBalance };
+    });
+    // Update UI if balances differ
+    if (
+        userCrateBalances.crates !== localCrateBalance ||
+        userKeyBalances.keys !== localKeyBalance
+    ) {
+        renderCrates(userCrateBalances, userKeyBalances?.keys || 0);
+        // Reinitialize crate selection with new balances
+        const crates = document.querySelectorAll(".my-crates-child");
+        setupCrateOpening(game, crates, totalSelected, openNowButton, userKeyBalances?.keys || 0);
     }
 }
 
@@ -164,7 +179,6 @@ async function updateClaimButton(game: Game): Promise<void> {
             errorAlert("Failed to claim items. Please try again!");
         } finally {
             isProcessing = false;
-            await updateClaimButton(game);
         }
     });
 }
@@ -182,7 +196,6 @@ async function loadCrates(game: Game): Promise<void> {
     renderCrates(userCrateBalances, userKeyBalances?.keys || 0);
 
     const crates = document.querySelectorAll(".my-crates-child");
-    const selectAll = document.querySelectorAll(".crates-info");
     const totalSelected = document.querySelector(".total-selected");
     const openNowButton = document.querySelector<HTMLButtonElement>(".open-now");
     setupCrateOpening(game, crates, totalSelected, openNowButton, userKeyBalances?.keys || 0);
