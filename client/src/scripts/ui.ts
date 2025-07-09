@@ -331,6 +331,9 @@ export async function setUpUI(game: Game): Promise<void> {
 
     const readyConnect = (data: GetGameResponse, gameAddress: string) => {
         if (data.success) {
+            ui.splashOptions.addClass("loading");
+            ui.loadingText.text("Verifying Game Assets");
+
             const params = new URLSearchParams();
 
             if (teamID) params.set("teamID", teamID);
