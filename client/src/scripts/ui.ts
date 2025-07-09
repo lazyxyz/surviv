@@ -79,8 +79,7 @@ export function resetPlayButtons(): void {
     $("#btn-cancel-finding-game").css("display", "none");
 }
 
-export async function visibleInventory(game: Game) {
-    await setUpUI(game);
+export async function showInventory(game: Game) {
     $("#btn-customize").on('click', async () => {
         await loadInventory(game);
     })
@@ -96,7 +95,7 @@ export async function visibleInventory(game: Game) {
     $('#tab-badges').on('click', () => {
         showBadges(game);
     })
- 
+
     $('#tab-emotes').on('click', () => {
         showEmotes(game);
     })
@@ -360,9 +359,11 @@ export async function setUpUI(game: Game): Promise<void> {
                 const badge = game.console.getBuiltInCVar("cv_loadout_badge");
                 if (badge) params.set("badge", badge);
 
-                const weaponPreset = JSON.parse(game.console.getBuiltInCVar("dv_weapon_preset"));
-                if (weaponPreset && weaponPreset.melee) params.set("melee", weaponPreset.melee);
-                if (weaponPreset && weaponPreset.gun) params.set("gun", weaponPreset.gun);
+                const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
+                if (weaponPreset) {
+                    if (JSON.parse(weaponPreset).melee) params.set("melee", JSON.parse(weaponPreset).melee);
+                    if (JSON.parse(weaponPreset).gun) params.set("gun", JSON.parse(weaponPreset).gun);
+                }
 
                 const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
                 if (lobbyClearing) params.set("lobbyClearing", "true");
@@ -513,13 +514,9 @@ export async function setUpUI(game: Game): Promise<void> {
 
         params.set("name", game.console.getBuiltInCVar("cv_player_name"));
         params.set("skin", game.console.getBuiltInCVar("cv_loadout_skin"));
-        // params.set("weapon", game.console.getBuiltInCVar("cv_loadout_weapon"));
 
         const badge = game.console.getBuiltInCVar("cv_loadout_badge");
         if (badge) params.set("badge", badge);
-
-        const devPass = game.console.getBuiltInCVar("dv_password");
-        if (devPass) params.set("password", devPass);
 
         const role = game.console.getBuiltInCVar("dv_role");
         if (role) params.set("role", role);
@@ -1452,7 +1449,7 @@ export async function setUpUI(game: Game): Promise<void> {
                 return;
             }
 
-            localStorage.setItem("suroi_config", input);
+            localStorage.setItem("surviv_config", input);
             alert("Settings loaded successfully.");
             window.location.reload();
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1463,11 +1460,11 @@ export async function setUpUI(game: Game): Promise<void> {
 
     // Copy settings to clipboard
     $("#export-settings-btn").on("click", () => {
-        const exportedSettings = localStorage.getItem("suroi_config");
+        const exportedSettings = localStorage.getItem("surviv_config");
         const error = (): void => {
             alert(
                 "Unable to copy settings. To export settings manually, open the dev tools with Ctrl+Shift+I (Cmd+Opt+I on Mac) "
-                + "and, after typing in the following, copy the result manually: localStorage.getItem(\"suroi_config\")"
+                + "and, after typing in the following, copy the result manually: localStorage.getItem(\"surviv_config\")"
             );
         };
         if (exportedSettings === null) {
@@ -1486,7 +1483,7 @@ export async function setUpUI(game: Game): Promise<void> {
     $("#reset-settings-btn").on("click", () => {
         if (!confirm("This option will reset all settings and reload the page. Continue?")) return;
         if (!confirm("Are you sure? This action cannot be undone.")) return;
-        localStorage.removeItem("suroi_config");
+        localStorage.removeItem("surviv_config");
         window.location.reload();
     });
 
