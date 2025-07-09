@@ -31,6 +31,7 @@ import { showSkins } from "./skin";
 import { showMelees as showWeapons } from "./weapons/weapons";
 import { Loots } from "@common/definitions/loots";
 import { showEmotes } from "./emotes";
+import { warningAlert } from "./modal";
 /*
     eslint-disable
 
@@ -455,7 +456,7 @@ export async function setUpUI(game: Game): Promise<void> {
     // Join server when play buttons are clicked
     $("#btn-play-solo, #btn-play-squad").on("click", event => {
         if (!game.account.address) {
-            alert("Please connect your wallet to continue!")
+            warningAlert("Please connect your wallet to continue!");
             return;
         }
         const now = Date.now();

@@ -131,7 +131,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
 
                 // Verify Skin
                 let skin = Skins.fromStringSafe("unknown"); // Default skins
-                await verifySkin(data.address, data.skin).then((isValid) => {
+                await verifySkin(data.address, data.skin, 5000).then((isValid) => {
                     if (isValid) skin = Skins.fromStringSafe(data.skin);
                 }).catch(err => {
                     console.log("Verify skin failed: ", err);
@@ -139,7 +139,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
 
                 // Verify Melee
                 let melee = undefined;
-                await verifyMelee(data.address, data.melee).then((isValid) => {
+                await verifyMelee(data.address, data.melee, 3000).then((isValid) => {
                     if (isValid) melee = Melees.fromStringSafe(data.melee);
                 }).catch(err => {
                     console.log("Verify melee failed: ", err);
@@ -147,7 +147,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
 
                 // Verify Gun
                 let gun = undefined;
-                await verifyGun(data.address, data.gun).then((isValid) => {
+                await verifyGun(data.address, data.gun, 2000).then((isValid) => {
                     if (isValid) gun = Guns.fromStringSafe(data.gun);
                 }).catch(err => {
                     console.log("Verify gun failed: ", err);
@@ -169,8 +169,8 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                 socket.send(stream.getBuffer(), true, false);
                 // data.player.sendGameOverPacket(false); // uncomment to test game over screen
             } catch (err: any) {
+                console.log("websocket connect failed: ", err);
                 socket.close();
-                console.error("websocket connect failed: ", err);
             }
         },
 

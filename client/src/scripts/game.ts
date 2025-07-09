@@ -66,6 +66,7 @@ import { ReadyPacket, type PlayerData } from "@common/packets/readyPacket";
 import { visibleConnectWallet, visibleWallet } from "./wallet";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { Melees } from "@common/definitions/melees";
+import { errorAlert } from "./modal";
 
 /* eslint-disable @stylistic/indent */
 
@@ -396,8 +397,9 @@ export class Game {
 
         this._socket.onerror = (): void => {
             this.error = true;
-            ui.splashMsgText.html(getTranslatedString("msg_err_joining"));
-            ui.splashMsg.show();
+            // ui.splashMsgText.html(getTranslatedString("msg_err_joining"));
+            // ui.splashMsg.show();
+            errorAlert("Failed to join the game. Please try again.");
             resetPlayButtons();
         };
 

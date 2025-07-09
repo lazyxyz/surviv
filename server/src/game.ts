@@ -1300,6 +1300,10 @@ export class Game implements GameData {
 
         this.pluginManager.emit("airdrop_did_summon", { airdrop, position });
     }
+
+    isStarted() {
+        return this._started;
+    }
 }
 
 export interface Airdrop {

@@ -165,7 +165,52 @@ export class Ninja extends Player {
         }
     }
 
+    private holdPositionPreGame(): void {
+        if (this.lastHideSpot) {
+            // Stay at current hiding spot
+            this.baseSpeed = GameConstants.player.baseSpeed;
+            this.movingToRadius = false;
+            this.moveToTarget(this.lastHideSpot, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
+        } else {
+            // Find nearest bush or tree to hide in
+            const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
+                ["bush", "tree"].includes(obj.definition.material) &&
+                !obj.dead &&
+                !this.game.gas.isInGas(obj.position)
+            );
+            if (nearestHideSpot) {
+                // Move to initial hiding spot
+                this.lastHideSpot = Vec.clone(nearestHideSpot.position);
+                this.baseSpeed = GameConstants.player.baseSpeed;
+                this.movingToRadius = false;
+                this.moveToTarget(nearestHideSpot.position, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
+            } else {
+                // If no hiding spot, stay put
+                this.movingToRadius = false;
+
+                const packet: PlayerInputData = {
+                    movement: { up: false, down: false, left: false, right: false },
+                    attacking: false,
+                    actions: [],
+                    isMobile: true,
+                    turning: true,
+                    mobile: { moving: false, angle: this.rotation },
+                    rotation: this.rotation,
+                    distanceToMouse: undefined,
+                };
+
+                this.processInputs(packet);
+            }
+        }
+    }
+
     private hideInSafeSpot(): void {
+        if (!this.game.isStarted()) {
+            this.holdPositionPreGame();
+            return;
+        }
+
+
         this.hideTimer += 1 / Config.tps;
 
         const currentDistanceToGas = Vec.length(Vec.sub(this.game.gas.newPosition, this.position));

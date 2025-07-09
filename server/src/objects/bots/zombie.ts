@@ -111,7 +111,7 @@ export class Zombie extends Player {
         const currentDistanceToGas = Vec.length(Vec.sub(this.game.gas.newPosition, this.position));
 
         // If within safe zone proximity, idle
-        if (currentDistanceToGas <= Zombie.CENTER_PROXIMITY) {
+        if (currentDistanceToGas <= Zombie.CENTER_PROXIMITY || !this.game.isStarted()) {
             this.moveTimer = 0;
             this.wanderTarget = null;
             this.idle();
