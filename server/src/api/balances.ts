@@ -12,7 +12,7 @@ import {
 import { ethers } from "ethers";
 import { Config } from "../config";
 
-export async function verifySkin(player: string, item: string): Promise<boolean> {
+export async function verifySkin(player: string, item: string, timeout: number = 7000): Promise<boolean> {
     const rpc = Config.assetsConfig?.rpc;
     if (!rpc) throw new Error("RPC configuration not found");
 
@@ -40,10 +40,31 @@ export async function verifySkin(player: string, item: string): Promise<boolean>
                     provider
                 );
 
-                // Get balance
-                const balance = await contract.balanceOf(player, tokenId);
-                // Convert balance to number and check if player owns at least 1
-                return balance > 0n;
+                // Set up timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                try {
+                    // Get balance with timeout
+                    const balance = await Promise.race([
+                        contract.balanceOf(player, tokenId),
+                        new Promise((_, reject) => {
+                            controller.signal.addEventListener('abort', () => {
+                                reject(new Error('Request timed out'));
+                            });
+                        })
+                    ]);
+
+                    clearTimeout(timeoutId);
+                    // Convert balance to number and check if player owns at least 1
+                    return balance > 0n;
+                } catch (error: any) {
+                    clearTimeout(timeoutId);
+                    if (error.message === 'Request timed out') {
+                        throw error;
+                    }
+                    throw error;
+                }
             } catch (error) {
                 console.error(`Error checking ${type} for item ${item}:`, error);
                 return false;
@@ -55,7 +76,7 @@ export async function verifySkin(player: string, item: string): Promise<boolean>
     return false;
 }
 
-export async function verifyMelee(player: string, item: string): Promise<boolean> {
+export async function verifyMelee(player: string, item: string, timeout: number = 5000): Promise<boolean> {
     const rpc = Config.assetsConfig?.rpc;
     if (!rpc) throw new Error("RPC configuration not found");
 
@@ -83,10 +104,31 @@ export async function verifyMelee(player: string, item: string): Promise<boolean
                     provider
                 );
 
-                // Get balance
-                const balance = await contract.balanceOf(player, tokenId);
-                // Convert balance to number and check if player owns at least 1
-                return balance > 0n;
+                // Set up timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                try {
+                    // Get balance with timeout
+                    const balance = await Promise.race([
+                        contract.balanceOf(player, tokenId),
+                        new Promise((_, reject) => {
+                            controller.signal.addEventListener('abort', () => {
+                                reject(new Error('Request timed out'));
+                            });
+                        })
+                    ]);
+
+                    clearTimeout(timeoutId);
+                    // Convert balance to number and check if player owns at least 1
+                    return balance > 0n;
+                } catch (error: any) {
+                    clearTimeout(timeoutId);
+                    if (error.message === 'Request timed out') {
+                        throw error;
+                    }
+                    throw error;
+                }
             } catch (error) {
                 console.error(`Error checking ${type} for item ${item}:`, error);
                 return false;
@@ -98,7 +140,7 @@ export async function verifyMelee(player: string, item: string): Promise<boolean
     return false;
 }
 
-export async function verifyEmotes(player: string, items: string[]): Promise<boolean> {
+export async function verifyEmotes(player: string, items: string[], timeout: number = 5000): Promise<boolean> {
     const rpc = Config.assetsConfig?.rpc;
     if (!rpc) throw new Error("RPC configuration not found");
 
@@ -130,11 +172,32 @@ export async function verifyEmotes(player: string, items: string[]): Promise<boo
                         provider
                     );
 
-                    // Get balance
-                    const balance = await contract.balanceOf(player, tokenId);
-                    // If player doesn't own this item, return false
-                    if (balance <= 0n) {
-                        return false;
+                    // Set up timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                    try {
+                        // Get balance with timeout
+                        const balance = await Promise.race([
+                            contract.balanceOf(player, tokenId),
+                            new Promise((_, reject) => {
+                                controller.signal.addEventListener('abort', () => {
+                                    reject(new Error('Request timed out'));
+                                });
+                            })
+                        ]);
+
+                        clearTimeout(timeoutId);
+                        // If player doesn't own this item, return false
+                        if (balance <= 0n) {
+                            return false;
+                        }
+                    } catch (error: any) {
+                        clearTimeout(timeoutId);
+                        if (error.message === 'Request timed out') {
+                            throw error;
+                        }
+                        throw error;
                     }
                 } catch (error) {
                     console.error(`Error checking ${type} for item ${item}:`, error);
@@ -154,8 +217,7 @@ export async function verifyEmotes(player: string, items: string[]): Promise<boo
     return true;
 }
 
-
-export async function verifyGun(player: string, item: string): Promise<boolean> {
+export async function verifyGun(player: string, item: string, timeout: number = 5000): Promise<boolean> {
     const rpc = Config.assetsConfig?.rpc;
     if (!rpc) throw new Error("RPC configuration not found");
 
@@ -181,10 +243,31 @@ export async function verifyGun(player: string, item: string): Promise<boolean> 
                     provider
                 );
 
-                // Get balance
-                const balance = await contract.balanceOf(player, tokenId);
-                // Convert balance to number and check if player owns at least 1
-                return balance > 0n;
+                // Set up timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                try {
+                    // Get balance with timeout
+                    const balance = await Promise.race([
+                        contract.balanceOf(player, tokenId),
+                        new Promise((_, reject) => {
+                            controller.signal.addEventListener('abort', () => {
+                                reject(new Error('Request timed out'));
+                            });
+                        })
+                    ]);
+
+                    clearTimeout(timeoutId);
+                    // Convert balance to number and check if player owns at least 1
+                    return balance > 0n;
+                } catch (error: any) {
+                    clearTimeout(timeoutId);
+                    if (error.message === 'Request timed out') {
+                        throw error;
+                    }
+                    throw error;
+                }
             } catch (error) {
                 console.error(`Error checking ${type} for item ${item}:`, error);
                 return false;

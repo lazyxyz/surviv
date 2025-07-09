@@ -104,68 +104,74 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
          * @param socket The socket being opened.
          */
         async open(socket: WebSocket<PlayerContainer>) {
-            const data = socket.getUserData();
 
-            if (!data.token) {
-                socket.close();
-                return;
-            }
-            const token = data.token;
-            const payload = await validateJWT(token);
+            try {
+                const data = socket.getUserData();
 
-            if (payload.walletAddress != data.address?.toLowerCase()) {
-                console.log(`Invalid address jwt: ${payload.walletAddress} user: ${data.address?.toLowerCase()}`);
-                socket.close();
-                return;
-            }
+                if (!data.token) {
+                    socket.close();
+                    return;
+                }
+                const token = data.token;
+                const payload = await validateJWT(token);
 
-            if ((data.player = game.addPlayer(socket)) === undefined) {
-                socket.close();
-            }
+                if (payload.walletAddress != data.address?.toLowerCase()) {
+                    console.log(`Invalid address jwt: ${payload.walletAddress} user: ${data.address?.toLowerCase()}`);
+                    socket.close();
+                    return;
+                }
 
-            const emotes = EMOTE_SLOTS.map(
-                slot => Emotes.fromStringSafe(data.emotes)
-            );
+                if ((data.player = game.addPlayer(socket)) === undefined) {
+                    socket.close();
+                }
 
-            // Verify Skin
-            let skin = Skins.fromStringSafe("unknown"); // Default skins
-            await verifySkin(data.address, data.skin).then((isValid) => {
-                if (isValid) skin = Skins.fromStringSafe(data.skin);
-            }).catch(err => {
-                console.log("Verify skin failed: ", err);
-            })
+                const emotes = EMOTE_SLOTS.map(
+                    slot => Emotes.fromStringSafe(data.emotes)
+                );
 
-            // Verify Melee
-            let melee = undefined;
-            await verifyMelee(data.address, data.melee).then((isValid) => {
-                if (isValid) melee = Melees.fromStringSafe(data.melee);
-            }).catch(err => {
-                console.log("Verify melee failed: ", err);
-            })
-            
-            // Verify Gun
-            let gun = undefined;
-            await verifyGun(data.address, data.gun).then((isValid) => {
-                if (isValid) gun = Guns.fromStringSafe(data.gun);
-            }).catch(err => {
-                console.log("Verify gun failed: ", err);
-            })
-
-            const stream = new PacketStream(new ArrayBuffer(128));
-            stream.serializeServerPacket(
-                ReadyPacket.create({
-                    isMobile: false,
-                    address: data.address ? data.address : "",
-                    emotes: emotes,
-                    name: data.name,
-                    skin: skin,
-                    badge: Badges.fromStringSafe(data.badge),
-                    melee: melee,
-                    gun: gun,
+                // Verify Skin
+                let skin = Skins.fromStringSafe("unknown"); // Default skins
+                await verifySkin(data.address, data.skin).then((isValid) => {
+                    if (isValid) skin = Skins.fromStringSafe(data.skin);
+                }).catch(err => {
+                    console.log("Verify skin failed: ", err);
                 })
-            );
-            socket.send(stream.getBuffer(), true, false);
-            // data.player.sendGameOverPacket(false); // uncomment to test game over screen
+
+                // Verify Melee
+                let melee = undefined;
+                await verifyMelee(data.address, data.melee).then((isValid) => {
+                    if (isValid) melee = Melees.fromStringSafe(data.melee);
+                }).catch(err => {
+                    console.log("Verify melee failed: ", err);
+                })
+
+                // Verify Gun
+                let gun = undefined;
+                await verifyGun(data.address, data.gun).then((isValid) => {
+                    if (isValid) gun = Guns.fromStringSafe(data.gun);
+                }).catch(err => {
+                    console.log("Verify gun failed: ", err);
+                })
+
+                const stream = new PacketStream(new ArrayBuffer(128));
+                stream.serializeServerPacket(
+                    ReadyPacket.create({
+                        isMobile: false,
+                        address: data.address ? data.address : "",
+                        emotes: emotes,
+                        name: data.name,
+                        skin: skin,
+                        badge: Badges.fromStringSafe(data.badge),
+                        melee: melee,
+                        gun: gun,
+                    })
+                );
+                socket.send(stream.getBuffer(), true, false);
+                // data.player.sendGameOverPacket(false); // uncomment to test game over screen
+            } catch (err: any) {
+                socket.close();
+                console.error("websocket connect failed: ", err);
+            }
         },
 
         /**

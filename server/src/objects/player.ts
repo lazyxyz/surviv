@@ -53,6 +53,8 @@ import { type ThrowableProjectile } from "./throwableProj";
 import { weaponPresentType } from "@common/typings";
 import { claimRewards } from "../api/api";
 import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
+import { PacketStream } from "@common/packets/packetStream";
+import { DisconnectPacket } from "@common/packets/disconnectPacket";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -315,8 +317,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     get zoom(): number { return this._scope.zoomLevel; }
 
-    // readonly socket: WebSocket<PlayerContainer>;
-
     private readonly _action: { type?: Action, dirty: boolean } = {
         type: undefined,
         dirty: true
@@ -419,8 +419,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             team.setDirty();
         }
 
-        // const userData = socket.getUserData();
-        // this.socket = socket;
         this.name = GameConstants.player.defaultName;
         this.ip = userData.ip;
         this.nameColor = userData.nameColor ?? 0;
@@ -1595,28 +1593,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     disconnect(reason?: string): void {
-        // const stream = new PacketStream(new ArrayBuffer(128));
-        // stream.serializeServerPacket(
-        //     DisconnectPacket.create({
-        //         reason
-        //     })
-        // );
-
-        // this.sendData(stream.getBuffer());
-        this.disconnected = true;
         // timeout to make sure disconnect packet is sent
         setTimeout(() => {
             this.game.removePlayer(this);
         }, 10);
     }
-
-    // sendData(buffer: ArrayBuffer): void {
-    //     try {
-    //         this.socket.send(buffer, true, false);
-    //     } catch (e) {
-    //         console.warn("Error sending packet. Details:", e);
-    //     }
-    // }
 
     private _clampDamageAmount(amount: number): number {
         if (this.health - amount > this.maxHealth) {

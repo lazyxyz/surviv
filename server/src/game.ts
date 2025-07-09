@@ -389,10 +389,10 @@ export class Game implements GameData {
         // Update gas
         this.gas.tick();
 
-        // Delete players that haven't sent a JoinPacket after 5 seconds
+        // Delete players that haven't sent a JoinPacket after 15 seconds
         for (const player of this.connectingPlayers) {
-            if (this.now - player.joinTime > 5000) {
-                player.disconnect("JoinPacket not received after 5 seconds");
+            if (this.now - player.joinTime > 15000) {
+                player.disconnect("Failed to join game, please try again!");
             }
         }
 

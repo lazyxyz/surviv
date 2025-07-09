@@ -53,7 +53,7 @@ import { Camera } from "./rendering/camera";
 import { Gas, GasRender } from "./rendering/gas";
 import { Minimap } from "./rendering/minimap";
 
-import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime, visibleInventory } from "./ui";
+import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime, showInventory } from "./ui";
 import { setUpCommands } from "./utils/console/commands";
 import { defaultClientCVars } from "./utils/console/defaultClientCVars";
 import { GameConsole } from "./utils/console/gameConsole";
@@ -254,8 +254,9 @@ export class Game {
             initPixi(),
             visibleWallet(game),
             visibleConnectWallet(game),
+            setUpUI(game),
         ]).then(() => {
-            visibleInventory(game);
+            showInventory(game);
             unlockPlayButtons();
             resetPlayButtons();
         });
