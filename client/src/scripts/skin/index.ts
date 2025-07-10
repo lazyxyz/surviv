@@ -43,7 +43,7 @@ function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function showSkins(game: Game) {
+export async function showSkins(game: Game, newUnlockedSkinId?: string) {
     if (!game?.account?.address) return;
 
     const role = game.console.getBuiltInCVar("dv_role");
@@ -63,51 +63,112 @@ export async function showSkins(game: Game) {
     const UserSkins = { ...SilverSkins, ...GoldSkins, ...DivineSkins };
     const mySkins = Object.entries(UserSkins).map(([key, _]) => key);
 
-    const SkinsIntance = Skins.definitions.filter(argument =>
-        [...freeSkin, ...(mySkins || [])].some(
-            argument_child => argument_child === argument.idString
-        )
+    // const SkinsIntance = Skins.definitions.filter(argument =>
+    //     [...freeSkin, ...(mySkins || [])].some(
+    //         argument_child => argument_child === argument.idString
+    //     )
+    // );
+
+    // // should be set or reset skin
+    // {
+    //     const avaliableSkin = allSkins.find(
+    //         meta =>
+    //             meta.idString === game.console.getBuiltInCVar("cv_loadout_skin")
+    //     );
+
+    //     if (avaliableSkin) {
+    //         updateSplashCustomize(avaliableSkin.idString);
+    //     }
+
+    //     if (!avaliableSkin) {
+    //         selectSkin(defaultClientCVars.cv_loadout_skin as string, game);
+    //     }
+    // }
+
+    // // reset items before render new
+    // skinList.empty();
+
+    // // display to preview and select
+    // for (const { idString, hideFromLoadout, rolesRequired } of SkinsIntance) {
+    //     if (hideFromLoadout || !(rolesRequired ?? [role]).includes(role)) {
+    //         continue;
+    //     }
+
+    //     const skinItem = $<HTMLDivElement>(`
+    //       <div id="skin-${idString}" class="skins-list-item-container${idString === currentSkin ? " selected" : ""}">
+    //         <div class="skin">
+    //           <div class="skin-base" style="background-image: url('./img/game/shared/skins/${idString}_base.svg')"></div>
+    //           <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
+    //           <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
+    //         </div>
+
+    //         <span class="skin-name">${getTranslatedString(idString as TranslationKeys)}</span>
+    //       </div>
+    //     `);
+
+    //     skinItem.on("click", () => selectSkin(idString, game));
+
+    //     skinList.append(skinItem);
+    // }
+
+    /* */
+    // Skins list
+    const allSkins = Skins.definitions.filter(argument =>
+        !(argument.hideFromLoadout || !(argument.rolesRequired ?? [role]).includes(role))
     );
 
-    // should be set or reset skin
-    {
-        const avaliableSkin = SkinsIntance.find(
-            meta =>
-                meta.idString === game.console.getBuiltInCVar("cv_loadout_skin")
-        );
+    // freeSkin is always at start of the list
+    const freeSkinIds = [...freeSkin];
 
-        if (avaliableSkin) {
-            updateSplashCustomize(avaliableSkin.idString);
-        }
-
-        if (!avaliableSkin) {
-            selectSkin(defaultClientCVars.cv_loadout_skin as string, game);
-        }
+    // push after freeSkin
+    let rewardSkinIds: string[] = [];
+    if (newUnlockedSkinId && !freeSkinIds.includes(newUnlockedSkinId)) {
+        rewardSkinIds = [newUnlockedSkinId];
     }
+
+    // another skins (not contain freeSkin and rewardSkin)
+    const otherActiveSkins = mySkins.filter(
+        id => !freeSkinIds.includes(id) && id !== newUnlockedSkinId
+    );
+    // inactive skins
+    const inactiveSkins = allSkins
+        .map(s => s.idString)
+        .filter(id => ![...freeSkinIds, ...rewardSkinIds, ...otherActiveSkins].includes(id));
+
+    // sort skins
+    const sortedSkinIds = [
+        ...freeSkinIds,
+        ...rewardSkinIds,
+        ...otherActiveSkins,
+        ...inactiveSkins
+    ];
 
     // reset items before render new
     skinList.empty();
 
-    // display to preview and select
-    for (const { idString, hideFromLoadout, rolesRequired } of SkinsIntance) {
-        if (hideFromLoadout || !(rolesRequired ?? [role]).includes(role)) {
-            continue;
-        }
+    for (const idString of sortedSkinIds) {
+        const skinDef = allSkins.find(s => s.idString === idString);
+        if (!skinDef) continue;
+
+        const isActive = [...freeSkin, ...(mySkins || [])].includes(idString);
+        const isSelected = idString === currentSkin;
 
         const skinItem = $<HTMLDivElement>(`
-          <div id="skin-${idString}" class="skins-list-item-container${idString === currentSkin ? " selected" : ""}">
-            <div class="skin">
+          <div id="skin-${idString}" class="skins-list-item-container${isSelected ? " selected" : ""}">
+            <div class="skin${isActive ? " active" : " inactive"}">
               <div class="skin-base" style="background-image: url('./img/game/shared/skins/${idString}_base.svg')"></div>
               <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
               <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
             </div>
-
             <span class="skin-name">${getTranslatedString(idString as TranslationKeys)}</span>
           </div>
         `);
 
-        skinItem.on("click", () => selectSkin(idString, game));
+        if (isActive) {
+            skinItem.on("click", () => selectSkin(idString, game));
+        }
 
         skinList.append(skinItem);
     }
+
 }
