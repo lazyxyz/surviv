@@ -357,6 +357,17 @@ input::-webkit-inner-spin-button {
   overflow: hidden;
   z-index: 101;
 
+  .skin.inactive {
+    filter: saturate(0.15);
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .skin.active {
+    filter: none;
+    opacity: 1;
+    cursor: pointer;
+  }
+
   .dialog-header {
     $headerHeight: 45px;
     display: flex;
