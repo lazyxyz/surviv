@@ -98,7 +98,8 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
                     localCrateBalance -= selectedCount;
                     localKeyBalance -= selectedCount;
                     // Update UI
-                    await updateUIAfterOpen(game, localCrateBalance, localKeyBalance, totalSelected, openNowButton);
+                    await updateBalancesUI(localCrateBalance, localKeyBalance, totalSelected, openNowButton);
+                    setTimeout(() => renderClaimButton(game), 2000);
                     successAlert("Crates opened successfully!");
                 }
             } catch (err) {
@@ -112,8 +113,7 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
     }
 }
 
-async function updateUIAfterOpen(
-    game: Game,
+async function updateBalancesUI(
     localCrateBalance: number,
     localKeyBalance: number,
     totalSelected: Element | null,
@@ -132,32 +132,12 @@ async function updateUIAfterOpen(
         openNowButton.disabled = true;
     }
     $(".select-all").prop("checked", false);
-    // Re-fetch balances to ensure UI consistency
-    const userKeyBalances = await game.account.getBalances(SurvivAssets.SurvivKeys).catch(err => {
-        console.error(`Failed to load key balance: ${err}`);
-        return { keys: localKeyBalance };
-    });
-    const userCrateBalances = await game.account.getBalances(SurvivAssets.SurvivCrates).catch(err => {
-        console.error(`Failed to load crate balance: ${err}`);
-        return { crates: localCrateBalance };
-    });
-    // Update UI if balances differ
-    if (
-        userCrateBalances.crates !== localCrateBalance ||
-        userKeyBalances.keys !== localKeyBalance
-    ) {
-        renderCrates(userCrateBalances, userKeyBalances?.keys || 0);
-        // Reinitialize crate selection with new balances
-        const crates = document.querySelectorAll(".my-crates-child");
-        setupCrateOpening(game, crates, totalSelected, openNowButton, userKeyBalances?.keys || 0);
-    }
 }
 
-async function updateClaimButton(game: Game): Promise<void> {
+async function renderClaimButton(game: Game): Promise<HTMLButtonElement | null> {
     const claimButton = document.querySelector<HTMLButtonElement>(".claim-items");
-    if (!claimButton) return;
+    if (!claimButton) return claimButton;
 
-    let isProcessing = false;
     const hasCommits = (await game.account.getCommits().catch(err => {
         console.error(`Failed to query commits: ${err}`);
         return [];
@@ -165,6 +145,15 @@ async function updateClaimButton(game: Game): Promise<void> {
 
     claimButton.disabled = !hasCommits;
     claimButton.classList.toggle("active", hasCommits);
+    return claimButton;
+}
+
+
+async function updateClaimButton(game: Game): Promise<void> {
+    const claimButton = await renderClaimButton(game);
+
+    if (!claimButton) return;
+    let isProcessing = false;
 
     $(claimButton).off("click").on("click", async () => {
         if (isProcessing) return;
