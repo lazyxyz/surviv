@@ -3,6 +3,6 @@ import language from "../languages/english"
 import { stringify } from "hjson"
 import { writeFileSync } from "fs"
 
-writeFileSync("../languages/vi.hjson", stringify(language, {
+writeFileSync("../languages/en.hjson", stringify(language, {
   quotes: "all"
 }))
