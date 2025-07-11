@@ -91,7 +91,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
 }
 
 export async function loadStore(game: Game): Promise<void> {
-    const [keyBalances, crateBalances, keyPrice, cratePrice] = await Promise.all([
+    const [keyBalances, crateBalances, cardBalances, keyPrice, cratePrice, cardPrice] = await Promise.all([
         game.account.getBalances(SurvivAssets.SurvivKeys).catch(err => {
             console.error(`Failed to load key balance: ${err}`);
             return { keys: 0 };
@@ -100,11 +100,19 @@ export async function loadStore(game: Game): Promise<void> {
             console.error(`Failed to load crate balance: ${err}`);
             return { crates: 0 };
         }),
+        game.account.getBalances(SurvivAssets.SurvivCards).catch(err => {
+            console.error(`Failed to load crate balance: ${err}`);
+            return { cards: 0 };
+        }),
         game.account.queryPrice(SaleItems.Keys, PaymentTokens.NativeToken).catch(err => {
             console.error(`Failed to fetch key price: ${err}`);
             return 0;
         }),
         game.account.queryPrice(SaleItems.Crates, PaymentTokens.NativeToken).catch(err => {
+            console.error(`Failed to fetch crate price: ${err}`);
+            return 0;
+        }),
+        game.account.queryPrice(SaleItems.Cards, PaymentTokens.NativeToken).catch(err => {
             console.error(`Failed to fetch crate price: ${err}`);
             return 0;
         }),
@@ -124,6 +132,13 @@ export async function loadStore(game: Game): Promise<void> {
             image: "./img/misc/crate.png",
             price: `${formatEther(cratePrice)} STT`,
             itemType: SaleItems.Crates,
+        },
+        {
+            balance: cardBalances?.cards || 0,
+            name: "Surviv Cards",
+            image: "./img/misc/card.gif",
+            price: `${formatEther(cardPrice)} STT`,
+            itemType: SaleItems.Cards,
         },
     ];
 

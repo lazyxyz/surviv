@@ -45,7 +45,7 @@ export enum SurvivAssets {
     SurvivMemes,
     SurvivCrates,
     SurvivKeys,
-    SurvivCard
+    SurvivCards
 }
 
 export const SaleItems = {
@@ -309,7 +309,7 @@ export class Account extends EIP6963 {
             [SurvivAssets.SurvivMemes]: SurvivMemesMapping,
             [SurvivAssets.SurvivCrates]: SurvivCratesMapping,
             [SurvivAssets.SurvivKeys]: SurvivKeysMapping,
-            [SurvivAssets.SurvivCard]: SurvivCardsMapping,
+            [SurvivAssets.SurvivCards]: SurvivCardsMapping,
         };
 
         const selectedMapping = assetMappings[assetType];
