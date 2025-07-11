@@ -93,12 +93,11 @@ interface ValidRewards {
 export class Account extends EIP6963 {
     address: string | null | undefined;
     token: string | null | undefined;
-    game;
+    api: string | null | undefined;
 
     constructor(game: Game) {
         
         super();
-        this.game = game;
         const getAddressFromStorage = localStorage.getItem(PUBLIC_KEY);
         const getTokenFromStorage = localStorage.getItem(ACCESS_TOKEN);
         const getSelectorFromStorage = localStorage.getItem(SELECTOR_WALLET);
@@ -128,6 +127,10 @@ export class Account extends EIP6963 {
         }
     }
 
+    setApi(api: string) {
+        this.api = api;
+    }
+
     disconnect(): void {
         // clear localStorage
         {
@@ -154,8 +157,6 @@ export class Account extends EIP6963 {
     }
 
     async connect(getProvider: Provider6963Props, turnstileToken: string): Promise<void> {
-        const selectedRegion = regionInfo[this.game.console.getBuiltInCVar("cv_region") ?? Config.defaultRegion];
-
         // Check and switch network if necessary
         {
             const targetChainId = toBeHex(CHAIN_ID);
@@ -209,7 +210,7 @@ export class Account extends EIP6963 {
             success: boolean
         } = await $.ajax({
             type: "GET",
-            url: `${selectedRegion.apiAddress}/api/requestNonce`
+            url: `${this.api}/api/requestNonce`
         });
 
         const signature = await getProvider.provider.request({
@@ -221,7 +222,7 @@ export class Account extends EIP6963 {
         });
 
         // Send POST request to /api/verifySignature
-        const response = await fetch(`${selectedRegion.apiAddress}/api/verifySignature`, {
+        const response = await fetch(`${this.api}/api/verifySignature`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -403,8 +404,6 @@ export class Account extends EIP6963 {
      * @throws Error if the API request fails or no valid rewards are found.
      */
     async getValidRewards(): Promise<ValidRewards> {
-        const selectedRegion = regionInfo[this.game.console.getBuiltInCVar("cv_region") ?? Config.defaultRegion];
-
         if (!this.token) {
             throw new Error('Authentication token is missing');
         }
@@ -419,7 +418,7 @@ export class Account extends EIP6963 {
 
         try {
             // Fetch available crates
-            const response = await fetch(`${selectedRegion.apiAddress}/api/getCrates`, {
+            const response = await fetch(`${this.api}/api/getCrates`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -496,8 +495,6 @@ export class Account extends EIP6963 {
      * @returns Promise resolving when the operation is complete
      */
     private async removeRewards(signatures?: string[]): Promise<void> {
-        const selectedRegion = regionInfo[this.game.console.getBuiltInCVar("cv_region") ?? Config.defaultRegion];
-
         if (!this.token) {
             throw new Error('Authentication token is missing');
         }
@@ -508,7 +505,7 @@ export class Account extends EIP6963 {
 
         try {
             const body = signatures?.length ? { signatures } : {};
-            const response = await fetch(`${selectedRegion.apiAddress}/api/removeCrates`, {
+            const response = await fetch(`${this.api}/api/removeCrates`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

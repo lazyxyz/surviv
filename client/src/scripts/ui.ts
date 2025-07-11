@@ -296,6 +296,9 @@ export async function setUpUI(game: Game): Promise<void> {
         if (!selectedRegion) { // Handle invalid region
             selectedRegion = regionInfo[Config.defaultRegion];
             game.console.setBuiltInCVar("cv_region", "");
+
+            const regionApi = selectedRegion.apiAddress;
+            game.account.setApi(regionApi);
         }
         const region = getTranslatedString(`region_${game.console.getBuiltInCVar("cv_region")}` as TranslationKeys);
         if (region === "region_") {
