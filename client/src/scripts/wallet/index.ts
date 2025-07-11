@@ -2,9 +2,52 @@ import $ from "jquery";
 import type { Game } from "../game";
 import { createDropdown } from "../uiHelpers";
 import { WalletType, shorten } from "../utils/constants";
+import { warningAlert } from "../modal";
 
-export function visibleConnectWallet(game: Game): void {
-    // handler what conditions to open modal?
+// Define Turnstile window interface
+interface TurnstileWindow extends Window {
+    turnstile: {
+        ready: (callback: () => void) => void;
+        render: (container: string, options: {
+            sitekey: string;
+            callback: (token: string) => void;
+            "error-callback"?: (error: string) => void;
+        }) => void;
+        reset: () => void;
+    };
+    turnstileToken: string | null;
+}
+declare let window: TurnstileWindow;
+
+export function onConnectWallet(game: Game): void {
+    let turnstileToken: string | null = null;
+
+    // Initialize Turnstile
+    $(() => {
+        if (!window.turnstile) {
+            console.error("Turnstile script not loaded.");
+            $("#wallet-inactive").append('<p style="color: red;">Bot verification failed. Please refresh.</p>');
+            return;
+        }
+
+        window.turnstile.ready(() => {
+            window.turnstile.render("#turnstile-widget", {
+                sitekey: "0x4AAAAAABksm6I-SBWksH-l", // Replace with your Site Key
+                callback: (token: string) => {
+                    turnstileToken = token;
+                    $("#connect-wallet-btn").prop("disabled", false);
+                    // Hide widget after 2 seconds
+                    setTimeout(() => {
+                        $("#turnstile-widget").css("display", "none");
+                    }, 2000);
+                },
+                "error-callback": (error: string) => {
+                    console.error("Turnstile error:", error);
+                    $("#wallet-inactive").append(`<p style="color: red;">Bot verification failed: ${error}</p>`);
+                },
+            });
+        });
+    });
 
     $("#connect-wallet-btn").on("click", () => {
         $(".connect-wallet-portal").css("display", "block");
@@ -13,6 +56,7 @@ export function visibleConnectWallet(game: Game): void {
     // Close connect wallet modal
     $("#close-connect-wallet").on("click", () => {
         $(".connect-wallet-portal").css("display", "none");
+        // Reset Turnstile widget to allow re-verification
     });
 
     // handler click to login...
@@ -24,8 +68,16 @@ export function visibleConnectWallet(game: Game): void {
             argument => argument?.info?.name === paragraphElement?.textContent
         );
 
+
+
         if (isExisted) {
             elements.onclick = async () => {
+                // Check if Turnstile token exists
+                if (!turnstileToken) {
+                    warningAlert("Please complete the bot verification.");
+                    return;
+                }
+
                 try {
                     // hidden to show loading ICON
                     $(logoElement).css("display", "none");
@@ -44,7 +96,7 @@ export function visibleConnectWallet(game: Game): void {
 
                         logoElement.after(newNode);
                     }
-                    return await game.account.connect(isExisted);
+                    return await game.account.connect(isExisted, turnstileToken);
                 } catch (error) {
                     console.log(error);
                 } finally {
