@@ -50,8 +50,12 @@ export const Config = {
     },
 
     assetsConfig: {
-        api: "https://api.surviv.fun",
-        rpc: "https://50312.rpc.thirdweb.com/220c649e4f0e7cb8cb634464c4244808"
+        rank: 30, // For testing
+        api: "http://localhost:3001", // For testing
+
+        // rank: 5,
+        // api: "https://api.surviv.fun",
+        rpc: "https://50312.rpc.thirdweb.com/220c649e4f0e7cb8cb634464c4244808",
     },
 
 } satisfies ConfigType as ConfigType;
@@ -261,7 +265,8 @@ export interface ConfigType {
     }
 
     
-    readonly assetsConfig?: {
+    readonly assetsConfig: {
+        readonly rank: number, // Rank receive rewards
         readonly api: string,
         readonly rpc: string,
     }; 

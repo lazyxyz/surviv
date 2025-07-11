@@ -34,8 +34,8 @@ export async function validateJWT(token: string, timeout: number = 5000): Promis
     }
 }
 
-export async function claimRewards(player: string, rank: number, kills: number, teamMode: boolean, gameId: string, timeout: number = 5000): Promise<any> {
-    const url = `${Config.assetsConfig?.api}/api/saveRewards`;
+export async function saveGameResult(player: string, rank: number, kills: number, teamMode: boolean, gameId: string, timeout: number = 5000): Promise<any> {
+    const url = `${Config.assetsConfig?.api}/admin/saveGameResult`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
