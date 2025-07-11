@@ -26,6 +26,15 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
     const crateList = Array.from(crates);
     $(".select-all").prop("checked", false);
 
+    // Default state
+    if (totalSelected) {
+        totalSelected.textContent = "0 selected";
+    }
+    if (openNowButton) {
+        openNowButton.classList.remove("active");
+        openNowButton.disabled = true;
+    }
+
     // Remove any existing click handlers to prevent duplicates
     $(document).off("click", ".my-crates-child .open-now .claim-items");
 

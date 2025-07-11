@@ -82,6 +82,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
             } catch (err) {
                 console.error(`Failed to buy ${itemType}: ${err}`);
                 errorAlert("Purchase failed. Please try again!");
+                await loadStore(game);
             } finally {
                 isProcessing = false;
                 $buyButton.prop("disabled", amount === 0);
