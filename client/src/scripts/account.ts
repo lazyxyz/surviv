@@ -95,7 +95,8 @@ export class Account extends EIP6963 {
     token: string | null | undefined;
     api: string | null | undefined;
 
-    constructor() {
+    constructor(game: Game) {
+        
         super();
         const getAddressFromStorage = localStorage.getItem(PUBLIC_KEY);
         const getTokenFromStorage = localStorage.getItem(ACCESS_TOKEN);
