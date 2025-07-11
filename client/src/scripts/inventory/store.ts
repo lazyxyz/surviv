@@ -26,7 +26,7 @@ function renderStoreItems(storeItems: StoreItem[]): void {
                 </div>
                 <div class="crates-supply">
                     <button class="crates-remove" disabled>-</button>
-                    <p class="crates-input">0</p>
+                    <input class="crates-input" value="0" min="0"></input>
                     <button class="crates-add">+</button>
                 </div>
                 <button class="btn btn-alert btn-darken buy-now-btn" disabled>Buy now</button>
@@ -39,6 +39,57 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
     const $cards = $(".crates-card");
     $(document).off("click", ".crates-add, .crates-remove, .buy-now-btn");
 
+    // $cards.each((index, card) => {
+    //     const $card = $(card);
+    //     const itemType = $card.data("item-type") as SaleItems;
+    //     const $purchaseAmount = $card.find(".crates-input");
+    //     const $addButton = $card.find(".crates-add");
+    //     const $removeButton = $card.find(".crates-remove");
+    //     const $buyButton = $card.find(".buy-now-btn");
+    //     let amount = 0;
+    //     let isProcessing = false;
+
+    //     $addButton.on("click", () => {
+    //         if (isProcessing) return;
+    //         amount++;
+    //         $purchaseAmount.text(amount.toString());
+    //         $removeButton.prop("disabled", false).addClass("active");
+    //         $buyButton.prop("disabled", false).addClass("active");
+    //     });
+
+    //     $removeButton.on("click", () => {
+    //         if (isProcessing || amount <= 0) return;
+    //         amount--;
+    //         $purchaseAmount.text(amount.toString());
+    //         if (amount === 0) {
+    //             $removeButton.prop("disabled", true).removeClass("active");
+    //             $buyButton.prop("disabled", true).removeClass("active");
+    //         }
+    //     });
+
+    //     $buyButton.on("click", async () => {
+    //         if (isProcessing || amount <= 0) return;
+    //         isProcessing = true;
+    //         $buyButton.prop("disabled", true);
+    //         try {
+    //             await game.account.buyItems(itemType, amount, PaymentTokens.NativeToken);
+    //             successAlert("Purchase successful!");
+    //             amount = 0;
+    //             $purchaseAmount.text("0");
+    //             $buyButton.prop("disabled", true).removeClass("active");
+    //             $removeButton.prop("disabled", true).removeClass("active");
+    //             await loadStore(game);
+    //         } catch (err) {
+    //             console.error(`Failed to buy ${itemType}: ${err}`);
+    //             errorAlert("Purchase failed. Please try again!");
+    //             await loadStore(game);
+    //         } finally {
+    //             isProcessing = false;
+    //             $buyButton.prop("disabled", amount === 0);
+    //         }
+    //     });
+    // });
+
     $cards.each((index, card) => {
         const $card = $(card);
         const itemType = $card.data("item-type") as SaleItems;
@@ -49,10 +100,41 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
         let amount = 0;
         let isProcessing = false;
 
+        // Default value = 0
+        $purchaseAmount.val("0");
+
+        // hide value when focused
+        $purchaseAmount.on("focus", function () {
+            $(this).val("");
+            amount = 0;
+        });
+        $purchaseAmount.on("blur", function () {
+            let val = parseInt($(this).val() as string, 10);
+            if (isNaN(val) || val < 0) {
+                $(this).val("0");
+                amount = 0;
+            }
+        });
+
+        // allowed of typing only numbers
+        $purchaseAmount.on("input", function () {
+            let val = parseInt($(this).val() as string, 10);
+            if (isNaN(val) || val < 0) val = 0;
+            amount = val;
+            $(this).val(amount.toString());
+            if (amount === 0) {
+                $removeButton.prop("disabled", true).removeClass("active");
+                $buyButton.prop("disabled", true).removeClass("active");
+            } else {
+                $removeButton.prop("disabled", false).addClass("active");
+                $buyButton.prop("disabled", false).addClass("active");
+            }
+        });
+
         $addButton.on("click", () => {
             if (isProcessing) return;
             amount++;
-            $purchaseAmount.text(amount.toString());
+            $purchaseAmount.val(amount.toString());
             $removeButton.prop("disabled", false).addClass("active");
             $buyButton.prop("disabled", false).addClass("active");
         });
@@ -60,7 +142,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
         $removeButton.on("click", () => {
             if (isProcessing || amount <= 0) return;
             amount--;
-            $purchaseAmount.text(amount.toString());
+            $purchaseAmount.val(amount.toString());
             if (amount === 0) {
                 $removeButton.prop("disabled", true).removeClass("active");
                 $buyButton.prop("disabled", true).removeClass("active");
@@ -75,7 +157,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
                 await game.account.buyItems(itemType, amount, PaymentTokens.NativeToken);
                 successAlert("Purchase successful!");
                 amount = 0;
-                $purchaseAmount.text("0");
+                $purchaseAmount.val("0");
                 $buyButton.prop("disabled", true).removeClass("active");
                 $removeButton.prop("disabled", true).removeClass("active");
                 await loadStore(game);
@@ -88,6 +170,10 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
                 $buyButton.prop("disabled", amount === 0);
             }
         });
+
+        // button state when value is 0
+        $removeButton.prop("disabled", true).removeClass("active");
+        $buyButton.prop("disabled", true).removeClass("active");
     });
 }
 

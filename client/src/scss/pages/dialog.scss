@@ -560,12 +560,19 @@ input::-webkit-inner-spin-button {
           display: flex;
           justify-content: center;
           align-items: center;
+          text-align: center;
 
           height: 32px;
           width: 80px;
           background: #608939;
           font-style: 14px;
           font-weight: 500;
+          border: none;
+
+          &:focus {
+            outline: orange solid 1.5px;
+            outline-offset: -1.5px;
+          }
         }
         .crates-remove {
           opacity: 0.35;
