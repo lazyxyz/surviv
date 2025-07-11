@@ -2271,7 +2271,8 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     handleGameOver(won = false): void {
-        const rank = won ? 1 as const : this.game.aliveCount + 1;
+        // const rank = won ? 1 as const : this.game.aliveCount + 1;
+        const rank = 1;
 
         if (this.address) {
             const packet = GameOverPacket.create({

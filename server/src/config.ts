@@ -49,10 +49,8 @@ export const Config = {
         address: "http://localhost:8080"
     },
 
-    
-
     assetsConfig: {
-        rank: 5,
+        rank: 50,
         api: "https://api.surviv.fun",
         rpc: "https://50312.rpc.thirdweb.com/220c649e4f0e7cb8cb634464c4244808",
     },
