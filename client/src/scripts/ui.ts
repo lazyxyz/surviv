@@ -310,6 +310,12 @@ export async function setUpUI(game: Game): Promise<void> {
     };
 
     selectedRegion = regionInfo[game.console.getBuiltInCVar("cv_region") ?? Config.defaultRegion];
+    if(selectedRegion) {
+        game.account.setApi(selectedRegion.apiAddress);
+    } else {
+        game.account.setApi(regionInfo[Config.defaultRegion].apiAddress);
+    }
+
     updateServerSelectors();
 
     // eslint-disable-next-line @typescript-eslint/no-deprecated

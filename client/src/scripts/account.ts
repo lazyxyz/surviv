@@ -1,4 +1,4 @@
-import $ from "jquery";
+import $, { error } from "jquery";
 
 import { ACCESS_TOKEN, PUBLIC_KEY, SELECTOR_WALLET, shorten } from "./utils/constants";
 import { EIP6963, type Provider6963Props } from "./eip6963";
@@ -25,9 +25,10 @@ import { abi as survivRewardsABI } from "@common/abis/ISurvivRewards.json";
 import { abi as crateBaseABI } from "@common/abis/ICrateBase.json";
 import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
+import type { Game } from "./game";
+import { errorAlert } from "./modal";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
-const selectedRegion = regionInfo[Config.defaultRegion];
 
 const CHAIN_ID = SurvivMapping.ChainId;
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
@@ -92,10 +93,10 @@ interface ValidRewards {
 export class Account extends EIP6963 {
     address: string | null | undefined;
     token: string | null | undefined;
+    api: string | null | undefined;
 
     constructor() {
         super();
-
         const getAddressFromStorage = localStorage.getItem(PUBLIC_KEY);
         const getTokenFromStorage = localStorage.getItem(ACCESS_TOKEN);
         const getSelectorFromStorage = localStorage.getItem(SELECTOR_WALLET);
@@ -125,6 +126,10 @@ export class Account extends EIP6963 {
         }
     }
 
+    setApi(api: string) {
+        this.api = api;
+    }
+
     disconnect(): void {
         // clear localStorage
         {
@@ -150,7 +155,7 @@ export class Account extends EIP6963 {
         // Check condition button
     }
 
-    async connect(getProvider: Provider6963Props): Promise<void> {
+    async connect(getProvider: Provider6963Props, turnstileToken: string): Promise<void> {
         // Check and switch network if necessary
         {
             const targetChainId = toBeHex(CHAIN_ID);
@@ -204,7 +209,7 @@ export class Account extends EIP6963 {
             success: boolean
         } = await $.ajax({
             type: "GET",
-            url: `${selectedRegion.apiAddress}/api/requestNonce`
+            url: `${this.api}/api/requestNonce`
         });
 
         const signature = await getProvider.provider.request({
@@ -214,9 +219,8 @@ export class Account extends EIP6963 {
                 accounts[0]
             ]
         });
-
         // Send POST request to /api/verifySignature
-        const response = await fetch(`${selectedRegion.apiAddress}/api/verifySignature`, {
+        const response = await fetch(`${this.api}/api/verifySignature`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -225,6 +229,7 @@ export class Account extends EIP6963 {
                 walletAddress: accounts[0],
                 signature,
                 nonce: requestNonce.nonce,
+                turnstileToken,
             }),
         });
 
@@ -232,6 +237,7 @@ export class Account extends EIP6963 {
         const data = await response.json();
 
         if (!data.success) {
+            errorAlert(data.message);
             throw new Error(data.error || 'Signature verification failed');
         }
 
@@ -410,7 +416,7 @@ export class Account extends EIP6963 {
 
         try {
             // Fetch available crates
-            const response = await fetch(`${selectedRegion.apiAddress}/api/getCrates`, {
+            const response = await fetch(`${this.api}/api/getCrates`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -497,7 +503,7 @@ export class Account extends EIP6963 {
 
         try {
             const body = signatures?.length ? { signatures } : {};
-            const response = await fetch(`${selectedRegion.apiAddress}/api/removeCrates`, {
+            const response = await fetch(`${this.api}/api/removeCrates`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

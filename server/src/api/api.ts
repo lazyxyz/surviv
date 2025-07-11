@@ -17,7 +17,6 @@ export async function validateJWT(token: string, timeout: number = 5000): Promis
             },
             signal: controller.signal,
         });
-
         clearTimeout(timeoutId);
 
         if (res.status !== 200) return { walletAddress: "" };
