@@ -102,7 +102,7 @@ export class UIManager {
         return this.getRawPlayerNameNullish(id) ?? "[Unknown Player]";
     }
 
-    getPlayerData(id: number): { name: string, badge: string} {
+    getPlayerData(id: number): { name: string, badge: string } {
         // Name
         const element = $<HTMLSpanElement>("<span>");
         const player = this.game.playerNames.get(id) ?? this._teammateDataCache.get(id);
@@ -437,17 +437,109 @@ export class UIManager {
         gameOverDamageDone.text(packet.damageDone);
         gameOverDamageTaken.text(packet.damageTaken);
         gameOverTime.text(formatDate(packet.timeAlive));
+        gameOverRank.text(`#${packet.rank}`);
 
         if (packet.won) void game.music.play();
 
         this.gameOverScreenTimeout = window.setTimeout(() => gameOverOverlay.fadeIn(500), 500);
     }
 
+
     showRewardsScreen(packet: RewardsData): void {
+        const { eligible, rank, rewards } = packet;
+        const { gameOverOverlay } = this.ui;
         const game = this.game;
-        const rewards = packet.rewards;
-        console.log("rewards:", packet);
-        // Player rank and rewards
+
+        // Create rewards modal with enhanced styling
+        const rewardsModal = $<HTMLDivElement>(
+            '<div class="modal dialog persistent-scrollbar" id="rewards-modal" style="display: none; width: 600px; height: 400px; background: #222; border-radius: 10px; opacity: 1; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); overflow-y: auto; text-align: center;">'
+        );
+
+        // Header with title and close button
+        const header = $<HTMLDivElement>('<div class="dialog-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #333; background: #1a1a1a; border-radius: 10px 10px 0 0;"></div>');
+        const title = $<HTMLHeadingElement>('<h3 style="margin: 0; font-size: 24px; color: #fff; text-transform: uppercase; text-align: center; width: 100%;"></h3>').text(
+            eligible ? (rank === 1 ? "Chicken Dinner #1!" : `Rank #${rank}`) : "Oh No!"
+        );
+        const closeButton = $<HTMLSpanElement>('<span class="dialog-close-btn fa-solid fa-xmark" style="color: #fff; font-size: 20px; cursor: pointer;"></span>')
+            .on("click", () => rewardsModal.fadeOut(350, () => rewardsModal.remove()));
+
+        header.append(title, closeButton);
+
+        // Content
+        const content = $<HTMLDivElement>('<div class="rewards-content" style="padding: 30px; text-align: center; color: #fff;"></div>');
+        const body = $<HTMLParagraphElement>('<p style="font-size: 22px; margin: 15px 0; font-weight: bold; text-align: center;"></p>').text(
+            eligible ? "Your Rewards" : `Missed ${rewards}x Crates`
+        );
+        const rewardsInfo = $<HTMLDivElement>('<div style="margin: 25px 0; font-size: 20px; text-align: center;"></div>').html(
+            eligible
+                ? `${rewards}x <img src="./img/misc/crate.png" alt="Crate" style="width: 40px; vertical-align: middle; margin-right: 10px;">`
+                : "No Surviv Card or campaign not started. Grab a Surviv Card or check back soon!"
+        );
+        const footer = $<HTMLDivElement>('<div style="margin-top: 25px; text-align: center;"></div>').text(
+            eligible ? "Claim your rewards in Inventory!" : ""
+        );
+
+        // Share button for eligible players with dynamic content
+        if (eligible) {
+            // Define random content options
+            const rank1Content = [
+                "Chicken Dinner Winner #1 🔥🔥",
+                "GGWP #1 🎉",
+                "Game is easy #1 🏆",
+                "Unstoppable #1 💥",
+                "Carried the squad to #1 💪😂",
+                "1st Place Loot King 🌟 - GG!"
+            ];
+
+            const otherContent = [
+                "Missed #1, but I’m a survivor! 👾💪",
+                "GGWP! 🎉",
+                "Just warming up 💪🎮",
+                "One step closer to #1! 🏃‍♂️💨",
+                "No crown, still proud! 🧢🏅"
+            ];
+
+            const randomContent = rank === 1
+                ? rank1Content[Math.floor(Math.random() * rank1Content.length)]
+                : otherContent[Math.floor(Math.random() * otherContent.length)];
+
+            const tweetTextRaw = `${randomContent}\nI just earned ${rewards} awesome @SurvivFun Crates on @Somnia_Network!\nCheck this out 👇`;
+
+            const shareButton = $<HTMLAnchorElement>(
+                '<a class="btn btn-lg btn-darken btn-primary" style="padding: 12px 25px; font-size: 18px; background: #1DA1F2; color: #fff; text-decoration: none; border-radius: 5px; transition: background 0.3s; display: block; margin: 20px auto 0;"></a>'
+            )
+                .text("Share on X")
+                .attr(
+                    "href",
+                    `https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/1943679417730883992`
+                )
+                .attr("target", "_blank")
+                .hover(function () {
+                    $(this).css("background", "#1a8cd8");
+                }, function () {
+                    $(this).css("background", "#1DA1F2");
+                });
+            footer.append(shareButton);
+        }
+
+        content.append(body, rewardsInfo, footer);
+        rewardsModal.append(header, content);
+
+        // Append to #game div to match other modals
+        this.ui.game.append(rewardsModal);
+
+        // Show modal
+        rewardsModal.fadeIn(350);
+
+        // Remove modal when game overlay fades out
+        gameOverOverlay.one("transitionend", () => {
+            rewardsModal.fadeOut(350, () => rewardsModal.remove());
+        });
+
+        // Play sound for winners
+        if (eligible && rank === 1) {
+            void game.music.play();
+        }
     }
 
     // I'd rewrite this as MapPings.filter(…), but it's not really clear how
@@ -1298,7 +1390,7 @@ export class UIManager {
 
                                         break outer;
                                 }
-                                // fallthrough
+                            // fallthrough
                             case KillfeedEventType.NormalTwoParty:
                                 killMessage = getTranslatedString("kf_message", {
                                     player: attackerText,
@@ -1592,7 +1684,7 @@ export class UIManager {
                         ? getTranslatedString("kf_kl_killed", { player: attackerText })
                         : getTranslatedString("kf_kl_dead")
                     : getTranslatedString("kf_kl_suicide")
-                }`;
+                    }`;
 
                 switch (this.game.activePlayerID) {
                     case attackerId: {
