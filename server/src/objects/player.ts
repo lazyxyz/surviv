@@ -51,10 +51,8 @@ import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
 import { weaponPresentType } from "@common/typings";
-import { claimRewards } from "../api/api";
+import { saveGameResult } from "../api/api";
 import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
-import { PacketStream } from "@common/packets/packetStream";
-import { DisconnectPacket } from "@common/packets/disconnectPacket";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -2291,24 +2289,26 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 spectator.sendPacket(packet);
             }
 
-            claimRewards(this.address, rank, this.kills, this.game.teamMode, this.game.gameId).then((data: any) => {
-                let rewards = 0;
-                let eligible = false;
-                if (data.success) {
-                    rewards = data.amount;
-                    eligible = true;
-                }
+            if (rank <= Config.assetsConfig.rank) {
+                saveGameResult(this.address, rank, this.kills, this.game.teamMode, this.game.gameId).then((data: any) => {
+                    let rewards = 0;
+                    let eligible = false;
+                    if (data.success && data.rewards.success) {
+                        rewards = data.rewards.amount;
+                        eligible = true;
+                    }
 
-                const packet = RewardsPacket.create({
-                    eligible,
-                    rank,
-                    rewards,
-                } as unknown as RewardsData);
+                    const packet = RewardsPacket.create({
+                        eligible,
+                        rank,
+                        rewards: rewards,
+                    } as unknown as RewardsData);
 
-                this.sendPacket(packet);
-            }).catch(err => {
-                console.log("Error claim rewards: ", err);
-            });
+                    this.sendPacket(packet);
+                }).catch(err => {
+                    console.log("Error claim rewards: ", err);
+                });
+            }
         }
     }
 
