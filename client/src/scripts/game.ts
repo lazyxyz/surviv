@@ -157,7 +157,7 @@ export class Game {
     readonly gasRender = new GasRender(PIXI_SCALE);
     readonly gas = new Gas(this);
     readonly eip6963 = new EIP6963();
-    readonly account = new Account(this);
+    readonly account = new Account();
 
     music!: Sound;
 

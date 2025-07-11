@@ -17,8 +17,8 @@ interface TurnstileWindow extends Window {
     };
     turnstileToken: string | null;
 }
-declare let window: TurnstileWindow;
 
+declare let window: TurnstileWindow;
 export function onConnectWallet(game: Game): void {
     let turnstileToken: string | null = null;
 
@@ -32,14 +32,10 @@ export function onConnectWallet(game: Game): void {
 
         window.turnstile.ready(() => {
             window.turnstile.render("#turnstile-widget", {
-                sitekey: "0x4AAAAAABksm6I-SBWksH-l", // Replace with your Site Key
+                sitekey: "0x4AAAAAABksm6I-SBWksH-l",
                 callback: (token: string) => {
                     turnstileToken = token;
                     $("#connect-wallet-btn").prop("disabled", false);
-                    // Hide widget after 2 seconds
-                    setTimeout(() => {
-                        $("#turnstile-widget").css("display", "none");
-                    }, 2000);
                 },
                 "error-callback": (error: string) => {
                     console.error("Turnstile error:", error);
