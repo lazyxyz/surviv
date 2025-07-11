@@ -51,8 +51,6 @@ export function successAlert(message: string, duration: number = ALERT_DURATION)
 export function warningAlert(message: string, duration: number = ALERT_DURATION) {
     // Create alert element
     const idRandom = Math.floor(Math.random() * 10000000);
-    console.log(idRandom);
-
 
     const alertChild = $(
         `

@@ -2,7 +2,7 @@ import $ from "jquery";
 import type { Game } from "../game";
 import { createDropdown } from "../uiHelpers";
 import { WalletType, shorten } from "../utils/constants";
-import { warningAlert } from "../modal";
+import { errorAlert, warningAlert } from "../modal";
 
 // Define Turnstile window interface
 interface TurnstileWindow extends Window {
@@ -19,40 +19,49 @@ interface TurnstileWindow extends Window {
 }
 
 declare let window: TurnstileWindow;
-export function onConnectWallet(game: Game): void {
-    let turnstileToken: string | null = null;
 
-    // Initialize Turnstile
-    $(() => {
+
+// Function to render Turnstile widget and return token
+const renderTurnstile = (): Promise<string> => {
+    return new Promise((resolve, reject) => {
         if (!window.turnstile) {
-            console.error("Turnstile script not loaded.");
-            $("#wallet-inactive").append('<p style="color: red;">Bot verification failed. Please refresh.</p>');
+            reject("Turnstile script not loaded");
             return;
         }
 
         window.turnstile.ready(() => {
             window.turnstile.render("#turnstile-widget", {
-                sitekey: "0x4AAAAAABksm6I-SBWksH-l",
+                sitekey: "0x4AAAAAABksm6I-SBWksH-l", // Your Site Key
                 callback: (token: string) => {
-                    turnstileToken = token;
-                    $("#connect-wallet-btn").prop("disabled", false);
+                    resolve(token);
                 },
                 "error-callback": (error: string) => {
-                    console.error("Turnstile error:", error);
-                    $("#wallet-inactive").append(`<p style="color: red;">Bot verification failed: ${error}</p>`);
+                    reject(error);
                 },
             });
         });
     });
+};
 
-    $("#connect-wallet-btn").on("click", () => {
+
+export function onConnectWallet(game: Game): void {
+    let turnstileToken: string | null = null;
+
+    $("#connect-wallet-btn").on("click", async () => {
         $(".connect-wallet-portal").css("display", "block");
+        turnstileToken = null;
+        $("#turnstile-widget").empty();
+
+        await renderTurnstile().then(value => {
+            turnstileToken = value;
+        }).catch(_ => {
+            errorAlert("Could not load bot verification. Please refresh!");
+        });
     });
 
     // Close connect wallet modal
     $("#close-connect-wallet").on("click", () => {
         $(".connect-wallet-portal").css("display", "none");
-        // Reset Turnstile widget to allow re-verification
     });
 
     // handler click to login...
@@ -64,10 +73,9 @@ export function onConnectWallet(game: Game): void {
             argument => argument?.info?.name === paragraphElement?.textContent
         );
 
-
-
         if (isExisted) {
             elements.onclick = async () => {
+
                 // Check if Turnstile token exists
                 if (!turnstileToken) {
                     warningAlert("Please complete the bot verification.");

@@ -212,8 +212,6 @@ export class Account extends EIP6963 {
             url: `${this.api}/api/requestNonce`
         });
 
-        console.log("requestNonce: ", requestNonce);
-
         const signature = await getProvider.provider.request({
             method: "personal_sign",
             params: [
@@ -221,7 +219,6 @@ export class Account extends EIP6963 {
                 accounts[0]
             ]
         });
-        console.log("turnstileToken: ", turnstileToken);
         // Send POST request to /api/verifySignature
         const response = await fetch(`${this.api}/api/verifySignature`, {
             method: 'POST',
