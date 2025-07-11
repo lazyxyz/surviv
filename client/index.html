@@ -3,6 +3,11 @@
 <html lang="en">
 
 <head>
+  <!-- <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script> -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
+
+  <!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self' challenges.cloudflare.com;"> -->
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
@@ -279,6 +284,8 @@
         <button id="connect-wallet-btn" class="btn btn-darken btn-primary account-wallet-button">
           <p class="account-wallet-placeholder">Connect Wallet</p>
         </button>
+
+        <div id="turnstile-widget" class="cf-turnstile"></div>
       </div>
 
       <div id="wallet-active" class="account-wallet-container dropdown" style="display: none;">

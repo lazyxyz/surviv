@@ -1,4 +1,4 @@
-import $ from "jquery";
+import $, { error } from "jquery";
 
 import { ACCESS_TOKEN, PUBLIC_KEY, SELECTOR_WALLET, shorten } from "./utils/constants";
 import { EIP6963, type Provider6963Props } from "./eip6963";
@@ -25,9 +25,10 @@ import { abi as survivRewardsABI } from "@common/abis/ISurvivRewards.json";
 import { abi as crateBaseABI } from "@common/abis/ICrateBase.json";
 import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
+import type { Game } from "./game";
+import { errorAlert } from "./modal";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
-const selectedRegion = regionInfo[Config.defaultRegion];
 
 const CHAIN_ID = SurvivMapping.ChainId;
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
@@ -92,10 +93,12 @@ interface ValidRewards {
 export class Account extends EIP6963 {
     address: string | null | undefined;
     token: string | null | undefined;
+    game;
 
-    constructor() {
+    constructor(game: Game) {
+        
         super();
-
+        this.game = game;
         const getAddressFromStorage = localStorage.getItem(PUBLIC_KEY);
         const getTokenFromStorage = localStorage.getItem(ACCESS_TOKEN);
         const getSelectorFromStorage = localStorage.getItem(SELECTOR_WALLET);
@@ -150,7 +153,9 @@ export class Account extends EIP6963 {
         // Check condition button
     }
 
-    async connect(getProvider: Provider6963Props): Promise<void> {
+    async connect(getProvider: Provider6963Props, turnstileToken: string): Promise<void> {
+        const selectedRegion = regionInfo[this.game.console.getBuiltInCVar("cv_region") ?? Config.defaultRegion];
+
         // Check and switch network if necessary
         {
             const targetChainId = toBeHex(CHAIN_ID);
@@ -225,6 +230,7 @@ export class Account extends EIP6963 {
                 walletAddress: accounts[0],
                 signature,
                 nonce: requestNonce.nonce,
+                turnstileToken,
             }),
         });
 
@@ -232,6 +238,7 @@ export class Account extends EIP6963 {
         const data = await response.json();
 
         if (!data.success) {
+            errorAlert(data.message);
             throw new Error(data.error || 'Signature verification failed');
         }
 
@@ -396,6 +403,8 @@ export class Account extends EIP6963 {
      * @throws Error if the API request fails or no valid rewards are found.
      */
     async getValidRewards(): Promise<ValidRewards> {
+        const selectedRegion = regionInfo[this.game.console.getBuiltInCVar("cv_region") ?? Config.defaultRegion];
+
         if (!this.token) {
             throw new Error('Authentication token is missing');
         }
@@ -487,6 +496,8 @@ export class Account extends EIP6963 {
      * @returns Promise resolving when the operation is complete
      */
     private async removeRewards(signatures?: string[]): Promise<void> {
+        const selectedRegion = regionInfo[this.game.console.getBuiltInCVar("cv_region") ?? Config.defaultRegion];
+
         if (!this.token) {
             throw new Error('Authentication token is missing');
         }

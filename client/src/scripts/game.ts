@@ -63,7 +63,7 @@ import { Tween } from "./utils/tween";
 import { EIP6963 } from "./eip6963";
 import { Account } from "./account";
 import { ReadyPacket, type PlayerData } from "@common/packets/readyPacket";
-import { visibleConnectWallet, visibleWallet } from "./wallet";
+import { onConnectWallet, visibleWallet } from "./wallet";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { Melees } from "@common/definitions/melees";
 import { errorAlert } from "./modal";
@@ -157,7 +157,7 @@ export class Game {
     readonly gasRender = new GasRender(PIXI_SCALE);
     readonly gas = new Gas(this);
     readonly eip6963 = new EIP6963();
-    readonly account = new Account();
+    readonly account = new Account(this);
 
     music!: Sound;
 
@@ -254,7 +254,7 @@ export class Game {
         void Promise.all([
             initPixi(),
             visibleWallet(game),
-            visibleConnectWallet(game),
+            onConnectWallet(game),
             setUpUI(game),
         ]).then(() => {
             showInventory(game);
