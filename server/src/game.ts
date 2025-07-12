@@ -466,11 +466,11 @@ export class Game implements GameData {
 
             this.setGameData({ allowJoin: false, over: true });
 
-            // End the game in 1 second
+            // End the game in 10 seconds
             this.addTimeout(() => {
                 this.setGameData({ stopped: true });
                 Logger.log(`Game ${this.port} | Ended`);
-            }, 1000);
+            }, 10000);
         }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {
