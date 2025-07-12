@@ -447,8 +447,6 @@ export class UIManager {
 
     showRewardsScreen(packet: RewardsData): void {
         const { eligible, rank, rewards } = packet;
-        const { gameOverOverlay } = this.ui;
-        const game = this.game;
 
         // Create rewards modal with enhanced styling
         const rewardsModal = $<HTMLDivElement>(
@@ -529,17 +527,7 @@ export class UIManager {
         this.ui.game.append(rewardsModal);
 
         // Show modal
-        rewardsModal.fadeIn(350);
-
-        // Remove modal when game overlay fades out
-        gameOverOverlay.one("transitionend", () => {
-            rewardsModal.fadeOut(350, () => rewardsModal.remove());
-        });
-
-        // Play sound for winners
-        if (eligible && rank === 1) {
-            void game.music.play();
-        }
+        rewardsModal.fadeIn();
     }
 
     // I'd rewrite this as MapPings.filter(…), but it's not really clear how
