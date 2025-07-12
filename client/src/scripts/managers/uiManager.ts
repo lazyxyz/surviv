@@ -468,7 +468,7 @@ export class UIManager {
         // Content
         const content = $<HTMLDivElement>('<div class="rewards-content" style="padding: 30px; text-align: center; color: #fff;"></div>');
         const body = $<HTMLParagraphElement>('<p style="font-size: 22px; margin: 15px 0; font-weight: bold; text-align: center;"></p>').text(
-            eligible ? "Your Rewards" : `Missed ${rewards}x Crates`
+            eligible ? "Your Rewards" : `You Missed Your Rewards`
         );
         const rewardsInfo = $<HTMLDivElement>('<div style="margin: 25px 0; font-size: 20px; text-align: center;"></div>').html(
             eligible

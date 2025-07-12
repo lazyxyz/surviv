@@ -2271,7 +2271,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     handleGameOver(won = false): void {
-        const rank = won ? 1 as const : this.game.aliveCount + 1;
+        const rank = won ? 1 : this.game.aliveCount + 1;
 
         if (this.address) {
             const packet = GameOverPacket.create({
@@ -2293,6 +2293,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 saveGameResult(this.address, rank, this.kills, this.game.teamMode, this.game.gameId).then((data: any) => {
                     let rewards = 0;
                     let eligible = false;
+
                     if (data.success && data.rewards.success) {
                         rewards = data.rewards.amount;
                         eligible = true;
