@@ -17,6 +17,44 @@ input::-webkit-inner-spin-button {
   max-width: 500px;
 }
 
+// Weapon tabs
+.weapon-tab {
+  margin-bottom: 8px;
+  gap: 4px;
+}
+.weapon-tab-child {
+  flex: 1;
+  padding: 8px 0;
+  background: #222;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  border-bottom: 2px solid transparent;
+}
+.weapon-tab-child.active {
+  background: #333;
+  border-bottom: 2px solid #ffd700;
+}
+.weapon-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  height: 340px;
+  overflow: hidden;
+  overflow-y: auto;
+}
+.weapons-container-card.inactive {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.weapons-container-card.selected {
+  border: 2px solid #ffd700;
+}
+.weapons-container {
+  overflow-y: unset;
+}
+
 .modal-alert {
   position: fixed;
   display: flex;
@@ -472,7 +510,8 @@ input::-webkit-inner-spin-button {
   }
 
   // Crate styles
-  .crates-tab-child {
+  .crates-tab-child,
+  .weapon-tab-child {
     padding: 8px 12px;
     font-size: 14px;
     font-weight: 500;
@@ -1087,12 +1126,12 @@ input::-webkit-inner-spin-button {
     // right
     &-list {
       display: flex;
+      flex-direction: column;
       flex-wrap: wrap;
-      overflow-y: auto;
 
       align-content: flex-start;
       flex: 1;
-      gap: 8px;
+      gap: 4px;
 
       h2 {
         margin: unset;
