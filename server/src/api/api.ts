@@ -33,7 +33,7 @@ export async function validateJWT(token: string, timeout: number = 5000): Promis
     }
 }
 
-export async function saveGameResult(player: string, rank: number, kills: number, teamMode: boolean, gameId: string, timeout: number = 15000): Promise<any> {
+export async function saveGameResult(player: string, rank: number, kills: number, teamMode: boolean, gameId: string, timeout: number = 10000): Promise<any> {
     const url = `${Config.assetsConfig?.api}/admin/saveGameResult`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);

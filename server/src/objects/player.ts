@@ -2274,7 +2274,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         const rank = won ? 1 : this.game.aliveCount + 1;
 
         if (this.address) {
-            const packet = GameOverPacket.create({
+            const gameOverPacket = GameOverPacket.create({
                 won,
                 playerID: this.id,
                 kills: this.kills,
@@ -2283,10 +2283,9 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 timeAlive: (this.game.now - this.joinTime) / 1000,
                 rank,
             } as unknown as GameOverData);
-
-            this.sendPacket(packet);
+            this.sendPacket(gameOverPacket);
             for (const spectator of this.spectators) {
-                spectator.sendPacket(packet);
+                spectator.sendPacket(gameOverPacket);
             }
 
             if (rank <= Config.assetsConfig.rank) {
@@ -2299,16 +2298,15 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                         eligible = true;
                     }
 
-                    const packet = RewardsPacket.create({
+                    const rewardsPacket = RewardsPacket.create({
                         eligible,
                         rank,
                         rewards: rewards,
                     } as unknown as RewardsData);
-
-                    this.sendPacket(packet);
+                    this.sendPacket(rewardsPacket);
                 }).catch(err => {
                     console.log("Error claim rewards: ", err);
-                });
+                })
             }
         }
     }
