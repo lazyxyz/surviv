@@ -23,12 +23,11 @@ import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaul
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
-// import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { getBadgeImage, showBadges } from "./badges";
 import { loadInventory } from "./inventory";
 import { showSkins } from "./skin";
-import { showMelees as showWeapons } from "./weapons/weapons";
+import { showWeapons } from "./weapons/weapons";
 import { Loots } from "@common/definitions/loots";
 import { showEmotes } from "./emotes";
 import { warningAlert } from "./modal";

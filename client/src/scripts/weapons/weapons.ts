@@ -26,11 +26,12 @@ const selectMelee = (game: Game, weaponId: string) => {
   // Store the selected weapon
   weapons.selectWeapon(game, { melee: weaponId });
 
-    // Save to localStorage
+  // Save to localStorage
   localStorage.setItem("selectedMelee", weaponId);
 
   // Add "selected" class to the weapon element
-  $(`#weapons-assets-${weaponId}`).addClass("selected");
+  $(`.weapons-container-card`).removeClass("selected");
+  $(`#weapons-list-${weaponId}`).addClass("selected");
 
   // Find the melee definition
   const melee = Melees.definitions.find((w) => w.idString === weaponId);
@@ -86,11 +87,12 @@ const selectGun = (game: Game, weaponId: string) => {
   // Store the selected weapon
   weapons.selectWeapon(game, { gun: weaponId });
 
-    // Save to localStorage
+  // Save to localStorage
   localStorage.setItem("selectedGun", weaponId);
 
   // Add "selected" class to the weapon element
-  $(`#weapons-assets-${weaponId}`).addClass("selected");
+  $(`.weapons-container-card`).removeClass("selected");
+  $(`#weapons-list-${weaponId}`).addClass("selected");
 
   // Find the gun definition
   const gun = Guns.definitions.find((w) => w.idString === weaponId);
@@ -100,116 +102,103 @@ const selectGun = (game: Game, weaponId: string) => {
   }
 };
 
-// Display weapons in a given category
-// async function displayWeapons(game: Game, category: string, type: WeaponType, items: any) {
-//   const $itemsList = $<HTMLDivElement>(".weapons-container-list");
-
-//   // Append category header
-//   $itemsList.append(`<h2 class='weapons-container-card-${type}'>${category}</h2>`);
-
-//   // Create and append weapon items
-//   for (const { idString, name } of items) {
-//     const $item = $<HTMLDivElement>(`
-//       <div class="weapons-container-card weapons-container-card-${type}" id="weapons-list-${idString}">
-//         <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
-//         <p class="weapons-container-paragraph">${name}</p>
-//       </div>
-//     `);
-
-//     $item.on("click", async () => {
-//       // Remove "selected" class from all items in the category
-//       $(`.weapons-container-card-${type}`).removeClass("selected");
-//       $item.addClass("selected");
-
-//       // Check if a preset weapon exists
-//       const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset").startsWith("{")
-//         ? JSON.parse(game.console.getBuiltInCVar("dv_weapon_preset"))
-//         : undefined;
-
-//       const availableWeapons = await weapons.appendAsset(idString, items);
-//       const presetWeapon = availableWeapons?.find((meta) => meta.idString === weaponPreset?.[type]);
-
-//       // Select the appropriate weapon
-//       if (type === "melee") {
-//         selectMelee(game, presetWeapon?.idString ?? idString);
-//       } else {
-//         selectGun(game, presetWeapon?.idString ?? idString);
-//       }
-//     });
-
-//     $itemsList.append($item);
-//   }
-
-//   // Event delegation for asset clicks
-//   $itemsList.off("click", ".weapons-container-card-assets").on("click", ".weapons-container-card-assets", ({ currentTarget }) => {
-//     const weaponId = currentTarget.id.replace("weapons-assets-", "");
-//     if (type === "melee") {
-//       selectMelee(game, weaponId);
-//     } else {
-//       selectGun(game, weaponId);
-//     }
-//   });
-// }
-
-// Main function to display melees and guns
-// export async function showMelees(game: Game): Promise<void> {
-//   if (!game?.account?.address) {
-//     console.warn("No account address provided");
-//     return;
-//   }
-
-//   // Reset items before rendering
-//   weapons.resetAll();
-
-//   // Fetch balances concurrently
-//   const [silverArms, goldArms, divineArms, divineGuns] = await Promise.all([
-//     game.account.getBalances(SurvivAssets.SilverArms).catch((err) => {
-//       console.error(`Get SilverArms error: ${err}`);
-//       return {};
-//     }),
-//     game.account.getBalances(SurvivAssets.GoldArms).catch((err) => {
-//       console.error(`Get GoldArms error: ${err}`);
-//       return {};
-//     }),
-//     game.account.getBalances(SurvivAssets.DivineArms).catch((err) => {
-//       console.error(`Get DivineArms error: ${err}`);
-//       return {};
-//     }),
-//     game.account.getBalances(SurvivAssets.DivineGuns).catch((err) => {
-//       console.error(`Get DivineGuns error: ${err}`);
-//       return {};
-//     }),
-//   ]);
-
-//   // Combine balances and extract weapon IDs
-//   const userArmsBalance = { ...silverArms, ...goldArms, ...divineArms };
-//   const userGunsBalance = { ...divineGuns };
-
-//   const userArmKeys = Object.keys(userArmsBalance);
-//   const userGunKeys = Object.keys(userGunsBalance);
-
-//   // Filter available melees and guns
-//   const userMelees = Melees.definitions.filter((weapon) =>
-//     [...freeMelees, ...userArmKeys].includes(weapon.idString)
-//   );
-//   const userGuns = Guns.definitions.filter((weapon) =>
-//     userGunKeys.includes(weapon.idString)
-//   );
-
-//   // Display melees and guns
-//   await Promise.all([
-//     displayWeapons(game, "Melees", "melee", userMelees),
-//     displayWeapons(game, "Guns", "gun", userGuns),
-//   ]);
-// }
-
 // Utility to check if a weapon is owned
 function isOwned(id: string, ownedIds: string[]) {
   return ownedIds.includes(id);
 }
 
-// Main function to display tabs and lists
-export async function showMelees(game: Game, highlightId?: string): Promise<void> {
+// Function to display guns
+async function showGuns(game: Game, selectedGunId?: string) {
+  try {
+    const divineGuns = await game.account.getBalances(SurvivAssets.DivineGuns).catch((err) => {
+      console.error(`Get DivineGuns error: ${err}`);
+      return {};
+    });
+
+    const divineGunIds = Object.keys(divineGuns);
+    const userGunsBalance = { ...divineGuns };
+    const ownedGunIds = Object.keys(userGunsBalance);
+    const allGuns = Guns.definitions.filter((gun) => divineGunIds.includes(gun.idString));
+
+    // Render gun items
+    const $gunList = $("#list-gun").empty();
+    for (const { idString, name } of allGuns) {
+      const owned = isOwned(idString, ownedGunIds);
+      $gunList.append(`
+        <div class="weapons-container-card weapons-container-card-gun${owned ? "" : " inactive"}" 
+             id="weapons-list-${idString}" data-id="${idString}">
+          <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+          <p class="weapons-container-paragraph">${name}</p>
+        </div>
+      `);
+    }
+
+    // Reapply selected class if provided
+    if (selectedGunId && $(`#weapons-list-${selectedGunId}`).length && !$(`#weapons-list-${selectedGunId}`).hasClass("inactive")) {
+      $(`#weapons-list-${selectedGunId}`).addClass("selected");
+    }
+
+    // Show gun list and hide melee list
+    $("#list-gun").show();
+    $("#list-melee").hide();
+  } catch (err) {
+    console.error(`Error displaying guns: ${err}`);
+  }
+}
+
+// Function to display melees
+async function showMelees(game: Game, selectedMeleeId?: string) {
+  try {
+    const [silverArms, goldArms, divineArms] = await Promise.all([
+      game.account.getBalances(SurvivAssets.SilverArms).catch(() => ({})),
+      game.account.getBalances(SurvivAssets.GoldArms).catch(() => ({})),
+      game.account.getBalances(SurvivAssets.DivineArms).catch(() => ({})),
+    ]);
+
+    const userArmsBalance = { ...silverArms, ...goldArms, ...divineArms };
+    const ownedMeleeIds = [...freeMelees, ...Object.keys(userArmsBalance)];
+    const allMelees = Melees.definitions;
+
+    // Split melees into owned and unowned
+    const ownedMelees = allMelees.filter((melee) => isOwned(melee.idString, ownedMeleeIds));
+    const unownedMelees = allMelees.filter((melee) => !isOwned(melee.idString, ownedMeleeIds));
+
+    // Render melee items (owned first, then unowned)
+    const $meleeList = $("#list-melee").empty();
+    for (const { idString, name } of ownedMelees) {
+      $meleeList.append(`
+        <div class="weapons-container-card weapons-container-card-melee" 
+             id="weapons-list-${idString}" data-id="${idString}">
+          <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+          <p class="weapons-container-paragraph">${name}</p>
+        </div>
+      `);
+    }
+    for (const { idString, name } of unownedMelees) {
+      $meleeList.append(`
+        <div class="weapons-container-card weapons-container-card-melee inactive" 
+             id="weapons-list-${idString}" data-id="${idString}">
+          <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+          <p class="weapons-container-paragraph">${name}</p>
+        </div>
+      `);
+    }
+
+    // Reapply selected class if provided
+    if (selectedMeleeId && $(`#weapons-list-${selectedMeleeId}`).length && !$(`#weapons-list-${selectedMeleeId}`).hasClass("inactive")) {
+      $(`#weapons-list-${selectedMeleeId}`).addClass("selected");
+    }
+
+    // Show melee list and hide gun list
+    $("#list-melee").show();
+    $("#list-gun").hide();
+  } catch (err) {
+    console.error(`Error displaying melees: ${err}`);
+  }
+}
+
+// Main function to display weapons (melees and guns)
+export async function showWeapons(game: Game, highlightId?: string): Promise<void> {
   if (!game?.account?.address) {
     console.warn("No account address provided");
     return;
@@ -217,119 +206,90 @@ export async function showMelees(game: Game, highlightId?: string): Promise<void
 
   weapons.resetAll();
 
-  // Fetch balances
-  const [silverArms, goldArms, divineArms, divineGuns] = await Promise.all([
-    game.account.getBalances(SurvivAssets.SilverArms).catch(() => ({})),
-    game.account.getBalances(SurvivAssets.GoldArms).catch(() => ({})),
-    game.account.getBalances(SurvivAssets.DivineArms).catch(() => ({})),
-    game.account.getBalances(SurvivAssets.DivineGuns).catch((err) => {
-      console.error(`Get DivineGuns error: ${err}`);
-      return {};
-    }),
-  ]);
-
-  const userArmsBalance = { ...silverArms, ...goldArms, ...divineArms };
-  const userGunsBalance = { ...divineGuns };
-
-  const ownedMeleeIds = [...freeMelees, ...Object.keys(userArmsBalance)];
-  const ownedGunIds = Object.keys(userGunsBalance);
-
-  // Prepare lists
-  const allMelees = Melees.definitions;
-  const divineGunIds = Object.keys(divineGuns);
-  const allGuns = Guns.definitions.filter(gun => divineGunIds.includes(gun.idString));
-  // const allGuns = Guns.definitions;
-
   // Build tab UI
-  const $container = $<HTMLDivElement>(".weapons-container-list");
-  $container.empty();
+  const $container = $<HTMLDivElement>(".weapons-container-list").empty();
   $container.append(`
     <div class="weapon-tab">
       <button class="weapon-tab-child active" id="tab-melee">Melees</button>
       <button class="weapon-tab-child" id="tab-gun">Guns</button>
     </div>
     <div class="weapon-list" id="list-melee"></div>
-    <div class="weapon-list" id="list-gun"></div>
+    <div class="weapon-list" id="list-gun" style="display: none;"></div>
   `);
 
-  // Render melee items
-  const $meleeList = $("#list-melee").empty();
-  for (const { idString, name } of allMelees) {
-    const owned = isOwned(idString, ownedMeleeIds);
-    $meleeList.append(`
-      <div class="weapons-container-card weapons-container-card-melee${owned ? "" : " inactive"}" 
-           id="weapons-list-${idString}" data-id="${idString}">
-        <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
-        <p class="weapons-container-paragraph">${name}</p>
-      </div>
-    `);
+  // Get weapon preset
+  let weaponPreset: { melee?: string; gun?: string } = {};
+  try {
+    const presetString = game.console.getBuiltInCVar("dv_weapon_preset");
+    if (presetString) {
+      weaponPreset = JSON.parse(presetString);
+    }
+  } catch (err) {
+    console.error(`Error parsing dv_weapon_preset: ${err}`);
   }
 
-  // Render gun items
-  const $gunList = $("#list-gun").empty();
-  for (const { idString, name } of allGuns) {
-    const owned = isOwned(idString, ownedGunIds);
-    $gunList.append(`
-      <div class="weapons-container-card weapons-container-card-gun${owned ? "" : " inactive"}" 
-           id="weapons-list-${idString}" data-id="${idString}">
-        <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
-        <p class="weapons-container-paragraph">${name}</p>
-      </div>
-    `);
-  }
+  // Load melee list by default
+  await showMelees(game, weaponPreset.melee);
 
   // Tab switching logic
-  $(".weapon-tab-child").off("click").on("click", function () {
+  $(".weapon-tab-child").off("click").on("click", async function () {
     $(".weapon-tab-child").removeClass("active");
     $(this).addClass("active");
+
     if (this.id === "tab-melee") {
-      $("#list-melee").show();
-      $("#list-gun").hide();
+      await showMelees(game, weaponPreset.melee);
     } else {
-      $("#list-melee").hide();
-      $("#list-gun").show();
+      await showGuns(game, weaponPreset.gun);
     }
   });
 
-  // Item click logic (only for owned)
-  $container.off("click", ".weapons-container-card").on("click", ".weapons-container-card", async function () {
+  // Item click logic (only for owned items)
+  $container.off("click", ".weapons-container-card").on("click", ".weapons-container-card", function () {
     if ($(this).hasClass("inactive")) return;
     const id = $(this).data("id");
     const type = $(this).hasClass("weapons-container-card-melee") ? "melee" : "gun";
-    $(".weapons-container-card").removeClass("selected");
-    $(this).addClass("selected");
-    if (type === "melee") selectMelee(game, id);
-    else selectGun(game, id);
+    if (type === "melee") {
+      weaponPreset.melee = id;
+      selectMelee(game, id);
+    } else {
+      weaponPreset.gun = id;
+      selectGun(game, id);
+    }
   });
 
-  // Read from localStorage if no highlightId provided
+  // Load selected weapons from dv_weapon_preset
   if (!highlightId) {
-    const savedMelee = localStorage.getItem("selectedMelee");
-    const savedGun = localStorage.getItem("selectedGun");
-
-    if (savedMelee && $(`#weapons-list-${savedMelee}`).length && !$(`#weapons-list-${savedMelee}`).hasClass("inactive")) {
-      const $item = $(`#weapons-list-${savedMelee}`);
-      $item.addClass("selected");
-      $("#tab-melee").click();
-      selectMelee(game, savedMelee);
-    } else if (savedGun && $(`#weapons-list-${savedGun}`).length && !$(`#weapons-list-${savedGun}`).hasClass("inactive")) {
-      const $item = $(`#weapons-list-${savedGun}`);
-      $item.addClass("selected");
-      $("#tab-gun").click();
-      selectGun(game, savedGun);
+    if (weaponPreset.melee && $(`#weapons-list-${weaponPreset.melee}`).length && !$(`#weapons-list-${weaponPreset.melee}`).hasClass("inactive")) {
+      $(`#weapons-list-${weaponPreset.melee}`).addClass("selected");
+      $("#tab-melee").addClass("active");
+      $("#tab-gun").removeClass("active");
+      await showMelees(game, weaponPreset.melee);
+      selectMelee(game, weaponPreset.melee);
+    } else if (weaponPreset.gun && $(`#weapons-list-${weaponPreset.gun}`).length && !$(`#weapons-list-${weaponPreset.gun}`).hasClass("inactive")) {
+      $(`#weapons-list-${weaponPreset.gun}`).addClass("selected");
+      $("#tab-gun").addClass("active");
+      $("#tab-melee").removeClass("active");
+      await showGuns(game, weaponPreset.gun);
+      selectGun(game, weaponPreset.gun);
     }
   }
 
-  // Highlight item if needed (e.g., from rewards)
+  // Highlight item if provided (e.g., from rewards)
   if (highlightId) {
     const $item = $(`#weapons-list-${highlightId}`);
     if ($item.length && !$item.hasClass("inactive")) {
       $item.addClass("selected");
       if ($item.hasClass("weapons-container-card-melee")) {
-        $("#tab-melee").click();
+        weaponPreset.melee = highlightId;
+        $("#tab-melee").addClass("active");
+        $("#tab-gun").removeClass("active");
+        await showMelees(game, highlightId);
         selectMelee(game, highlightId);
       } else {
-        $("#tab-gun").click();
+        weaponPreset.gun = highlightId;
+        $("#tab-gun").addClass("active");
+        $("#tab-melee").removeClass("active");
+        await showGuns(game, highlightId);
         selectGun(game, highlightId);
       }
     }
