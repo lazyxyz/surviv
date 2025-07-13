@@ -18,33 +18,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
 <body class="bg-gradient-to-b from-gray-900 to-gray-800 text-white font-sans min-h-screen">
-  <header class="bg-gray-900/80 backdrop-blur-sm py-4 shadow-lg sticky top-0 z-20">
-    <div class="container mx-auto px-4 flex justify-between items-center">
-      <a href="../" title="Play Game (Return Home)">
-        <img src="../img/logos/surviv_favicon_32x32.png" alt="Surviv logo" class="h-10" draggable="false" />
-      </a>
-      <div class="relative">
-        <button id="btn-dropdown-more" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center transition duration-300">
-          More
-          <i class="fa-solid fa-caret-down ml-2"></i>
-        </button>
-        <div id="dropdown-content" class="absolute hidden right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl z-10 border border-gray-700">
-          <a href="/" class="block px-4 py-2 hover:bg-blue-600 hover:text-white transition duration-200">
-            Play Game
-            <i class="fa-solid fa-arrow-up-right-from-square ml-2"></i>
-          </a>
-          <a href="/leaderboard" class="block px-4 py-2 hover:bg-blue-600 hover:text-white transition duration-200">
-            Leaderboard
-            <i class="fa-solid fa-arrow-up-right-from-square ml-2"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </header>
   <main class="container mx-auto px-4 py-12">
-    <a class="block text-center mb-8">
+    <a href="../" class="block text-center mb-8">
       <img src="../img/logos/surviv.fun.png" alt="Surviv logo" class="h-64 mx-auto" draggable="false" />
     </a>
+    <h1 class="text-4xl font-extrabold text-center mb-10 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">Surviv Fun Leaderboard</h1>
     <div id="leaderboard" class="bg-gray-800/90 backdrop-blur-md rounded-xl shadow-2xl p-8 border border-gray-700">
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-semibold text-blue-300">Top Survivors</h2>
@@ -134,11 +112,6 @@
     document.getElementById('next-page').addEventListener('click', () => {
       currentPage++;
       fetchLeaderboard(currentPage);
-    });
-
-    document.getElementById('btn-dropdown-more').addEventListener('click', () => {
-      const dropdown = document.getElementById('dropdown-content');
-      dropdown.classList.toggle('hidden');
     });
 
     // Fetch initial leaderboard
