@@ -80,6 +80,15 @@ const selectMelee = (game: Game, weaponId: string) => {
 
   // Append assets and set viewBox
   weapons.appendPreview(assets).attr("viewBox", VIEWBOX);
+
+  // Update weapon info panel
+  const dps = melee.damage && melee.cooldown ? (melee.damage / (melee.cooldown / 1000)).toFixed(2) : "N/A";
+  $("#weapon-info").html(`
+    <p>${melee.name}</p>
+    <p>DPS: ${dps}</p>
+    <p>Damage: ${melee.damage ?? "N/A"}</p>
+    <p>Cooldown: ${melee.cooldown ? (melee.cooldown / 1000) + "s" : "N/A"}</p>
+  `);
 };
 
 // Function to select a gun
@@ -100,6 +109,17 @@ const selectGun = (game: Game, weaponId: string) => {
     console.warn(`Gun not found: ${weaponId}`);
     return;
   }
+
+  // Update weapon info panel
+  const dps = gun.ballistics.damage && gun.fireDelay ? (gun.ballistics.damage / (gun.fireDelay / 1000)).toFixed(2) : "N/A";
+  $("#weapon-info").html(`
+    <p>${gun.name}</p>
+    <p>DPS: ${dps}</p>
+    <p>Damage: ${gun.ballistics.damage ?? "N/A"}</p>
+    <p>Speed: ${gun.ballistics.speed ?? "N/A"}</p>
+    <p>Range: ${gun.ballistics.range ?? "N/A"}</p>
+    <p>Ammo Type: ${gun.ammoType ?? "N/A"}</p>
+  `);
 };
 
 // Utility to check if a weapon is owned
@@ -139,7 +159,7 @@ async function showGuns(game: Game, selectedGunId?: string) {
       $gunList.append(`
         <div class="weapons-container-card weapons-container-card-gun inactive" 
              id="weapons-list-${idString}" data-id="${idString}">
-          <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height Mirror="72px" />
+          <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
           <p class="weapons-container-paragraph">${name}</p>
         </div>
       `);
@@ -228,6 +248,14 @@ export async function showWeapons(game: Game, highlightId?: string): Promise<voi
     <div class="weapon-list" id="list-melee"></div>
     <div class="weapon-list" id="list-gun" style="display: none;"></div>
   `);
+
+  // Append weapon info panel to .weapons-container-aside, below .weapons-container-aside-preview
+  const $aside = $(".weapons-container-aside");
+  if ($("#weapon-info").length === 0) {
+    $aside.append(`
+      <div id="weapon-info" style="margin-top: 5px; padding: 5px; background: rgba(0, 0, 0, 0.1); border-radius: 4px; font-size: 0.5em; max-height: 100px; overflow-y: auto;"></div>
+    `);
+  }
 
   // Get weapon preset
   let weaponPreset: { melee?: string; gun?: string } = {};

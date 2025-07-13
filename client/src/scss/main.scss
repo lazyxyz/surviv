@@ -46,6 +46,15 @@ a:visited {
   justify-content: center;
 }
 
+#weapon-info {
+  margin-top: 5px;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  font-size: 0.5em;
+  max-height: 100px;
+  overflow-y: auto;
+}
 // a:hover {
 //     text-decoration: underline;
 // }
