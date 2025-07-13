@@ -823,19 +823,6 @@ export async function setUpUI(game: Game): Promise<void> {
         } */
     });
 
-    const rulesBtn = $<HTMLButtonElement>("#btn-rules");
-
-    // Highlight rules & tutorial button for new players
-    if (!game.console.getBuiltInCVar("cv_rules_acknowledged")) {
-        rulesBtn.removeClass("btn-secondary").addClass("highlighted");
-    }
-
-    // Event listener for rules button
-    rulesBtn.on("click", () => {
-        game.console.setBuiltInCVar("cv_rules_acknowledged", true);
-        location.href = "./rules/";
-    });
-
     $("#btn-quit-game, #btn-spectate-menu, #btn-menu").on("click", () => {
         void game.endGame();
     });
