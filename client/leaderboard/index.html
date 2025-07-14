@@ -38,7 +38,10 @@
             <tr class="bg-gray-700/50 text-blue-200">
               <th class="py-4 px-6 font-semibold">Rank</th>
               <th class="py-4 px-6 font-semibold">Player</th>
-              <th class="py-4 px-6 font-semibold">Points</th>
+              <th class="py-4 px-6 font-semibold">Total Points</th>
+              <th class="py-4 px-6 font-semibold">Solo Points</th>
+              <th class="py-4 px-6 font-semibold">Squad Points</th>
+              <th class="py-4 px-6 font-semibold">Social Points</th>
               <th class="py-4 px-6 font-semibold">Games</th>
               <th class="py-4 px-6 font-semibold">Rate</th>
               <th class="py-4 px-6 font-semibold">Kills</th>
@@ -83,8 +86,11 @@
             <td class="py-4 px-6">${page * limit + index + 1}</td>
             <td class="py-4 px-6">${player.player}</td>
             <td class="py-4 px-6">${player.totalPoints}</td>
+            <td class="py-4 px-6">${player.soloPoints}</td>
+            <td class="py-4 px-6">${player.squadPoints}</td>
+            <td class="py-4 px-6">${player.socialPoints}</td>
             <td class="py-4 px-6">${player.games}</td>
-            <td class="py-4 px-6">${(player.totalPoints / player.games).toFixed(2)}</td>
+            <td class="py-4 px-6">${player.games > 0 ? (player.totalPoints / player.games).toFixed(2) : '0.00'}</td>
             <td class="py-4 px-6">N/A</td>
           `;
           leaderboardBody.appendChild(row);
