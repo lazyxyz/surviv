@@ -130,9 +130,9 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                 if (data.emotes) {
                     const emoteIds = data.emotes.split(',');
                     // VERIFY BALANCES
-
-                    emotes = emoteIds.map(emoteId => Emotes.fromStringSafe(emoteId)) // Map each ID to the desired format
-                        .filter(emote => emote !== undefined);
+                    emotes = emoteIds.map(emoteId => Emotes.fromStringSafe(emoteId));
+                } else {
+                    emotes = EMOTE_SLOTS.map(slot => undefined);
                 }
 
                 // Verify Skin
@@ -164,7 +164,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                     ReadyPacket.create({
                         isMobile: false,
                         address: data.address ? data.address : "",
-                        emotes: emotes? emotes : undefined,
+                        emotes: emotes,
                         name: data.name,
                         skin: skin,
                         badge: Badges.fromStringSafe(data.badge),
