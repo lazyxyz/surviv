@@ -311,7 +311,8 @@
     "dual_template": "Dual <gun>",
     "region_dev": "Localhost Server",
     "region_na": "North America",
-    "region_eu": "Europe",
     "region_sa": "South America",
+    "region_eu": "Europe",
+    "region_us": "United States",
     "region_as": "Asia"
 }
