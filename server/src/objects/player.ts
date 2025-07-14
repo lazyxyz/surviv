@@ -2273,21 +2273,21 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     handleGameOver(won = false): void {
         const rank = won ? 1 : this.game.aliveCount + 1;
 
-        if (this.address) {
-            const gameOverPacket = GameOverPacket.create({
-                won,
-                playerID: this.id,
-                kills: this.kills,
-                damageDone: this.damageDone,
-                damageTaken: this.damageTaken,
-                timeAlive: (this.game.now - this.joinTime) / 1000,
-                rank,
-            } as unknown as GameOverData);
-            this.sendPacket(gameOverPacket);
-            for (const spectator of this.spectators) {
-                spectator.sendPacket(gameOverPacket);
-            }
+        const gameOverPacket = GameOverPacket.create({
+            won,
+            playerID: this.id,
+            kills: this.kills,
+            damageDone: this.damageDone,
+            damageTaken: this.damageTaken,
+            timeAlive: (this.game.now - this.joinTime) / 1000,
+            rank,
+        } as unknown as GameOverData);
+        this.sendPacket(gameOverPacket);
+        for (const spectator of this.spectators) {
+            spectator.sendPacket(gameOverPacket);
+        }
 
+        if (this.address) {
             if (rank <= Config.assetsConfig.rank) {
                 saveGameResult(this.address, rank, this.kills, this.game.teamMode, this.game.gameId).then((data: any) => {
                     let rewards = 0;
