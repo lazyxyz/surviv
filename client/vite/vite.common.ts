@@ -10,7 +10,8 @@ const config: UserConfig = {
         rollupOptions: {
             input: {
                 main: resolve(__dirname, "../index.html"),
-                earn: resolve(__dirname, "../earn/index.html")
+                earn: resolve(__dirname, "../earn/index.html"),
+                leaderboard: resolve(__dirname, "../leaderboard/index.html"),
             }
         }
     },

@@ -28,9 +28,9 @@
   <link rel="icon" type="image/x-icon" href="./favicon.ico" />
   <link rel="icon" type="image/svg+xml" sizes="any" href="./img/logos/suroi_small.svg" />
 
-  <link rel="icon" type="image/x-icon" sizes="16x16" href="./img/logos/suroi_favicon_16x16.png" />
-  <link rel="icon" type="image/x-icon" sizes="32x32" href="./img/logos/suroi_favicon_32x32.png" />
-  <link rel="icon" type="image/x-icon" sizes="96x96" href="./img/logos/suroi_favicon_96x96.png" />
+  <link rel="icon" type="image/x-icon" sizes="16x16" href="./img/logos/surviv_favicon_16x16.png" />
+  <link rel="icon" type="image/x-icon" sizes="32x32" href="./img/logos/surviv_favicon_32x32.png" />
+  <link rel="icon" type="image/x-icon" sizes="96x96" href="./img/logos/surviv_favicon_96x96.png" />
 
   <link rel="manifest" href="./manifest.json" />
   <style>
@@ -114,7 +114,7 @@
 
   <div id="splash-ui">
     <div id="splash-logo">
-      <img src="./img/logos/surviv.fun.png" alt="Suroi logo" draggable="false" />
+      <img src="./img/logos/surviv.fun.png" alt="Surviv logo" draggable="false" />
     </div>
     <div id="splash-modals">
       <div id="splash-earn">
@@ -208,13 +208,15 @@
               <div id="locked-tooltip" style="display: none" translation="msg_locked_tooltip"></div>
             </span>
 
-            <button class="rules-close-btn btn-darken" id="rules-close-btn" style="display: none">
+            <!-- <button class="rules-close-btn btn-darken" id="rules-close-btn" style="display: none">
               <i class="fa-solid fa-xmark"></i>
-            </button>
-            <button class="btn btn-lg btn-darken btn-secondary" id="btn-rules" style="display: none">
-              <div class="pulsating-circle" style="display: none"></div>
-              <span translation="rules_and_tutorial"></span>
-            </button>
+            </button> -->
+            <a href="/leaderboard/">
+              <button class="btn btn-lg btn-darken btn-secondary" id="btn-rules" style="display: none">
+                <div class="pulsating-circle" style="display: none"></div>
+                <span>Leaderboard</span>
+              </button>
+            </a>
           </div>
         </div>
         <div id="splash-socials">
@@ -222,6 +224,8 @@
             class="btn btn-darken btn-social btn-discord" target="_blank"></a>
           <a href="https://socials.surviv.fun/twitter" rel="noopener noreferrer"
             class="btn btn-darken btn-social btn-twitter" target="_blank"></a>
+          <a href="https://socials.surviv.fun/telegram" rel="noopener noreferrer"
+            class="btn btn-darken btn-social btn-telegram" target="_blank"></a>
         </div>
       </div>
       <div id="splash-customize">
@@ -1043,7 +1047,7 @@
           <div class="weapons-container-aside">
             <svg class="weapons-container-aside-preview"></svg>
 
-            <div class="weapons-container-aside-assets"></div>
+            <!-- <div class="weapons-container-aside-assets"></div> -->
           </div>
 
           <!-- <div class="weapons-container-list">

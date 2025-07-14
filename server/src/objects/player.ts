@@ -2271,43 +2271,42 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     handleGameOver(won = false): void {
-        const rank = won ? 1 as const : this.game.aliveCount + 1;
+        const rank = won ? 1 : this.game.aliveCount + 1;
+
+        const gameOverPacket = GameOverPacket.create({
+            won,
+            playerID: this.id,
+            kills: this.kills,
+            damageDone: this.damageDone,
+            damageTaken: this.damageTaken,
+            timeAlive: (this.game.now - this.joinTime) / 1000,
+            rank,
+        } as unknown as GameOverData);
+        this.sendPacket(gameOverPacket);
+        for (const spectator of this.spectators) {
+            spectator.sendPacket(gameOverPacket);
+        }
 
         if (this.address) {
-            const packet = GameOverPacket.create({
-                won,
-                playerID: this.id,
-                kills: this.kills,
-                damageDone: this.damageDone,
-                damageTaken: this.damageTaken,
-                timeAlive: (this.game.now - this.joinTime) / 1000,
-                rank,
-            } as unknown as GameOverData);
-
-            this.sendPacket(packet);
-            for (const spectator of this.spectators) {
-                spectator.sendPacket(packet);
-            }
-
             if (rank <= Config.assetsConfig.rank) {
                 saveGameResult(this.address, rank, this.kills, this.game.teamMode, this.game.gameId).then((data: any) => {
                     let rewards = 0;
                     let eligible = false;
+
                     if (data.success && data.rewards.success) {
                         rewards = data.rewards.amount;
                         eligible = true;
                     }
 
-                    const packet = RewardsPacket.create({
+                    const rewardsPacket = RewardsPacket.create({
                         eligible,
                         rank,
                         rewards: rewards,
                     } as unknown as RewardsData);
-
-                    this.sendPacket(packet);
+                    this.sendPacket(rewardsPacket);
                 }).catch(err => {
                     console.log("Error claim rewards: ", err);
-                });
+                })
             }
         }
     }

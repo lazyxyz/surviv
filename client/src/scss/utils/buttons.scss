@@ -93,8 +93,8 @@
 .btn-social {
   display: inline-block;
 
-  height: 45px;
-  width: 45px;
+  height: 70px;
+  width: 70px;
 
   margin: 4px 0;
 
@@ -110,27 +110,15 @@
 }
 
 .btn-twitter {
-  background-image: url("/img/socials/twitter.svg");
-  background-color: palette.$twitter;
-  box-shadow: inset 0 -4px palette.$twitter_bg;
+  background-image: url("/img/socials/x.svg");
 }
 
-.btn-instagram {
-  background-image: url("/img/socials/instagram.svg");
-  background-color: palette.$instagram;
-  box-shadow: inset 0 -4px palette.$instagram_bg;
-}
-
-.btn-reddit {
-  background-image: url("/img/socials/reddit.svg");
-  background-color: palette.$reddit;
-  box-shadow: inset 0 -4px palette.$reddit_bg;
+.btn-telegram {
+  background-image: url("/img/socials/telegram.svg");
 }
 
 .btn-discord {
   background-image: url("/img/socials/discord.svg");
-  background-color: palette.$discord;
-  box-shadow: inset 0 -4px palette.$discord_bg;
 }
 
 .btn-github {

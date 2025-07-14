@@ -23,12 +23,11 @@ import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaul
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
-// import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, SELECTOR_WALLET, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { getBadgeImage, showBadges } from "./badges";
 import { loadInventory } from "./inventory";
 import { showSkins } from "./skin";
-import { showMelees as showWeapons } from "./weapons/weapons";
+import { showWeapons } from "./weapons/weapons";
 import { Loots } from "@common/definitions/loots";
 import { showEmotes } from "./emotes";
 import { warningAlert } from "./modal";
@@ -822,19 +821,6 @@ export async function setUpUI(game: Game): Promise<void> {
         /* if (value !== undefined) {
             game.console.setBuiltInCVar("cv_region", value);
         } */
-    });
-
-    const rulesBtn = $<HTMLButtonElement>("#btn-rules");
-
-    // Highlight rules & tutorial button for new players
-    if (!game.console.getBuiltInCVar("cv_rules_acknowledged")) {
-        rulesBtn.removeClass("btn-secondary").addClass("highlighted");
-    }
-
-    // Event listener for rules button
-    rulesBtn.on("click", () => {
-        game.console.setBuiltInCVar("cv_rules_acknowledged", true);
-        location.href = "./rules/";
     });
 
     $("#btn-quit-game, #btn-spectate-menu, #btn-menu").on("click", () => {
