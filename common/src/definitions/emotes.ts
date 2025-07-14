@@ -16,17 +16,41 @@ const emote = createTemplate<EmoteDefinition>()((name: string, category: EmoteCa
     category
 }));
 
-export const freeEmotes: string[] = [
-    ""
-];
-
 export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
     ...[
-        "Suroi Logo",
-        "AEGIS Logo",
-        "Flint Logo",
-        "Duel",
+        "Abuse",
+        "Bang",
+        "Fire",
+        "Forever Alone",
+        "Froog",
+        "Fuuuu",
+        "Gangnam Style",
+        "Giggle Meme",
+        "Headshot",
+        "Laughing",
+        "Leosmug",
+        "Meow Meme",
+        "Bleh",
+        "Noice",
+        "Nood",
+        "Oh No",
+        "Orange Smile",
+        "Pog",
+        "Really",
+        "Rip",
+        "Sad",
+        "Sick",
+        "So Small",
+        "Boykisser",
+        "Stare Dad",
+        "The Pain",
+        "Thumbs Down",
+        "Thumbs Up",
         "Chicken Dinner",
-        "Trophy"
+        "Clown",
+        "Clueless",
+        "Dog Thumb Down",
+        "Dont Care",
+        "Fart"
     ].map(name => emote([name, EmoteCategory.Memes]))
 ]);

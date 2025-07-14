@@ -1,15 +1,21 @@
 import $ from 'jquery';
 import { EMOTE_SLOTS } from "@common/constants";
 import type { Game } from "../game";
-import { EmoteCategory, Emotes, freeEmotes, type EmoteDefinition } from "@common/definitions/emotes";
+import { EmoteCategory, Emotes, type EmoteDefinition } from "@common/definitions/emotes";
 import { TRANSLATIONS, getTranslatedString } from "../../translations";
 import type { ReferenceTo } from "@common/utils/objectDefinitions";
 import type { TranslationKeys } from "../../typings/translations";
+import { SurvivAssets } from '../account';
 
-export function showEmotes(game: Game) {
+export async function showEmotes(game: Game) {
+    let SurvivMemes = await game.account.getBalances(SurvivAssets.SurvivMemes).catch(err => {
+        console.log(`Get SilverSkins error: ${err}`);
+    });
+
+    const playerMemes = Object.entries({ ...SurvivMemes }).map(([key, _]) => key);
 
     // Load emotes
-    function handleEmote(slot: "win" | "death"): void { // eipi can you improve this so that it uses `emoteSlots` items with index >3
+    function handleEmote(slot: "win" | "death"): void {
         const emote = $(`#emote-wheel-bottom .emote-${slot} .fa-xmark`);
         const cvar = `cv_loadout_${slot}_emote` as const;
         const emoteSlot = $(`#emote-wheel-container .emote-${slot}`);
@@ -35,13 +41,7 @@ export function showEmotes(game: Game) {
     function updateEmotesList(): void {
         emoteList.empty();
 
-        const EmotesInstance = Emotes.definitions.filter(argument =>
-            freeEmotes.some(argument_child => argument_child === argument.idString)
-        );
-
-        const emotes = EmotesInstance.sort((a, b) => {
-            return a.category - b.category;
-        });
+        const emotes = Emotes.definitions;
 
         let lastCategory: EmoteCategory | undefined;
 
@@ -57,42 +57,47 @@ export function showEmotes(game: Game) {
             }
 
             const idString = emote.idString;
+            const isOwned = playerMemes.includes(idString);
+            
             // noinspection CssUnknownTarget
             const emoteItem = $<HTMLDivElement>(
-                `<div id="emote-${idString}" class="emotes-list-item-container">
-                    <div class="emotes-list-item" style="background-image: url(./img/game/shared/emotes/${idString}.svg)"></div>
+                `<div id="emote-${idString}" class="emotes-list-item-container${isOwned ? '' : ' unowned'}">
+                    <div class="emotes-list-item" style="background-image: url(./img/game/shared/emotes/${idString}.svg)${isOwned ? '' : '; opacity: 0.5; filter: grayscale(100%)'}"></div>
                     <span class="emote-name">${getTranslatedString(`emote_${idString}` as TranslationKeys)}</span>
                 </div>`
             );
 
-            emoteItem.on("click", () => {
-                if (selectedEmoteSlot === undefined) return;
+            if (isOwned) {
+                emoteItem.on("click", () => {
+                    if (selectedEmoteSlot === undefined) return;
 
-                const cvarName = selectedEmoteSlot;
-                (
-                    bottomEmoteUiCache[cvarName] ??= $((`#emote-wheel-bottom .emote-${cvarName} .fa-xmark` as const))
-                ).show();
+                    const cvarName = selectedEmoteSlot;
+                    (
+                        bottomEmoteUiCache[cvarName] ??= $((`#emote-wheel-bottom .emote-${cvarName} .fa-xmark` as const))
+                    ).show();
 
-                game.console.setBuiltInCVar(`cv_loadout_${cvarName}_emote`, emote.idString);
+                    game.console.setBuiltInCVar(`cv_loadout_${cvarName}_emote`, emote.idString);
 
-                emoteItem.addClass("selected")
-                    .siblings()
-                    .removeClass("selected");
+                    emoteItem.addClass("selected")
+                        .siblings()
+                        .removeClass("selected");
 
-                (
-                    emoteWheelUiCache[cvarName] ??= $(`#emote-wheel-container .emote-${cvarName}`)
-                ).css(
-                    "background-image",
-                    `url("./img/game/shared/emotes/${emote.idString}.svg")`
-                );
-            });
+                    (
+                        emoteWheelUiCache[cvarName] ??= $(`#emote-wheel-container .emote-${cvarName}`)
+                    ).css(
+                        "background-image",
+                        `url("./img/game/shared/emotes/${emote.idString}.svg")`
+                    );
+                });
+            } else {
+                emoteItem.css("cursor", "not-allowed");
+            }
 
             emoteList.append(emoteItem);
         }
     }
 
     updateEmotesList();
-
 
     const customizeEmote = $<HTMLDivElement>("#emote-customize-wheel");
     const emoteListItemContainer = $<HTMLDivElement>(".emotes-list-item-container");
@@ -102,7 +107,6 @@ export function showEmotes(game: Game) {
             emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)
         ).css("background-image", emote ? `url("./img/game/shared/emotes/${emote}.svg")` : "none");
     }
-
 
     for (const slot of EMOTE_SLOTS) {
         const cvar = `cv_loadout_${slot}_emote` as const;
@@ -130,7 +134,6 @@ export function showEmotes(game: Game) {
                 updateEmotesList();
 
                 if (EMOTE_SLOTS.indexOf(slot) > 3) {
-                    // win / death emote
                     customizeEmote.css(
                         "background-image",
                         "url('/img/misc/emote_wheel.svg')"
@@ -148,7 +151,7 @@ export function showEmotes(game: Game) {
 
                 emoteListItemContainer
                     .removeClass("selected")
-                    .css("cursor", "pointer");
+                    .css("cursor", playerMemes.includes(game.console.getBuiltInCVar(cvar) || "none") ? "pointer" : "not-allowed");
 
                 $(`#emote-${game.console.getBuiltInCVar(cvar) || "none"}`).addClass("selected");
             });

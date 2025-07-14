@@ -88,6 +88,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                     lobbyClearing: searchParams.get("lobbyClearing") === "true",
                     weaponPreset: searchParams.get("weaponPreset") ?? "",
                     skin: searchParams.get("skin") ?? "",
+                    emotes: searchParams.get("emotes") ?? "",
                     badge: searchParams.get("badge") ?? "",
                     melee: searchParams.get("melee") ?? "",
                     gun: searchParams.get("gun") ?? "",
@@ -125,9 +126,14 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                     socket.close();
                 }
 
-                const emotes = EMOTE_SLOTS.map(
-                    slot => Emotes.fromStringSafe(data.emotes)
-                );
+                let emotes = undefined;
+                if (data.emotes) {
+                    const emoteIds = data.emotes.split(',');
+                    // VERIFY BALANCES
+
+                    emotes = emoteIds.map(emoteId => Emotes.fromStringSafe(emoteId)) // Map each ID to the desired format
+                        .filter(emote => emote !== undefined);
+                }
 
                 // Verify Skin
                 let skin = Skins.fromStringSafe("unknown"); // Default skins
@@ -158,7 +164,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                     ReadyPacket.create({
                         isMobile: false,
                         address: data.address ? data.address : "",
-                        emotes: emotes,
+                        emotes: emotes? emotes : undefined,
                         name: data.name,
                         skin: skin,
                         badge: Badges.fromStringSafe(data.badge),

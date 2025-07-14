@@ -63,54 +63,6 @@ export async function showSkins(game: Game, newUnlockedSkinId?: string) {
     const UserSkins = { ...SilverSkins, ...GoldSkins, ...DivineSkins };
     const mySkins = Object.entries(UserSkins).map(([key, _]) => key);
 
-    // const SkinsIntance = Skins.definitions.filter(argument =>
-    //     [...freeSkin, ...(mySkins || [])].some(
-    //         argument_child => argument_child === argument.idString
-    //     )
-    // );
-
-    // // should be set or reset skin
-    // {
-    //     const avaliableSkin = allSkins.find(
-    //         meta =>
-    //             meta.idString === game.console.getBuiltInCVar("cv_loadout_skin")
-    //     );
-
-    //     if (avaliableSkin) {
-    //         updateSplashCustomize(avaliableSkin.idString);
-    //     }
-
-    //     if (!avaliableSkin) {
-    //         selectSkin(defaultClientCVars.cv_loadout_skin as string, game);
-    //     }
-    // }
-
-    // // reset items before render new
-    // skinList.empty();
-
-    // // display to preview and select
-    // for (const { idString, hideFromLoadout, rolesRequired } of SkinsIntance) {
-    //     if (hideFromLoadout || !(rolesRequired ?? [role]).includes(role)) {
-    //         continue;
-    //     }
-
-    //     const skinItem = $<HTMLDivElement>(`
-    //       <div id="skin-${idString}" class="skins-list-item-container${idString === currentSkin ? " selected" : ""}">
-    //         <div class="skin">
-    //           <div class="skin-base" style="background-image: url('./img/game/shared/skins/${idString}_base.svg')"></div>
-    //           <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
-    //           <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
-    //         </div>
-
-    //         <span class="skin-name">${getTranslatedString(idString as TranslationKeys)}</span>
-    //       </div>
-    //     `);
-
-    //     skinItem.on("click", () => selectSkin(idString, game));
-
-    //     skinList.append(skinItem);
-    // }
-
     /* */
     // Skins list
     const allSkins = Skins.definitions.filter(argument =>

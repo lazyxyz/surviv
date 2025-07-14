@@ -150,7 +150,6 @@ export async function verifyEmotes(player: string, items: string[], timeout: num
     // List of emote mappings to check
     const emoteMappings = [
         { mapping: SurvivMemesMapping, type: "SurvivMemes" },
-        { mapping: SurvivCardsMapping, type: "SurvivCards" },
     ];
 
     // Check each item in the provided list

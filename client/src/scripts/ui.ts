@@ -31,6 +31,7 @@ import { showWeapons } from "./weapons/weapons";
 import { Loots } from "@common/definitions/loots";
 import { showEmotes } from "./emotes";
 import { warningAlert } from "./modal";
+import { Emotes } from "@common/definitions/emotes";
 /*
     eslint-disable
 
@@ -309,7 +310,7 @@ export async function setUpUI(game: Game): Promise<void> {
     };
 
     selectedRegion = regionInfo[game.console.getBuiltInCVar("cv_region") ?? Config.defaultRegion];
-    if(selectedRegion) {
+    if (selectedRegion) {
         game.account.setApi(selectedRegion.apiAddress);
     } else {
         game.account.setApi(regionInfo[Config.defaultRegion].apiAddress);
@@ -387,9 +388,18 @@ export async function setUpUI(game: Game): Promise<void> {
                     }
                 }
 
-                // const emotes = EMOTE_SLOTS.map(
-                //     slot => Emotes.fromStringSafe(game.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))
-                // );
+                const emoteIds = EMOTE_SLOTS.map(
+                    slot => Emotes.fromStringSafe(game.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))?.idString
+                );
+                
+                if (emoteIds.length > 0) {
+                    const emotes = emoteIds.join(',');
+                    try {
+                        params.set("emotes", emotes);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
             }
 
             const websocketURL = `${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`;
