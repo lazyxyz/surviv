@@ -27,6 +27,7 @@ import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
 import type { Game } from "./game";
 import { errorAlert } from "./modal";
+import { getErc1155Mints } from "./utils/onchain";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 
@@ -594,11 +595,12 @@ export class Account extends EIP6963 {
             if (remainingCommits.length > 0n) {
                 // Execute claim transaction
                 const tx = await crateBaseContract.openCratesBatch();
+                await tx.wait();
                 console.info('Transaction sent:', tx.hash);
-                const receipt = await tx.wait();
-                console.info('Transaction confirmed:', receipt);
+                const balances = await getErc1155Mints(tx.hash);
+                console.log("balances: ", balances);
                 clearTimeout(timeoutId);
-                return receipt;
+                return balances;
             } else {
                 throw new Error(`No requests available`);
             }
