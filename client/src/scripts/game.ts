@@ -395,7 +395,7 @@ export class Game {
             }
         };
 
-        this._socket.onerror = (): void => {
+        this._socket.onerror = (error): void => {
             this.error = true;
             // ui.splashMsgText.html(getTranslatedString("msg_err_joining"));
             // ui.splashMsg.show();
@@ -403,16 +403,14 @@ export class Game {
             resetPlayButtons();
         };
 
-        this._socket.onclose = (): void => {
+        this._socket.onclose = (event): void => {
             resetPlayButtons();
 
             const reason = this.disconnectReason || "Connection lost";
 
             if (!this.gameOver) {
                 if (this.gameStarted) {
-                    ui.splashUi.fadeIn(400);
-                    ui.splashMsgText.html(this.disconnectReason || "Connection lost.");
-                    ui.splashMsg.show();
+                    errorAlert(this.disconnectReason || "Connection lost, please try again.");
                 }
                 this.uiManager.ui.btnSpectate.addClass("btn-disabled");
                 if (!this.error) void this.endGame();
