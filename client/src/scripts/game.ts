@@ -395,7 +395,8 @@ export class Game {
             }
         };
 
-        this._socket.onerror = (): void => {
+        this._socket.onerror = (error): void => {
+            console.error('WebSocket error:', error);
             this.error = true;
             // ui.splashMsgText.html(getTranslatedString("msg_err_joining"));
             // ui.splashMsg.show();
@@ -403,7 +404,8 @@ export class Game {
             resetPlayButtons();
         };
 
-        this._socket.onclose = (): void => {
+        this._socket.onclose = (event): void => {
+            console.log('WebSocket closed:', event);
             resetPlayButtons();
 
             const reason = this.disconnectReason || "Connection lost";

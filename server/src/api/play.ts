@@ -16,8 +16,26 @@ import { Emotes } from "@common/definitions/emotes";
 import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
 import { verifyGun, verifyMelee, verifySkin } from "./balances";
+import { DisconnectPacket } from "@common/packets/disconnectPacket";
 
 const simultaneousConnections: Record<string, number> = {};
+
+function disconnect(socket: WebSocket<PlayerContainer>, reason: string): void {
+    const stream = new PacketStream(new ArrayBuffer(128));
+    stream.serializeServerPacket(
+        DisconnectPacket.create({
+            reason
+        })
+    );
+
+    try {
+        socket.send(stream.getBuffer(), true, false);
+    } catch (e) {
+        console.warn("Error sending packet. Details:", e);
+    }
+    socket.close();
+}
+
 
 export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<string, number>, joinAttempts: Record<string, number>) {
     app.ws("/play", {
@@ -105,25 +123,24 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
          * @param socket The socket being opened.
          */
         async open(socket: WebSocket<PlayerContainer>) {
-
             try {
                 const data = socket.getUserData();
 
                 if (!data.token) {
-                    socket.close();
+                    disconnect(socket, `JWT not found, user: ${data.address?.toLowerCase()}`);
                     return;
                 }
                 const token = data.token;
                 const payload = await validateJWT(token);
 
                 if (payload.walletAddress != data.address?.toLowerCase()) {
-                    console.log(`Invalid address jwt: ${payload.walletAddress} user: ${data.address?.toLowerCase()}`);
-                    socket.close();
+                    disconnect(socket, `Invalid address jwt: ${payload.walletAddress} user: ${data.address?.toLowerCase()}`);
                     return;
                 }
 
                 if ((data.player = game.addPlayer(socket)) === undefined) {
-                    socket.close();
+                    disconnect(socket, `JWT authentication failed`);
+                    return;
                 }
 
                 let emotes = undefined;
@@ -175,8 +192,8 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                 socket.send(stream.getBuffer(), true, false);
                 // data.player.sendGameOverPacket(false); // uncomment to test game over screen
             } catch (err: any) {
-                console.log("websocket connect failed: ", err);
-                socket.close();
+                console.log("Open websocket failed: ", err);
+                disconnect(socket, "Open websocket failed");
             }
         },
 
