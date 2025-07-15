@@ -127,14 +127,14 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                 const data = socket.getUserData();
 
                 if (!data.token) {
-                    disconnect(socket, `JWT not found, user: ${data.address?.toLowerCase()}`);
+                    disconnect(socket, `JWT tokem not found`);
                     return;
                 }
                 const token = data.token;
                 const payload = await validateJWT(token);
 
                 if (payload.walletAddress != data.address?.toLowerCase()) {
-                    disconnect(socket, `Invalid address jwt: ${payload.walletAddress} user: ${data.address?.toLowerCase()}`);
+                    disconnect(socket, `Invalid JWT address`);
                     return;
                 }
 
