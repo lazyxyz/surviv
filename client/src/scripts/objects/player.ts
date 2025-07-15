@@ -211,13 +211,14 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
         let emote: this["emote"];
         this.emote = emote = {
-            background: new SuroiSprite("emote_background").setPos(0, 0),
+            background: new SuroiSprite().setPos(0, 0), // No frame specified
             image: new SuroiSprite().setPos(0, 0),
             container: new Container()
         };
 
         game.camera.addObject(emote.container);
-        emote.container.addChild(emote.background, emote.image);
+        // Remove background from container
+        emote.container.addChild(emote.image);
         emote.container.zIndex = getEffectiveZIndex(ZIndexes.Emotes, this.layer, this.game.layer);
         emote.container.visible = false;
 
@@ -1335,13 +1336,15 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
         container.scale.set(0);
         container.alpha = 0;
 
-        let backgroundFrame = "emote_background";
-        if (Guns.fromStringSafe(type.idString)) {
-            backgroundFrame = `loot_background_gun_${Guns.fromStringSafe(type.idString)?.ammoType}`;
-        }
+        // let backgroundFrame = "emote_background";
+        // if (Guns.fromStringSafe(type.idString)) {
+        //     backgroundFrame = `loot_background_gun_${Guns.fromStringSafe(type.idString)?.ammoType}`;
+        // }
+
+        this.emote.background.visible = false;
 
         this.emote.image.setScale(isItemEmote && !isHealingOrAmmoEmote ? 0.7 : 1);
-        this.emote.background.setFrame(backgroundFrame);
+        // this.emote.background.setFrame(backgroundFrame);
 
         this.anims.emote = this.game.addTween({
             target: container,
