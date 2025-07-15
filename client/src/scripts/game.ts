@@ -284,9 +284,86 @@ export class Game {
         this.sendPacket(JoinPacket.create(packet));
     }
 
-    connect(address: string): void {
+    async connectWebSocket(
+        url: string,
+        totalRetryTime: number = 10000,
+        retryInterval: number = 1000,
+        handlers?: Partial<{
+            onopen: (this: WebSocket, ev: Event) => any,
+            onmessage: (this: WebSocket, ev: MessageEvent) => any,
+            onerror: (this: WebSocket, ev: Event) => any,
+            onclose: (this: WebSocket, ev: CloseEvent) => any
+        }>
+    ): Promise<WebSocket> {
+        let isConnecting = false;
+        const startTime = Date.now();
+
+        const attemptConnection = (): Promise<WebSocket> => {
+            if (isConnecting) return Promise.reject(new Error('Connection attempt already in progress'));
+            isConnecting = true;
+
+            return new Promise<WebSocket>((resolve, reject) => {
+                let socket: WebSocket;
+                try {
+                    socket = new WebSocket(url);
+                    socket.binaryType = "arraybuffer";
+                    // Set handlers before connection can complete
+                    if (handlers?.onopen) socket.onopen = handlers.onopen;
+                    if (handlers?.onmessage) socket.onmessage = handlers.onmessage;
+                    if (handlers?.onerror) socket.onerror = handlers.onerror;
+                    if (handlers?.onclose) socket.onclose = handlers.onclose;
+                } catch (err: unknown) {
+                    isConnecting = false;
+                    const errorMessage = err instanceof Error ? err.message : 'WebSocket creation failed';
+                    reject(new Error(errorMessage));
+                    return;
+                }
+
+                const connectionTimeout = setTimeout(() => {
+                    isConnecting = false;
+                    if (socket.readyState !== WebSocket.OPEN) {
+                        socket.close();
+                        reject(new Error('WebSocket connection timed out'));
+                    }
+                }, 2000);
+
+                const checkConnection = () => {
+                    if (socket.readyState === WebSocket.OPEN) {
+                        clearTimeout(connectionTimeout);
+                        isConnecting = false;
+                        resolve(socket);
+                    } else if (socket.readyState === WebSocket.CLOSING || socket.readyState === WebSocket.CLOSED) {
+                        clearTimeout(connectionTimeout);
+                        isConnecting = false;
+                        reject(new Error('WebSocket connection failed'));
+                    } else {
+                        setTimeout(checkConnection, 100);
+                    }
+                };
+                setTimeout(checkConnection, 100);
+            });
+        };
+
+        while (Date.now() - startTime < totalRetryTime) {
+            try {
+                const socket = await attemptConnection();
+                console.log('WebSocket connected successfully');
+                return socket;
+            } catch (error: unknown) {
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                console.error(errorMessage, 'Retrying in 1 second...');
+                await new Promise(resolve => setTimeout(resolve, retryInterval));
+            }
+        }
+
+        errorAlert('Failed to connect to the game. Please check your network or try again.');
+        resetPlayButtons();
+        throw new Error('Failed to connect to WebSocket within 10 seconds');
+    }
+
+
+    async connect(address: string) {
         const url = new URL(address);
-        const ui = this.uiManager.ui;
 
         this.error = false;
 
@@ -302,126 +379,114 @@ export class Game {
         }
 
         // append token intro params
-        {
-            if (url.search) {
-                url.searchParams.append("token", this.account.token);
-            } else {
-                url.searchParams.set("token", this.account.token);
-            }
+        if (url.search) {
+            url.searchParams.append("token", this.account.token);
+        } else {
+            url.searchParams.set("token", this.account.token);
         }
 
-        this._socket = new WebSocket(url.toString());
-        this._socket.binaryType = "arraybuffer";
+        this._socket = await this.connectWebSocket(url.toString(), 10000, 1000, {
+            onopen: () => {
+                if (this.music) {
+                    this.music.stop();
+                }
+                this.gameStarted = true;
+                this.gameOver = false;
+                this.spectating = false;
+                this.disconnectReason = "";
 
-        this._socket.onopen = (): void => {
-            if (this.music) {
-                this.music.stop();
-            }
-            this.gameStarted = true;
-            this.gameOver = false;
-            this.spectating = false;
-            this.disconnectReason = "";
+                if (!UI_DEBUG_MODE) {
+                    clearTimeout(this.uiManager.gameOverScreenTimeout);
+                    const ui = this.uiManager.ui;
 
-            if (!UI_DEBUG_MODE) {
-                clearTimeout(this.uiManager.gameOverScreenTimeout);
-                const ui = this.uiManager.ui;
+                    ui.gameOverOverlay.hide();
+                    ui.killMsgModal.hide();
+                    ui.killMsgCounter.text("0");
+                    ui.killFeed.html("");
+                    ui.spectatingContainer.hide();
+                    ui.joystickContainer.show();
+                }
 
-                ui.gameOverOverlay.hide();
-                ui.killMsgModal.hide();
-                ui.killMsgCounter.text("0");
-                ui.killFeed.html("");
-                ui.spectatingContainer.hide();
-                ui.joystickContainer.show();
-            }
+                this.sendPacket(PingPacket.create());
+                this.lastPingDate = Date.now();
 
-            this.sendPacket(PingPacket.create());
-            this.lastPingDate = Date.now();
+                this.camera.addObject(this.gasRender.graphics);
+                this.map.indicator.setFrame("player_indicator");
 
-            this.camera.addObject(this.gasRender.graphics);
-            this.map.indicator.setFrame("player_indicator");
+                const particleEffects = MODE.particleEffects;
 
-            const particleEffects = MODE.particleEffects;
+                if (particleEffects !== undefined) {
+                    const This = this;
+                    const gravityOn = particleEffects.gravity;
+                    this.particleManager.addEmitter(
+                        {
+                            delay: particleEffects.delay,
+                            active: this.console.getBuiltInCVar("cv_ambient_particles"),
+                            spawnOptions: () => ({
+                                frames: particleEffects.frames,
+                                get position(): Vector {
+                                    const width = This.camera.width / PIXI_SCALE;
+                                    const height = This.camera.height / PIXI_SCALE;
+                                    const player = This.activePlayer;
+                                    if (!player) return Vec.create(0, 0);
+                                    const { x, y } = player.position;
+                                    return randomVector(x - width, x + width, y - height, y + height);
+                                },
+                                speed: randomVector(-10, 10, gravityOn ? 10 : -10, 10),
+                                lifetime: randomFloat(12000, 50000),
+                                zIndex: Number.MAX_SAFE_INTEGER - 5,
+                                alpha: {
+                                    start: this.layer === Layer.Ground ? 0.7 : 0,
+                                    end: 0
+                                },
+                                rotation: {
+                                    start: randomFloat(0, 36),
+                                    end: randomFloat(40, 80)
+                                },
+                                scale: {
+                                    start: randomFloat(0.8, 1.1),
+                                    end: randomFloat(0.7, 0.8)
+                                }
+                            })
+                        }
+                    );
+                }
+            },
 
-            if (particleEffects !== undefined) {
-                const This = this;
-                const gravityOn = particleEffects.gravity;
-                this.particleManager.addEmitter(
-                    {
-                        delay: particleEffects.delay,
-                        active: this.console.getBuiltInCVar("cv_ambient_particles"),
-                        spawnOptions: () => ({
-                            frames: particleEffects.frames,
-                            get position(): Vector {
-                                const width = This.camera.width / PIXI_SCALE;
-                                const height = This.camera.height / PIXI_SCALE;
-                                const player = This.activePlayer;
-                                if (!player) return Vec.create(0, 0);
-                                const { x, y } = player.position;
-                                return randomVector(x - width, x + width, y - height, y + height);
-                            },
-                            speed: randomVector(-10, 10, gravityOn ? 10 : -10, 10),
-                            lifetime: randomFloat(12000, 50000),
-                            zIndex: Number.MAX_SAFE_INTEGER - 5,
-                            alpha: {
-                                start: this.layer === Layer.Ground ? 0.7 : 0,
-                                end: 0
-                            },
-                            rotation: {
-                                start: randomFloat(0, 36),
-                                end: randomFloat(40, 80)
-                            },
-                            scale: {
-                                start: randomFloat(0.8, 1.1),
-                                end: randomFloat(0.7, 0.8)
-                            }
-                        })
+            onmessage: (message: MessageEvent<ArrayBuffer>): void => {
+                const stream = new PacketStream(message.data);
+                let iterationCount = 0;
+                while (true) {
+                    if (++iterationCount === 1e3) {
+                        console.warn("1000 iterations of packet reading; possible infinite loop");
                     }
-                );
-            }
-
-        };
-
-        // Handle incoming messages
-        this._socket.onmessage = (message: MessageEvent<ArrayBuffer>): void => {
-            const stream = new PacketStream(message.data);
-            let iterationCount = 0;
-            while (true) {
-                if (++iterationCount === 1e3) {
-                    console.warn("1000 iterations of packet reading; possible infinite loop");
+                    const packet = stream.deserializeServerPacket();
+                    if (packet === undefined) break;
+                    this.onPacket(packet);
                 }
-                const packet = stream.deserializeServerPacket();
-                if (packet === undefined) break;
-                this.onPacket(packet);
-            }
-        };
+            },
 
-        this._socket.onerror = (error): void => {
-            this.error = true;
-            // ui.splashMsgText.html(getTranslatedString("msg_err_joining"));
-            // ui.splashMsg.show();
-            errorAlert("Failed to join the game. Please try again.");
-            resetPlayButtons();
-        };
+            onerror: () => {
+                this.error = true;
+            },
 
-        this._socket.onclose = (event): void => {
-            resetPlayButtons();
+            onclose: () => {
+                const reason = this.disconnectReason || "Connection lost";
 
-            const reason = this.disconnectReason || "Connection lost";
-
-            if (!this.gameOver) {
-                if (this.gameStarted) {
-                    errorAlert(this.disconnectReason || "Connection lost, please try again.");
+                if (!this.gameOver) {
+                    if (this.gameStarted) {
+                        errorAlert(this.disconnectReason || "Connection lost, please try again.");
+                    }
+                    this.uiManager.ui.btnSpectate.addClass("btn-disabled");
+                    if (!this.error) void this.endGame();
                 }
-                this.uiManager.ui.btnSpectate.addClass("btn-disabled");
-                if (!this.error) void this.endGame();
-            }
 
-            if (reason.startsWith("Invalid game version")) {
-                alert(reason);
-                // reload the page with a time stamp to try clearing cache
-                location.search = `t=${Date.now()}`;
+                if (reason.startsWith("Invalid game version")) {
+                    alert(reason);
+                    location.search = `t=${Date.now()}`;
+                }
             }
-        };
+        });
     }
 
     inventoryMsgTimeout: number | undefined;

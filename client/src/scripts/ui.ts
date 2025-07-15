@@ -336,10 +336,10 @@ export async function setUpUI(game: Game): Promise<void> {
         updateServerSelectors();
     });
 
-    const readyConnect = (data: GetGameResponse, gameAddress: string) => {
+    const readyConnect = async (data: GetGameResponse, gameAddress: string) => {
         if (data.success) {
             ui.splashOptions.addClass("loading");
-            ui.loadingText.text("Verifying Game Assets");
+            ui.loadingText.text(getTranslatedString('msg_loading'));
 
             const params = new URLSearchParams();
 
@@ -391,7 +391,7 @@ export async function setUpUI(game: Game): Promise<void> {
                 const emoteIds = EMOTE_SLOTS.map(
                     slot => Emotes.fromStringSafe(game.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))?.idString
                 );
-                
+
                 if (emoteIds.length > 0) {
                     const emotes = emoteIds.join(',');
                     try {
@@ -403,7 +403,9 @@ export async function setUpUI(game: Game): Promise<void> {
             }
 
             const websocketURL = `${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`;
-            game.connect(websocketURL);
+            await game.connect(websocketURL);
+            ui.splashOptions.addClass("loading");
+            ui.loadingText.text("Verifying Game Assets");
             ui.splashMsg.hide();
 
             // Check again because there is a small chance that the create-team-menu element won't hide.
@@ -748,9 +750,9 @@ export async function setUpUI(game: Game): Promise<void> {
 
     ui.btnStartGame.on("click", () => {
         $.get(`${selectedRegion?.mainAddress}/api/getGame?teamSize=${TeamSize.Squad}&teamID=${teamID}&token=${game.account.token}`,
-            (data: GetGameResponse) => {
+            async (data: GetGameResponse) => {
                 if (data.success) {
-                    readyConnect(data, String(selectedRegion?.gameAddress));
+                    await readyConnect(data, String(selectedRegion?.gameAddress));
                 } else {
                     teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Start }));
                 }
