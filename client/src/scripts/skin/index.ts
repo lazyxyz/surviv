@@ -4,7 +4,6 @@ import type { Game } from "../game";
 import { freeSkin, Skins, type SkinDefinition } from "@common/definitions/skins";
 import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
-import { defaultClientCVars } from "../utils/console/defaultClientCVars";
 import { SurvivAssets } from "../account";
 
 // handler display change preview

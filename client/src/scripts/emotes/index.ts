@@ -9,16 +9,23 @@ import { SurvivAssets } from '../account';
 
 export async function showEmotes(game: Game) {
     let SurvivMemes = await game.account.getBalances(SurvivAssets.SurvivMemes).catch(err => {
-        console.log(`Get SilverSkins error: ${err}`);
+        console.log(`Get SurvivMemes error: ${err}`);
+        return {};
     });
 
-    const playerMemes = Object.entries({ ...SurvivMemes }).map(([key, _]) => key);
+    const playerMemes = Object.keys(SurvivMemes);
 
-    // Load emotes
+    // Cache jQuery selectors for performance
+    const emoteList = $("#emotes-list");
+    const customizeEmote = $("#emote-customize-wheel");
+    const bottomEmoteUiCache: Partial<Record<typeof EMOTE_SLOTS[number], JQuery<HTMLSpanElement>>> = {};
+    const emoteWheelUiCache: Partial<Record<typeof EMOTE_SLOTS[number], JQuery<HTMLDivElement>>> = {};
+
+    // Handle emote slot clearing
     function handleEmote(slot: "win" | "death"): void {
-        const emote = $(`#emote-wheel-bottom .emote-${slot} .fa-xmark`);
         const cvar = `cv_loadout_${slot}_emote` as const;
         const emoteSlot = $(`#emote-wheel-container .emote-${slot}`);
+        const emote = $(`#emote-wheel-bottom .emote-${slot} .fa-xmark`);
 
         emote.on("click", () => {
             game.console.setBuiltInCVar(cvar, "");
@@ -26,144 +33,131 @@ export async function showEmotes(game: Game) {
             emote.hide();
         });
 
-        if (game.console.getBuiltInCVar(`cv_loadout_${slot}_emote`) === "") emote.hide();
+        if (!game.console.getBuiltInCVar(cvar)) emote.hide();
     }
 
     handleEmote("win");
     handleEmote("death");
 
     let selectedEmoteSlot: typeof EMOTE_SLOTS[number] | undefined;
-    const emoteList = $<HTMLDivElement>("#emotes-list");
-
-    const bottomEmoteUiCache: Partial<Record<typeof EMOTE_SLOTS[number], JQuery<HTMLSpanElement>>> = {};
-    const emoteWheelUiCache: Partial<Record<typeof EMOTE_SLOTS[number], JQuery<HTMLDivElement>>> = {};
 
     function updateEmotesList(): void {
         emoteList.empty();
 
         const emotes = Emotes.definitions;
 
-        let lastCategory: EmoteCategory | undefined;
-
+        // Group emotes by category
+        const categoryMap = new Map<EmoteCategory, EmoteDefinition[]>();
         for (const emote of emotes) {
-            if (emote.category !== lastCategory) {
-                emoteList.append(
-                    $<HTMLDivElement>(
-                        `<div class="emote-list-header">${getTranslatedString(`emotes_category_${EmoteCategory[emote.category]}` as TranslationKeys)
-                        }</div>`
-                    )
-                );
-                lastCategory = emote.category;
+            if (!categoryMap.has(emote.category)) {
+                categoryMap.set(emote.category, []);
             }
+            categoryMap.get(emote.category)!.push(emote);
+        }
 
-            const idString = emote.idString;
-            const isOwned = playerMemes.includes(idString);
-            
-            // noinspection CssUnknownTarget
-            const emoteItem = $<HTMLDivElement>(
-                `<div id="emote-${idString}" class="emotes-list-item-container${isOwned ? '' : ' unowned'}">
+        // Loop through each category
+        for (const [category, emoteDefs] of categoryMap.entries()) {
+            // Sort: owned first, then unowned
+            const sortedEmotes = [...emoteDefs].sort((a, b) => {
+                const aOwned = playerMemes.includes(a.idString);
+                const bOwned = playerMemes.includes(b.idString);
+                return Number(bOwned) - Number(aOwned); // owned = true -> 1
+            });
+
+            // Add category header
+            emoteList.append(
+                $<HTMLDivElement>(
+                    `<div class="emote-list-header">${getTranslatedString(`emotes_category_${EmoteCategory[category]}` as TranslationKeys)}</div>`
+                )
+            );
+
+            for (const emote of sortedEmotes) {
+                const idString = emote.idString;
+                const isOwned = playerMemes.includes(idString);
+
+                const emoteItem = $<HTMLDivElement>(
+                    `<div id="emote-${idString}" class="emotes-list-item-container${isOwned ? '' : ' unowned'}">
                     <div class="emotes-list-item" style="background-image: url(./img/game/shared/emotes/${idString}.svg)${isOwned ? '' : '; opacity: 0.5; filter: grayscale(100%)'}"></div>
                     <span class="emote-name">${getTranslatedString(`emote_${idString}` as TranslationKeys)}</span>
                 </div>`
-            );
+                );
 
-            if (isOwned) {
-                emoteItem.on("click", () => {
-                    if (selectedEmoteSlot === undefined) return;
+                if (isOwned) {
+                    emoteItem.on("click", () => {
+                        if (selectedEmoteSlot === undefined) return;
 
-                    const cvarName = selectedEmoteSlot;
-                    (
-                        bottomEmoteUiCache[cvarName] ??= $((`#emote-wheel-bottom .emote-${cvarName} .fa-xmark` as const))
-                    ).show();
+                        const cvarName = selectedEmoteSlot;
+                        (
+                            bottomEmoteUiCache[cvarName] ??= $((`#emote-wheel-bottom .emote-${cvarName} .fa-xmark` as const))
+                        ).show();
 
-                    game.console.setBuiltInCVar(`cv_loadout_${cvarName}_emote`, emote.idString);
+                        game.console.setBuiltInCVar(`cv_loadout_${cvarName}_emote`, emote.idString);
 
-                    emoteItem.addClass("selected")
-                        .siblings()
-                        .removeClass("selected");
+                        emoteItem.addClass("selected")
+                            .siblings()
+                            .removeClass("selected");
 
-                    (
-                        emoteWheelUiCache[cvarName] ??= $(`#emote-wheel-container .emote-${cvarName}`)
-                    ).css(
-                        "background-image",
-                        `url("./img/game/shared/emotes/${emote.idString}.svg")`
-                    );
-                });
-            } else {
-                emoteItem.css("cursor", "not-allowed");
+                        (
+                            emoteWheelUiCache[cvarName] ??= $(`#emote-wheel-container .emote-${cvarName}`)
+                        ).css(
+                            "background-image",
+                            `url("./img/game/shared/emotes/${emote.idString}.svg")`
+                        );
+                    });
+                } else {
+                    emoteItem.css("cursor", "not-allowed");
+                }
+
+                emoteList.append(emoteItem);
             }
-
-            emoteList.append(emoteItem);
         }
     }
 
     updateEmotesList();
 
-    const customizeEmote = $<HTMLDivElement>("#emote-customize-wheel");
-    const emoteListItemContainer = $<HTMLDivElement>(".emotes-list-item-container");
-
     function changeEmoteSlotImage(slot: typeof EMOTE_SLOTS[number], emote: ReferenceTo<EmoteDefinition>): JQuery<HTMLDivElement> {
-        return (
-            emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)
-        ).css("background-image", emote ? `url("./img/game/shared/emotes/${emote}.svg")` : "none");
+        return (emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)).css(
+            "background-image",
+            emote ? `url("./img/game/shared/emotes/${emote}.svg")` : "none"
+        );
     }
 
     for (const slot of EMOTE_SLOTS) {
         const cvar = `cv_loadout_${slot}_emote` as const;
         const emote = game.console.getBuiltInCVar(cvar);
 
-        game.console.variables.addChangeListener(
-            cvar,
-            (_, newEmote) => {
-                changeEmoteSlotImage(slot, newEmote);
+        game.console.variables.addChangeListener(cvar, (_, newEmote) => {
+            changeEmoteSlotImage(slot, newEmote);
+        });
+
+        changeEmoteSlotImage(slot, emote).on("click", () => {
+            if (selectedEmoteSlot === slot) return;
+
+            if (selectedEmoteSlot) {
+                (emoteWheelUiCache[selectedEmoteSlot] ??= $(`#emote-wheel-container .emote-${selectedEmoteSlot}`)).removeClass("selected");
             }
-        );
 
-        changeEmoteSlotImage(slot, emote)
-            .on("click", () => {
-                if (selectedEmoteSlot === slot) return;
+            selectedEmoteSlot = slot;
+            updateEmotesList();
 
-                if (selectedEmoteSlot !== undefined) {
-                    (
-                        emoteWheelUiCache[selectedEmoteSlot] ??= $(`#emote-wheel-container .emote-${selectedEmoteSlot}`)
-                    ).removeClass("selected");
-                }
+            customizeEmote.css(
+                "background-image",
+                EMOTE_SLOTS.indexOf(slot) > 3
+                    ? "url('/img/misc/emote_wheel.svg')"
+                    : `url("./img/misc/emote_wheel_highlight_${slot}.svg"), url("/img/misc/emote_wheel.svg")`
+            );
 
-                selectedEmoteSlot = slot;
+            (emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)).addClass("selected");
+            $(`.emotes-list-item-container`).removeClass("selected").css(
+                "cursor",
+                playerMemes.includes(game.console.getBuiltInCVar(cvar) || "none") ? "pointer" : "not-allowed"
+            );
+            $(`#emote-${game.console.getBuiltInCVar(cvar) || "none"}`).addClass("selected");
+        });
 
-                updateEmotesList();
-
-                if (EMOTE_SLOTS.indexOf(slot) > 3) {
-                    customizeEmote.css(
-                        "background-image",
-                        "url('/img/misc/emote_wheel.svg')"
-                    );
-
-                    (
-                        emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)
-                    ).addClass("selected");
-                } else {
-                    customizeEmote.css(
-                        "background-image",
-                        `url("./img/misc/emote_wheel_highlight_${slot}.svg"), url("/img/misc/emote_wheel.svg")`
-                    );
-                }
-
-                emoteListItemContainer
-                    .removeClass("selected")
-                    .css("cursor", playerMemes.includes(game.console.getBuiltInCVar(cvar) || "none") ? "pointer" : "not-allowed");
-
-                $(`#emote-${game.console.getBuiltInCVar(cvar) || "none"}`).addClass("selected");
-            });
-
-        (
-            emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)
-        ).children(".remove-emote-btn")
-            .on("click", () => {
-                game.console.setBuiltInCVar(cvar, "");
-                (
-                    emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)
-                ).css("background-image", "none");
-            });
+        (emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)).children(".remove-emote-btn").on("click", () => {
+            game.console.setBuiltInCVar(cvar, "");
+            (emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)).css("background-image", "none");
+        });
     }
 }
