@@ -106,7 +106,7 @@ export async function setUpUI(game: Game): Promise<void> {
     const { inputManager, uiManager: { ui } } = game;
 
     // Change the menu based on the mode.
-    if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/suroi_beta_${MODE.idString}.svg`);
+    if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/surviv_round.svg`);
     if (MODE.specialPlayButtons) {
         const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
 
