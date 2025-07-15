@@ -19,7 +19,70 @@ interface AssetConfig {
   rotate: number;
 }
 
-type WeaponType = "melee" | "gun";
+
+const showViewBox = (game: Game) => {
+  const meleeId = localStorage.getItem("selectedMelee");
+  const gunId = localStorage.getItem("selectedGun");
+
+  const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
+  const melee = Melees.definitions.find((w) => w.idString === meleeId);
+  if (!melee) {
+    console.warn(`Melee not found: ${meleeId}`);
+    return;
+  }
+
+  // Generate asset configuration
+  let assets: AssetConfig[] = [
+    {
+      class: "assets-base",
+      url: `${ASSET_PATH}/skins/${currentSkin}_base.svg`,
+      x: 0,
+      y: 0,
+      zIndex: 2,
+      rotate: 0,
+    },
+
+    {
+      class: "assets-fist",
+      url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
+      x: melee.fists.right.x,
+      y: melee.fists.right.y,
+      zIndex: 3,
+      rotate: 0,
+    },
+    {
+      class: "assets-fist",
+      url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
+      x: melee.fists.left.x,
+      y: melee.fists.left.y,
+      zIndex: 4,
+      rotate: 0,
+    },
+   {
+      class: "assets-world",
+      url: `${ASSET_PATH}/weapons/${melee.idString}.svg`,
+      x: melee.image?.position.x ?? 0,
+      y: melee.fists.right.x,
+      rotate: melee.image?.angle ?? 0,
+      zIndex: 1,
+    }
+  ];
+
+  const gun = Guns.definitions.find((w) => w.idString === gunId);
+  if (gun) {
+    assets.push({
+      class: "assets-world",
+      url: `${ASSET_PATH}/weapons/${gun.idString}_world.svg`,
+      x: - gun.fists.right.x,
+      y: 0,
+      rotate: 90,
+      zIndex: 1,
+    });
+  }
+
+  // Append assets and set viewBox
+  weapons.appendPreview(assets).attr("viewBox", VIEWBOX);
+}
 
 // Function to select a melee weapon
 const selectMelee = (game: Game, weaponId: string) => {
@@ -40,47 +103,6 @@ const selectMelee = (game: Game, weaponId: string) => {
     return;
   }
 
-  const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
-
-  // Generate asset configuration
-  const assets: AssetConfig[] = [
-    {
-      class: "assets-base",
-      url: `${ASSET_PATH}/skins/${currentSkin}_base.svg`,
-      x: 0,
-      y: 0,
-      zIndex: 2,
-      rotate: 0,
-    },
-    {
-      class: "assets-world",
-      url: `${ASSET_PATH}/weapons/${melee.idString}.svg`,
-      x: melee.image?.position.x ?? 0,
-      y: melee.image?.position.y ?? 0,
-      rotate: melee.image?.angle ?? 0,
-      zIndex: 1,
-    },
-    {
-      class: "assets-fist",
-      url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
-      x: melee.fists.right.x,
-      y: melee.fists.right.y,
-      zIndex: 4,
-      rotate: 0,
-    },
-    {
-      class: "assets-fist",
-      url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
-      x: melee.fists.left.x,
-      y: melee.fists.left.y,
-      zIndex: 3,
-      rotate: 0,
-    },
-  ];
-
-  // Append assets and set viewBox
-  weapons.appendPreview(assets).attr("viewBox", VIEWBOX);
-
   // Update weapon info panel
   const dps = melee.damage && melee.cooldown ? (melee.damage / (melee.cooldown / 1000)).toFixed(2) : "N/A";
   $("#weapon-info").html(`
@@ -89,6 +111,8 @@ const selectMelee = (game: Game, weaponId: string) => {
     <p>Damage: ${melee.damage ?? "N/A"}</p>
     <p>Cooldown: ${melee.cooldown ? (melee.cooldown / 1000) + "s" : "N/A"}</p>
   `);
+
+  showViewBox(game);
 };
 
 // Function to select a gun
@@ -120,6 +144,8 @@ const selectGun = (game: Game, weaponId: string) => {
     <p>Range: ${gun.ballistics.range ?? "N/A"}</p>
     <p>Ammo Type: ${gun.ammoType ?? "N/A"}</p>
   `);
+
+  showViewBox(game);
 };
 
 // Utility to check if a weapon is owned
@@ -135,7 +161,6 @@ async function showGuns(game: Game, selectedGunId?: string) {
       return {};
     });
 
-    const divineGunIds = Object.keys(divineGuns);
     const userGunsBalance = { ...divineGuns };
     const ownedGunIds = Object.keys(userGunsBalance);
     const allGuns = Guns.definitions; // Show all guns, not just owned ones
@@ -146,6 +171,14 @@ async function showGuns(game: Game, selectedGunId?: string) {
 
     // Render gun items (owned first, then unowned)
     const $gunList = $("#list-gun").empty();
+    $gunList.append(`
+    <div class="weapons-container-card weapons-container-card-gun" 
+        id="weapons-list-no-gun" data-id="no-gun">
+      <img src="${ASSET_PATH}/weapons/empty_slot.svg" alt="No Gun" width="72px" height="72px" />
+      <p class="weapons-container-paragraph">No Gun</p>
+    </div>
+  `);
+
     for (const { idString, name } of ownedGuns) {
       $gunList.append(`
         <div class="weapons-container-card weapons-container-card-gun" 
@@ -165,8 +198,9 @@ async function showGuns(game: Game, selectedGunId?: string) {
       `);
     }
 
-    // Reapply selected class if provided
-    if (selectedGunId && $(`#weapons-list-${selectedGunId}`).length && !$(`#weapons-list-${selectedGunId}`).hasClass("inactive")) {
+    if (!selectedGunId) {
+      $("#weapons-list-no-gun").addClass("selected");
+    } else if ($(`#weapons-list-${selectedGunId}`).length && !$(`#weapons-list-${selectedGunId}`).hasClass("inactive")) {
       $(`#weapons-list-${selectedGunId}`).addClass("selected");
     }
 
@@ -252,9 +286,7 @@ export async function showWeapons(game: Game, highlightId?: string): Promise<voi
   // Append weapon info panel to .weapons-container-aside, below .weapons-container-aside-preview
   const $aside = $(".weapons-container-aside");
   if ($("#weapon-info").length === 0) {
-    $aside.append(`
-      <div id="weapon-info" style="margin-top: 5px; padding: 5px; background: rgba(0, 0, 0, 0.1); border-radius: 4px; font-size: 0.5em; max-height: 100px; overflow-y: auto;"></div>
-    `);
+    $aside.append(`<div id="weapon-info"></div>`);
   }
 
   // Get weapon preset
@@ -271,6 +303,8 @@ export async function showWeapons(game: Game, highlightId?: string): Promise<voi
   // Load melee list by default
   await showMelees(game, weaponPreset.melee);
 
+  showViewBox(game);
+
   // Tab switching logic
   $(".weapon-tab-child").off("click").on("click", async function () {
     $(".weapon-tab-child").removeClass("active");
@@ -283,17 +317,30 @@ export async function showWeapons(game: Game, highlightId?: string): Promise<voi
     }
   });
 
-  // Item click logic (only for owned items)
   $container.off("click", ".weapons-container-card").on("click", ".weapons-container-card", function () {
     if ($(this).hasClass("inactive")) return;
+
     const id = $(this).data("id");
     const type = $(this).hasClass("weapons-container-card-melee") ? "melee" : "gun";
+
+    // Remove all selected classes first
+    $(".weapons-container-card").removeClass("selected");
+    $(this).addClass("selected");
+
     if (type === "melee") {
       weaponPreset.melee = id;
       selectMelee(game, id);
     } else {
-      weaponPreset.gun = id;
-      selectGun(game, id);
+      if (id === "no-gun") {
+        weaponPreset.gun = undefined;
+        localStorage.removeItem("selectedGun");
+        weapons.selectWeapon(game, { gun: undefined });
+        $("#weapon-info").empty();
+        showViewBox(game);
+      } else {
+        weaponPreset.gun = id;
+        selectGun(game, id);
+      }
     }
   });
 
