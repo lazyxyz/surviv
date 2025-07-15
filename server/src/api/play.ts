@@ -127,19 +127,19 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                 const data = socket.getUserData();
 
                 if (!data.token) {
-                    disconnect(socket, `JWT tokem not found`);
+                    disconnect(socket, `Authentication token not found. Please reconnect your wallet.`);
                     return;
                 }
                 const token = data.token;
                 const payload = await validateJWT(token);
 
                 if (payload.walletAddress != data.address?.toLowerCase()) {
-                    disconnect(socket, `Invalid JWT address`);
+                    disconnect(socket, `Invalid address. Please reconnect your wallet.`);
                     return;
                 }
 
                 if ((data.player = game.addPlayer(socket)) === undefined) {
-                    disconnect(socket, `JWT authentication failed`);
+                    disconnect(socket, `Authentication failed. Please reconnect your wallet.`);
                     return;
                 }
 
@@ -193,7 +193,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                 // data.player.sendGameOverPacket(false); // uncomment to test game over screen
             } catch (err: any) {
                 console.log("Open websocket failed: ", err);
-                disconnect(socket, "Open websocket failed");
+                disconnect(socket, "Unknown error. Please contact Surviv team.");
             }
         },
 
