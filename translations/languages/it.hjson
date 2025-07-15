@@ -313,4 +313,5 @@
     region_eu: "Europa"
     region_sa: "Sud America"
     region_as: "Asia"
+    "region_us": "United States"
 }
