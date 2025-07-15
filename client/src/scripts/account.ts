@@ -27,6 +27,7 @@ import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
 import type { Game } from "./game";
 import { errorAlert } from "./modal";
+import { getErc1155Mints } from "./utils/onchain";
 
 const regionInfo: Record<string, RegionInfo> = Config.regions;
 
@@ -384,9 +385,8 @@ export class Account extends EIP6963 {
 
             // Execute claim transaction
             const tx = await contract.claimBatch(validCrates, validSignatures);
-            console.info('Transaction sent:', tx.hash);
+
             const receipt = await tx.wait();
-            console.info('Transaction confirmed:', receipt);
 
             clearTimeout(timeoutId);
             return receipt;
@@ -519,7 +519,6 @@ export class Account extends EIP6963 {
                 console.warn('Failed to update reward signatures:', data.error);
                 throw new Error(`Failed to update signatures: ${data.error}`);
             }
-            console.info(`Successfully updated ${signatures?.length || 'all'} signatures`);
         } catch (error: any) {
             clearTimeout(timeoutId);
             throw new Error(`Failed to update signatures: ${error.message || 'Unknown error'}`);
@@ -554,9 +553,7 @@ export class Account extends EIP6963 {
             if (Number(balance) >= amount) {
                 // Execute claim transaction
                 const tx = await crateBaseContract.commitCrates(0, amount);
-                console.info('Transaction sent:', tx.hash);
                 const receipt = await tx.wait();
-                console.info('Transaction confirmed:', receipt);
                 clearTimeout(timeoutId);
                 return receipt;
             } else {
@@ -574,41 +571,46 @@ export class Account extends EIP6963 {
      * @returns A promise resolving to the API response.
      * @throws Error if the API request fails or authentication is invalid.
      */
-    async claimItems(): Promise<any> {
-        if (!this.provider?.provider) {
-            throw new Error('Web3 provider not initialized');
-        }
-
-        // Set fetch timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-        try {
-            // Initialize contract
-            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-            const signer = await ethersProvider.getSigner();
-
-            const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
-            const remainingCommits = await crateBaseContract.getCommits(signer.address);
-
-            if (remainingCommits.length > 0n) {
-                // Execute claim transaction
-                const tx = await crateBaseContract.openCratesBatch();
-                console.info('Transaction sent:', tx.hash);
-                const receipt = await tx.wait();
-                console.info('Transaction confirmed:', receipt);
-                clearTimeout(timeoutId);
-                return receipt;
-            } else {
-                throw new Error(`No requests available`);
-            }
-
-
-        } catch (error: any) {
-            clearTimeout(timeoutId);
-            throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
-        }
+    async claimItems(): Promise<{ hash?: string; balances?: any[]; error?: string }> {
+    if (!this.provider?.provider) {
+        throw new Error('Web3 provider not initialized');
     }
+
+    // Set fetch timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+        // Initialize contract
+        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+        const signer = await ethersProvider.getSigner();
+
+        const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
+        const remainingCommits = await crateBaseContract.getCommits(signer.address);
+
+        if (remainingCommits.length > 0n) {
+            // Execute claim transaction
+            const tx = await crateBaseContract.openCratesBatch();
+            await tx.wait();
+
+            // Wait 2 seconds before fetching balances
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Await the balances and return the result
+            const balances = await getErc1155Mints(tx.hash).catch(err => {
+                return [];
+            });
+            clearTimeout(timeoutId);
+            return { hash: tx.hash, balances };
+        } else {
+            clearTimeout(timeoutId);
+            return { error: 'No requests available' };
+        }
+    } catch (error: any) {
+        clearTimeout(timeoutId);
+        return { error: `Failed to claim rewards: ${error.message || 'Unknown error'}` };
+    }
+}
 
     /**
      * Purchases a specified item with a given payment token.
@@ -638,9 +640,7 @@ export class Account extends EIP6963 {
 
             if (paymentToken == PaymentTokens.NativeToken) {
                 const tx = await survivShopContract.buyItems(item, amount, paymentToken, { value: totalCost });
-                console.info('Transaction sent:', tx.hash);
                 const receipt = await tx.wait();
-                console.info('Transaction confirmed:', receipt);
                 clearTimeout(timeoutId);
                 return receipt;
             } else {

@@ -1,0 +1,153 @@
+$primary-bg: #70722f;
+$modal-bg: #b5b789; // Slightly lighter shade for contrast
+$white: #fff;
+$gray: #666;
+$red: #ff4444;
+$shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+$spacing: 15px;
+$transition: all 0.3s ease;
+
+.minted-items-alert {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: 80%;
+    max-width: 800px;
+    padding: $spacing;
+    background: $primary-bg;
+    border-radius: 15px;
+    box-shadow: $shadow;
+}
+
+.minted-items-modal {
+    background: $modal-bg; // Use lighter shade to integrate with primary-bg
+    // padding: $spacing;
+    border-radius: 10px;
+    text-align: center;
+    overflow: hidden;
+    color: $white; // Ensure text is readable against $modal-bg
+    padding-bottom: 10px;
+}
+
+.minted-items-header {
+    font-size: 20px;
+    font-weight: bold;
+    color: $white;
+    padding-bottom: $spacing;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.minted-items-body {
+    display: flex;
+    align-items: center;
+    gap: $spacing;
+    justify-content: center;
+    padding-bottom: 10px;
+}
+
+.minted-items-body i {
+    font-size: 20px;
+    color: #28a745;
+    margin-bottom: $spacing / 2;
+}
+
+.minted-items-close {
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    color: $white; // Changed from $gray to contrast with $primary-bg
+    transition: $transition;
+
+    &:hover {
+        color: $red;
+    }
+}
+
+.minted-items-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 100px)); // Limit to 2 rows
+    gap: $spacing;
+    padding: $spacing / 2 0;
+    justify-content: center;
+    max-height: 220px; // 2 rows x 100px + gap
+    overflow: hidden;
+}
+
+
+.minted-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background: transparent; // Removed light gray to blend with $modal-bg
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: $transition;
+
+    &:hover {
+        transform: scale(1.05);
+    }
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .balance {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        font-size: 14px;
+        font-weight: bold;
+        color: $white;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 2px 8px;
+        border-radius: 3px;
+    }
+}
+
+.no-items {
+    color: $white;
+    font-size: 18px;
+    padding: $spacing;
+}
+
+.more-items {
+    font-size: 18px;
+    color: $white;
+    text-align: center;
+    margin: auto;
+    padding-top: $spacing / 2;
+    cursor: pointer;
+
+    &:hover {
+        color: lighten($white, 20%);
+    }
+}
+
+.minted-item img {
+    background: #737636;
+}
+
+.view-on-explorer {
+    display: inline-block;
+    padding: 10px 16px; // Increased vertical padding from 8px to 10px
+    background-color: darken($primary-bg, 10%);
+    color: $white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: $transition;
+    padding-bottom: 10px;
+
+    &:hover {
+        background-color: darken($primary-bg, 20%);
+    }
+}

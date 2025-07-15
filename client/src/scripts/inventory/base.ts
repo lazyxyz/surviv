@@ -2,6 +2,18 @@ import $ from "jquery";
 import { SurvivAssets } from "../account";
 import type { Game } from "../game";
 import { successAlert, errorAlert, warningAlert } from "../modal";
+import type { MintResult } from "../utils/onchain";
+
+import {
+    SilverSkinsMapping,
+    GoldSkinsMapping,
+    DivineSkinsMapping,
+    SilverArmsMapping,
+    GoldArmsMapping,
+    DivineArmsMapping,
+    DivineGunsMapping,
+    SurvivMemesMapping
+} from "@common/mappings";
 
 function renderCrates(userCrateBalances: any, keyBalances: number): void {
     const crateImages = userCrateBalances?.crates
@@ -157,6 +169,80 @@ async function renderClaimButton(game: Game): Promise<HTMLButtonElement | null> 
     return claimButton;
 }
 
+function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): void {
+    const collectionMappings: { [key: string]: { address: string; assets: string[] } } = {
+        SilverSkins: SilverSkinsMapping,
+        GoldSkins: GoldSkinsMapping,
+        DivineSkins: DivineSkinsMapping,
+        SilverArms: SilverArmsMapping,
+        GoldArms: GoldArmsMapping,
+        DivineArms: DivineArmsMapping,
+        DivineGuns: DivineGunsMapping,
+        SurvivMemes: SurvivMemesMapping
+    };
+
+    const getImagePath = (collection: string, assetName: string) => {
+        if (['SilverSkins', 'GoldSkins', 'DivineSkins'].some(pattern => collection.includes(pattern))) {
+            return `./img/game/shared/skins/${assetName}_base.svg`;
+        }
+        if (['SilverArms', 'GoldArms', 'DivineArms'].some(pattern => collection.includes(pattern))) {
+            return `./img/game/shared/weapons/${assetName}.svg`;
+        }
+        if (collection.includes('DivineGuns')) {
+            return `./img/game/shared/weapons/${assetName}_world.svg`;
+        }
+        if (collection.includes('SurvivMemes')) {
+            return `./img/game/shared/emotes/${assetName}.svg`;
+        }
+        return `./img/game/shared/skins/${assetName}_base.svg`; // Default fallback
+    };
+
+    const alertDiv = document.createElement('div');
+    alertDiv.className = "minted-items-alert";
+
+    const idRandom = Math.floor(Math.random() * 10000000);
+    const totalItems = mintedItems.flatMap(item => item.values).length;
+    const maxDisplay = 11; // 2 rows x 6 items
+    const popupContent = mintedItems.length > 0
+        ? mintedItems.flatMap(item => {
+            const mapping = Object.values(collectionMappings).find(m => m.address.toLowerCase() === item.address.toLowerCase());
+            return item.values.map(([tokenId, value]) => {
+                const assetName = mapping && mapping.assets[tokenId] ? mapping.assets[tokenId] : `unknown_${tokenId}`;
+                const imageUrl = getImagePath(item.collection, assetName);
+                return `
+                    <div class="minted-item">
+                        <img src="${imageUrl}" alt="${assetName}" data-balance="${value}">
+                        <span class="balance">x${value}</span>
+                    </div>
+                `;
+            });
+        }).slice(0, maxDisplay).join("") + (totalItems > maxDisplay ? '<div class="more-items">More</div>' : '')
+        : "<div class='no-items'>No items minted.</div>";
+
+    const alertChild = $(`
+        <div class="minted-items-modal" id="${idRandom}">
+            <div class="minted-items-header">Items claimed successfully!</div>
+            <div class="minted-items-body">
+                <div class="minted-items-grid">${popupContent}</div>
+            </div>
+            <div class="minted-items-footer">
+                <a href="${explorerLink}" target="_blank" class="view-on-explorer">View on Explorer</a>
+            </div>
+            <span class="minted-items-close fa-solid fa-xmark close-popup" id="close-customize"></span>
+        </div>
+    `);
+
+    alertDiv.append(alertChild[0]);
+    document.body.appendChild(alertDiv);
+
+    // Close popup
+    $(".close-popup").on("click", (event) => {
+        event.target.parentElement?.remove();
+        if (!alertDiv.children.length) {
+            alertDiv.remove();
+        }
+    });
+}
 
 async function updateClaimButton(game: Game): Promise<void> {
     const claimButton = await renderClaimButton(game);
@@ -168,10 +254,25 @@ async function updateClaimButton(game: Game): Promise<void> {
         if (isProcessing) return;
         isProcessing = true;
         try {
-            await game.account.claimItems();
-            successAlert("Items claimed successfully!");
-            claimButton.classList.remove("active");
-            claimButton.disabled = true;
+            const result = await game.account.claimItems();
+
+            if (result.error) {
+                errorAlert(result.error);
+            } else {
+                // successAlert("Items claimed successfully!");
+                if (result.hash) {
+                    const explorerLink = `https://shannon-explorer.somnia.network/tx/${result.hash}?tab=index"`;
+                    
+                    if(result.balances) {
+                        showMintedItemsPopup(result.balances, explorerLink);
+                    } else {
+                        showMintedItemsPopup([], explorerLink);
+                    }
+                }
+
+                claimButton.classList.remove("active");
+                claimButton.disabled = true;
+            }
         } catch (err) {
             console.error(`Failed to claim items: ${err}`);
             errorAlert("Failed to claim items. Please try again!");

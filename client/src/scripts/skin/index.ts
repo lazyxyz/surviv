@@ -7,7 +7,7 @@ import type { TranslationKeys } from "../../typings/translations";
 import { SurvivAssets } from "../account";
 
 // handler display change preview
-const updateSplashCustomize = (skinID: string): void => {
+export const updateSplashCustomize = (skinID: string): void => {
     $<HTMLDivElement>(".assets-base").attr(
         "href",
         `./img/game/shared/skins/${skinID}_base.svg`
