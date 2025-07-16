@@ -625,10 +625,12 @@ export class Account extends EIP6963 {
      * @returns A promise resolving to the API response.
      * @throws Error if the API request fails, authentication is invalid, or payment fails.
      */
-    async buyItems(item: (typeof SaleItems)[keyof typeof SaleItems], amount: number, paymentToken: (typeof PaymentTokens)[keyof typeof PaymentTokens]): Promise<any> {
+    async buyItems(item: SaleItemType, amount: number, paymentToken: PaymentTokenType): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
+        let itemValue = SaleItems[item];
+        let paymentTokenValue = PaymentTokens[paymentToken];
 
         // Set fetch timeout
         const controller = new AbortController();
@@ -640,25 +642,32 @@ export class Account extends EIP6963 {
             const signer = await ethersProvider.getSigner();
 
             const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
-            const price = await survivShopContract.getPrice(paymentToken, item);
+            const price = await survivShopContract.getPrice(paymentTokenValue, itemValue);
             const totalCost = price * BigInt(amount);
 
-            if (paymentToken == PaymentTokens.NativeToken) {
-                const tx = await survivShopContract.buyItems(item, amount, paymentToken, { value: totalCost });
+            if (paymentTokenValue == PaymentTokens.NativeToken) {
+                const signerBalance = await ethersProvider.getBalance(signer.address);
+                if (signerBalance < totalCost) {
+                    throw new Error(`Insufficient Balance!`);
+                }
+
+                const tx = await survivShopContract.buyItems(itemValue, amount, paymentTokenValue, { value: totalCost });
                 const receipt = await tx.wait();
                 clearTimeout(timeoutId);
                 return receipt;
             } else {
-                throw new Error('Not supported yet.');
+                throw new Error('Payment supported yet.');
             }
-
         } catch (error: any) {
             clearTimeout(timeoutId);
-            throw new Error(`Failed to claim rewards: ${error.message || 'Unknown error'}`);
+            throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
         }
     }
 
-    async queryPrice(item: (typeof SaleItems)[keyof typeof SaleItems], paymentToken: (typeof PaymentTokens)[keyof typeof PaymentTokens]): Promise<any> {
+    async queryPrice(
+        item: SaleItemType, // Use SaleItems key type ("Crates" | "Cards" | "Keys")
+        paymentToken: PaymentTokenType // Use PaymentTokens key type ("NativeToken")
+    ): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
@@ -673,7 +682,11 @@ export class Account extends EIP6963 {
             const signer = await ethersProvider.getSigner();
 
             const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
-            const price = await survivShopContract.getPrice(paymentToken, item);
+
+            console.log("payment: ", PaymentTokens[paymentToken]);
+            console.log("item: ", SaleItems[item]);
+
+            const price = await survivShopContract.getPrice(PaymentTokens[paymentToken], SaleItems[item]);
             clearTimeout(timeoutId);
             return price;
         } catch (error: any) {
