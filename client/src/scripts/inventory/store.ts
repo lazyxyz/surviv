@@ -50,6 +50,7 @@ function renderStoreItems(game: Game, storeItems: StoreItem[]): void {
         <div class="crates-information">
           <p>${item.name}</p>
           <h3 class="price-placeholder">Loading...</h3>
+          <h3 class="total-purchase"></h3>
         </div>
         <div class="crates-supply">
           <button class="crates-remove" disabled>-</button>
@@ -66,6 +67,20 @@ function renderStoreItems(game: Game, storeItems: StoreItem[]): void {
             $card.find(".price-placeholder").text(price);
         });
     });
+}
+
+// Update total purchase amount based on user input
+function updateTotalPurchase($card: JQuery<HTMLElement>, amount: number) {
+    const priceText = $card.find(".price-placeholder").text();
+    const priceValue = parseFloat(priceText);
+    const $buyButton = $card.find(".buy-now-btn");
+    if (!isNaN(priceValue) && amount > 0) {
+        $buyButton.text(`Buy ${(priceValue * amount).toFixed(1)} STT`);
+    } else {
+        $buyButton.text("Buy now");
+        $buyButton.prop("disabled", true).removeClass("active");
+
+    }
 }
 
 function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
@@ -89,6 +104,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
         $purchaseAmount.on("focus", function () {
             $(this).val("");
             amount = 0;
+            updateTotalPurchase($card, amount);
         });
         $purchaseAmount.on("blur", function () {
             let val = parseInt($(this).val() as string, 10);
@@ -111,6 +127,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
                 $removeButton.prop("disabled", false).addClass("active");
                 $buyButton.prop("disabled", false).addClass("active");
             }
+            updateTotalPurchase($card, amount);
         });
 
         $addButton.on("click", () => {
@@ -119,6 +136,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
             $purchaseAmount.val(amount.toString());
             $removeButton.prop("disabled", false).addClass("active");
             $buyButton.prop("disabled", false).addClass("active");
+            updateTotalPurchase($card, amount);
         });
 
         $removeButton.on("click", () => {
@@ -129,6 +147,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
                 $removeButton.prop("disabled", true).removeClass("active");
                 $buyButton.prop("disabled", true).removeClass("active");
             }
+            updateTotalPurchase($card, amount);
         });
 
         $buyButton.on("click", async () => {
@@ -142,6 +161,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
                 $purchaseAmount.val("0");
                 $buyButton.prop("disabled", true).removeClass("active");
                 $removeButton.prop("disabled", true).removeClass("active");
+                updateTotalPurchase($card, amount);
                 await loadStore(game);
             } catch (err: any) {
                 errorAlert(err.message);
