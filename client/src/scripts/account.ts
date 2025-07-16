@@ -56,9 +56,13 @@ export const SaleItems = {
     Keys: SurvivKeysMapping.address
 } as const;
 
+export type SaleItemType = keyof typeof SaleItems;
+
 export const PaymentTokens = {
     NativeToken: SurvivMapping.NativeToken.address,
 } as const;
+
+export type PaymentTokenType = keyof typeof PaymentTokens;
 
 /**
 * Interface for crate data structure

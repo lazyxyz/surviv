@@ -284,7 +284,6 @@ async function updateClaimButton(game: Game): Promise<void> {
 
 async function loadCrates(game: Game): Promise<void> {
     if (!game.account.address) {
-        warningAlert("Please connect your wallet to continue!")
         return;
     }
 

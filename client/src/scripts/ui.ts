@@ -28,7 +28,7 @@ import { loadInventory } from "./inventory";
 import { showSkins } from "./inventory/skins";
 import { showWeapons } from "./inventory/weapons";
 import { Loots } from "@common/definitions/loots";
-import { showEmotes } from "./emotes";
+import { showEmotes } from "./inventory/emotes";
 import { warningAlert } from "./modal";
 import { Emotes } from "@common/definitions/emotes";
 /*
