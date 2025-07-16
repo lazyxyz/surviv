@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { Config } from '../../../config';
 
 interface TokenBalancesResult {
     success: boolean;
@@ -25,7 +26,6 @@ const TRANSFER_SINGLE_ABI = [
 
 const SEQUENCE_INDEXER_BASE_URL = "https://somnia-testnet-indexer.sequence.app/rpc/Indexer";
 const CHAIN_ID = "somnia-testnet";
-const PUBLIC_ACCESS_KEY = "AQAAAAAAAKdMeINbvh5WD5qqBoorr9wHtcs";
 
 async function getTokenBalances(
     accountAddresses: string[],
@@ -40,7 +40,7 @@ async function getTokenBalances(
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-Access-Key": PUBLIC_ACCESS_KEY,
+                    "X-Access-Key": Config.publicSequenceKey,
                 },
                 body: JSON.stringify({
                     chainID: CHAIN_ID,
@@ -93,7 +93,7 @@ async function getTokenMints(txnHash: string): Promise<MintResult[]> {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Access-Key': PUBLIC_ACCESS_KEY,
+                'X-Access-Key': Config.publicSequenceKey,
             },
             body: JSON.stringify({
                 chainID: CHAIN_ID,

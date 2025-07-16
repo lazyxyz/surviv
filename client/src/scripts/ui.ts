@@ -14,7 +14,7 @@ import $ from "jquery";
 import { Color, isMobile, isWebGPUSupported } from "pixi.js";
 import { TRANSLATIONS, getTranslatedString } from "../translations";
 
-import { Config, type ServerInfo } from "./config";
+import { Config, type ServerInfo } from "../config";
 import { type Game } from "./game";
 import { body, createDropdown } from "./uiHelpers";
 import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaultClientCVars";

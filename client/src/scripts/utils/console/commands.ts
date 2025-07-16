@@ -11,7 +11,7 @@ import { handleResult, type Result } from "@common/utils/misc";
 import { ItemType, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { Vec } from "@common/utils/vector";
 import { Rectangle, RendererType, Sprite, VERSION } from "pixi.js";
-import { Config, type ServerInfo } from "../../config";
+import { Config, type ServerInfo } from "../../../config";
 import { type Game } from "../../game";
 import { type CompiledAction, type CompiledTuple, type InputManager } from "../../managers/inputManager";
 import { COLORS } from "../constants";

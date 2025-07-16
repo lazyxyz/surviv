@@ -2,13 +2,13 @@ import { type TeamSize } from "@common/constants";
 
 export const Config = {
     regions: {
-        dev: {
-            name: "Local Server",
-            mainAddress: "http://127.0.0.1:8000",
-            gameAddress: "ws://127.0.0.1:<ID>",
-            teamAddress: "ws://127.0.0.1:8000",
-            apiAddress: "https://api.surviv.fun",
-        },
+        // dev: {
+        //     name: "Local Server",
+        //     mainAddress: "http://127.0.0.1:8000",
+        //     gameAddress: "ws://127.0.0.1:<ID>",
+        //     teamAddress: "ws://127.0.0.1:8000",
+        //     apiAddress: "https://api.surviv.fun",
+        // },
         as: {
             name: "Asia",
             mainAddress: "https://as.surviv.fun",
@@ -31,13 +31,14 @@ export const Config = {
             apiAddress: "https://api.surviv.fun",
         }
     },
-    defaultRegion: "as"
+    defaultRegion: "as",
+    publicSequenceKey: "AQAAAAAAAKdMeINbvh5WD5qqBoorr9wHtcs"
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {
     readonly regions: Record<string, Region>
     readonly defaultRegion: string,
-
+    readonly publicSequenceKey: string,
 }
 
 export interface Region {
