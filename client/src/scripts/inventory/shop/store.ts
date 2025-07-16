@@ -1,10 +1,11 @@
 import $ from "jquery";
 import { formatEther } from "ethers";
-import { PaymentTokens, type PaymentTokenType, type SaleItemType } from "../account";
-import type { Game } from "../game";
-import { successAlert, errorAlert, warningAlert } from "../modal";
+import { type PaymentTokenType, type SaleItemType } from "../../account";
+import type { Game } from "../../game";
+import { successAlert, errorAlert, warningAlert } from "../../modal";
 import { SurvivKeysMapping, SurvivCratesMapping, SurvivCardsMapping } from "@common/mappings";
-import { getTokenBalances } from "../utils/onchain/sequence";
+import { getTokenBalances } from "../../utils/onchain/sequence";
+import { ShopCache } from "../shop";
 
 interface StoreItem {
     balance: number;
@@ -156,16 +157,23 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
             $buyButton.prop("disabled", true);
             try {
                 await game.account.buyItems(itemType, amount, "NativeToken");
-                successAlert("Purchase successful!");
+                // Update balance locally
+                const item = storeItems.find(item => item.itemType === itemType);
+                if (item) {
+                    item.balance = Math.max(0, item.balance + amount); // Subtract purchased amount, ensure non-negative
+                }
                 amount = 0;
                 $purchaseAmount.val("0");
                 $buyButton.prop("disabled", true).removeClass("active");
                 $removeButton.prop("disabled", true).removeClass("active");
                 updateTotalPurchase($card, amount);
-                await loadStore(game);
+
+                // Re-render store items with updated balances
+                renderStoreItems(game, storeItems);
+                setupPurchaseInteractions(game, storeItems);
+                successAlert("Purchase successful!");
             } catch (err: any) {
                 errorAlert(err.message);
-                await loadStore(game);
             } finally {
                 isProcessing = false;
                 $buyButton.prop("disabled", amount === 0);
@@ -183,6 +191,9 @@ export async function loadStore(game: Game): Promise<void> {
         warningAlert("Please connect your wallet to continue!");
         return;
     }
+
+    if(ShopCache.storeLoaded) return;
+    ShopCache.storeLoaded = true;
 
     const [keyBalances, crateBalances, cardBalances] = await Promise.all([
         getTokenBalances([game.account.address], [SurvivKeysMapping.address]).catch(err => {

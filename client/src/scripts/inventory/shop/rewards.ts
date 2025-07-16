@@ -1,6 +1,7 @@
 import $ from "jquery";
-import type { Game } from "../game";
-import { successAlert, warningAlert, errorAlert } from "../modal";
+import type { Game } from "../../game";
+import { successAlert, errorAlert } from "../../modal";
+import { ShopCache } from "../shop";
 
 interface RewardItem {
     image: string;
@@ -61,7 +62,10 @@ function renderRewardList(game: Game, rewardData: RewardData): void {
 }
 
 export async function loadRewards(game: Game): Promise<void> {
-    const rewardData = await game.account.getValidRewards().catch(err => {
+    if (ShopCache.rewardsLoaded) return;
+    ShopCache.rewardsLoaded = true;
+
+    const rewardData = await game.account.getValidRewards().catch((err: any) => {
         console.error(`Failed to load rewards: ${err}`);
         return { validCrates: [] };
     });

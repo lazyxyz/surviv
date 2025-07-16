@@ -53,9 +53,8 @@ import { Camera } from "./rendering/camera";
 import { Gas, GasRender } from "./rendering/gas";
 import { Minimap } from "./rendering/minimap";
 
-import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime, showInventory } from "./ui";
+import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime } from "./ui";
 import { setUpCommands } from "./utils/console/commands";
-import { defaultClientCVars } from "./utils/console/defaultClientCVars";
 import { GameConsole } from "./utils/console/gameConsole";
 import { COLORS, LAYER_TRANSITION_DELAY, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { loadTextures, SuroiSprite } from "./utils/pixi";
@@ -67,6 +66,7 @@ import { onConnectWallet, visibleWallet } from "./wallet";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { Melees } from "@common/definitions/melees";
 import { errorAlert } from "./modal";
+import { showInventory } from "./inventory";
 
 /* eslint-disable @stylistic/indent */
 

@@ -1,49 +1,45 @@
-import $ from "jquery";
+import $ from 'jquery';
+import { showBadges } from "./badges";
 import type { Game } from "../game";
-import { loadStore } from "./store";
-import { loadBase } from "./base";
-import { loadRewards } from "./rewards";
+import { showEmotes } from "./emotes";
+import { showShop } from "./shop";
+import { showSkins } from "./skins";
+import { showWeapons } from "./weapons";
 
+export let InventoryCache: {
+    shopLoaded: boolean,
+    skinsLoaded: boolean,
+    weaponsLoaded: boolean,
+    badgesLoaded: boolean,
+    emotesLoaded: boolean,
+};
 
-function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeListOf<HTMLElement>) {
-    $(document).off("click", ".crates-tab-child");
-    tabButtons.forEach(button => {
-        button.addEventListener("click", () => {
-            const tabId = button.getAttribute("data-tab");
-            if (!tabId) return;
+export async function showInventory(game: Game) {
+    InventoryCache = {
+        shopLoaded: false,
+        skinsLoaded: false,
+        weaponsLoaded: false,
+        badgesLoaded: false,
+        emotesLoaded: false,
+    }
 
-            tabButtons.forEach(btn => btn.classList.remove("active"));
-            tabContents.forEach(content => content.style.display = "none");
-
-            const targetTab = document.getElementById(tabId);
-            if (targetTab) {
-                targetTab.style.display = "flex";
-                button.classList.add("active");
-            }
-        });
-    });
-}
-
-
-export async function loadInventory(game: Game) {
-
-    // Setup tabs
-    const tabButtons = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
-    const tabContents = document.querySelectorAll<HTMLElement>(".crates-customize-child");
-    setupTabs(tabButtons, tabContents);
-
-    $("#store-tab").on('click', () => {
-        loadStore(game);
+    $("#btn-customize").on('click', async () => {
+        showShop(game);
     })
 
-    $("#my-crates-tab").on('click', () => {
-        loadBase(game);
+    $('#tab-skins').on('click', () => {
+        showSkins(game);
     })
 
-    $("#rewards-tab").on('click', () => {
-        loadRewards(game);
+    $('#tab-weapons').on('click', () => {
+        showWeapons(game);
     })
 
-    // Trigger store tab click by default
-    $("#store-tab").trigger('click');
+    $('#tab-emotes').on('click', () => {
+        showEmotes(game);
+    })
+
+    $('#tab-badges').on('click', () => {
+        showBadges(game);
+    })
 }

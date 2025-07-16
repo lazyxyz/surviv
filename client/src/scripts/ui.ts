@@ -23,8 +23,8 @@ import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
-import { getBadgeImage, showBadges } from "./badges";
-import { loadInventory } from "./inventory";
+// import { getBadgeImage, showBadges } from "./inventory/badges";
+import { showShop } from "./inventory/shop";
 import { showSkins } from "./inventory/skins";
 import { showWeapons } from "./inventory/weapons";
 import { Loots } from "@common/definitions/loots";
@@ -77,28 +77,6 @@ export function resetPlayButtons(): void {
     $("#splash-options").removeClass("loading");
     $("#loading-text").text(getTranslatedString("loading_connecting"));
     $("#btn-cancel-finding-game").css("display", "none");
-}
-
-export async function showInventory(game: Game) {
-    $("#btn-customize").on('click', async () => {
-        await loadInventory(game);
-    })
-
-    $('#tab-skins').on('click', () => {
-        showSkins(game);
-    })
-
-    $('#tab-weapons').on('click', () => {
-        showWeapons(game);
-    })
-
-    $('#tab-badges').on('click', () => {
-        showBadges(game);
-    })
-
-    $('#tab-emotes').on('click', () => {
-        showEmotes(game);
-    })
 }
 
 export async function setUpUI(game: Game): Promise<void> {
@@ -583,7 +561,7 @@ export async function setUpUI(game: Game): Promise<void> {
                                     </div>
                                     <div class="create-team-player-name-container">
                                         <span class="create-team-player-name"${nameColor ? ` style="color: ${new Color(nameColor).toHex()}"` : ""};>${name}</span>
-                                        ${badge?.length ? `<img class="create-team-player-badge" draggable="false" src="${getBadgeImage(badge)}" />` : ""}
+                                        ${badge?.length ? `<img class="create-team-player-badge" draggable="false" src="${""}" />` : ""}
                                     </div>
                                 </div>
                                 `

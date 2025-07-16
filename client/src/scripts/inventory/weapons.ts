@@ -7,6 +7,7 @@ import type { ObjectDefinition } from "@common/utils/objectDefinitions";
 import type { Game } from "../game";
 import { DivineArmsMapping, DivineGunsMapping, GoldArmsMapping, SilverArmsMapping } from "@common/mappings";
 import { getTokenBalances } from "../utils/onchain/sequence";
+import { InventoryCache } from ".";
 
 // Constants for repeated strings
 const ASSET_PATH = "./img/game/shared";
@@ -352,17 +353,17 @@ async function showMelees(game: Game, selectedMeleeId?: string) {
     const armAddresses = armMappingList.map(arm => arm.address);
     let armBalances = await getTokenBalances([game.account.address], armAddresses);
 
-     const userArms = armBalances.balances
-        .map(balance => {
-            let itemId = "";
-            armMappingList.forEach(mapping => {
-                if (mapping.address === balance.contractAddress) {
-                    itemId = mapping.assets[balance.tokenID];
-                }
-            });
-            return itemId; // Return itemId regardless
-        })
-        .filter(itemId => !!itemId);
+    const userArms = armBalances.balances
+      .map(balance => {
+        let itemId = "";
+        armMappingList.forEach(mapping => {
+          if (mapping.address === balance.contractAddress) {
+            itemId = mapping.assets[balance.tokenID];
+          }
+        });
+        return itemId; // Return itemId regardless
+      })
+      .filter(itemId => !!itemId);
 
 
     const allMelees = Melees.definitions;
@@ -406,10 +407,12 @@ async function showMelees(game: Game, selectedMeleeId?: string) {
 
 // Main function to display weapons (melees and guns)
 export async function showWeapons(game: Game, highlightId?: string): Promise<void> {
-  if (!game?.account?.address) {
-    console.warn("No account address provided");
+  if (!game.account.address) {
     return;
   }
+
+  if (InventoryCache.weaponsLoaded) return;
+  InventoryCache.weaponsLoaded = true;
 
   resetAll();
 

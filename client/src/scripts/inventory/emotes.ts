@@ -7,11 +7,15 @@ import type { ReferenceTo } from "@common/utils/objectDefinitions";
 import type { TranslationKeys } from "../../typings/translations";
 import { SurvivMemesMapping } from '@common/mappings';
 import { getTokenBalances } from '../utils/onchain/sequence';
+import { InventoryCache } from '.';
 
 export async function showEmotes(game: Game) {
     if (!game.account.address) {
         return;
     }
+
+    if (InventoryCache.emotesLoaded) return;
+    InventoryCache.emotesLoaded = true;
 
     let memeBalances = await getTokenBalances([game.account.address], [SurvivMemesMapping.address]);
     const userMemes: string[] = memeBalances.balances.flatMap(balance => {

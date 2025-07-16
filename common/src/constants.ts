@@ -273,7 +273,5 @@ export const TentTints = {
     purple: 0x994cb2
 };
 
-export const IPFS_GATEWAY_URL = "https://ipfs-gw.openmark.io/ipfs/"; // process.env.IPFS_GATEWAY_URL || "https://ipfs-gw.openmark.io/ipfs/";
-
 export const EMOTE_SLOTS = ["top", "right", "bottom", "left", "win", "death"] as const;
 

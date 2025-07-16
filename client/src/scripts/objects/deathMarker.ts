@@ -8,7 +8,7 @@ import { type Game } from "../game";
 import { SuroiSprite, toPixiCoords } from "../utils/pixi";
 import { type Tween } from "../utils/tween";
 import { GameObject } from "./gameObject";
-import { getBadgeImage } from "../badges";
+import { getBadgeImage } from "../inventory/badges";
 
 export class DeathMarker extends GameObject.derive(ObjectCategory.DeathMarker) {
     playerName!: string;

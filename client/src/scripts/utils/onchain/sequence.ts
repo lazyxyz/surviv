@@ -44,7 +44,7 @@ async function getTokenBalances(
                 },
                 body: JSON.stringify({
                     chainID: CHAIN_ID,
-                    omitMetadata: true,
+                    // omitMetadata: true,
                     maxBlockWait: 10,
                     filter: {
                         contractStatus: "ALL",

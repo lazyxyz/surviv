@@ -1,6 +1,6 @@
 import $ from "jquery";
-import type { Game } from "../game";
-import { successAlert, errorAlert, warningAlert } from "../modal";
+import type { Game } from "../../game";
+import { successAlert, errorAlert, warningAlert } from "../../modal";
 
 import {
     SilverSkinsMapping,
@@ -14,7 +14,8 @@ import {
     SurvivKeysMapping,
     SurvivCratesMapping
 } from "@common/mappings";
-import { getTokenBalances } from "../utils/onchain/sequence";
+import { getTokenBalances } from "../../utils/onchain/sequence";
+import { ShopCache } from "../shop";
 
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
     const crateImages = new Array(userCrateBalances).fill({ image: "./img/misc/crate.png" });
@@ -302,5 +303,8 @@ async function loadCrates(game: Game): Promise<void> {
 }
 
 export async function loadBase(game: Game): Promise<void> {
+    if (ShopCache.baseLoaded) return;
+    ShopCache.baseLoaded = true;
+
     await Promise.all([loadCrates(game), updateClaimButton(game)]);
 }

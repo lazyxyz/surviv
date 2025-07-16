@@ -11,6 +11,7 @@ import {
     DivineSkinsMapping,
 } from "@common/mappings";
 import { getTokenBalances } from "../utils/onchain/sequence";
+import { InventoryCache } from ".";
 
 // handler display change preview
 export const updateSplashCustomize = (skinID: string): void => {
@@ -48,8 +49,12 @@ function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function showSkins(game: Game, newUnlockedSkinId?: string) {
+export async function showSkins(game: Game) {
     if (!game?.account?.address) return;
+
+    if (InventoryCache.skinsLoaded) return;
+    InventoryCache.skinsLoaded = true;
+
 
     const role = game.console.getBuiltInCVar("dv_role");
     const skinList = $<HTMLDivElement>("#skins-list");

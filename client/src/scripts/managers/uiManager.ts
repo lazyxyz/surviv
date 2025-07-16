@@ -26,8 +26,8 @@ import { GHILLIE_TINT, MODE, TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/con
 import { formatDate, html } from "../utils/misc";
 import { SuroiSprite } from "../utils/pixi";
 import { ClientPerkManager } from "./perkManager";
-import { getBadgeImage } from "../badges";
 import type { RewardsData } from "@common/packets/rewardsPacket";
+import { getBadgeImage } from "../inventory/badges";
 
 function safeRound(value: number): number {
     if (0 < value && value <= 1) return 1;

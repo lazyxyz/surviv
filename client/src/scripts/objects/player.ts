@@ -34,7 +34,7 @@ import { GameObject } from "./gameObject";
 import { Obstacle } from "./obstacle";
 import { type Particle, type ParticleEmitter } from "./particles";
 import type { AllowedEmoteSources } from "@common/packets/inputPacket";
-import { getBadgeImage } from "../badges";
+import { getBadgeImage } from "../inventory/badges";
 
 export class Player extends GameObject.derive(ObjectCategory.Player) {
     teamID!: number;
@@ -1124,8 +1124,8 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
         const imagePresent = image !== undefined;
         if (imagePresent) {
             let frame = `${reference.idString}${weaponDef.itemType === ItemType.Gun || (image as NonNullable<MeleeDefinition["image"]>).separateWorldImage
-                    ? "_world"
-                    : ""
+                ? "_world"
+                : ""
                 }`;
 
             if (weaponDef.itemType === ItemType.Throwable && this.halloweenThrowableSkin && !weaponDef.noSkin) {
