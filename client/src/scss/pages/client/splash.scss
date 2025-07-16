@@ -426,6 +426,7 @@
   }
 }
 
+
 #splash-options {
   position: relative;
   z-index: 1;
@@ -433,6 +434,18 @@
   align-items: center;
   justify-content: center;
   min-height: 312px;
+
+    .btn-quests {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: white;
+  }
+
+  .btn-leaderboard {
+    color: white;
+  }
 
   #splash-options-wrapper {
     flex: 1 1 auto;
@@ -531,7 +544,8 @@
 
   .team-btns-container {
     display: flex;
-    gap: 5px;
+    gap: 8px;
+    margin-top: 5px;
   }
 
   .locked {

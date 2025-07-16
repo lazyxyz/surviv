@@ -23,7 +23,8 @@ export interface ModeDefinition {
     }
     readonly specialLogo?: boolean
     readonly specialPlayButtons?: boolean
-    readonly modeLogoImage?: string
+    // icons for the mode
+    readonly modeLogoImage?: string | { solo: string, squads: string }
 }
 
 export type Mode = "normal" | "fall" | "halloween" | "winter";
@@ -63,7 +64,11 @@ export const Modes: Record<Mode, ModeDefinition> = {
             delay: 1000
         },
         specialPlayButtons: true,
-        modeLogoImage: "./img/game/fall/obstacles/baby_plumpkin.svg"
+        // Icons
+        modeLogoImage: {
+             solo: "./img/misc/user.svg",
+             squads: "./img/misc/user-group.svg"
+        },
     },
     halloween: {
         idString: "halloween",
