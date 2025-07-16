@@ -89,6 +89,14 @@
   box-shadow: inset 0 -2px palette.$success;
 }
 
+// Event buttons
+.btn-event {
+background: linear-gradient(180deg, #131417 0%, #3826A8 100%);
+  border-bottom: 2px solid #492bff;
+  box-shadow: inset 0 -2px #492bff;
+}
+
+
 // Socials
 .btn-social {
   display: inline-block;
