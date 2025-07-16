@@ -1343,7 +1343,8 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
         this.emote.background.visible = false;
 
-        this.emote.image.setScale(isItemEmote && !isHealingOrAmmoEmote ? 0.7 : 1);
+        // this.emote.image.setScale(isItemEmote && !isHealingOrAmmoEmote ? 0.7 : 1);
+        this.emote.image.setScale(isItemEmote && !isHealingOrAmmoEmote ? 0.7 : 1.5);
         // this.emote.background.setFrame(backgroundFrame);
 
         this.anims.emote = this.game.addTween({

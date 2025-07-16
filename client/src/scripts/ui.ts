@@ -118,9 +118,18 @@ export async function setUpUI(game: Game): Promise<void> {
             // Mode Logo
             if (MODE.modeLogoImage) {
                 const translationString = `play_${["solo", "squad"][buttonIndex]}`;
+                let logoSrc = "";
+
+                 if (typeof MODE.modeLogoImage === "string") {
+            logoSrc = MODE.modeLogoImage;
+        } else {
+            logoSrc = buttonIndex === 0
+                ? MODE.modeLogoImage.solo
+                : MODE.modeLogoImage.squads;
+        }
 
                 button.html(`
-                    <img class="btn-icon" width="26" height="26" src=${MODE.modeLogoImage}>
+                    <img class="btn-icon" width="26" height="26" src=${logoSrc}>
                     <span style="margin-left: ${(buttonIndex > 0 ? "20px;" : "0")}" translation="${translationString}">${getTranslatedString(translationString as TranslationKeys)}</span>
                 `);
             }
