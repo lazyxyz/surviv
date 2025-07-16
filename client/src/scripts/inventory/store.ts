@@ -4,7 +4,7 @@ import { PaymentTokens, type PaymentTokenType, type SaleItemType } from "../acco
 import type { Game } from "../game";
 import { successAlert, errorAlert, warningAlert } from "../modal";
 import { SurvivKeysMapping, SurvivCratesMapping, SurvivCardsMapping } from "@common/mappings";
-import { getTokenBalances } from "../utils/onchain";
+import { getTokenBalances } from "../utils/onchain/sequence";
 
 interface StoreItem {
     balance: number;

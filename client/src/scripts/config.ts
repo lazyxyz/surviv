@@ -36,7 +36,8 @@ export const Config = {
 
 export interface ConfigType {
     readonly regions: Record<string, Region>
-    readonly defaultRegion: string
+    readonly defaultRegion: string,
+
 }
 
 export interface Region {

@@ -25,11 +25,8 @@ import { abi as survivRewardsABI } from "@common/abis/ISurvivRewards.json";
 import { abi as crateBaseABI } from "@common/abis/ICrateBase.json";
 import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
-import type { Game } from "./game";
 import { errorAlert } from "./modal";
-import { getErc1155Mints } from "./utils/onchain";
-
-const regionInfo: Record<string, RegionInfo> = Config.regions;
+import { getTokenMints } from "./utils/onchain/sequence";
 
 const CHAIN_ID = SurvivMapping.ChainId;
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
@@ -597,11 +594,8 @@ export class Account extends EIP6963 {
                 const tx = await crateBaseContract.openCratesBatch();
                 await tx.wait();
 
-                // Wait 2 seconds before fetching balances
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
                 // Await the balances and return the result
-                const balances = await getErc1155Mints(tx.hash).catch(err => {
+                const balances = await getTokenMints(tx.hash).catch(err => {
                     return [];
                 });
 
@@ -682,9 +676,6 @@ export class Account extends EIP6963 {
             const signer = await ethersProvider.getSigner();
 
             const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
-
-            console.log("payment: ", PaymentTokens[paymentToken]);
-            console.log("item: ", SaleItems[item]);
 
             const price = await survivShopContract.getPrice(PaymentTokens[paymentToken], SaleItems[item]);
             clearTimeout(timeoutId);

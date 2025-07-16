@@ -4,13 +4,13 @@ import type { Game } from "../game";
 import { Skins, type SkinDefinition } from "@common/definitions/skins";
 import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
-import { getTokenBalances } from "../utils/onchain";
 
 import {
     SilverSkinsMapping,
     GoldSkinsMapping,
     DivineSkinsMapping,
 } from "@common/mappings";
+import { getTokenBalances } from "../utils/onchain/sequence";
 
 // handler display change preview
 export const updateSplashCustomize = (skinID: string): void => {

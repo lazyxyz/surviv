@@ -5,8 +5,8 @@ import { EmoteCategory, Emotes, type EmoteDefinition } from "@common/definitions
 import { getTranslatedString } from "../../translations";
 import type { ReferenceTo } from "@common/utils/objectDefinitions";
 import type { TranslationKeys } from "../../typings/translations";
-import { getTokenBalances } from '../utils/onchain';
 import { SurvivMemesMapping } from '@common/mappings';
+import { getTokenBalances } from '../utils/onchain/sequence';
 
 export async function showEmotes(game: Game) {
     if (!game.account.address) {

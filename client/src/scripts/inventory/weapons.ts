@@ -6,8 +6,7 @@ import { SurvivAssets } from "../account";
 import type { ObjectDefinition } from "@common/utils/objectDefinitions";
 import type { Game } from "../game";
 import { DivineArmsMapping, DivineGunsMapping, GoldArmsMapping, SilverArmsMapping } from "@common/mappings";
-import { getTokenBalances } from "../utils/onchain";
-
+import { getTokenBalances } from "../utils/onchain/sequence";
 
 // Constants for repeated strings
 const ASSET_PATH = "./img/game/shared";

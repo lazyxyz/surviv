@@ -1,7 +1,6 @@
 import $ from "jquery";
 import type { Game } from "../game";
 import { successAlert, errorAlert, warningAlert } from "../modal";
-import { getTokenBalances, type MintResult } from "../utils/onchain";
 
 import {
     SilverSkinsMapping,
@@ -15,6 +14,7 @@ import {
     SurvivKeysMapping,
     SurvivCratesMapping
 } from "@common/mappings";
+import { getTokenBalances } from "../utils/onchain/sequence";
 
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
     const crateImages = new Array(userCrateBalances).fill({ image: "./img/misc/crate.png" });
@@ -181,17 +181,17 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
         SurvivMemes: SurvivMemesMapping
     };
 
-    const getImagePath = (collection: string, assetName: string) => {
-        if (['SilverSkins', 'GoldSkins', 'DivineSkins'].some(pattern => collection.includes(pattern))) {
+    const getImagePath = (address: string, assetName: string) => {
+        if ([SilverSkinsMapping, GoldSkinsMapping, DivineSkinsMapping].some(pattern => pattern.address == address)) {
             return `./img/game/shared/skins/${assetName}_base.svg`;
         }
-        if (['SilverArms', 'GoldArms', 'DivineArms'].some(pattern => collection.includes(pattern))) {
+        if ([SilverArmsMapping, GoldArmsMapping, DivineArmsMapping].some(pattern => pattern.address == address)) {
             return `./img/game/shared/weapons/${assetName}.svg`;
         }
-        if (collection.includes('DivineGuns')) {
+        if (address == DivineGunsMapping.address) {
             return `./img/game/shared/weapons/${assetName}_world.svg`;
         }
-        if (collection.includes('SurvivMemes')) {
+        if (address == SurvivMemesMapping.address) {
             return `./img/game/shared/emotes/${assetName}.svg`;
         }
         return `./img/game/shared/skins/${assetName}_base.svg`; // Default fallback
@@ -206,9 +206,9 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
     const popupContent = mintedItems.length > 0
         ? mintedItems.flatMap(item => {
             const mapping = Object.values(collectionMappings).find(m => m.address.toLowerCase() === item.address.toLowerCase());
-            return item.values.map(([tokenId, value]) => {
+            if (mapping) return item.values.map(([tokenId, value]) => {
                 const assetName = mapping && mapping.assets[tokenId] ? mapping.assets[tokenId] : `unknown_${tokenId}`;
-                const imageUrl = getImagePath(item.collection, assetName);
+                const imageUrl = getImagePath(mapping.address, assetName);
                 return `
                     <div class="minted-item">
                         <img src="${imageUrl}" alt="${assetName}" data-balance="${value}">
@@ -217,7 +217,7 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
                 `;
             });
         }).slice(0, maxDisplay).join("") + (totalItems > maxDisplay ? '<div class="more-items">More</div>' : '')
-        : "<div class='no-items'>No items minted.</div>";
+        : "<div class='no-items'>Items not found. Check explorer instead.</div>";
 
     const alertChild = $(`
         <div class="minted-items-modal" id="${idRandom}">
