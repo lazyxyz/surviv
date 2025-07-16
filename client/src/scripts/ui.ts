@@ -16,7 +16,6 @@ import { TRANSLATIONS, getTranslatedString } from "../translations";
 
 import { Config, type ServerInfo } from "./config";
 import { type Game } from "./game";
-import { news } from "./news/newsPosts";
 import { body, createDropdown } from "./uiHelpers";
 import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaultClientCVars";
 
@@ -26,8 +25,8 @@ import type { TranslationKeys } from "../typings/translations";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, shorten, UI_DEBUG_MODE, WalletType } from "./utils/constants";
 import { getBadgeImage, showBadges } from "./badges";
 import { loadInventory } from "./inventory";
-import { showSkins } from "./skin";
-import { showWeapons } from "./weapons/weapons";
+import { showSkins } from "./inventory/skins";
+import { showWeapons } from "./inventory/weapons";
 import { Loots } from "@common/definitions/loots";
 import { showEmotes } from "./emotes";
 import { warningAlert } from "./modal";
@@ -186,23 +185,6 @@ export async function setUpUI(game: Game): Promise<void> {
             game.console.setBuiltInCVar("cv_region", region);
         })();
     }
-
-    // Load news
-    let newsText = "";
-    for (const newsPost of news.slice(0, 5)) {
-        const date = new Date(newsPost.date).toLocaleDateString("default", {
-            month: "long",
-            day: "numeric",
-            year: "numeric"
-        });
-
-        newsText += '<article class="splash-news-entry">';
-        newsText += `<div class="news-date">${date}</div>`;
-        newsText += `<div class="news-title">${newsPost.title}</div>`;
-        newsText += `<p>${newsPost.content}<br><i>- ${newsPost.author}</i></p></article>`;
-    }
-
-    ui.newsPosts.html(newsText);
 
     // createDropdown("#splash-more");
     createDropdown("#language-dropdown");
