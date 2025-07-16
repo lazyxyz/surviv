@@ -572,45 +572,46 @@ export class Account extends EIP6963 {
      * @throws Error if the API request fails or authentication is invalid.
      */
     async claimItems(): Promise<{ hash?: string; balances?: any[]; error?: string }> {
-    if (!this.provider?.provider) {
-        throw new Error('Web3 provider not initialized');
-    }
-
-    // Set fetch timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    try {
-        // Initialize contract
-        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-        const signer = await ethersProvider.getSigner();
-
-        const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
-        const remainingCommits = await crateBaseContract.getCommits(signer.address);
-
-        if (remainingCommits.length > 0n) {
-            // Execute claim transaction
-            const tx = await crateBaseContract.openCratesBatch();
-            await tx.wait();
-
-            // Wait 2 seconds before fetching balances
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            // Await the balances and return the result
-            const balances = await getErc1155Mints(tx.hash).catch(err => {
-                return [];
-            });
-            clearTimeout(timeoutId);
-            return { hash: tx.hash, balances };
-        } else {
-            clearTimeout(timeoutId);
-            return { error: 'No requests available' };
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
         }
-    } catch (error: any) {
-        clearTimeout(timeoutId);
-        return { error: `Failed to claim rewards: ${error.message || 'Unknown error'}` };
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+
+            const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
+            const remainingCommits = await crateBaseContract.getCommits(signer.address);
+
+            if (remainingCommits.length > 0n) {
+                // Execute claim transaction
+                const tx = await crateBaseContract.openCratesBatch();
+                await tx.wait();
+
+                // Wait 2 seconds before fetching balances
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Await the balances and return the result
+                const balances = await getErc1155Mints(tx.hash).catch(err => {
+                    return [];
+                });
+
+                clearTimeout(timeoutId);
+                return { hash: tx.hash, balances };
+            } else {
+                clearTimeout(timeoutId);
+                return { error: 'No requests available' };
+            }
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            return { error: `Failed to claim rewards: ${error.message || 'Unknown error'}` };
+        }
     }
-}
 
     /**
      * Purchases a specified item with a given payment token.
