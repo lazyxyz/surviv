@@ -4,6 +4,79 @@ interface MintResult {
   values: [number, number][];
 }
 
+interface TokenBalancesResult {
+  success: boolean;
+  balances: FormattedBalance[];
+}
+
+interface FormattedBalance {
+  contractType: string;
+  contractAddress: string;
+  accountAddress: string;
+  tokenID: number;
+  balance: number;
+}
+
+async function getTokenBalances(
+  accountAddresses: string[],
+  contractAddresses: string[],
+  accessKey: string = "AQAAAAAAAKdMeINbvh5WD5qqBoorr9wHtcs",
+  chainID: string = "somnia-testnet"
+): Promise<TokenBalancesResult> {
+  try {
+    let allBalances: FormattedBalance[] = [];
+    let after: string | undefined = undefined;
+
+    do {
+      const response = await fetch("https://somnia-testnet-indexer.sequence.app/rpc/Indexer/GetTokenBalancesByContract", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Access-Key": accessKey,
+        },
+        body: JSON.stringify({
+          chainID,
+          omitMetadata: true,
+          filter: {
+            contractStatus: "ALL",
+            accountAddresses,
+            contractAddresses,
+          },
+          ...(after ? { page: { after } } : {}),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: any = await response.json();
+      const pageBalances = data.balances.map((item: any) => ({
+        contractType: item.contractType,
+        contractAddress: item.contractAddress,
+        accountAddress: item.accountAddress,
+        tokenID: parseInt(item.tokenID),
+        balance: parseInt(item.balance),
+      }));
+
+
+      allBalances = [...allBalances, ...pageBalances];
+      after = data.page?.more ? data.page.after : undefined;
+    } while (after);
+
+    return {
+      success: true,
+      balances: allBalances,
+    };
+  } catch (error) {
+    console.error("Error fetching token balances:", error);
+    return {
+      success: false,
+      balances: [],
+    };
+  }
+}
+
 async function getErc1155Mints(
   transactionHash: string,
   baseUrl: string = 'https://somnia.w3us.site/api/v2'
@@ -74,5 +147,5 @@ async function getErc1155Mints(
   }
 }
 
-export { getErc1155Mints };
-export type { MintResult };
+export { getErc1155Mints, getTokenBalances };
+export type { MintResult, FormattedBalance };

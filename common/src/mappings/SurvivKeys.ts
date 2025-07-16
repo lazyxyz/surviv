@@ -1,5 +1,5 @@
 export const assetsMapping = {
-  "address": "0x0Ff0AEE310EAA4C42171aA6e2E65CF46338579BA",
+  "address": "0x0ff0aee310eaa4c42171aa6e2e65cf46338579ba",
   "assets": [
     "keys"
   ]

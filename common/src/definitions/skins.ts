@@ -20,7 +20,7 @@ export interface SkinDefinition extends ItemDefinition {
     readonly noSwap?: boolean
 }
 
-export const freeSkin: string[] = ["unknown"];
+export const DEFAULT_SKIN: string = "unknown";
 
 const defaultSkin = {
     itemType: ItemType.Skin,

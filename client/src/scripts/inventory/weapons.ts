@@ -1,11 +1,12 @@
 import $ from "jquery";
-import { freeMelees, Melees } from "@common/definitions/melees";
+import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
-import type { weaponPresentType } from "@common/typings";
 // import weapons from ".";
 import { SurvivAssets } from "../account";
 import type { ObjectDefinition } from "@common/utils/objectDefinitions";
 import type { Game } from "../game";
+import { DivineArmsMapping, DivineGunsMapping, GoldArmsMapping, SilverArmsMapping } from "@common/mappings";
+import { getTokenBalances } from "../utils/onchain";
 
 
 // Constants for repeated strings
@@ -22,102 +23,101 @@ interface AssetConfig {
 }
 
 
-
 const selectWeapon = (game: Game, value: object) => {
-    const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
+  const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
 
-    game.console.setBuiltInCVar("dv_weapon_preset", JSON.stringify({
-        ...(weaponPreset?.startsWith("{") ? JSON.parse(weaponPreset) : undefined),
-        ...value
-    }));
+  game.console.setBuiltInCVar("dv_weapon_preset", JSON.stringify({
+    ...(weaponPreset?.startsWith("{") ? JSON.parse(weaponPreset) : undefined),
+    ...value
+  }));
 };
 
 const resetAll = () => {
-    $(".weapons-container-list").empty();
-    $(".weapons-container-aside-assets").empty();
-    $(".weapons-container-card-melee").empty();
-    $(".weapons-container-aside-preview").empty();
+  $(".weapons-container-list").empty();
+  $(".weapons-container-aside-assets").empty();
+  $(".weapons-container-card-melee").empty();
+  $(".weapons-container-aside-preview").empty();
 };
 
 const appendPreview = (images: Array<{
-    zIndex: number
-    rotate?: number
-    url: string
-    class: string
-    x: number
-    y: number
+  zIndex: number
+  rotate?: number
+  url: string
+  class: string
+  x: number
+  y: number
 }>): JQuery<Partial<HTMLElement>> => {
-    const asideElement = $(".weapons-container-aside-preview");
+  const asideElement = $(".weapons-container-aside-preview");
 
-    // clear previous
-    asideElement.empty();
+  // clear previous
+  asideElement.empty();
 
-    // append new
-    images.sort((a, b) => a.zIndex - b.zIndex).map(argument => {
-        const gVector = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        const iVector = document.createElementNS("http://www.w3.org/2000/svg", "image");
+  // append new
+  images.sort((a, b) => a.zIndex - b.zIndex).map(argument => {
+    const gVector = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    const iVector = document.createElementNS("http://www.w3.org/2000/svg", "image");
 
-        $(gVector).css({
-            transformBox: "fill-box",
-            translate: `calc(${argument.x}px - 50%) calc(${argument.y}px - 50%)`,
-            transformOrigin: "center",
-            rotate: `${argument.rotate}deg`
-        });
-
-        $(iVector).attr({
-            class: argument.class,
-            href: argument.url
-        });
-
-        gVector.append(iVector);
-
-        asideElement.append(gVector);
+    $(gVector).css({
+      transformBox: "fill-box",
+      translate: `calc(${argument.x}px - 50%) calc(${argument.y}px - 50%)`,
+      transformOrigin: "center",
+      rotate: `${argument.rotate}deg`
     });
 
-    return asideElement;
+    $(iVector).attr({
+      class: argument.class,
+      href: argument.url
+    });
+
+    gVector.append(iVector);
+
+    asideElement.append(gVector);
+  });
+
+  return asideElement;
 };
 
-const appendAsset = async(
-    idString: string,
-    definition: ObjectDefinition[]
+const appendAsset = async (
+  idString: string,
+  definition: ObjectDefinition[]
 ): Promise<ObjectDefinition[] | undefined> => {
-    const rootAssetsElement = $(".weapons-container-aside-assets");
-    const rootListElement = $(".weapons-container-list");
-    const loadingElement = document.createElement("div");
+  const rootAssetsElement = $(".weapons-container-aside-assets");
+  const rootListElement = $(".weapons-container-list");
+  const loadingElement = document.createElement("div");
 
-    // if existed you need empty (remove all nodes) and append new
-    rootAssetsElement.empty();
+  // if existed you need empty (remove all nodes) and append new
+  rootAssetsElement.empty();
 
-    // prevent spamming call API
-    rootListElement.css("pointer-events", "none");
+  // prevent spamming call API
+  rootListElement.css("pointer-events", "none");
 
-    // append loading ICON
+  // append loading ICON
+  {
+    loadingElement.className = "loading-icon";
+    loadingElement.style.gridColumn = "span 3";
+    loadingElement.style.display = "flex";
+    loadingElement.style.alignItems = "center";
+    loadingElement.style.justifyContent = "center";
+    loadingElement.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
+
+    rootAssetsElement.prepend(loadingElement);
+  }
+
+  const weaponsInstance = [
     {
-        loadingElement.className = "loading-icon";
-        loadingElement.style.gridColumn = "span 3";
-        loadingElement.style.display = "flex";
-        loadingElement.style.alignItems = "center";
-        loadingElement.style.justifyContent = "center";
-        loadingElement.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
+      idString,
+      name: "Default"
+    },
+    ...(definition
+      // should be get related item
+      ?.filter(meta => meta?.idString?.startsWith(idString))
+      // change from orignal to 'Default' at weaponsInstance[0].name
+      ?.filter(meta => meta?.idString !== idString)
+      || [])
+  ];
 
-        rootAssetsElement.prepend(loadingElement);
-    }
-
-    const weaponsInstance = [
-        {
-            idString,
-            name: "Default"
-        },
-        ...(definition
-            // should be get related item
-            ?.filter(meta => meta?.idString?.startsWith(idString))
-            // change from orignal to 'Default' at weaponsInstance[0].name
-            ?.filter(meta => meta?.idString !== idString)
-            || [])
-    ];
-
-    for (const { idString, name } of weaponsInstance) {
-        const weaponItem = $<HTMLDivElement>(`
+  for (const { idString, name } of weaponsInstance) {
+    const weaponItem = $<HTMLDivElement>(`
             <div class="weapons-container-card weapons-container-card-assets" id="weapons-assets-${idString}">
                 <img src="./img/game/shared/weapons/${idString}.svg" alt=${name} width="72px" height="72px" />
 
@@ -125,22 +125,22 @@ const appendAsset = async(
           </div>
         `);
 
-        weaponItem.on("click", () => {
-            $(".weapons-container-card-assets").removeClass("selected");
+    weaponItem.on("click", () => {
+      $(".weapons-container-card-assets").removeClass("selected");
 
-            weaponItem.toggleClass("selected");
-        });
+      weaponItem.toggleClass("selected");
+    });
 
-        rootAssetsElement.append(weaponItem);
-    }
+    rootAssetsElement.append(weaponItem);
+  }
 
-    // reset states
-    {
-        loadingElement.remove();
-        rootListElement.css("pointer-events", "unset");
-    }
+  // reset states
+  {
+    loadingElement.remove();
+    rootListElement.css("pointer-events", "unset");
+  }
 
-    return weaponsInstance;
+  return weaponsInstance;
 };
 
 const showViewBox = (game: Game) => {
@@ -181,7 +181,7 @@ const showViewBox = (game: Game) => {
       zIndex: 4,
       rotate: 0,
     },
-   {
+    {
       class: "assets-world",
       url: `${ASSET_PATH}/weapons/${melee.idString}.svg`,
       x: melee.image?.position.x ?? 0,
@@ -278,19 +278,26 @@ function isOwned(id: string, ownedIds: string[]) {
 
 // Function to display guns
 async function showGuns(game: Game, selectedGunId?: string) {
+  if (!game.account.address) {
+    return;
+  }
+
   try {
-    const divineGuns = await game.account.getBalances(SurvivAssets.DivineGuns).catch((err) => {
-      console.error(`Get DivineGuns error: ${err}`);
-      return {};
+
+    let gunBalances = await getTokenBalances([game.account.address], [DivineGunsMapping.address]);
+    const userGuns: string[] = gunBalances.balances.flatMap(balance => {
+      if (balance.balance > 0) {
+        const itemId = DivineGunsMapping.assets[balance.tokenID];
+        return itemId ? [itemId] : [];
+      }
+      return [];
     });
 
-    const userGunsBalance = { ...divineGuns };
-    const ownedGunIds = Object.keys(userGunsBalance);
     const allGuns = Guns.definitions; // Show all guns, not just owned ones
 
     // Split guns into owned and unowned
-    const ownedGuns = allGuns.filter((gun) => isOwned(gun.idString, ownedGunIds));
-    const unownedGuns = allGuns.filter((gun) => !isOwned(gun.idString, ownedGunIds));
+    const ownedGuns = allGuns.filter((gun) => isOwned(gun.idString, userGuns));
+    const unownedGuns = allGuns.filter((gun) => !isOwned(gun.idString, userGuns));
 
     // Render gun items (owned first, then unowned)
     const $gunList = $("#list-gun").empty();
@@ -337,20 +344,32 @@ async function showGuns(game: Game, selectedGunId?: string) {
 
 // Function to display melees
 async function showMelees(game: Game, selectedMeleeId?: string) {
+  if (!game.account.address) {
+    return;
+  }
+
   try {
-    const [silverArms, goldArms, divineArms] = await Promise.all([
-      game.account.getBalances(SurvivAssets.SilverArms).catch(() => ({})),
-      game.account.getBalances(SurvivAssets.GoldArms).catch(() => ({})),
-      game.account.getBalances(SurvivAssets.DivineArms).catch(() => ({})),
-    ]);
+    const armMappingList = [SilverArmsMapping, GoldArmsMapping, DivineArmsMapping];
+    const armAddresses = armMappingList.map(arm => arm.address);
+    let armBalances = await getTokenBalances([game.account.address], armAddresses);
 
-    const userArmsBalance = { ...silverArms, ...goldArms, ...divineArms };
-    const ownedMeleeIds = [...freeMelees, ...Object.keys(userArmsBalance)];
+     const userArms = armBalances.balances
+        .map(balance => {
+            let itemId = "";
+            armMappingList.forEach(mapping => {
+                if (mapping.address === balance.contractAddress) {
+                    itemId = mapping.assets[balance.tokenID];
+                }
+            });
+            return itemId; // Return itemId regardless
+        })
+        .filter(itemId => !!itemId);
+
+
     const allMelees = Melees.definitions;
-
     // Split melees into owned and unowned
-    const ownedMelees = allMelees.filter((melee) => isOwned(melee.idString, ownedMeleeIds));
-    const unownedMelees = allMelees.filter((melee) => !isOwned(melee.idString, ownedMeleeIds));
+    const ownedMelees = allMelees.filter((melee) => isOwned(melee.idString, userArms));
+    const unownedMelees = allMelees.filter((melee) => !isOwned(melee.idString, userArms));
 
     // Render melee items (owned first, then unowned)
     const $meleeList = $("#list-melee").empty();

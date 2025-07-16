@@ -2,18 +2,25 @@ import $ from 'jquery';
 import { EMOTE_SLOTS } from "@common/constants";
 import type { Game } from "../game";
 import { EmoteCategory, Emotes, type EmoteDefinition } from "@common/definitions/emotes";
-import { TRANSLATIONS, getTranslatedString } from "../../translations";
+import { getTranslatedString } from "../../translations";
 import type { ReferenceTo } from "@common/utils/objectDefinitions";
 import type { TranslationKeys } from "../../typings/translations";
-import { SurvivAssets } from '../account';
+import { getTokenBalances } from '../utils/onchain';
+import { SurvivMemesMapping } from '@common/mappings';
 
 export async function showEmotes(game: Game) {
-    let SurvivMemes = await game.account.getBalances(SurvivAssets.SurvivMemes).catch(err => {
-        console.log(`Get SurvivMemes error: ${err}`);
-        return {};
-    });
+    if (!game.account.address) {
+        return;
+    }
 
-    const playerMemes = Object.keys(SurvivMemes);
+    let memeBalances = await getTokenBalances([game.account.address], [SurvivMemesMapping.address]);
+    const userMemes: string[] = memeBalances.balances.flatMap(balance => {
+        if (balance.balance > 0) {
+            const itemId = SurvivMemesMapping.assets[balance.tokenID];
+            return itemId ? [itemId] : [];
+        }
+        return [];
+    });
 
     // Cache jQuery selectors for performance
     const emoteList = $("#emotes-list");
@@ -59,8 +66,8 @@ export async function showEmotes(game: Game) {
         for (const [category, emoteDefs] of categoryMap.entries()) {
             // Sort: owned first, then unowned
             const sortedEmotes = [...emoteDefs].sort((a, b) => {
-                const aOwned = playerMemes.includes(a.idString);
-                const bOwned = playerMemes.includes(b.idString);
+                const aOwned = userMemes.includes(a.idString);
+                const bOwned = userMemes.includes(b.idString);
                 return Number(bOwned) - Number(aOwned); // owned = true -> 1
             });
 
@@ -73,7 +80,7 @@ export async function showEmotes(game: Game) {
 
             for (const emote of sortedEmotes) {
                 const idString = emote.idString;
-                const isOwned = playerMemes.includes(idString);
+                const isOwned = userMemes.includes(idString);
 
                 const emoteItem = $<HTMLDivElement>(
                     `<div id="emote-${idString}" class="emotes-list-item-container${isOwned ? '' : ' unowned'}">
@@ -150,7 +157,7 @@ export async function showEmotes(game: Game) {
             (emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)).addClass("selected");
             $(`.emotes-list-item-container`).removeClass("selected").css(
                 "cursor",
-                playerMemes.includes(game.console.getBuiltInCVar(cvar) || "none") ? "pointer" : "not-allowed"
+                userMemes.includes(game.console.getBuiltInCVar(cvar) || "none") ? "pointer" : "not-allowed"
             );
             $(`#emote-${game.console.getBuiltInCVar(cvar) || "none"}`).addClass("selected");
         });

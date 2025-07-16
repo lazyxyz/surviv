@@ -1,5 +1,5 @@
 export const assetsMapping = {
-  "address": "0xD81591D94ADA5fD3c92Ed9001Fa8E541aF417df3",
+  "address": "0xd81591d94ada5fd3c92ed9001fa8e541af417df3",
   "assets": [
     "crates"
   ]

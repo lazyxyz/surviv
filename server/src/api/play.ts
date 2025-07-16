@@ -9,7 +9,7 @@ import { forbidden, getIP } from "../utils/serverHelpers"
 import { validateJWT } from "./api";
 import { PacketStream } from "@common/packets/packetStream";
 import { ReadyPacket } from "@common/packets/readyPacket";
-import { Skins } from "@common/definitions/skins";
+import { DEFAULT_SKIN, Skins } from "@common/definitions/skins";
 import { Badges } from "@common/definitions/badges";
 import { EMOTE_SLOTS } from "@common/constants";
 import { Emotes } from "@common/definitions/emotes";
@@ -153,7 +153,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                 }
 
                 // Verify Skin
-                let skin = Skins.fromStringSafe("unknown"); // Default skins
+                let skin = Skins.fromStringSafe(DEFAULT_SKIN); // Default skins
                 await verifySkin(data.address, data.skin, 5000).then((isValid) => {
                     if (isValid) skin = Skins.fromStringSafe(data.skin);
                 }).catch(err => {
