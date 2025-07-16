@@ -1,8 +1,7 @@
 import $ from "jquery";
-import { SurvivAssets } from "../account";
 import type { Game } from "../game";
 import { successAlert, errorAlert, warningAlert } from "../modal";
-import type { MintResult } from "../utils/onchain";
+import { getTokenBalances, type MintResult } from "../utils/onchain";
 
 import {
     SilverSkinsMapping,
@@ -12,14 +11,15 @@ import {
     GoldArmsMapping,
     DivineArmsMapping,
     DivineGunsMapping,
-    SurvivMemesMapping
+    SurvivMemesMapping,
+    SurvivKeysMapping,
+    SurvivCratesMapping
 } from "@common/mappings";
 
-function renderCrates(userCrateBalances: any, keyBalances: number): void {
-    const crateImages = userCrateBalances?.crates
-        ? new Array(Number(userCrateBalances.crates)).fill({ image: "./img/misc/crate.png" })
-        : [];
-    $("#total-crates").text(`You have: ${userCrateBalances?.crates || 0} crates - ${keyBalances} keys`);
+function renderCrates(userCrateBalances: number, keyBalances: number): void {
+    const crateImages = new Array(userCrateBalances).fill({ image: "./img/misc/crate.png" });
+
+    $("#total-crates").text(`You have: ${userCrateBalances || 0} crates - ${keyBalances} keys`);
     $(".my-crates-customize").empty();
     crateImages.forEach(item => {
         $(".my-crates-customize").append(`
@@ -262,8 +262,8 @@ async function updateClaimButton(game: Game): Promise<void> {
                 // successAlert("Items claimed successfully!");
                 if (result.hash) {
                     const explorerLink = `https://shannon-explorer.somnia.network/tx/${result.hash}?tab=index"`;
-                    
-                    if(result.balances) {
+
+                    if (result.balances) {
                         showMintedItemsPopup(result.balances, explorerLink);
                     } else {
                         showMintedItemsPopup([], explorerLink);
@@ -283,21 +283,23 @@ async function updateClaimButton(game: Game): Promise<void> {
 }
 
 async function loadCrates(game: Game): Promise<void> {
-    const userKeyBalances = await game.account.getBalances(SurvivAssets.SurvivKeys).catch(err => {
-        console.error(`Failed to load key balance: ${err}`);
-        return { keys: 0 };
-    });
-    const userCrateBalances = await game.account.getBalances(SurvivAssets.SurvivCrates).catch(err => {
-        console.error(`Failed to load crate balance: ${err}`);
-        return { crates: 0 };
-    });
+    if (!game.account.address) {
+        warningAlert("Please connect your wallet to continue!")
+        return;
+    }
 
-    renderCrates(userCrateBalances, userKeyBalances?.keys || 0);
+    let keyBalances = await getTokenBalances([game.account.address], [SurvivKeysMapping.address]);
+    const userKeyBalances = keyBalances.balances.length > 0 ? keyBalances.balances[0].balance : 0;
+
+    let crateBalances = await getTokenBalances([game.account.address], [SurvivCratesMapping.address]);
+    const userCrateBalances = crateBalances.balances.length > 0 ? crateBalances.balances[0].balance : 0;
+
+    renderCrates(userCrateBalances, userKeyBalances);
 
     const crates = document.querySelectorAll(".my-crates-child");
     const totalSelected = document.querySelector(".total-selected");
     const openNowButton = document.querySelector<HTMLButtonElement>(".open-now");
-    setupCrateOpening(game, crates, totalSelected, openNowButton, userKeyBalances?.keys || 0);
+    setupCrateOpening(game, crates, totalSelected, openNowButton, userKeyBalances);
 }
 
 export async function loadBase(game: Game): Promise<void> {

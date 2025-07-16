@@ -51,9 +51,16 @@ async function getTokenBalances(
       }
 
       const data: any = await response.json();
-      console.log("data: ", data);
+      const pageBalances = data.balances.map((item: any) => ({
+        contractType: item.contractType,
+        contractAddress: item.contractAddress,
+        accountAddress: item.accountAddress,
+        tokenID: parseInt(item.tokenID),
+        balance: parseInt(item.balance),
+      }));
 
-      allBalances = [...allBalances, ...data.balances];
+
+      allBalances = [...allBalances, ...pageBalances];
       after = data.page?.more ? data.page.after : undefined;
     } while (after);
 
