@@ -1,5 +1,5 @@
 export const assetsMapping = {
-  "address": "0xFE3c7597Cb2fFfB4c8544246CBb8B4fA6c80f8A1",
+  "address": "0xfe3c7597cb2fffb4c8544246cbb8b4fa6c80f8a1",
   "assets": [
     "ahegao",
     "astro",

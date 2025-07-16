@@ -1,10 +1,16 @@
 import $ from "jquery";
 import type { ReferenceTo } from "@common/utils/objectDefinitions";
 import type { Game } from "../game";
-import { freeSkin, Skins, type SkinDefinition } from "@common/definitions/skins";
+import { Skins, type SkinDefinition } from "@common/definitions/skins";
 import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
-import { SurvivAssets } from "../account";
+import { getTokenBalances } from "../utils/onchain";
+
+import {
+    SilverSkinsMapping,
+    GoldSkinsMapping,
+    DivineSkinsMapping,
+} from "@common/mappings";
 
 // handler display change preview
 export const updateSplashCustomize = (skinID: string): void => {
@@ -49,18 +55,22 @@ export async function showSkins(game: Game, newUnlockedSkinId?: string) {
     const skinList = $<HTMLDivElement>("#skins-list");
     const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-async-promise-executor
-    let SilverSkins = await game.account.getBalances(SurvivAssets.SilverSkins).catch(err => {
-        console.log(`Get SilverSkins error: ${err}`);
-    });
-    let GoldSkins = await game.account.getBalances(SurvivAssets.GoldSkins).catch(err => {
-        console.log(`Get SilverSkins error: ${err}`);
-    });
-    let DivineSkins = await game.account.getBalances(SurvivAssets.DivineSkins).catch(err => {
-        console.log(`Get SilverSkins error: ${err}`);
-    });
-    const UserSkins = { ...SilverSkins, ...GoldSkins, ...DivineSkins };
-    const mySkins = Object.entries(UserSkins).map(([key, _]) => key);
+
+    const skinAddresses = [SilverSkinsMapping.address, GoldSkinsMapping.address, DivineSkinsMapping.address]
+    let skinBalances = await getTokenBalances([game.account.address], skinAddresses);
+    const skinsMappingList = [SilverSkinsMapping, GoldSkinsMapping, DivineSkinsMapping];
+
+    const userSkins = skinBalances.balances
+        .map(balance => {
+            let itemId = "";
+            skinsMappingList.forEach(mapping => {
+                if (mapping.address === balance.contractAddress) {
+                    itemId = mapping.assets[balance.tokenID];
+                }
+            });
+            return itemId; // Return itemId regardless
+        })
+        .filter(itemId => !!itemId);
 
     /* */
     // Skins list
@@ -68,29 +78,14 @@ export async function showSkins(game: Game, newUnlockedSkinId?: string) {
         !(argument.hideFromLoadout || !(argument.rolesRequired ?? [role]).includes(role))
     );
 
-    // freeSkin is always at start of the list
-    const freeSkinIds = [...freeSkin];
-
-    // push after freeSkin
-    let rewardSkinIds: string[] = [];
-    if (newUnlockedSkinId && !freeSkinIds.includes(newUnlockedSkinId)) {
-        rewardSkinIds = [newUnlockedSkinId];
-    }
-
-    // another skins (not contain freeSkin and rewardSkin)
-    const otherActiveSkins = mySkins.filter(
-        id => !freeSkinIds.includes(id) && id !== newUnlockedSkinId
-    );
     // inactive skins
     const inactiveSkins = allSkins
         .map(s => s.idString)
-        .filter(id => ![...freeSkinIds, ...rewardSkinIds, ...otherActiveSkins].includes(id));
+        .filter(id => ![, ...userSkins].includes(id));
 
     // sort skins
     const sortedSkinIds = [
-        ...freeSkinIds,
-        ...rewardSkinIds,
-        ...otherActiveSkins,
+        ...userSkins,
         ...inactiveSkins
     ];
 
@@ -101,7 +96,7 @@ export async function showSkins(game: Game, newUnlockedSkinId?: string) {
         const skinDef = allSkins.find(s => s.idString === idString);
         if (!skinDef) continue;
 
-        const isActive = [...freeSkin, ...(mySkins || [])].includes(idString);
+        const isActive = [...(userSkins || [])].includes(idString);
         const isSelected = idString === currentSkin;
 
         const skinItem = $<HTMLDivElement>(`

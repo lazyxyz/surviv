@@ -1,5 +1,5 @@
 export const assetsMapping = {
-  "address": "0x368eb2453f048e49CDd6Be67D47a3F41D4c1bB72",
+  "address": "0x368eb2453f048e49cdd6be67d47a3f41d4c1bb72",
   "assets": [
     "android",
     "bee",

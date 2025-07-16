@@ -2,7 +2,7 @@ import { Ammos } from "./definitions/ammos";
 import { HealingItems } from "./definitions/healingItems";
 import { type Mode } from "./definitions/modes";
 import { Scopes } from "./definitions/scopes";
-import { freeSkin } from "./definitions/skins";
+import { DEFAULT_SKIN } from "./definitions/skins";
 import { Throwables } from "./definitions/throwables";
 import { freezeDeep } from "./utils/misc";
 import { ItemType } from "./utils/objectDefinitions";
@@ -58,7 +58,7 @@ export const GameConstants = freezeDeep({
         maxWeapons: inventorySlotTypings.length,
         nameMaxLength: Constants.PLAYER_NAME_MAX_LENGTH,
         defaultName: "Player",
-        defaultSkin: freeSkin[0],
+        defaultSkin: DEFAULT_SKIN,
         killLeaderMinKills: 3,
         maxMouseDist: 256,
         reviveTime: 8,
