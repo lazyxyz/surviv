@@ -12,10 +12,10 @@ import { ReadyPacket } from "@common/packets/readyPacket";
 import { DEFAULT_SKIN, Skins } from "@common/definitions/skins";
 import { Badges } from "@common/definitions/badges";
 import { EMOTE_SLOTS } from "@common/constants";
-import { Emotes } from "@common/definitions/emotes";
+import { EmoteDefinition, Emotes } from "@common/definitions/emotes";
 import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
-import { verifyGun, verifyMelee, verifySkin } from "./balances";
+import { verifyEmotes, verifyGun, verifyMelee, verifySkin } from "./balances";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
 
 const simultaneousConnections: Record<string, number> = {};
@@ -143,14 +143,13 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                     return;
                 }
 
-                let emotes = undefined;
-                if (data.emotes) {
-                    const emoteIds = data.emotes.split(',');
-                    // VERIFY BALANCES
-                    emotes = emoteIds.map(emoteId => Emotes.fromStringSafe(emoteId));
-                } else {
+                let emotes: readonly (EmoteDefinition | undefined)[] = [];
+                await verifyEmotes(data.address, data.emotes.split(',')).then((validEmotes) => {
+                    emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
+                }).catch(err => {
+                    console.log("Verify melee failed: ", err);
                     emotes = EMOTE_SLOTS.map(slot => undefined);
-                }
+                })
 
                 // Verify Skin
                 let skin = Skins.fromStringSafe(DEFAULT_SKIN); // Default skins
