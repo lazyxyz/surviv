@@ -15,7 +15,7 @@ import {
     SurvivCratesMapping
 } from "@common/mappings";
 import { getTokenBalances } from "../../utils/onchain/sequence";
-import { ShopCache } from "../shop";
+import { ShopCache } from ".";
 
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
     const crateImages = new Array(userCrateBalances).fill({ image: "./img/misc/crate.png" });
@@ -117,10 +117,10 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
                     // Perform contract interaction
                     await game.account.requestOpenCrates(selectedCount);
                     // Update local balances
-                    localCrateBalance -= selectedCount;
-                    localKeyBalance -= selectedCount;
+                    ShopCache.assetsBalance.Keys -= selectedCount;
+                    ShopCache.assetsBalance.Crates -= selectedCount;
                     // Update UI
-                    await updateBalancesUI(localCrateBalance, localKeyBalance, totalSelected, openNowButton);
+                    await updateBalancesUI(totalSelected, openNowButton);
                     setTimeout(() => renderClaimButton(game), 2000);
                     successAlert("Crates opened successfully!");
                 }
@@ -136,15 +136,13 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
 }
 
 async function updateBalancesUI(
-    localCrateBalance: number,
-    localKeyBalance: number,
     totalSelected: Element | null,
     openNowButton: HTMLButtonElement | null
 ): Promise<void> {
     // Remove opened crates
     document.querySelectorAll(".my-crates-child.active").forEach(crate => crate.remove());
     // Update total crates and keys display
-    $("#total-crates").text(`You have: ${localCrateBalance} crates - ${localKeyBalance} keys`);
+    $("#total-crates").text(`You have: ${ShopCache.assetsBalance.Crates} crates - ${ShopCache.assetsBalance.Keys} keys`);
     // Reset selection
     if (totalSelected) {
         totalSelected.textContent = "0 selected";
@@ -283,28 +281,34 @@ async function updateClaimButton(game: Game): Promise<void> {
     });
 }
 
-async function loadCrates(game: Game): Promise<void> {
-    if (!game.account.address) {
-        return;
-    }
+async function loadCrates(game: Game, keyBalance: number, crateBalance: number): Promise<void> {
 
-    let keyBalances = await getTokenBalances([game.account.address], [SurvivKeysMapping.address]);
-    const userKeyBalances = keyBalances.balances.length > 0 ? keyBalances.balances[0].balance : 0;
-
-    let crateBalances = await getTokenBalances([game.account.address], [SurvivCratesMapping.address]);
-    const userCrateBalances = crateBalances.balances.length > 0 ? crateBalances.balances[0].balance : 0;
-
-    renderCrates(userCrateBalances, userKeyBalances);
+    renderCrates(crateBalance, keyBalance);
 
     const crates = document.querySelectorAll(".my-crates-child");
     const totalSelected = document.querySelector(".total-selected");
     const openNowButton = document.querySelector<HTMLButtonElement>(".open-now");
-    setupCrateOpening(game, crates, totalSelected, openNowButton, userKeyBalances);
+    setupCrateOpening(game, crates, totalSelected, openNowButton, keyBalance);
 }
 
 export async function loadBase(game: Game): Promise<void> {
-    if (ShopCache.baseLoaded) return;
-    ShopCache.baseLoaded = true;
+    if (!game.account.address) {
+        return;
+    }
 
-    await Promise.all([loadCrates(game), updateClaimButton(game)]);
+    if (!ShopCache.baseLoaded) {
+        let keyBalances = await getTokenBalances([game.account.address], [SurvivKeysMapping.address]);
+        ShopCache.assetsBalance.Keys = keyBalances.balances.length > 0 ? keyBalances.balances[0].balance : 0;
+
+        let crateBalances = await getTokenBalances([game.account.address], [SurvivCratesMapping.address]);
+        ShopCache.assetsBalance.Crates = crateBalances.balances.length > 0 ? crateBalances.balances[0].balance : 0;
+    };
+
+    await Promise.all(
+        [
+            loadCrates(game, ShopCache.assetsBalance.Keys, ShopCache.assetsBalance.Crates),
+            updateClaimButton(game)
+        ]
+    );
+    ShopCache.baseLoaded = true;
 }

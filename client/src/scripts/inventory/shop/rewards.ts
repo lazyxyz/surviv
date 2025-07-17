@@ -1,7 +1,7 @@
 import $ from "jquery";
 import type { Game } from "../../game";
 import { successAlert, errorAlert } from "../../modal";
-import { ShopCache } from "../shop";
+import { ShopCache } from ".";
 
 interface RewardItem {
     image: string;
@@ -49,7 +49,8 @@ function renderRewardList(game: Game, rewardData: RewardData): void {
         $claimButton.prop("disabled", true);
         try {
             await game.account.claimRewards();
-            successAlert("Rewards claimed successfully!")
+            successAlert("Rewards claimed successfully!");
+            ShopCache.assetsBalance.Crates += totalCrates;
         } catch (err) {
             console.error(`Failed to claim rewards: ${err}`);
             errorAlert("No valid crates found");
@@ -62,9 +63,6 @@ function renderRewardList(game: Game, rewardData: RewardData): void {
 }
 
 export async function loadRewards(game: Game): Promise<void> {
-    if (ShopCache.rewardsLoaded) return;
-    ShopCache.rewardsLoaded = true;
-
     const rewardData = await game.account.getValidRewards().catch((err: any) => {
         console.error(`Failed to load rewards: ${err}`);
         return { validCrates: [] };

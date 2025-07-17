@@ -5,10 +5,10 @@ import type { Game } from "../../game";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 import { SurvivKeysMapping, SurvivCratesMapping, SurvivCardsMapping } from "@common/mappings";
 import { getTokenBalances } from "../../utils/onchain/sequence";
-import { ShopCache } from "../shop";
+import { ShopCache } from ".";
 
 interface StoreItem {
-    balance: number;
+    // balance: number;
     name: string;
     image: string;
     price: string;
@@ -46,7 +46,7 @@ function renderStoreItems(game: Game, storeItems: StoreItem[]): void {
         // Use placeholder price initially
         const $card = $(`
       <div class="crates-card" data-item-type="${item.itemType}">
-        <p>You have ${item.balance}</p>
+        <p>You have ${ShopCache.assetsBalance[item.itemType]}</p>
         <img src="${item.image}" class="crates-image" alt="${item.name}">
         <div class="crates-information">
           <p>${item.name}</p>
@@ -160,7 +160,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
                 // Update balance locally
                 const item = storeItems.find(item => item.itemType === itemType);
                 if (item) {
-                    item.balance = Math.max(0, item.balance + amount); // Subtract purchased amount, ensure non-negative
+                    ShopCache.assetsBalance[item.itemType] += amount;
                 }
                 amount = 0;
                 $purchaseAmount.val("0");
@@ -192,45 +192,48 @@ export async function loadStore(game: Game): Promise<void> {
         return;
     }
 
-    if(ShopCache.storeLoaded) return;
-    ShopCache.storeLoaded = true;
+    if (!ShopCache.storeLoaded) {
+        ShopCache.storeLoaded = true;
+        const balances = await Promise.all([
+            getTokenBalances([game.account.address], [SurvivKeysMapping.address]).then(balances => {
+                return balances.balances.length > 0 ? balances.balances[0].balance : 0;
+            }).catch(err => {
+                console.error(`Failed to fetch key balances: ${err}`);
+                return 0;
+            }),
+            getTokenBalances([game.account.address], [SurvivCratesMapping.address]).then(balances => {
+                return balances.balances.length > 0 ? balances.balances[0].balance : 0;
+            }).catch(err => {
+                console.error(`Failed to fetch crate balances: ${err}`);
+                return 0;
+            }),
+            getTokenBalances([game.account.address], [SurvivCardsMapping.address]).then(balances => {
+                return balances.balances.length > 0 ? balances.balances[0].balance : 0;
+            }).catch(err => {
+                console.error(`Failed to fetch card balances: ${err}`);
+                return 0;
+            }),
+        ]);
 
-    const [keyBalances, crateBalances, cardBalances] = await Promise.all([
-        getTokenBalances([game.account.address], [SurvivKeysMapping.address]).catch(err => {
-            console.error(`Failed to fetch key balances: ${err}`);
-            return { success: false, balances: [] };
-        }),
-        getTokenBalances([game.account.address], [SurvivCratesMapping.address]).catch(err => {
-            console.error(`Failed to fetch crate balances: ${err}`);
-            return { success: false, balances: [] };
-        }),
-        getTokenBalances([game.account.address], [SurvivCardsMapping.address]).catch(err => {
-            console.error(`Failed to fetch card balances: ${err}`);
-            return { success: false, balances: [] };
-        }),
-    ]);
-
-    const userKeyBalances = keyBalances.balances.length > 0 ? keyBalances.balances[0].balance : 0;
-    const userCrateBalances = crateBalances.balances.length > 0 ? crateBalances.balances[0].balance : 0;
-    const userCardBalances = cardBalances.balances.length > 0 ? cardBalances.balances[0].balance : 0;
+        ShopCache.assetsBalance["Keys"] = balances[0];
+        ShopCache.assetsBalance["Crates"] = balances[1];
+        ShopCache.assetsBalance["Cards"] = balances[2];
+    };
 
     const storeItems: StoreItem[] = [
         {
-            balance: userKeyBalances,
             name: "Surviv Keys",
             image: "./img/misc/Keys.png",
             price: "Loading...", // Placeholder, actual price fetched in renderStoreItems
             itemType: "Keys",
         },
         {
-            balance: userCrateBalances,
             name: "Surviv Crates",
             image: "./img/misc/crate.png",
             price: "Loading...",
             itemType: "Crates",
         },
         {
-            balance: userCardBalances,
             name: "Surviv Cards",
             image: "./img/misc/card.gif",
             price: "Loading...",

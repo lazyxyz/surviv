@@ -1,9 +1,10 @@
 import $ from "jquery";
-import type { Game } from "../game";
-import { InventoryCache } from ".";
-import { loadStore } from "./shop/store";
-import { loadBase } from "./shop/base";
-import { loadRewards } from "./shop/rewards";
+import type { Game } from "../../game";
+import { InventoryCache } from "..";
+import { loadStore } from "./store";
+import { loadBase } from "./base";
+import { loadRewards } from "./rewards";
+import type { SaleItemType } from "../../account";
 
 
 function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeListOf<HTMLElement>) {
@@ -28,7 +29,7 @@ function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeL
 export let ShopCache: {
     storeLoaded: boolean,
     baseLoaded: boolean,
-    rewardsLoaded: boolean,
+    assetsBalance: Record<SaleItemType, number>;
 }
 
 export async function showShop(game: Game) {
@@ -38,7 +39,11 @@ export async function showShop(game: Game) {
     ShopCache = {
         storeLoaded: false,
         baseLoaded: false,
-        rewardsLoaded: false,
+        assetsBalance: {
+            Crates: 0,
+            Cards: 0,
+            Keys: 0
+        }
     }
 
     // Setup tabs

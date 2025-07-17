@@ -590,8 +590,33 @@ export class Account extends EIP6963 {
             const remainingCommits = await crateBaseContract.getCommits(signer.address);
 
             if (remainingCommits.length > 0n) {
+
+                const feeData = await ethersProvider.getFeeData();
+                const remainingCommitsArray = Array.from(remainingCommits);
+
+                const numberOfCrates = remainingCommitsArray.reduce(
+                    (sum: number, item: any) => sum + Number(item[1] ?? 0),
+                    0
+                );
+                let gasPrice;
+                const gasPriceMultiplier = 1 + 0.01 * numberOfCrates; // 1% increase per crate
+
+                // Check if the network supports EIP-1559
+                if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas) {
+                    // Increase maxFeePerGas by 1% per crate
+                    gasPrice = {
+                        maxFeePerGas: (feeData.maxFeePerGas * BigInt(Math.round(gasPriceMultiplier * 100))) / 100n,
+                        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas, // Keep priority fee as suggested
+                    };
+                } else if (feeData.gasPrice) {
+                    // For non-EIP-1559 networks, increase gasPrice by 1% per crate
+                    gasPrice = {
+                        gasPrice: (feeData.gasPrice * BigInt(Math.round(gasPriceMultiplier * 100))) / 100n,
+                    };
+                }
+
                 // Execute claim transaction
-                const tx = await crateBaseContract.openCratesBatch();
+                const tx = await crateBaseContract.openCratesBatch(gasPrice);
                 await tx.wait();
 
                 // Await the balances and return the result
