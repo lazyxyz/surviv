@@ -11,30 +11,7 @@ import {
     DivineSkinsMapping,
 } from "@common/mappings";
 import { getTokenBalances } from "../utils/onchain/sequence";
-import { InventoryCache } from ".";
-
-// handler display change preview
-export const updateSplashCustomize = (skinID: string): void => {
-    $<HTMLDivElement>(".assets-base").attr(
-        "href",
-        `./img/game/shared/skins/${skinID}_base.svg`
-    );
-
-    $<HTMLDivElement>(".assets-fist").attr(
-        "href",
-        `./img/game/shared/skins/${skinID}_fist.svg`
-    );
-
-    $<HTMLDivElement>("#skin-base").css(
-        "background-image",
-        `url("./img/game/shared/skins/${skinID}_base.svg")`
-    );
-
-    $<HTMLDivElement>("#skin-left-fist, #skin-right-fist").css(
-        "background-image",
-        `url("./img/game/shared/skins/${skinID}_fist.svg")`
-    );
-};
+import { InventoryCache, updateSplashCustomize } from ".";
 
 // handler select and save skin
 function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {

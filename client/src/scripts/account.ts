@@ -3,8 +3,7 @@ import $, { error } from "jquery";
 import { ACCESS_TOKEN, PUBLIC_KEY, SELECTOR_WALLET, shorten } from "./utils/constants";
 import { EIP6963, type Provider6963Props } from "./eip6963";
 import { ethers, toBeHex } from "ethers";
-import { resetPlayButtons, type RegionInfo } from "./ui";
-import { Config } from "../config";
+import { resetPlayButtons } from "./ui";
 
 import {
     SilverSkinsMapping,
