@@ -97,13 +97,13 @@ export async function setUpUI(game: Game): Promise<void> {
                 const translationString = `play_${["solo", "squad"][buttonIndex]}`;
                 let logoSrc = "";
 
-                 if (typeof MODE.modeLogoImage === "string") {
-            logoSrc = MODE.modeLogoImage;
-        } else {
-            logoSrc = buttonIndex === 0
-                ? MODE.modeLogoImage.solo
-                : MODE.modeLogoImage.squads;
-        }
+                if (typeof MODE.modeLogoImage === "string") {
+                    logoSrc = MODE.modeLogoImage;
+                } else {
+                    logoSrc = buttonIndex === 0
+                        ? MODE.modeLogoImage.solo
+                        : MODE.modeLogoImage.squads;
+                }
 
                 button.html(`
                     <img class="btn-icon" width="26" height="26" src=${logoSrc}>
@@ -254,8 +254,6 @@ export async function setUpUI(game: Game): Promise<void> {
         };
 
         listItem.find(".server-player-count").text(serverInfo.playerCount ?? "-");
-
-        console.log(`Loaded server info for region ${regionID}`);
     });
     await Promise.all(regionPromises);
 
@@ -532,9 +530,7 @@ export async function setUpUI(game: Game): Promise<void> {
                     joinedTeam = true;
                     teamID = data.teamID;
                     window.location.hash = `#${teamID}`;
-
-                    ui.createTeamUrl.val(`${window.location.origin}/?region=${game.console.getBuiltInCVar("cv_region")}#${teamID}`);
-
+                    ui.createTeamUrl.val(`${window.location.origin}/?region=${game.console.getBuiltInCVar("cv_region") || Config.defaultRegion}#${teamID}`);
                     ui.createTeamAutoFill.prop("checked", data.autoFill);
                     ui.createTeamLock.prop("checked", data.locked);
                     break;
@@ -797,11 +793,10 @@ export async function setUpUI(game: Game): Promise<void> {
 
     // Select region
     serverSelect.on("change", () => {
-        // const value = serverSelect.val() as string | undefined;
-
-        /* if (value !== undefined) {
+        const value = serverSelect.val() as string | undefined;
+        if (value !== undefined) {
             game.console.setBuiltInCVar("cv_region", value);
-        } */
+        }
     });
 
     $("#btn-quit-game, #btn-spectate-menu, #btn-menu").on("click", () => {
