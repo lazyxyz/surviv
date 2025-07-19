@@ -62,7 +62,7 @@ import { Tween } from "./utils/tween";
 import { EIP6963 } from "./eip6963";
 import { Account } from "./account";
 import { ReadyPacket, type PlayerData } from "@common/packets/readyPacket";
-import { onConnectWallet, visibleWallet } from "./wallet";
+import { onConnectWallet, showWallet } from "./wallet";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { Melees } from "@common/definitions/melees";
 import { errorAlert } from "./modal";
@@ -253,8 +253,8 @@ export class Game {
 
         void Promise.all([
             initPixi(),
-            visibleWallet(game),
             onConnectWallet(game),
+            showWallet(game),
             setUpUI(game),
         ]).then(() => {
             showInventory(game);

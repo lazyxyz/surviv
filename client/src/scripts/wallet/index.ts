@@ -48,6 +48,7 @@ export function onConnectWallet(game: Game): void {
     let turnstileToken: string | null = null;
 
     $("#connect-wallet-btn").on("click", async () => {
+        console.log("CONNECT WALLET");
         $(".connect-wallet-portal").css("display", "block");
         turnstileToken = null;
         $("#turnstile-widget").empty();
@@ -134,7 +135,9 @@ export function onConnectWallet(game: Game): void {
     }
 };
 
-export function visibleWallet(game: Game): void {
+export function showWallet(game: Game): void {
+    if (!game.account.address) $("#connect-wallet-btn").trigger("click");
+
     if (game?.eip6963.provider?.provider && game.account.address?.length) {
         // handler first time you need visible container
         {
