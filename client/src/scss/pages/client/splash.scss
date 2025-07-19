@@ -393,7 +393,7 @@
 #splash-customize {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 28px;
 
   #skin-container {
     position: relative;
@@ -426,7 +426,6 @@
   }
 }
 
-
 #splash-options {
   position: relative;
   z-index: 1;
@@ -435,7 +434,7 @@
   justify-content: center;
   min-height: 312px;
 
-    .btn-quests {
+  .btn-quests {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -724,7 +723,7 @@
   margin-top: 14px;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   background: palette.$transparent_bg;
   padding: 20px;
   border-radius: 20px;
