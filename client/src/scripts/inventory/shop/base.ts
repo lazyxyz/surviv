@@ -257,7 +257,6 @@ async function updateClaimButton(game: Game): Promise<void> {
             if (result.error) {
                 errorAlert(result.error);
             } else {
-                // successAlert("Items claimed successfully!");
                 if (result.hash) {
                     const explorerLink = `https://shannon-explorer.somnia.network/tx/${result.hash}?tab=index"`;
 
@@ -296,8 +295,8 @@ export async function loadBase(game: Game): Promise<void> {
     }
 
     if (!ShopCache.baseLoaded) {
-        ShopCache.assetsBalance.Keys = (await game.account.getBalances(SurvivAssets.SurvivKeys))["keys"];
-        ShopCache.assetsBalance.Crates = (await game.account.getBalances(SurvivAssets.SurvivCrates))["crates"];
+        ShopCache.assetsBalance.Keys = (await game.account.getBalances(SurvivAssets.SurvivKeys))["keys"] || 0;
+        ShopCache.assetsBalance.Crates = (await game.account.getBalances(SurvivAssets.SurvivCrates))["crates"] || 0;
     };
 
     await Promise.all(

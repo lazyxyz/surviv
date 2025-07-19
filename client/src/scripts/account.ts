@@ -25,7 +25,6 @@ import { abi as crateBaseABI } from "@common/abis/ICrateBase.json";
 import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
 import { errorAlert } from "./modal";
-import { getErc1155Mints } from "./utils/onchain";
 
 const CHAIN_ID = SurvivMapping.ChainId;
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
@@ -90,6 +89,16 @@ interface ValidRewards {
     validSignatures: string[];
 }
 
+export interface MintResult {
+    address: string;
+    values: [number, number][];
+}
+
+
+// ABI for the TransferSingle event
+const TRANSFER_SINGLE_ABI = [
+    'event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)'
+];
 
 export class Account extends EIP6963 {
     address: string | null | undefined;
@@ -571,7 +580,7 @@ export class Account extends EIP6963 {
      * @returns A promise resolving to the API response.
      * @throws Error if the API request fails or authentication is invalid.
      */
-    async claimItems(): Promise<{ hash?: string; balances?: any[]; error?: string }> {
+    async claimItems(): Promise<{ hash?: string; balances?: MintResult[], error?: string }> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
@@ -618,13 +627,11 @@ export class Account extends EIP6963 {
                 const tx = await crateBaseContract.openCratesBatch(gasPrice);
                 await tx.wait();
 
-                // Await the balances and return the result
-                const balances = await getErc1155Mints(tx.hash).catch(err => {
-                    return [];
-                });
+                const claimItems = await this.getTokenMints(tx.hash)
+                console.log("claimItems: ", claimItems);
 
                 clearTimeout(timeoutId);
-                return { hash: tx.hash, balances };
+                return { hash: tx.hash, balances: claimItems };
             } else {
                 clearTimeout(timeoutId);
                 return { error: 'No requests available' };
@@ -722,6 +729,90 @@ export class Account extends EIP6963 {
         } catch (error: any) {
             clearTimeout(timeoutId);
             throw new Error(`Failed to request get commits: ${error.message || 'Unknown error'}`);
+        }
+    }
+
+    async getTokenMints(txnHash: string): Promise<MintResult[]> {
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
+
+        try {
+             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            // Fetch the transaction receipt using the provider
+            const receipt = await ethersProvider.getTransactionReceipt(txnHash);
+
+            if (!receipt) {
+                throw new Error(`Transaction receipt not found for hash: ${txnHash}`);
+            }
+
+            // Find all TransferSingle event logs
+            const transferSingleTopic = ethers.id('TransferSingle(address,address,address,uint256,uint256)');
+            const transferSingleLogs = receipt.logs.filter(
+                (log: any) => log.topics[0] === transferSingleTopic
+            );
+
+            if (transferSingleLogs.length === 0) {
+                console.warn('No ERC-1155 minting events found in the transaction logs');
+                return [];
+            }
+
+            // Create an interface for decoding the logs
+            const iface = new ethers.Interface(TRANSFER_SINGLE_ABI);
+
+            // Group mints by contract address
+            const mintsByCollection: { [key: string]: MintResult } = {};
+
+            for (const log of transferSingleLogs) {
+                const decodedLog = iface.parseLog({
+                    topics: log.topics,
+                    data: log.data,
+                });
+
+                if (!decodedLog) {
+                    console.warn(`Failed to decode TransferSingle event for log index ${log.index}`);
+                    continue;
+                }
+
+                const { operator, from, to, id, value } = decodedLog.args;
+                const contractAddress = log.address.toLowerCase();
+
+                // Initialize MintResult for this contract if not already present
+                if (!mintsByCollection[contractAddress]) {
+                    mintsByCollection[contractAddress] = {
+                        address: contractAddress,
+                        values: [],
+                    };
+                }
+
+                // Convert id and value to numbers
+                const tokenId = Number(id);
+                const tokenValue = Number(value);
+
+                // Check if tokenId already exists in values
+                const existingEntry = mintsByCollection[contractAddress].values.find(([id]) => id === tokenId);
+
+                if (existingEntry) {
+                    // Update the value if tokenId already exists
+                    existingEntry[1] += tokenValue;
+                } else {
+                    // Add new entry if tokenId is unique
+                    mintsByCollection[contractAddress].values.push([tokenId, tokenValue]);
+                }
+            }
+
+            // Convert grouped object to array
+            const result = Object.values(mintsByCollection);
+
+            // Sort values by tokenId for consistency
+            result.forEach((mint) => {
+                mint.values.sort((a, b) => a[0] - b[0]);
+            });
+
+            return result;
+        } catch (error) {
+            console.log("error: ", error);
+            return [];
         }
     }
 }

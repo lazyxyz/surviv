@@ -194,9 +194,9 @@ export async function loadStore(game: Game): Promise<void> {
 
     if (!ShopCache.storeLoaded) {
         ShopCache.storeLoaded = true;
-        ShopCache.assetsBalance["Keys"] = (await game.account.getBalances(SurvivAssets.SurvivKeys))["keys"];
-        ShopCache.assetsBalance["Crates"] = (await game.account.getBalances(SurvivAssets.SurvivCrates))["crates"];
-        ShopCache.assetsBalance["Cards"] = (await game.account.getBalances(SurvivAssets.SurvivCards))["cards"];
+        ShopCache.assetsBalance["Keys"] = (await game.account.getBalances(SurvivAssets.SurvivKeys))["keys"] || 0;
+        ShopCache.assetsBalance["Crates"] = (await game.account.getBalances(SurvivAssets.SurvivCrates))["crates"] || 0;
+        ShopCache.assetsBalance["Cards"] = (await game.account.getBalances(SurvivAssets.SurvivCards))["cards"] || 0;
     };
 
     const storeItems: StoreItem[] = [
