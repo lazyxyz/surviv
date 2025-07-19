@@ -13,24 +13,20 @@ interface StoreItem {
     itemType: SaleItemType;
 }
 
-// Cache for storing fetched prices to avoid redundant queries
-const priceCache: Partial<Record<SaleItemType, string>> = {};
-
 async function fetchPrice(
     game: Game,
     itemType: SaleItemType,
     paymentToken: PaymentTokenType = "NativeToken"
 ): Promise<string> {
     // Return cached price if available
-    if (priceCache[itemType]) {
-        return priceCache[itemType]!;
+    if (ShopCache.assetsPrice[itemType]) {
+        return ShopCache.assetsPrice[itemType]!;
     }
 
     try {
         const price = await game.account.queryPrice(itemType, paymentToken);
-        const formattedPrice = `${formatEther(price)} STT`;
-        priceCache[itemType] = formattedPrice; // Cache the formatted price
-        return formattedPrice;
+        ShopCache.assetsPrice[itemType] = price; // Cache the formatted price
+        return price;
     } catch (err) {
         console.error(`Failed to fetch price for ${itemType}: ${err}`);
         return "N/A"; // Fallback price
@@ -63,7 +59,7 @@ function renderStoreItems(game: Game, storeItems: StoreItem[]): void {
 
         // Fetch price asynchronously and update the UI
         fetchPrice(game, item.itemType).then(price => {
-            $card.find(".price-placeholder").text(price);
+            $card.find(".price-placeholder").text(`${formatEther(price)} STT`);
         });
     });
 }
@@ -150,11 +146,17 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
         });
 
         $buyButton.on("click", async () => {
+            if (!game.account.address) {
+                warningAlert("Please connect your wallet to continue!");
+                return;
+            }
+
             if (isProcessing || amount <= 0) return;
             isProcessing = true;
             $buyButton.prop("disabled", true);
             try {
-                await game.account.buyItems(itemType, amount, "NativeToken");
+                const value = BigInt(ShopCache.assetsPrice[itemType]) * BigInt(amount);
+                await game.account.buyItems(itemType, amount, "NativeToken", value);
                 // Update balance locally
                 const item = storeItems.find(item => item.itemType === itemType);
                 if (item) {
@@ -171,7 +173,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
                 setupPurchaseInteractions(game, storeItems);
                 successAlert("Purchase successful!");
             } catch (err: any) {
-                errorAlert(err.message);
+                errorAlert("Transaction Failed: Please check your wallet balance or try again.", 3000);
             } finally {
                 isProcessing = false;
                 $buyButton.prop("disabled", amount === 0);
@@ -192,29 +194,6 @@ export async function loadStore(game: Game): Promise<void> {
 
     if (!ShopCache.storeLoaded) {
         ShopCache.storeLoaded = true;
-        // const balances = await Promise.all([
-        //     getTokenBalances([game.account.address], [SurvivKeysMapping.address]).then(balances => {
-        //         return balances.balances.length > 0 ? balances.balances[0].balance : 0;
-        //     }).catch(err => {
-        //         console.error(`Failed to fetch key balances: ${err}`);
-        //         return 0;
-        //     }),
-        //     getTokenBalances([game.account.address], [SurvivCratesMapping.address]).then(balances => {
-        //         return balances.balances.length > 0 ? balances.balances[0].balance : 0;
-        //     }).catch(err => {
-        //         console.error(`Failed to fetch crate balances: ${err}`);
-        //         return 0;
-        //     }),
-        //     getTokenBalances([game.account.address], [SurvivCardsMapping.address]).then(balances => {
-        //         return balances.balances.length > 0 ? balances.balances[0].balance : 0;
-        //     }).catch(err => {
-        //         console.error(`Failed to fetch card balances: ${err}`);
-        //         return 0;
-        //     }),
-        // ]);
-
-        // const balanceResult = await game.account.getBalances(SurvivAssets.SurvivKeys);
-
         ShopCache.assetsBalance["Keys"] = (await game.account.getBalances(SurvivAssets.SurvivKeys))["keys"];
         ShopCache.assetsBalance["Crates"] = (await game.account.getBalances(SurvivAssets.SurvivCrates))["crates"];
         ShopCache.assetsBalance["Cards"] = (await game.account.getBalances(SurvivAssets.SurvivCards))["cards"];

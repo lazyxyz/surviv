@@ -26,7 +26,6 @@ import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
 import { errorAlert } from "./modal";
 import { getErc1155Mints } from "./utils/onchain";
-// import { getTokenMints } from "./utils/onchain/sequence";
 
 const CHAIN_ID = SurvivMapping.ChainId;
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
@@ -644,7 +643,7 @@ export class Account extends EIP6963 {
      * @returns A promise resolving to the API response.
      * @throws Error if the API request fails, authentication is invalid, or payment fails.
      */
-    async buyItems(item: SaleItemType, amount: number, paymentToken: PaymentTokenType): Promise<any> {
+    async buyItems(item: SaleItemType, amount: number, paymentToken: PaymentTokenType, value: bigint): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
@@ -661,16 +660,8 @@ export class Account extends EIP6963 {
             const signer = await ethersProvider.getSigner();
 
             const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
-            const price = await survivShopContract.getPrice(paymentTokenValue, itemValue);
-            const totalCost = price * BigInt(amount);
-
             if (paymentTokenValue == PaymentTokens.NativeToken) {
-                const signerBalance = await ethersProvider.getBalance(signer.address);
-                if (signerBalance < totalCost) {
-                    throw new Error(`Insufficient Balance!`);
-                }
-
-                const tx = await survivShopContract.buyItems(itemValue, amount, paymentTokenValue, { value: totalCost });
+                const tx = await survivShopContract.buyItems(itemValue, amount, paymentTokenValue, { value });
                 const receipt = await tx.wait();
                 clearTimeout(timeoutId);
                 return receipt;

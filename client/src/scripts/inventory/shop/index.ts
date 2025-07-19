@@ -30,6 +30,7 @@ export let ShopCache: {
     storeLoaded: boolean,
     baseLoaded: boolean,
     assetsBalance: Record<SaleItemType, number>;
+    assetsPrice: Record<SaleItemType, string>;
 }
 
 export async function showShop(game: Game) {
@@ -43,6 +44,11 @@ export async function showShop(game: Game) {
             Crates: 0,
             Cards: 0,
             Keys: 0
+        },
+        assetsPrice: {
+            Crates: "",
+            Cards: "",
+            Keys: ""
         }
     }
 
