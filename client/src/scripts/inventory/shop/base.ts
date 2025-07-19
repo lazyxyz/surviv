@@ -11,11 +11,10 @@ import {
     DivineArmsMapping,
     DivineGunsMapping,
     SurvivMemesMapping,
-    SurvivKeysMapping,
-    SurvivCratesMapping
 } from "@common/mappings";
-import { getTokenBalances } from "../../utils/onchain/sequence";
 import { ShopCache } from ".";
+import type { MintResult } from "../../utils/onchain";
+import { SurvivAssets } from "../../account";
 
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
     const crateImages = new Array(userCrateBalances).fill({ image: "./img/misc/crate.png" });
@@ -297,11 +296,8 @@ export async function loadBase(game: Game): Promise<void> {
     }
 
     if (!ShopCache.baseLoaded) {
-        let keyBalances = await getTokenBalances([game.account.address], [SurvivKeysMapping.address]);
-        ShopCache.assetsBalance.Keys = keyBalances.balances.length > 0 ? keyBalances.balances[0].balance : 0;
-
-        let crateBalances = await getTokenBalances([game.account.address], [SurvivCratesMapping.address]);
-        ShopCache.assetsBalance.Crates = crateBalances.balances.length > 0 ? crateBalances.balances[0].balance : 0;
+        ShopCache.assetsBalance.Keys = (await game.account.getBalances(SurvivAssets.SurvivKeys))["keys"];
+        ShopCache.assetsBalance.Crates = (await game.account.getBalances(SurvivAssets.SurvivCrates))["crates"];
     };
 
     await Promise.all(
