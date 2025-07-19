@@ -1,12 +1,8 @@
 import $ from "jquery";
 import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
-// import weapons from ".";
 import { SurvivAssets } from "../account";
-import type { ObjectDefinition } from "@common/utils/objectDefinitions";
 import type { Game } from "../game";
-import { DivineArmsMapping, DivineGunsMapping, GoldArmsMapping, SilverArmsMapping } from "@common/mappings";
-import { getTokenBalances } from "../utils/onchain/sequence";
 import { InventoryCache } from ".";
 
 // Constants for repeated strings
@@ -76,72 +72,6 @@ const appendPreview = (images: Array<{
 
   return asideElement;
 };
-
-// const appendAsset = async (
-//   idString: string,
-//   definition: ObjectDefinition[]
-// ): Promise<ObjectDefinition[] | undefined> => {
-//   const rootAssetsElement = $(".weapons-container-aside-assets");
-//   const rootListElement = $(".weapons-container-list");
-//   const loadingElement = document.createElement("div");
-
-//   // if existed you need empty (remove all nodes) and append new
-//   rootAssetsElement.empty();
-
-//   // prevent spamming call API
-//   rootListElement.css("pointer-events", "none");
-
-//   // append loading ICON
-//   {
-//     loadingElement.className = "loading-icon";
-//     loadingElement.style.gridColumn = "span 3";
-//     loadingElement.style.display = "flex";
-//     loadingElement.style.alignItems = "center";
-//     loadingElement.style.justifyContent = "center";
-//     loadingElement.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
-
-//     rootAssetsElement.prepend(loadingElement);
-//   }
-
-//   const weaponsInstance = [
-//     {
-//       idString,
-//       name: "Default"
-//     },
-//     ...(definition
-//       // should be get related item
-//       ?.filter(meta => meta?.idString?.startsWith(idString))
-//       // change from orignal to 'Default' at weaponsInstance[0].name
-//       ?.filter(meta => meta?.idString !== idString)
-//       || [])
-//   ];
-
-//   for (const { idString, name } of weaponsInstance) {
-//     const weaponItem = $<HTMLDivElement>(`
-//             <div class="weapons-container-card weapons-container-card-assets" id="weapons-assets-${idString}">
-//                 <img src="./img/game/shared/weapons/${idString}.svg" alt=${name} width="72px" height="72px" />
-
-//                 <p class="weapons-container-paragraph">${name}</p>
-//           </div>
-//         `);
-
-//     weaponItem.on("click", () => {
-//       $(".weapons-container-card-assets").removeClass("selected");
-
-//       weaponItem.toggleClass("selected");
-//     });
-
-//     rootAssetsElement.append(weaponItem);
-//   }
-
-//   // reset states
-//   {
-//     loadingElement.remove();
-//     rootListElement.css("pointer-events", "unset");
-//   }
-
-//   return weaponsInstance;
-// };
 
 const showViewBox = (game: Game) => {
   const meleeId = localStorage.getItem("selectedMelee");
@@ -284,17 +214,10 @@ async function showGuns(game: Game, selectedGunId?: string) {
 
   try {
 
-    let gunBalances = await getTokenBalances([game.account.address], [DivineGunsMapping.address]);
-    const userGuns: string[] = gunBalances.balances.flatMap(balance => {
-      if (balance.balance > 0) {
-        const itemId = DivineGunsMapping.assets[balance.tokenID];
-        return itemId ? [itemId] : [];
-      }
-      return [];
-    });
+    let gunBalances = Object.entries(await game.account.getBalances(SurvivAssets.DivineGuns));
+    const userGuns = gunBalances.map(g => g[0]);
 
     const allGuns = Guns.definitions; // Show all guns, not just owned ones
-
     // Split guns into owned and unowned
     const ownedGuns = allGuns.filter((gun) => isOwned(gun.idString, userGuns));
     const unownedGuns = allGuns.filter((gun) => !isOwned(gun.idString, userGuns));
@@ -349,21 +272,13 @@ async function showMelees(game: Game, selectedMeleeId?: string) {
   }
 
   try {
-    const armMappingList = [SilverArmsMapping, GoldArmsMapping, DivineArmsMapping];
-    const armAddresses = armMappingList.map(arm => arm.address);
-    let armBalances = await getTokenBalances([game.account.address], armAddresses);
 
-    const userArms = armBalances.balances
-      .map(balance => {
-        let itemId = "";
-        armMappingList.forEach(mapping => {
-          if (mapping.address === balance.contractAddress) {
-            itemId = mapping.assets[balance.tokenID];
-          }
-        });
-        return itemId; // Return itemId regardless
-      })
-      .filter(itemId => !!itemId);
+     const userArmsBalance = [
+        ...Object.entries(await game.account.getBalances(SurvivAssets.SilverArms)),
+        ...Object.entries(await game.account.getBalances(SurvivAssets.GoldArms)),
+        ...Object.entries(await game.account.getBalances(SurvivAssets.DivineArms)),
+    ];
+    const userArms = userArmsBalance.map(s => s[0]);
     userArms.push("fists"); // Add default
 
     const allMelees = Melees.definitions;

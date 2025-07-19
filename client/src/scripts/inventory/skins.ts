@@ -5,13 +5,8 @@ import { Skins, type SkinDefinition } from "@common/definitions/skins";
 import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
 
-import {
-    SilverSkinsMapping,
-    GoldSkinsMapping,
-    DivineSkinsMapping,
-} from "@common/mappings";
-import { getTokenBalances } from "../utils/onchain/sequence";
 import { InventoryCache, updateSplashCustomize } from ".";
+import { SurvivAssets } from "../account";
 
 // handler select and save skin
 function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {
@@ -37,22 +32,12 @@ export async function showSkins(game: Game) {
     const skinList = $<HTMLDivElement>("#skins-list");
     const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
 
-
-    const skinAddresses = [SilverSkinsMapping.address, GoldSkinsMapping.address, DivineSkinsMapping.address]
-    let skinBalances = await getTokenBalances([game.account.address], skinAddresses);
-    const skinsMappingList = [SilverSkinsMapping, GoldSkinsMapping, DivineSkinsMapping];
-
-    const userSkins = skinBalances.balances
-        .map(balance => {
-            let itemId = "";
-            skinsMappingList.forEach(mapping => {
-                if (mapping.address === balance.contractAddress) {
-                    itemId = mapping.assets[balance.tokenID];
-                }
-            });
-            return itemId; // Return itemId regardless
-        })
-        .filter(itemId => !!itemId);
+    const userSkinBalance = [
+        ...Object.entries(await game.account.getBalances(SurvivAssets.SilverSkins)),
+        ...Object.entries(await game.account.getBalances(SurvivAssets.GoldSkins)),
+        ...Object.entries(await game.account.getBalances(SurvivAssets.DivineSkins)),
+    ];
+    const userSkins = userSkinBalance.map(s => s[0]);
 
     /* */
     // Skins list

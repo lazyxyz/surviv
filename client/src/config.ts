@@ -32,13 +32,11 @@ export const Config = {
         // }
     },
     defaultRegion: "as",
-    publicSequenceKey: "AQAAAAAAAKdMeINbvh5WD5qqBoorr9wHtcs"
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {
     readonly regions: Record<string, Region>
     readonly defaultRegion: string,
-    readonly publicSequenceKey: string,
 }
 
 export interface Region {

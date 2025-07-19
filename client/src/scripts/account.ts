@@ -25,7 +25,8 @@ import { abi as crateBaseABI } from "@common/abis/ICrateBase.json";
 import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
 import { errorAlert } from "./modal";
-import { getTokenMints } from "./utils/onchain/sequence";
+import { getErc1155Mints } from "./utils/onchain";
+// import { getTokenMints } from "./utils/onchain/sequence";
 
 const CHAIN_ID = SurvivMapping.ChainId;
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
@@ -619,7 +620,7 @@ export class Account extends EIP6963 {
                 await tx.wait();
 
                 // Await the balances and return the result
-                const balances = await getTokenMints(tx.hash).catch(err => {
+                const balances = await getErc1155Mints(tx.hash).catch(err => {
                     return [];
                 });
 

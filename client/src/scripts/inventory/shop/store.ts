@@ -1,10 +1,8 @@
 import $ from "jquery";
 import { formatEther } from "ethers";
-import { type PaymentTokenType, type SaleItemType } from "../../account";
+import { SurvivAssets, type PaymentTokenType, type SaleItemType } from "../../account";
 import type { Game } from "../../game";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
-import { SurvivKeysMapping, SurvivCratesMapping, SurvivCardsMapping } from "@common/mappings";
-import { getTokenBalances } from "../../utils/onchain/sequence";
 import { ShopCache } from ".";
 
 interface StoreItem {
@@ -194,30 +192,32 @@ export async function loadStore(game: Game): Promise<void> {
 
     if (!ShopCache.storeLoaded) {
         ShopCache.storeLoaded = true;
-        const balances = await Promise.all([
-            getTokenBalances([game.account.address], [SurvivKeysMapping.address]).then(balances => {
-                return balances.balances.length > 0 ? balances.balances[0].balance : 0;
-            }).catch(err => {
-                console.error(`Failed to fetch key balances: ${err}`);
-                return 0;
-            }),
-            getTokenBalances([game.account.address], [SurvivCratesMapping.address]).then(balances => {
-                return balances.balances.length > 0 ? balances.balances[0].balance : 0;
-            }).catch(err => {
-                console.error(`Failed to fetch crate balances: ${err}`);
-                return 0;
-            }),
-            getTokenBalances([game.account.address], [SurvivCardsMapping.address]).then(balances => {
-                return balances.balances.length > 0 ? balances.balances[0].balance : 0;
-            }).catch(err => {
-                console.error(`Failed to fetch card balances: ${err}`);
-                return 0;
-            }),
-        ]);
+        // const balances = await Promise.all([
+        //     getTokenBalances([game.account.address], [SurvivKeysMapping.address]).then(balances => {
+        //         return balances.balances.length > 0 ? balances.balances[0].balance : 0;
+        //     }).catch(err => {
+        //         console.error(`Failed to fetch key balances: ${err}`);
+        //         return 0;
+        //     }),
+        //     getTokenBalances([game.account.address], [SurvivCratesMapping.address]).then(balances => {
+        //         return balances.balances.length > 0 ? balances.balances[0].balance : 0;
+        //     }).catch(err => {
+        //         console.error(`Failed to fetch crate balances: ${err}`);
+        //         return 0;
+        //     }),
+        //     getTokenBalances([game.account.address], [SurvivCardsMapping.address]).then(balances => {
+        //         return balances.balances.length > 0 ? balances.balances[0].balance : 0;
+        //     }).catch(err => {
+        //         console.error(`Failed to fetch card balances: ${err}`);
+        //         return 0;
+        //     }),
+        // ]);
 
-        ShopCache.assetsBalance["Keys"] = balances[0];
-        ShopCache.assetsBalance["Crates"] = balances[1];
-        ShopCache.assetsBalance["Cards"] = balances[2];
+        // const balanceResult = await game.account.getBalances(SurvivAssets.SurvivKeys);
+
+        ShopCache.assetsBalance["Keys"] = (await game.account.getBalances(SurvivAssets.SurvivKeys))["keys"];
+        ShopCache.assetsBalance["Crates"] = (await game.account.getBalances(SurvivAssets.SurvivCrates))["crates"];
+        ShopCache.assetsBalance["Cards"] = (await game.account.getBalances(SurvivAssets.SurvivCards))["cards"];
     };
 
     const storeItems: StoreItem[] = [
