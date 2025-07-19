@@ -438,7 +438,7 @@ export async function setUpUI(game: Game): Promise<void> {
     let lastPlayButtonClickTime = 0;
 
     // Join server when play buttons are clicked
-    $("#btn-play-solo, #btn-play-squad").on("click", event => {
+    $("#btn-play-solo").on("click", _ => {
         if (!game.account.address) {
             warningAlert("Please connect your wallet to continue!");
             return;
@@ -447,8 +447,18 @@ export async function setUpUI(game: Game): Promise<void> {
         if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit
         lastPlayButtonClickTime = now;
 
-        const teamSize = event.target.id === "btn-play-solo" ? TeamSize.Solo : TeamSize.Squad;
-        joinGame(teamSize);
+        joinGame(TeamSize.Solo);
+    });
+    // Join server when play buttons are clicked
+    $("#btn-play-squad").on("click", event => {
+        if (!game.account.address) {
+            warningAlert("Please connect your wallet to continue!");
+            return;
+        }
+        const now = Date.now();
+        if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit
+        lastPlayButtonClickTime = now;
+        joinGame(TeamSize.Squad);
     });
 
     const createTeamMenu = $("#create-team-menu");
