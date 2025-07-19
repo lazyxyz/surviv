@@ -46,7 +46,7 @@ input::-webkit-inner-spin-button {
 }
 .weapons-container-card.inactive {
   opacity: 0.4;
-  pointer-events: none;
+  // pointer-events: none;
 }
 .weapons-container-card.selected {
   border: 2px solid #ffd700;
@@ -1111,7 +1111,6 @@ input::-webkit-inner-spin-button {
         background: #16161626;
         border-radius: 8px;
         height: 100%;
-        padding: 24px;
       }
 
       &-assets {

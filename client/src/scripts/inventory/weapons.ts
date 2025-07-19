@@ -226,17 +226,51 @@ const selectMelee = (game: Game, weaponId: string) => {
     return;
   }
 
+  // Check if owned
+  const isUnowned = $(`#weapons-list-${weaponId}`).hasClass("inactive");
+
   // Update weapon info panel
   const dps = melee.damage && melee.cooldown ? (melee.damage / (melee.cooldown / 1000)).toFixed(2) : "N/A";
   $("#weapon-info").html(`
-    <p>${melee.name}</p>
-    <p>DPS: ${dps}</p>
-    <p>Damage: ${melee.damage ?? "N/A"}</p>
-    <p>Cooldown: ${melee.cooldown ? (melee.cooldown / 1000) + "s" : "N/A"}</p>
+     <div class="weapon-title">${melee.name}${isUnowned ? ' <span style="color: #ffc107;font-size: 14px;">(Locked)</span>' : ''}</div>
+    <div class="row-stats">
+      <div class="row-section">
+              <p class="stat-type">DPS:</p>
+              <span class="stat-value">${dps}</span>
+      </div>
+      <div class="row-section">
+              <p class="stat-type">Damage:</p>
+              <span class="stat-value">${melee.damage ?? "N/A"}</span>
+      </div>
+      </div>
+      <div class="child-section">
+              <p class="stat-type">Cooldown:</p>
+              <span class="stat-value">${melee.cooldown ? (melee.cooldown / 1000) + "s" : "N/A"}</span>
+      </div>
   `);
 
   showViewBox(game);
 };
+
+/*
+======================================================
+======================================================
+*/
+
+// ammo mapping
+const AMMO_TYPE_IMAGES: Record<string, string> = {
+  "762mm": `${ASSET_PATH}/loot/762mm.svg`,
+  "556mm": `${ASSET_PATH}/loot/556mm.svg`,
+  "9mm": `${ASSET_PATH}/loot/9mm.svg`,
+  "12g": `${ASSET_PATH}/loot/12g.svg`,
+  "50cal": `${ASSET_PATH}/loot/50cal.svg`,
+  "338lap": `${ASSET_PATH}/loot/338lap.svg`,
+  "power_cell": `${ASSET_PATH}/loot/power_cell.svg`,
+  "firework_rocket": `${ASSET_PATH}/loot/firework_rocket.svg`,
+  "bb": `${ASSET_PATH}/loot/bb.svg`,
+  "curadell": `${ASSET_PATH}/loot/curadell.svg`,
+};
+
 
 // Function to select a gun
 const selectGun = (game: Game, weaponId: string) => {
@@ -257,15 +291,43 @@ const selectGun = (game: Game, weaponId: string) => {
     return;
   }
 
+  // Check if owned
+  const isUnowned = $(`#weapons-list-${weaponId}`).hasClass("inactive");
+
+  // Get ammo image or fallback to text
+  let ammoTypeHtml = "N/A";
+  if (gun.ammoType && AMMO_TYPE_IMAGES[gun.ammoType]) {
+    ammoTypeHtml = `<img src="${AMMO_TYPE_IMAGES[gun.ammoType]}" alt="${gun.ammoType}" style="height:20px;vertical-align:middle;" />`;
+  } else if (gun.ammoType) {
+    ammoTypeHtml = gun.ammoType;
+  }
+
   // Update weapon info panel
   const dps = gun.ballistics.damage && gun.fireDelay ? (gun.ballistics.damage / (gun.fireDelay / 1000)).toFixed(2) : "N/A";
   $("#weapon-info").html(`
-    <p>${gun.name}</p>
-    <p>DPS: ${dps}</p>
-    <p>Damage: ${gun.ballistics.damage ?? "N/A"}</p>
-    <p>Speed: ${gun.ballistics.speed ?? "N/A"}</p>
-    <p>Range: ${gun.ballistics.range ?? "N/A"}</p>
-    <p>Ammo Type: ${gun.ammoType ?? "N/A"}</p>
+    <div class="weapon-title">${gun.name}${isUnowned ? ' <span style="color: #ffc107;font-size: 14px;">(Locked)</span>' : ''}</div>
+    <div class="row-stats">
+      <div class="row-section">
+              <p class="stat-type">DPS:</p>
+              <span class="stat-value">${dps}</span>
+      </div>
+      <div class="row-section">
+              <p class="stat-type">Damage:</p>
+              <span class="stat-value">${gun.ballistics.damage ?? "N/A"}</span>
+      </div>
+      <div class="row-section">
+              <p class="stat-type">Speed:</p>
+              <span class="stat-value">${gun.ballistics.speed ?? "N/A"}</span>
+      </div>
+      <div class="row-section">
+              <p class="stat-type">Range:</p>
+              <span class="stat-value">${gun.ballistics.range ?? "N/A"}</span>
+      </div>
+    </div>
+    <div class="child-section">
+              <p class="stat-type">Ammo Type:</p>
+              <span class="stat-value">${ammoTypeHtml}</span>
+      </div>
   `);
 
   showViewBox(game);
@@ -302,7 +364,7 @@ async function showGuns(game: Game, selectedGunId?: string) {
     // Render gun items (owned first, then unowned)
     const $gunList = $("#list-gun").empty();
     $gunList.append(`
-    <div class="weapons-container-card weapons-container-card-gun" 
+    <div class="weapons-container-card weapons-container-card-gun"
         id="weapons-list-no-gun" data-id="no-gun">
       <img src="${ASSET_PATH}/weapons/empty_slot.svg" alt="No Gun" width="72px" height="72px" />
       <p class="weapons-container-paragraph">No Gun</p>
@@ -311,7 +373,7 @@ async function showGuns(game: Game, selectedGunId?: string) {
 
     for (const { idString, name } of ownedGuns) {
       $gunList.append(`
-        <div class="weapons-container-card weapons-container-card-gun" 
+        <div class="weapons-container-card weapons-container-card-gun"
              id="weapons-list-${idString}" data-id="${idString}">
           <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
           <p class="weapons-container-paragraph">${name}</p>
@@ -320,7 +382,7 @@ async function showGuns(game: Game, selectedGunId?: string) {
     }
     for (const { idString, name } of unownedGuns) {
       $gunList.append(`
-        <div class="weapons-container-card weapons-container-card-gun inactive" 
+        <div class="weapons-container-card weapons-container-card-gun inactive"
              id="weapons-list-${idString}" data-id="${idString}">
           <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
           <p class="weapons-container-paragraph">${name}</p>
@@ -461,29 +523,69 @@ export async function showWeapons(game: Game, highlightId?: string): Promise<voi
     }
   });
 
-  $container.off("click", ".weapons-container-card").on("click", ".weapons-container-card", function () {
-    if ($(this).hasClass("inactive")) return;
+  // $container.off("click", ".weapons-container-card").on("click", ".weapons-container-card", function () {
+  //   if ($(this).hasClass("inactive")) return;
 
+  //   const id = $(this).data("id");
+  //   const type = $(this).hasClass("weapons-container-card-melee") ? "melee" : "gun";
+
+  //   // Remove all selected classes first
+  //   $(".weapons-container-card").removeClass("selected");
+  //   $(this).addClass("selected");
+
+  //   if (type === "melee") {
+  //     weaponPreset.melee = id;
+  //     selectMelee(game, id);
+  //   } else {
+  //     if (id === "no-gun") {
+  //       weaponPreset.gun = undefined;
+  //       localStorage.removeItem("selectedGun");
+  //       selectWeapon(game, { gun: undefined });
+  //       $("#weapon-info").empty();
+  //       showViewBox(game);
+  //     } else {
+  //       weaponPreset.gun = id;
+  //       selectGun(game, id);
+  //     }
+  //   }
+  // });
+
+  // ...existing code...
+
+  $container.off("click", ".weapons-container-card").on("click", ".weapons-container-card", function () {
     const id = $(this).data("id");
     const type = $(this).hasClass("weapons-container-card-melee") ? "melee" : "gun";
+    const isInactive = $(this).hasClass("inactive");
 
     // Remove all selected classes first
     $(".weapons-container-card").removeClass("selected");
-    $(this).addClass("selected");
 
     if (type === "melee") {
-      weaponPreset.melee = id;
-      selectMelee(game, id);
+      if (!isInactive) {
+        $(this).addClass("selected");
+        weaponPreset.melee = id;
+        selectMelee(game, id);
+      } else {
+        // Show info for unowned melee, but do not select or update preset
+        selectMelee(game, id);
+      }
     } else {
       if (id === "no-gun") {
+        $(this).addClass("selected");
         weaponPreset.gun = undefined;
         localStorage.removeItem("selectedGun");
         selectWeapon(game, { gun: undefined });
         $("#weapon-info").empty();
         showViewBox(game);
       } else {
-        weaponPreset.gun = id;
-        selectGun(game, id);
+        if (!isInactive) {
+          $(this).addClass("selected");
+          weaponPreset.gun = id;
+          selectGun(game, id);
+        } else {
+          // Show info for unowned gun, but do not select or update preset
+          selectGun(game, id);
+        }
       }
     }
   });
