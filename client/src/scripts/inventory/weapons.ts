@@ -335,10 +335,10 @@ async function showMelees(game: Game, selectedMeleeId?: string) {
 
   try {
 
-     const userArmsBalance = [
-        ...Object.entries(await game.account.getBalances(SurvivAssets.SilverArms)),
-        ...Object.entries(await game.account.getBalances(SurvivAssets.GoldArms)),
-        ...Object.entries(await game.account.getBalances(SurvivAssets.DivineArms)),
+    const userArmsBalance = [
+      ...Object.entries(await game.account.getBalances(SurvivAssets.SilverArms)),
+      ...Object.entries(await game.account.getBalances(SurvivAssets.GoldArms)),
+      ...Object.entries(await game.account.getBalances(SurvivAssets.DivineArms)),
     ];
     const userArms = userArmsBalance.map(s => s[0]);
     userArms.push("fists"); // Add default
