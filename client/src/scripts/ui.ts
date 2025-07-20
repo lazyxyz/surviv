@@ -24,7 +24,7 @@ import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
 import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { Loots } from "@common/definitions/loots";
-import { warningAlert } from "./modal";
+import { errorAlert, successAlert, warningAlert } from "./modal";
 import { Emotes } from "@common/definitions/emotes";
 /*
     eslint-disable
@@ -107,6 +107,26 @@ export async function setUpUI(game: Game): Promise<void> {
             }
         }
     }
+
+    // Buy Card directly in Home
+    $(".home-buy-card-button").on("click", async () => {
+
+        try {
+            // Check if wallet is connected
+            if (!game.account?.address) {
+                warningAlert("Please connect your wallet to continue.");
+                return;
+            }
+
+            const price = await game.account.queryPrice("Cards", "NativeToken");
+            await game.account.buyItems("Cards", 1, "NativeToken", price);
+
+            successAlert("Purchase successful!");
+        } catch (err) {
+            console.error("Purchase error:", err);
+            errorAlert("Something went wrong, please try again.");
+        }
+    })
 
     if (UI_DEBUG_MODE) {
         // Kill message

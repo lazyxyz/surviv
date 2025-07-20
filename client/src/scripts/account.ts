@@ -628,8 +628,6 @@ export class Account extends EIP6963 {
                 await tx.wait();
 
                 const claimItems = await this.getTokenMints(tx.hash)
-                console.log("claimItems: ", claimItems);
-
                 clearTimeout(timeoutId);
                 return { hash: tx.hash, balances: claimItems };
             } else {

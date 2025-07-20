@@ -13,8 +13,7 @@ import {
     SurvivMemesMapping,
 } from "@common/mappings";
 import { ShopCache } from ".";
-import type { MintResult } from "../../utils/onchain";
-import { SurvivAssets } from "../../account";
+import { SurvivAssets, type MintResult } from "../../account";
 
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
     const crateImages = new Array(userCrateBalances).fill({ image: "./img/misc/crate.png" });
