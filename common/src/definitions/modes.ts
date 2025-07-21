@@ -29,6 +29,20 @@ export interface ModeDefinition {
 
 export type Mode = "normal" | "fall" | "halloween" | "winter";
 
+export const ModeToNumber: Record<Mode, number> = {
+    normal: 0,
+    fall: 1,
+    halloween: 2,
+    winter: 3,
+};
+
+export const NumberToMode: Record<number, Mode> = {
+    0: "normal",
+    1: "fall",
+    2: "halloween",
+    3: "winter",
+};
+
 export const Modes: Record<Mode, ModeDefinition> = {
     normal: {
         idString: "normal",
@@ -66,8 +80,8 @@ export const Modes: Record<Mode, ModeDefinition> = {
         specialPlayButtons: true,
         // Icons
         modeLogoImage: {
-             solo: "./img/misc/user.svg",
-             squads: "./img/misc/user-group.svg"
+            solo: "./img/misc/user.svg",
+            squads: "./img/misc/user-group.svg"
         },
     },
     halloween: {

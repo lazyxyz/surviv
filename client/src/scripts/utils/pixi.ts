@@ -11,19 +11,16 @@ import { atlases as fallHighRes } from "virtual:spritesheets-jsons-high-res-fall
 import { atlases as fallLowRes } from "virtual:spritesheets-jsons-low-res-fall";
 import { atlases as winterHighRes } from "virtual:spritesheets-jsons-high-res-winter";
 import { atlases as winterLowRes } from "virtual:spritesheets-jsons-low-res-winter";
-import { atlases as sharedHighRes } from "virtual:spritesheets-jsons-high-res-shared";
-import { atlases as sharedLowRes } from "virtual:spritesheets-jsons-low-res-shared";
+import { atlases as normalHighRes } from "virtual:spritesheets-jsons-high-res-normal";
+import { atlases as normalLowRes } from "virtual:spritesheets-jsons-low-res-normal";
+import { atlases as halloweenHighRes } from "virtual:spritesheets-jsons-high-res-halloween";
+import { atlases as halloweenLowRes } from "virtual:spritesheets-jsons-low-res-halloween";
 
 const textures: Record<string, Texture> = {};
 
 const loadingText = $("#loading-text");
 
 export async function loadTextures(renderer: Renderer, highResolution: boolean, modeName: string): Promise<void> {
-    // Validate modeName
-    if (!["fall", "winter", "normal", "shared"].includes(modeName)) {
-        throw new Error(`Invalid modeName: ${modeName}. Must be one of 'fall', 'winter', 'normal', or 'shared'.`);
-    }
-
     // If device doesn't support 4096x4096 textures, force low resolution textures since they are 2048x2048
     if (renderer.type as RendererType === RendererType.WEBGL) {
         const gl = (renderer as WebGLRenderer).gl;
@@ -34,9 +31,10 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean, 
 
     // Select the appropriate spritesheets based on modeName and resolution
     const modeAtlases: Record<string, SpritesheetData[]> = {
+        normal: highResolution ? normalHighRes : normalLowRes,
         fall: highResolution ? fallHighRes : fallLowRes,
-        winter: highResolution ? winterHighRes : winterLowRes,
-        shared: highResolution ? sharedHighRes : sharedLowRes,
+        halloween: highResolution ? halloweenHighRes : halloweenLowRes,
+        winter: highResolution ? winterHighRes : winterLowRes
     };
 
     const spritesheets: SpritesheetData[] = modeAtlases[modeName];
@@ -198,8 +196,6 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean, 
             }))
     ]);
 }
-
-// ... rest of the file (SuroiSprite, toPixiCoords, drawGroundGraphics, drawHitbox) remains unchanged
 
 export class SuroiSprite extends Sprite {
     static getTexture(frame: string): Texture {

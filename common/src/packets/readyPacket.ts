@@ -19,6 +19,8 @@ export type PlayerData = {
 
     readonly melee?: MeleeDefinition
     readonly gun?: GunDefinition
+} & {
+    readonly gameMode: number
 };
 
 // protocol version is automatically set; use this type when
@@ -77,6 +79,7 @@ export const ReadyPacket = createPacket("ReadyPacket")<JoinPacketCreation, Playe
         if (hasGun) {
             Guns.writeToStream(stream, data.gun);
         }
+        stream.writeInt8(data.gameMode);
     },
 
     deserialize(stream) {
@@ -104,6 +107,7 @@ export const ReadyPacket = createPacket("ReadyPacket")<JoinPacketCreation, Playe
 
             melee: hasMelee ? Melees.readFromStream(stream) : undefined,
             gun: hasGun ? Guns.readFromStream(stream) : undefined,
+            gameMode: stream.readInt8(),
         };
     }
 });

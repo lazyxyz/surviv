@@ -67,7 +67,7 @@ import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { Melees } from "@common/definitions/melees";
 import { errorAlert } from "./modal";
 import { showInventory } from "./inventory";
-import type { Mode } from "node:fs";
+import { NumberToMode, type Mode } from "@common/definitions/modes";
 
 /* eslint-disable @stylistic/indent */
 
@@ -489,7 +489,8 @@ export class Game {
     onPacket(packet: OutputPacket): void {
         switch (true) {
             case packet instanceof ReadyPacket:
-                this.initPixi("fall").then(_ => {
+                const gameMode = NumberToMode[ packet.output.gameMode];
+                this.initPixi(gameMode).then(_ => {
                     this.ready(packet.output);
                 })
                 break;

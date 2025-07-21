@@ -17,6 +17,7 @@ import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
 import { verifyEmotes, verifyGun, verifyMelee, verifySkin } from "./balances";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
+import { ModeToNumber } from "@common/definitions/modes";
 
 const simultaneousConnections: Record<string, number> = {};
 
@@ -186,6 +187,7 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                         badge: Badges.fromStringSafe(data.badge),
                         melee: melee,
                         gun: gun,
+                        gameMode: ModeToNumber[game.gameMode],
                     })
                 );
                 socket.send(stream.getBuffer(), true, false);
