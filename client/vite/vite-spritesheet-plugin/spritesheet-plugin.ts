@@ -12,7 +12,8 @@ import { existsSync } from "fs";
 
 const PLUGIN_NAME = "vite-spritesheet-plugin";
 
-export const cacheDir = ".spritesheet-cache";
+export const getCacheDir = (modeName: string) => `.spritesheet-cache-${modeName}`;
+
 export type CacheData = {
     lastModified: number
     fileMap: Record<string, string>
@@ -44,12 +45,11 @@ const getImageDirs = (modeName: Mode | "shared", imageDirs: string[] = []): stri
 
 const imageDirs = getImageDirs(GameConstants.modeName).reverse();
 
-async function buildSpritesheets(): Promise<MultiResAtlasList> {
+async function buildSpritesheets(modeName: Mode | "shared"): Promise<MultiResAtlasList> {
+    const cacheDir = getCacheDir(modeName);
+    const imageDirs = getImageDirs(modeName).reverse();
     const fileMap = new Map<string, { lastModified: number, path: string }>();
 
-    // Maps have unique keys.
-    // Since the filename is used as the key, and mode sprites are added to the map after the common sprites,
-    // this method allows mode sprites to override common sprites with the same filename.
     for (const imagePath of imageDirs.map(dir => readDirectory(dir).filter(x => imagesMatcher.match(x))).flat()) {
         const imageFileInfo = await stat(imagePath);
         const { mtime, ctime } = imageFileInfo;
@@ -66,25 +66,14 @@ async function buildSpritesheets(): Promise<MultiResAtlasList> {
     }
     if (!existsSync(path.join(cacheDir, "data.json"))) isCached = false;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const cacheData: CacheData = existsSync(path.join(cacheDir, "data.json"))
-        ? JSON.parse(await readFile(path.join(cacheDir, "data.json"), "utf8"))
-        : {
-            lastModified: Date.now(),
-            fileMap: {},
-            atlasFiles: {
-                low: [],
-                high: []
-            }
-        };
-
-    if (Array.from(fileMap.values()).find(f => f.lastModified > cacheData.lastModified)) isCached = false;
-
-    if (Object.entries(cacheData.fileMap).find(([name, path]) => fileMap.get(name)?.path === path)) isCached = false;
-    if (Array.from(fileMap.entries()).find(([name, data]) => data.path === cacheData.fileMap[name])) isCached = false;
+    let cacheData: CacheData = {
+        lastModified: 0,
+        fileMap: {},
+        atlasFiles: { low: [], high: [] }
+    };
 
     if (isCached) {
-        console.log("Spritesheets are cached! Skipping build.");
+        console.log(`Spritesheets for mode ${modeName} are cached and valid! Skipping build.`);
         return {
             low: await Promise.all(cacheData.atlasFiles.low.map(async file => ({
                 json: JSON.parse(await readFile(path.join(cacheDir, `${file}.json`), "utf8")) as SpritesheetData,
@@ -97,40 +86,55 @@ async function buildSpritesheets(): Promise<MultiResAtlasList> {
         };
     }
 
-    console.log("Building spritesheets...");
+    console.log(`Building spritesheets for mode ${modeName}...`);
 
-    return await createSpritesheets(fileMap, compilerOpts);
+    return await createSpritesheets(fileMap, compilerOpts, modeName);
 }
+const getHighResVirtualModuleId = (modeName: string) => `virtual:spritesheets-jsons-high-res-${modeName}`;
+const getHighResResolvedVirtualModuleId = (modeName: string) => `\0${getHighResVirtualModuleId(modeName)}`;
 
-const highResVirtualModuleId = "virtual:spritesheets-jsons-high-res";
-const highResResolvedVirtualModuleId = `\0${highResVirtualModuleId}`;
-
-const lowResVirtualModuleId = "virtual:spritesheets-jsons-low-res";
-const lowResResolvedVirtualModuleId = `\0${lowResVirtualModuleId}`;
+const getLowResVirtualModuleId = (modeName: string) => `virtual:spritesheets-jsons-low-res-${modeName}`;
+const getLowResResolvedVirtualModuleId = (modeName: string) => `\0${getLowResVirtualModuleId(modeName)}`;
 
 const resolveId = (id: string): string | undefined => {
-    switch (id) {
-        case highResVirtualModuleId: return highResResolvedVirtualModuleId;
-        case lowResVirtualModuleId: return lowResResolvedVirtualModuleId;
+    const modes = ["fall", "winter", "normal", "shared"];
+    for (const mode of modes) {
+        const highResId = getHighResVirtualModuleId(mode);
+        const lowResId = getLowResVirtualModuleId(mode);
+        if (id === highResId) return getHighResResolvedVirtualModuleId(mode);
+        if (id === lowResId) return getLowResResolvedVirtualModuleId(mode);
     }
+    return undefined;
 };
+
 
 export function spritesheet(): Plugin[] {
     let watcher: FSWatcher;
     let config: ResolvedConfig;
 
-    let atlases: MultiResAtlasList;
-
-    const exportedAtlases: {
-        low: SpritesheetData[]
-        high: SpritesheetData[]
-    } = { low: [], high: [] };
+    const atlasesByMode: Record<string, MultiResAtlasList> = {};
+    const exportedAtlasesByMode: Record<string, { low: SpritesheetData[], high: SpritesheetData[] }> = {
+        fall: { low: [], high: [] },
+        winter: { low: [], high: [] },
+        normal: { low: [], high: [] },
+        shared: { low: [], high: [] }
+    };
 
     const load = (id: string): string | undefined => {
-        switch (id) {
-            case highResResolvedVirtualModuleId: return `export const atlases = JSON.parse('${JSON.stringify(exportedAtlases.high)}')`;
-            case lowResResolvedVirtualModuleId: return `export const atlases = JSON.parse('${JSON.stringify(exportedAtlases.low)}')`;
+        const modes = ["fall", "winter", "normal", "shared"];
+        for (const mode of modes) {
+            if (id === getHighResResolvedVirtualModuleId(mode)) {
+                return `
+                export const atlases = ${JSON.stringify(exportedAtlasesByMode[mode].high)};
+            `;
+            }
+            if (id === getLowResResolvedVirtualModuleId(mode)) {
+                return `
+                export const atlases = ${JSON.stringify(exportedAtlasesByMode[mode].low)};
+            `;
+            }
         }
+        return undefined;
     };
 
     let buildTimeout: NodeJS.Timeout | undefined;
@@ -140,20 +144,24 @@ export function spritesheet(): Plugin[] {
             name: `${PLUGIN_NAME}:build`,
             apply: "build",
             async buildStart() {
-                atlases = await buildSpritesheets();
-
-                exportedAtlases.high = atlases.high.map(sheet => sheet.json);
-                exportedAtlases.low = atlases.low.map(sheet => sheet.json);
+                for (const mode of ["fall", "winter", "shared"]) {
+                    const atlases = await buildSpritesheets(mode);
+                    atlasesByMode[mode] = atlases;
+                    exportedAtlasesByMode[mode].high = atlasesByMode[mode].high.map(sheet => sheet.json);
+                    exportedAtlasesByMode[mode].low = atlasesByMode[mode].low.map(sheet => sheet.json);
+                }
             },
             generateBundle() {
-                for (const sheet of [...atlases.low, ...atlases.high]) {
-                    this.emitFile({
-                        type: "asset",
-                        fileName: sheet.json.meta.image,
-                        source: sheet.image
-                    });
-                    this.info("Built spritesheets");
+                for (const mode of ["fall", "winter", "normal", "shared"]) {
+                    for (const sheet of [...atlasesByMode[mode].low, ...atlasesByMode[mode].high]) {
+                        this.emitFile({
+                            type: "asset",
+                            fileName: sheet.json.meta.image,
+                            source: sheet.image
+                        });
+                    }
                 }
+                this.info("Built spritesheets for all modes");
             },
             resolveId,
             load
@@ -170,10 +178,12 @@ export function spritesheet(): Plugin[] {
 
                     buildTimeout = setTimeout(() => {
                         buildSheets().then(() => {
-                            const module = server.moduleGraph.getModuleById(highResResolvedVirtualModuleId);
-                            if (module !== undefined) void server.reloadModule(module);
-                            const module2 = server.moduleGraph.getModuleById(lowResResolvedVirtualModuleId);
-                            if (module2 !== undefined) void server.reloadModule(module2);
+                            for (const mode of ["fall", "winter", "normal", "shared"]) {
+                                const moduleHigh = server.moduleGraph.getModuleById(getHighResResolvedVirtualModuleId(mode));
+                                if (moduleHigh !== undefined) void server.reloadModule(moduleHigh);
+                                const moduleLow = server.moduleGraph.getModuleById(getLowResResolvedVirtualModuleId(mode));
+                                if (moduleLow !== undefined) void server.reloadModule(moduleLow);
+                            }
                         }).catch(e => console.error(e));
                     }, 500);
                 }
@@ -189,36 +199,39 @@ export function spritesheet(): Plugin[] {
                 const files = new Map<string, Buffer | string>();
 
                 async function buildSheets(): Promise<void> {
-                    atlases = await buildSpritesheets();
+                    for (const mode of ["fall", "winter", "normal", "shared"]) {
+                        atlasesByMode[mode] = await buildSpritesheets(mode);
+                        exportedAtlasesByMode[mode].high = atlasesByMode[mode].high.map(sheet => sheet.json);
+                        exportedAtlasesByMode[mode].low = atlasesByMode[mode].low.map(sheet => sheet.json);
 
-                    exportedAtlases.high = atlases.high.map(sheet => sheet.json);
-                    exportedAtlases.low = atlases.low.map(sheet => sheet.json);
-
-                    files.clear();
-                    for (const sheet of [...atlases.low, ...atlases.high]) {
-                        // consistently assigned in ./spritesheet.ts in function `createSheet` (in function `createSpritesheets`)
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        files.set(sheet.json.meta.image!, sheet.image);
+                        for (const sheet of [...atlasesByMode[mode].low, ...atlasesByMode[mode].high]) {
+                            files.set(sheet.json.meta.image!, sheet.image);
+                        }
                     }
                 }
-                await buildSheets();
 
+                await buildSheets();
                 return () => {
                     server.middlewares.use((req, res, next) => {
                         if (req.originalUrl === undefined) return next();
+
+                        // Set CORS headers for all responses
+                        res.setHeader("Access-Control-Allow-Origin", "*");
+                        res.setHeader("Access-Control-Allow-Methods", "GET");
 
                         const file = files.get(req.originalUrl.slice(1));
                         if (file === undefined) return next();
 
                         res.writeHead(200, {
-                            "Content-Type": `image/${compilerOpts.outputFormat}`
+                            "Content-Type": `image/${compilerOpts.outputFormat}`,
+                            "Access-Control-Allow-Origin": "*", // Ensure CORS headers are set for image responses
                         });
 
                         res.end(file);
                     });
                 };
             },
-            closeBundle: async() => {
+            closeBundle: async () => {
                 await watcher.close();
             },
             resolveId,

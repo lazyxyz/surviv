@@ -1,16 +1,29 @@
+import { Assets, Container, Graphics, RendererType, RenderTexture, Sprite, Spritesheet, Texture, type ColorSource, type Renderer, type SpritesheetData, type WebGLRenderer } from "pixi.js";
 import { Obstacles } from "@common/definitions/obstacles";
 import { HitboxType, RectangleHitbox, type Hitbox } from "@common/utils/hitbox";
 import { Vec, type Vector } from "@common/utils/vector";
 import $ from "jquery";
-import { Assets, Container, Graphics, RendererType, RenderTexture, Sprite, Spritesheet, Texture, type ColorSource, type Renderer, type SpritesheetData, type WebGLRenderer } from "pixi.js";
 import { getTranslatedString } from "../../translations";
 import { PIXI_SCALE, WALL_STROKE_WIDTH } from "./constants";
+
+// Import all mode-specific spritesheet modules statically
+import { atlases as fallHighRes } from "virtual:spritesheets-jsons-high-res-fall";
+import { atlases as fallLowRes } from "virtual:spritesheets-jsons-low-res-fall";
+import { atlases as winterHighRes } from "virtual:spritesheets-jsons-high-res-winter";
+import { atlases as winterLowRes } from "virtual:spritesheets-jsons-low-res-winter";
+import { atlases as sharedHighRes } from "virtual:spritesheets-jsons-high-res-shared";
+import { atlases as sharedLowRes } from "virtual:spritesheets-jsons-low-res-shared";
 
 const textures: Record<string, Texture> = {};
 
 const loadingText = $("#loading-text");
 
-export async function loadTextures(renderer: Renderer, highResolution: boolean): Promise<void> {
+export async function loadTextures(renderer: Renderer, highResolution: boolean, modeName: string): Promise<void> {
+    // Validate modeName
+    if (!["fall", "winter", "normal", "shared"].includes(modeName)) {
+        throw new Error(`Invalid modeName: ${modeName}. Must be one of 'fall', 'winter', 'normal', or 'shared'.`);
+    }
+
     // If device doesn't support 4096x4096 textures, force low resolution textures since they are 2048x2048
     if (renderer.type as RendererType === RendererType.WEBGL) {
         const gl = (renderer as WebGLRenderer).gl;
@@ -19,13 +32,14 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean):
         }
     }
 
-    // we pray
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const spritesheets: SpritesheetData[] = highResolution
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        ? (await import("virtual:spritesheets-jsons-high-res")).atlases
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        : (await import("virtual:spritesheets-jsons-low-res")).atlases;
+    // Select the appropriate spritesheets based on modeName and resolution
+    const modeAtlases: Record<string, SpritesheetData[]> = {
+        fall: highResolution ? fallHighRes : fallLowRes,
+        winter: highResolution ? winterHighRes : winterLowRes,
+        shared: highResolution ? sharedHighRes : sharedLowRes,
+    };
+
+    const spritesheets: SpritesheetData[] = modeAtlases[modeName];
 
     let resolved = 0;
     const count = spritesheets.length;
@@ -184,6 +198,8 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean):
             }))
     ]);
 }
+
+// ... rest of the file (SuroiSprite, toPixiCoords, drawGroundGraphics, drawHitbox) remains unchanged
 
 export class SuroiSprite extends Sprite {
     static getTexture(frame: string): Texture {

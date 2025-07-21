@@ -3,7 +3,7 @@ import { createHash } from "crypto";
 import { type IOption, MaxRectsPacker } from "maxrects-packer";
 import path from "path";
 import { type SpritesheetData } from "pixi.js";
-import { CacheData, cacheDir } from "../spritesheet-plugin";
+import { CacheData, getCacheDir } from "../spritesheet-plugin";
 import { writeFileSync } from "fs";
 
 export const supportedFormats = ["png", "jpeg"] as const;
@@ -58,8 +58,9 @@ export type MultiResAtlasList = { readonly low: AtlasList, readonly high: AtlasL
  * Pack images spritesheets.
  * @param paths List of paths to the images.
  * @param options Options passed to the packer.
+ * @param modeName The mode for which to build spritesheets ("fall", "winter", "normal", or "shared").
  */
-export async function createSpritesheets(pathMap: Map<string, { lastModified: number, path: string }>, options: CompilerOptions): Promise<MultiResAtlasList> {
+export async function createSpritesheets(pathMap: Map<string, { lastModified: number, path: string }>, options: CompilerOptions, modeName: string): Promise<MultiResAtlasList> {
     const paths = Array.from(pathMap.values(), v => v.path);
     if (paths.length === 0) throw new Error("No file given.");
 
@@ -84,7 +85,7 @@ export async function createSpritesheets(pathMap: Map<string, { lastModified: nu
 
     const sep = path.sep;
 
-    process.stdout.write(`Loading ${length} images...\n`);
+    process.stdout.write(`Loading ${length} images for mode ${modeName}...\n`);
     const results = (await Promise.allSettled(
         paths.map(
             async path => {
@@ -99,7 +100,7 @@ export async function createSpritesheets(pathMap: Map<string, { lastModified: nu
             }
         )
     ));
-    writeFromStart(`Loaded ${length} images`.padEnd(prevLength, " "));
+    writeFromStart(`Loaded ${length} images for mode ${modeName}`.padEnd(prevLength, " "));
     console.log();
 
     const images: readonly PackerRectData[] = results.filter(x => x.status === "fulfilled").map(({ value }) => value);
@@ -110,7 +111,7 @@ export async function createSpritesheets(pathMap: Map<string, { lastModified: nu
     }
 
     function createSheet(resolution: number): AtlasList {
-        console.log(`Building spritesheet @ ${resolution}x...`);
+        console.log(`Building spritesheet @ ${resolution}x for mode ${modeName}...`);
         const packer = new MaxRectsPacker(
             options.maximumSize * resolution,
             options.maximumSize * resolution,
@@ -203,6 +204,9 @@ export async function createSpritesheets(pathMap: Map<string, { lastModified: nu
 
             writeFromStart("Caching data".padEnd(prevLength, " "));
             const cacheName = `${options.name}-${hash}@${resolution}x`;
+            const cacheDir = getCacheDir(modeName);
+
+            console.log("cacheDir: ", cacheDir);
             writeFileSync(path.join(cacheDir, `${cacheName}.json`), JSON.stringify(json));
             writeFileSync(path.join(cacheDir, `${cacheName}.${options.outputFormat}`), buffer);
 
@@ -216,7 +220,7 @@ export async function createSpritesheets(pathMap: Map<string, { lastModified: nu
             prevLength = str.length;
         }
 
-        console.log(`\nBuilt spritesheet @ ${resolution}x\n`);
+        console.log(`\nBuilt spritesheet @ ${resolution}x for mode ${modeName}\n`);
 
         return atlases;
     }
@@ -235,9 +239,10 @@ export async function createSpritesheets(pathMap: Map<string, { lastModified: nu
         }
     };
 
+    const cacheDir = getCacheDir(modeName);
     writeFileSync(path.join(cacheDir, "data.json"), JSON.stringify(cacheData));
 
-    console.log(`Finished building spritesheets in ${Math.round(performance.now() - start) / 1000}s`);
+    console.log(`Finished building spritesheets for mode ${modeName} in ${Math.round(performance.now() - start) / 1000}s`);
 
     return sheets;
 }
