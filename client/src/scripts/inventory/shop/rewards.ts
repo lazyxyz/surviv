@@ -1,7 +1,7 @@
 import $ from "jquery";
-import type { Game } from "../../game";
 import { successAlert, errorAlert } from "../../modal";
 import { ShopCache } from ".";
+import type { Account } from "../../account";
 
 interface RewardItem {
     image: string;
@@ -13,7 +13,7 @@ interface RewardData {
     validCrates?: Array<{ amount: number; expiry: number }>;
 }
 
-function renderRewardList(game: Game, rewardData: RewardData): void {
+function renderRewardList(account: Account, rewardData: RewardData): void {
     const now = Math.floor(Date.now() / 1000);
     const rewards: RewardItem[] = rewardData?.validCrates?.map(item => {
         const secondsLeft = item.expiry - now;
@@ -48,7 +48,7 @@ function renderRewardList(game: Game, rewardData: RewardData): void {
         isProcessing = true;
         $claimButton.prop("disabled", true);
         try {
-            await game.account.claimRewards();
+            await account.claimRewards();
             successAlert("Rewards claimed successfully!");
             ShopCache.assetsBalance.Crates += totalCrates;
         } catch (err) {
@@ -57,15 +57,15 @@ function renderRewardList(game: Game, rewardData: RewardData): void {
         } finally {
             isProcessing = false;
             $claimButton.prop("disabled", false);
-            await loadRewards(game);
+            await loadRewards(account);
         }
     });
 }
 
-export async function loadRewards(game: Game): Promise<void> {
-    const rewardData = await game.account.getValidRewards().catch((err: any) => {
+export async function loadRewards(account: Account): Promise<void> {
+    const rewardData = await account.getValidRewards().catch((err: any) => {
         console.error(`Failed to load rewards: ${err}`);
         return { validCrates: [] };
     });
-    renderRewardList(game, rewardData);
+    renderRewardList(account, rewardData);
 }

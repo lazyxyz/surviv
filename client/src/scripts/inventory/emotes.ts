@@ -6,17 +6,17 @@ import { getTranslatedString } from "../../translations";
 import type { ReferenceTo } from "@common/utils/objectDefinitions";
 import type { TranslationKeys } from "../../typings/translations";
 import { InventoryCache } from '.';
-import { SurvivAssets } from '../account';
+import { Account, SurvivAssets } from '../account';
 
-export async function showEmotes(game: Game) {
-    if (!game.account.address) {
+export async function showEmotes(game: Game, account: Account) {
+    if (!account.address) {
         return;
     }
 
     if (InventoryCache.emotesLoaded) return;
     InventoryCache.emotesLoaded = true;
 
-    const userEmoteBalance = Object.entries(await game.account.getBalances(SurvivAssets.SurvivMemes));
+    const userEmoteBalance = Object.entries(await account.getBalances(SurvivAssets.SurvivMemes));
     const userEmotes = userEmoteBalance.map(e => e[0]);
    
     // Cache jQuery selectors for performance

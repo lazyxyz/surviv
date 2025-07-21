@@ -1,10 +1,9 @@
 import $ from "jquery";
-import type { Game } from "../../game";
 import { InventoryCache } from "..";
 import { loadStore } from "./store";
 import { loadBase } from "./base";
 import { loadRewards } from "./rewards";
-import type { SaleItemType } from "../../account";
+import type { Account, SaleItemType } from "../../account";
 
 
 function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeListOf<HTMLElement>) {
@@ -33,7 +32,7 @@ export let ShopCache: {
     assetsPrice: Record<SaleItemType, string>;
 }
 
-export async function showShop(game: Game) {
+export async function showShop(account: Account) {
     if (InventoryCache.shopLoaded) return;
     InventoryCache.shopLoaded = true;
 
@@ -58,15 +57,15 @@ export async function showShop(game: Game) {
     setupTabs(tabButtons, tabContents);
 
     $("#store-tab").on('click', () => {
-        loadStore(game);
+        loadStore(account);
     })
 
     $("#my-crates-tab").on('click', () => {
-        loadBase(game);
+        loadBase(account);
     })
 
     $("#rewards-tab").on('click', () => {
-        loadRewards(game);
+        loadRewards(account);
     })
 
     // Trigger store tab click by default

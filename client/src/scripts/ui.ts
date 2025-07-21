@@ -26,6 +26,7 @@ import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/
 import { Loots } from "@common/definitions/loots";
 import { errorAlert, successAlert, warningAlert } from "./modal";
 import { Emotes } from "@common/definitions/emotes";
+import type { Account } from "./account";
 /*
     eslint-disable
 
@@ -74,7 +75,7 @@ export function resetPlayButtons(): void {
     $("#btn-cancel-finding-game").css("display", "none");
 }
 
-export async function setUpUI(game: Game): Promise<void> {
+export async function setUpUI(game: Game, account: Account): Promise<void> {
     const { inputManager, uiManager: { ui } } = game;
 
     // Change the menu based on the mode.
@@ -113,13 +114,13 @@ export async function setUpUI(game: Game): Promise<void> {
 
         try {
             // Check if wallet is connected
-            if (!game.account?.address) {
+            if (!account?.address) {
                 warningAlert("Please connect your wallet to continue.");
                 return;
             }
 
-            const price = await game.account.queryPrice("Cards", "NativeToken");
-            await game.account.buyItems("Cards", 1, "NativeToken", price);
+            const price = await account.queryPrice("Cards", "NativeToken");
+            await account.buyItems("Cards", 1, "NativeToken", price);
 
             successAlert("Purchase successful!");
         } catch (err) {
@@ -293,9 +294,9 @@ export async function setUpUI(game: Game): Promise<void> {
 
     selectedRegion = regionInfo[game.console.getBuiltInCVar("cv_region") ?? Config.defaultRegion];
     if (selectedRegion) {
-        game.account.setApi(selectedRegion.apiAddress);
+        account.setApi(selectedRegion.apiAddress);
     } else {
-        game.account.setApi(regionInfo[Config.defaultRegion].apiAddress);
+        account.setApi(regionInfo[Config.defaultRegion].apiAddress);
     }
 
     updateServerSelectors();
@@ -335,7 +336,7 @@ export async function setUpUI(game: Game): Promise<void> {
                 const name = game.console.getBuiltInCVar("cv_player_name");
                 if (name) params.set("name", name);
 
-                if (game.account.address) params.set("address", game.account.address)
+                if (account.address) params.set("address", account.address)
 
                 let skin: typeof defaultClientCVars["cv_loadout_skin"];
                 const playerSkin = Loots.fromStringSafe(
@@ -385,7 +386,7 @@ export async function setUpUI(game: Game): Promise<void> {
             }
 
             const websocketURL = `${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`;
-            await game.connect(websocketURL);
+            await game.connect(websocketURL, account);
             ui.splashOptions.addClass("loading");
             ui.loadingText.text("Verifying Game Assets");
             ui.splashMsg.hide();
@@ -421,14 +422,14 @@ export async function setUpUI(game: Game): Promise<void> {
         ui.loadingText.text(getTranslatedString("loading_finding_game"));
         // ui.cancelFindingGame.css("display", "");
         // shouldn't happen
-        if (selectedRegion === undefined || !game.account.token?.length) return;
+        if (selectedRegion === undefined || !account.token?.length) return;
 
         // token is expired
         {
-            const { exp } = parseJWT(game.account.token);
+            const { exp } = parseJWT(account.token);
 
             if (new Date().getTime() >= (exp * 1000)) {
-                return game.account.sessionExpired();
+                return account.sessionExpired();
             }
         }
 
@@ -454,7 +455,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
     // Join server when play buttons are clicked
     $("#btn-play-solo").on("click", _ => {
-        if (!game.account.address) {
+        if (!account.address) {
             warningAlert("Please connect your wallet to continue!");
             return;
         }
@@ -466,7 +467,7 @@ export async function setUpUI(game: Game): Promise<void> {
     });
     // Join server when play buttons are clicked
     $("#btn-play-squad").on("click", event => {
-        if (!game.account.address) {
+        if (!account.address) {
             warningAlert("Please connect your wallet to continue!");
             return;
         }
@@ -480,14 +481,14 @@ export async function setUpUI(game: Game): Promise<void> {
     $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function () {
         const now = Date.now();
 
-        if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined || !game.account.token?.length) return;
+        if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined || !account.token?.length) return;
 
         // token is expired
         {
-            const { exp } = parseJWT(game.account.token);
+            const { exp } = parseJWT(account.token);
 
             if (new Date().getTime() >= (exp * 1000)) {
-                return game.account.sessionExpired();
+                return account.sessionExpired();
             }
         }
 
@@ -739,7 +740,7 @@ export async function setUpUI(game: Game): Promise<void> {
     });
 
     ui.btnStartGame.on("click", () => {
-        $.get(`${selectedRegion?.mainAddress}/api/getGame?teamSize=${TeamSize.Squad}&teamID=${teamID}&token=${game.account.token}`,
+        $.get(`${selectedRegion?.mainAddress}/api/getGame?teamSize=${TeamSize.Squad}&teamID=${teamID}&token=${account.token}`,
             async (data: GetGameResponse) => {
                 if (data.success) {
                     await readyConnect(data, String(selectedRegion?.gameAddress));

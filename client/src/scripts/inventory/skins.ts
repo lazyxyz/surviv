@@ -6,7 +6,7 @@ import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
 
 import { InventoryCache, updateSplashCustomize } from ".";
-import { SurvivAssets } from "../account";
+import { Account, SurvivAssets } from "../account";
 
 // handler select and save skin
 function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {
@@ -21,8 +21,8 @@ function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function showSkins(game: Game) {
-    if (!game?.account?.address) return;
+export async function showSkins(game: Game, account: Account) {
+    if (!account.address) return;
 
     if (InventoryCache.skinsLoaded) return;
     InventoryCache.skinsLoaded = true;
@@ -33,9 +33,9 @@ export async function showSkins(game: Game) {
     const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
 
     const userSkinBalance = [
-        ...Object.entries(await game.account.getBalances(SurvivAssets.SilverSkins)),
-        ...Object.entries(await game.account.getBalances(SurvivAssets.GoldSkins)),
-        ...Object.entries(await game.account.getBalances(SurvivAssets.DivineSkins)),
+        ...Object.entries(await account.getBalances(SurvivAssets.SilverSkins)),
+        ...Object.entries(await account.getBalances(SurvivAssets.GoldSkins)),
+        ...Object.entries(await account.getBalances(SurvivAssets.DivineSkins)),
     ];
     const userSkins = userSkinBalance.map(s => s[0]);
 

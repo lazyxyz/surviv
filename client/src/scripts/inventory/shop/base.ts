@@ -1,5 +1,4 @@
 import $ from "jquery";
-import type { Game } from "../../game";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 
 import {
@@ -13,7 +12,7 @@ import {
     SurvivMemesMapping,
 } from "@common/mappings";
 import { ShopCache } from ".";
-import { SurvivAssets, type MintResult } from "../../account";
+import { Account, SurvivAssets, type MintResult } from "../../account";
 
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
     const crateImages = new Array(userCrateBalances).fill({ image: "./img/misc/crate.png" });
@@ -29,7 +28,7 @@ function renderCrates(userCrateBalances: number, keyBalances: number): void {
     });
 }
 
-function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelected: Element | null, openNowButton: HTMLButtonElement | null, keyBalances: number): void {
+function setupCrateOpening(account: Account, crates: NodeListOf<Element>, totalSelected: Element | null, openNowButton: HTMLButtonElement | null, keyBalances: number): void {
     let selectedCount = 0;
     let isOpening = false;
     let localCrateBalance = crates.length;
@@ -113,13 +112,13 @@ function setupCrateOpening(game: Game, crates: NodeListOf<Element>, totalSelecte
             try {
                 if (selectedCount > 0) {
                     // Perform contract interaction
-                    await game.account.requestOpenCrates(selectedCount);
+                    await account.requestOpenCrates(selectedCount);
                     // Update local balances
                     ShopCache.assetsBalance.Keys -= selectedCount;
                     ShopCache.assetsBalance.Crates -= selectedCount;
                     // Update UI
                     await updateBalancesUI(totalSelected, openNowButton);
-                    setTimeout(() => renderClaimButton(game), 2000);
+                    setTimeout(() => renderClaimButton(account), 2000);
                     successAlert("Crates opened successfully!");
                 }
             } catch (err) {
@@ -152,11 +151,11 @@ async function updateBalancesUI(
     $(".select-all").prop("checked", false);
 }
 
-async function renderClaimButton(game: Game): Promise<HTMLButtonElement | null> {
+async function renderClaimButton(account: Account): Promise<HTMLButtonElement | null> {
     const claimButton = document.querySelector<HTMLButtonElement>(".claim-items");
     if (!claimButton) return claimButton;
 
-    const hasCommits = (await game.account.getCommits().catch(err => {
+    const hasCommits = (await account.getCommits().catch(err => {
         console.error(`Failed to query commits: ${err}`);
         return [];
     })).length > 0;
@@ -241,8 +240,8 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
     });
 }
 
-async function updateClaimButton(game: Game): Promise<void> {
-    const claimButton = await renderClaimButton(game);
+async function updateClaimButton(account: Account): Promise<void> {
+    const claimButton = await renderClaimButton(account);
 
     if (!claimButton) return;
     let isProcessing = false;
@@ -251,7 +250,7 @@ async function updateClaimButton(game: Game): Promise<void> {
         if (isProcessing) return;
         isProcessing = true;
         try {
-            const result = await game.account.claimItems();
+            const result = await account.claimItems();
 
             if (result.error) {
                 errorAlert(result.error);
@@ -278,30 +277,30 @@ async function updateClaimButton(game: Game): Promise<void> {
     });
 }
 
-async function loadCrates(game: Game, keyBalance: number, crateBalance: number): Promise<void> {
+async function loadCrates(account: Account, keyBalance: number, crateBalance: number): Promise<void> {
 
     renderCrates(crateBalance, keyBalance);
 
     const crates = document.querySelectorAll(".my-crates-child");
     const totalSelected = document.querySelector(".total-selected");
     const openNowButton = document.querySelector<HTMLButtonElement>(".open-now");
-    setupCrateOpening(game, crates, totalSelected, openNowButton, keyBalance);
+    setupCrateOpening(account, crates, totalSelected, openNowButton, keyBalance);
 }
 
-export async function loadBase(game: Game): Promise<void> {
-    if (!game.account.address) {
+export async function loadBase(account: Account): Promise<void> {
+    if (!account.address) {
         return;
     }
 
     if (!ShopCache.baseLoaded) {
-        ShopCache.assetsBalance.Keys = (await game.account.getBalances(SurvivAssets.SurvivKeys))["keys"] || 0;
-        ShopCache.assetsBalance.Crates = (await game.account.getBalances(SurvivAssets.SurvivCrates))["crates"] || 0;
+        ShopCache.assetsBalance.Keys = (await account.getBalances(SurvivAssets.SurvivKeys))["keys"] || 0;
+        ShopCache.assetsBalance.Crates = (await account.getBalances(SurvivAssets.SurvivCrates))["crates"] || 0;
     };
 
     await Promise.all(
         [
-            loadCrates(game, ShopCache.assetsBalance.Keys, ShopCache.assetsBalance.Crates),
-            updateClaimButton(game)
+            loadCrates(account, ShopCache.assetsBalance.Keys, ShopCache.assetsBalance.Crates),
+            updateClaimButton(account)
         ]
     );
     ShopCache.baseLoaded = true;

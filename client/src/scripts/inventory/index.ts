@@ -5,6 +5,7 @@ import { showEmotes } from "./emotes";
 import { showShop } from "./shop";
 import { showSkins } from "./skins";
 import { showWeapons } from "./weapons";
+import type { Account } from '../account';
 
 // handler display change preview
 export const updateSplashCustomize = (skinID: string): void => {
@@ -37,7 +38,7 @@ export let InventoryCache: {
     emotesLoaded: boolean,
 };
 
-export async function showInventory(game: Game) {
+export async function showInventory(game: Game, account: Account) {
     InventoryCache = {
         shopLoaded: false,
         skinsLoaded: false,
@@ -47,19 +48,19 @@ export async function showInventory(game: Game) {
     }
 
     $("#btn-customize").on('click', async () => {
-        showShop(game);
+        showShop(account);
     })
 
     $('#tab-skins').on('click', () => {
-        showSkins(game);
+        showSkins(game, account);
     })
 
     $('#tab-weapons').on('click', () => {
-        showWeapons(game);
+        showWeapons(game, account);
     })
 
     $('#tab-emotes').on('click', () => {
-        showEmotes(game);
+        showEmotes(game, account);
     })
 
     $('#tab-badges').on('click', () => {

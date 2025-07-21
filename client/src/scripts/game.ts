@@ -156,8 +156,6 @@ export class Game {
 
     readonly gasRender = new GasRender(PIXI_SCALE);
     readonly gas = new Gas(this);
-    readonly eip6963 = new EIP6963();
-    readonly account = new Account();
 
     music!: Sound;
 
@@ -185,82 +183,6 @@ export class Game {
         await initTranslation(game);
         game.inputManager.setupInputs();
 
-        const initPixi = async (): Promise<void> => {
-            const renderMode = game.console.getBuiltInCVar("cv_renderer");
-            const renderRes = game.console.getBuiltInCVar("cv_renderer_res");
-
-            await game.pixi.init({
-                resizeTo: window,
-                background: COLORS.grass,
-                antialias: game.console.getBuiltInCVar("cv_antialias"),
-                autoDensity: true,
-                preferWebGLVersion: renderMode === "webgl1" ? 1 : 2,
-                preference: renderMode === "webgpu" ? "webgpu" : "webgl",
-                resolution: renderRes === "auto" ? (window.devicePixelRatio || 1) : parseFloat(renderRes),
-                hello: true,
-                canvas: document.getElementById("game-canvas") as HTMLCanvasElement,
-                // we only use pixi click events (to spectate players on click)
-                // so other events can be disabled for performance
-                eventFeatures: {
-                    move: false,
-                    globalMove: false,
-                    wheel: false,
-                    click: true
-                }
-            });
-
-            const pixi = game.pixi;
-            await loadTextures(
-                pixi.renderer,
-                game.inputManager.isMobile
-                    ? game.console.getBuiltInCVar("mb_high_res_textures")
-                    : game.console.getBuiltInCVar("cv_high_res_textures")
-            );
-
-            // HACK: the game ui covers the canvas
-            // so send pointer events manually to make clicking to spectate players work
-            game.uiManager.ui.gameUi[0].addEventListener("pointerdown", e => {
-                pixi.canvas.dispatchEvent(new PointerEvent("pointerdown", {
-                    pointerId: e.pointerId,
-                    button: e.button,
-                    clientX: e.clientX,
-                    clientY: e.clientY,
-                    screenY: e.screenY,
-                    screenX: e.screenX
-                }));
-            });
-
-            pixi.ticker.add(game.render.bind(game));
-            pixi.stage.addChild(
-                game.camera.container,
-                game.map.container,
-                game.map.mask
-            );
-
-            game.map.visible = !game.console.getBuiltInCVar("cv_minimap_minimized");
-            game.map.expanded = game.console.getBuiltInCVar("cv_map_expanded");
-            game.uiManager.ui.gameUi.toggle(game.console.getBuiltInCVar("cv_draw_hud"));
-
-            pixi.renderer.on("resize", () => game.resize());
-            game.resize();
-
-            setInterval(() => {
-                if (game.console.getBuiltInCVar("pf_show_fps")) {
-                    game.uiManager.debugReadouts.fps.text(`${Math.round(game.pixi.ticker.FPS)} fps`);
-                }
-            }, 500);
-        };
-
-        void Promise.all([
-            initPixi(),
-            onConnectWallet(game),
-            showWallet(game),
-            setUpUI(game),
-        ]).then(() => {
-            showInventory(game);
-            unlockPlayButtons();
-            resetPlayButtons();
-        });
 
         setUpCommands(game);
         game.inputManager.generateBindsConfigScreen();
@@ -274,6 +196,72 @@ export class Game {
         });
         return game;
     }
+
+    initPixi = async (): Promise<void> => {
+        const renderMode = this.console.getBuiltInCVar("cv_renderer");
+        const renderRes = this.console.getBuiltInCVar("cv_renderer_res");
+
+        await this.pixi.init({
+            resizeTo: window,
+            background: COLORS.grass,
+            antialias: this.console.getBuiltInCVar("cv_antialias"),
+            autoDensity: true,
+            preferWebGLVersion: renderMode === "webgl1" ? 1 : 2,
+            preference: renderMode === "webgpu" ? "webgpu" : "webgl",
+            resolution: renderRes === "auto" ? (window.devicePixelRatio || 1) : parseFloat(renderRes),
+            hello: true,
+            canvas: document.getElementById("game-canvas") as HTMLCanvasElement,
+            // we only use pixi click events (to spectate players on click)
+            // so other events can be disabled for performance
+            eventFeatures: {
+                move: false,
+                globalMove: false,
+                wheel: false,
+                click: true
+            }
+        });
+
+        const pixi = this.pixi;
+        await loadTextures(
+            pixi.renderer,
+            this.inputManager.isMobile
+                ? this.console.getBuiltInCVar("mb_high_res_textures")
+                : this.console.getBuiltInCVar("cv_high_res_textures")
+        );
+
+        // HACK: the game ui covers the canvas
+        // so send pointer events manually to make clicking to spectate players work
+        this.uiManager.ui.gameUi[0].addEventListener("pointerdown", e => {
+            pixi.canvas.dispatchEvent(new PointerEvent("pointerdown", {
+                pointerId: e.pointerId,
+                button: e.button,
+                clientX: e.clientX,
+                clientY: e.clientY,
+                screenY: e.screenY,
+                screenX: e.screenX
+            }));
+        });
+
+        pixi.ticker.add(this.render.bind(this));
+        pixi.stage.addChild(
+            this.camera.container,
+            this.map.container,
+            this.map.mask
+        );
+
+        this.map.visible = !this.console.getBuiltInCVar("cv_minimap_minimized");
+        this.map.expanded = this.console.getBuiltInCVar("cv_map_expanded");
+        this.uiManager.ui.gameUi.toggle(this.console.getBuiltInCVar("cv_draw_hud"));
+
+        pixi.renderer.on("resize", () => this.resize());
+        this.resize();
+
+        setInterval(() => {
+            if (this.console.getBuiltInCVar("pf_show_fps")) {
+                this.uiManager.debugReadouts.fps.text(`${Math.round(this.pixi.ticker.FPS)} fps`);
+            }
+        }, 500);
+    };
 
     resize(): void {
         this.map.resize();
@@ -362,27 +350,28 @@ export class Game {
     }
 
 
-    async connect(address: string) {
-        const url = new URL(address);
+    async connect(raw_url: string, account: Account) {
+        await this.initPixi();
+        const url = new URL(raw_url);
 
         this.error = false;
 
-        if (this.gameStarted || !this.account.token?.length) return;
+        if (this.gameStarted || !account.token?.length) return;
 
         // token is expired
         {
-            const { exp } = parseJWT(this.account.token);
+            const { exp } = parseJWT(account.token);
 
             if (new Date().getTime() >= (exp * 1000)) {
-                return this.account.sessionExpired();
+                return account.sessionExpired();
             }
         }
 
         // append token intro params
         if (url.search) {
-            url.searchParams.append("token", this.account.token);
+            url.searchParams.append("token", account.token);
         } else {
-            url.searchParams.set("token", this.account.token);
+            url.searchParams.set("token", account.token);
         }
 
         this._socket = await this.connectWebSocket(url.toString(), 10000, 1000, {

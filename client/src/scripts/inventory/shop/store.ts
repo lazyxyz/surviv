@@ -1,7 +1,6 @@
 import $ from "jquery";
 import { formatEther } from "ethers";
-import { SurvivAssets, type PaymentTokenType, type SaleItemType } from "../../account";
-import type { Game } from "../../game";
+import { Account, SurvivAssets, type PaymentTokenType, type SaleItemType } from "../../account";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 import { ShopCache } from ".";
 
@@ -14,7 +13,7 @@ interface StoreItem {
 }
 
 async function fetchPrice(
-    game: Game,
+    account: Account,
     itemType: SaleItemType,
     paymentToken: PaymentTokenType = "NativeToken"
 ): Promise<string> {
@@ -24,7 +23,7 @@ async function fetchPrice(
     }
 
     try {
-        const price = await game.account.queryPrice(itemType, paymentToken);
+        const price = await account.queryPrice(itemType, paymentToken);
         ShopCache.assetsPrice[itemType] = price; // Cache the formatted price
         return price;
     } catch (err) {
@@ -33,7 +32,7 @@ async function fetchPrice(
     }
 }
 
-function renderStoreItems(game: Game, storeItems: StoreItem[]): void {
+function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
     const $storeContainer = $("#buy-customize-items");
     $storeContainer.empty();
     storeItems.forEach((item, index) => {
@@ -58,7 +57,7 @@ function renderStoreItems(game: Game, storeItems: StoreItem[]): void {
         $storeContainer.append($card);
 
         // Fetch price asynchronously and update the UI
-        fetchPrice(game, item.itemType).then(price => {
+        fetchPrice(account, item.itemType).then(price => {
             $card.find(".price-placeholder").text(`${formatEther(price)} STT`);
         });
     });
@@ -78,7 +77,7 @@ function updateTotalPurchase($card: JQuery<HTMLElement>, amount: number) {
     }
 }
 
-function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
+function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): void {
     const $cards = $(".crates-card");
     $(document).off("click", ".crates-add, .crates-remove, .buy-now-btn");
 
@@ -146,7 +145,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
         });
 
         $buyButton.on("click", async () => {
-            if (!game.account.address) {
+            if (!account.address) {
                 warningAlert("Please connect your wallet to continue!");
                 return;
             }
@@ -156,7 +155,7 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
             $buyButton.prop("disabled", true);
             try {
                 const value = BigInt(ShopCache.assetsPrice[itemType]) * BigInt(amount);
-                await game.account.buyItems(itemType, amount, "NativeToken", value);
+                await account.buyItems(itemType, amount, "NativeToken", value);
                 // Update balance locally
                 const item = storeItems.find(item => item.itemType === itemType);
                 if (item) {
@@ -169,8 +168,8 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
                 updateTotalPurchase($card, amount);
 
                 // Re-render store items with updated balances
-                renderStoreItems(game, storeItems);
-                setupPurchaseInteractions(game, storeItems);
+                renderStoreItems(account, storeItems);
+                setupPurchaseInteractions(account, storeItems);
                 successAlert("Purchase successful!");
             } catch (err: any) {
                 errorAlert("Transaction Failed: Please check your wallet balance or try again.", 3000);
@@ -186,17 +185,17 @@ function setupPurchaseInteractions(game: Game, storeItems: StoreItem[]): void {
     });
 }
 
-export async function loadStore(game: Game): Promise<void> {
-    if (!game.account.address) {
+export async function loadStore(account: Account): Promise<void> {
+    if (!account.address) {
         warningAlert("Please connect your wallet to continue!");
         return;
     }
 
     if (!ShopCache.storeLoaded) {
         ShopCache.storeLoaded = true;
-        ShopCache.assetsBalance["Keys"] = (await game.account.getBalances(SurvivAssets.SurvivKeys))["keys"] || 0;
-        ShopCache.assetsBalance["Crates"] = (await game.account.getBalances(SurvivAssets.SurvivCrates))["crates"] || 0;
-        ShopCache.assetsBalance["Cards"] = (await game.account.getBalances(SurvivAssets.SurvivCards))["cards"] || 0;
+        ShopCache.assetsBalance["Keys"] = (await account.getBalances(SurvivAssets.SurvivKeys))["keys"] || 0;
+        ShopCache.assetsBalance["Crates"] = (await account.getBalances(SurvivAssets.SurvivCrates))["crates"] || 0;
+        ShopCache.assetsBalance["Cards"] = (await account.getBalances(SurvivAssets.SurvivCards))["cards"] || 0;
     };
 
     const storeItems: StoreItem[] = [
@@ -220,6 +219,6 @@ export async function loadStore(game: Game): Promise<void> {
         },
     ];
 
-    renderStoreItems(game, storeItems);
-    setupPurchaseInteractions(game, storeItems);
+    renderStoreItems(account, storeItems);
+    setupPurchaseInteractions(account, storeItems);
 }

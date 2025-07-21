@@ -3,6 +3,7 @@ import type { Game } from "../game";
 import { createDropdown } from "../uiHelpers";
 import { WalletType, shorten } from "../utils/constants";
 import { errorAlert, warningAlert } from "../modal";
+import type { Account } from "../account";
 
 // Define Turnstile window interface
 interface TurnstileWindow extends Window {
@@ -44,7 +45,7 @@ const renderTurnstile = (): Promise<string> => {
 };
 
 
-export function onConnectWallet(game: Game): void {
+export function onConnectWallet(account: Account): void {
     let turnstileToken: string | null = null;
 
     $("#connect-wallet-btn").on("click", async () => {
@@ -70,7 +71,7 @@ export function onConnectWallet(game: Game): void {
         const paragraphElement = elements.children[1];
         const logoElement = elements.children[0];
 
-        const isExisted = game.eip6963.providers?.find(
+        const isExisted = account.eip6963.providers?.find(
             argument => argument?.info?.name === paragraphElement?.textContent
         );
 
@@ -101,7 +102,7 @@ export function onConnectWallet(game: Game): void {
 
                         logoElement.after(newNode);
                     }
-                    return await game.account.connect(isExisted, turnstileToken);
+                    return await account.connect(isExisted, turnstileToken);
                 } catch (error) {
                     console.log(error);
                 } finally {
@@ -133,12 +134,16 @@ export function onConnectWallet(game: Game): void {
             };
         }
     }
+
+    if (!account.address) {
+        $("#connect-wallet-btn").trigger("click");
+    }
 };
 
-export function showWallet(game: Game): void {
-    if (!game.account.address) $("#connect-wallet-btn").trigger("click");
+export function showWallet(account: Account): void {
+    if (!account.address) $("#connect-wallet-btn").trigger("click");
 
-    if (game?.eip6963.provider?.provider && game.account.address?.length) {
+    if (account.eip6963.provider?.provider && account.address?.length) {
         // handler first time you need visible container
         {
             $(".account-wallet-container").css("display", "block");
@@ -146,7 +151,7 @@ export function showWallet(game: Game): void {
 
         // handler placeholder for button
         {
-            $(".account-wallet-placeholder").append(shorten(game.account.address));
+            $(".account-wallet-placeholder").append(shorten(account.address));
         }
     }
 
@@ -160,11 +165,11 @@ export function showWallet(game: Game): void {
                 onClick: () => {
                     // https://dev.to/0shuvo0/copy-text-to-clipboard-in-jstwo-ways-1pn1
                     if (navigator.clipboard) {
-                        return navigator.clipboard.writeText(String(game.account.address));
+                        return navigator.clipboard.writeText(String(account.address));
                     }
 
                     const textArea = document.createElement("textarea");
-                    textArea.value = String(game.account.address);
+                    textArea.value = String(account.address);
 
                     document.body.appendChild(textArea);
 
@@ -180,7 +185,7 @@ export function showWallet(game: Game): void {
                 key: "disconnect",
                 fieldName: "Disconnect",
                 icon: "./img/line/log-out.svg",
-                onClick: () => game.account.disconnect()
+                onClick: () => account.disconnect()
             }
         ];
 

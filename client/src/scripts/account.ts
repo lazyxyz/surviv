@@ -104,6 +104,7 @@ export class Account extends EIP6963 {
     address: string | null | undefined;
     token: string | null | undefined;
     api: string | null | undefined;
+    readonly eip6963 = new EIP6963();
 
     constructor() {
         super();
