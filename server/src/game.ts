@@ -50,6 +50,7 @@ import { cleanUsername, Logger, removeFrom } from "./utils/misc";
 import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
 import { PlayerData } from "@common/packets/readyPacket";
+import { Mode } from "@common/definitions/modes";
 
 /*
     eslint-disable
@@ -98,6 +99,8 @@ export class Game implements GameData {
     readonly maxTeamSize: TeamSize;
 
     readonly teamMode: boolean;
+
+    readonly gameMode: Mode;
 
     readonly teams = new (class SetArray<T> extends Set<T> {
         private _valueCache?: T[];
@@ -225,10 +228,11 @@ export class Game implements GameData {
         return this._idAllocator.takeNext();
     }
 
-    constructor(port: number, maxTeamSize: TeamSize, gameId: string) {
+    constructor(port: number, maxTeamSize: TeamSize, gameId: string, gameMode: Mode) {
         this.port = port;
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
+        this.gameMode = gameMode;
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
         this.updateGameData({
             aliveCount: 0,
@@ -240,9 +244,9 @@ export class Game implements GameData {
 
         this.pluginManager.loadPlugins();
 
-        const { width, height } = Maps[Config.map.split(":")[0] as MapName];
+        const { width, height } = Maps[this.gameMode];
         this.grid = new Grid(this, width, height);
-        this.map = new GameMap(this, Config.map);
+        this.map = new GameMap(this);
         this.gas = new Gas(this);
 
         this.setGameData({ allowJoin: true });

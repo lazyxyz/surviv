@@ -1101,7 +1101,8 @@ const maps = {
 
             Object.entries(loots ?? {}).forEach(([lootTable, count]) => {
                 for (let i = 0; i < count; i++) {
-                    const loot = getLootFromTable(lootTable);
+                    // const loot = getLootFromTable(lootTable);
+                    const loot = getLootFromTable("fall", lootTable);
 
                     const position = map.getRandomPosition(
                         new CircleHitbox(5),

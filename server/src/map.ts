@@ -1,7 +1,7 @@
 import { GameConstants, Layer, ObjectCategory } from "@common/constants";
 import { Buildings, type BuildingDefinition } from "@common/definitions/buildings";
 import { Obstacles, RotationMode, type ObstacleDefinition } from "@common/definitions/obstacles";
-import { ObstacleModeVariations } from "@common/definitions/modes";
+import { Mode, ObstacleModeVariations } from "@common/definitions/modes";
 import { MapPacket, type MapPacketData } from "@common/packets/mapPacket";
 import { PacketStream } from "@common/packets/packetStream";
 import { type Orientation, type Variation } from "@common/typings";
@@ -80,11 +80,11 @@ export class GameMap {
         }
     }
 
-    constructor(game: Game, mapData: typeof Config["map"]) {
+    constructor(game: Game) {
         this.game = game;
 
-        const [name, ...params] = mapData.split(":") as [MapName, ...string[]];
-        const mapDef: MapDefinition = Maps[name];
+        // const [name, ...params] = mapData.split(":") as [MapName, ...string[]];
+        const mapDef: MapDefinition = Maps[game.gameMode];
 
         // @ts-expect-error I don't know why this rule exists
         type PacketType = this["_packet"];
@@ -160,7 +160,7 @@ export class GameMap {
 
         Object.entries(mapDef.loots ?? {}).forEach(([loot, count]) => this._generateLoots(loot, count));
 
-        mapDef.onGenerate?.(this, params);
+        // mapDef.onGenerate?.(this, params);
 
         if (mapDef.places) {
             packet.places = mapDef.places.map(({ name, position }) => {
@@ -534,7 +534,7 @@ export class GameMap {
                 ReferenceTo<ObstacleDefinition> | typeof NullString
             >(obstacleData.idString);
             if (idString === NullString) continue;
-            const gameMode = GameConstants.modeName;
+            const gameMode = this.game.gameMode;
             if (obstacleData.modeVariant) {
                 idString = `${idString}${ObstacleModeVariations[gameMode] ?? ""}`;
             }
@@ -577,7 +577,7 @@ export class GameMap {
         }
 
         for (const lootData of definition.lootSpawners) {
-            for (const item of getLootFromTable(lootData.table)) {
+            for (const item of getLootFromTable(this.game.gameMode, lootData.table)) {
                 this.game.addLoot(
                     item.idString,
                     Vec.addAdjust(position, lootData.position, orientation),
@@ -764,7 +764,7 @@ export class GameMap {
 
     private _generateLoots(table: string, count: number): void {
         for (let i = 0; i < count; i++) {
-            const loot = getLootFromTable(table);
+            const loot = getLootFromTable(this.game.gameMode, table);
 
             const position = this.getRandomPosition(
                 new CircleHitbox(5),

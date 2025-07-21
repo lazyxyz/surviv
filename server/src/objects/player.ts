@@ -440,7 +440,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         this.inventory.addOrReplaceWeapon(2, "fists");
 
-        const defaultScope = Modes[GameConstants.modeName].defaultScope;
+        const defaultScope = Modes[this.game.gameMode].defaultScope;
         if (defaultScope) {
             this.inventory.scope = defaultScope;
             this.inventory.items.setItem(defaultScope, 1);
@@ -536,7 +536,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             // and if we somehow don't have any matching slots, then someone's probably messing with us… fallback to slot 0 lol
         }
 
-        const spawnable = SpawnableLoots();
+        const spawnable = SpawnableLoots(this.game.gameMode);
 
         const { inventory } = this;
         const { items, backpack: { maxCapacity }, throwableItemMap } = inventory;

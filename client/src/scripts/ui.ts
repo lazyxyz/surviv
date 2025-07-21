@@ -329,9 +329,6 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
             if (teamID) params.set("teamID", teamID);
             if (autoFill) params.set("autoFill", String(autoFill));
 
-            // const devPass = game.console.getBuiltInCVar("dv_password");
-            // if (devPass) params.set("password", devPass);
-
             {
                 const name = game.console.getBuiltInCVar("cv_player_name");
                 if (name) params.set("name", name);
@@ -386,7 +383,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
             }
 
             const websocketURL = `${gameAddress.replace("<ID>", (data.gameID).toString())}/play?${params.toString()}`;
-            await game.connect(websocketURL, account);
+            await game.connect(websocketURL, account, "fall");
             ui.splashOptions.addClass("loading");
             ui.loadingText.text("Verifying Game Assets");
             ui.splashMsg.hide();

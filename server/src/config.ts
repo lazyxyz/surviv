@@ -24,8 +24,6 @@ export const Config = {
     squadPort: 9001,
     addBot: true,
 
-    map: "fall",
-
     spawn: { mode: SpawnMode.Normal },
 
     maxTeamSize: {
@@ -81,13 +79,6 @@ export interface ConfigType {
         readonly keyFile: string
         readonly certFile: string
     }
-
-    /**
-     * The map name. Must be a valid value from the server maps definitions (`maps.ts`).
-     * Example: `"main"` for the main map or `"debug"` for the debug map.
-     * Parameters can also be specified for certain maps, separated by colons (e.g. `singleObstacle:rock`)
-     */
-    readonly map: `${keyof typeof Maps}${string}`
 
     /**
      * There are 4 spawn modes: `Normal`, `Radius`, `Fixed`, and `Center`.

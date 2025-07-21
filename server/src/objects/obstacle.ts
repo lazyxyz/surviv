@@ -102,11 +102,11 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
         this.collidable = !definition.noCollisions;
 
         if (definition.hasLoot) {
-            this.loot = getLootFromTable(definition.lootTable ?? definition.idString);
+            this.loot = getLootFromTable(this.game.gameMode, definition.lootTable ?? definition.idString);
         }
 
         if (definition.spawnWithLoot) {
-            for (const item of getLootFromTable(definition.lootTable ?? definition.idString)) {
+            for (const item of getLootFromTable(this.game.gameMode, definition.lootTable ?? definition.idString)) {
                 this.game.addLoot(
                     item.idString,
                     this.position,

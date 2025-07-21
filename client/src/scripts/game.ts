@@ -67,6 +67,7 @@ import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { Melees } from "@common/definitions/melees";
 import { errorAlert } from "./modal";
 import { showInventory } from "./inventory";
+import type { Mode } from "node:fs";
 
 /* eslint-disable @stylistic/indent */
 
@@ -197,29 +198,32 @@ export class Game {
         return game;
     }
 
-    initPixi = async (): Promise<void> => {
+    initPixi = async (gameMode: Mode): Promise<void> => {
         const renderMode = this.console.getBuiltInCVar("cv_renderer");
         const renderRes = this.console.getBuiltInCVar("cv_renderer_res");
 
-        await this.pixi.init({
-            resizeTo: window,
-            background: COLORS.grass,
-            antialias: this.console.getBuiltInCVar("cv_antialias"),
-            autoDensity: true,
-            preferWebGLVersion: renderMode === "webgl1" ? 1 : 2,
-            preference: renderMode === "webgpu" ? "webgpu" : "webgl",
-            resolution: renderRes === "auto" ? (window.devicePixelRatio || 1) : parseFloat(renderRes),
-            hello: true,
-            canvas: document.getElementById("game-canvas") as HTMLCanvasElement,
-            // we only use pixi click events (to spectate players on click)
-            // so other events can be disabled for performance
-            eventFeatures: {
-                move: false,
-                globalMove: false,
-                wheel: false,
-                click: true
-            }
-        });
+        // Check if Pixi.js is already initialized
+        if (this.pixi.stage.children.length == 0) {
+            await this.pixi.init({
+                resizeTo: window,
+                background: COLORS.grass,
+                antialias: this.console.getBuiltInCVar("cv_antialias"),
+                autoDensity: true,
+                preferWebGLVersion: renderMode === "webgl1" ? 1 : 2,
+                preference: renderMode === "webgpu" ? "webgpu" : "webgl",
+                resolution: renderRes === "auto" ? (window.devicePixelRatio || 1) : parseFloat(renderRes),
+                hello: true,
+                canvas: document.getElementById("game-canvas") as HTMLCanvasElement,
+                // we only use pixi click events (to spectate players on click)
+                // so other events can be disabled for performance
+                eventFeatures: {
+                    move: false,
+                    globalMove: false,
+                    wheel: false,
+                    click: true
+                }
+            });
+        }
 
         const pixi = this.pixi;
         await loadTextures(
@@ -227,7 +231,7 @@ export class Game {
             this.inputManager.isMobile
                 ? this.console.getBuiltInCVar("mb_high_res_textures")
                 : this.console.getBuiltInCVar("cv_high_res_textures")
-            , "fall"
+            , gameMode.toString()
         );
 
         // HACK: the game ui covers the canvas
@@ -263,6 +267,7 @@ export class Game {
             }
         }, 500);
     };
+
 
     resize(): void {
         this.map.resize();
@@ -351,8 +356,8 @@ export class Game {
     }
 
 
-    async connect(raw_url: string, account: Account) {
-        await this.initPixi();
+    async connect(raw_url: string, account: Account, gameMode: Mode) {
+        // await this.initPixi(gameMode);
         const url = new URL(raw_url);
 
         this.error = false;
@@ -484,7 +489,9 @@ export class Game {
     onPacket(packet: OutputPacket): void {
         switch (true) {
             case packet instanceof ReadyPacket:
-                this.ready(packet.output);
+                this.initPixi("fall").then(_ => {
+                    this.ready(packet.output);
+                })
                 break;
             case packet instanceof JoinedPacket:
                 this.startGame(packet.output);
@@ -582,8 +589,6 @@ export class Game {
         [InventoryMessages.CannotUseRadio]: "msg_cannot_use_radio",
         [InventoryMessages.RadioOverused]: "msg_radio_overused"
     };
-
-
 
     startGame(packet: JoinedPacketData): void {
         // Sound which notifies the player that the
