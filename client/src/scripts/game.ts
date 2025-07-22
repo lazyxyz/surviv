@@ -56,10 +56,9 @@ import { Minimap } from "./rendering/minimap";
 import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime } from "./ui";
 import { setUpCommands } from "./utils/console/commands";
 import { GameConsole } from "./utils/console/gameConsole";
-import { COLORS, LAYER_TRANSITION_DELAY, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
+import {  getColorsForMode, LAYER_TRANSITION_DELAY, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
-import { EIP6963 } from "./eip6963";
 import { Account } from "./account";
 import { ReadyPacket, type PlayerData } from "@common/packets/readyPacket";
 import { onConnectWallet, showWallet } from "./wallet";
@@ -67,7 +66,7 @@ import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { Melees } from "@common/definitions/melees";
 import { errorAlert } from "./modal";
 import { showInventory } from "./inventory";
-import { NumberToMode, type Mode } from "@common/definitions/modes";
+import { Modes, NumberToMode, type Mode } from "@common/definitions/modes";
 
 /* eslint-disable @stylistic/indent */
 
@@ -125,6 +124,7 @@ export class Game {
     teamMode = false;
     teamSize = TeamSize.Solo;
     gameId = "";
+    gameMode: Mode = "fall";
 
     /**
      * proxy for `activePlayer`'s layer
@@ -206,7 +206,7 @@ export class Game {
         if (this.pixi.stage.children.length == 0) {
             await this.pixi.init({
                 resizeTo: window,
-                background: COLORS.grass,
+                background: getColorsForMode(this.gameMode).grass,
                 antialias: this.console.getBuiltInCVar("cv_antialias"),
                 autoDensity: true,
                 preferWebGLVersion: renderMode === "webgl1" ? 1 : 2,
@@ -408,7 +408,7 @@ export class Game {
                 this.camera.addObject(this.gasRender.graphics);
                 this.map.indicator.setFrame("player_indicator");
 
-                const particleEffects = MODE.particleEffects;
+                const particleEffects = Modes[this.gameMode].particleEffects;
 
                 if (particleEffects !== undefined) {
                     const This = this;
@@ -489,8 +489,8 @@ export class Game {
     onPacket(packet: OutputPacket): void {
         switch (true) {
             case packet instanceof ReadyPacket:
-                const gameMode = NumberToMode[ packet.output.gameMode];
-                this.initPixi(gameMode).then(_ => {
+                this.gameMode = NumberToMode[ packet.output.gameMode];
+                this.initPixi(this.gameMode).then(_ => {
                     this.ready(packet.output);
                 })
                 break;
@@ -596,8 +596,9 @@ export class Game {
         // game started if page is out of focus.
         if (!document.hasFocus()) this.soundManager.play("join_notification");
 
-        if (MODE.ambience) {
-            this.ambience = this.soundManager.play(MODE.ambience, { loop: true, ambient: true });
+        const ambience =  Modes[this.gameMode].ambience;
+        if (ambience) {
+            this.ambience = this.soundManager.play(ambience, { loop: true, ambient: true });
         }
 
         this.uiManager.emotes = packet.emotes;
@@ -940,7 +941,7 @@ export class Game {
         this.map.terrainGraphics.visible = !basement;
         const { red, green, blue } = this.pixi.renderer.background.color;
         const color = { r: red * 255, g: green * 255, b: blue * 255 };
-        const targetColor = basement ? COLORS.void : COLORS.grass;
+        const targetColor = basement ? getColorsForMode(this.gameMode).void : getColorsForMode(this.gameMode).grass;
 
         this.backgroundTween?.kill();
         this.backgroundTween = this.addTween({

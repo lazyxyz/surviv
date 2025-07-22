@@ -1,5 +1,5 @@
 import { GameConstants, Layer } from "@common/constants";
-import { Modes, type ColorKeys } from "@common/definitions/modes";
+import { Modes, type ColorKeys, type Mode } from "@common/definitions/modes";
 import { Color } from "pixi.js";
 
 export const FORCE_MOBILE = false;
@@ -39,6 +39,24 @@ export const COLORS = (Object.keys(MODE.colors) as ColorKeys[])
     );
 
 export const GHILLIE_TINT = COLORS.grass.multiply(new Color("hsl(0, 0%, 99%)"));
+
+export function getColorsForMode(mode: Mode): Record<ColorKeys, Color> {
+    const modeDef = Modes[mode];
+
+    return (Object.keys(modeDef.colors) as ColorKeys[]).reduce(
+        (result, key) => {
+            result[key] = new Color(modeDef.colors[key]);
+            return result;
+        },
+        {} as Record<ColorKeys, Color>
+    );
+}
+
+export function getGhillieTint(mode: Mode): Color {
+    const colors = getColorsForMode(mode);
+    return colors.grass.multiply(new Color("hsl(0, 0%, 99%)"));
+}
+
 
 export const TEAMMATE_COLORS = [
     new Color("#00ffff"),

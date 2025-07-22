@@ -188,7 +188,7 @@ if (!isMainThread) {
     const gameId = uuidv4();
     let maxTeamSize = (workerData as WorkerInitData).maxTeamSize;
     
-    let game = new Game(port, maxTeamSize, gameId, "fall");
+    let game = new Game(port, maxTeamSize, gameId, "winter");
 
     // string = ip, number = expire time
     const allowedIPs = new Map<string, number>();
