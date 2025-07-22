@@ -102,13 +102,13 @@ export class GameContainer {
                     void newGame(teamSize);
                     break;
                 }
-                case WorkerMessages.IPAllowed: {
-                    const promises = this._ipPromiseMap.get(message.ip);
-                    if (!promises) break;
-                    for (const resolve of promises) resolve();
-                    this._ipPromiseMap.delete(message.ip);
-                    break;
-                }
+                // case WorkerMessages.IPAllowed: {
+                //     const promises = this._ipPromiseMap.get(message.ip);
+                //     if (!promises) break;
+                //     for (const resolve of promises) resolve();
+                //     this._ipPromiseMap.delete(message.ip);
+                //     break;
+                // }
                 case WorkerMessages.GameEnded: {
                     this.worker.terminate();
                     games[this.id] = undefined; // Clear from games array
@@ -120,19 +120,6 @@ export class GameContainer {
 
     sendMessage(message: WorkerMessage): void {
         this.worker.postMessage(message);
-    }
-
-    async allowIP(ip: string): Promise<void> {
-        return await new Promise(resolve => {
-            const promises = this._ipPromiseMap.get(ip);
-            if (promises) {
-                promises.push(resolve);
-            } else {
-                this.sendMessage({ type: WorkerMessages.AllowIP, ip });
-
-                this._ipPromiseMap.set(ip, [resolve]);
-            }
-        });
     }
 }
 
@@ -198,35 +185,24 @@ if (!isMainThread) {
     const gameId = uuidv4();
     let maxTeamSize = (workerData as WorkerInitData).maxTeamSize;
 
-    let game = new Game(port, maxTeamSize, gameId);
+   const game = new Game(port, maxTeamSize, gameId);
 
-    // string = ip, number = expire time
     const allowedIPs = new Map<string, number>();
-    let joinAttempts: Record<string, number> = {};
 
     parentPort?.on("message", (message: WorkerMessage) => {
         switch (message.type) {
-            case WorkerMessages.AllowIP: {
-                allowedIPs.set(message.ip, game.now + 10000);
-                parentPort?.postMessage({
-                    type: WorkerMessages.IPAllowed,
-                    ip: message.ip
-                });
-                break;
-            }
+            // case WorkerMessages.AllowIP: {
+            //     allowedIPs.set(message.ip, game.now + 10000);
+            //     parentPort?.postMessage({
+            //         type: WorkerMessages.IPAllowed,
+            //         ip: message.ip
+            //     });
+            //     break;
+            // }
             case WorkerMessages.UpdateMaxTeamSize: {
                 maxTeamSize = message.maxTeamSize;
                 break;
             }
         }
     });
-
-    // const app = createServer();
-    // initPlayRoutes(app, game, allowedIPs, joinAttempts);
-
-    // if (Config.protection?.maxJoinAttempts) {
-    //     setInterval((): void => {
-    //         joinAttempts = {};
-    //     }, Config.protection.maxJoinAttempts.duration);
-    // }
 }

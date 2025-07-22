@@ -1,4 +1,4 @@
-import { GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { EMOTE_SLOTS, GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
 import { type ExplosionDefinition } from "@common/definitions/explosions";
 import { Loots, type LootDefinition } from "@common/definitions/loots";
 import { MapPings, type MapPing } from "@common/definitions/mapPings";
@@ -52,10 +52,13 @@ import { Ninja } from "./objects/bots/ninja";
 import { PlayerData, ReadyPacket } from "@common/packets/readyPacket";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { Badges } from "@common/definitions/badges";
-import { EmoteDefinition } from "@common/definitions/emotes";
+import { EmoteDefinition, Emotes } from "@common/definitions/emotes";
 import { Skins, DEFAULT_SKIN } from "@common/definitions/skins";
 import { validateJWT } from "./api/api";
 import { getIP, forbidden, createServer } from "./utils/serverHelpers";
+import { Guns } from "@common/definitions/guns";
+import { Melees } from "@common/definitions/melees";
+import { verifyEmotes, verifySkin, verifyMelee, verifyGun } from "./api/balances";
 
 /*
     eslint-disable
@@ -482,8 +485,8 @@ export class Game implements GameData {
             this.addTimeout(() => {
                 this.setGameData({ stopped: true });
                 this.app.close();
-                parentPort?.postMessage({ type: WorkerMessages.GameEnded });
                 Logger.log(`Game ${this.port} | Ended`);
+                parentPort?.postMessage({ type: WorkerMessages.GameEnded });
             }, 10000);
         }
 
@@ -1330,46 +1333,9 @@ export class Game implements GameData {
 
                 const ip = getIP(res, req);
 
-                // //
-                // // Rate limits
-                // //
-                // if (Config.protection) {
-                //     const { maxSimultaneousConnections, maxJoinAttempts } = Config.protection;
-
-                //     if (
-                //         (simultaneousConnections[ip] >= (maxSimultaneousConnections ?? Infinity))
-                //         || (joinAttempts[ip] >= (maxJoinAttempts?.count ?? Infinity))
-                //     ) {
-                //         Logger.log(`Game ${game.port} | Rate limited: ${ip}`);
-                //         forbidden(res);
-                //         return;
-                //     } else {
-                //         if (maxSimultaneousConnections) {
-                //             simultaneousConnections[ip] = (simultaneousConnections[ip] ?? 0) + 1;
-                //             Logger.log(`Game ${game.port} | ${simultaneousConnections[ip]}/${maxSimultaneousConnections} simultaneous connections: ${ip}`);
-                //         }
-                //         if (maxJoinAttempts) {
-                //             joinAttempts[ip] = (joinAttempts[ip] ?? 0) + 1;
-                //             Logger.log(`Game ${game.port} | ${joinAttempts[ip]}/${maxJoinAttempts.count} join attempts in the last ${maxJoinAttempts.duration} ms: ${ip}`);
-                //         }
-                //     }
-                // }
-
                 // Extract token from Authorization header
                 const searchParams = new URLSearchParams(req.getQuery());
                 const token = searchParams.get('token');
-
-                // //
-                // // Ensure IP is allowed
-                // //
-                // if ((allowedIPs.get(ip) ?? 0) < game.now) {
-                //     forbidden(res);
-                //     return;
-                // }
-
-                //
-                // Validate and parse name color
-                //
 
                 let nameColor = 0xffffff;
 
@@ -1426,36 +1392,36 @@ export class Game implements GameData {
                     }
 
                     let emotes: readonly (EmoteDefinition | undefined)[] = [];
-                    // await verifyEmotes(data.address, data.emotes.split(',')).then((validEmotes) => {
-                    //     emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
-                    // }).catch(err => {
-                    //     console.log("Verify melee failed: ", err);
-                    //     emotes = EMOTE_SLOTS.map(slot => undefined);
-                    // })
+                    await verifyEmotes(data.address, data.emotes.split(',')).then((validEmotes) => {
+                        emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
+                    }).catch(err => {
+                        console.log("Verify melee failed: ", err);
+                        emotes = EMOTE_SLOTS.map(slot => undefined);
+                    })
 
                     // Verify Skin
                     let skin = Skins.fromStringSafe(DEFAULT_SKIN); // Default skins
-                    // await verifySkin(data.address, data.skin, 5000).then((isValid) => {
-                    //     if (isValid) skin = Skins.fromStringSafe(data.skin);
-                    // }).catch(err => {
-                    //     console.log("Verify skin failed: ", err);
-                    // })
+                    await verifySkin(data.address, data.skin, 5000).then((isValid) => {
+                        if (isValid) skin = Skins.fromStringSafe(data.skin);
+                    }).catch(err => {
+                        console.log("Verify skin failed: ", err);
+                    })
 
                     // Verify Melee
                     let melee = undefined;
-                    // await verifyMelee(data.address, data.melee, 3000).then((isValid) => {
-                    //     if (isValid) melee = Melees.fromStringSafe(data.melee);
-                    // }).catch(err => {
-                    //     console.log("Verify melee failed: ", err);
-                    // })
+                    await verifyMelee(data.address, data.melee, 3000).then((isValid) => {
+                        if (isValid) melee = Melees.fromStringSafe(data.melee);
+                    }).catch(err => {
+                        console.log("Verify melee failed: ", err);
+                    })
 
                     // Verify Gun
                     let gun = undefined;
-                    // await verifyGun(data.address, data.gun, 2000).then((isValid) => {
-                    //     if (isValid) gun = Guns.fromStringSafe(data.gun);
-                    // }).catch(err => {
-                    //     console.log("Verify gun failed: ", err);
-                    // })
+                    await verifyGun(data.address, data.gun, 2000).then((isValid) => {
+                        if (isValid) gun = Guns.fromStringSafe(data.gun);
+                    }).catch(err => {
+                        console.log("Verify gun failed: ", err);
+                    })
 
                     const stream = new PacketStream(new ArrayBuffer(128));
                     stream.serializeServerPacket(

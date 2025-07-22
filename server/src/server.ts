@@ -49,7 +49,7 @@ if (isMainThread) {
             }
 
             Logger.log(perfString);
-        }, 60000);
+        }, 30000);
 
         const teamSize = Config.maxTeamSize;
         if (typeof teamSize === "object") {
