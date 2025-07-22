@@ -144,36 +144,36 @@ export function initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<st
                 }
 
                 let emotes: readonly (EmoteDefinition | undefined)[] = [];
-                await verifyEmotes(data.address, data.emotes.split(',')).then((validEmotes) => {
-                    emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
-                }).catch(err => {
-                    console.log("Verify melee failed: ", err);
-                    emotes = EMOTE_SLOTS.map(slot => undefined);
-                })
+                // await verifyEmotes(data.address, data.emotes.split(',')).then((validEmotes) => {
+                //     emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
+                // }).catch(err => {
+                //     console.log("Verify melee failed: ", err);
+                //     emotes = EMOTE_SLOTS.map(slot => undefined);
+                // })
 
                 // Verify Skin
                 let skin = Skins.fromStringSafe(DEFAULT_SKIN); // Default skins
-                await verifySkin(data.address, data.skin, 5000).then((isValid) => {
-                    if (isValid) skin = Skins.fromStringSafe(data.skin);
-                }).catch(err => {
-                    console.log("Verify skin failed: ", err);
-                })
+                // await verifySkin(data.address, data.skin, 5000).then((isValid) => {
+                //     if (isValid) skin = Skins.fromStringSafe(data.skin);
+                // }).catch(err => {
+                //     console.log("Verify skin failed: ", err);
+                // })
 
                 // Verify Melee
                 let melee = undefined;
-                await verifyMelee(data.address, data.melee, 3000).then((isValid) => {
-                    if (isValid) melee = Melees.fromStringSafe(data.melee);
-                }).catch(err => {
-                    console.log("Verify melee failed: ", err);
-                })
+                // await verifyMelee(data.address, data.melee, 3000).then((isValid) => {
+                //     if (isValid) melee = Melees.fromStringSafe(data.melee);
+                // }).catch(err => {
+                //     console.log("Verify melee failed: ", err);
+                // })
 
                 // Verify Gun
                 let gun = undefined;
-                await verifyGun(data.address, data.gun, 2000).then((isValid) => {
-                    if (isValid) gun = Guns.fromStringSafe(data.gun);
-                }).catch(err => {
-                    console.log("Verify gun failed: ", err);
-                })
+                // await verifyGun(data.address, data.gun, 2000).then((isValid) => {
+                //     if (isValid) gun = Guns.fromStringSafe(data.gun);
+                // }).catch(err => {
+                //     console.log("Verify gun failed: ", err);
+                // })
 
                 const stream = new PacketStream(new ArrayBuffer(128));
                 stream.serializeServerPacket(

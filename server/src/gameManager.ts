@@ -17,7 +17,8 @@ export enum WorkerMessages {
     IPAllowed,
     UpdateGameData,
     UpdateMaxTeamSize,
-    CreateNewGame
+    CreateNewGame,
+    GameEnded,
 }
 
 export type WorkerMessage =
@@ -37,6 +38,10 @@ export type WorkerMessage =
         readonly type:
         | WorkerMessages.CreateNewGame
         readonly maxTeamSize: TeamSize
+    }
+    | {
+        readonly type:
+        | WorkerMessages.GameEnded
     };
 
 export interface GameData {
@@ -102,6 +107,11 @@ export class GameContainer {
                     if (!promises) break;
                     for (const resolve of promises) resolve();
                     this._ipPromiseMap.delete(message.ip);
+                    break;
+                }
+                case WorkerMessages.GameEnded: {
+                    this.worker.terminate();
+                    games[this.id] = undefined; // Clear from games array
                     break;
                 }
             }
@@ -187,7 +197,7 @@ if (!isMainThread) {
     const port = (workerData as WorkerInitData).id;
     const gameId = uuidv4();
     let maxTeamSize = (workerData as WorkerInitData).maxTeamSize;
-    
+
     let game = new Game(port, maxTeamSize, gameId);
 
     // string = ip, number = expire time
@@ -211,12 +221,12 @@ if (!isMainThread) {
         }
     });
 
-    const app = createServer();
-    initPlayRoutes(app, game, allowedIPs, joinAttempts);
+    // const app = createServer();
+    // initPlayRoutes(app, game, allowedIPs, joinAttempts);
 
-    if (Config.protection?.maxJoinAttempts) {
-        setInterval((): void => {
-            joinAttempts = {};
-        }, Config.protection.maxJoinAttempts.duration);
-    }
+    // if (Config.protection?.maxJoinAttempts) {
+    //     setInterval((): void => {
+    //         joinAttempts = {};
+    //     }, Config.protection.maxJoinAttempts.duration);
+    // }
 }
