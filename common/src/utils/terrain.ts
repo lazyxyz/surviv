@@ -1,4 +1,5 @@
 import { GameConstants, Layer } from "../constants";
+import { Mode } from "../definitions/modes";
 import { PolygonHitbox, RectangleHitbox, type Hitbox } from "./hitbox";
 import { Collision, Numeric } from "./math";
 import { SeededRandom } from "./random";
@@ -195,7 +196,7 @@ export class Terrain {
         }
     }
 
-    getFloor(position: Vector, layer: number): FloorNames {
+    getFloor(position: Vector, layer: number, gameMode: Mode): FloorNames {
         const pos = this._roundToCells(position);
         let floor: FloorNames = FloorNames.Water;
 
@@ -212,7 +213,7 @@ export class Terrain {
 
                 if (this.grassHitbox.isPointInside(position)) {
                     // adding a property wont work for some reason in the mode def
-                    floor = GameConstants.modeName === "winter" ? FloorNames.Sand : FloorNames.Grass;
+                    floor = gameMode === "winter" ? FloorNames.Sand : FloorNames.Grass;
                 }
             }
         }

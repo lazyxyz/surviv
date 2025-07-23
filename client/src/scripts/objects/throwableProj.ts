@@ -82,7 +82,7 @@ export class ThrowableProjectile extends GameObject.derive(ObjectCategory.Throwa
         if (data.airborne) {
             this.container.zIndex = getEffectiveZIndex(ZIndexes.AirborneThrowables, this.layer, this.game.layer);
         } else {
-            const floorType = this.game.map.terrain.getFloor(this.position, this.layer);
+            const floorType = this.game.map.terrain.getFloor(this.position, this.layer, this.game.gameMode);
             const doOverlay = FloorTypes[floorType].overlay;
 
             this.container.zIndex = getEffectiveZIndex(doOverlay ? ZIndexes.UnderwaterGroundedThrowables : ZIndexes.GroundedThrowables, this.layer, this.game.layer);

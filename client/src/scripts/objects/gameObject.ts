@@ -137,7 +137,7 @@ export abstract class GameObject<Cat extends ObjectCategory = ObjectCategory> ex
     }
 
     doOverlay(): boolean {
-        return FloorTypes[this.game.map.terrain.getFloor(this.position, this.layer)]?.overlay ?? false;
+        return FloorTypes[this.game.map.terrain.getFloor(this.position, this.layer, this.game.gameMode)]?.overlay ?? false;
     }
 
     abstract updateFromData(data: ObjectsNetData[Cat], isNew: boolean): void;

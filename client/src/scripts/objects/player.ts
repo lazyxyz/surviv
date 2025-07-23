@@ -402,7 +402,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             }
         }
 
-        const floorType = game.map.terrain.getFloor(this.position, this.layer);
+        const floorType = game.map.terrain.getFloor(this.position, this.layer, this.game.gameMode);
 
         const doOverlay = FloorTypes[floorType].overlay;
         const layerChanged = previousLayer !== this.layer || game.activePlayer?.layer !== this.layer || isNew;

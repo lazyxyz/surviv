@@ -189,7 +189,7 @@ export class Game {
         game.inputManager.generateBindsConfigScreen();
 
         game.music = sound.add("menu_music", {
-            url: `./audio/music/menu_music${game.console.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : MODE.specialMenuMusic ? `_${GameConstants.modeName}` : ""}.mp3`,
+            url: `./audio/music/menu_music${game.console.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : MODE.specialMenuMusic ? `_${this.gameMode}` : ""}.mp3`,
             singleInstance: true,
             preload: true,
             autoPlay: true,

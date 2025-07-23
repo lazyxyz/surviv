@@ -190,7 +190,7 @@ export class Obstacle extends GameObject.derive(ObjectCategory.Obstacle) {
 
                         texture = "airdrop_crate_unlocking";
 
-                        if (GameConstants.modeName === "winter") {
+                        if (this.game.gameMode === "winter") {
                             this.game.particleManager.spawnParticles(1, () => ({
                                 frames: "airdrop_particle_4",
                                 position: this.hitbox.randomPoint(),
@@ -232,7 +232,7 @@ export class Obstacle extends GameObject.derive(ObjectCategory.Obstacle) {
         if (this.smokeEmitter) {
             this.smokeEmitter.active = !this.dead
 
-            && (("emitParticles" in definition && this.activated) || (scaleFactor > 0 && scaleFactor < 0.5));
+                && (("emitParticles" in definition && this.activated) || (scaleFactor > 0 && scaleFactor < 0.5));
 
             if ("emitParticles" in definition) this.smokeEmitter.delay = 300;
             else this.smokeEmitter.delay = Numeric.lerp(150, 3000, scaleFactor);

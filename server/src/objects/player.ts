@@ -994,7 +994,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             this.setPartialDirty();
 
             if (this.isMoving) {
-                this.floor = this.game.map.terrain.getFloor(this.position, this.layer);
+                this.floor = this.game.map.terrain.getFloor(this.position, this.layer, this.game.gameMode);
             }
         }
 
