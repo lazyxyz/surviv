@@ -51,10 +51,6 @@ export function initGameRoutes(app: TemplatedApp) {
                 response = await findGame(teamSize);
             }
 
-            if (response.success) {
-                await games[response.gameID]?.allowIP(ip);
-            }
-
             if (!aborted) {
                 res.cork(() => {
                     res.writeHeader("Content-Type", "application/json").end(JSON.stringify(response));
