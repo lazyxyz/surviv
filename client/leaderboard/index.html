@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<!-- <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="title" content="Surviv Fun - Leaderboard" />
@@ -123,5 +123,209 @@
     // Fetch initial leaderboard
     fetchLeaderboard(currentPage);
   </script>
+</body> -->
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta name="title" content="Surviv - Earn" />
+  <meta name="description"
+    content="The new 2D survival battle royale, inspired by a legendary game loved by millions! Win big with our play-and-earn model and tons of cool items for nonstop fun!" />
+  <meta name="keywords" content="battle royale, io game, browser game, open source" />
+
+  <meta property="og:title" content="Surviv - Earn" />
+  <meta property="og:description"
+    content="The new 2D survival battle royale, inspired by a legendary game loved by millions! Win big with our play-and-earn model and tons of cool items for nonstop fun!" />
+
+  <title>Surviv - Earn</title>
+
+  <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+  <link rel="icon" type="image/svg+xml" sizes="any" href="../img/logos/surviv_favicon.svg" />
+
+  <link rel="icon" type="image/x-icon" sizes="16x16" href="../img/logos/surviv_favicon_16x16.png" />
+  <link rel="icon" type="image/x-icon" sizes="32x32" href="../img/logos/surviv_favicon_32x32.png" />
+  <link rel="icon" type="image/x-icon" sizes="96x96" href="../img/logos/surviv_favicon_96x96.png" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+  <div id="splash-ui">
+    <div style="position: relative;backdrop-filter: blur(40px);">
+      <div class="container-table">
+        <!-- table header -->
+        <div class="header-section">
+          <div class="logo">
+            <a href="../" title="Play Game (Return Home)">
+              <img src="../img/logos/surviv.fun.png" alt="Surviv logo" draggable="false" style="width: 190px;" />
+            </a>
+
+            <div>
+              <div class="logo-heading">LEADERBOARD</div>
+
+              <div class="logo-body text-xs">Surviv Play-and-Earn on Somnia - Phase I</div>
+            </div>
+          </div>
+
+          <div class="countdown">
+            <div class="pulse-ring" style="display: block"></div>
+            <p class="count-time">end in: 00:00 31 Aug 2025 GMT+7</p>
+          </div>
+
+          <div class="header">
+            <p class="header-title">top survivors</p>
+            <div class="header-pagination">
+              <button class="btn-pagination" id="prev-page" disabled><i class="fa-solid fa-chevron-left"></i></button>
+              <input class="input-pagination" type="text">
+              <button class="btn-pagination" id="next-page" disabled><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!--table body -->
+        <div class="body-section">
+          <div class="leaderboard">
+            <div class="leaderboard-header">
+              <div class="w-[80px] h-[48px]" id="header-child">Rank</div>
+              <div class="w-[250px] h-[48px]" id="header-child">Player</div>
+              <div class="w-[160px] h-[48px]" id="header-child">Total Points</div>
+              <div class="w-[160px] h-[48px]" id="header-child">Solo Points</div>
+              <div class="w-[160px] h-[48px]" id="header-child">Squad Points</div>
+              <div class="w-[160px] h-[48px]" id="header-child">Social Points</div>
+              <div class="w-[110px] h-[48px]" id="header-child">Games</div>
+              <div class="w-[100px] h-[48px]" id="header-child">Rate</div>
+              <div class="w-[100px] h-[48px]" id="header-child">Kills</div>
+            </div>
+            <div class="my-account"></div>
+            <div class="leaderboard-body" id="table-body">
+            </div>
+          </div>
+        </div>
+        <div id="loading" class="text-center text-[#ffd23a] font-semibold mt-6 hidden">Loading...</div>
+        <div id="error" class="text-center text-red-400 font-semibold mt-6 hidden"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const API_URL = 'https://api.surviv.fun/api/playerRankings';
+    let currentPage = 1;
+    const limit = 10;
+    let totalPages = 1;
+
+    // shorten Wallet Address
+    function shortenAddress(address, chars = 6) {
+      if (!address) return '';
+      return `${address.slice(0, 2 + chars)}...${address.slice(-chars)}`;
+    }
+
+    const pageInput = document.querySelector('.input-pagination');
+    const prevButton = document.getElementById('prev-page');
+    const nextButton = document.getElementById('next-page');
+
+
+    function updatePaginationUI() {
+      pageInput.value = `${currentPage}/${totalPages}`;
+      prevButton.disabled = currentPage <= 1;
+      nextButton.disabled = currentPage >= totalPages;
+    }
+
+    async function fetchLeaderboard(page) {
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
+      const leaderboardBody = document.getElementById('table-body');
+      // const pageInfo = document.getElementById('page-info');
+
+      loading.classList.remove('hidden');
+      error.classList.add('hidden');
+      leaderboardBody.innerHTML = '';
+
+      try {
+        const response = await fetch(`${API_URL}?page=${page}&limit=${limit}`);
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error('Failed to fetch leaderboard data');
+        }
+
+        totalPages = data.totalPages || 1;
+        updatePaginationUI();
+
+        data.players.forEach((player, index) => {
+          const row = document.createElement('div');
+          row.className = 'leaderboard-body-row';
+          row.innerHTML = `
+            <div class="w-[80px] h-[48px]" id="row-child">${(page - 1) * limit + index + 1}</div>
+            <div class="w-[250px] h-[48px]" id="row-child">${shortenAddress(player.player)}<i id="copy-address" class="fa-solid fa-copy"></i></div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.totalPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.soloPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.squadPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints}</div>
+            <div class="w-[110px] h-[48px]" id="row-child">${player.games}</div>
+            <div class="w-[100px] h-[48px]" id="row-child">${player.games > 0 ? (player.totalPoints / player.games).toFixed(2) : '0.00'}</div>
+            <div class="w-[100px] h-[48px]" id="row-child">N/A</div>
+          `;
+          leaderboardBody.appendChild(row);
+        });
+
+      } catch (err) {
+        error.textContent = 'Error loading leaderboard. Please try again later.';
+        error.classList.remove('hidden');
+      } finally {
+        loading.classList.add('hidden');
+      }
+    }
+
+    prevButton.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        fetchLeaderboard(currentPage);
+      }
+
+      if (currentPage == 1) {
+        prevButton.classList.add('disabled');
+      } else {
+        prevButton.classList.remove('disabled');
+      }
+    });
+
+    nextButton.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        fetchLeaderboard(currentPage);
+      }
+    });
+
+    // Input page navigation
+    pageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        let val = parseInt(pageInput.value.split('/')[0]);
+        if (!isNaN(val) && val >= 1 && val <= totalPages) {
+          currentPage = val;
+          fetchLeaderboard(currentPage);
+        } else {
+          pageInput.value = `${currentPage}/${totalPages}`; // Reset to valid value
+        }
+      }
+    });
+
+    // Fetch initial leaderboard
+    fetchLeaderboard(currentPage);
+
+    // Add copy event listeners to all fa-copy icons
+    leaderboardBody.querySelectorAll('#copy-address').forEach((icon, idx) => {
+      icon.style.cursor = 'pointer';
+      icon.title = 'Copy address';
+      icon.addEventListener('click', () => {
+        const address = data.players[idx].player;
+        navigator.clipboard.writeText(address);
+        icon.classList.add('text-green-400'); // Optional: visual feedback
+        setTimeout(() => icon.classList.remove('text-green-400'), 800);
+      });
+    });
+
+  </script>
+  <script src="../src/earn.ts" type="module"></script>
 </body>
+
 </html>
