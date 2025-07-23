@@ -3,8 +3,6 @@ import { type GetGameResponse } from "@common/typings";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
 import { Config } from "./config";
 import { Game } from "./game";
-import { createServer } from "./utils/serverHelpers";
-import { initPlayRoutes } from "./api/play";
 import { v4 as uuidv4 } from 'uuid';
 
 export interface WorkerInitData {
@@ -22,10 +20,6 @@ export enum WorkerMessages {
 }
 
 export type WorkerMessage =
-    | {
-        readonly type: WorkerMessages.AllowIP | WorkerMessages.IPAllowed
-        readonly ip: string
-    }
     | {
         readonly type: WorkerMessages.UpdateGameData
         readonly data: Partial<GameData>
@@ -102,13 +96,6 @@ export class GameContainer {
                     void newGame(teamSize);
                     break;
                 }
-                // case WorkerMessages.IPAllowed: {
-                //     const promises = this._ipPromiseMap.get(message.ip);
-                //     if (!promises) break;
-                //     for (const resolve of promises) resolve();
-                //     this._ipPromiseMap.delete(message.ip);
-                //     break;
-                // }
                 case WorkerMessages.GameEnded: {
                     this.worker.terminate();
                     games[this.id] = undefined; // Clear from games array
@@ -185,20 +172,11 @@ if (!isMainThread) {
     const gameId = uuidv4();
     let maxTeamSize = (workerData as WorkerInitData).maxTeamSize;
 
-   const game = new Game(port, maxTeamSize, gameId);
-
-    const allowedIPs = new Map<string, number>();
+   new Game(port, maxTeamSize, gameId);
 
     parentPort?.on("message", (message: WorkerMessage) => {
         switch (message.type) {
-            // case WorkerMessages.AllowIP: {
-            //     allowedIPs.set(message.ip, game.now + 10000);
-            //     parentPort?.postMessage({
-            //         type: WorkerMessages.IPAllowed,
-            //         ip: message.ip
-            //     });
-            //     break;
-            // }
+         
             case WorkerMessages.UpdateMaxTeamSize: {
                 maxTeamSize = message.maxTeamSize;
                 break;

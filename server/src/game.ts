@@ -276,10 +276,7 @@ export class Game implements GameData {
         }
 
         this.app = createServer();
-        const allowedIPs = new Map<string, number>();
-        let joinAttempts: Record<string, number> = {};
-
-        this.initPlayRoutes(this.app, this, allowedIPs, joinAttempts);
+        this.initPlayRoutes(this.app, this);
 
         // Start the tick loop
         this.tick();
@@ -466,28 +463,7 @@ export class Game implements GameData {
                     : this.aliveCount <= 1
             )
         ) {
-            for (const player of this.livingPlayers) {
-                const { movement } = player;
-                movement.up = movement.down = movement.left = movement.right = false;
-                player.attacking = false;
-                player.sendEmote(player.loadout.emotes[4]);
-                if (player instanceof Gamer) {
-                    player.handleGameOver(true);
-                }
-                this.pluginManager.emit("player_did_win", player);
-            }
-
-            this.pluginManager.emit("game_end", this);
-
-            this.setGameData({ allowJoin: false, over: true });
-
-            // End the game in 10 seconds
-            this.addTimeout(() => {
-                this.setGameData({ stopped: true });
-                this.app.close();
-                Logger.log(`Game ${this.port} | Ended`);
-                parentPort?.postMessage({ type: WorkerMessages.GameEnded });
-            }, 10000);
+            this.endGame();
         }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {
@@ -513,6 +489,53 @@ export class Game implements GameData {
             setTimeout(this.tick, this.idealDt);
         }
     };
+
+    endGame(): void {
+        this.setGameData({ allowJoin: false, over: true });
+
+        for (const player of this.livingPlayers) {
+            const { movement } = player;
+            movement.up = movement.down = movement.left = movement.right = false;
+            player.attacking = false;
+            player.sendEmote(player.loadout.emotes[4]);
+            if (player instanceof Gamer) {
+                player.handleGameOver(true);
+            }
+            this.pluginManager.emit("player_did_win", player);
+        }
+
+        this.pluginManager.emit("game_end", this);
+
+        // Clear all collections
+        this.livingPlayers.clear();
+        this.connectedPlayers.clear();
+        this.connectingPlayers.clear();
+        this.spectatablePlayers.length = 0;
+        this.teams.clear();
+        this.customTeams.clear();
+        this.airdrops.length = 0;
+        this.detectors.length = 0;
+        this.bullets.clear();
+        this.newBullets.length = 0;
+        this.explosions.length = 0;
+        this.emotes.length = 0;
+        this.newPlayers.length = 0;
+        this.deletedPlayers.length = 0;
+        this.packets.length = 0;
+        this.planes.length = 0;
+        this.mapPings.length = 0;
+        this._timeouts.forEach(timeout => timeout.kill());
+        this._timeouts.clear();
+        this.grid.pool.clear();
+
+        // End the game in 10 seconds
+        this.addTimeout(() => {
+            this.setGameData({ stopped: true });
+            this.app.close();
+            Logger.log(`Game ${this.port} | Ended`);
+            parentPort?.postMessage({ type: WorkerMessages.GameEnded });
+        }, 10000);
+    }
 
     setGameData(data: Partial<Omit<GameData, "aliveCount">>): void {
         for (const [key, value] of Object.entries(data)) {
@@ -1322,7 +1345,7 @@ export class Game implements GameData {
         return this._started;
     }
 
-    initPlayRoutes(app: TemplatedApp, game: Game, allowedIPs: Map<string, number>, joinAttempts: Record<string, number>) {
+    initPlayRoutes(app: TemplatedApp, game: Game) {
         app.ws("/play", {
             idleTimeout: 30,
             /**
