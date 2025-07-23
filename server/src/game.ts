@@ -1415,7 +1415,7 @@ export class Game implements GameData {
                     }
 
                     let emotes: readonly (EmoteDefinition | undefined)[] = [];
-                    await verifyEmotes(data.address, data.emotes.split(',')).then((validEmotes) => {
+                    await verifyEmotes(data.address, data.emotes.split(','), 2000).then((validEmotes) => {
                         emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
                     }).catch(err => {
                         console.log("Verify melee failed: ", err);
@@ -1424,7 +1424,7 @@ export class Game implements GameData {
 
                     // Verify Skin
                     let skin = Skins.fromStringSafe(DEFAULT_SKIN); // Default skins
-                    await verifySkin(data.address, data.skin, 5000).then((isValid) => {
+                    await verifySkin(data.address, data.skin, 2000).then((isValid) => {
                         if (isValid) skin = Skins.fromStringSafe(data.skin);
                     }).catch(err => {
                         console.log("Verify skin failed: ", err);
@@ -1432,7 +1432,7 @@ export class Game implements GameData {
 
                     // Verify Melee
                     let melee = undefined;
-                    await verifyMelee(data.address, data.melee, 3000).then((isValid) => {
+                    await verifyMelee(data.address, data.melee, 2000).then((isValid) => {
                         if (isValid) melee = Melees.fromStringSafe(data.melee);
                     }).catch(err => {
                         console.log("Verify melee failed: ", err);
