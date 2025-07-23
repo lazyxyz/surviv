@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'surviv',
       script: 'pnpm',
-      args: 'dev',
+      args: 'start',
       env: { NODE_ENV: 'production' },
       max_memory_restart: '50G',
       autorestart: true,
