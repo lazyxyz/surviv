@@ -33,8 +33,8 @@ export const Config = {
 
     maxPlayersPerGame: 100,
 
-    maxGames: 20,
-    gameJoinTime: 30,
+    maxGames: 30,
+    gameJoinTime: 60,
 
     gas: { mode: GasMode.Normal },
 

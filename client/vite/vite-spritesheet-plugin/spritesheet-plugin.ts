@@ -22,6 +22,8 @@ export type CacheData = {
     }
 };
 
+const gameModes = ["normal", "fall", "halloween", "winter", "shared"];
+
 const defaultGlob = "**/*.{png,gif,jpg,bmp,tiff,svg}";
 const imagesMatcher = new Minimatch(defaultGlob);
 
@@ -164,7 +166,8 @@ export function spritesheet(): Plugin[] {
             name: `${PLUGIN_NAME}:build`,
             apply: "build",
             async buildStart() {
-                for (const mode of ["normal", "fall", "halloween", "winter", "shared"]) {
+                for (const mode of gameModes) {
+                    // for (const mode of ["normal", "fall", "halloween", "winter", "shared"]) {
                     const atlases = await buildSpritesheets(mode);
                     atlasesByMode[mode] = atlases;
                     exportedAtlasesByMode[mode].high = atlasesByMode[mode].high.map(sheet => sheet.json);
@@ -200,7 +203,7 @@ export function spritesheet(): Plugin[] {
 
                     buildTimeout = setTimeout(() => {
                         buildSheets().then(() => {
-                            for (const mode of ["normal", "fall", "halloween", "winter", "shared"]) {
+                            for (const mode of gameModes) {
                                 const moduleHigh = server.moduleGraph.getModuleById(getHighResResolvedVirtualModuleId(mode));
                                 if (moduleHigh !== undefined) void server.reloadModule(moduleHigh);
                                 const moduleLow = server.moduleGraph.getModuleById(getLowResResolvedVirtualModuleId(mode));
@@ -221,7 +224,7 @@ export function spritesheet(): Plugin[] {
                 const files = new Map<string, Buffer | string>();
 
                 async function buildSheets(): Promise<void> {
-                    for (const mode of ["normal", "fall", "halloween", "winter", "shared"]) {
+                    for (const mode of gameModes) {
                         const cacheDir = getCacheDir(mode);
                         const cacheDataPath = path.join(cacheDir, "data.json");
                         let isCached = existsSync(cacheDir) && existsSync(cacheDataPath);

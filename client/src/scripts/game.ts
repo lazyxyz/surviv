@@ -201,6 +201,8 @@ export class Game {
     initPixi = async (gameMode: Mode): Promise<void> => {
         const renderMode = this.console.getBuiltInCVar("cv_renderer");
         const renderRes = this.console.getBuiltInCVar("cv_renderer_res");
+        
+        console.log("gameMode: ", gameMode);
 
         // Check if Pixi.js is already initialized
         if (this.pixi.stage.children.length == 0) {
@@ -357,7 +359,6 @@ export class Game {
 
 
     async connect(raw_url: string, account: Account, gameMode: Mode) {
-        // await this.initPixi(gameMode);
         const url = new URL(raw_url);
 
         this.error = false;

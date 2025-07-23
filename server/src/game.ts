@@ -1,4 +1,4 @@
-import { GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { EMOTE_SLOTS, GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
 import { type ExplosionDefinition } from "@common/definitions/explosions";
 import { Loots, type LootDefinition } from "@common/definitions/loots";
 import { MapPings, type MapPing } from "@common/definitions/mapPings";
@@ -19,9 +19,9 @@ import { EaseFunctions, Geometry, Numeric, Statistics } from "@common/utils/math
 import { Timeout } from "@common/utils/misc";
 import { ItemType, MapObjectSpawnMode, type ReifiableDef } from "@common/utils/objectDefinitions";
 import { pickRandomInArray, randomFloat, randomPointInsideCircle, randomRotation } from "@common/utils/random";
-import { type SuroiByteStream } from "@common/utils/suroiByteStream";
+import { SuroiByteStream } from "@common/utils/suroiByteStream";
 import { Vec, type Vector } from "@common/utils/vector";
-import { type WebSocket } from "uWebSockets.js";
+import { TemplatedApp, type WebSocket } from "uWebSockets.js";
 import { parentPort } from "worker_threads";
 import { Config, SpawnMode } from "./config";
 import { MapName, Maps } from "./data/maps";
@@ -49,8 +49,17 @@ import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
 import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
-import { PlayerData } from "@common/packets/readyPacket";
-import { Mode } from "@common/definitions/modes";
+import { Mode, ModeToNumber } from "@common/definitions/modes";
+import { PlayerData, ReadyPacket } from "@common/packets/readyPacket";
+import { DisconnectPacket } from "@common/packets/disconnectPacket";
+import { Badges } from "@common/definitions/badges";
+import { EmoteDefinition, Emotes } from "@common/definitions/emotes";
+import { Skins, DEFAULT_SKIN } from "@common/definitions/skins";
+import { validateJWT } from "./api/api";
+import { getIP, forbidden, createServer } from "./utils/serverHelpers";
+import { Guns } from "@common/definitions/guns";
+import { Melees } from "@common/definitions/melees";
+import { verifyEmotes, verifySkin, verifyMelee, verifyGun } from "./api/balances";
 
 /*
     eslint-disable
@@ -219,6 +228,8 @@ export class Game implements GameData {
 
     private totalBots: number = 0;
 
+    readonly app: any;
+
     /**
      * **Warning**: This is a getter _with side effects_! Make
      * sure to either use the id returned by this getter or
@@ -228,11 +239,12 @@ export class Game implements GameData {
         return this._idAllocator.takeNext();
     }
 
-    constructor(port: number, maxTeamSize: TeamSize, gameId: string, gameMode: Mode) {
+    constructor(port: number, maxTeamSize: TeamSize, gameId: string) {
         this.port = port;
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
-        this.gameMode = gameMode;
+        // this.gameMode = "winter";
+        this.gameMode = "fall";
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
         this.updateGameData({
             aliveCount: 0,
@@ -269,6 +281,8 @@ export class Game implements GameData {
             Logger.log(`Bots added to game: Total Bots = ${this.totalBots} (Zombies: ${zombieCount}, Ninjas: ${ninjaCount}, Assassins: ${assassinCount})`);
         }
 
+        this.app = createServer();
+        this.initPlayRoutes(this.app, this);
 
         // Start the tick loop
         this.tick();
@@ -455,26 +469,7 @@ export class Game implements GameData {
                     : this.aliveCount <= 1
             )
         ) {
-            for (const player of this.livingPlayers) {
-                const { movement } = player;
-                movement.up = movement.down = movement.left = movement.right = false;
-                player.attacking = false;
-                player.sendEmote(player.loadout.emotes[4]);
-                if (player instanceof Gamer) {
-                    player.handleGameOver(true);
-                }
-                this.pluginManager.emit("player_did_win", player);
-            }
-
-            this.pluginManager.emit("game_end", this);
-
-            this.setGameData({ allowJoin: false, over: true });
-
-            // End the game in 10 seconds
-            this.addTimeout(() => {
-                this.setGameData({ stopped: true });
-                Logger.log(`Game ${this.port} | Ended`);
-            }, 10000);
+            this.endGame();
         }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {
@@ -500,6 +495,53 @@ export class Game implements GameData {
             setTimeout(this.tick, this.idealDt);
         }
     };
+
+    endGame(): void {
+        this.setGameData({ allowJoin: false, over: true });
+
+        for (const player of this.livingPlayers) {
+            const { movement } = player;
+            movement.up = movement.down = movement.left = movement.right = false;
+            player.attacking = false;
+            player.sendEmote(player.loadout.emotes[4]);
+            if (player instanceof Gamer) {
+                player.handleGameOver(true);
+            }
+            this.pluginManager.emit("player_did_win", player);
+        }
+
+        this.pluginManager.emit("game_end", this);
+
+        // End the game in 10 seconds
+        this.addTimeout(() => {
+            // Clear all collections
+            this.livingPlayers.clear();
+            this.connectedPlayers.clear();
+            this.connectingPlayers.clear();
+            this.spectatablePlayers.length = 0;
+            this.teams.clear();
+            this.customTeams.clear();
+            this.airdrops.length = 0;
+            this.detectors.length = 0;
+            this.bullets.clear();
+            this.newBullets.length = 0;
+            this.explosions.length = 0;
+            this.emotes.length = 0;
+            this.newPlayers.length = 0;
+            this.deletedPlayers.length = 0;
+            this.packets.length = 0;
+            this.planes.length = 0;
+            this.mapPings.length = 0;
+            this._timeouts.forEach(timeout => timeout.kill());
+            this._timeouts.clear();
+            this.grid.pool.clear();
+
+            this.setGameData({ stopped: true });
+            this.app.close();
+            Logger.log(`Game ${this.port} | Ended`);
+            parentPort?.postMessage({ type: WorkerMessages.GameEnded });
+        }, 10000);
+    }
 
     setGameData(data: Partial<Omit<GameData, "aliveCount">>): void {
         for (const [key, value] of Object.entries(data)) {
@@ -826,7 +868,7 @@ export class Game implements GameData {
         if (packet.melee) {
             player.inventory.weapons[2] = new MeleeItem(packet.melee, player);
         }
-        
+
         if (packet.gun) {
             player.inventory.weapons[0] = new GunItem(packet.gun, player);
         }
@@ -1308,7 +1350,184 @@ export class Game implements GameData {
     isStarted() {
         return this._started;
     }
+
+    initPlayRoutes(app: TemplatedApp, game: Game) {
+        app.ws("/play", {
+            idleTimeout: 30,
+            /**
+             * Upgrade the connection to WebSocket.
+             */
+            upgrade(res, req, context) {
+                res.onAborted((): void => { /* Handle errors in WS connection */ });
+
+                const ip = getIP(res, req);
+
+                // Extract token from Authorization header
+                const searchParams = new URLSearchParams(req.getQuery());
+                const token = searchParams.get('token');
+
+                let nameColor = 0xffffff;
+
+                //
+                // Upgrade the connection
+                //
+                res.upgrade(
+                    {
+                        name: searchParams.get("name") ?? "No name",
+                        teamID: searchParams.get("teamID") ?? undefined,
+                        autoFill: Boolean(searchParams.get("autoFill")),
+                        address: searchParams.get("address") ?? "",
+                        token: token,
+                        ip,
+                        nameColor,
+                        lobbyClearing: searchParams.get("lobbyClearing") === "true",
+                        weaponPreset: searchParams.get("weaponPreset") ?? "",
+                        skin: searchParams.get("skin") ?? "",
+                        emotes: searchParams.get("emotes") ?? "",
+                        badge: searchParams.get("badge") ?? "",
+                        melee: searchParams.get("melee") ?? "",
+                        gun: searchParams.get("gun") ?? "",
+                    },
+                    req.getHeader("sec-websocket-key"),
+                    req.getHeader("sec-websocket-protocol"),
+                    req.getHeader("sec-websocket-extensions"),
+                    context
+                );
+            },
+
+            /**
+             * Handle opening of the socket.
+             * @param socket The socket being opened.
+             */
+            async open(socket: WebSocket<PlayerContainer>) {
+                try {
+                    const data = socket.getUserData();
+
+                    if (!data.token) {
+                        disconnect(socket, `Authentication token not found. Please reconnect your wallet.`);
+                        return;
+                    }
+                    const token = data.token;
+                    const payload = await validateJWT(token);
+
+                    if (payload.walletAddress != data.address?.toLowerCase()) {
+                        disconnect(socket, `Invalid address. Please reconnect your wallet.`);
+                        return;
+                    }
+
+                    if ((data.player = game.addPlayer(socket)) === undefined) {
+                        disconnect(socket, `Authentication failed. Please reconnect your wallet.`);
+                        return;
+                    }
+
+                    let emotes: readonly (EmoteDefinition | undefined)[] = [];
+                    await verifyEmotes(data.address, data.emotes.split(','), 2000).then((validEmotes) => {
+                        emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
+                    }).catch(err => {
+                        console.log("Verify melee failed: ", err);
+                        emotes = EMOTE_SLOTS.map(slot => undefined);
+                    })
+
+                    // Verify Skin
+                    let skin = Skins.fromStringSafe(DEFAULT_SKIN); // Default skins
+                    await verifySkin(data.address, data.skin, 2000).then((isValid) => {
+                        if (isValid) skin = Skins.fromStringSafe(data.skin);
+                    }).catch(err => {
+                        console.log("Verify skin failed: ", err);
+                    })
+
+                    // Verify Melee
+                    let melee = undefined;
+                    await verifyMelee(data.address, data.melee, 2000).then((isValid) => {
+                        if (isValid) melee = Melees.fromStringSafe(data.melee);
+                    }).catch(err => {
+                        console.log("Verify melee failed: ", err);
+                    })
+
+                    // Verify Gun
+                    let gun = undefined;
+                    await verifyGun(data.address, data.gun, 2000).then((isValid) => {
+                        if (isValid) gun = Guns.fromStringSafe(data.gun);
+                    }).catch(err => {
+                        console.log("Verify gun failed: ", err);
+                    })
+
+                    const stream = new PacketStream(new ArrayBuffer(128));
+                    stream.serializeServerPacket(
+                        ReadyPacket.create({
+                            isMobile: false,
+                            address: data.address ? data.address : "",
+                            emotes: emotes,
+                            name: data.name,
+                            skin: skin,
+                            badge: Badges.fromStringSafe(data.badge),
+                            melee: melee,
+                            gun: gun,
+                            gameMode: ModeToNumber[game.gameMode],
+                        })
+                    );
+                    socket.send(stream.getBuffer(), true, false);
+                    // data.player.sendGameOverPacket(false); // uncomment to test game over screen
+                } catch (err: any) {
+                    console.log("Open websocket failed: ", err);
+                    disconnect(socket, "Unknown error. Please contact Surviv team.");
+                }
+            },
+
+            /**
+             * Handle messages coming from the socket.
+             * @param socket The socket in question.
+             * @param message The message to handle.
+             */
+            message(socket: WebSocket<PlayerContainer>, message: ArrayBuffer) {
+                const stream = new SuroiByteStream(message);
+                try {
+                    const player = socket.getUserData().player;
+                    if (player === undefined) return;
+                    game.onMessage(stream, player);
+                } catch (e) {
+                    console.warn("Error parsing message:", e);
+                }
+            },
+
+            /**
+             * Handle closing of the socket.
+             * @param socket The socket being closed.
+             */
+            close(socket: WebSocket<PlayerContainer>) {
+                const { player, ip } = socket.getUserData();
+
+                // this should never be null-ish, but will leave it here for any potential race conditions (i.e. TFO? (verification required))
+                if (Config.protection && ip !== undefined) simultaneousConnections[ip]--;
+
+                if (!player) return;
+
+                Logger.log(`Game ${game.port} | "${player.name}" left`);
+                game.removePlayer(player);
+            }
+        }).listen(Config.host, game.port, (): void => {
+            Logger.log(`Game ${game.port} | Listening on ${Config.host}:${game.port}`);
+        });
+    }
 }
+
+function disconnect(socket: WebSocket<PlayerContainer>, reason: string): void {
+    const stream = new PacketStream(new ArrayBuffer(128));
+    stream.serializeServerPacket(
+        DisconnectPacket.create({
+            reason
+        })
+    );
+
+    try {
+        socket.send(stream.getBuffer(), true, false);
+    } catch (e) {
+        console.warn("Error sending packet. Details:", e);
+    }
+    socket.close();
+}
+
+const simultaneousConnections: Record<string, number> = {};
 
 export interface Airdrop {
     readonly position: Vector
