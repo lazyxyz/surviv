@@ -56,7 +56,7 @@ import { Minimap } from "./rendering/minimap";
 import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime } from "./ui";
 import { setUpCommands } from "./utils/console/commands";
 import { GameConsole } from "./utils/console/gameConsole";
-import {  getColorsForMode, LAYER_TRANSITION_DELAY, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
+import { getColorsForMode, LAYER_TRANSITION_DELAY, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 import { Account } from "./account";
@@ -201,7 +201,7 @@ export class Game {
     initPixi = async (gameMode: Mode): Promise<void> => {
         const renderMode = this.console.getBuiltInCVar("cv_renderer");
         const renderRes = this.console.getBuiltInCVar("cv_renderer_res");
-        
+
         console.log("gameMode: ", gameMode);
 
         // Check if Pixi.js is already initialized
@@ -405,48 +405,6 @@ export class Game {
 
                 this.sendPacket(PingPacket.create());
                 this.lastPingDate = Date.now();
-
-                this.camera.addObject(this.gasRender.graphics);
-                this.map.indicator.setFrame("player_indicator");
-
-                const particleEffects = Modes[this.gameMode].particleEffects;
-
-                if (particleEffects !== undefined) {
-                    const This = this;
-                    const gravityOn = particleEffects.gravity;
-                    this.particleManager.addEmitter(
-                        {
-                            delay: particleEffects.delay,
-                            active: this.console.getBuiltInCVar("cv_ambient_particles"),
-                            spawnOptions: () => ({
-                                frames: particleEffects.frames,
-                                get position(): Vector {
-                                    const width = This.camera.width / PIXI_SCALE;
-                                    const height = This.camera.height / PIXI_SCALE;
-                                    const player = This.activePlayer;
-                                    if (!player) return Vec.create(0, 0);
-                                    const { x, y } = player.position;
-                                    return randomVector(x - width, x + width, y - height, y + height);
-                                },
-                                speed: randomVector(-10, 10, gravityOn ? 10 : -10, 10),
-                                lifetime: randomFloat(12000, 50000),
-                                zIndex: Number.MAX_SAFE_INTEGER - 5,
-                                alpha: {
-                                    start: this.layer === Layer.Ground ? 0.7 : 0,
-                                    end: 0
-                                },
-                                rotation: {
-                                    start: randomFloat(0, 36),
-                                    end: randomFloat(40, 80)
-                                },
-                                scale: {
-                                    start: randomFloat(0.8, 1.1),
-                                    end: randomFloat(0.7, 0.8)
-                                }
-                            })
-                        }
-                    );
-                }
             },
 
             onmessage: (message: MessageEvent<ArrayBuffer>): void => {
@@ -485,14 +443,60 @@ export class Game {
         });
     }
 
+    setupUI() {
+        this.camera.addObject(this.gasRender.graphics);
+        this.map.indicator.setFrame("player_indicator");
+
+        console.log("this.gameMode: ", this.gameMode);
+        const particleEffects = Modes[this.gameMode].particleEffects;
+
+        if (particleEffects !== undefined) {
+            const This = this;
+            const gravityOn = particleEffects.gravity;
+            this.particleManager.addEmitter(
+                {
+                    delay: particleEffects.delay,
+                    active: this.console.getBuiltInCVar("cv_ambient_particles"),
+                    spawnOptions: () => ({
+                        frames: particleEffects.frames,
+                        get position(): Vector {
+                            const width = This.camera.width / PIXI_SCALE;
+                            const height = This.camera.height / PIXI_SCALE;
+                            const player = This.activePlayer;
+                            if (!player) return Vec.create(0, 0);
+                            const { x, y } = player.position;
+                            return randomVector(x - width, x + width, y - height, y + height);
+                        },
+                        speed: randomVector(-10, 10, gravityOn ? 10 : -10, 10),
+                        lifetime: randomFloat(12000, 50000),
+                        zIndex: Number.MAX_SAFE_INTEGER - 5,
+                        alpha: {
+                            start: this.layer === Layer.Ground ? 0.7 : 0,
+                            end: 0
+                        },
+                        rotation: {
+                            start: randomFloat(0, 36),
+                            end: randomFloat(40, 80)
+                        },
+                        scale: {
+                            start: randomFloat(0.8, 1.1),
+                            end: randomFloat(0.7, 0.8)
+                        }
+                    })
+                }
+            );
+        }
+    }
+
     inventoryMsgTimeout: number | undefined;
 
     onPacket(packet: OutputPacket): void {
         switch (true) {
             case packet instanceof ReadyPacket:
-                this.gameMode = NumberToMode[ packet.output.gameMode];
+                this.gameMode = NumberToMode[packet.output.gameMode];
                 this.initPixi(this.gameMode).then(_ => {
                     this.ready(packet.output);
+                    this.setupUI();
                 })
                 break;
             case packet instanceof JoinedPacket:
@@ -597,7 +601,7 @@ export class Game {
         // game started if page is out of focus.
         if (!document.hasFocus()) this.soundManager.play("join_notification");
 
-        const ambience =  Modes[this.gameMode].ambience;
+        const ambience = Modes[this.gameMode].ambience;
         if (ambience) {
             this.ambience = this.soundManager.play(ambience, { loop: true, ambient: true });
         }
