@@ -506,30 +506,30 @@ export class Game implements GameData {
 
         this.pluginManager.emit("game_end", this);
 
-        // Clear all collections
-        this.livingPlayers.clear();
-        this.connectedPlayers.clear();
-        this.connectingPlayers.clear();
-        this.spectatablePlayers.length = 0;
-        this.teams.clear();
-        this.customTeams.clear();
-        this.airdrops.length = 0;
-        this.detectors.length = 0;
-        this.bullets.clear();
-        this.newBullets.length = 0;
-        this.explosions.length = 0;
-        this.emotes.length = 0;
-        this.newPlayers.length = 0;
-        this.deletedPlayers.length = 0;
-        this.packets.length = 0;
-        this.planes.length = 0;
-        this.mapPings.length = 0;
-        this._timeouts.forEach(timeout => timeout.kill());
-        this._timeouts.clear();
-        this.grid.pool.clear();
-
         // End the game in 10 seconds
         this.addTimeout(() => {
+            // Clear all collections
+            this.livingPlayers.clear();
+            this.connectedPlayers.clear();
+            this.connectingPlayers.clear();
+            this.spectatablePlayers.length = 0;
+            this.teams.clear();
+            this.customTeams.clear();
+            this.airdrops.length = 0;
+            this.detectors.length = 0;
+            this.bullets.clear();
+            this.newBullets.length = 0;
+            this.explosions.length = 0;
+            this.emotes.length = 0;
+            this.newPlayers.length = 0;
+            this.deletedPlayers.length = 0;
+            this.packets.length = 0;
+            this.planes.length = 0;
+            this.mapPings.length = 0;
+            this._timeouts.forEach(timeout => timeout.kill());
+            this._timeouts.clear();
+            this.grid.pool.clear();
+
             this.setGameData({ stopped: true });
             this.app.close();
             Logger.log(`Game ${this.port} | Ended`);
