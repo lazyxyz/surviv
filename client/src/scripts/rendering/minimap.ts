@@ -10,7 +10,7 @@ import $ from "jquery";
 import { Container, Graphics, RenderTexture, Sprite, Text, isMobile, type ColorSource, type Texture } from "pixi.js";
 import { getTranslatedString } from "../../translations";
 import { type Game } from "../game";
-import { COLORS, DIFF_LAYER_HITBOX_OPACITY, FOOTSTEP_HITBOX_LAYER, HITBOX_DEBUG_MODE, PIXI_SCALE, TEAMMATE_COLORS } from "../utils/constants";
+import { getColors, DIFF_LAYER_HITBOX_OPACITY, FOOTSTEP_HITBOX_LAYER, HITBOX_DEBUG_MODE, PIXI_SCALE, TEAMMATE_COLORS } from "../utils/constants";
 import { SuroiSprite, drawGroundGraphics, drawHitbox, toPixiCoords } from "../utils/pixi";
 import { GasRender } from "./gas";
 
@@ -74,7 +74,7 @@ export class Minimap {
 
     private _margins = Vec.create(0, 0);
 
-    readonly gasRender = new GasRender(1);
+    readonly gasRender: GasRender;
     readonly placesContainer = new Container();
 
     private _terrain = new Terrain(0, 0, 0, 0, 0, []);
@@ -98,6 +98,7 @@ export class Minimap {
             throw new Error("Class 'Minimap' has already been instantiated");
         }
         Minimap._instantiated = true;
+        this.gasRender = new GasRender(1, this.game.gameMode)
 
         this._objectsContainer.mask = this.mask;
 
@@ -153,7 +154,7 @@ export class Minimap {
         ctx.cut();
 
         ctx.roundShape?.(beach, radius);
-        ctx.fill(COLORS.beach);
+        ctx.fill(getColors(this.game.gameMode).beach);
 
         const grass = scale === 1 ? grassPoints : grassPoints.map(point => Vec.scale(point, scale));
         ctx.roundShape(grass, radius);
@@ -177,7 +178,7 @@ export class Minimap {
             ctx
                 .beginPath()
                 .roundShape(getRiverPoly(river.bankHitbox.points), 0, true)
-                .fill(river.isTrail ? COLORS.trail : COLORS.riverBank);
+                .fill(river.isTrail ? getColors(this.game.gameMode).trail : getColors(this.game.gameMode).riverBank);
         }
 
         ctx.beginPath();
@@ -186,11 +187,11 @@ export class Minimap {
                 ctx.roundShape(getRiverPoly(river.waterHitbox.points), 0, true);
             }
         }
-        ctx.fill(COLORS.water);
+        ctx.fill(getColors(this.game.gameMode).water);
 
         ctx.beginPath();
         ctx.rect(0, 0, this._width * scale, this._height * scale);
-        ctx.fill(COLORS.water);
+        ctx.fill(getColors(this.game.gameMode).water);
         ctx.roundShape(beach, radius);
         ctx.cut();
 
@@ -250,7 +251,7 @@ export class Minimap {
         terrainGraphics.rect(-margin, realHeight, realWidth + doubleMargin, margin);
         terrainGraphics.rect(-margin, -margin, margin, realHeight + doubleMargin);
         terrainGraphics.rect(realWidth, -margin, margin, realHeight + doubleMargin);
-        terrainGraphics.fill(COLORS.border);
+        terrainGraphics.fill(getColors(this.game.gameMode).border);
 
         this.game.camera.addObject(terrainGraphics);
 
@@ -333,7 +334,7 @@ export class Minimap {
             resolution: isMobile.any ? 1 : 2
         });
 
-        this.game.pixi.renderer.render({ container: mapRender, target: this._texture, clearColor: COLORS.grass });
+        this.game.pixi.renderer.render({ container: mapRender, target: this._texture, clearColor: getColors(this.game.gameMode).grass });
         this.sprite.texture.destroy(true);
         this.sprite.texture = this._texture;
         mapRender.destroy({

@@ -239,13 +239,22 @@ export class Game implements GameData {
         return this._idAllocator.takeNext();
     }
 
+    getRandomMode(): Mode {
+        const random = Math.random() * 100;
+        if (random < 40) return "fall";
+        if (random < 80) return "winter";
+        if (random < 95) return "normal";
+        return "halloween";
+    }
+
+
     constructor(port: number, maxTeamSize: TeamSize, gameId: string) {
         this.port = port;
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
-        // this.gameMode = "fall";
+        this.gameMode = this.getRandomMode();
         // this.gameMode = "halloween";
-        this.gameMode = "winter";
+        // this.gameMode = "winter";
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
         this.updateGameData({
             aliveCount: 0,
@@ -380,7 +389,7 @@ export class Game implements GameData {
             Do the damage after updating all bullets
             This is to make sure bullets hitting the same object on the same tick will all die so
             they don't de-sync with the client
-
+    
             Example: a shotgun insta-killing a crate—on the client all bullets will hit the crate,
             while on the server, the usual approach of dealing damage on-update would cause some
             bullets to pass through unhindered since the crate would have been destroyed by the
@@ -553,13 +562,17 @@ export class Game implements GameData {
     }
 
     updateGameData(data: Partial<GameData>): void {
-        parentPort?.postMessage({ type: WorkerMessages.UpdateGameData, data } satisfies WorkerMessage);
+        parentPort?.postMessage({
+            type: WorkerMessages.UpdateGameData, data
+        } satisfies WorkerMessage);
     }
 
     createNewGame(): void {
         if (!this.allowJoin) return; // means a new game has already been created by this game
 
-        parentPort?.postMessage({ type: WorkerMessages.CreateNewGame, maxTeamSize: this.maxTeamSize });
+        parentPort?.postMessage({
+            type: WorkerMessages.CreateNewGame, maxTeamSize: this.maxTeamSize
+        });
         Logger.log(`Game ${this.port} | Attempting to create new game`);
         this.setGameData({ allowJoin: false });
     }

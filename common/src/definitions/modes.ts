@@ -43,6 +43,11 @@ export const NumberToMode: Record<number, Mode> = {
     3: "winter",
 };
 
+export function getRandomMode(): Mode {
+    const modes: Mode[] = ["normal", "fall", "halloween", "winter"];
+    return modes[Math.floor(Math.random() * modes.length)];
+}
+
 export const Modes: Record<Mode, ModeDefinition> = {
     normal: {
         idString: "normal",

@@ -53,13 +53,13 @@ type PredicateFor<Role extends ObstacleSpecialRoles | undefined = ObstacleSpecia
         readonly [K in (keyof typeof ObstacleSpecialRoles & string) as `is${K}`]?: boolean | undefined
     }
     : Role extends undefined
-        ? {
-            // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-            readonly [K in (keyof typeof ObstacleSpecialRoles & string) as `is${K}`]?: false | undefined
-        }
-        : Readonly<Record<`is${GetName<NonNullable<Role>>}`, true>> & {
-            readonly [K in Exclude<ObstacleSpecialRoles, Role> as `is${GetName<K>}`]?: K extends GetName<NonNullable<Role>> ? never : false
-        };
+    ? {
+        // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
+        readonly [K in (keyof typeof ObstacleSpecialRoles & string) as `is${K}`]?: false | undefined
+    }
+    : Readonly<Record<`is${GetName<NonNullable<Role>>}`, true>> & {
+        readonly [K in Exclude<ObstacleSpecialRoles, Role> as `is${GetName<K>}`]?: K extends GetName<NonNullable<Role>> ? never : false
+    };
 
 type GetName<Member extends number> = GetEnumMemberName<typeof ObstacleSpecialRoles, Member>;
 
@@ -274,133 +274,134 @@ export const Materials = [
 ] as const;
 
 export const MaterialSounds: Record<string, { hit?: string, destroyed?: string }> = {
-    cardboard: { hit: "stone",       destroyed: "crate"     },
-    iron:      { hit: "metal_light", destroyed: "appliance" },
-    crate:     { hit: "wood"  },
-    pumpkin:   { hit: "stone" },
+    cardboard: { hit: "stone", destroyed: "crate" },
+    iron: { hit: "metal_light", destroyed: "appliance" },
+    crate: { hit: "wood" },
+    pumpkin: { hit: "stone" },
     trash_bag: { hit: "sand" }
 };
 
-const aidrTint = GameConstants.modeName as string === "winter" ? 0xb94646 : 0x4059bf;
+// const aidrTint = GameConstants.modeName as string === "winter" ? 0xb94646 : 0x4059bf;
+const aidrTint = 0x4059bf;
 
 /* eslint-disable @stylistic/key-spacing, @stylistic/no-multi-spaces */
 export const TintedParticles: Record<string, { readonly base: string, readonly tint: number, readonly variants?: number }> = {
-    _glow_:                        { base: "_glow_",           tint: 0xffffff },
+    _glow_: { base: "_glow_", tint: 0xffffff },
 
-    metal_particle:                { base: "metal_particle_1", tint: 0x5f5f5f },
-    metal_column_particle:         { base: "metal_particle_1", tint: 0x8f8f8f },
-    super_barrel_particle:         { base: "metal_particle_1", tint: 0xce2b29 },
-    propane_tank_particle:         { base: "metal_particle_1", tint: 0xb08b3f },
-    dumpster_particle:             { base: "metal_particle_1", tint: 0x3c7033 },
-    washing_machine_particle:      { base: "metal_particle_1", tint: 0xcccccc },
-    tv_particle:                   { base: "metal_particle_1", tint: 0x333333 },
-    smokestack_particle:           { base: "metal_particle_1", tint: 0xb5b5b5 },
-    distillation_column_particle:  { base: "metal_particle_1", tint: 0x1b5e98 },
-    ship_oil_tank_particle:        { base: "metal_particle_1", tint: 0x00538f },
-    forklift_particle:             { base: "metal_particle_1", tint: 0xac5339 },
-    bollard_particle:              { base: "metal_particle_1", tint: 0xa66e20 },
-    m1117_particle:                { base: "metal_particle_1", tint: 0x2f3725 },
-    file_cart_particle:            { base: "metal_particle_1", tint: 0x404040 },
-    container_particle_white:      { base: "metal_particle_1", tint: 0xc0c0c0 },
-    container_particle_red:        { base: "metal_particle_1", tint: 0xa32900 },
-    container_particle_green:      { base: "metal_particle_1", tint: 0x00a30e },
-    container_particle_blue:       { base: "metal_particle_1", tint: 0x005fa3 },
-    container_particle_yellow:     { base: "metal_particle_1", tint: 0xcccc00 },
-    filing_cabinet_particle:       { base: "metal_particle_2", tint: 0x7f714d },
-    briefcase_particle:            { base: "metal_particle_2", tint: 0xcfcfcf },
-    aegis_crate_particle:          { base: "wood_particle",    tint: 0x2687d9 },
-    airdrop_crate_particle:        { base: "wood_particle",    tint: aidrTint },
-    chest_particle:                { base: "wood_particle",    tint: 0xa87e5a },
-    cooler_particle:               { base: "wood_particle",    tint: 0x406c65 },
-    crate_particle:                { base: "wood_particle",    tint: 0x9e7437 },
-    flint_crate_particle:          { base: "wood_particle",    tint: 0xda6a0b },
-    furniture_particle:            { base: "wood_particle",    tint: 0x785a2e },
-    couch_part_particle:           { base: "wood_particle",    tint: 0x6a330b },
-    grenade_crate_particle:        { base: "wood_particle",    tint: 0x4c4823 },
-    gun_case_particle:             { base: "wood_particle",    tint: 0x3e5130 },
-    hazel_crate_particle:          { base: "wood_particle",    tint: 0x6ba371 },
-    lux_crate_particle:            { base: "wood_particle",    tint: 0x4e5c3d },
-    melee_crate_particle:          { base: "wood_particle",    tint: 0x23374c },
-    tango_crate_particle:          { base: "wood_particle",    tint: 0x3f4c39 },
-    wall_particle:                 { base: "wood_particle",    tint: 0xafa08c },
-    flint_stone_particle_1:        { base: "stone_particle_1", tint: 0x26272c },
-    flint_stone_particle_2:        { base: "stone_particle_2", tint: 0x26272c },
-    gold_rock_particle_1:          { base: "stone_particle_1", tint: 0xaa8534 },
-    gold_rock_particle_2:          { base: "stone_particle_2", tint: 0xd3a440 },
-    rock_particle_1:               { base: "stone_particle_1", tint: 0x8e8e8e },
-    rock_particle_2:               { base: "stone_particle_2", tint: 0x8e8e8e },
-    river_rock_particle_1:         { base: "stone_particle_1", tint: 0x626471 },
-    river_rock_particle_2:         { base: "stone_particle_2", tint: 0x626471 },
-    clearing_boulder_particle_1:   { base: "stone_particle_1", tint: 0x5a5a5a },
-    clearing_boulder_particle_2:   { base: "stone_particle_2", tint: 0x5a5a5a },
-    sandbags_particle:             { base: "stone_particle_2", tint: 0xd59d4e },
-    fire_pit_particle_1:           { base: "stone_particle_1", tint: 0x5b4f3e },
-    fire_pit_particle_2:           { base: "stone_particle_2", tint: 0x5b4f3e },
-    porta_potty_door_particle:     { base: "plastic_particle", tint: 0xf5f9fd },
-    porta_potty_toilet_particle:   { base: "plastic_particle", tint: 0x5e5e5e },
-    porta_potty_wall_particle:     { base: "plastic_particle", tint: 0x1c71d8 },
-    porta_potty_particle_fall:     { base: "plastic_particle", tint: 0x78593b },
-    porta_potty_particle:          { base: "ceiling_particle", tint: 0xe7e7e7 },
-    outhouse_particle:             { base: "ceiling_particle", tint: 0x78593b },
-    outhouse_wall_particle:        { base: "wood_particle",    tint: 0x6e4d2f },
-    mobile_home_particle:          { base: "ceiling_particle", tint: 0xa8a8a8 },
-    grey_office_chair_particle:    { base: "wood_particle",    tint: 0x616161 },
-    office_chair_particle:         { base: "wood_particle",    tint: 0x7d2b2b },
-    hq_stone_wall_particle_1:      { base: "stone_particle_1", tint: 0x591919 },
-    hq_stone_wall_particle_2:      { base: "stone_particle_2", tint: 0x591919 },
-    headquarters_desk_particle:    { base: "wood_particle",    tint: 0x61341a },
-    headquarters_c_desk_particle:  { base: "wood_particle",    tint: 0x6e5838 },
-    gold_aegis_case_particle:      { base: "wood_particle",    tint: 0x1a1a1a },
-    hq_tp_wall_particle:           { base: "wood_particle",    tint: 0x74858b },
-    white_small_couch_particle:    { base: "wood_particle",    tint: 0xcfc1af },
-    red_small_couch_particle:      { base: "wood_particle",    tint: 0x823323 },
-    planted_bushes_particle:       { base: "toilet_particle",  tint: 0xaaaaaa },
-    barn_wall_particle_1:          { base: "stone_particle_1", tint: 0x690c0c },
-    barn_wall_particle_2:          { base: "stone_particle_2", tint: 0x690c0c },
-    lodge_particle:                { base: "wood_particle",    tint: 0x49371d },
-    lodge_wall_particle:           { base: "wood_particle",    tint: 0x5a4320 },
-    gun_mount_dual_rsh12_particle: { base: "wood_particle",    tint: 0x595959 },
-    square_desk_particle:          { base: "wood_particle",    tint: 0x4d3e28 },
-    plumpkin_bunker_particle:      { base: "metal_particle_1", tint: 0x262626 },
-    metal_auto_door_particle:      { base: "metal_particle_1", tint: 0x404040 },
-    red_metal_auto_door_particle:  { base: "metal_particle_1", tint: 0x401a1a },
+    metal_particle: { base: "metal_particle_1", tint: 0x5f5f5f },
+    metal_column_particle: { base: "metal_particle_1", tint: 0x8f8f8f },
+    super_barrel_particle: { base: "metal_particle_1", tint: 0xce2b29 },
+    propane_tank_particle: { base: "metal_particle_1", tint: 0xb08b3f },
+    dumpster_particle: { base: "metal_particle_1", tint: 0x3c7033 },
+    washing_machine_particle: { base: "metal_particle_1", tint: 0xcccccc },
+    tv_particle: { base: "metal_particle_1", tint: 0x333333 },
+    smokestack_particle: { base: "metal_particle_1", tint: 0xb5b5b5 },
+    distillation_column_particle: { base: "metal_particle_1", tint: 0x1b5e98 },
+    ship_oil_tank_particle: { base: "metal_particle_1", tint: 0x00538f },
+    forklift_particle: { base: "metal_particle_1", tint: 0xac5339 },
+    bollard_particle: { base: "metal_particle_1", tint: 0xa66e20 },
+    m1117_particle: { base: "metal_particle_1", tint: 0x2f3725 },
+    file_cart_particle: { base: "metal_particle_1", tint: 0x404040 },
+    container_particle_white: { base: "metal_particle_1", tint: 0xc0c0c0 },
+    container_particle_red: { base: "metal_particle_1", tint: 0xa32900 },
+    container_particle_green: { base: "metal_particle_1", tint: 0x00a30e },
+    container_particle_blue: { base: "metal_particle_1", tint: 0x005fa3 },
+    container_particle_yellow: { base: "metal_particle_1", tint: 0xcccc00 },
+    filing_cabinet_particle: { base: "metal_particle_2", tint: 0x7f714d },
+    briefcase_particle: { base: "metal_particle_2", tint: 0xcfcfcf },
+    aegis_crate_particle: { base: "wood_particle", tint: 0x2687d9 },
+    airdrop_crate_particle: { base: "wood_particle", tint: aidrTint },
+    chest_particle: { base: "wood_particle", tint: 0xa87e5a },
+    cooler_particle: { base: "wood_particle", tint: 0x406c65 },
+    crate_particle: { base: "wood_particle", tint: 0x9e7437 },
+    flint_crate_particle: { base: "wood_particle", tint: 0xda6a0b },
+    furniture_particle: { base: "wood_particle", tint: 0x785a2e },
+    couch_part_particle: { base: "wood_particle", tint: 0x6a330b },
+    grenade_crate_particle: { base: "wood_particle", tint: 0x4c4823 },
+    gun_case_particle: { base: "wood_particle", tint: 0x3e5130 },
+    hazel_crate_particle: { base: "wood_particle", tint: 0x6ba371 },
+    lux_crate_particle: { base: "wood_particle", tint: 0x4e5c3d },
+    melee_crate_particle: { base: "wood_particle", tint: 0x23374c },
+    tango_crate_particle: { base: "wood_particle", tint: 0x3f4c39 },
+    wall_particle: { base: "wood_particle", tint: 0xafa08c },
+    flint_stone_particle_1: { base: "stone_particle_1", tint: 0x26272c },
+    flint_stone_particle_2: { base: "stone_particle_2", tint: 0x26272c },
+    gold_rock_particle_1: { base: "stone_particle_1", tint: 0xaa8534 },
+    gold_rock_particle_2: { base: "stone_particle_2", tint: 0xd3a440 },
+    rock_particle_1: { base: "stone_particle_1", tint: 0x8e8e8e },
+    rock_particle_2: { base: "stone_particle_2", tint: 0x8e8e8e },
+    river_rock_particle_1: { base: "stone_particle_1", tint: 0x626471 },
+    river_rock_particle_2: { base: "stone_particle_2", tint: 0x626471 },
+    clearing_boulder_particle_1: { base: "stone_particle_1", tint: 0x5a5a5a },
+    clearing_boulder_particle_2: { base: "stone_particle_2", tint: 0x5a5a5a },
+    sandbags_particle: { base: "stone_particle_2", tint: 0xd59d4e },
+    fire_pit_particle_1: { base: "stone_particle_1", tint: 0x5b4f3e },
+    fire_pit_particle_2: { base: "stone_particle_2", tint: 0x5b4f3e },
+    porta_potty_door_particle: { base: "plastic_particle", tint: 0xf5f9fd },
+    porta_potty_toilet_particle: { base: "plastic_particle", tint: 0x5e5e5e },
+    porta_potty_wall_particle: { base: "plastic_particle", tint: 0x1c71d8 },
+    porta_potty_particle_fall: { base: "plastic_particle", tint: 0x78593b },
+    porta_potty_particle: { base: "ceiling_particle", tint: 0xe7e7e7 },
+    outhouse_particle: { base: "ceiling_particle", tint: 0x78593b },
+    outhouse_wall_particle: { base: "wood_particle", tint: 0x6e4d2f },
+    mobile_home_particle: { base: "ceiling_particle", tint: 0xa8a8a8 },
+    grey_office_chair_particle: { base: "wood_particle", tint: 0x616161 },
+    office_chair_particle: { base: "wood_particle", tint: 0x7d2b2b },
+    hq_stone_wall_particle_1: { base: "stone_particle_1", tint: 0x591919 },
+    hq_stone_wall_particle_2: { base: "stone_particle_2", tint: 0x591919 },
+    headquarters_desk_particle: { base: "wood_particle", tint: 0x61341a },
+    headquarters_c_desk_particle: { base: "wood_particle", tint: 0x6e5838 },
+    gold_aegis_case_particle: { base: "wood_particle", tint: 0x1a1a1a },
+    hq_tp_wall_particle: { base: "wood_particle", tint: 0x74858b },
+    white_small_couch_particle: { base: "wood_particle", tint: 0xcfc1af },
+    red_small_couch_particle: { base: "wood_particle", tint: 0x823323 },
+    planted_bushes_particle: { base: "toilet_particle", tint: 0xaaaaaa },
+    barn_wall_particle_1: { base: "stone_particle_1", tint: 0x690c0c },
+    barn_wall_particle_2: { base: "stone_particle_2", tint: 0x690c0c },
+    lodge_particle: { base: "wood_particle", tint: 0x49371d },
+    lodge_wall_particle: { base: "wood_particle", tint: 0x5a4320 },
+    gun_mount_dual_rsh12_particle: { base: "wood_particle", tint: 0x595959 },
+    square_desk_particle: { base: "wood_particle", tint: 0x4d3e28 },
+    plumpkin_bunker_particle: { base: "metal_particle_1", tint: 0x262626 },
+    metal_auto_door_particle: { base: "metal_particle_1", tint: 0x404040 },
+    red_metal_auto_door_particle: { base: "metal_particle_1", tint: 0x401a1a },
     blue_metal_auto_door_particle: { base: "metal_particle_1", tint: 0x1a1a40 },
 
-    red_gift_particle:             { base: "toilet_particle",  tint: 0x962626 },
-    green_gift_particle:           { base: "toilet_particle",  tint: 0x377130 },
-    blue_gift_particle:            { base: "toilet_particle",  tint: 0x264b96 },
-    purple_gift_particle:          { base: "toilet_particle",  tint: 0x692d69 },
-    black_gift_particle:           { base: "toilet_particle",  tint: 0x1b1b1b },
+    red_gift_particle: { base: "toilet_particle", tint: 0x962626 },
+    green_gift_particle: { base: "toilet_particle", tint: 0x377130 },
+    blue_gift_particle: { base: "toilet_particle", tint: 0x264b96 },
+    purple_gift_particle: { base: "toilet_particle", tint: 0x692d69 },
+    black_gift_particle: { base: "toilet_particle", tint: 0x1b1b1b },
 
-    pumpkin_particle:              { base: "pumpkin_particle_base", tint: 0xff8c01 },
-    plumpkin_particle:             { base: "pumpkin_particle_base", tint: 0x8a4c70 },
-    diseased_plumpkin_particle:    { base: "pumpkin_particle_base", tint: 0x654646 },
+    pumpkin_particle: { base: "pumpkin_particle_base", tint: 0xff8c01 },
+    plumpkin_particle: { base: "pumpkin_particle_base", tint: 0x8a4c70 },
+    diseased_plumpkin_particle: { base: "pumpkin_particle_base", tint: 0x654646 },
 
-    tent_particle_1:               { base: "ceiling_particle", tint: TentTints.red },
-    tent_particle_2:               { base: "ceiling_particle", tint: TentTints.green },
-    tent_particle_3:               { base: "ceiling_particle", tint: TentTints.blue },
-    tent_particle_4:               { base: "ceiling_particle", tint: TentTints.orange },
-    tent_particle_5:               { base: "ceiling_particle", tint: TentTints.purple },
+    tent_particle_1: { base: "ceiling_particle", tint: TentTints.red },
+    tent_particle_2: { base: "ceiling_particle", tint: TentTints.green },
+    tent_particle_3: { base: "ceiling_particle", tint: TentTints.blue },
+    tent_particle_4: { base: "ceiling_particle", tint: TentTints.orange },
+    tent_particle_5: { base: "ceiling_particle", tint: TentTints.purple },
 
-    tent_ceiling_particle_red_1:     { base: "tent_ceiling_particle_1", tint: TentTints.red },
-    tent_ceiling_particle_red_2:     { base: "tent_ceiling_particle_2", tint: TentTints.red },
-    tent_ceiling_particle_red_3:     { base: "tent_ceiling_particle_3", tint: TentTints.red },
+    tent_ceiling_particle_red_1: { base: "tent_ceiling_particle_1", tint: TentTints.red },
+    tent_ceiling_particle_red_2: { base: "tent_ceiling_particle_2", tint: TentTints.red },
+    tent_ceiling_particle_red_3: { base: "tent_ceiling_particle_3", tint: TentTints.red },
 
-    tent_ceiling_particle_green_1:     { base: "tent_ceiling_particle_1", tint: TentTints.green },
-    tent_ceiling_particle_green_2:     { base: "tent_ceiling_particle_2", tint: TentTints.green },
-    tent_ceiling_particle_green_3:     { base: "tent_ceiling_particle_3", tint: TentTints.green },
+    tent_ceiling_particle_green_1: { base: "tent_ceiling_particle_1", tint: TentTints.green },
+    tent_ceiling_particle_green_2: { base: "tent_ceiling_particle_2", tint: TentTints.green },
+    tent_ceiling_particle_green_3: { base: "tent_ceiling_particle_3", tint: TentTints.green },
 
-    tent_ceiling_particle_blue_1:     { base: "tent_ceiling_particle_1", tint: TentTints.blue },
-    tent_ceiling_particle_blue_2:     { base: "tent_ceiling_particle_2", tint: TentTints.blue },
-    tent_ceiling_particle_blue_3:     { base: "tent_ceiling_particle_3", tint: TentTints.blue },
+    tent_ceiling_particle_blue_1: { base: "tent_ceiling_particle_1", tint: TentTints.blue },
+    tent_ceiling_particle_blue_2: { base: "tent_ceiling_particle_2", tint: TentTints.blue },
+    tent_ceiling_particle_blue_3: { base: "tent_ceiling_particle_3", tint: TentTints.blue },
 
-    tent_ceiling_particle_orange_1:     { base: "tent_ceiling_particle_1", tint: TentTints.orange },
-    tent_ceiling_particle_orange_2:     { base: "tent_ceiling_particle_2", tint: TentTints.orange },
-    tent_ceiling_particle_orange_3:     { base: "tent_ceiling_particle_3", tint: TentTints.orange },
+    tent_ceiling_particle_orange_1: { base: "tent_ceiling_particle_1", tint: TentTints.orange },
+    tent_ceiling_particle_orange_2: { base: "tent_ceiling_particle_2", tint: TentTints.orange },
+    tent_ceiling_particle_orange_3: { base: "tent_ceiling_particle_3", tint: TentTints.orange },
 
-    tent_ceiling_particle_purple_1:     { base: "tent_ceiling_particle_1", tint: TentTints.purple },
-    tent_ceiling_particle_purple_2:     { base: "tent_ceiling_particle_2", tint: TentTints.purple },
-    tent_ceiling_particle_purple_3:     { base: "tent_ceiling_particle_3", tint: TentTints.purple }
+    tent_ceiling_particle_purple_1: { base: "tent_ceiling_particle_1", tint: TentTints.purple },
+    tent_ceiling_particle_purple_2: { base: "tent_ceiling_particle_2", tint: TentTints.purple },
+    tent_ceiling_particle_purple_3: { base: "tent_ceiling_particle_3", tint: TentTints.purple }
 };
 /* eslint-enable @stylistic/key-spacing, @stylistic/no-multi-spaces */
 
@@ -1720,24 +1721,24 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     reflectBullets: true
                 }, 3
             ],
-            [
-                {
-                    idString: "super_barrel",
-                    name: "Super Barrel",
-                    material: "metal_light",
-                    health: 240,
-                    scale: {
-                        spawnMin: 1,
-                        spawnMax: 1,
-                        destroy: 0.5
-                    },
-                    spawnMode: MapObjectSpawnMode.GrassAndSand,
-                    hitbox: new CircleHitbox(3.75),
-                    rotationMode: RotationMode.Full,
-                    explosion: "super_barrel_explosion",
-                    reflectBullets: true
-                }, 3
-            ]),
+                [
+                    {
+                        idString: "super_barrel",
+                        name: "Super Barrel",
+                        material: "metal_light",
+                        health: 240,
+                        scale: {
+                            spawnMin: 1,
+                            spawnMax: 1,
+                            destroy: 0.5
+                        },
+                        spawnMode: MapObjectSpawnMode.GrassAndSand,
+                        hitbox: new CircleHitbox(3.75),
+                        rotationMode: RotationMode.Full,
+                        explosion: "super_barrel_explosion",
+                        reflectBullets: true
+                    }, 3
+                ]),
             {
                 idString: "propane_tank",
                 name: "Propane Tank",
@@ -2349,28 +2350,28 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     allowFlyover: FlyoverPref.Always
                 }, 2
             ],
-            [
-                {
-                    idString: "trash_bag",
-                    name: "Trash Bag",
-                    material: "trash_bag",
-                    health: 70,
-                    scale: {
-                        spawnMin: 1,
-                        spawnMax: 1,
-                        destroy: 0.9
-                    },
-                    hitbox: new CircleHitbox(2.2),
-                    rotationMode: RotationMode.Full,
-                    allowFlyover: FlyoverPref.Always,
-                    hasLoot: true,
-                    lootTable: "trash",
-                    frames: {
-                        particle: "flint_stone_particle"
-                    },
-                    particleVariations: 2
-                }
-            ]),
+                [
+                    {
+                        idString: "trash_bag",
+                        name: "Trash Bag",
+                        material: "trash_bag",
+                        health: 70,
+                        scale: {
+                            spawnMin: 1,
+                            spawnMax: 1,
+                            destroy: 0.9
+                        },
+                        hitbox: new CircleHitbox(2.2),
+                        rotationMode: RotationMode.Full,
+                        allowFlyover: FlyoverPref.Always,
+                        hasLoot: true,
+                        lootTable: "trash",
+                        frames: {
+                            particle: "flint_stone_particle"
+                        },
+                        particleVariations: 2
+                    }
+                ]),
             {
                 idString: "hay_bale",
                 name: "Hay Bale",
@@ -2583,7 +2584,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 hitbox: RectangleHitbox.fromRect(7.6, 2.5),
                 rotationMode: RotationMode.Limited,
                 zIndex: ZIndexes.ObstaclesLayer3,
-                frames: { }
+                frames: {}
             },
             {
                 idString: "windowed_vault_door",

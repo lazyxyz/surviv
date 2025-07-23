@@ -581,7 +581,7 @@ export const Buildings = ObjectDefinitions.withDefault<BuildingDefinition>()(
                         rotation: Math.PI,
                         tint
                     },
-                    ...(GameConstants.modeName === "winter" ? snowDecalDefinitions[open] : [])
+                    // ...(GameConstants.modeName === "winter" ? snowDecalDefinitions[open] : [])
                 ],
                 floors: [{
                     type: FloorNames.Metal,

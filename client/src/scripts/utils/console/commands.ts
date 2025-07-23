@@ -14,7 +14,7 @@ import { Rectangle, RendererType, Sprite, VERSION } from "pixi.js";
 import { Config, type ServerInfo } from "../../../config";
 import { type Game } from "../../game";
 import { type CompiledAction, type CompiledTuple, type InputManager } from "../../managers/inputManager";
-import { COLORS } from "../constants";
+import { getColors } from "../constants";
 import { sanitizeHTML, stringify } from "../misc";
 import { type PossibleError, type Stringable } from "./gameConsole";
 import { Casters, ConVar } from "./variables";
@@ -868,7 +868,7 @@ export function setUpCommands(game: Game): void {
             );
 
             const canvas = game.pixi.renderer.extract.canvas({
-                clearColor: COLORS.grass,
+                clearColor: getColors(game.gameMode).grass,
                 target: container,
                 frame: rectangle,
                 resolution: container.scale.x,

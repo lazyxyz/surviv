@@ -56,7 +56,7 @@ import { Minimap } from "./rendering/minimap";
 import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime } from "./ui";
 import { setUpCommands } from "./utils/console/commands";
 import { GameConsole } from "./utils/console/gameConsole";
-import { getColorsForMode, LAYER_TRANSITION_DELAY, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
+import { getColors, LAYER_TRANSITION_DELAY, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 import { Account } from "./account";
@@ -66,7 +66,7 @@ import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { Melees } from "@common/definitions/melees";
 import { errorAlert } from "./modal";
 import { showInventory } from "./inventory";
-import { Modes, NumberToMode, type Mode } from "@common/definitions/modes";
+import { getRandomMode, Modes, NumberToMode, type Mode } from "@common/definitions/modes";
 
 /* eslint-disable @stylistic/indent */
 
@@ -155,7 +155,7 @@ export class Game {
     readonly inputManager = new InputManager(this);
     readonly soundManager = new SoundManager(this);
 
-    readonly gasRender = new GasRender(PIXI_SCALE);
+    readonly gasRender = new GasRender(PIXI_SCALE, this.gameMode);
     readonly gas = new Gas(this);
 
     music!: Sound;
@@ -189,7 +189,7 @@ export class Game {
         game.inputManager.generateBindsConfigScreen();
 
         game.music = sound.add("menu_music", {
-            url: `./audio/music/menu_music${game.console.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : MODE.specialMenuMusic ? `_${this.gameMode}` : ""}.mp3`,
+            url: `./audio/music/menu_music${game.console.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : getRandomMode() ? `_${getRandomMode()}` : ""}.mp3`,
             singleInstance: true,
             preload: true,
             autoPlay: true,
@@ -208,7 +208,7 @@ export class Game {
         if (this.pixi.stage.children.length == 0) {
             await this.pixi.init({
                 resizeTo: window,
-                background: getColorsForMode(this.gameMode).grass,
+                background: getColors(this.gameMode).grass,
                 antialias: this.console.getBuiltInCVar("cv_antialias"),
                 autoDensity: true,
                 preferWebGLVersion: renderMode === "webgl1" ? 1 : 2,
@@ -447,9 +447,7 @@ export class Game {
         this.camera.addObject(this.gasRender.graphics);
         this.map.indicator.setFrame("player_indicator");
 
-        console.log("this.gameMode: ", this.gameMode);
         const particleEffects = Modes[this.gameMode].particleEffects;
-
         if (particleEffects !== undefined) {
             const This = this;
             const gravityOn = particleEffects.gravity;
@@ -946,7 +944,7 @@ export class Game {
         this.map.terrainGraphics.visible = !basement;
         const { red, green, blue } = this.pixi.renderer.background.color;
         const color = { r: red * 255, g: green * 255, b: blue * 255 };
-        const targetColor = basement ? getColorsForMode(this.gameMode).void : getColorsForMode(this.gameMode).grass;
+        const targetColor = basement ? getColors(this.gameMode).void : getColors(this.gameMode).grass;
 
         this.backgroundTween?.kill();
         this.backgroundTween = this.addTween({

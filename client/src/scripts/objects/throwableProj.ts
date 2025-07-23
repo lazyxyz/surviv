@@ -9,14 +9,14 @@ import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
 import { type Game } from "../game";
 import { type GameSound } from "../managers/soundManager";
-import { COLORS, HITBOX_COLORS, HITBOX_DEBUG_MODE, TEAMMATE_COLORS } from "../utils/constants";
+import { getColors, HITBOX_COLORS, HITBOX_DEBUG_MODE, TEAMMATE_COLORS } from "../utils/constants";
 import { SuroiSprite, drawHitbox, toPixiCoords } from "../utils/pixi";
 import { type Tween } from "../utils/tween";
 import { GameObject } from "./gameObject";
 
 export class ThrowableProjectile extends GameObject.derive(ObjectCategory.ThrowableProjectile) {
     readonly image = new SuroiSprite();
-    readonly waterOverlay = new SuroiSprite("water_overlay").setVisible(false).setScale(0.75).setTint(COLORS.water);
+    readonly waterOverlay = new SuroiSprite("water_overlay").setVisible(false).setScale(0.75).setTint(getColors(this.game.gameMode).water);
 
     private _definition!: ThrowableDefinition;
     get definition(): ThrowableDefinition { return this._definition; }

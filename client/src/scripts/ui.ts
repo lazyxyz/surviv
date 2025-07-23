@@ -22,11 +22,12 @@ import { defaultClientCVars, type CVarTypeMapping } from "./utils/console/defaul
 import { Crosshairs, getCrosshair } from "./utils/crosshairs";
 import { html, requestFullscreen } from "./utils/misc";
 import type { TranslationKeys } from "../typings/translations";
-import { EMOTE_SLOTS, MODE, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
+import { EMOTE_SLOTS, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { Loots } from "@common/definitions/loots";
 import { errorAlert, successAlert, warningAlert } from "./modal";
 import { Emotes } from "@common/definitions/emotes";
 import type { Account } from "./account";
+import { Modes } from "@common/definitions/modes";
 /*
     eslint-disable
 
@@ -79,26 +80,26 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
     const { inputManager, uiManager: { ui } } = game;
 
     // Change the menu based on the mode.
-    if (MODE.specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/surviv_round.svg`);
-    if (MODE.specialPlayButtons) {
+    if (Modes[game.gameMode].specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/surviv_round.svg`);
+    if (Modes[game.gameMode].specialPlayButtons) {
         const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
 
         for (let buttonIndex = 0; buttonIndex < playButtons.length; buttonIndex++) {
             const button = playButtons[buttonIndex];
 
-            button.addClass(`event-${MODE.idString}`);
+            button.addClass(`event-${Modes[game.gameMode].idString}`);
 
             // Mode Logo
-            if (MODE.modeLogoImage) {
+            if (Modes[game.gameMode].modeLogoImage) {
                 const translationString = `play_${["solo", "squad"][buttonIndex]}`;
                 let logoSrc = "";
 
-                if (typeof MODE.modeLogoImage === "string") {
-                    logoSrc = MODE.modeLogoImage;
+                if (typeof Modes[game.gameMode].modeLogoImage === "string") {
+                    logoSrc = Modes[game.gameMode].modeLogoImage;
                 } else {
                     logoSrc = buttonIndex === 0
-                        ? MODE.modeLogoImage.solo
-                        : MODE.modeLogoImage.squads;
+                        ? Modes[game.gameMode].modeLogoImage.solo
+                        : Modes[game.gameMode].modeLogoImage.squads;
                 }
 
                 button.html(`
@@ -908,7 +909,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
     const crosshairTargets = $<HTMLDivElement>("#crosshair-preview, #game");
 
     // Darken canvas (halloween mode)
-    if (MODE.darkShaders) {
+    if (Modes[game.gameMode].darkShaders) {
         $("#game-canvas").css({
             "filter": "brightness(0.65) saturate(0.85)",
             "position": "relative",
