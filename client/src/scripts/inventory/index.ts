@@ -39,7 +39,7 @@ export let InventoryCache: {
     emotesLoaded: boolean,
 };
 
-export async function showInventory(game: Game, account: Account) {
+export async function showInventory(account: Account) {
     InventoryCache = {
         shopLoaded: false,
         skinsLoaded: false,
@@ -53,19 +53,19 @@ export async function showInventory(game: Game, account: Account) {
     })
 
     $('#tab-skins').on('click', () => {
-        showSkins(game, account);
+        showSkins(account);
     })
 
     $('#tab-weapons').on('click', () => {
-        showWeapons(game, account);
+        showWeapons(account);
     })
 
     $('#tab-emotes').on('click', () => {
-        showEmotes(game, account);
+        showEmotes(account);
     })
 
     $('#tab-badges').on('click', () => {
-        showBadges(game);
+        showBadges();
     })
 
     const idString = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");

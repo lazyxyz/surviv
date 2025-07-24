@@ -10,7 +10,7 @@ export function getBadgeImage(badgeId: string) {
 }
 
 // handler select and save badge
-function selectBadge(idString: string, game: Game): void {
+function selectBadge(idString: string): void {
     // remove previous selected
     $(".badges-list-item-container").removeClass("selected");
 
@@ -21,7 +21,7 @@ function selectBadge(idString: string, game: Game): void {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function showBadges(game: Game) {
+export async function showBadges() {
     if (InventoryCache.weaponsLoaded) return;
     InventoryCache.weaponsLoaded = true;
 
@@ -39,7 +39,7 @@ export async function showBadges(game: Game) {
           </div>`
         );
 
-        noBadgeItem.on("click", () => selectBadge("", game));
+        noBadgeItem.on("click", () => selectBadge(""));
 
         badgeList.append(noBadgeItem);
     }

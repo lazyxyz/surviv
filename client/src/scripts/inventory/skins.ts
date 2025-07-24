@@ -1,6 +1,5 @@
 import $ from "jquery";
 import type { ReferenceTo } from "@common/utils/objectDefinitions";
-import type { Game } from "../game";
 import { Skins, type SkinDefinition } from "@common/definitions/skins";
 import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
@@ -10,7 +9,7 @@ import { Account, SurvivAssets } from "../account";
 import { GAME_CONSOLE } from "../..";
 
 // handler select and save skin
-function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {
+function selectSkin(idString: ReferenceTo<SkinDefinition>): void {
     // remove previous selected
     $(".skins-list-item-container").removeClass("selected");
 
@@ -22,7 +21,7 @@ function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function showSkins(game: Game, account: Account) {
+export async function showSkins(account: Account) {
     if (!account.address) return;
 
     if (InventoryCache.skinsLoaded) return;
@@ -79,7 +78,7 @@ export async function showSkins(game: Game, account: Account) {
         `);
 
         if (isActive) {
-            skinItem.on("click", () => selectSkin(idString, game));
+            skinItem.on("click", () => selectSkin(idString));
         }
 
         skinList.append(skinItem);

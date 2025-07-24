@@ -9,7 +9,7 @@ import { InventoryCache } from '.';
 import { Account, SurvivAssets } from '../account';
 import { GAME_CONSOLE } from '../..';
 
-export async function showEmotes(game: Game, account: Account) {
+export async function showEmotes(account: Account) {
     if (!account.address) {
         return;
     }

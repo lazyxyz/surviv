@@ -2,7 +2,6 @@ import $ from "jquery";
 import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
 import { Account, SurvivAssets } from "../account";
-import type { Game } from "../game";
 import { InventoryCache } from ".";
 import { GAME_CONSOLE } from "../..";
 
@@ -20,7 +19,7 @@ interface AssetConfig {
 }
 
 
-const selectWeapon = (game: Game, value: object) => {
+const selectWeapon = (value: object) => {
   const weaponPreset = GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset");
 
   GAME_CONSOLE.setBuiltInCVar("dv_weapon_preset", JSON.stringify({
@@ -74,7 +73,7 @@ const appendPreview = (images: Array<{
   return asideElement;
 };
 
-const showViewBox = (game: Game) => {
+const showViewBox = () => {
   const meleeId = localStorage.getItem("selectedMelee");
   const gunId = localStorage.getItem("selectedGun");
 
@@ -139,9 +138,9 @@ const showViewBox = (game: Game) => {
 }
 
 // Function to select a melee weapon
-const selectMelee = (game: Game, weaponId: string) => {
+const selectMelee = (weaponId: string) => {
   // Store the selected weapon
-  selectWeapon(game, { melee: weaponId });
+  selectWeapon({ melee: weaponId });
 
   // Save to localStorage
   localStorage.setItem("selectedMelee", weaponId);
@@ -180,7 +179,7 @@ const selectMelee = (game: Game, weaponId: string) => {
       </div>
   `);
 
-  showViewBox(game);
+  showViewBox();
 };
 
 /*
@@ -204,9 +203,9 @@ const AMMO_TYPE_IMAGES: Record<string, string> = {
 
 
 // Function to select a gun
-const selectGun = (game: Game, weaponId: string) => {
+const selectGun = (weaponId: string) => {
   // Store the selected weapon
-  selectWeapon(game, { gun: weaponId });
+  selectWeapon({ gun: weaponId });
 
   // Save to localStorage
   localStorage.setItem("selectedGun", weaponId);
@@ -261,7 +260,7 @@ const selectGun = (game: Game, weaponId: string) => {
       </div>
   `);
 
-  showViewBox(game);
+  showViewBox();
 };
 
 // Utility to check if a weapon is owned
@@ -270,7 +269,7 @@ function isOwned(id: string, ownedIds: string[]) {
 }
 
 // Function to display guns
-async function showGuns(game: Game, account: Account, selectedGunId?: string) {
+async function showGuns(account: Account, selectedGunId?: string) {
   if (!account.address) {
     return;
   }
@@ -384,7 +383,7 @@ async function showMelees(account: Account, selectedMeleeId?: string) {
 }
 
 // Main function to display weapons (melees and guns)
-export async function showWeapons(game: Game, account: Account, highlightId?: string): Promise<void> {
+export async function showWeapons(account: Account, highlightId?: string): Promise<void> {
 
   if (InventoryCache.weaponsLoaded) return;
   InventoryCache.weaponsLoaded = true;
@@ -422,7 +421,7 @@ export async function showWeapons(game: Game, account: Account, highlightId?: st
   // Load melee list by default
   await showMelees(account, weaponPreset.melee);
 
-  showViewBox(game);
+  showViewBox();
 
   // Tab switching logic
   $(".weapon-tab-child").off("click").on("click", async function () {
@@ -432,7 +431,7 @@ export async function showWeapons(game: Game, account: Account, highlightId?: st
     if (this.id === "tab-melee") {
       await showMelees(account, weaponPreset.melee);
     } else {
-      await showGuns(game, account, weaponPreset.gun);
+      await showGuns(account, weaponPreset.gun);
     }
   });
 
@@ -448,27 +447,27 @@ export async function showWeapons(game: Game, account: Account, highlightId?: st
       if (!isInactive) {
         $(this).addClass("selected");
         weaponPreset.melee = id;
-        selectMelee(game, id);
+        selectMelee(id);
       } else {
         // Show info for unowned melee, but do not select or update preset
-        selectMelee(game, id);
+        selectMelee(id);
       }
     } else {
       if (id === "no-gun") {
         $(this).addClass("selected");
         weaponPreset.gun = undefined;
         localStorage.removeItem("selectedGun");
-        selectWeapon(game, { gun: undefined });
+        selectWeapon({ gun: undefined });
         $("#weapon-info").empty();
-        showViewBox(game);
+        showViewBox();
       } else {
         if (!isInactive) {
           $(this).addClass("selected");
           weaponPreset.gun = id;
-          selectGun(game, id);
+          selectGun(id);
         } else {
           // Show info for unowned gun, but do not select or update preset
-          selectGun(game, id);
+          selectGun(id);
         }
       }
     }
@@ -481,13 +480,13 @@ export async function showWeapons(game: Game, account: Account, highlightId?: st
       $("#tab-melee").addClass("active");
       $("#tab-gun").removeClass("active");
       await showMelees(account, weaponPreset.melee);
-      selectMelee(game, weaponPreset.melee);
+      selectMelee(weaponPreset.melee);
     } else if (weaponPreset.gun && $(`#weapons-list-${weaponPreset.gun}`).length && !$(`#weapons-list-${weaponPreset.gun}`).hasClass("inactive")) {
       $(`#weapons-list-${weaponPreset.gun}`).addClass("selected");
       $("#tab-gun").addClass("active");
       $("#tab-melee").removeClass("active");
-      await showGuns(game, account, weaponPreset.gun);
-      selectGun(game, weaponPreset.gun);
+      await showGuns(account, weaponPreset.gun);
+      selectGun(weaponPreset.gun);
     }
   }
 
@@ -501,13 +500,13 @@ export async function showWeapons(game: Game, account: Account, highlightId?: st
         $("#tab-melee").addClass("active");
         $("#tab-gun").removeClass("active");
         await showMelees(account, highlightId);
-        selectMelee(game, highlightId);
+        selectMelee(highlightId);
       } else {
         weaponPreset.gun = highlightId;
         $("#tab-gun").addClass("active");
         $("#tab-melee").removeClass("active");
-        await showGuns(game, account, highlightId);
-        selectGun(game, highlightId);
+        await showGuns(account, highlightId);
+        selectGun(highlightId);
       }
     }
   }

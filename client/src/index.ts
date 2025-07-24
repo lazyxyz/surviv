@@ -28,7 +28,7 @@ void (async () => {
         onConnectWallet(account),
     ]).then(() => {
         setUpUI(game, account);
-        showInventory(game, account);
+        showInventory(account);
         unlockPlayButtons();
         resetPlayButtons();
     });
