@@ -5,6 +5,7 @@ import type { Game } from "../game";
 import type { weaponPresentType } from "@common/typings";
 import weapons from ".";
 import { SurvivAssets } from "../account";
+import { GAME_CONSOLE } from "../..";
 
 // Constants for repeated strings
 const ASSET_PATH = "./img/game/shared";
@@ -40,7 +41,7 @@ const selectMelee = (game: Game, weaponId: string) => {
     return;
   }
 
-  const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
+  const currentSkin = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
 
   // Generate asset configuration
   const assets: AssetConfig[] = [
@@ -263,7 +264,7 @@ export async function showWeapons(game: Game, highlightId?: string): Promise<voi
   // Get weapon preset
   let weaponPreset: { melee?: string; gun?: string } = {};
   try {
-    const presetString = game.console.getBuiltInCVar("dv_weapon_preset");
+    const presetString = GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset");
     if (presetString) {
       weaponPreset = JSON.parse(presetString);
     }

@@ -7,6 +7,7 @@ import { type Game } from "../game";
 import { DIFF_LAYER_HITBOX_OPACITY, HITBOX_COLORS, HITBOX_DEBUG_MODE } from "../utils/constants";
 import { drawHitbox, SuroiSprite, toPixiCoords } from "../utils/pixi";
 import { GameObject } from "./gameObject";
+import { GAME_CONSOLE } from "../..";
 
 export class SyncedParticle extends GameObject.derive(ObjectCategory.SyncedParticle) {
     readonly image = new SuroiSprite();
@@ -81,7 +82,7 @@ export class SyncedParticle extends GameObject.derive(ObjectCategory.SyncedParti
         this.scale = data.scale ?? this._scale;
         this.container.alpha = (this._alpha = data.alpha ?? this._alpha) * this._alphaMult;
 
-        if (!this.game.console.getBuiltInCVar("cv_movement_smoothing") || isNew) {
+        if (!GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing") || isNew) {
             this.container.position = toPixiCoords(this.position);
             this.container.rotation = this.rotation;
             this.container.scale.set(this._scale);

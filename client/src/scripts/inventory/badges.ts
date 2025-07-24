@@ -3,6 +3,7 @@ import { getTranslatedString } from "../../translations";
 import $ from "jquery";
 import { html } from "../utils/misc";
 import { InventoryCache } from ".";
+import { GAME_CONSOLE } from "../..";
 
 export function getBadgeImage(badgeId: string) {
     return "";
@@ -16,13 +17,11 @@ function selectBadge(idString: string, game: Game): void {
     // wait for dom
     setTimeout(() => $(`#badge-${idString}`).addClass("selected"), 0);
 
-    game.console.setBuiltInCVar("cv_loadout_badge", idString);
+    GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", idString);
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function showBadges(game: Game) {
-    if (!game?.account?.address) return;
-
     if (InventoryCache.weaponsLoaded) return;
     InventoryCache.weaponsLoaded = true;
 

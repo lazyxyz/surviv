@@ -8,6 +8,7 @@ import { type Game } from "../game";
 import { PIXI_SCALE } from "../utils/constants";
 import { SuroiSprite } from "../utils/pixi";
 import { type Tween } from "../utils/tween";
+import { GAME_CONSOLE } from "../..";
 
 export class Camera {
     readonly pixi: Application;
@@ -98,7 +99,7 @@ export class Camera {
     }
 
     shake(duration: number, intensity: number): void {
-        if (!this.game.console.getBuiltInCVar("cv_camera_shake_fx")) return;
+        if (!GAME_CONSOLE.getBuiltInCVar("cv_camera_shake_fx")) return;
         this.shaking = true;
         this.shakeStart = Date.now();
         this.shakeDuration = duration;
@@ -106,7 +107,7 @@ export class Camera {
     }
 
     shockwave(duration: number, position: Vector, amplitude: number, wavelength: number, speed: number): void {
-        if (!this.game.console.getBuiltInCVar("cv_cooler_graphics")) return;
+        if (!GAME_CONSOLE.getBuiltInCVar("cv_cooler_graphics")) return;
         this.shockwaves.add(new Shockwave(this.game, duration, position, amplitude, wavelength, speed));
     }
 

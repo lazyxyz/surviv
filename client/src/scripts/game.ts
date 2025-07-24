@@ -67,6 +67,7 @@ import { Melees } from "@common/definitions/melees";
 import { errorAlert } from "./modal";
 import { showInventory } from "./inventory";
 import { getRandomMode, Modes, NumberToMode, type Mode } from "@common/definitions/modes";
+import { GAME_CONSOLE } from "..";
 
 /* eslint-disable @stylistic/indent */
 
@@ -151,9 +152,9 @@ export class Game {
     readonly particleManager = new ParticleManager(this);
     readonly map = new Minimap(this);
     readonly camera = new Camera(this);
-    readonly console = new GameConsole(this);
     readonly inputManager = new InputManager(this);
-    readonly soundManager = new SoundManager(this);
+    readonly soundManager: SoundManager;
+    // console = GAME_CONSOLE;
 
     readonly gasRender = new GasRender(PIXI_SCALE, this.gameMode);
     readonly gas = new Gas(this);
@@ -170,6 +171,13 @@ export class Game {
         return timeout;
     }
 
+    constructor() {
+        GAME_CONSOLE.setInputManager(this.inputManager);
+        GAME_CONSOLE.readFromLocalStorage();
+
+        this.soundManager = new SoundManager(this);
+    }
+
     private static _instantiated = false;
 
     static async init(): Promise<Game> {
@@ -179,28 +187,27 @@ export class Game {
         Game._instantiated = true;
 
         const game = new Game();
-
-        game.console.readFromLocalStorage();
         await initTranslation(game);
         game.inputManager.setupInputs();
 
 
         setUpCommands(game);
         game.inputManager.generateBindsConfigScreen();
+        console.log("console: ", GAME_CONSOLE);
 
         game.music = sound.add("menu_music", {
-            url: `./audio/music/menu_music${game.console.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : getRandomMode() ? `_${getRandomMode()}` : ""}.mp3`,
+            url: `./audio/music/menu_music${GAME_CONSOLE.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : getRandomMode() ? `_${getRandomMode()}` : ""}.mp3`,
             singleInstance: true,
             preload: true,
             autoPlay: true,
-            volume: game.console.getBuiltInCVar("cv_music_volume")
+            volume: GAME_CONSOLE.getBuiltInCVar("cv_music_volume")
         });
         return game;
     }
 
     initPixi = async (gameMode: Mode): Promise<void> => {
-        const renderMode = this.console.getBuiltInCVar("cv_renderer");
-        const renderRes = this.console.getBuiltInCVar("cv_renderer_res");
+        const renderMode = GAME_CONSOLE.getBuiltInCVar("cv_renderer");
+        const renderRes = GAME_CONSOLE.getBuiltInCVar("cv_renderer_res");
 
         console.log("gameMode: ", gameMode);
 
@@ -209,7 +216,7 @@ export class Game {
             await this.pixi.init({
                 resizeTo: window,
                 background: getColors(this.gameMode).grass,
-                antialias: this.console.getBuiltInCVar("cv_antialias"),
+                antialias: GAME_CONSOLE.getBuiltInCVar("cv_antialias"),
                 autoDensity: true,
                 preferWebGLVersion: renderMode === "webgl1" ? 1 : 2,
                 preference: renderMode === "webgpu" ? "webgpu" : "webgl",
@@ -231,8 +238,8 @@ export class Game {
         await loadTextures(
             pixi.renderer,
             this.inputManager.isMobile
-                ? this.console.getBuiltInCVar("mb_high_res_textures")
-                : this.console.getBuiltInCVar("cv_high_res_textures")
+                ? GAME_CONSOLE.getBuiltInCVar("mb_high_res_textures")
+                : GAME_CONSOLE.getBuiltInCVar("cv_high_res_textures")
             , gameMode.toString()
         );
 
@@ -256,15 +263,15 @@ export class Game {
             this.map.mask
         );
 
-        this.map.visible = !this.console.getBuiltInCVar("cv_minimap_minimized");
-        this.map.expanded = this.console.getBuiltInCVar("cv_map_expanded");
-        this.uiManager.ui.gameUi.toggle(this.console.getBuiltInCVar("cv_draw_hud"));
+        this.map.visible = !GAME_CONSOLE.getBuiltInCVar("cv_minimap_minimized");
+        this.map.expanded = GAME_CONSOLE.getBuiltInCVar("cv_map_expanded");
+        this.uiManager.ui.gameUi.toggle(GAME_CONSOLE.getBuiltInCVar("cv_draw_hud"));
 
         pixi.renderer.on("resize", () => this.resize());
         this.resize();
 
         setInterval(() => {
-            if (this.console.getBuiltInCVar("pf_show_fps")) {
+            if (GAME_CONSOLE.getBuiltInCVar("pf_show_fps")) {
                 this.uiManager.debugReadouts.fps.text(`${Math.round(this.pixi.ticker.FPS)} fps`);
             }
         }, 500);
@@ -454,7 +461,7 @@ export class Game {
             this.particleManager.addEmitter(
                 {
                     delay: particleEffects.delay,
-                    active: this.console.getBuiltInCVar("cv_ambient_particles"),
+                    active: GAME_CONSOLE.getBuiltInCVar("cv_ambient_particles"),
                     spawnOptions: () => ({
                         frames: particleEffects.frames,
                         get position(): Vector {
@@ -712,10 +719,10 @@ export class Game {
         }
 
         let players: Set<Player> | undefined;
-        if (this.console.getBuiltInCVar("cv_movement_smoothing")) {
+        if (GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing")) {
             for (const player of players = this.objects.getCategory(ObjectCategory.Player)) {
                 player.updateContainerPosition();
-                if (!player.isActivePlayer || !this.console.getBuiltInCVar("cv_responsive_rotation") || this.spectating) {
+                if (!player.isActivePlayer || !GAME_CONSOLE.getBuiltInCVar("cv_responsive_rotation") || this.spectating) {
                     player.updateContainerRotation();
                 }
             }
@@ -893,7 +900,7 @@ export class Game {
         }
 
         for (const emote of updateData.emotes ?? []) {
-            if (this.console.getBuiltInCVar("cv_hide_emotes")) break;
+            if (GAME_CONSOLE.getBuiltInCVar("cv_hide_emotes")) break;
             const player = this.objects.get(emote.playerID);
             if (player?.isPlayer) {
                 player.showEmote(emote.definition);
@@ -1175,7 +1182,7 @@ export class Game {
 
                     // Auto pickup (top 10 conditionals)
                     if (
-                        this.console.getBuiltInCVar("cv_autopickup")
+                        GAME_CONSOLE.getBuiltInCVar("cv_autopickup")
                         && object?.isLoot
                         && autoPickup
                         && (

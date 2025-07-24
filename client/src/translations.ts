@@ -7,6 +7,7 @@ import { defaultClientCVars } from "./scripts/utils/console/defaultClientCVars";
 import TRANSLATIONS_MANIFEST from "./translationsManifest.json";
 import { type TranslationKeys } from "./typings/translations";
 import { Emotes } from "@common/definitions/emotes";
+import { GAME_CONSOLE } from ".";
 
 export type TranslationMap = Partial<Record<TranslationKeys, string>> & TranslationManifest;
 
@@ -47,7 +48,7 @@ export async function initTranslation(game: Game): Promise<void> {
         ? defaultClientCVars.cv_language.value
         : defaultClientCVars.cv_language;
 
-    selectedLanguage = game.console.getBuiltInCVar("cv_language");
+    selectedLanguage = GAME_CONSOLE.getBuiltInCVar("cv_language");
 
     const loadRightNow = (language: string, content: TranslationManifest): boolean => content.mandatory || language === selectedLanguage || language === defaultLanguage;
 

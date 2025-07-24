@@ -5,6 +5,7 @@ import { Account } from "./scripts/account";
 import { Game } from "./scripts/game";
 import { showInventory } from "./scripts/inventory";
 import { resetPlayButtons, setUpUI, unlockPlayButtons } from "./scripts/ui";
+import { GameConsole } from "./scripts/utils/console/gameConsole";
 import { onConnectWallet, showWallet } from "./scripts/wallet";
 import "./scss/pages/client.scss";
 import { Buffer } from "buffer";
@@ -16,8 +17,10 @@ if (typeof window !== "undefined") {
     }
 }
 
+export let GAME_CONSOLE = new GameConsole();
+
 void (async () => {
-    const account = new Account();
+    const account = new Account();    
     const game = await Game.init();
 
     void Promise.all([

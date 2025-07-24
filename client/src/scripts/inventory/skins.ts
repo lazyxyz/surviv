@@ -7,6 +7,7 @@ import type { TranslationKeys } from "../../typings/translations";
 
 import { InventoryCache, updateSplashCustomize } from ".";
 import { Account, SurvivAssets } from "../account";
+import { GAME_CONSOLE } from "../..";
 
 // handler select and save skin
 function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {
@@ -16,7 +17,7 @@ function selectSkin(idString: ReferenceTo<SkinDefinition>, game: Game): void {
     // wait for dom
     setTimeout(() => $(`#skin-${idString}`).addClass("selected"), 0);
 
-    game.console.setBuiltInCVar("cv_loadout_skin", idString);
+    GAME_CONSOLE.setBuiltInCVar("cv_loadout_skin", idString);
     updateSplashCustomize(idString);
 }
 
@@ -28,9 +29,9 @@ export async function showSkins(game: Game, account: Account) {
     InventoryCache.skinsLoaded = true;
 
 
-    const role = game.console.getBuiltInCVar("dv_role");
+    const role = GAME_CONSOLE.getBuiltInCVar("dv_role");
     const skinList = $<HTMLDivElement>("#skins-list");
-    const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
+    const currentSkin = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
 
     const userSkinBalance = [
         ...Object.entries(await account.getBalances(SurvivAssets.SilverSkins)),

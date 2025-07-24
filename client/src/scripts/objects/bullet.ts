@@ -15,6 +15,7 @@ import type { Building } from "./building";
 import { type Obstacle } from "./obstacle";
 import { type Player } from "./player";
 import { Modes } from "@common/definitions/modes";
+import { GAME_CONSOLE } from "../..";
 
 const white = 0xFFFFFF;
 
@@ -49,7 +50,7 @@ export class Bullet extends BaseBullet {
         this._image.scale.y = tracerStats.width * (tracerMods?.width ?? 1) * (this.thin ? 0.5 : 1);
         this._image.alpha = tracerStats.opacity * (tracerMods?.opacity ?? 1) / (this.reflectionCount + 1);
 
-        if (this.game.console.getBuiltInCVar("cv_cooler_graphics")) {
+        if (GAME_CONSOLE.getBuiltInCVar("cv_cooler_graphics")) {
             this._image.filters = new BloomFilter({
                 strength: 5
             });
@@ -170,7 +171,7 @@ export class Bullet extends BaseBullet {
 
         if (
             this.definition.trail
-            && this.game.console.getBuiltInCVar("cv_cooler_graphics")
+            && GAME_CONSOLE.getBuiltInCVar("cv_cooler_graphics")
             && Date.now() - this._lastParticleTrail >= this.definition.trail.interval
         ) {
             const trail = this.definition.trail;

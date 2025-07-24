@@ -14,6 +14,7 @@ import { SuroiSprite, drawHitbox, toPixiCoords } from "../utils/pixi";
 import { type Tween } from "../utils/tween";
 import { GameObject } from "./gameObject";
 import { type Player } from "./player";
+import { GAME_CONSOLE } from "../..";
 
 export class Loot extends GameObject.derive(ObjectCategory.Loot) {
     definition!: LootDefinition;
@@ -163,7 +164,7 @@ export class Loot extends GameObject.derive(ObjectCategory.Loot) {
 
         this.updateZIndex();
 
-        if (!this.game.console.getBuiltInCVar("cv_movement_smoothing") || isNew) {
+        if (!GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing") || isNew) {
             this.container.position = toPixiCoords(this.position);
         }
 

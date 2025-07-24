@@ -13,6 +13,7 @@ import { getColors, HITBOX_COLORS, HITBOX_DEBUG_MODE, TEAMMATE_COLORS } from "..
 import { SuroiSprite, drawHitbox, toPixiCoords } from "../utils/pixi";
 import { type Tween } from "../utils/tween";
 import { GameObject } from "./gameObject";
+import { GAME_CONSOLE } from "../..";
 
 export class ThrowableProjectile extends GameObject.derive(ObjectCategory.ThrowableProjectile) {
     readonly image = new SuroiSprite();
@@ -106,7 +107,7 @@ export class ThrowableProjectile extends GameObject.derive(ObjectCategory.Throwa
             this.floorType = floorType;
         }
 
-        if (!this.game.console.getBuiltInCVar("cv_movement_smoothing") || isNew) {
+        if (!GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing") || isNew) {
             this.container.position = toPixiCoords(this.position);
             this.container.rotation = this.rotation;
         }

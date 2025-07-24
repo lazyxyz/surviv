@@ -3,7 +3,7 @@ import { Badges } from "@common/definitions/badges";
 import { Numeric } from "@common/utils/math";
 import $ from "jquery";
 import { type Game } from "../../game";
-import { type CompiledAction, type CompiledTuple } from "../../managers/inputManager";
+import { InputManager, type CompiledAction, type CompiledTuple } from "../../managers/inputManager";
 import { sanitizeHTML } from "../misc";
 import { type Command } from "./commands";
 import { defaultBinds, defaultClientCVars, type CVarTypeMapping } from "./defaultClientCVars";
@@ -46,6 +46,7 @@ let noHeightAdjust = false;
 
 export class GameConsole {
     private _isOpen = false;
+    inputManager: InputManager | undefined;
     get isOpen(): boolean { return this._isOpen; }
     set isOpen(value: boolean) {
         if (this._isOpen === value) return;
@@ -58,10 +59,14 @@ export class GameConsole {
             this._ui.globalContainer.show();
             this._ui.input.trigger("focus");
 
-            invalidateNextCharacter = !this.game.gameStarted;
+            // invalidateNextCharacter = !this.game.gameStarted;
         } else {
             this._ui.globalContainer.hide();
         }
+    }
+
+    setInputManager(inputManager: InputManager) {
+        this.inputManager = inputManager;
     }
 
     private readonly _ui = {
@@ -193,7 +198,7 @@ export class GameConsole {
         const settings: GameSettings = {
             variables: this.variables.getAll({ defaults: !includeDefaults, noArchive: !includeNoArchive }),
             aliases: Object.fromEntries(this.aliases),
-            binds: this.game.inputManager.binds.getAll()
+            binds: this.inputManager ? this.inputManager.binds.getAll() : {}
         };
 
         localStorage.setItem(this._localStorageKey, JSON.stringify(settings));
@@ -266,18 +271,21 @@ export class GameConsole {
             this._autocmpData.cache.invalidateAll();
         }
 
-        const bindManager = this.game.inputManager.binds;
-        for (const command in binds) {
-            const bindList = binds[command];
-            if (!bindList.length) {
-                bindManager.addInputsToAction(command);
-                continue;
-            }
+        if (this.inputManager) {
+            const bindManager = this.inputManager.binds;
+            for (const command in binds) {
+                const bindList = binds[command];
+                if (!bindList.length) {
+                    bindManager.addInputsToAction(command);
+                    continue;
+                }
 
-            for (const bind of bindList) {
-                bindManager.addActionsToInput(bind, command);
+                for (const bind of bindList) {
+                    bindManager.addActionsToInput(bind, command);
+                }
             }
         }
+
 
         if (rewriteToLS) {
             this.writeToLocalStorage();
@@ -425,49 +433,12 @@ export class GameConsole {
     }
 
     private static _instantiated = false;
-    constructor(readonly game: Game) {
+    constructor() {
         if (GameConsole._instantiated) {
             throw new Error("Class 'GameConsole' has already been instantiated");
         }
         GameConsole._instantiated = true;
-
         this._attachListeners();
-
-        /* const T = this;
-        // Overrides for native console methods
-        {
-            const {
-                log: nativeLog,
-                info: nativeInfo,
-                warn: nativeWarn,
-                error: nativeError
-            } = console;
-
-            function makeOverride<
-                C extends typeof window.console,
-                K extends "log" | "info" | "warn" | "error"
-            >(
-                nativeKey: K,
-                nativeMethod: C[K],
-                gameConsoleMethod: "log" | "warn" | "error",
-                altMode?: boolean
-            ): void {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (window.console as C)[nativeKey] = function(this: typeof window["console"], ...contents: any[]) {
-                    nativeMethod.call(console, ...contents);
-                    contents.forEach(c => { T[gameConsoleMethod](`${c}`, altMode); });
-                };
-            }
-
-            (
-                [
-                    ["log", nativeLog, "log"],
-                    ["info", nativeInfo, "log", true],
-                    ["warn", nativeWarn, "warn"],
-                    ["error", nativeError, "error"]
-                ] as Array<Parameters<typeof makeOverride>>
-            ).forEach(args => { makeOverride(...args); });
-        } */
 
         window.addEventListener("error", err => {
             if (err.filename) {
@@ -764,28 +735,28 @@ export class GameConsole {
             aliasCandidates,
             variableCandidates
         ] = isEmpty
-            ? [
-                this._history.all(),
-                [],
-                [],
-                []
-            ]
-            : [
-                this._history.filter(
-                    (() => {
-                        const allEntities = ([] as string[]).concat(
-                            commands ??= cache.commands,
-                            aliases ??= cache.aliases,
-                            variables ??= cache.variables
-                        );
+                ? [
+                    this._history.all(),
+                    [],
+                    [],
+                    []
+                ]
+                : [
+                    this._history.filter(
+                        (() => {
+                            const allEntities = ([] as string[]).concat(
+                                commands ??= cache.commands,
+                                aliases ??= cache.aliases,
+                                variables ??= cache.variables
+                            );
 
-                        return (s: string) => matches(s) && !allEntities.includes(s);
-                    })()
-                ),
-                (commands ??= cache.commands).filter(s => matches(s)),
-                (aliases ??= cache.aliases).filter(s => matches(s)),
-                (variables ??= cache.variables).filter(s => matches(s))
-            ];
+                            return (s: string) => matches(s) && !allEntities.includes(s);
+                        })()
+                    ),
+                    (commands ??= cache.commands).filter(s => matches(s)),
+                    (aliases ??= cache.aliases).filter(s => matches(s)),
+                    (variables ??= cache.variables).filter(s => matches(s))
+                ];
 
         const generateAutocompleteNode = (text: string): JQuery<HTMLDivElement> => {
             const matches = findMatches(text);
@@ -814,7 +785,7 @@ export class GameConsole {
                 this._updateAutocmp();
             });
 
-            node.on("keydown", function(ev) {
+            node.on("keydown", function (ev) {
                 if (ev.code !== "Enter") return;
 
                 ev.preventDefault();
@@ -972,17 +943,17 @@ export class GameConsole {
             propertyToModify,
             sanitizer
         ]: [
-            "html" | "text",
-            typeof sanitizeHTML
-        ] = raw
-            ? [
-                "html",
-                sanitizeHTML
-            ]
-            : [
-                "text",
-                (s: string) => s
-            ];
+                "html" | "text",
+                typeof sanitizeHTML
+            ] = raw
+                ? [
+                    "html",
+                    sanitizeHTML
+                ]
+                : [
+                    "text",
+                    (s: string) => s
+                ];
 
         if (typeof entry.content === "string") {
             message.content[propertyToModify](

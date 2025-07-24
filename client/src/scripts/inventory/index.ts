@@ -6,6 +6,7 @@ import { showShop } from "./shop";
 import { showSkins } from "./skins";
 import { showWeapons } from "./weapons";
 import type { Account } from '../account';
+import { GAME_CONSOLE } from '../..';
 
 // handler display change preview
 export const updateSplashCustomize = (skinID: string): void => {
@@ -67,7 +68,7 @@ export async function showInventory(game: Game, account: Account) {
         showBadges(game);
     })
 
-    const idString = game.console.getBuiltInCVar("cv_loadout_skin");
+    const idString = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
     updateSplashCustomize(idString);
 }
 

@@ -28,6 +28,7 @@ import { errorAlert, successAlert, warningAlert } from "./modal";
 import { Emotes } from "@common/definitions/emotes";
 import type { Account } from "./account";
 import { Modes } from "@common/definitions/modes";
+import { GAME_CONSOLE } from "..";
 /*
     eslint-disable
 
@@ -148,7 +149,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
 
     const languageFieldset = $("#languages-selector");
     for (const [language, languageInfo] of Object.entries(TRANSLATIONS.translations)) {
-        const isSelected = game.console.getBuiltInCVar("cv_language") === language;
+        const isSelected = GAME_CONSOLE.getBuiltInCVar("cv_language") === language;
         languageFieldset.append(html`
            <a id="language-${language}" ${isSelected ? 'class="selected"' : ""}>
               ${languageInfo.flag} <strong>${languageInfo.name}</strong> [${!isSelected ? TRANSLATIONS.translations[language].percentage : languageInfo.percentage}]
@@ -156,11 +157,11 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
         `);
 
         $(`#language-${language}`).on("click", () => {
-            game.console.setBuiltInCVar("cv_language", language);
+            GAME_CONSOLE.setBuiltInCVar("cv_language", language);
         });
     }
 
-    game.console.variables.addChangeListener("cv_language", () => location.reload());
+    GAME_CONSOLE.variables.addChangeListener("cv_language", () => location.reload());
 
     const params = new URLSearchParams(window.location.search);
 
@@ -171,7 +172,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
             params.delete("region");
             if (region === null) return;
             if (!Object.hasOwn(Config.regions, region)) return;
-            game.console.setBuiltInCVar("cv_region", region);
+            GAME_CONSOLE.setBuiltInCVar("cv_region", region);
         })();
     }
 
@@ -264,9 +265,9 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
     const updateServerSelectors = (): void => {
         if (!selectedRegion) { // Handle invalid region
             selectedRegion = regionInfo[Config.defaultRegion];
-            game.console.setBuiltInCVar("cv_region", "");
+            GAME_CONSOLE.setBuiltInCVar("cv_region", "");
         }
-        const region = getTranslatedString(`region_${game.console.getBuiltInCVar("cv_region")}` as TranslationKeys);
+        const region = getTranslatedString(`region_${GAME_CONSOLE.getBuiltInCVar("cv_region")}` as TranslationKeys);
         if (region === "region_") {
             serverName.text(selectedRegion.name); // this for now until we find a way to selectedRegion.id
         } else {
@@ -278,7 +279,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
         resetPlayButtons();
     };
 
-    selectedRegion = regionInfo[game.console.getBuiltInCVar("cv_region") ?? Config.defaultRegion];
+    selectedRegion = regionInfo[GAME_CONSOLE.getBuiltInCVar("cv_region") ?? Config.defaultRegion];
     if (selectedRegion) {
         account.setApi(selectedRegion.apiAddress);
     } else {
@@ -300,7 +301,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
 
         selectedRegion = info;
 
-        game.console.setBuiltInCVar("cv_region", region);
+        GAME_CONSOLE.setBuiltInCVar("cv_region", region);
 
         updateServerSelectors();
     });
@@ -316,14 +317,14 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
             if (autoFill) params.set("autoFill", String(autoFill));
 
             {
-                const name = game.console.getBuiltInCVar("cv_player_name");
+                const name = GAME_CONSOLE.getBuiltInCVar("cv_player_name");
                 if (name) params.set("name", name);
 
                 if (account.address) params.set("address", account.address)
 
                 let skin: typeof defaultClientCVars["cv_loadout_skin"];
                 const playerSkin = Loots.fromStringSafe(
-                    game.console.getBuiltInCVar("cv_loadout_skin")
+                    GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin")
                 ) ?? Loots.fromString(
                     typeof (skin = defaultClientCVars.cv_loadout_skin) === "object"
                         ? skin.value
@@ -332,30 +333,30 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
 
                 if (playerSkin) params.set("skin", playerSkin.idString);
 
-                const badge = game.console.getBuiltInCVar("cv_loadout_badge");
+                const badge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
                 if (badge) params.set("badge", badge);
 
-                const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
+                const weaponPreset = GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset");
                 if (weaponPreset) {
                     if (JSON.parse(weaponPreset).melee) params.set("melee", JSON.parse(weaponPreset).melee);
                     if (JSON.parse(weaponPreset).gun) params.set("gun", JSON.parse(weaponPreset).gun);
                 }
 
-                const lobbyClearing = game.console.getBuiltInCVar("dv_lobby_clearing");
+                const lobbyClearing = GAME_CONSOLE.getBuiltInCVar("dv_lobby_clearing");
                 if (lobbyClearing) params.set("lobbyClearing", "true");
 
-                const nameColor = game.console.getBuiltInCVar("dv_name_color");
+                const nameColor = GAME_CONSOLE.getBuiltInCVar("dv_name_color");
                 if (nameColor) {
                     try {
                         params.set("nameColor", new Color(nameColor).toNumber().toString());
                     } catch (e) {
-                        game.console.setBuiltInCVar("dv_name_color", "");
+                        GAME_CONSOLE.setBuiltInCVar("dv_name_color", "");
                         console.error(e);
                     }
                 }
 
                 const emoteIds = EMOTE_SLOTS.map(
-                    slot => Emotes.fromStringSafe(game.console.getBuiltInCVar(`cv_loadout_${slot}_emote`))?.idString
+                    slot => Emotes.fromStringSafe(GAME_CONSOLE.getBuiltInCVar(`cv_loadout_${slot}_emote`))?.idString
                 );
 
                 if (emoteIds.length > 0) {
@@ -509,21 +510,21 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
             params.set("teamID", teamID);
         }
 
-        params.set("name", game.console.getBuiltInCVar("cv_player_name"));
-        params.set("skin", game.console.getBuiltInCVar("cv_loadout_skin"));
+        params.set("name", GAME_CONSOLE.getBuiltInCVar("cv_player_name"));
+        params.set("skin", GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin"));
 
-        const badge = game.console.getBuiltInCVar("cv_loadout_badge");
+        const badge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
         if (badge) params.set("badge", badge);
 
-        const role = game.console.getBuiltInCVar("dv_role");
+        const role = GAME_CONSOLE.getBuiltInCVar("dv_role");
         if (role) params.set("role", role);
 
-        const nameColor = game.console.getBuiltInCVar("dv_name_color");
+        const nameColor = GAME_CONSOLE.getBuiltInCVar("dv_name_color");
         if (nameColor) {
             try {
                 params.set("nameColor", new Color(nameColor).toNumber().toString());
             } catch (e) {
-                game.console.setBuiltInCVar("dv_name_color", "");
+                GAME_CONSOLE.setBuiltInCVar("dv_name_color", "");
                 console.error(e);
             }
         }
@@ -539,7 +540,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
                     joinedTeam = true;
                     teamID = data.teamID;
                     window.location.hash = `#${teamID}`;
-                    ui.createTeamUrl.val(`${window.location.origin}/?region=${game.console.getBuiltInCVar("cv_region") || Config.defaultRegion}#${teamID}`);
+                    ui.createTeamUrl.val(`${window.location.origin}/?region=${GAME_CONSOLE.getBuiltInCVar("cv_region") || Config.defaultRegion}#${teamID}`);
                     ui.createTeamAutoFill.prop("checked", data.autoFill);
                     ui.createTeamLock.prop("checked", data.locked);
                     break;
@@ -736,23 +737,23 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
 
     const nameColor = params.get("nameColor");
     if (nameColor) {
-        game.console.setBuiltInCVar("dv_name_color", nameColor);
+        GAME_CONSOLE.setBuiltInCVar("dv_name_color", nameColor);
     }
 
     const lobbyClearing = params.get("lobbyClearing");
     if (lobbyClearing) {
-        game.console.setBuiltInCVar("dv_lobby_clearing", lobbyClearing === "true");
+        GAME_CONSOLE.setBuiltInCVar("dv_lobby_clearing", lobbyClearing === "true");
     }
 
     const devPassword = params.get("password");
     if (devPassword) {
-        game.console.setBuiltInCVar("dv_password", devPassword);
+        GAME_CONSOLE.setBuiltInCVar("dv_password", devPassword);
         location.search = "";
     }
 
     const roleParam = params.get("role");
     if (roleParam) {
-        game.console.setBuiltInCVar("dv_role", roleParam);
+        GAME_CONSOLE.setBuiltInCVar("dv_role", roleParam);
         location.search = "";
     }
 
@@ -765,20 +766,20 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
     toggleRotateMessage();
     $(window).on("resize", toggleRotateMessage);
 
-    game.console.variables.addChangeListener(
+    GAME_CONSOLE.variables.addChangeListener(
         "cv_console_open",
-        (_, val) => game.console.isOpen = val
+        (_, val) => GAME_CONSOLE.isOpen = val
     );
 
     const gameMenu = ui.gameMenu;
     const settingsMenu = $("#settings-menu");
 
-    usernameField.val(game.console.getBuiltInCVar("cv_player_name"));
+    usernameField.val(GAME_CONSOLE.getBuiltInCVar("cv_player_name"));
 
     usernameField.on("input", function () {
         // Replace fancy quotes & dashes, so they don't get stripped out
 
-        game.console.setBuiltInCVar(
+        GAME_CONSOLE.setBuiltInCVar(
             "cv_player_name",
             this.value = this.value
                 .replace(/[\u201c\u201d\u201f]/g, '"')
@@ -804,7 +805,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
     serverSelect.on("change", () => {
         const value = serverSelect.val() as string | undefined;
         if (value !== undefined) {
-            game.console.setBuiltInCVar("cv_region", value);
+            GAME_CONSOLE.setBuiltInCVar("cv_region", value);
         }
     });
 
@@ -856,11 +857,11 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
 
     body.on("keydown", (e: JQuery.KeyDownEvent) => {
         if (e.key === "Escape") {
-            if (ui.canvas.hasClass("active") && !game.console.isOpen) {
+            if (ui.canvas.hasClass("active") && !GAME_CONSOLE.isOpen) {
                 gameMenu.fadeToggle(250);
                 settingsMenu.hide();
             }
-            game.console.isOpen = false;
+            GAME_CONSOLE.isOpen = false;
         }
     });
 
@@ -904,13 +905,13 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
 
     // Load crosshairs
     function loadCrosshair(): void {
-        const size = 20 * game.console.getBuiltInCVar("cv_crosshair_size");
+        const size = 20 * GAME_CONSOLE.getBuiltInCVar("cv_crosshair_size");
         const crosshair = getCrosshair(
-            game.console.getBuiltInCVar("cv_loadout_crosshair"),
-            game.console.getBuiltInCVar("cv_crosshair_color"),
+            GAME_CONSOLE.getBuiltInCVar("cv_loadout_crosshair"),
+            GAME_CONSOLE.getBuiltInCVar("cv_crosshair_color"),
             size,
-            game.console.getBuiltInCVar("cv_crosshair_stroke_color"),
-            game.console.getBuiltInCVar("cv_crosshair_stroke_size")
+            GAME_CONSOLE.getBuiltInCVar("cv_crosshair_stroke_color"),
+            GAME_CONSOLE.getBuiltInCVar("cv_crosshair_stroke_size")
         );
         const cursor = crosshair === "crosshair" ? crosshair : `url("${crosshair}") ${size / 2} ${size / 2}, crosshair`;
 
@@ -920,7 +921,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
             height: size
         });
 
-        crosshairControls.toggleClass("disabled", !Crosshairs[game.console.getBuiltInCVar("cv_loadout_crosshair")]);
+        crosshairControls.toggleClass("disabled", !Crosshairs[GAME_CONSOLE.getBuiltInCVar("cv_loadout_crosshair")]);
         crosshairTargets.css({ cursor });
     }
 
@@ -928,7 +929,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
 
     const crosshairCache: Array<JQuery<HTMLDivElement>> = [];
 
-    game.console.variables.addChangeListener(
+    GAME_CONSOLE.variables.addChangeListener(
         "cv_loadout_crosshair",
         (_, value) => {
             (crosshairCache[value] ??= $(`#crosshair-${value}`))
@@ -940,8 +941,8 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
         }
     );
 
-    const crosshairSize = game.console.getBuiltInCVar("cv_crosshair_size");
-    const currentCrosshair = game.console.getBuiltInCVar("cv_loadout_crosshair");
+    const crosshairSize = GAME_CONSOLE.getBuiltInCVar("cv_crosshair_size");
+    const currentCrosshair = GAME_CONSOLE.getBuiltInCVar("cv_loadout_crosshair");
 
     $<HTMLDivElement>("#crosshairs-list").append(
         Crosshairs.map((_, crosshairIndex) => {
@@ -965,7 +966,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
             });
 
             crosshairItem.on("click", () => {
-                game.console.setBuiltInCVar("cv_loadout_crosshair", crosshairIndex);
+                GAME_CONSOLE.setBuiltInCVar("cv_loadout_crosshair", crosshairIndex);
                 loadCrosshair();
                 crosshairItem.addClass("selected")
                     .siblings()
@@ -977,33 +978,33 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
     );
 
     // Load special tab
-    if (game.console.getBuiltInCVar("dv_role") !== "") {
+    if (GAME_CONSOLE.getBuiltInCVar("dv_role") !== "") {
         $("#tab-special").show();
 
         $<HTMLInputElement>("#role-name")
-            .val(game.console.getBuiltInCVar("dv_role"))
+            .val(GAME_CONSOLE.getBuiltInCVar("dv_role"))
             .on("input", e => {
-                game.console.setBuiltInCVar("dv_role", e.target.value);
+                GAME_CONSOLE.setBuiltInCVar("dv_role", e.target.value);
             });
 
         $<HTMLInputElement>("#role-password").on("input", e => {
-            game.console.setBuiltInCVar("dv_password", e.target.value);
+            GAME_CONSOLE.setBuiltInCVar("dv_password", e.target.value);
         });
 
         addCheckboxListener("#toggle-lobbyclearing", "dv_lobby_clearing");
 
-        if (game.console.getBuiltInCVar("dv_name_color") === "") game.console.setBuiltInCVar("dv_name_color", "#FFFFFF");
+        if (GAME_CONSOLE.getBuiltInCVar("dv_name_color") === "") GAME_CONSOLE.setBuiltInCVar("dv_name_color", "#FFFFFF");
 
         $<HTMLInputElement>("#namecolor-color-picker")
-            .val(game.console.getBuiltInCVar("dv_name_color"))
+            .val(GAME_CONSOLE.getBuiltInCVar("dv_name_color"))
             .on("input", e => {
-                game.console.setBuiltInCVar("dv_name_color", e.target.value);
+                GAME_CONSOLE.setBuiltInCVar("dv_name_color", e.target.value);
             });
 
         $<HTMLInputElement>("#weapon-preset")
-            .val(game.console.getBuiltInCVar("dv_weapon_preset"))
+            .val(GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset"))
             .on("input", e => {
-                game.console.setBuiltInCVar("dv_weapon_preset", e.target.value);
+                GAME_CONSOLE.setBuiltInCVar("dv_weapon_preset", e.target.value);
             });
     }
 
@@ -1029,12 +1030,12 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
 
             const value = +element.value;
             ignore = true;
-            game.console.setBuiltInCVar(settingName, value);
+            GAME_CONSOLE.setBuiltInCVar(settingName, value);
             ignore = false;
             callback?.(value);
         });
 
-        game.console.variables.addChangeListener(settingName, (game, newValue) => {
+        GAME_CONSOLE.variables.addChangeListener(settingName, (game, newValue) => {
             if (ignore) return;
 
             const casted = +newValue;
@@ -1047,7 +1048,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
             ignore = false;
         });
 
-        const value = game.console.getBuiltInCVar(settingName) as number;
+        const value = GAME_CONSOLE.getBuiltInCVar(settingName) as number;
         callback?.(value);
         element.value = value.toString();
     }
@@ -1065,18 +1066,18 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
 
         element.addEventListener("input", () => {
             const value = element.checked;
-            game.console.setBuiltInCVar(settingName, value);
+            GAME_CONSOLE.setBuiltInCVar(settingName, value);
             callback?.(value);
         });
 
-        game.console.variables.addChangeListener(settingName, (game, newValue) => {
+        GAME_CONSOLE.variables.addChangeListener(settingName, (game, newValue) => {
             const casted = !!newValue;
 
             callback?.(casted);
             element.checked = casted;
         });
 
-        element.checked = game.console.getBuiltInCVar(settingName) as boolean;
+        element.checked = GAME_CONSOLE.getBuiltInCVar(settingName) as boolean;
     }
 
     addSliderListener(
@@ -1099,11 +1100,11 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
     const crosshairColor = $<HTMLInputElement>("#crosshair-color-picker");
 
     crosshairColor.on("input", function () {
-        game.console.setBuiltInCVar("cv_crosshair_color", this.value);
+        GAME_CONSOLE.setBuiltInCVar("cv_crosshair_color", this.value);
         loadCrosshair();
     });
 
-    game.console.variables.addChangeListener(
+    GAME_CONSOLE.variables.addChangeListener(
         "cv_crosshair_color",
         (game, value) => {
             crosshairColor.val(value);
@@ -1113,11 +1114,11 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
     const crosshairStrokeColor = $<HTMLInputElement>("#crosshair-stroke-picker");
 
     crosshairStrokeColor.on("input", function () {
-        game.console.setBuiltInCVar("cv_crosshair_stroke_color", this.value);
+        GAME_CONSOLE.setBuiltInCVar("cv_crosshair_stroke_color", this.value);
         loadCrosshair();
     });
 
-    game.console.variables.addChangeListener(
+    GAME_CONSOLE.variables.addChangeListener(
         "cv_crosshair_stroke_color",
         (game, value) => {
             crosshairStrokeColor.val(value);
@@ -1202,7 +1203,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
         const debugReadout = game.uiManager.debugReadouts[prop];
 
         // toggleClass is sadly depreciated.
-        toggleClass(debugReadout, "hidden-prop", !game.console.getBuiltInCVar(`pf_show_${prop}`));
+        toggleClass(debugReadout, "hidden-prop", !GAME_CONSOLE.getBuiltInCVar(`pf_show_${prop}`));
 
         addCheckboxListener(
             `#toggle-${prop}`,
@@ -1218,15 +1219,15 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
         const element = $<HTMLInputElement>("#toggle-text-kill-feed")[0];
 
         element.addEventListener("input", () => {
-            game.console.setBuiltInCVar("cv_killfeed_style", element.checked ? "text" : "icon");
+            GAME_CONSOLE.setBuiltInCVar("cv_killfeed_style", element.checked ? "text" : "icon");
         });
 
-        game.console.variables.addChangeListener("cv_killfeed_style", (game, value) => {
+        GAME_CONSOLE.variables.addChangeListener("cv_killfeed_style", (game, value) => {
             element.checked = value === "text";
             game.uiManager.updateWeaponSlots();
         });
 
-        element.checked = game.console.getBuiltInCVar("cv_killfeed_style") === "text";
+        element.checked = GAME_CONSOLE.getBuiltInCVar("cv_killfeed_style") === "text";
     }
 
     // Weapon slot style toggle
@@ -1234,25 +1235,25 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
         const element = $<HTMLInputElement>("#toggle-colored-slots")[0];
 
         element.addEventListener("input", () => {
-            game.console.setBuiltInCVar("cv_weapon_slot_style", element.checked ? "colored" : "simple");
+            GAME_CONSOLE.setBuiltInCVar("cv_weapon_slot_style", element.checked ? "colored" : "simple");
             game.uiManager.updateWeaponSlots();
         });
 
-        game.console.variables.addChangeListener("cv_weapon_slot_style", (game, value) => {
+        GAME_CONSOLE.variables.addChangeListener("cv_weapon_slot_style", (game, value) => {
             console.trace();
             element.checked = value === "colored";
             game.uiManager.updateWeaponSlots();
         });
 
-        element.checked = game.console.getBuiltInCVar("cv_weapon_slot_style") === "colored";
+        element.checked = GAME_CONSOLE.getBuiltInCVar("cv_weapon_slot_style") === "colored";
     }
 
     // render mode select menu
     const renderSelect = $<HTMLSelectElement>("#render-mode-select")[0];
     renderSelect.addEventListener("input", () => {
-        game.console.setBuiltInCVar("cv_renderer", renderSelect.value as unknown as "webgl1" | "webgl2" | "webgpu");
+        GAME_CONSOLE.setBuiltInCVar("cv_renderer", renderSelect.value as unknown as "webgl1" | "webgl2" | "webgpu");
     });
-    renderSelect.value = game.console.getBuiltInCVar("cv_renderer");
+    renderSelect.value = GAME_CONSOLE.getBuiltInCVar("cv_renderer");
 
     void (async () => {
         $("#webgpu-option").toggle(await isWebGPUSupported());
@@ -1261,16 +1262,16 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
     // render resolution select menu
     const renderResSelect = $<HTMLSelectElement>("#render-res-select")[0];
     renderResSelect.addEventListener("input", () => {
-        game.console.setBuiltInCVar("cv_renderer_res", renderResSelect.value as unknown as "auto" | "0.5" | "1" | "2" | "3");
+        GAME_CONSOLE.setBuiltInCVar("cv_renderer_res", renderResSelect.value as unknown as "auto" | "0.5" | "1" | "2" | "3");
     });
-    renderResSelect.value = game.console.getBuiltInCVar("cv_renderer_res");
+    renderResSelect.value = GAME_CONSOLE.getBuiltInCVar("cv_renderer_res");
 
     // High resolution toggle
     $("#toggle-high-res").parent().parent().toggle(!inputManager.isMobile);
     addCheckboxListener("#toggle-high-res", "cv_high_res_textures");
     addCheckboxListener("#toggle-cooler-graphics", "cv_cooler_graphics");
 
-    game.console.variables.addChangeListener(
+    GAME_CONSOLE.variables.addChangeListener(
         "cv_cooler_graphics",
         (_, newVal, oldVal) => {
             if (newVal !== oldVal && !newVal) {
@@ -1294,11 +1295,11 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
 
     const { gameUi } = game.uiManager.ui;
 
-    game.console.variables.addChangeListener(
+    GAME_CONSOLE.variables.addChangeListener(
         "cv_draw_hud",
         (_, newVal) => {
             gameUi.toggle(newVal);
-            game.map.visible = !game.console.getBuiltInCVar("cv_minimap_minimized") && newVal;
+            game.map.visible = !GAME_CONSOLE.getBuiltInCVar("cv_minimap_minimized") && newVal;
         }
     );
     addCheckboxListener("#toggle-draw-hud", "cv_draw_hud");
@@ -1321,7 +1322,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
     addCheckboxListener("#toggle-high-res-mobile", "mb_high_res_textures");
 
     function updateUiScale(): void {
-        const scale = game.console.getBuiltInCVar("cv_ui_scale");
+        const scale = GAME_CONSOLE.getBuiltInCVar("cv_ui_scale");
 
         gameUi.width(window.innerWidth / scale);
         gameUi.height(window.innerHeight / scale);
@@ -1342,7 +1343,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
     // TODO: fix joysticks on mobile when UI scale is not 1
     if (inputManager.isMobile) {
         $("#ui-scale-container").hide();
-        game.console.setBuiltInCVar("cv_ui_scale", 1);
+        GAME_CONSOLE.setBuiltInCVar("cv_ui_scale", 1);
     }
 
     // Minimap stuff
@@ -1368,7 +1369,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
         }
     );
 
-    game.console.variables.addChangeListener(
+    GAME_CONSOLE.variables.addChangeListener(
         "cv_map_expanded",
         (_, newValue) => {
             game.map.expanded = newValue;
@@ -1387,7 +1388,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
             splashUi.toggleClass("blur", value);
         }
     );
-    splashUi.toggleClass("blur", game.console.getBuiltInCVar("cv_blur_splash"));
+    splashUi.toggleClass("blur", GAME_CONSOLE.getBuiltInCVar("cv_blur_splash"));
 
     const button = $<HTMLButtonElement>("#btn-rules, #rules-close-btn");
     // Hide rules button
@@ -1398,19 +1399,19 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
             button.toggle(!value);
         }
     );
-    button.toggle(!game.console.getBuiltInCVar("cv_hide_rules_button"));
+    button.toggle(!GAME_CONSOLE.getBuiltInCVar("cv_hide_rules_button"));
 
     // Hide option to hide rules if rules haven't been acknowledged
-    $(".checkbox-setting").has("#toggle-hide-rules").toggle(game.console.getBuiltInCVar("cv_rules_acknowledged"));
+    $(".checkbox-setting").has("#toggle-hide-rules").toggle(GAME_CONSOLE.getBuiltInCVar("cv_rules_acknowledged"));
 
     const rules = $<HTMLButtonElement>("#btn-rules, #rules-close-btn");
     const toggleHideRules = $<HTMLInputElement>("#toggle-hide-rules");
 
     $("#rules-close-btn").on("click", () => {
         rules.hide();
-        game.console.setBuiltInCVar("cv_hide_rules_button", true);
+        GAME_CONSOLE.setBuiltInCVar("cv_hide_rules_button", true);
         toggleHideRules.prop("checked", true);
-    }).toggle(game.console.getBuiltInCVar("cv_rules_acknowledged") && !game.console.getBuiltInCVar("cv_hide_rules_button"));
+    }).toggle(GAME_CONSOLE.getBuiltInCVar("cv_rules_acknowledged") && !GAME_CONSOLE.getBuiltInCVar("cv_hide_rules_button"));
 
     // Import settings
     $("#import-settings-btn").on("click", () => {
@@ -1789,7 +1790,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
         ui.interactKey.html('<img src="./img/misc/tap-icon.svg" alt="Tap">');
 
         // Active weapon ammo button reloads
-        ui.activeAmmo.on("click", () => game.console.handleQuery("reload", "never"));
+        ui.activeAmmo.on("click", () => GAME_CONSOLE.handleQuery("reload", "never"));
 
         // Emote button & wheel
         ui.emoteWheel
@@ -1874,7 +1875,7 @@ export async function setUpUI(game: Game, account: Account): Promise<void> {
 
     // Prompt when trying to close the tab while playing
     window.addEventListener("beforeunload", (e: Event) => {
-        if (ui.canvas.hasClass("active") && game.console.getBuiltInCVar("cv_leave_warning") && !game.gameOver) {
+        if (ui.canvas.hasClass("active") && GAME_CONSOLE.getBuiltInCVar("cv_leave_warning") && !game.gameOver) {
             e.preventDefault();
         }
     });

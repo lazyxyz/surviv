@@ -18,6 +18,7 @@ import { getColors } from "../constants";
 import { sanitizeHTML, stringify } from "../misc";
 import { type PossibleError, type Stringable } from "./gameConsole";
 import { Casters, ConVar } from "./variables";
+import { GAME_CONSOLE } from "../../..";
 
 export type CommandExecutor<ErrorType> = (
     this: Game,
@@ -170,10 +171,10 @@ export class Command<
             });
         }
 
-        if (game.console.commands.has(this._name)) {
+        if (GAME_CONSOLE.commands.has(this._name)) {
             console.warn(`Overwriting command '${this._name}'`);
         }
-        game.console.commands.set(this._name, this);
+        GAME_CONSOLE.commands.set(this._name, this);
     }
 
     toString(): string {
@@ -182,7 +183,7 @@ export class Command<
 }
 
 export function setUpCommands(game: Game): void {
-    const gameConsole = game.console;
+    const gameConsole = GAME_CONSOLE;
     const keybinds = game.inputManager.binds;
 
     const createMovementCommand = (
@@ -744,13 +745,13 @@ export function setUpCommands(game: Game): void {
         "emote_wheel",
         function() {
             if (
-                game.console.getBuiltInCVar("cv_hide_emotes")
+                GAME_CONSOLE.getBuiltInCVar("cv_hide_emotes")
                 || this.gameOver
                 || this.inputManager.emoteWheelActive
             ) return;
             const { mouseX, mouseY } = this.inputManager;
 
-            const scale = this.console.getBuiltInCVar("cv_ui_scale");
+            const scale = GAME_CONSOLE.getBuiltInCVar("cv_ui_scale");
 
             if (!this.inputManager.pingWheelMinimap) {
                 this.inputManager.pingWheelPosition = Vec.clone(this.inputManager.gameMousePosition);
@@ -1815,12 +1816,12 @@ export function setUpCommands(game: Game): void {
             };
 
             if (handleResult(Casters.toBoolean(raw ?? "false"), () => false)) {
-                game.console.log.raw(
+                GAME_CONSOLE.log.raw(
                     JSON.stringify(data, null, 2)
                         .replace(/\n| /g, r => ({ "\n": "<br>", " ": "&nbsp;" }[r] ?? ""))
                 );
             } else {
-                game.console.log.raw(
+                GAME_CONSOLE.log.raw(
                     (function construct(obj: Record<string, unknown>): string {
                         let retVal = "<ul>";
 

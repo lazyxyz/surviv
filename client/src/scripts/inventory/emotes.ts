@@ -7,6 +7,7 @@ import type { ReferenceTo } from "@common/utils/objectDefinitions";
 import type { TranslationKeys } from "../../typings/translations";
 import { InventoryCache } from '.';
 import { Account, SurvivAssets } from '../account';
+import { GAME_CONSOLE } from '../..';
 
 export async function showEmotes(game: Game, account: Account) {
     if (!account.address) {
@@ -32,12 +33,12 @@ export async function showEmotes(game: Game, account: Account) {
         const emote = $(`#emote-wheel-bottom .emote-${slot} .fa-xmark`);
 
         emote.on("click", () => {
-            game.console.setBuiltInCVar(cvar, "");
+            GAME_CONSOLE.setBuiltInCVar(cvar, "");
             emoteSlot.css("background-image", "none");
             emote.hide();
         });
 
-        if (!game.console.getBuiltInCVar(cvar)) emote.hide();
+        if (!GAME_CONSOLE.getBuiltInCVar(cvar)) emote.hide();
     }
 
     handleEmote("win");
@@ -95,7 +96,7 @@ export async function showEmotes(game: Game, account: Account) {
                             bottomEmoteUiCache[cvarName] ??= $((`#emote-wheel-bottom .emote-${cvarName} .fa-xmark` as const))
                         ).show();
 
-                        game.console.setBuiltInCVar(`cv_loadout_${cvarName}_emote`, emote.idString);
+                        GAME_CONSOLE.setBuiltInCVar(`cv_loadout_${cvarName}_emote`, emote.idString);
 
                         emoteItem.addClass("selected")
                             .siblings()
@@ -128,9 +129,9 @@ export async function showEmotes(game: Game, account: Account) {
 
     for (const slot of EMOTE_SLOTS) {
         const cvar = `cv_loadout_${slot}_emote` as const;
-        const emote = game.console.getBuiltInCVar(cvar);
+        const emote = GAME_CONSOLE.getBuiltInCVar(cvar);
 
-        game.console.variables.addChangeListener(cvar, (_, newEmote) => {
+        GAME_CONSOLE.variables.addChangeListener(cvar, (_, newEmote) => {
             changeEmoteSlotImage(slot, newEmote);
         });
 
@@ -154,13 +155,13 @@ export async function showEmotes(game: Game, account: Account) {
             (emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)).addClass("selected");
             $(`.emotes-list-item-container`).removeClass("selected").css(
                 "cursor",
-                userEmotes.includes(game.console.getBuiltInCVar(cvar) || "none") ? "pointer" : "not-allowed"
+                userEmotes.includes(GAME_CONSOLE.getBuiltInCVar(cvar) || "none") ? "pointer" : "not-allowed"
             );
-            $(`#emote-${game.console.getBuiltInCVar(cvar) || "none"}`).addClass("selected");
+            $(`#emote-${GAME_CONSOLE.getBuiltInCVar(cvar) || "none"}`).addClass("selected");
         });
 
         (emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)).children(".remove-emote-btn").on("click", () => {
-            game.console.setBuiltInCVar(cvar, "");
+            GAME_CONSOLE.setBuiltInCVar(cvar, "");
             (emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)).css("background-image", "none");
         });
     }

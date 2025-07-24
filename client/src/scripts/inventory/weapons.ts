@@ -4,6 +4,7 @@ import { Guns } from "@common/definitions/guns";
 import { Account, SurvivAssets } from "../account";
 import type { Game } from "../game";
 import { InventoryCache } from ".";
+import { GAME_CONSOLE } from "../..";
 
 // Constants for repeated strings
 const ASSET_PATH = "./img/game/shared";
@@ -20,9 +21,9 @@ interface AssetConfig {
 
 
 const selectWeapon = (game: Game, value: object) => {
-  const weaponPreset = game.console.getBuiltInCVar("dv_weapon_preset");
+  const weaponPreset = GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset");
 
-  game.console.setBuiltInCVar("dv_weapon_preset", JSON.stringify({
+  GAME_CONSOLE.setBuiltInCVar("dv_weapon_preset", JSON.stringify({
     ...(weaponPreset?.startsWith("{") ? JSON.parse(weaponPreset) : undefined),
     ...value
   }));
@@ -77,7 +78,7 @@ const showViewBox = (game: Game) => {
   const meleeId = localStorage.getItem("selectedMelee");
   const gunId = localStorage.getItem("selectedGun");
 
-  const currentSkin = game.console.getBuiltInCVar("cv_loadout_skin");
+  const currentSkin = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
   const melee = Melees.definitions.find((w) => w.idString === meleeId);
   if (!melee) {
     console.warn(`Melee not found: ${meleeId}`);
@@ -410,7 +411,7 @@ export async function showWeapons(game: Game, account: Account, highlightId?: st
   // Get weapon preset
   let weaponPreset: { melee?: string; gun?: string } = {};
   try {
-    const presetString = game.console.getBuiltInCVar("dv_weapon_preset");
+    const presetString = GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset");
     if (presetString) {
       weaponPreset = JSON.parse(presetString);
     }

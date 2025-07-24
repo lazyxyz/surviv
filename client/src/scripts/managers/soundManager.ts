@@ -7,6 +7,7 @@ import { /* , SOUND_FILTER_FOR_LAYERS */ } from "../utils/constants";
 // add a namespace to pixi sound imports because it has annoying generic names like "sound" and "filters" without a namespace
 import * as PixiSound from "@pixi/sound";
 import { getRandomMode, Modes } from "@common/definitions/modes";
+import { GAME_CONSOLE } from "../..";
 
 export interface SoundOptions {
     position?: Vector
@@ -153,9 +154,8 @@ export class SoundManager {
             throw new Error("Class 'SoundManager' has already been instantiated");
         }
         SoundManager._instantiated = true;
-
-        this.sfxVolume = game.console.getBuiltInCVar("cv_sfx_volume");
-        this.ambienceVolume = game.console.getBuiltInCVar("cv_ambience_volume");
+        this.sfxVolume = GAME_CONSOLE.getBuiltInCVar("cv_sfx_volume");
+        this.ambienceVolume = GAME_CONSOLE.getBuiltInCVar("cv_ambience_volume");
         this.loadSounds();
     }
 

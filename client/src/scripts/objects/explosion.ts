@@ -8,6 +8,7 @@ import { Vec, type Vector } from "@common/utils/vector";
 import { type Game } from "../game";
 import { SHOCKWAVE_EXPLOSION_MULTIPLIERS } from "../utils/constants";
 import { SuroiSprite, toPixiCoords } from "../utils/pixi";
+import { GAME_CONSOLE } from "../..";
 
 export function explosion(game: Game, definition: ExplosionDefinition, position: Vector, layer: Layer): void {
     const pixiPos = toPixiCoords(position);
@@ -61,7 +62,7 @@ export function explosion(game: Game, definition: ExplosionDefinition, position:
     }
 
     game.camera.shake(definition.cameraShake.duration, !isOnSameLayer ? (definition.cameraShake.intensity / 2) : definition.cameraShake.intensity);
-    if (game.console.getBuiltInCVar("cv_cooler_graphics") && isOnSameLayer) {
+    if (GAME_CONSOLE.getBuiltInCVar("cv_cooler_graphics") && isOnSameLayer) {
         game.camera.shockwave(
             definition.cameraShake.duration * SHOCKWAVE_EXPLOSION_MULTIPLIERS.time,
             pixiPos,
@@ -71,7 +72,7 @@ export function explosion(game: Game, definition: ExplosionDefinition, position:
         );
     }
 
-    if (game.console.getBuiltInCVar("mb_haptics")) {
+    if (GAME_CONSOLE.getBuiltInCVar("mb_haptics")) {
         navigator.vibrate(
             definition.animation.duration * 0.75
         );

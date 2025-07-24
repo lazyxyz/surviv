@@ -29,6 +29,7 @@ import { ClientPerkManager } from "./perkManager";
 import type { RewardsData } from "@common/packets/rewardsPacket";
 import { getBadgeImage } from "../inventory/badges";
 import { Modes } from "@common/definitions/modes";
+import { GAME_CONSOLE } from "../..";
 
 function safeRound(value: number): number {
     if (0 < value && value <= 1) return 1;
@@ -90,7 +91,7 @@ export class UIManager {
 
         if (!player) {
             console.warn(`Unknown player name with id ${id}`);
-        } else if (this.game.console.getBuiltInCVar("cv_anonymize_player_names")) {
+        } else if (GAME_CONSOLE.getBuiltInCVar("cv_anonymize_player_names")) {
             name = `${GameConstants.player.defaultName}_${id}`;
         } else {
             name = player.name;
@@ -110,7 +111,7 @@ export class UIManager {
 
         const name = this.getRawPlayerName(id);
 
-        if (player && player.hasColor && !this.game.console.getBuiltInCVar("cv_anonymize_player_names")) {
+        if (player && player.hasColor && !GAME_CONSOLE.getBuiltInCVar("cv_anonymize_player_names")) {
             element.css("color", player.nameColor?.toHex() ?? "");
         }
 
@@ -122,7 +123,7 @@ export class UIManager {
         // Badge
         let playerBadge = "";
 
-        if (!this.game.console.getBuiltInCVar("cv_anonymize_player_names")) {
+        if (!GAME_CONSOLE.getBuiltInCVar("cv_anonymize_player_names")) {
             if (player !== undefined) {
                 playerBadge = player.badge
                     ? html`<img class="badge-icon" src="${getBadgeImage(player.badge.idString)}" badge">`
@@ -913,7 +914,7 @@ export class UIManager {
                 if (!hadItem) container.addClass(ClassNames.HasItem);
                 if (activityChanged) container.toggleClass(ClassNames.IsActive, isActive);
 
-                container.css(isGun && this.game.console.getBuiltInCVar("cv_weapon_slot_style") === "colored"
+                container.css(isGun && GAME_CONSOLE.getBuiltInCVar("cv_weapon_slot_style") === "colored"
                     ? {
                         "outline-color": `hsl(${color.hue}, ${color.saturation}%, ${(color.lightness + 50) / 3}%)`,
                         "background-color": `hsla(${color.hue}, ${color.saturation}%, ${color.lightness / 2}%, 50%)`,
@@ -953,7 +954,7 @@ export class UIManager {
                     = isFists
                         ? this.skinID !== undefined && Skins.fromStringSafe(this.skinID)?.grassTint
                             ? `url("data:image/svg+xml,${encodeURIComponent(`<svg width="34" height="34" viewBox="0 0 8.996 8.996" xmlns="http://www.w3.org/2000/svg"><circle fill="${getGhillieTint(this.game.gameMode).toHex()}" stroke="${new Color(getGhillieTint(this.game.gameMode)).multiply("#111").toHex()}" stroke-width="1.05833" cx="4.498" cy="4.498" r="3.969"/></svg>`)}")`
-                            : `url(./img/game/shared/skins/${this.skinID ?? this.game.console.getBuiltInCVar("cv_loadout_skin")}_fist.svg)`
+                            : `url(./img/game/shared/skins/${this.skinID ?? GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin")}_fist.svg)`
                         : "none";
 
                 itemImage
@@ -1329,9 +1330,9 @@ export class UIManager {
                 const killstreak = "killstreak" in message ? message.killstreak : undefined;
                 const hasKillstreak = !!killstreak;
 
-                const language = this.game.console.getBuiltInCVar("cv_language");
+                const language = GAME_CONSOLE.getBuiltInCVar("cv_language");
 
-                switch (this.game.console.getBuiltInCVar("cv_killfeed_style")) {
+                switch (GAME_CONSOLE.getBuiltInCVar("cv_killfeed_style")) {
                     case "text": {
                         let killMessage = "";
 
@@ -1697,7 +1698,7 @@ export class UIManager {
         }
 
         // Disable spaces in chinese languages.
-        if (TRANSLATIONS.translations[(this.game.console.getBuiltInCVar("cv_language"))].no_space) {
+        if (TRANSLATIONS.translations[(GAME_CONSOLE.getBuiltInCVar("cv_language"))].no_space) {
             classes.push("no-spaces");
         }
 

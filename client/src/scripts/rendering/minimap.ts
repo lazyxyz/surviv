@@ -13,6 +13,7 @@ import { type Game } from "../game";
 import { getColors, DIFF_LAYER_HITBOX_OPACITY, FOOTSTEP_HITBOX_LAYER, HITBOX_DEBUG_MODE, PIXI_SCALE, TEAMMATE_COLORS } from "../utils/constants";
 import { SuroiSprite, drawGroundGraphics, drawHitbox, toPixiCoords } from "../utils/pixi";
 import { GasRender } from "./gas";
+import { GAME_CONSOLE } from "../..";
 
 export class Minimap {
     private _expanded = false;
@@ -543,7 +544,7 @@ export class Minimap {
 
     resize(): void {
         this._border.visible = this._expanded;
-        const uiScale = this.game.console.getBuiltInCVar("cv_ui_scale");
+        const uiScale = GAME_CONSOLE.getBuiltInCVar("cv_ui_scale");
 
         if (this.game.spectating) {
             this.game.uiManager.ui.spectatingContainer.toggle(this.game.uiManager.ui.spectatingOptions.hasClass("fa-eye-slash"));
@@ -692,7 +693,7 @@ export class Minimap {
     }
 
     updateTransparency(): void {
-        this.container.alpha = this.game.console.getBuiltInCVar(
+        this.container.alpha = GAME_CONSOLE.getBuiltInCVar(
             this._expanded
                 ? "cv_map_transparency"
                 : "cv_minimap_transparency"

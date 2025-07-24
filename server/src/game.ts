@@ -252,9 +252,10 @@ export class Game implements GameData {
         this.port = port;
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
-        this.gameMode = this.getRandomMode();
+        // this.gameMode = this.getRandomMode();
         // this.gameMode = "halloween";
-        // this.gameMode = "winter";
+        // this.gameMode = "fall";
+        this.gameMode = "winter";
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
         this.updateGameData({
             aliveCount: 0,
@@ -1435,20 +1436,20 @@ export class Game implements GameData {
                     }
 
                     let emotes: readonly (EmoteDefinition | undefined)[] = [];
-                    await verifyEmotes(data.address, data.emotes.split(','), 2000).then((validEmotes) => {
-                        emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
-                    }).catch(err => {
-                        console.log("Verify melee failed: ", err);
-                        emotes = EMOTE_SLOTS.map(slot => undefined);
-                    })
+                    // await verifyEmotes(data.address, data.emotes.split(','), 2000).then((validEmotes) => {
+                    //     emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
+                    // }).catch(err => {
+                    //     console.log("Verify melee failed: ", err);
+                    //     emotes = EMOTE_SLOTS.map(slot => undefined);
+                    // })
 
                     // Verify Skin
                     let skin = Skins.fromStringSafe(DEFAULT_SKIN); // Default skins
-                    await verifySkin(data.address, data.skin, 2000).then((isValid) => {
-                        if (isValid) skin = Skins.fromStringSafe(data.skin);
-                    }).catch(err => {
-                        console.log("Verify skin failed: ", err);
-                    })
+                    // await verifySkin(data.address, data.skin, 2000).then((isValid) => {
+                    //     if (isValid) skin = Skins.fromStringSafe(data.skin);
+                    // }).catch(err => {
+                    //     console.log("Verify skin failed: ", err);
+                    // })
 
                     // Verify Melee
                     let melee = undefined;
@@ -1460,11 +1461,11 @@ export class Game implements GameData {
 
                     // Verify Gun
                     let gun = undefined;
-                    await verifyGun(data.address, data.gun, 2000).then((isValid) => {
-                        if (isValid) gun = Guns.fromStringSafe(data.gun);
-                    }).catch(err => {
-                        console.log("Verify gun failed: ", err);
-                    })
+                    // await verifyGun(data.address, data.gun, 2000).then((isValid) => {
+                    //     if (isValid) gun = Guns.fromStringSafe(data.gun);
+                    // }).catch(err => {
+                    //     console.log("Verify gun failed: ", err);
+                    // })
 
                     const stream = new PacketStream(new ArrayBuffer(128));
                     stream.serializeServerPacket(

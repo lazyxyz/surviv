@@ -35,6 +35,7 @@ import { Obstacle } from "./obstacle";
 import { type Particle, type ParticleEmitter } from "./particles";
 import type { AllowedEmoteSources } from "@common/packets/inputPacket";
 import { getBadgeImage } from "../inventory/badges";
+import { GAME_CONSOLE } from "../..";
 
 export class Player extends GameObject.derive(ObjectCategory.Player) {
     teamID!: number;
@@ -385,7 +386,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
         this.rotation = data.rotation;
 
-        const noMovementSmoothing = !game.console.getBuiltInCVar("cv_movement_smoothing");
+        const noMovementSmoothing = !GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing");
 
         if (noMovementSmoothing || isNew) this.container.rotation = this.rotation;
 
@@ -395,7 +396,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
             if (noMovementSmoothing) game.camera.position = toPixiCoords(this.position);
 
-            if (game.console.getBuiltInCVar("pf_show_pos")) {
+            if (GAME_CONSOLE.getBuiltInCVar("pf_show_pos")) {
                 uiManager.debugReadouts.pos.text(
                     `X: ${this.position.x.toFixed(2)} Y: ${this.position.y.toFixed(2)} Z: ${this.layer}`
                 );
@@ -489,7 +490,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             }
         }
 
-        if (isNew || !game.console.getBuiltInCVar("cv_movement_smoothing")) {
+        if (isNew || !GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing")) {
             this.container.position.copyFrom(toPixiCoords(this.position));
             this.disguiseContainer.position.copyFrom(toPixiCoords(this.position));
             this.emote.container.position.copyFrom(Vec.add(toPixiCoords(this.position), Vec.create(0, -175)));
@@ -544,7 +545,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
             // Blood particles on death (cooler graphics only)
             if (
-                game.console.getBuiltInCVar("cv_cooler_graphics")
+                GAME_CONSOLE.getBuiltInCVar("cv_cooler_graphics")
                 && !isNew
                 && !this.dead
                 && dead
@@ -1654,7 +1655,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     yoyo: true
                 });
 
-                if (weaponDef.gasParticles && this.game.console.getBuiltInCVar("cv_cooler_graphics")) {
+                if (weaponDef.gasParticles && GAME_CONSOLE.getBuiltInCVar("cv_cooler_graphics")) {
                     const gas = weaponDef.gasParticles;
                     const halfSpread = 0.5 * gas.spread;
 
@@ -2002,7 +2003,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             speed: Vec.fromPolar(angle, randomFloat(0.5, 1))
         });
 
-        if (this.game.console.getBuiltInCVar("cv_cooler_graphics") && !this.downed) {
+        if (GAME_CONSOLE.getBuiltInCVar("cv_cooler_graphics") && !this.downed) {
             const isOnWater = this.floorType === FloorNames.Water;
             this._bloodDecals.add(
                 this.game.particleManager.spawnParticle({

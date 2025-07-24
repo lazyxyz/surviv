@@ -16,6 +16,7 @@ import { defaultBinds } from "../utils/console/defaultClientCVars";
 import { type GameSettings, type PossibleError } from "../utils/console/gameConsole";
 import { FORCE_MOBILE, PIXI_SCALE } from "../utils/constants";
 import { html } from "../utils/misc";
+import { GAME_CONSOLE } from "../..";
 
 export class InputManager {
     readonly binds = new InputMapper();
@@ -178,7 +179,7 @@ export class InputManager {
     private mWheelStopTimer: number | undefined;
     setupInputs(): void {
         // @ts-expect-error init code
-        this.isMobile = (isMobile.any && this.game.console.getBuiltInCVar("mb_controls_enabled")) || FORCE_MOBILE;
+        this.isMobile = (isMobile.any && GAME_CONSOLE.getBuiltInCVar("mb_controls_enabled")) || FORCE_MOBILE;
 
         const game = this.game;
         const gameContainer = $("#game")[0];
@@ -260,7 +261,7 @@ export class InputManager {
                 this.gameMousePosition = Vec.scale(pixiPos, 1 / PIXI_SCALE);
                 this.distanceToMouse = Geometry.distance(game.activePlayer.position, this.gameMousePosition);
 
-                if (game.console.getBuiltInCVar("cv_responsive_rotation")) {
+                if (GAME_CONSOLE.getBuiltInCVar("cv_responsive_rotation")) {
                     game.activePlayer.container.rotation = this.rotation;
                 }
             }
@@ -270,8 +271,8 @@ export class InputManager {
 
         // Mobile joysticks
         if (this.isMobile) {
-            const size = game.console.getBuiltInCVar("mb_joystick_size");
-            const transparency = game.console.getBuiltInCVar("mb_joystick_transparency");
+            const size = GAME_CONSOLE.getBuiltInCVar("mb_joystick_size");
+            const transparency = GAME_CONSOLE.getBuiltInCVar("mb_joystick_transparency");
 
             const leftJoyStick = nipplejs.create({
                 zone: $("#left-joystick-container")[0],
@@ -297,7 +298,7 @@ export class InputManager {
                 if (!rightJoyStickUsed && !shootOnRelease) {
                     this.rotation = movementAngle;
                     this.turning = true;
-                    if (game.console.getBuiltInCVar("cv_responsive_rotation") && !game.gameOver && game.activePlayer) {
+                    if (GAME_CONSOLE.getBuiltInCVar("cv_responsive_rotation") && !game.gameOver && game.activePlayer) {
                         game.activePlayer.container.rotation = this.rotation;
                     }
                 }
@@ -312,7 +313,7 @@ export class InputManager {
                 this.rotation = -Math.atan2(data.vector.y, data.vector.x);
                 this.turning = true;
                 const activePlayer = game.activePlayer;
-                if (game.console.getBuiltInCVar("cv_responsive_rotation") && !game.gameOver && activePlayer) {
+                if (GAME_CONSOLE.getBuiltInCVar("cv_responsive_rotation") && !game.gameOver && activePlayer) {
                     game.activePlayer.container.rotation = this.rotation;
                 }
 
@@ -322,7 +323,7 @@ export class InputManager {
 
                 activePlayer.images.aimTrail.alpha = 1;
 
-                const attacking = data.distance > game.console.getBuiltInCVar("mb_joystick_size") / 3;
+                const attacking = data.distance > GAME_CONSOLE.getBuiltInCVar("mb_joystick_size") / 3;
                 if (
                     (def.itemType === ItemType.Throwable && this.attacking)
                     || (def.itemType === ItemType.Gun && def.shootOnRelease)
@@ -343,7 +344,7 @@ export class InputManager {
             });
         }
         // Gyro stuff
-        const gyroAngle = game.console.getBuiltInCVar("mb_gyro_angle");
+        const gyroAngle = GAME_CONSOLE.getBuiltInCVar("mb_gyro_angle");
         if (gyroAngle > 0) {
             const inv = this.game.uiManager.inventory;
             const swap = (x: number): void => {
@@ -500,7 +501,7 @@ export class InputManager {
             }
 
             if (typeof query === "string") {
-                const { compiled } = this.game.console.handleQuery(query, "always");
+                const { compiled } = GAME_CONSOLE.handleQuery(query, "always");
 
                 if (compiled !== undefined) {
                     this.binds.overrideWithCompiled(input, query, compiled);
@@ -567,7 +568,7 @@ export class InputManager {
         let iterationCount = 0;
         // Prevent possible infinite loops
         while (iterationCount++ < 100) {
-            searchIndex = this.game.console.getBuiltInCVar("cv_loop_scope_selection")
+            searchIndex = GAME_CONSOLE.getBuiltInCVar("cv_loop_scope_selection")
                 ? Numeric.absMod(searchIndex + offset, Scopes.definitions.length)
                 : Numeric.clamp(searchIndex + offset, 0, Scopes.definitions.length - 1);
 
@@ -684,7 +685,7 @@ export class InputManager {
                             this.binds.addActionsToInput(key, action);
                         }
 
-                        this.game.console.writeToLocalStorage();
+                        GAME_CONSOLE.writeToLocalStorage();
                         this.generateBindsConfigScreen();
                     }
                 };
@@ -718,7 +719,7 @@ export class InputManager {
             }
 
             this.generateBindsConfigScreen();
-            this.game.console.writeToLocalStorage();
+            GAME_CONSOLE.writeToLocalStorage();
         })).appendTo(this._keybindsContainer);
 
         // Change the weapons slots keybind text
