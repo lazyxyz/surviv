@@ -82,7 +82,7 @@ export class Zombie extends Player {
             if (obj instanceof Gamer && !obj.dead) {
                 if (Vec.length(Vec.sub(obj.position, this.position)) < Zombie.CHASE_DISTANCE) {
                     // Chase nearest player
-                    this.attackNearestPlayer();
+                    this.attackNearestPlayer(obj);
                     return;
                 }
             }
@@ -92,13 +92,11 @@ export class Zombie extends Player {
         this.wanderOrIdle();
     }
 
-    private attackNearestPlayer(): void {
-        const nearestPlayer = this.findNearestObject<Gamer>(Gamer);
-
-        if (nearestPlayer) {
+    private attackNearestPlayer(player: Gamer): void {
+        if (player) {
             // Attack nearest player with melee
             this.baseSpeed = Zombie.BASE_SPEED;
-            this.moveToTarget2(nearestPlayer.position, Zombie.SAFE_DISTANCE_FROM_PLAYER, !this.attacking);
+            this.moveToTarget(player.position, Zombie.SAFE_DISTANCE_FROM_PLAYER, !this.attacking);
         }
     }
 
@@ -125,12 +123,12 @@ export class Zombie extends Player {
             this.moveTimer = 0;
             this.currentMoveDuration = this.getRandomMoveDuration();
             this.baseSpeed = Zombie.WANDER_SPEED;
-            this.moveToTarget2(this.wanderTarget, 0, false);
+            this.moveToTarget(this.wanderTarget, 0, false);
         } else {
             // Continue moving to current wander target
             if (this.wanderTarget) {
                 this.baseSpeed = Zombie.WANDER_SPEED;
-                this.moveToTarget2(this.wanderTarget, 0, false);
+                this.moveToTarget(this.wanderTarget, 0, false);
             } else {
                 // Fallback to idling if no target
                 this.idle();
@@ -170,7 +168,7 @@ export class Zombie extends Player {
     /**
      * Generic function to move towards a target position while rotating appropriately.
      */
-    private moveToTarget2(targetPosition: Vector, safeDistance: number, isAttacking: boolean): void {
+    private moveToTarget(targetPosition: Vector, safeDistance: number, isAttacking: boolean): void {
         const directionToTarget = Vec.normalize(Vec.sub(targetPosition, this.position));
         const distanceToTarget = Vec.length(Vec.sub(targetPosition, this.position));
 
@@ -202,25 +200,5 @@ export class Zombie extends Player {
 
         // Process movement input
         this.processInputs(packet);
-    }
-
-    /**
-     * Find the nearest object of a specific type.
-     */
-    private findNearestObject<T>(type: new (...args: any[]) => T, filter?: (obj: T) => boolean): T | null {
-        let nearestObject: T | null = null;
-        let nearestDistance = Infinity;
-
-        for (const obj of this.visibleObjects) {
-            if (obj instanceof type && (!filter || filter(obj))) {
-                const distance = Vec.length(Vec.sub(obj.position, this.position));
-                if (distance < nearestDistance) {
-                    nearestDistance = distance;
-                    nearestObject = obj;
-                }
-            }
-        }
-
-        return nearestObject;
     }
 }
