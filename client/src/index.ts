@@ -4,7 +4,8 @@ import "../node_modules/@fortawesome/fontawesome-free/css/solid.css";
 import { Account } from "./scripts/account";
 import { Game } from "./scripts/game";
 import { showInventory } from "./scripts/inventory";
-import { resetPlayButtons, setUpUI, unlockPlayButtons } from "./scripts/ui";
+import { setupGame } from "./scripts/ui/game";
+import { setupHome } from "./scripts/ui/home";
 import { GameConsole } from "./scripts/utils/console/gameConsole";
 import { onConnectWallet, showWallet } from "./scripts/wallet";
 import "./scss/pages/client.scss";
@@ -27,10 +28,9 @@ void (async () => {
         showWallet(account),
         onConnectWallet(account),
     ]).then(() => {
-        setUpUI(game, account);
+        setupHome(game, account);
+        setupGame(game, account);
         showInventory(account);
-        unlockPlayButtons();
-        resetPlayButtons();
     });
 
 })();

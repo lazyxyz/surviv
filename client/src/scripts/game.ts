@@ -53,7 +53,7 @@ import { Camera } from "./rendering/camera";
 import { Gas, GasRender } from "./rendering/gas";
 import { Minimap } from "./rendering/minimap";
 
-import { autoPickup, resetPlayButtons, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime } from "./ui";
+// import { autoPickup, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime } from "./ui";
 import { setUpCommands } from "./utils/console/commands";
 import { GameConsole } from "./utils/console/gameConsole";
 import { getColors, LAYER_TRANSITION_DELAY, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
@@ -68,6 +68,7 @@ import { errorAlert } from "./modal";
 import { showInventory } from "./inventory";
 import { getRandomMode, Modes, NumberToMode, type Mode } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "..";
+import { resetPlayButtons, updateDisconnectTime, teamSocket, autoPickup } from "./ui/home";
 
 /* eslint-disable @stylistic/indent */
 

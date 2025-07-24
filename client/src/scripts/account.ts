@@ -3,7 +3,6 @@ import $, { error } from "jquery";
 import { ACCESS_TOKEN, PUBLIC_KEY, SELECTOR_WALLET, shorten } from "./utils/constants";
 import { EIP6963, type Provider6963Props } from "./eip6963";
 import { ethers, toBeHex } from "ethers";
-import { resetPlayButtons } from "./ui";
 
 import {
     SilverSkinsMapping,
@@ -25,6 +24,7 @@ import { abi as crateBaseABI } from "@common/abis/ICrateBase.json";
 import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
 import { errorAlert } from "./modal";
+import { resetPlayButtons } from "./ui/home";
 
 const CHAIN_ID = SurvivMapping.ChainId;
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
