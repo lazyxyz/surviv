@@ -234,7 +234,6 @@
       const loading = document.getElementById('loading');
       const error = document.getElementById('error');
       const leaderboardBody = document.getElementById('table-body');
-      // const pageInfo = document.getElementById('page-info');
 
       loading.classList.remove('hidden');
       error.classList.add('hidden');
@@ -255,17 +254,50 @@
           const row = document.createElement('div');
           row.className = 'leaderboard-body-row';
           row.innerHTML = `
-            <div class="w-[80px] h-[48px]" id="row-child">${(page - 1) * limit + index + 1}</div>
-            <div class="w-[250px] h-[48px]" id="row-child">${shortenAddress(player.player)}<i id="copy-address" class="fa-solid fa-copy"></i></div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.totalPoints}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.soloPoints}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.squadPoints}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints}</div>
-            <div class="w-[110px] h-[48px]" id="row-child">${player.games}</div>
-            <div class="w-[100px] h-[48px]" id="row-child">${player.games > 0 ? (player.totalPoints / player.games).toFixed(2) : '0.00'}</div>
-            <div class="w-[100px] h-[48px]" id="row-child">N/A</div>
-          `;
+        <div class="w-[80px] h-[48px]" id="row-child">${(page - 1) * limit + index + 1}</div>
+        <div class="w-[250px] h-[48px]" id="row-child">${shortenAddress(player.player)}<i id="copy-address-${index}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i></div>
+        <div class="w-[160px] h-[48px]" id="row-child">${player.totalPoints}</div>
+        <div class="w-[160px] h-[48px]" id="row-child">${player.soloPoints}</div>
+        <div class="w-[160px] h-[48px]" id="row-child">${player.squadPoints}</div>
+        <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints}</div>
+        <div class="w-[110px] h-[48px]" id="row-child">${player.games}</div>
+        <div class="w-[100px] h-[48px]" id="row-child">${player.games > 0 ? (player.totalPoints / player.games).toFixed(2) : '0.00'}</div>
+        <div class="w-[100px] h-[48px]" id="row-child">N/A</div>
+      `;
           leaderboardBody.appendChild(row);
+
+          // Add copy functionality for this specific row
+          const copyIcon = document.getElementById(`copy-address-${index}`);
+          copyIcon.addEventListener('click', async () => {
+            try {
+              await navigator.clipboard.writeText(player.player);
+
+              // Visual feedback
+              copyIcon.classList.remove('fa-copy');
+              copyIcon.classList.add('fa-circle-check', 'text-green-400');
+              copyIcon.title = 'Copied!';
+
+              // Reset icon after 1.5 seconds
+              setTimeout(() => {
+                copyIcon.classList.remove('fa-circle-check', 'text-green-400');
+                copyIcon.classList.add('fa-copy');
+                copyIcon.title = 'Copy full address';
+              }, 1500);
+
+            } catch (err) {
+              // Fallback for older browsers
+              const textArea = document.createElement('textarea');
+              textArea.value = player.player;
+              document.body.appendChild(textArea);
+              textArea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textArea);
+
+              // Visual feedback for fallback
+              copyIcon.classList.add('text-blue-400');
+              setTimeout(() => copyIcon.classList.remove('text-blue-400'), 1000);
+            }
+          });
         });
 
       } catch (err) {
@@ -311,19 +343,6 @@
 
     // Fetch initial leaderboard
     fetchLeaderboard(currentPage);
-
-    // Add copy event listeners to all fa-copy icons
-    leaderboardBody.querySelectorAll('#copy-address').forEach((icon, idx) => {
-      icon.style.cursor = 'pointer';
-      icon.title = 'Copy address';
-      icon.addEventListener('click', () => {
-        const address = data.players[idx].player;
-        navigator.clipboard.writeText(address);
-        icon.classList.add('text-green-400'); // Optional: visual feedback
-        setTimeout(() => icon.classList.remove('text-green-400'), 800);
-      });
-    });
-
   </script>
   <script src="../src/earn.ts" type="module"></script>
 </body>
