@@ -124,7 +124,7 @@ export class Game {
     teamMode = false;
     teamSize = TeamSize.Solo;
     gameId = "";
-    gameMode: Mode = "fall";
+    gameMode: Mode = "winter";
 
     /**
      * proxy for `activePlayer`'s layer

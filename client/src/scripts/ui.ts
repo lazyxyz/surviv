@@ -79,35 +79,20 @@ export function resetPlayButtons(): void {
 export async function setUpUI(game: Game, account: Account): Promise<void> {
     const { inputManager, uiManager: { ui } } = game;
 
-    // Change the menu based on the mode.
-    if (Modes[game.gameMode].specialLogo) $("#splash-logo").children("img").attr("src", `./img/logos/surviv_round.svg`);
-    if (Modes[game.gameMode].specialPlayButtons) {
-        const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
+    const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
+    for (let buttonIndex = 0; buttonIndex < playButtons.length; buttonIndex++) {
+        const button = playButtons[buttonIndex];
 
-        for (let buttonIndex = 0; buttonIndex < playButtons.length; buttonIndex++) {
-            const button = playButtons[buttonIndex];
+        button.addClass(`play-button`);
 
-            button.addClass(`event-${Modes[game.gameMode].idString}`);
+        // Mode Logo
+        const translationString = `play_${["solo", "squad"][buttonIndex]}`;
+        let logoSrc = buttonIndex == 0 ? "./img/misc/user.svg" : "./img/misc/user-group.svg";
 
-            // Mode Logo
-            if (Modes[game.gameMode].modeLogoImage) {
-                const translationString = `play_${["solo", "squad"][buttonIndex]}`;
-                let logoSrc = "";
-
-                if (typeof Modes[game.gameMode].modeLogoImage === "string") {
-                    logoSrc = Modes[game.gameMode].modeLogoImage;
-                } else {
-                    logoSrc = buttonIndex === 0
-                        ? Modes[game.gameMode].modeLogoImage.solo
-                        : Modes[game.gameMode].modeLogoImage.squads;
-                }
-
-                button.html(`
+        button.html(`
                     <img class="btn-icon" width="26" height="26" src=${logoSrc}>
                     <span style="margin-left: ${(buttonIndex > 0 ? "20px;" : "0")}" translation="${translationString}">${getTranslatedString(translationString as TranslationKeys)}</span>
                 `);
-            }
-        }
     }
 
     // Buy Card directly in Home

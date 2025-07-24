@@ -21,7 +21,6 @@ export interface ModeDefinition {
         readonly tint?: number
         readonly gravity?: boolean
     }
-    readonly specialLogo?: boolean
     readonly specialPlayButtons?: boolean
     // icons for the mode
     readonly modeLogoImage?: string | { solo: string, squads: string }
@@ -106,7 +105,6 @@ export const Modes: Record<Mode, ModeDefinition> = {
         specialMenuMusic: true,
         darkShaders: true,
         reskin: "fall",
-        specialLogo: true,
         specialPlayButtons: true,
         modeLogoImage: "./img/game/halloween/obstacles/jack_o_lantern.svg"
     },
@@ -135,7 +133,6 @@ export const Modes: Record<Mode, ModeDefinition> = {
             delay: 800,
             gravity: true
         },
-        specialLogo: true,
         specialPlayButtons: true,
         modeLogoImage: "./img/game/winter/obstacles/red_gift.svg"
     }

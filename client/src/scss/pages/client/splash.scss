@@ -98,8 +98,7 @@
   margin-top: -100%;
   border-radius: 45px;
   background-color: white;
-  -webkit-animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1)
-    infinite;
+  -webkit-animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
   animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
@@ -114,8 +113,7 @@
   background-color: white;
   border-radius: 15px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-  -webkit-animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s
-    infinite;
+  -webkit-animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s infinite;
   animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s infinite;
 }
 
@@ -178,7 +176,7 @@
     border-bottom: 2px solid palette.$orange_bg;
     box-shadow: inset 0 -2px palette.$orange_bg;
 
-    & > .pulsating-circle {
+    &>.pulsating-circle {
       display: block !important;
     }
   }
@@ -200,6 +198,7 @@
 }
 
 .blur {
+
   #splash-news,
   #splash-options,
   #splash-customize,
@@ -259,7 +258,7 @@
     margin-bottom: 15px;
   }
 
-  > div {
+  >div {
     height: 240px;
     overflow-y: auto;
     padding-right: 10px;
@@ -355,6 +354,7 @@
       padding: 12px 24px;
       margin-top: 16px;
       transition: 300ms;
+
       &:hover {
         opacity: 0.8;
       }
@@ -768,28 +768,7 @@
   }
 }
 
-.event-winter {
-  background-color: #dcdcdc;
-  border-bottom: 2px solid #c2c1c1;
-  box-shadow: inset 0 -2px #c2c1c1;
-  animation: mode-winter-color 4s linear infinite;
-}
-
-.event-fall {
-  background-color: #72742f;
-  border-bottom: 2px solid #535421;
-  box-shadow: inset 0 -2px #535421;
-  animation: mode-fall-color 4s linear infinite;
-}
-
-.event-halloween {
-  background-color: #5a0e0e;
-  border-bottom: 2px solid #450b0b;
-  box-shadow: inset 0 -2px #450b0b;
-  animation: mode-halloween-color 4s linear infinite;
-}
-
-.event-fall {
+.play-button {
   background-color: #72742f;
   border-bottom: 2px solid #535421;
   box-shadow: inset 0 -2px #535421;
