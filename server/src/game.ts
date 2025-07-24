@@ -263,9 +263,12 @@ export class Game implements GameData {
         if (Config.addBot) {
             const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-            const zombieCount = randomInRange(10, 20);
-            const ninjaCount = randomInRange(5, 10);
-            const assassinCount = randomInRange(3, 5);
+            const zombieCount = randomInRange(20, 21);
+            const ninjaCount = randomInRange(20, 21);
+            const assassinCount = randomInRange(20, 21);
+            // const zombieCount = randomInRange(10, 20);
+            // const ninjaCount = randomInRange(5, 10);
+            // const assassinCount = randomInRange(3, 5);
 
             this.activeZombie(zombieCount);
             this.activeNinja(ninjaCount);

@@ -133,18 +133,18 @@ export class Assassin extends Player {
                 const distance = Vec.length(Vec.sub(obj.position, this.position));
                 if (distance < Assassin.ATTACK_RADIUS) {
                     // Initiate melee attack if player is too close
-                    this.initiateMeleeAttack();
+                    this.initiateMeleeAttack(obj);
                     this.movingToRadius = false;
                     return;
                 } else if (distance < this.shotRadius) {
                     this.inventory.setActiveWeaponIndex(0);
                     if (this.canFire()) {
                         // Shoot if player is within shot radius and can fire
-                        this.shotNearestPlayer();
+                        this.shotNearestPlayer(obj);
                         this.movingToRadius = false;
                     } else if (distance < Assassin.ATTACK_RADIUS) {
                         // Fallback to melee if out of ammo
-                        this.initiateMeleeAttack();
+                        this.initiateMeleeAttack(obj);
                         this.movingToRadius = false;
                     }
                     return;
@@ -169,9 +169,9 @@ export class Assassin extends Player {
         return Assassin.SHOT_RADIUS * stageMultiplier;
     }
 
-    private initiateMeleeAttack(): void {
+    private initiateMeleeAttack(player: Gamer): void {
         this.inventory.setActiveWeaponIndex(2);
-        this.attackNearestPlayer();
+        this.attackNearestPlayer(player);
     }
 
     private canFire(): boolean {
@@ -179,14 +179,8 @@ export class Assassin extends Player {
             || (this.inventory.activeWeapon instanceof GunItem && this.inventory.activeWeapon.ammo > 0);
     }
 
-    private shotNearestPlayer(): void {
-        const nearestPlayer = this.findNearestGamer();
-        if (!nearestPlayer) {
-            // No player to shoot
-            return;
-        }
-
-        const directionToPlayer = Vec.normalize(Vec.sub(nearestPlayer.position, this.position));
+    private shotNearestPlayer(player: Gamer): void {
+        const directionToPlayer = Vec.normalize(Vec.sub(player.position, this.position));
         const desiredRotation = Math.atan2(directionToPlayer.y, directionToPlayer.x);
         const rotationDifference = desiredRotation - this.rotation;
         const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), Assassin.SHOT_ROTATION_RATE) * Math.sign(rotationDifference);
@@ -211,52 +205,49 @@ export class Assassin extends Player {
         this.processInputs(packet);
     }
 
-    private attackNearestPlayer(): void {
-        const nearestPlayer = this.findNearestObject<Gamer>(Gamer);
-        if (nearestPlayer) {
-            // Attack nearest player with melee
-            this.baseSpeed = Assassin.BASE_ATTACK_SPEED;
-            this.moveToTarget(nearestPlayer.position, Assassin.SAFE_DISTANCE_PLAYER, !this.attacking);
-        }
+    private attackNearestPlayer(player: Gamer): void {
+        // Attack nearest player with melee
+        this.baseSpeed = Assassin.BASE_ATTACK_SPEED;
+        this.moveToTarget(player.position, Assassin.SAFE_DISTANCE_PLAYER, !this.attacking);
     }
 
     private holdPositionPreGame(): void {
-         if (this.lastHideSpot) {
-                // Stay at current hiding spot
+        if (this.lastHideSpot) {
+            // Stay at current hiding spot
+            this.baseSpeed = GameConstants.player.baseSpeed;
+            this.movingToRadius = false;
+            this.moveToTarget(this.lastHideSpot, Assassin.SAFE_DISTANCE_HIDE_SPOT, false);
+        } else {
+            // Find nearest bush or tree to hide in
+            const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
+                ["bush", "tree"].includes(obj.definition.material) &&
+                !obj.dead &&
+                !this.game.gas.isInGas(obj.position)
+            );
+            if (nearestHideSpot) {
+                // Move to initial hiding spot
+                this.lastHideSpot = Vec.clone(nearestHideSpot.position);
                 this.baseSpeed = GameConstants.player.baseSpeed;
                 this.movingToRadius = false;
-                this.moveToTarget(this.lastHideSpot, Assassin.SAFE_DISTANCE_HIDE_SPOT, false);
+                this.moveToTarget(nearestHideSpot.position, Assassin.SAFE_DISTANCE_HIDE_SPOT, false);
             } else {
-                // Find nearest bush or tree to hide in
-                const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
-                    ["bush", "tree"].includes(obj.definition.material) &&
-                    !obj.dead &&
-                    !this.game.gas.isInGas(obj.position)
-                );
-                if (nearestHideSpot) {
-                    // Move to initial hiding spot
-                    this.lastHideSpot = Vec.clone(nearestHideSpot.position);
-                    this.baseSpeed = GameConstants.player.baseSpeed;
-                    this.movingToRadius = false;
-                    this.moveToTarget(nearestHideSpot.position, Assassin.SAFE_DISTANCE_HIDE_SPOT, false);
-                } else {
-                    // If no hiding spot, stay put
-                    this.movingToRadius = false;
+                // If no hiding spot, stay put
+                this.movingToRadius = false;
 
-                    const packet: PlayerInputData = {
-                        movement: { up: false, down: false, left: false, right: false },
-                        attacking: false,
-                        actions: [],
-                        isMobile: true,
-                        turning: true,
-                        mobile: { moving: false, angle: this.rotation },
-                        rotation: this.rotation,
-                        distanceToMouse: undefined,
-                    };
+                const packet: PlayerInputData = {
+                    movement: { up: false, down: false, left: false, right: false },
+                    attacking: false,
+                    actions: [],
+                    isMobile: true,
+                    turning: true,
+                    mobile: { moving: false, angle: this.rotation },
+                    rotation: this.rotation,
+                    distanceToMouse: undefined,
+                };
 
-                    this.processInputs(packet);
-                }
+                this.processInputs(packet);
             }
+        }
     }
 
     private hideInSafeSpot(): void {
