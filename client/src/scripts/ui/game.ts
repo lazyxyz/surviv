@@ -10,32 +10,32 @@ import { sound } from "@pixi/sound";
 import { body } from "../uiHelpers";
 import { Crosshairs, getCrosshair } from "../utils/crosshairs";
 import { EMOTE_SLOTS, PIXI_SCALE, UI_DEBUG_MODE } from "../utils/constants";
-import { Emotes } from "@common/definitions/emotes";
 import { Modes } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "../../";
 import $ from "jquery";
-import type { Account } from "../account";
 import type { Game } from "../game";
 import { ExtendedMap } from "@common/utils/misc";
 import { getTranslatedString } from "../../translations";
 import { Vec, type Vector } from "@common/utils/vector";
 import { ItemType } from "@common/utils/objectDefinitions";
 import { CustomTeamMessages } from "@common/typings";
-import { teamSocket } from "./home";
 import type { CVarTypeMapping } from "../utils/console/defaultClientCVars";
 import { html, requestFullscreen } from "../utils/misc";
 import type { TranslationKeys } from "../../typings/translations";
+import { errorAlert } from "../modal";
+import { joinGame, teamSocket } from "./play";
 
 export let autoPickup = true;
 
-export async function setupGame(game: Game, account: Account): Promise<void> {
-    const { inputManager, uiManager: { ui } } = game;
-
+function setupConsoleListener(game: Game): void {
     GAME_CONSOLE.variables.addChangeListener(
         "cv_console_open",
         (_, val) => GAME_CONSOLE.isOpen = val
     );
+}
 
+function setupMenuButtons(game: Game): void {
+    const { ui } = game.uiManager;
     const gameMenu = ui.gameMenu;
     const settingsMenu = $("#settings-menu");
 
@@ -45,9 +45,51 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
 
     $("#btn-play-again, #btn-spectate-replay").on("click", async () => {
         await game.endGame();
-        // if (teamSocket) teamSocket.send(JSON.stringify({ type: CustomTeamMessages.Start }));
-        // else joinGame(game.teamSize);
+        if (teamSocket) {
+            teamSocket.send(JSON.stringify({ type: CustomTeamMessages.Start }))
+        } else {
+            if (game.account) {
+                joinGame(game.teamSize, game, game.account)
+            } else {
+                errorAlert("Please connect your wallet to continue!")
+            }
+        }
     });
+
+    $<HTMLButtonElement>("#btn-resume-game").on("click", () => gameMenu.hide());
+    $<HTMLButtonElement>("#btn-fullscreen").on("click", () => {
+        requestFullscreen();
+        ui.gameMenu.hide();
+    });
+
+    $<HTMLButtonElement>("#btn-settings").on("click", () => {
+        $(".dialog").hide();
+        settingsMenu.fadeToggle(250);
+        settingsMenu.removeClass("in-game");
+    });
+
+    $<HTMLButtonElement>("#btn-settings-game").on("click", () => {
+        gameMenu.hide();
+        settingsMenu.fadeToggle(250);
+        settingsMenu.addClass("in-game");
+    });
+
+    $<HTMLButtonElement>("#close-settings").on("click", () => {
+        settingsMenu.fadeOut(250);
+    });
+
+    const customizeMenu = $<HTMLButtonElement>("#customize-menu");
+    $<HTMLButtonElement>("#btn-customize").on("click", () => {
+        $(".dialog").hide();
+        customizeMenu.fadeToggle(250);
+    });
+    $<HTMLButtonElement>("#close-customize").on("click", () => customizeMenu.fadeOut(250));
+
+    $<HTMLButtonElement>("#close-report").on("click", () => ui.reportingModal.fadeOut(250));
+}
+
+function setupSpectateControls(game: Game): void {
+    const { ui } = game.uiManager;
 
     const sendSpectatePacket = (action: Exclude<SpectateActions, SpectateActions.SpectateSpecific>): void => {
         game.sendPacket(
@@ -77,12 +119,12 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
     ui.spectateNext.on("click", () => {
         sendSpectatePacket(SpectateActions.SpectateNext);
     });
+}
 
-    $<HTMLButtonElement>("#btn-resume-game").on("click", () => gameMenu.hide());
-    $<HTMLButtonElement>("#btn-fullscreen").on("click", () => {
-        requestFullscreen();
-        ui.gameMenu.hide();
-    });
+function setupKeyboardControls(game: Game): void {
+    const { ui } = game.uiManager;
+    const gameMenu = ui.gameMenu;
+    const settingsMenu = $("#settings-menu");
 
     body.on("keydown", (e: JQuery.KeyDownEvent) => {
         if (e.key === "Escape") {
@@ -93,43 +135,13 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
             GAME_CONSOLE.isOpen = false;
         }
     });
+}
 
-    $<HTMLButtonElement>("#btn-settings").on("click", () => {
-        $(".dialog").hide();
-        settingsMenu.fadeToggle(250);
-        settingsMenu.removeClass("in-game");
-    });
-
-    $<HTMLButtonElement>("#btn-settings-game").on("click", () => {
-        gameMenu.hide();
-        settingsMenu.fadeToggle(250);
-        settingsMenu.addClass("in-game");
-    });
-
-    $<HTMLButtonElement>("#close-settings").on("click", () => {
-        settingsMenu.fadeOut(250);
-    });
-
-    const customizeMenu = $<HTMLButtonElement>("#customize-menu");
-    $<HTMLButtonElement>("#btn-customize").on("click", () => {
-        $(".dialog").hide();
-        customizeMenu.fadeToggle(250);
-    });
-    $<HTMLButtonElement>("#close-customize").on("click", () => customizeMenu.fadeOut(250));
-
-    $<HTMLButtonElement>("#close-report").on("click", () => ui.reportingModal.fadeOut(250));
-
+function setupCrosshair(game: Game): void {
+    const { ui } = game.uiManager;
     const crosshairImage = $<HTMLDivElement>("#crosshair-image");
     const crosshairControls = $<HTMLDivElement>("#crosshair-controls");
     const crosshairTargets = $<HTMLDivElement>("#crosshair-preview, #game");
-
-    if (Modes[game.gameMode].darkShaders) {
-        $("#game-canvas").css({
-            "filter": "brightness(0.65) saturate(0.85)",
-            "position": "relative",
-            "z-index": "-1"
-        });
-    }
 
     function loadCrosshair(): void {
         const size = 20 * GAME_CONSOLE.getBuiltInCVar("cv_crosshair_size");
@@ -204,6 +216,55 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
         })
     );
 
+    addSliderListener(
+        "#slider-crosshair-size",
+        "cv_crosshair_size",
+        loadCrosshair
+    );
+    addSliderListener(
+        "#slider-crosshair-stroke-size",
+        "cv_crosshair_stroke_size",
+        loadCrosshair
+    );
+
+    const crosshairColor = $<HTMLInputElement>("#crosshair-color-picker");
+    crosshairColor.on("input", function () {
+        GAME_CONSOLE.setBuiltInCVar("cv_crosshair_color", this.value);
+        loadCrosshair();
+    });
+
+    GAME_CONSOLE.variables.addChangeListener(
+        "cv_crosshair_color",
+        (game, value) => {
+            crosshairColor.val(value);
+        }
+    );
+
+    const crosshairStrokeColor = $<HTMLInputElement>("#crosshair-stroke-picker");
+    crosshairStrokeColor.on("input", function () {
+        GAME_CONSOLE.setBuiltInCVar("cv_crosshair_stroke_color", this.value);
+        loadCrosshair();
+    });
+
+    GAME_CONSOLE.variables.addChangeListener(
+        "cv_crosshair_stroke_color",
+        (game, value) => {
+            crosshairStrokeColor.val(value);
+        }
+    );
+}
+
+function setupGameModeStyles(game: Game): void {
+    if (Modes[game.gameMode].darkShaders) {
+        $("#game-canvas").css({
+            "filter": "brightness(0.65) saturate(0.85)",
+            "position": "relative",
+            "z-index": "-1"
+        });
+    }
+}
+
+function setupRoleSettings(game: Game): void {
     if (GAME_CONSOLE.getBuiltInCVar("dv_role") !== "") {
         $("#tab-special").show();
 
@@ -236,143 +297,77 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
 
     $("#tab-badges").show();
     $("#tab-weapons").show();
+}
 
-    function addSliderListener(
-        elementId: string,
-        settingName: keyof CVarTypeMapping,
-        callback?: (value: number) => void
-    ): void {
-        const element = $<HTMLInputElement>(elementId)[0] as HTMLInputElement | undefined;
-        if (!element) {
-            console.error("Invalid element id");
-            return;
-        }
+function addSliderListener(
+    elementId: string,
+    settingName: keyof CVarTypeMapping,
+    callback?: (value: number) => void
+): void {
+    const element = $<HTMLInputElement>(elementId)[0] as HTMLInputElement | undefined;
+    if (!element) {
+        console.error("Invalid element id");
+        return;
+    }
 
-        let ignore = false;
+    let ignore = false;
 
-        element.addEventListener("input", () => {
-            if (ignore) return;
+    element.addEventListener("input", () => {
+        if (ignore) return;
 
-            const value = +element.value;
-            ignore = true;
-            GAME_CONSOLE.setBuiltInCVar(settingName, value);
-            ignore = false;
-            callback?.(value);
-        });
-
-        GAME_CONSOLE.variables.addChangeListener(settingName, (game, newValue) => {
-            if (ignore) return;
-
-            const casted = +newValue;
-
-            callback?.(casted);
-
-            ignore = true;
-            element.value = `${casted}`;
-            element.dispatchEvent(new InputEvent("input"));
-            ignore = false;
-        });
-
-        const value = GAME_CONSOLE.getBuiltInCVar(settingName) as number;
+        const value = +element.value;
+        ignore = true;
+        GAME_CONSOLE.setBuiltInCVar(settingName, value);
+        ignore = false;
         callback?.(value);
-        element.value = value.toString();
-    }
-
-    function addCheckboxListener(
-        elementId: string,
-        settingName: keyof CVarTypeMapping,
-        callback?: (value: boolean) => void
-    ): void {
-        const element = $<HTMLInputElement>(elementId)[0] as HTMLInputElement | undefined;
-        if (!element) {
-            console.error("Invalid element id");
-            return;
-        }
-
-        element.addEventListener("input", () => {
-            const value = element.checked;
-            GAME_CONSOLE.setBuiltInCVar(settingName, value);
-            callback?.(value);
-        });
-
-        GAME_CONSOLE.variables.addChangeListener(settingName, (game, newValue) => {
-            const casted = !!newValue;
-
-            callback?.(casted);
-            element.checked = casted;
-        });
-
-        element.checked = GAME_CONSOLE.getBuiltInCVar(settingName) as boolean;
-    }
-
-    addSliderListener(
-        "#slider-crosshair-size",
-        "cv_crosshair_size",
-        loadCrosshair
-    );
-    addSliderListener(
-        "#slider-crosshair-stroke-size",
-        "cv_crosshair_stroke_size",
-        loadCrosshair
-    );
-
-    const toggleClass = (elem: JQuery, className: string, bool: boolean): void => {
-        if (bool) {
-            elem.addClass(className);
-        } else elem.removeClass(className);
-    };
-
-    const crosshairColor = $<HTMLInputElement>("#crosshair-color-picker");
-
-    crosshairColor.on("input", function () {
-        GAME_CONSOLE.setBuiltInCVar("cv_crosshair_color", this.value);
-        loadCrosshair();
     });
 
-    GAME_CONSOLE.variables.addChangeListener(
-        "cv_crosshair_color",
-        (game, value) => {
-            crosshairColor.val(value);
-        }
-    );
+    GAME_CONSOLE.variables.addChangeListener(settingName, (game, newValue) => {
+        if (ignore) return;
 
-    const crosshairStrokeColor = $<HTMLInputElement>("#crosshair-stroke-picker");
+        const casted = +newValue;
 
-    crosshairStrokeColor.on("input", function () {
-        GAME_CONSOLE.setBuiltInCVar("cv_crosshair_stroke_color", this.value);
-        loadCrosshair();
+        callback?.(casted);
+
+        ignore = true;
+        element.value = `${casted}`;
+        element.dispatchEvent(new InputEvent("input"));
+        ignore = false;
     });
 
-    GAME_CONSOLE.variables.addChangeListener(
-        "cv_crosshair_stroke_color",
-        (game, value) => {
-            crosshairStrokeColor.val(value);
-        }
-    );
+    const value = GAME_CONSOLE.getBuiltInCVar(settingName) as number;
+    callback?.(value);
+    element.value = value.toString();
+}
 
-    ui.game.on("contextmenu", e => { e.preventDefault(); });
+function addCheckboxListener(
+    elementId: string,
+    settingName: keyof CVarTypeMapping,
+    callback?: (value: boolean) => void
+): void {
+    const element = $<HTMLInputElement>(elementId)[0] as HTMLInputElement | undefined;
+    if (!element) {
+        console.error("Invalid element id");
+        return;
+    }
 
-    addCheckboxListener(
-        "#toggle-scope-looping",
-        "cv_loop_scope_selection"
-    );
+    element.addEventListener("input", () => {
+        const value = element.checked;
+        GAME_CONSOLE.setBuiltInCVar(settingName, value);
+        callback?.(value);
+    });
 
-    addCheckboxListener(
-        "#toggle-autopickup",
-        "cv_autopickup"
-    );
-    $("#toggle-autopickup").parent().parent().toggle(inputManager.isMobile);
+    GAME_CONSOLE.variables.addChangeListener(settingName, (game, newValue) => {
+        const casted = !!newValue;
 
-    addCheckboxListener(
-        "#toggle-autopickup-dual-guns",
-        "cv_autopickup_dual_guns"
-    );
-    $("#toggle-autopickup-dual-guns").parent().parent().toggle(inputManager.isMobile);
+        callback?.(casted);
+        element.checked = casted;
+    });
 
-    addCheckboxListener("#toggle-anonymous-player", "cv_anonymize_player_names");
+    element.checked = GAME_CONSOLE.getBuiltInCVar(settingName) as boolean;
+}
 
-    addCheckboxListener("#toggle-hide-emote", "cv_hide_emotes");
-
+function setupAudioControls(game: Game): void {
     addSliderListener(
         "#slider-music-volume",
         "cv_music_volume",
@@ -406,9 +401,9 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
     );
 
     addCheckboxListener("#toggle-old-music", "cv_use_old_menu_music");
+}
 
-    addCheckboxListener("#toggle-camera-shake", "cv_camera_shake_fx");
-
+function setupDebugReadouts(game: Game): void {
     for (const prop of ["fps", "ping", "pos"] as const) {
         const debugReadout = game.uiManager.debugReadouts[prop];
 
@@ -420,39 +415,42 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
             value => toggleClass(debugReadout, "hidden-prop", !value)
         );
     }
+}
 
-    {
-        const element = $<HTMLInputElement>("#toggle-text-kill-feed")[0];
+function toggleClass(elem: JQuery, className: string, bool: boolean): void {
+    if (bool) {
+        elem.addClass(className);
+    } else elem.removeClass(className);
+}
 
-        element.addEventListener("input", () => {
-            GAME_CONSOLE.setBuiltInCVar("cv_killfeed_style", element.checked ? "text" : "icon");
-        });
+function setupKillFeedAndWeaponSlots(game: Game): void {
+    const killFeedToggle = $<HTMLInputElement>("#toggle-text-kill-feed")[0];
+    killFeedToggle.addEventListener("input", () => {
+        GAME_CONSOLE.setBuiltInCVar("cv_killfeed_style", killFeedToggle.checked ? "text" : "icon");
+    });
 
-        GAME_CONSOLE.variables.addChangeListener("cv_killfeed_style", (game, value) => {
-            element.checked = value === "text";
-            game.uiManager.updateWeaponSlots();
-        });
+    GAME_CONSOLE.variables.addChangeListener("cv_killfeed_style", (game, value) => {
+        killFeedToggle.checked = value === "text";
+        game.uiManager.updateWeaponSlots();
+    });
 
-        element.checked = GAME_CONSOLE.getBuiltInCVar("cv_killfeed_style") === "text";
-    }
+    killFeedToggle.checked = GAME_CONSOLE.getBuiltInCVar("cv_killfeed_style") === "text";
 
-    {
-        const element = $<HTMLInputElement>("#toggle-colored-slots")[0];
+    const weaponSlotToggle = $<HTMLInputElement>("#toggle-colored-slots")[0];
+    weaponSlotToggle.addEventListener("input", () => {
+        GAME_CONSOLE.setBuiltInCVar("cv_weapon_slot_style", weaponSlotToggle.checked ? "colored" : "simple");
+        game.uiManager.updateWeaponSlots();
+    });
 
-        element.addEventListener("input", () => {
-            GAME_CONSOLE.setBuiltInCVar("cv_weapon_slot_style", element.checked ? "colored" : "simple");
-            game.uiManager.updateWeaponSlots();
-        });
+    GAME_CONSOLE.variables.addChangeListener("cv_weapon_slot_style", (game, value) => {
+        weaponSlotToggle.checked = value === "colored";
+        game.uiManager.updateWeaponSlots();
+    });
 
-        GAME_CONSOLE.variables.addChangeListener("cv_weapon_slot_style", (game, value) => {
-            console.trace();
-            element.checked = value === "colored";
-            game.uiManager.updateWeaponSlots();
-        });
+    weaponSlotToggle.checked = GAME_CONSOLE.getBuiltInCVar("cv_weapon_slot_style") === "colored";
+}
 
-        element.checked = GAME_CONSOLE.getBuiltInCVar("cv_weapon_slot_style") === "colored";
-    }
-
+function setupRenderSettings(game: Game): void {
     const renderSelect = $<HTMLSelectElement>("#render-mode-select")[0];
     renderSelect.addEventListener("input", () => {
         GAME_CONSOLE.setBuiltInCVar("cv_renderer", renderSelect.value as unknown as "webgl1" | "webgl2" | "webgpu");
@@ -469,7 +467,7 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
     });
     renderResSelect.value = GAME_CONSOLE.getBuiltInCVar("cv_renderer_res");
 
-    $("#toggle-high-res").parent().parent().toggle(!inputManager.isMobile);
+    $("#toggle-high-res").parent().parent().toggle(!game.inputManager.isMobile);
     addCheckboxListener("#toggle-high-res", "cv_high_res_textures");
     addCheckboxListener("#toggle-cooler-graphics", "cv_cooler_graphics");
 
@@ -493,39 +491,20 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
             }
         }
     );
+
     addCheckboxListener("#toggle-ambient-particles", "cv_ambient_particles");
+}
 
-    const { gameUi } = game.uiManager.ui;
-
-    GAME_CONSOLE.variables.addChangeListener(
-        "cv_draw_hud",
-        (_, newVal) => {
-            gameUi.toggle(newVal);
-            game.map.visible = !GAME_CONSOLE.getBuiltInCVar("cv_minimap_minimized") && newVal;
-        }
-    );
-    addCheckboxListener("#toggle-draw-hud", "cv_draw_hud");
-
-    addCheckboxListener("#toggle-antialias", "cv_antialias");
-
-    addCheckboxListener("#toggle-movement-smoothing", "cv_movement_smoothing");
-
-    addCheckboxListener("#toggle-responsive-rotation", "cv_responsive_rotation");
-
-    addCheckboxListener("#toggle-mobile-controls", "mb_controls_enabled");
-    addSliderListener("#slider-joystick-size", "mb_joystick_size");
-    addSliderListener("#slider-joystick-transparency", "mb_joystick_transparency");
-    addSliderListener("#slider-gyro-angle", "mb_gyro_angle");
-    addCheckboxListener("#toggle-haptics", "mb_haptics");
-    addCheckboxListener("#toggle-high-res-mobile", "mb_high_res_textures");
+function setupUIScale(game: Game): void {
+    const { ui } = game.uiManager;
 
     function updateUiScale(): void {
         const scale = GAME_CONSOLE.getBuiltInCVar("cv_ui_scale");
-
-        gameUi.width(window.innerWidth / scale);
-        gameUi.height(window.innerHeight / scale);
-        gameUi.css("transform", `scale(${scale})`);
+        ui.gameUi.width(window.innerWidth / scale);
+        ui.gameUi.height(window.innerHeight / scale);
+        ui.gameUi.css("transform", `scale(${scale})`);
     }
+
     updateUiScale();
     window.addEventListener("resize", () => updateUiScale());
 
@@ -538,11 +517,13 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
         }
     );
 
-    if (inputManager.isMobile) {
+    if (game.inputManager.isMobile) {
         $("#ui-scale-container").hide();
         GAME_CONSOLE.setBuiltInCVar("cv_ui_scale", 1);
     }
+}
 
+function setupMapSettings(game: Game): void {
     addSliderListener(
         "#slider-minimap-transparency",
         "cv_minimap_transparency",
@@ -550,6 +531,7 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
             game.map.updateTransparency();
         }
     );
+
     addSliderListener(
         "#slider-big-map-transparency",
         "cv_map_transparency",
@@ -557,6 +539,7 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
             game.map.updateTransparency();
         }
     );
+
     addCheckboxListener(
         "#toggle-hide-minimap",
         "cv_minimap_minimized",
@@ -571,6 +554,22 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
             game.map.expanded = newValue;
         }
     );
+}
+
+function setupGeneralSettings(game: Game): void {
+    const { ui } = game.uiManager;
+
+    addCheckboxListener("#toggle-scope-looping", "cv_loop_scope_selection");
+    addCheckboxListener("#toggle-autopickup", "cv_autopickup");
+    $("#toggle-autopickup").parent().parent().toggle(game.inputManager.isMobile);
+    addCheckboxListener("#toggle-autopickup-dual-guns", "cv_autopickup_dual_guns");
+    $("#toggle-autopickup-dual-guns").parent().parent().toggle(game.inputManager.isMobile);
+    addCheckboxListener("#toggle-anonymous-player", "cv_anonymize_player_names");
+    addCheckboxListener("#toggle-hide-emote", "cv_hide_emotes");
+    addCheckboxListener("#toggle-camera-shake", "cv_camera_shake_fx");
+    addCheckboxListener("#toggle-antialias", "cv_antialias");
+    addCheckboxListener("#toggle-movement-smoothing", "cv_movement_smoothing");
+    addCheckboxListener("#toggle-responsive-rotation", "cv_responsive_rotation");
 
     addCheckboxListener("#toggle-leave-warning", "cv_leave_warning");
 
@@ -596,77 +595,126 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
 
     $(".checkbox-setting").has("#toggle-hide-rules").toggle(GAME_CONSOLE.getBuiltInCVar("cv_rules_acknowledged"));
 
-    const rules = $<HTMLButtonElement>("#btn-rules, #rules-close-btn");
-    const toggleHideRules = $<HTMLInputElement>("#toggle-hide-rules");
-
     $("#rules-close-btn").on("click", () => {
-        rules.hide();
+        button.hide();
         GAME_CONSOLE.setBuiltInCVar("cv_hide_rules_button", true);
-        toggleHideRules.prop("checked", true);
+        $<HTMLInputElement>("#toggle-hide-rules").prop("checked", true);
     }).toggle(GAME_CONSOLE.getBuiltInCVar("cv_rules_acknowledged") && !GAME_CONSOLE.getBuiltInCVar("cv_hide_rules_button"));
+}
 
-    $("#import-settings-btn").on("click", () => {
-        if (!confirm("This option will overwrite all settings and reload the page. Continue?")) return;
-        const error = (): void => { alert("Invalid config."); };
+function setupMobileControls(game: Game): void {
+    const { uiManager: { ui }, inputManager } = game;
 
-        try {
-            const input = prompt("Enter a config:");
-            if (!input) {
-                error();
-                return;
+    if (inputManager.isMobile) {
+        addCheckboxListener("#toggle-mobile-controls", "mb_controls_enabled");
+        addSliderListener("#slider-joystick-size", "mb_joystick_size");
+        addSliderListener("#slider-joystick-transparency", "mb_joystick_transparency");
+        addSliderListener("#slider-gyro-angle", "mb_gyro_angle");
+        addCheckboxListener("#toggle-haptics", "mb_haptics");
+        addCheckboxListener("#toggle-high-res-mobile", "mb_high_res_textures");
+
+        ui.spectatingContainer.addClass("mobile-mode");
+        ui.spectatingContainer.css({
+            width: "150px",
+            position: "fixed",
+            top: "15%",
+            left: "5rem"
+        });
+
+        ui.btnReport.html("<i class=\"fa-solid fa-flag\"></i>");
+        ui.btnPlayAgainSpectating.html("<i class=\"fa-solid fa-rotate-right\"></i>");
+        ui.spectateKillLeader.html("<i class=\"fa-solid fa-crown\"></i>");
+        ui.spectateKillLeader.addClass("btn-spectate-kill-leader");
+        ui.btnSpectateMenu.html("<i class=\"fa-solid fa-bars\"></i>");
+        ui.btnSpectateMenu.addClass("btn-success");
+
+        ui.interactMsg.on("click", () => {
+            inputManager.addAction(game.uiManager.action.active ? InputActions.Cancel : InputActions.Interact);
+        });
+        ui.interactKey.html('<img src="./img/misc/tap-icon.svg" alt="Tap">');
+        ui.activeAmmo.on("click", () => GAME_CONSOLE.handleQuery("reload", "never"));
+        ui.emoteWheel.css("top", "50%").css("left", "50%");
+        $("#mobile-options").show();
+        ui.menuButton.on("click", () => ui.gameMenu.toggle());
+        ui.emoteButton.on("click", () => ui.emoteWheel.show());
+
+        ui.pingToggle.on("click", () => {
+            inputManager.pingWheelActive = !inputManager.pingWheelActive;
+            const { pingWheelActive } = inputManager;
+            ui.pingToggle
+                .toggleClass("btn-danger", pingWheelActive)
+                .toggleClass("btn-primary", !pingWheelActive);
+            game.uiManager.updateEmoteWheel();
+        });
+    }
+
+    $("#tab-mobile").toggle(isMobile.any);
+}
+
+function setupEmoteWheel(game: Game): void {
+    const { uiManager: { ui }, inputManager } = game;
+
+    const createEmoteWheelListener = (slot: typeof EMOTE_SLOTS[number], emoteSlot: number): void => {
+        $(`#emote-wheel .emote-${slot}`).on("click", () => {
+            ui.emoteWheel.hide();
+            let clicked = true;
+
+            if (inputManager.pingWheelActive) {
+                const ping = game.uiManager.mapPings[emoteSlot];
+
+                setTimeout(() => {
+                    let gameMousePosition: Vector;
+
+                    if (game.map.expanded) {
+                        ui.game.one("click", () => {
+                            gameMousePosition = inputManager.pingWheelPosition;
+
+                            if (ping && inputManager.pingWheelActive && clicked) {
+                                inputManager.addAction({
+                                    type: InputActions.MapPing,
+                                    ping,
+                                    position: gameMousePosition
+                                });
+                                clicked = false;
+                            }
+                        });
+                    } else {
+                        ui.game.one("click", e => {
+                            const globalPos = Vec.create(e.clientX, e.clientY);
+                            const pixiPos = game.camera.container.toLocal(globalPos);
+                            gameMousePosition = Vec.scale(pixiPos, 1 / PIXI_SCALE);
+
+                            if (ping && inputManager.pingWheelActive && clicked) {
+                                inputManager.addAction({
+                                    type: InputActions.MapPing,
+                                    ping,
+                                    position: gameMousePosition
+                                });
+                                clicked = false;
+                            }
+                        });
+                    }
+                }, 100);
+            } else {
+                const emote = game.uiManager.emotes[emoteSlot];
+                if (emote) {
+                    inputManager.addAction({
+                        type: InputActions.Emote,
+                        emote
+                    });
+                }
             }
-
-            const config: unknown = JSON.parse(input);
-            if (typeof config !== "object" || config === null || !("variables" in config)) {
-                error();
-                return;
-            }
-
-            localStorage.setItem("surviv_config", input);
-            alert("Settings loaded successfully.");
-            window.location.reload();
-        } catch (_) {
-            error();
-        }
-    });
-
-       $("#export-settings-btn").on("click", () => {
-        const exportedSettings = localStorage.getItem("surviv_config");
-        const error = (): void => {
-            alert(
-                "Unable to copy settings. To export settings manually, open the dev tools with Ctrl+Shift+I (Cmd+Opt+I on Mac) "
-                + "and, after typing in the following, copy the result manually: localStorage.getItem(\"surviv_config\")"
-            );
-        };
-        if (exportedSettings === null) {
-            error();
-            return;
-        }
-        navigator.clipboard
-            .writeText(exportedSettings)
-            .then(() => {
-                alert("Settings copied to clipboard.");
-            })
-            .catch(error);
-    });
-
-    $("#reset-settings-btn").on("click", () => {
-        if (!confirm("This option will reset all settings and reload the page. Continue?")) return;
-        if (!confirm("Are you sure? This action cannot be undone.")) return;
-        localStorage.removeItem("surviv_config");
-        window.location.reload();
-    });
-
-    const step = 1;
-    const inventorySlotTypings = GameConstants.player.inventorySlotTypings;
-
-    const slotListener = (element: JQuery<HTMLDivElement>, listener: (button: number) => void): void => {
-        element[0].addEventListener("pointerdown", (e: PointerEvent): void => {
-            listener(e.button);
-            e.stopPropagation();
         });
     };
 
+    createEmoteWheelListener("top", 0);
+    createEmoteWheelListener("right", 1);
+    createEmoteWheelListener("bottom", 2);
+    createEmoteWheelListener("left", 3);
+}
+
+function setupInventorySlots(game: Game): void {
+    const { inputManager } = game;
     let dropTimer: number | undefined;
 
     function mobileDropItem(button: number, condition: boolean, item?: AmmoDefinition | ArmorDefinition | ScopeDefinition | HealingItemDefinition, slot?: number): void {
@@ -692,6 +740,14 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
         }, 600);
     }
 
+    const slotListener = (element: JQuery<HTMLDivElement>, listener: (button: number) => void): void => {
+        element[0].addEventListener("pointerdown", (e: PointerEvent): void => {
+            listener(e.button);
+            e.stopPropagation();
+        });
+    };
+    const step = 1;
+
     $<HTMLDivElement>("#weapons-container").append(
         ...Array.from(
             { length: GameConstants.player.maxWeapons },
@@ -708,7 +764,7 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
                     </div>`
                 );
 
-                const isGrenadeSlot = inventorySlotTypings[slot] === ItemType.Throwable;
+                const isGrenadeSlot = GameConstants.player.inventorySlotTypings[slot] === ItemType.Throwable;
                 const element = ele[0];
 
                 element.addEventListener("pointerup", () => clearTimeout(dropTimer));
@@ -847,7 +903,7 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
 
         ammoContainers[`${ammo.hideUnlessPresent}`].append(ele);
 
-        ele[0].addEventListener("pointerup", (): void => {
+        ele[0].addEventListener("pointerup", () => {
             clearTimeout(dropTimer);
         });
 
@@ -928,26 +984,10 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
             });
         });
     }
+}
 
-    if (inputManager.isMobile) {
-        ui.spectatingContainer.addClass("mobile-mode");
-        ui.spectatingContainer.css({
-            width: "150px",
-            position: "fixed",
-            top: "15%",
-            left: "5rem"
-        });
-
-        ui.btnReport.html("<i class=\"fa-solid fa-flag\"></i>");
-        ui.btnPlayAgainSpectating.html("<i class=\"fa-solid fa-rotate-right\"></i>");
-
-        ui.spectateKillLeader.html("<i class=\"fa-solid fa-crown\"></i>");
-        ui.spectateKillLeader.addClass("btn-spectate-kill-leader");
-
-        ui.btnSpectateMenu.html("<i class=\"fa-solid fa-bars\"></i>");
-        ui.btnSpectateMenu.addClass("btn-success");
-    }
-
+function setupSpectateOptions(game: Game): void {
+    const { ui } = game.uiManager;
     const optionsIcon = $("#btn-spectate-options-icon");
     $<HTMLButtonElement>("#btn-spectate-options").on("click", () => {
         ui.spectatingContainer.toggle();
@@ -959,103 +999,63 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
             .toggleClass("fa-eye", !visible)
             .toggleClass("fa-eye-slash", visible);
     });
+}
 
-    $("#tab-mobile").toggle(isMobile.any);
+function setupSettingsImportExport(): void {
+    $("#import-settings-btn").on("click", () => {
+        if (!confirm("This option will overwrite all settings and reload the page. Continue?")) return;
+        const error = (): void => { alert("Invalid config."); };
 
-    if (inputManager.isMobile) {
-        ui.interactMsg.on("click", () => {
-            inputManager.addAction(game.uiManager.action.active ? InputActions.Cancel : InputActions.Interact);
-        });
-        ui.interactKey.html('<img src="./img/misc/tap-icon.svg" alt="Tap">');
+        try {
+            const input = prompt("Enter a config:");
+            if (!input) {
+                error();
+                return;
+            }
 
-        ui.activeAmmo.on("click", () => GAME_CONSOLE.handleQuery("reload", "never"));
+            const config: unknown = JSON.parse(input);
+            if (typeof config !== "object" || config === null || !("variables" in config)) {
+                error();
+                return;
+            }
 
-        ui.emoteWheel
-            .css("top", "50%")
-            .css("left", "50%");
-
-        const createEmoteWheelListener = (slot: typeof EMOTE_SLOTS[number], emoteSlot: number): void => {
-            $(`#emote-wheel .emote-${slot}`).on("click", () => {
-                ui.emoteWheel.hide();
-                let clicked = true;
-
-                if (inputManager.pingWheelActive) {
-                    const ping = game.uiManager.mapPings[emoteSlot];
-
-                    setTimeout(() => {
-                        let gameMousePosition: Vector;
-
-                        if (game.map.expanded) {
-                            ui.game.one("click", () => {
-                                gameMousePosition = inputManager.pingWheelPosition;
-
-                                if (ping && inputManager.pingWheelActive && clicked) {
-                                    inputManager.addAction({
-                                        type: InputActions.MapPing,
-                                        ping,
-                                        position: gameMousePosition
-                                    });
-
-                                    clicked = false;
-                                }
-                            });
-                        } else {
-                            ui.game.one("click", e => {
-                                const globalPos = Vec.create(e.clientX, e.clientY);
-                                const pixiPos = game.camera.container.toLocal(globalPos);
-                                gameMousePosition = Vec.scale(pixiPos, 1 / PIXI_SCALE);
-
-                                if (ping && inputManager.pingWheelActive && clicked) {
-                                    inputManager.addAction({
-                                        type: InputActions.MapPing,
-                                        ping,
-                                        position: gameMousePosition
-                                    });
-
-                                    clicked = false;
-                                }
-                            });
-                        }
-                    }, 100);
-                } else {
-                    const emote = game.uiManager.emotes[emoteSlot];
-                    if (emote) {
-                        inputManager.addAction({
-                            type: InputActions.Emote,
-                            emote
-                        });
-                    }
-                }
-            });
-        };
-
-        createEmoteWheelListener("top", 0);
-        createEmoteWheelListener("right", 1);
-        createEmoteWheelListener("bottom", 2);
-        createEmoteWheelListener("left", 3);
-
-        $("#mobile-options").show();
-
-        ui.menuButton.on("click", () => ui.gameMenu.toggle());
-        ui.emoteButton.on("click", () => ui.emoteWheel.show());
-
-        ui.pingToggle.on("click", () => {
-            inputManager.pingWheelActive = !inputManager.pingWheelActive;
-            const { pingWheelActive } = inputManager;
-            ui.pingToggle
-                .toggleClass("btn-danger", pingWheelActive)
-                .toggleClass("btn-primary", !pingWheelActive);
-
-            game.uiManager.updateEmoteWheel();
-        });
-    }
-
-    window.addEventListener("beforeunload", (e: Event) => {
-        if (ui.canvas.hasClass("active") && GAME_CONSOLE.getBuiltInCVar("cv_leave_warning") && !game.gameOver) {
-            e.preventDefault();
+            localStorage.setItem("surviv_config", input);
+            alert("Settings loaded successfully.");
+            window.location.reload();
+        } catch (_) {
+            error();
         }
     });
 
+    $("#export-settings-btn").on("click", () => {
+        const exportedSettings = localStorage.getItem("surviv_config");
+        const error = (): void => {
+            alert(
+                "Unable to copy settings. To export settings manually, open the dev tools with Ctrl+Shift+I (Cmd+Opt+I on Mac) "
+                + "and, after typing in the following, copy the result manually: localStorage.getItem(\"surviv_config\")"
+            );
+        };
+        if (exportedSettings === null) {
+            error();
+            return;
+        }
+        navigator.clipboard
+            .writeText(exportedSettings)
+            .then(() => {
+                alert("Settings copied to clipboard.");
+            })
+            .catch(error);
+    });
+
+    $("#reset-settings-btn").on("click", () => {
+        if (!confirm("This option will reset all settings and reload the page. Continue?")) return;
+        if (!confirm("Are you sure? This action cannot be undone.")) return;
+        localStorage.removeItem("surviv_config");
+        window.location.reload();
+    });
+}
+
+function setupRangeInputs(): void {
     const wrapperCache = new ExtendedMap<HTMLElement, JQuery>();
 
     function updateRangeInput(element: HTMLInputElement): void {
@@ -1084,7 +1084,10 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
         .each((_, element) => {
             updateRangeInput(element);
         });
+}
 
+function setupTabNavigation(): void {
+    const wrapperCache = new ExtendedMap<HTMLElement, JQuery>();
     $(".tab").on("click", ({ target }) => {
         const tab = wrapperCache.getAndGetDefaultIfAbsent(target, () => $(target));
 
@@ -1099,4 +1102,49 @@ export async function setupGame(game: Game, account: Account): Promise<void> {
         tabContent.addClass("active");
         tabContent.show();
     });
+}
+
+function setupGameInteraction(game: Game): void {
+    const { ui } = game.uiManager;
+    ui.game.on("contextmenu", e => { e.preventDefault(); });
+
+    window.addEventListener("beforeunload", (e: Event) => {
+        if (ui.canvas.hasClass("active") && GAME_CONSOLE.getBuiltInCVar("cv_leave_warning") && !game.gameOver) {
+            e.preventDefault();
+        }
+    });
+
+    GAME_CONSOLE.variables.addChangeListener(
+        "cv_draw_hud",
+        (_, newVal) => {
+            ui.gameUi.toggle(newVal);
+            game.map.visible = !GAME_CONSOLE.getBuiltInCVar("cv_minimap_minimized") && newVal;
+        }
+    );
+    addCheckboxListener("#toggle-draw-hud", "cv_draw_hud");
+}
+
+export async function setupGame(game: Game): Promise<void> {
+    setupConsoleListener(game);
+    setupMenuButtons(game);
+    setupSpectateControls(game);
+    setupKeyboardControls(game);
+    setupGameModeStyles(game);
+    setupCrosshair(game);
+    setupRoleSettings(game);
+    setupAudioControls(game);
+    setupDebugReadouts(game);
+    setupKillFeedAndWeaponSlots(game);
+    setupRenderSettings(game);
+    setupUIScale(game);
+    setupMapSettings(game);
+    setupGeneralSettings(game);
+    setupMobileControls(game);
+    setupEmoteWheel(game);
+    setupInventorySlots(game);
+    setupSpectateOptions(game);
+    setupSettingsImportExport();
+    setupRangeInputs();
+    setupTabNavigation();
+    setupGameInteraction(game);
 }

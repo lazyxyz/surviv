@@ -53,22 +53,19 @@ import { Camera } from "./rendering/camera";
 import { Gas, GasRender } from "./rendering/gas";
 import { Minimap } from "./rendering/minimap";
 
-// import { autoPickup, setUpUI, teamSocket, unlockPlayButtons, updateDisconnectTime } from "./ui";
 import { setUpCommands } from "./utils/console/commands";
-import { GameConsole } from "./utils/console/gameConsole";
 import { getColors, LAYER_TRANSITION_DELAY, parseJWT, PIXI_SCALE, UI_DEBUG_MODE } from "./utils/constants";
 import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 import { Account } from "./account";
 import { ReadyPacket, type PlayerData } from "@common/packets/readyPacket";
-import { onConnectWallet, showWallet } from "./wallet";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
-import { Melees } from "@common/definitions/melees";
 import { errorAlert } from "./modal";
-import { showInventory } from "./inventory";
 import { getRandomMode, Modes, NumberToMode, type Mode } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "..";
-import { resetPlayButtons, updateDisconnectTime, teamSocket, autoPickup } from "./ui/home";
+import { resetPlayButtons, updateDisconnectTime } from "./ui/home";
+import { autoPickup } from "./ui/game";
+import { teamSocket } from "./ui/play";
 
 /* eslint-disable @stylistic/indent */
 
@@ -127,6 +124,7 @@ export class Game {
     teamSize = TeamSize.Solo;
     gameId = "";
     gameMode: Mode = "winter";
+    account: Account | undefined;
 
     /**
      * proxy for `activePlayer`'s layer
@@ -155,7 +153,6 @@ export class Game {
     readonly camera = new Camera(this);
     readonly inputManager = new InputManager(this);
     readonly soundManager: SoundManager;
-    // console = GAME_CONSOLE;
 
     readonly gasRender = new GasRender(PIXI_SCALE, this.gameMode);
     readonly gas = new Gas(this);
@@ -366,7 +363,8 @@ export class Game {
     }
 
 
-    async connect(raw_url: string, account: Account, gameMode: Mode) {
+    async connect(raw_url: string, account: Account) {
+        this.account = account;
         const url = new URL(raw_url);
 
         this.error = false;
