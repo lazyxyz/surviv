@@ -191,7 +191,6 @@ export class Game {
 
         setUpCommands(game);
         game.inputManager.generateBindsConfigScreen();
-        console.log("console: ", GAME_CONSOLE);
 
         game.music = sound.add("menu_music", {
             url: `./audio/music/menu_music${GAME_CONSOLE.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : getRandomMode() ? `_${getRandomMode()}` : ""}.mp3`,
