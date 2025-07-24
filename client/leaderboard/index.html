@@ -188,16 +188,15 @@
           <div class="leaderboard">
             <div class="leaderboard-header">
               <div class="w-[80px] h-[48px]" id="header-child">Rank</div>
-              <div class="w-[250px] h-[48px]" id="header-child">Player</div>
+              <div class="w-[350px] h-[48px]" id="header-child">Player</div>
               <div class="w-[160px] h-[48px]" id="header-child">Total Points</div>
               <div class="w-[160px] h-[48px]" id="header-child">Solo Points</div>
               <div class="w-[160px] h-[48px]" id="header-child">Squad Points</div>
               <div class="w-[160px] h-[48px]" id="header-child">Social Points</div>
               <div class="w-[110px] h-[48px]" id="header-child">Games</div>
               <div class="w-[100px] h-[48px]" id="header-child">Rate</div>
-              <div class="w-[100px] h-[48px]" id="header-child">Kills</div>
             </div>
-            <div class="my-account"></div>
+            <div class="my-ranking-data"></div>
             <div class="leaderboard-body" id="table-body">
             </div>
           </div>
@@ -214,7 +213,7 @@
     let totalPages = 1;
 
     // shorten Wallet Address
-    function shortenAddress(address, chars = 6) {
+    function shortenAddress(address, chars = 10) {
       if (!address) return '';
       return `${address.slice(0, 2 + chars)}...${address.slice(-chars)}`;
     }
@@ -255,14 +254,13 @@
           row.className = 'leaderboard-body-row';
           row.innerHTML = `
         <div class="w-[80px] h-[48px]" id="row-child">${(page - 1) * limit + index + 1}</div>
-        <div class="w-[250px] h-[48px]" id="row-child">${shortenAddress(player.player)}<i id="copy-address-${index}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i></div>
+        <div class="w-[350px] h-[48px]" id="row-child">${shortenAddress(player.player)}<i id="copy-address-${index}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i></div>
         <div class="w-[160px] h-[48px]" id="row-child">${player.totalPoints}</div>
         <div class="w-[160px] h-[48px]" id="row-child">${player.soloPoints}</div>
         <div class="w-[160px] h-[48px]" id="row-child">${player.squadPoints}</div>
         <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints}</div>
         <div class="w-[110px] h-[48px]" id="row-child">${player.games}</div>
         <div class="w-[100px] h-[48px]" id="row-child">${player.games > 0 ? (player.totalPoints / player.games).toFixed(2) : '0.00'}</div>
-        <div class="w-[100px] h-[48px]" id="row-child">N/A</div>
       `;
           leaderboardBody.appendChild(row);
 
@@ -295,7 +293,7 @@
 
               // Visual feedback for fallback
               copyIcon.classList.add('text-blue-400');
-              setTimeout(() => copyIcon.classList.remove('text-blue-400'), 1000);
+              setTimeout(() => copyIcon.classList.remove('text-blue-400'), 500);
             }
           });
         });
@@ -312,12 +310,6 @@
       if (currentPage > 1) {
         currentPage--;
         fetchLeaderboard(currentPage);
-      }
-
-      if (currentPage == 1) {
-        prevButton.classList.add('disabled');
-      } else {
-        prevButton.classList.remove('disabled');
       }
     });
 
