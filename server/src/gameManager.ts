@@ -5,6 +5,8 @@ import { Config } from "./config";
 import { Game } from "./game";
 import { v4 as uuidv4 } from 'uuid';
 
+export const GAMES: Array<GameContainer | undefined> = [];
+
 export interface WorkerInitData {
     readonly id: number
     readonly maxTeamSize: number
@@ -98,7 +100,7 @@ export class GameContainer {
                 }
                 case WorkerMessages.GameEnded: {
                     this.worker.terminate();
-                    games[this.id] = undefined; // Clear from games array
+                    GAMES[this.id] = undefined; // Clear from games array
                     break;
                 }
             }
@@ -112,7 +114,7 @@ export class GameContainer {
 
 export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
     let gameID: number;
-    let eligibleGames = games.filter((g?: GameContainer): g is GameContainer =>
+    let eligibleGames = GAMES.filter((g?: GameContainer): g is GameContainer =>
         !!g && g.maxTeamSize == teamSize && g.allowJoin && !g.over);
 
     // Attempt to create a new game if one isn't available
@@ -154,9 +156,9 @@ export async function newGame(maxTeamSize?: TeamSize): Promise<number> {
         }
         const maxGames = Config.maxGames + startGameId;
         for (let i = startGameId; i < maxGames; i++) {
-            const game = games[i];
+            const game = GAMES[i];
             if (!game || game.stopped) {
-                games[i] = new GameContainer(i, teamSize, resolve);
+                GAMES[i] = new GameContainer(i, teamSize, resolve);
                 resolve(i);
                 return;
             }
@@ -165,7 +167,6 @@ export async function newGame(maxTeamSize?: TeamSize): Promise<number> {
     });
 }
 
-export const games: Array<GameContainer | undefined> = [];
 
 if (!isMainThread) {
     const port = (workerData as WorkerInitData).id;

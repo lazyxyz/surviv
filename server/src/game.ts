@@ -55,6 +55,7 @@ import { validateJWT } from "./api/api";
 import { getIP, createServer } from "./utils/serverHelpers";
 import { verifyAllAssets } from "./api/balances";
 
+
 /*
     eslint-disable
 
@@ -137,7 +138,7 @@ export class Game implements GameData {
     private _nextTeamID = -1;
     get nextTeamID(): number { return ++this._nextTeamID; }
 
-    readonly customTeams: globalThis.Map<string, Team> = new globalThis.Map<string, Team>();
+    readonly teamsMapping: globalThis.Map<string, Team> = new globalThis.Map<string, Team>();
 
     readonly explosions: Explosion[] = [];
     readonly emotes: Emote[] = [];
@@ -508,7 +509,6 @@ export class Game implements GameData {
             this.connectingPlayers.clear();
             this.spectatablePlayers.length = 0;
             this.teams.clear();
-            this.customTeams.clear();
             this.airdrops.length = 0;
             this.detectors.length = 0;
             this.bullets.clear();
@@ -629,14 +629,14 @@ export class Game implements GameData {
             const { teamID, autoFill } = socket.getUserData();
 
             if (teamID) {
-                team = this.customTeams.get(teamID);
+                team = this.teamsMapping.get(teamID);
                 if (
                     !team // team doesn't exist
                     || (team.players.length && !team.hasLivingPlayers()) // team isn't empty but has no living players
                     || team.players.length >= (this.maxTeamSize as number) // team is full
                 ) {
                     this.teams.add(team = new Team(this.nextTeamID, autoFill));
-                    this.customTeams.set(teamID, team);
+                    this.teamsMapping.set(teamID, team);
                 }
             } else {
                 const vacantTeams = this.teams.valueArray.filter(
@@ -943,7 +943,9 @@ export class Game implements GameData {
                 if (team) {
                     team.removePlayer(player);
 
-                    if (!team.players.length) this.teams.delete(team);
+                    if (!team.players.length) {
+                        this.teams.delete(team);
+                    };
                 }
                 player.teamWipe();
                 player.beingRevivedBy?.action?.cancel();
@@ -1415,7 +1417,7 @@ export class Game implements GameData {
                         melee: data.melee,
                         gun: data.gun,
                         emotes: data.emotes,
-                    } )
+                    })
 
                     const stream = new PacketStream(new ArrayBuffer(128));
                     stream.serializeServerPacket(
