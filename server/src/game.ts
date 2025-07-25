@@ -1,4 +1,4 @@
-import { EMOTE_SLOTS, GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
 import { type ExplosionDefinition } from "@common/definitions/explosions";
 import { Loots, type LootDefinition } from "@common/definitions/loots";
 import { MapPings, type MapPing } from "@common/definitions/mapPings";
@@ -51,14 +51,9 @@ import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
 import { PlayerData, ReadyPacket } from "@common/packets/readyPacket";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
-import { Badges } from "@common/definitions/badges";
-import { EmoteDefinition, Emotes } from "@common/definitions/emotes";
-import { Skins, DEFAULT_SKIN } from "@common/definitions/skins";
 import { validateJWT } from "./api/api";
-import { getIP, forbidden, createServer } from "./utils/serverHelpers";
-import { Guns } from "@common/definitions/guns";
-import { Melees } from "@common/definitions/melees";
-import { verifyEmotes, verifySkin, verifyMelee, verifyGun } from "./api/balances";
+import { getIP, createServer } from "./utils/serverHelpers";
+import { verifyAllAssets } from "./api/balances";
 
 /*
     eslint-disable
@@ -263,12 +258,9 @@ export class Game implements GameData {
         if (Config.addBot) {
             const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-            const zombieCount = randomInRange(20, 21);
-            const ninjaCount = randomInRange(20, 21);
-            const assassinCount = randomInRange(20, 21);
-            // const zombieCount = randomInRange(10, 20);
-            // const ninjaCount = randomInRange(5, 10);
-            // const assassinCount = randomInRange(3, 5);
+            const zombieCount = randomInRange(10, 20);
+            const ninjaCount = randomInRange(5, 10);
+            const assassinCount = randomInRange(3, 5);
 
             this.activeZombie(zombieCount);
             this.activeNinja(ninjaCount);
@@ -1417,49 +1409,25 @@ export class Game implements GameData {
                         return;
                     }
 
-                    let emotes: readonly (EmoteDefinition | undefined)[] = [];
-                    await verifyEmotes(data.address, data.emotes.split(','), 2000).then((validEmotes) => {
-                        emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
-                    }).catch(err => {
-                        console.log("Verify melee failed: ", err);
-                        emotes = EMOTE_SLOTS.map(slot => undefined);
-                    })
-
-                    // Verify Skin
-                    let skin = Skins.fromStringSafe(DEFAULT_SKIN); // Default skins
-                    await verifySkin(data.address, data.skin, 2000).then((isValid) => {
-                        if (isValid) skin = Skins.fromStringSafe(data.skin);
-                    }).catch(err => {
-                        console.log("Verify skin failed: ", err);
-                    })
-
-                    // Verify Melee
-                    let melee = undefined;
-                    await verifyMelee(data.address, data.melee, 2000).then((isValid) => {
-                        if (isValid) melee = Melees.fromStringSafe(data.melee);
-                    }).catch(err => {
-                        console.log("Verify melee failed: ", err);
-                    })
-
-                    // Verify Gun
-                    let gun = undefined;
-                    await verifyGun(data.address, data.gun, 2000).then((isValid) => {
-                        if (isValid) gun = Guns.fromStringSafe(data.gun);
-                    }).catch(err => {
-                        console.log("Verify gun failed: ", err);
-                    })
+                    const assets = await verifyAllAssets(data.address, {
+                        badge: data.badge,
+                        skin: data.skin,
+                        melee: data.melee,
+                        gun: data.gun,
+                        emotes: data.emotes,
+                    } )
 
                     const stream = new PacketStream(new ArrayBuffer(128));
                     stream.serializeServerPacket(
                         ReadyPacket.create({
                             isMobile: false,
                             address: data.address ? data.address : "",
-                            emotes: emotes,
+                            emotes: assets.emotes,
                             name: data.name,
-                            skin: skin,
-                            badge: Badges.fromStringSafe(data.badge),
-                            melee: melee,
-                            gun: gun,
+                            badge: assets.badge,
+                            skin: assets.skin,
+                            melee: assets.melee,
+                            gun: assets.gun,
                         })
                     );
                     socket.send(stream.getBuffer(), true, false);

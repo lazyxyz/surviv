@@ -2288,25 +2288,34 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         }
 
         if (this.address) {
-            if (rank <= Config.assetsConfig.rank) {
-                saveGameResult(this.address, rank, this.kills, this.game.teamMode, this.game.gameId).then((data: any) => {
-                    let rewards = 0;
-                    let eligible = false;
+            if ((rank <= Config.assetsConfig.rank)) {
+                if (this.loadout.badge) {
+                    saveGameResult(this.address, rank, this.kills, this.game.teamMode, this.game.gameId).then((data: any) => {
+                        let rewards = 0;
+                        let eligible = false;
 
-                    if (data.success && data.rewards.success) {
-                        rewards = data.rewards.amount;
-                        eligible = true;
-                    }
+                        if (data.success && data.rewards.success) {
+                            rewards = data.rewards.amount;
+                            eligible = true;
+                        }
 
+                        const rewardsPacket = RewardsPacket.create({
+                            eligible,
+                            rank,
+                            rewards: rewards,
+                        } as unknown as RewardsData);
+                        this.sendPacket(rewardsPacket);
+                    }).catch(err => {
+                        console.log("Error claim rewards: ", err);
+                    })
+                } else {
                     const rewardsPacket = RewardsPacket.create({
-                        eligible,
+                        eligible: false,
                         rank,
-                        rewards: rewards,
+                        rewards: 0,
                     } as unknown as RewardsData);
                     this.sendPacket(rewardsPacket);
-                }).catch(err => {
-                    console.log("Error claim rewards: ", err);
-                })
+                }
             }
         }
     }
