@@ -5,16 +5,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <meta name="title" content="Surviv - Earn" />
+
+  <meta name="title" content="Surviv - Leaderboard." />
   <meta name="description"
     content="The new 2D survival battle royale, inspired by a legendary game loved by millions! Win big with our play-and-earn model and tons of cool items for nonstop fun!" />
   <meta name="keywords" content="battle royale, io game, browser game, open source" />
 
-  <meta property="og:title" content="Surviv - Earn" />
+  <meta property="og:title" content="Surviv Fun - Leaderboard" />
   <meta property="og:description"
     content="The new 2D survival battle royale, inspired by a legendary game loved by millions! Win big with our play-and-earn model and tons of cool items for nonstop fun!" />
+  <meta property="og:site_name" content="surviv.fun" />
+  <meta property="og:image" content="https://surviv.fun/img/socials/thumbnail.png" />
 
-  <title>Surviv - Earn</title>
+  <title>Surviv Fun - Leaderboard</title>
 
   <link rel="icon" type="image/x-icon" href="./favicon.ico" />
   <link rel="icon" type="image/svg+xml" sizes="any" href="../img/logos/surviv_favicon.svg" />
@@ -75,7 +78,6 @@
                   id="solo-tooltip-toggle"></i>
                 <div id="solo-tooltip"
                   class="hidden absolute z-10 bg-gray-800 text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
-                  <p><strong>Solo Points</strong></p>
                   <ul class="list-disc pl-5">
                     <li>Rank #1: 10 points</li>
                     <li>Rank #2: 5 points</li>
@@ -91,7 +93,6 @@
                   id="squad-tooltip-toggle"></i>
                 <div id="squad-tooltip"
                   class="hidden absolute z-10 bg-gray-800 text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
-                  <p><strong>Squad Points</strong></p>
                   <ul class="list-disc pl-5">
                     <li>Rank #1: 6 points </li>
                     <li>Rank #2: 3 points</li>
@@ -105,8 +106,9 @@
                   id="social-tooltip-toggle"></i>
                 <div id="social-tooltip"
                   class="hidden absolute z-10 bg-gray-800 text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
-                  <p><strong>Social Points</strong></p>
-                  <p>Earned by completing tasks on Galxe.</p>
+                  <ul class="list-disc pl-5">
+                    <li>Earned by completing tasks on Galxe.</li>
+                  </ul>
                 </div>
               </div>
               <div class="w-[110px] h-[48px]" id="header-child">Games</div>
@@ -140,6 +142,14 @@
 
     // Tooltip toggle functionality
     function toggleTooltip(tooltipId) {
+      const tooltips = ['solo-tooltip', 'squad-tooltip', 'social-tooltip'];
+      tooltips.forEach(id => {
+        const tooltip = document.getElementById(id);
+        if (tooltip) {
+          tooltip.classList.add('hidden');
+        }
+      });
+
       const tooltip = document.getElementById(tooltipId);
       tooltip.classList.toggle('hidden');
     }
@@ -149,7 +159,7 @@
     document.getElementById('squad-tooltip-toggle').addEventListener('click', () => toggleTooltip('squad-tooltip'));
     document.getElementById('social-tooltip-toggle').addEventListener('click', () => toggleTooltip('social-tooltip'));
 
-    // Close tooltips when clicking outside
+    // Close all tooltips when clicking outside
     document.addEventListener('click', (e) => {
       const tooltips = ['solo-tooltip', 'squad-tooltip', 'social-tooltip'];
       const toggleIds = ['solo-tooltip-toggle', 'squad-tooltip-toggle', 'social-tooltip-toggle'];
