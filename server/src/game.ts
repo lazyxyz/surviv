@@ -498,7 +498,6 @@ export class Game implements GameData {
             }
             this.pluginManager.emit("player_did_win", player);
         }
-
         this.pluginManager.emit("game_end", this);
 
         // End the game in 10 seconds
@@ -529,7 +528,7 @@ export class Game implements GameData {
             this.app.close();
             Logger.log(`Game ${this.port} | Ended`);
             parentPort?.postMessage({ type: WorkerMessages.GameEnded });
-        }, 10000);
+        }, 3000);
     }
 
     setGameData(data: Partial<Omit<GameData, "aliveCount">>): void {
@@ -890,6 +889,7 @@ export class Game implements GameData {
 
         this.addTimeout(() => { player.disableInvulnerability(); }, 5000);
 
+        // Start the game
         if (
             (this.teamMode ? this.teams.size : this.aliveCount) > (Config.startImmediately ? 0 : 1)
             && !this._started

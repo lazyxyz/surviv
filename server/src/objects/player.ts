@@ -2170,11 +2170,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             c4.damage({ amount: Infinity });
         }
 
-        // Send game over to dead player
-        if (!this.disconnected) {
-            this.handleGameOver();
-        }
-
         // Remove player from kill leader
         if (this === this.game.killLeader) {
             this.game.killLeaderDead(sourceIsPlayer ? source : undefined);
@@ -2268,56 +2263,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this.setDirty();
         reviver.animation = AnimationType.Revive;
         reviver.executeAction(new ReviveAction(reviver, this));
-    }
-
-    handleGameOver(won = false): void {
-        const rank = won ? 1 : this.game.aliveCount + 1;
-
-        const gameOverPacket = GameOverPacket.create({
-            won,
-            playerID: this.id,
-            kills: this.kills,
-            damageDone: this.damageDone,
-            damageTaken: this.damageTaken,
-            timeAlive: (this.game.now - this.joinTime) / 1000,
-            rank,
-        } as unknown as GameOverData);
-        this.sendPacket(gameOverPacket);
-        for (const spectator of this.spectators) {
-            spectator.sendPacket(gameOverPacket);
-        }
-
-        if (this.address) {
-            if ((rank <= Config.assetsConfig.rank)) {
-                if (this.loadout.badge) {
-                    saveGameResult(this.address, rank, this.kills, this.game.teamMode, this.game.gameId).then((data: any) => {
-                        let rewards = 0;
-                        let eligible = false;
-
-                        if (data.success && data.rewards.success) {
-                            rewards = data.rewards.amount;
-                            eligible = true;
-                        }
-
-                        const rewardsPacket = RewardsPacket.create({
-                            eligible,
-                            rank,
-                            rewards: rewards,
-                        } as unknown as RewardsData);
-                        this.sendPacket(rewardsPacket);
-                    }).catch(err => {
-                        console.log("Error claim rewards: ", err);
-                    })
-                } else {
-                    const rewardsPacket = RewardsPacket.create({
-                        eligible: false,
-                        rank,
-                        rewards: 0,
-                    } as unknown as RewardsData);
-                    this.sendPacket(rewardsPacket);
-                }
-            }
-        }
     }
 
     processInputs(packet: PlayerInputData): void {

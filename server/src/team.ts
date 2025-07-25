@@ -192,21 +192,17 @@ export class CustomTeam {
             }
             case CustomTeamMessages.Start: {
                 if (player.isLeader) {
+                    // console.log("FIND GAME", player.team.players.map(p=> p.name));
                     const result = await findGame(TeamSize.Squad);
                     if (result.success) {
                         this.gameID = result.gameID;
                         clearTimeout(this.resetTimeout);
                         // this.resetTimeout = setTimeout(() => this.gameID = undefined, 10000);
 
-                        for (const player of this.players) {
-                            player.ready = false;
-                        }
-
                         this._publishMessage({ type: CustomTeamMessages.Started });
                         this._publishPlayerUpdate();
                     }
                 } else {
-                    player.ready = true;
                     this._publishPlayerUpdate();
                 }
                 break;
@@ -217,7 +213,6 @@ export class CustomTeam {
     private _publishPlayerUpdate(): void {
         const players = this.players.map(p => ({
             isLeader: p.isLeader,
-            ready: p.ready,
             name: p.name,
             skin: p.skin,
             badge: p.badge,
@@ -229,7 +224,6 @@ export class CustomTeam {
                 type: CustomTeamMessages.Update,
                 players,
                 isLeader: player.isLeader,
-                ready: player.ready
             });
         }
     }
@@ -246,7 +240,6 @@ export class CustomTeamPlayer {
     team: CustomTeam;
     get id(): number { return this.team.players.indexOf(this); }
     get isLeader(): boolean { return this.id === 0; }
-    ready: boolean;
     name: string;
     skin: string;
     badge?: string;
@@ -261,7 +254,6 @@ export class CustomTeamPlayer {
     ) {
         this.team = team;
         team.players.push(this);
-        this.ready = false;
         this.name = name;
         this.skin = skin;
         this.badge = badge;
