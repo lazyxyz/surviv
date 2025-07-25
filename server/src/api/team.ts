@@ -5,7 +5,7 @@ import { Config } from "../config";
 import { CustomTeam, CustomTeamPlayer, type CustomTeamPlayerContainer } from "../team";
 import { Logger, cleanUsername } from "../utils/misc";
 import { forbidden, getIP, textDecoder } from "../utils/serverHelpers";
-import { customTeams, maxTeamSize, teamsCreated } from "../server";
+import { CUSTOM_TEAMS, maxTeamSize, teamsCreated } from "../server";
 
 export function initTeamRoutes(app: TemplatedApp) {
     app.ws("/team", {
@@ -34,7 +34,7 @@ export function initTeamRoutes(app: TemplatedApp) {
             if (
                 noTeamIdGiven
                 // @ts-expect-error cleanest overall way to do this (`undefined` gets filtered out anyways)
-                && (team = customTeams.get(teamID)) === undefined
+                && (team = CUSTOM_TEAMS.get(teamID)) === undefined
             ) {
                 forbidden(res);
                 return;
@@ -47,7 +47,7 @@ export function initTeamRoutes(app: TemplatedApp) {
                 }
             } else {
                 team = new CustomTeam();
-                customTeams.set(team.id, team);
+                CUSTOM_TEAMS.set(team.id, team);
 
                 if (Config.protection?.maxTeams) {
                     teamsCreated[ip] = (teamsCreated[ip] ?? 0) + 1;

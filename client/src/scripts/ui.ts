@@ -414,7 +414,6 @@ export async function setUpUI(game: Game): Promise<void> {
     };
 
     const joinGame = (teamSize: number): void => {
-        console.log("JOIN GAME");
         ui.splashOptions.addClass("loading");
         ui.loadingText.text(getTranslatedString("loading_finding_game"));
         // ui.cancelFindingGame.css("display", "");
@@ -738,7 +737,7 @@ export async function setUpUI(game: Game): Promise<void> {
         $.get(`${selectedRegion?.mainAddress}/api/getGame?teamSize=${TeamSize.Squad}&teamID=${teamID}&token=${game.account.token}`,
             async (data: GetGameResponse) => {
                 if (data.success) {
-                    await readyConnect(data, String(selectedRegion?.gameAddress));
+                    errorAlert("Teammate in game! Wait or leave to start.");
                 } else {
                     teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Start }));
                 }

@@ -2,10 +2,10 @@ import { GameConstants, TeamSize } from "@common/constants";
 import { type GetGameResponse } from "@common/typings";
 import { URLSearchParams } from "node:url";
 import { Config } from "../config";
-import { findGame, games } from "../gameManager";
+import { findGame, GAMES } from "../gameManager";
 import { cors } from "../utils/serverHelpers";
 import { TemplatedApp } from "uWebSockets.js";
-import { customTeams } from "../server";
+import { CUSTOM_TEAMS } from "../server";
 
 export function initGameRoutes(app: TemplatedApp) {
     app
@@ -14,7 +14,7 @@ export function initGameRoutes(app: TemplatedApp) {
             res
                 .writeHeader("Content-Type", "application/json")
                 .end(JSON.stringify({
-                    playerCount: games.reduce((a, b) => a + (b?.aliveCount ?? 0), 0),
+                    playerCount: GAMES.reduce((a, b) => a + (b?.aliveCount ?? 0), 0),
                     maxTeamSize: Config.maxTeamSize,
                     protocolVersion: GameConstants.protocolVersion
                 }));
@@ -37,12 +37,10 @@ export function initGameRoutes(app: TemplatedApp) {
 
             let response: GetGameResponse;
             if (teamID) {
-                const team = customTeams.get(teamID);
-
+                const team = CUSTOM_TEAMS.get(teamID);
                 if (team?.gameID !== undefined) {
-                    const game = games[team.gameID];
-                    response = game && !game.stopped && game.startedTime == -1 
-                        ? { success: true, gameID: team.gameID }
+                    const game = GAMES[team.gameID];
+                    response = game && !game.stopped && game.startedTime == -1 ? { success: true, gameID: team.gameID }
                         : { success: false };
                 } else {
                     response = { success: false };
