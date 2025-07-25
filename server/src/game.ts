@@ -58,7 +58,7 @@ import { validateJWT } from "./api/api";
 import { getIP, forbidden, createServer } from "./utils/serverHelpers";
 import { Guns } from "@common/definitions/guns";
 import { Melees } from "@common/definitions/melees";
-import { verifyEmotes, verifySkin, verifyMelee, verifyGun } from "./api/balances";
+import { verifyEmotes, verifySkin, verifyMelee, verifyGun, verifyAllAssets } from "./api/balances";
 
 /*
     eslint-disable
@@ -1417,49 +1417,25 @@ export class Game implements GameData {
                         return;
                     }
 
-                    let emotes: readonly (EmoteDefinition | undefined)[] = [];
-                    await verifyEmotes(data.address, data.emotes.split(','), 2000).then((validEmotes) => {
-                        emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
-                    }).catch(err => {
-                        console.log("Verify melee failed: ", err);
-                        emotes = EMOTE_SLOTS.map(slot => undefined);
-                    })
-
-                    // Verify Skin
-                    let skin = Skins.fromStringSafe(DEFAULT_SKIN); // Default skins
-                    await verifySkin(data.address, data.skin, 2000).then((isValid) => {
-                        if (isValid) skin = Skins.fromStringSafe(data.skin);
-                    }).catch(err => {
-                        console.log("Verify skin failed: ", err);
-                    })
-
-                    // Verify Melee
-                    let melee = undefined;
-                    await verifyMelee(data.address, data.melee, 2000).then((isValid) => {
-                        if (isValid) melee = Melees.fromStringSafe(data.melee);
-                    }).catch(err => {
-                        console.log("Verify melee failed: ", err);
-                    })
-
-                    // Verify Gun
-                    let gun = undefined;
-                    await verifyGun(data.address, data.gun, 2000).then((isValid) => {
-                        if (isValid) gun = Guns.fromStringSafe(data.gun);
-                    }).catch(err => {
-                        console.log("Verify gun failed: ", err);
-                    })
+                    const assets = await verifyAllAssets(data.address, {
+                        badge: data.badge,
+                        skin: data.skin,
+                        melee: data.melee,
+                        gun: data.gun,
+                        emotes: data.emotes,
+                    } )
 
                     const stream = new PacketStream(new ArrayBuffer(128));
                     stream.serializeServerPacket(
                         ReadyPacket.create({
                             isMobile: false,
                             address: data.address ? data.address : "",
-                            emotes: emotes,
+                            emotes: assets.emotes,
                             name: data.name,
-                            skin: skin,
-                            badge: Badges.fromStringSafe(data.badge),
-                            melee: melee,
-                            gun: gun,
+                            badge: assets.badge,
+                            skin: assets.skin,
+                            melee: assets.melee,
+                            gun: assets.gun,
                         })
                     );
                     socket.send(stream.getBuffer(), true, false);
