@@ -126,20 +126,42 @@ export class Gamer extends Player {
                 }
                 break;
             }
-            case SpectateActions.SpectatePrevious:
+            case SpectateActions.SpectatePrevious: {
                 if (this.spectating !== undefined) {
-                    toSpectate = spectatablePlayers[
-                        Numeric.absMod(spectatablePlayers.indexOf(this.spectating) - 1, spectatablePlayers.length)
-                    ];
+                    let availablePlayers = spectatablePlayers;
+                    if (this.game.teamMode && this._team?.hasLivingPlayers()) {
+                        // Filter to only living teammates who are spectatable
+                        availablePlayers = this._team.players.filter(
+                            player => this.game.livingPlayers.has(player) && spectatablePlayers.includes(player)
+                        );
+                    }
+                    if (availablePlayers.length > 0) {
+                        const currentIndex = availablePlayers.indexOf(this.spectating);
+                        toSpectate = availablePlayers[
+                            Numeric.absMod(currentIndex - 1, availablePlayers.length)
+                        ];
+                    }
                 }
                 break;
-            case SpectateActions.SpectateNext:
+            }
+            case SpectateActions.SpectateNext: {
                 if (this.spectating !== undefined) {
-                    toSpectate = spectatablePlayers[
-                        Numeric.absMod(spectatablePlayers.indexOf(this.spectating) + 1, spectatablePlayers.length)
-                    ];
+                    let availablePlayers = spectatablePlayers;
+                    if (this.game.teamMode && this._team?.hasLivingPlayers()) {
+                        // Filter to only living teammates who are spectatable
+                        availablePlayers = this._team.players.filter(
+                            player => this.game.livingPlayers.has(player) && spectatablePlayers.includes(player)
+                        );
+                    }
+                    if (availablePlayers.length > 0) {
+                        const currentIndex = availablePlayers.indexOf(this.spectating);
+                        toSpectate = availablePlayers[
+                            Numeric.absMod(currentIndex + 1, availablePlayers.length)
+                        ];
+                    }
                 }
                 break;
+            }
             case SpectateActions.SpectateSpecific: {
                 toSpectate = spectatablePlayers.find(player => player.id === packet.playerID);
                 break;
@@ -246,7 +268,7 @@ export class Gamer extends Player {
 
         // If no rank, exit early
         if (!rank) {
-            this.spectate({spectateAction: SpectateActions.BeginSpectating});
+            this.spectate({ spectateAction: SpectateActions.BeginSpectating });
             return
         };
 
