@@ -8,12 +8,16 @@ import { Player, ActorContainer } from "./player";
 import { PacketStream } from "@common/packets/packetStream";
 import { SuroiByteStream } from "@common/utils/suroiByteStream";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
-import { type SpectatePacketData } from "@common/packets/spectatePacket";
+import { SpectatePacket, type SpectatePacketData } from "@common/packets/spectatePacket";
 import { ReportPacket } from "@common/packets/reportPacket";
 import { Geometry, Numeric } from "@common/utils/math";
 import { pickRandomInArray } from "@common/utils/random";
 import { randomBytes } from "crypto";
 import { Config } from "../config";
+import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
+import { saveGameResult } from "../api/api";
+import { GameOverData, GameOverPacket } from "@common/packets/gameOverPacket";
+import { DamageParams } from "./gameObject";
 
 export interface PlayerContainer {
     readonly name: string
@@ -89,6 +93,15 @@ export class Gamer extends Player {
         this.sendData(stream.getBuffer());
 
         super.disconnect();
+    }
+
+    die(params: Omit<DamageParams, "amount">): void {
+        super.die(params);
+
+        // Send game over to dead player
+        if (!this.disconnected) {
+            this.handleGameOver();
+        }
     }
 
     spectate(packet: SpectatePacketData): void {
@@ -205,5 +218,95 @@ export class Gamer extends Player {
         this.startedSpectating = true;
         this.spectating = toSpectate;
         toSpectate.spectators.add(this);
+    }
+
+    handleGameOver(won = false): void {
+        if (!this.address) return; // Skip bot
+
+        // Calculate rank
+        let rank: number | undefined;
+        if (this.game.teamMode && this.team) {
+            if (won) {
+                rank = 1; // Winning team gets rank 1
+            } else {
+                // Check if all teammates are dead
+                const teammates = this.team.players;
+                const teamIsDead = teammates.every(player => !this.game.livingPlayers.has(player));
+                if (teamIsDead) {
+                    // Count unique teams still alive
+                    const uniqueTeams = new Set(
+                        [...this.game.livingPlayers].map(p => p.teamID).filter(id => id !== undefined)
+                    ).size;
+                    rank = uniqueTeams + 1; // Rank is number of teams still alive + 1
+                }
+            }
+        } else {
+            rank = won ? 1 : this.game.aliveCount + 1; // Solo mode logic
+        }
+
+        // If no rank, exit early
+        if (!rank) {
+            this.spectate({spectateAction: SpectateActions.BeginSpectating});
+            return
+        };
+
+        // Prepare game over packet data
+        const createGameOverPacket = (player: any) => GameOverPacket.create({
+            won,
+            playerID: player.id,
+            kills: player.kills,
+            damageDone: player.damageDone,
+            damageTaken: player.damageTaken,
+            timeAlive: (this.game.now - player.joinTime) / 1000,
+            rank,
+        } as unknown as GameOverData);
+
+        // Send game over packets
+        if (this.game.teamMode && this.team) {
+            for (const teammate of this.team.players) {
+                teammate.sendPacket(createGameOverPacket(teammate));
+            }
+        } else {
+            this.sendPacket(createGameOverPacket(this));
+        }
+
+        // Handle rewards if rank qualifies
+        if (rank < Config.assetsConfig.rank) {
+            const sendRewardsPacket = (player: any, eligible: boolean, rewards: number) => {
+                player.sendPacket(RewardsPacket.create({
+                    eligible,
+                    rank,
+                    rewards,
+                } as unknown as RewardsData));
+            };
+
+            const processRewards = async (player: any) => {
+                if (player.loadout.badge) {
+                    try {
+                        const data = await saveGameResult(
+                            player.address,
+                            rank,
+                            player.kills,
+                            this.game.teamMode,
+                            this.game.gameId
+                        );
+                        sendRewardsPacket(player, data.success && data.rewards.success, data.rewards.amount || 0);
+                    } catch (err) {
+                        console.log("Error claiming rewards:", err);
+                        sendRewardsPacket(player, false, 0);
+                    }
+                } else {
+                    sendRewardsPacket(player, false, 0);
+                }
+            };
+
+            if (this.game.teamMode && this.team) {
+                for (const teammate of this.team.players) {
+                    processRewards(teammate);
+                }
+            } else {
+                processRewards(this);
+            }
+        }
     }
 }
