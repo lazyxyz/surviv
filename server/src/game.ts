@@ -889,6 +889,7 @@ export class Game implements GameData {
 
         this.addTimeout(() => { player.disableInvulnerability(); }, 5000);
 
+        // Start the game
         if (
             (this.teamMode ? this.teams.size : this.aliveCount) > (Config.startImmediately ? 0 : 1)
             && !this._started

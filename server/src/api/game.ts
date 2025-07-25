@@ -3,7 +3,7 @@ import { type GetGameResponse } from "@common/typings";
 import { URLSearchParams } from "node:url";
 import { Config } from "../config";
 import { findGame, games } from "../gameManager";
-import { cors, forbidden, getIP } from "../utils/serverHelpers";
+import { cors } from "../utils/serverHelpers";
 import { TemplatedApp } from "uWebSockets.js";
 import { customTeams } from "../server";
 
@@ -23,7 +23,6 @@ export function initGameRoutes(app: TemplatedApp) {
             res.onAborted(() => { aborted = true; });
             cors(res);
 
-            const ip = getIP(res, req);
             const searchParams = new URLSearchParams(req.getQuery());
 
             let teamSize = Number(searchParams.get("teamSize"));
@@ -39,9 +38,10 @@ export function initGameRoutes(app: TemplatedApp) {
             let response: GetGameResponse;
             if (teamID) {
                 const team = customTeams.get(teamID);
+
                 if (team?.gameID !== undefined) {
                     const game = games[team.gameID];
-                    response = game && !game.stopped
+                    response = game && !game.stopped && game.startedTime == -1 
                         ? { success: true, gameID: team.gameID }
                         : { success: false };
                 } else {
