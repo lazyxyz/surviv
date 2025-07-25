@@ -341,21 +341,24 @@
       <div id="team-container"></div>
 
       <div class="ui-leaderboard">
-        <div id="ui-kill-leader">
-          <div id="kill-leader-leader-container">
-            <span id="kill-leader-leader" translation="msg_waiting_for_leader"></span>
-            <i class="fa-solid fa-crown" style="margin-left: 5px; margin-right: 5px"></i>
-            <span id="kill-leader-kills-counter">0</span>
+        <div id="group-child">
+          <div id="ui-kill-leader">
+            <div id="kill-leader-leader-container">
+              <span id="kill-leader-leader" translation="msg_waiting_for_leader"></span>
+              <i class="fa-solid fa-crown" style="margin-left: 5px; margin-right: 5px"></i>
+              <span id="kill-leader-kills-counter">0</span>
+            </div>
           </div>
+          <div id="badges-container"></div>
         </div>
         <div id="counter-holder">
-          <div class="counter" id="kill-counter">
-            <img src="./img/misc/skull_icon.svg" />
-            <div class="counter-text" id="ui-kills">0</div>
-          </div>
           <div class="counter">
             <img src="./img/misc/player_icon.svg" />
             <div class="counter-text" id="ui-players-alive">1</div>
+          </div>
+          <div class="counter" id="kill-counter">
+            <img src="./img/misc/skull_icon.svg" />
+            <div class="counter-text" id="ui-kills">0</div>
           </div>
         </div>
         <div id="kill-feed"></div>
