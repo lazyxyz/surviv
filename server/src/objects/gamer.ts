@@ -99,7 +99,7 @@ export class Gamer extends Player {
         super.die(params);
 
         // Send game over to dead player
-        if (!this.disconnected) {
+        if (!this.disconnected && !this.game.over) {
             this.handleGameOver();
         }
     }
