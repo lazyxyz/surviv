@@ -74,6 +74,27 @@ export function resetPlayButtons(): void {
     $("#btn-cancel-finding-game").css("display", "none");
 }
 
+function updateUsersBadge(game: Game): void {
+    const selectedBadge = game.console.getBuiltInCVar("cv_loadout_badge");
+    const aliveUsersContainer = document.getElementById("badges-container");
+
+    if (!aliveUsersContainer) return;
+
+    // Clear existing badge content
+    aliveUsersContainer.innerHTML = "";
+
+    // Show badge image if "cards" is selected
+    if (selectedBadge === "cards") {
+        const badgeImage = document.createElement("img");
+        badgeImage.src = `./img/game/shared/badges/${selectedBadge}.svg`;
+        badgeImage.alt = "Cards Badge";
+        badgeImage.className = "badge-image";
+        badgeImage.draggable = false;
+
+        aliveUsersContainer.appendChild(badgeImage);
+    }
+}
+
 export async function setUpUI(game: Game): Promise<void> {
     const { inputManager, uiManager: { ui } } = game;
 
@@ -1774,6 +1795,14 @@ export async function setUpUI(game: Game): Promise<void> {
         ui.btnSpectateMenu.html("<i class=\"fa-solid fa-bars\"></i>");
         ui.btnSpectateMenu.addClass("btn-success");
     }
+
+    // Update the user's badge
+    game.console.variables.addChangeListener("cv_loadout_badge", () => {
+        updateUsersBadge(game);
+    });
+
+    // Initial badge update
+    updateUsersBadge(game);
 
     const optionsIcon = $("#btn-spectate-options-icon");
     $<HTMLButtonElement>("#btn-spectate-options").on("click", () => {
