@@ -1,4 +1,4 @@
-import { EMOTE_SLOTS, GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
 import { type ExplosionDefinition } from "@common/definitions/explosions";
 import { Loots, type LootDefinition } from "@common/definitions/loots";
 import { MapPings, type MapPing } from "@common/definitions/mapPings";
@@ -51,14 +51,9 @@ import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
 import { PlayerData, ReadyPacket } from "@common/packets/readyPacket";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
-import { Badges } from "@common/definitions/badges";
-import { EmoteDefinition, Emotes } from "@common/definitions/emotes";
-import { Skins, DEFAULT_SKIN } from "@common/definitions/skins";
 import { validateJWT } from "./api/api";
-import { getIP, forbidden, createServer } from "./utils/serverHelpers";
-import { Guns } from "@common/definitions/guns";
-import { Melees } from "@common/definitions/melees";
-import { verifyEmotes, verifySkin, verifyMelee, verifyGun, verifyAllAssets } from "./api/balances";
+import { getIP, createServer } from "./utils/serverHelpers";
+import { verifyAllAssets } from "./api/balances";
 
 /*
     eslint-disable
@@ -263,12 +258,9 @@ export class Game implements GameData {
         if (Config.addBot) {
             const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-            const zombieCount = randomInRange(20, 21);
-            const ninjaCount = randomInRange(20, 21);
-            const assassinCount = randomInRange(20, 21);
-            // const zombieCount = randomInRange(10, 20);
-            // const ninjaCount = randomInRange(5, 10);
-            // const assassinCount = randomInRange(3, 5);
+            const zombieCount = randomInRange(10, 20);
+            const ninjaCount = randomInRange(5, 10);
+            const assassinCount = randomInRange(3, 5);
 
             this.activeZombie(zombieCount);
             this.activeNinja(ninjaCount);
