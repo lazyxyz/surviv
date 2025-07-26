@@ -1528,16 +1528,19 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     piercingDamage(params: DamageParams): void {
         const { source, weaponUsed } = params;
         let { amount } = params;
-        if (
-            this.invulnerable
-            || (
-                this.game.teamMode
-                && source instanceof Player
-                && source.teamID === this.teamID
-                && source.id !== this.id
-                && !this.disconnected
-            )
-        ) return;
+
+        if (this.invulnerable) return;
+
+        // Team mode not allow using gun and melee attack teammate
+        if (this.game.teamMode
+            && source instanceof Player
+            && source.teamID === this.teamID
+            && source.id !== this.id
+            && !this.disconnected) {
+            if (params.weaponUsed instanceof GunItem || params.weaponUsed instanceof MeleeItem) {
+                return;
+            }
+        }
 
         amount = this._clampDamageAmount(amount);
 
