@@ -83,12 +83,20 @@ export async function showBadges(game: Game) {
         const isSelected = idString === currentBadge;
         console.log(`Badge ${idString}: isActive=${isActive}, isSelected=${isSelected}`);
 
+        // const badgeItem = $<HTMLDivElement>(
+        //     html`<div id="badge-${idString}" class="badges-list-item-container${isSelected ? " selected" : ""}">
+        //         <div class="badges-list-item badge${isActive ? " active" : " inactive"}" ${inactiveStyle}>
+        //             <div class="badge-image" style="background-image: url('${getBadgeImage(idString)}')"></div>
+        //         </div>
+        //         <span class="badge-name">${getTranslatedString(idString as TranslationKeys)}</span>
+        //     </div>`
+        // );
         const badgeItem = $<HTMLDivElement>(
             html`<div id="badge-${idString}" class="badges-list-item-container${isSelected ? " selected" : ""}">
                 <div class="badges-list-item badge${isActive ? " active" : " inactive"}" ${inactiveStyle}>
-                    <div class="badge-image" style="background-image: url('${getBadgeImage(idString)}')"></div>
+                    <div class="badge-image" style="background-image: url('./img/misc/card.gif'); border-radius: 12px"></div>
                 </div>
-                <span class="badge-name">${getTranslatedString(idString as TranslationKeys)}</span>
+                <span class="badge-name">Surviv Card</span>
             </div>`
         );
 

@@ -350,19 +350,25 @@
 #group-child {
   position: absolute;
   display: flex;
-  right: 160px;
+  right: 130px;
   justify-content: center;
   align-items: center;
   gap: 8px;
+
+  @media screen and (max-width: variables.$screen_large) {
+    right: 100px;
+  }
+
   #badges-container {
     display: flex;
     background: palette.$transparent_bg;
     flex-shrink: 0;
     border-radius: 8px;
+    opacity: 0.5;
 
     .badge-image {
-      width: 64px;
-      height: 64px;
+      width: 36px;
+      height: 36px;
       margin: 6px;
 
       @media screen and (max-width: variables.$screen_large) {
@@ -372,11 +378,10 @@
       }
     }
   }
+
   #ui-kill-leader {
     display: flex;
-    // position: absolute;
     top: 15px;
-    // right: 185px;
     right: 245px;
     margin-left: auto;
     width: max-content;
@@ -386,7 +391,6 @@
     gap: 10px;
     @media screen and (max-width: variables.$screen_large) {
       top: 7px;
-      // right: 90px;
       right: 140px;
       padding: 4px 5px 4px 8px;
       gap: 5px;
@@ -482,7 +486,7 @@
       padding-left: 5px;
       padding-right: 8px;
       font-weight: bold;
-      font-size: 50px;
+      font-size: 25px;
 
       @media screen and (max-width: variables.$screen_large) {
         font-size: 25px;
@@ -491,12 +495,10 @@
   }
 
   #kill-feed {
-    // margin-right: 185px;
-    margin-right: 160px;
-    margin-top: -10px;
+    margin-right: 130px;
+    margin-top: 0px;
     @media screen and (max-width: variables.$screen_large) {
-      //   margin-right: 90px;
-      margin-right: 140px;
+      margin-right: 100px;
       margin-top: 0px;
     }
     @media screen and (max-width: variables.$screen_medium) {
