@@ -67,9 +67,11 @@ export const PUBLIC_KEY = "PUBLIC_KEY";
 export const ACCESS_TOKEN = "ACCESS_TOKEN";
 
 export enum WalletType {
-    METAMASK = "MetaMask",
-    TRUSTWALLET = "Trust Wallet",
-    COINBASEWALLET = "Coinbase Wallet"
+    MetaMask = "MetaMask",
+    TrustWallet = "Trust Wallet",
+    CoinbaseWallet = "Coinbase Wallet",
+    OKXWallet = "OKX Wallet",
+    BraveWallet = "Brave Wallet",
 }
 
 /**

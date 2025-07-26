@@ -48,7 +48,6 @@ export function onConnectWallet(game: Game): void {
     let turnstileToken: string | null = null;
 
     $("#connect-wallet-btn").on("click", async () => {
-        console.log("CONNECT WALLET");
         $(".connect-wallet-portal").css("display", "block");
         turnstileToken = null;
         $("#turnstile-widget").empty();
@@ -117,18 +116,27 @@ export function onConnectWallet(game: Game): void {
             paragraphElement.insertAdjacentText("afterbegin", "Install ");
 
             elements.onclick = () => {
-                if (paragraphElement?.textContent?.includes(WalletType.METAMASK)) {
+                if (paragraphElement?.textContent?.includes(WalletType.MetaMask)) {
                     return window.open("https://metamask.io/download/", "_blank");
                 }
-                if (paragraphElement?.textContent?.includes(WalletType.COINBASEWALLET)) {
+
+                if (paragraphElement?.textContent?.includes(WalletType.CoinbaseWallet)) {
                     return window.open(
                         "https://www.coinbase.com/wallet/downloads",
                         "_blank"
                     );
                 }
 
-                if (paragraphElement?.textContent?.includes(WalletType.TRUSTWALLET)) {
+                if (paragraphElement?.textContent?.includes(WalletType.TrustWallet)) {
                     return window.open("https://trustwallet.com/download", "_blank");
+                }
+
+                if (paragraphElement?.textContent?.includes(WalletType.OKXWallet)) {
+                    return window.open("https://www.okx.com/web3", "_blank");
+                }
+
+                if (paragraphElement?.textContent?.includes(WalletType.BraveWallet)) {
+                    return window.open("https://brave.com/wallet/", "_blank");
                 }
             };
         }
