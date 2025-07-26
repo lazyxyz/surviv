@@ -88,7 +88,7 @@ export async function showBadges(game: Game) {
                 <div class="badges-list-item badge${isActive ? " active" : " inactive"}" ${inactiveStyle}>
                     <div class="badge-image" style="background-image: url('${getBadgeImage(idString)}')"></div>
                 </div>
-                <span class="badge-name">${getTranslatedString(idString as TranslationKeys)}</span>
+                <span class="badge-name">${"Surviv Card"}</span>
             </div>`
         );
 
