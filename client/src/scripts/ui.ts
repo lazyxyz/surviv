@@ -897,9 +897,6 @@ export async function setUpUI(game: Game): Promise<void> {
         sendSpectatePacket(SpectateActions.SpectateKillLeader);
     });
 
-    ui.btnReport.on("click", () => {
-        sendSpectatePacket(SpectateActions.Report);
-    });
     ui.spectateNext.on("click", () => {
         sendSpectatePacket(SpectateActions.SpectateNext);
     });
@@ -942,8 +939,6 @@ export async function setUpUI(game: Game): Promise<void> {
         customizeMenu.fadeToggle(250);
     });
     $<HTMLButtonElement>("#close-customize").on("click", () => customizeMenu.fadeOut(250));
-
-    $<HTMLButtonElement>("#close-report").on("click", () => ui.reportingModal.fadeOut(250));
 
     const crosshairImage = $<HTMLDivElement>("#crosshair-image");
     const crosshairControls = $<HTMLDivElement>("#crosshair-controls");
@@ -1809,7 +1804,6 @@ export async function setUpUI(game: Game): Promise<void> {
             left: "5rem"
         });
 
-        ui.btnReport.html("<i class=\"fa-solid fa-flag\"></i>");
         ui.btnPlayAgainSpectating.html("<i class=\"fa-solid fa-rotate-right\"></i>");
 
         // Spectate Kill Leader button

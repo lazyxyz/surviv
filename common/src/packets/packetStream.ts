@@ -10,7 +10,6 @@ import { type InputPacket, type OutputPacket, type PacketTemplate } from "./pack
 import { PickupPacket } from "./pickupPacket";
 import { PingPacket } from "./pingPacket";
 import { ReadyPacket } from "./readyPacket";
-import { ReportPacket } from "./reportPacket";
 import { RewardsPacket } from "./rewardsPacket";
 import { SpectatePacket } from "./spectatePacket";
 import { UpdatePacket } from "./updatePacket";
@@ -56,7 +55,6 @@ export const ServerToClientPackets = new PacketRegister(
     MapPacket,
     GameOverPacket,
     RewardsPacket,
-    ReportPacket,
     DisconnectPacket,
     ReadyPacket,
 );

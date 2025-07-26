@@ -322,11 +322,12 @@
               <div id="coordinates-hud">X: -- Y: -- Z: --</div>
             </div>
           </div>
+
           <div id="spectating-container">
             <button id="btn-spectate-previous" class="btn btn-lg btn-primary">
               <i class="fa-solid fa-arrow-left"></i>
             </button>
-            <button id="btn-report" class="btn btn-lg btn-danger" translation="btn_report"></button>
+            <div style="display: inline-block; width: 80px;"></div>
             <button id="btn-spectate-next" class="btn btn-lg btn-primary">
               <i class="fa-solid fa-arrow-right"></i>
             </button>
@@ -335,6 +336,7 @@
             <button id="btn-spectate-replay" class="btn btn-lg btn-primary" translation="btn_play_again"></button>
             <button id="btn-spectate-menu" class="btn btn-lg btn-secondary" translation="btn_menu"></button>
           </div>
+
         </div>
       </div>
 
@@ -539,22 +541,7 @@
       </button>
     </div>
   </div>
-
-  <div class="modal dialog" id="report-modal" style="display: none">
-    <div class="dialog-header">
-      <h3>
-        <span style="font-weight: 600" translation="report_reporting"></span><span id="reporting-name"></span>
-      </h3>
-      <span class="dialog-close-btn fa-solid fa-xmark" id="close-report"></span>
-    </div>
-    <div id="report-modal-content">
-      <div id="report-id-container">
-        <span translation="report_id"></span>
-        <span id="report-id"></span>
-      </div>
-      <span translation="report_instructions" use-html></span>
-    </div>
-  </div>
+  
   <div class="modal dialog" id="warning-modal" style="display: none">
     <div id="warning-modal-content">
       <h1 id="warning-modal-title"></h1>

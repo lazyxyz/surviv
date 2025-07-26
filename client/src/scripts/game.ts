@@ -13,7 +13,6 @@ import { type InputPacket, type OutputPacket } from "@common/packets/packet";
 import { PacketStream } from "@common/packets/packetStream";
 import { PickupPacket } from "@common/packets/pickupPacket";
 import { PingPacket } from "@common/packets/pingPacket";
-import { ReportPacket } from "@common/packets/reportPacket";
 import { UpdatePacket, type UpdatePacketDataOut } from "@common/packets/updatePacket";
 import { CircleHitbox } from "@common/utils/hitbox";
 import { adjacentOrEqualLayer } from "@common/utils/layer";
@@ -518,14 +517,6 @@ export class Game {
                     this.sendPacket(PingPacket.create());
                     this.lastPingDate = Date.now();
                 }, 5000);
-                break;
-            }
-            case packet instanceof ReportPacket: {
-                const ui = this.uiManager.ui;
-                const { output } = packet;
-                ui.reportingName.text(output.playerName);
-                ui.reportingId.text(output.reportID);
-                ui.reportingModal.fadeIn(250);
                 break;
             }
             case packet instanceof PickupPacket: {

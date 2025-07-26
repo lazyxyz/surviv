@@ -247,11 +247,6 @@ export class UIManager {
         splashUi: $<HTMLDivElement>("#splash-ui"),
         splashOptions: $<HTMLDivElement>("#splash-options"),
 
-        btnReport: $<HTMLButtonElement>("#btn-report"),
-        reportingName: $<HTMLSpanElement>("#reporting-name"),
-        reportingId: $<HTMLSpanElement>("#report-id"),
-        reportingModal: $<HTMLDivElement>("#report-modal"),
-
         game: $<HTMLDivElement>("#game"),
         gameMenu: $<HTMLDivElement>("#game-menu"),
 

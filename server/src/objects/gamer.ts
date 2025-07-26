@@ -9,7 +9,6 @@ import { PacketStream } from "@common/packets/packetStream";
 import { SuroiByteStream } from "@common/utils/suroiByteStream";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { type SpectatePacketData } from "@common/packets/spectatePacket";
-import { ReportPacket } from "@common/packets/reportPacket";
 import { Geometry, Numeric } from "@common/utils/math";
 import { pickRandomInArray } from "@common/utils/random";
 import { randomBytes } from "crypto";
@@ -170,67 +169,6 @@ export class Gamer extends Player {
             case SpectateActions.SpectateKillLeader: {
                 toSpectate = game.killLeader;
                 break;
-            }
-            case SpectateActions.Report: {
-                const reportID = randomBytes(4).toString("hex");
-                // SERVER HOSTERS assign your custom server an ID somewhere then pass it into the report body region: region
-                const reportJson = {
-                    id: reportID,
-                    reporterName: this.name,
-                    suspectName: this.spectating?.name,
-                    suspectIP: this.spectating?.ip,
-                    reporterIP: this.ip
-                };
-
-                this.sendPacket(ReportPacket.create({
-                    playerName: this.spectating?.name ?? "",
-                    reportID: reportID
-                }));
-                if (Config.protection) {
-                    const reportURL = String(Config.protection?.ipChecker?.logURL);
-                    const reportData = {
-                        embeds: [
-                            {
-                                title: "Report Received",
-                                description: `Report ID: \`${reportID}\``,
-                                color: 16711680,
-                                fields: [
-                                    {
-                                        name: "Username",
-                                        value: `\`${this.spectating?.name}\``
-                                    },
-                                    {
-                                        name: "Time reported",
-                                        value: this.game.now
-                                    },
-                                    {
-                                        name: "Reporter",
-                                        value: this.name
-                                    }
-
-                                ]
-                            }
-                        ]
-                    };
-
-                    // Send report to Discord
-                    fetch(reportURL, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(reportData)
-                    }).catch(error => {
-                        console.error("Error: ", error);
-                    });
-
-                    // Post the report to the server
-                    fetch(`${Config.protection?.punishments?.url}/reports`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json", "api-key": Config?.protection?.punishments?.password || "" },
-                        body: JSON.stringify(reportJson)
-                    }).then(response => response.json())
-                        .then(console.log)
-                        .catch((e: unknown) => console.error(e));
-                }
             }
         }
 
