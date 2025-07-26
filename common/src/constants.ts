@@ -57,7 +57,7 @@ export const GameConstants = freezeDeep({
         inventorySlotTypings,
         maxWeapons: inventorySlotTypings.length,
         nameMaxLength: Constants.PLAYER_NAME_MAX_LENGTH,
-        defaultName: "Player",
+        defaultName: "No name",
         defaultSkin: DEFAULT_SKIN,
         killLeaderMinKills: 3,
         maxMouseDist: 256,

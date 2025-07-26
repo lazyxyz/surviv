@@ -528,7 +528,7 @@ export class Game implements GameData {
             this.app.close();
             Logger.log(`Game ${this.port} | Ended`);
             parentPort?.postMessage({ type: WorkerMessages.GameEnded });
-        }, 3000);
+        }, 5000);
     }
 
     setGameData(data: Partial<Omit<GameData, "aliveCount">>): void {

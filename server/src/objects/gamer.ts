@@ -8,7 +8,7 @@ import { Player, ActorContainer } from "./player";
 import { PacketStream } from "@common/packets/packetStream";
 import { SuroiByteStream } from "@common/utils/suroiByteStream";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
-import { SpectatePacket, type SpectatePacketData } from "@common/packets/spectatePacket";
+import { type SpectatePacketData } from "@common/packets/spectatePacket";
 import { ReportPacket } from "@common/packets/reportPacket";
 import { Geometry, Numeric } from "@common/utils/math";
 import { pickRandomInArray } from "@common/utils/random";
@@ -42,6 +42,7 @@ export class Gamer extends Player {
     private readonly _packetStream = new PacketStream(new SuroiByteStream(new ArrayBuffer(1 << 16)));
 
     readonly socket: WebSocket<PlayerContainer>;
+    gameOver: boolean = false;
 
     constructor(game: Game, socket: WebSocket<PlayerContainer>, position: Vector, layer?: Layer, team?: Team) {
         const userData = socket.getUserData();
@@ -99,7 +100,7 @@ export class Gamer extends Player {
         super.die(params);
 
         // Send game over to dead player
-        if (!this.disconnected && !this.game.over) {
+        if (!this.disconnected) {
             this.handleGameOver();
         }
     }
@@ -243,7 +244,8 @@ export class Gamer extends Player {
     }
 
     handleGameOver(won = false): void {
-        if (!this.address) return; // Skip bot
+        if (!this.address || this.gameOver) return; // Skip bot and recall
+        this.gameOver = true;
 
         // Calculate rank
         let rank: number | undefined;

@@ -469,30 +469,42 @@ export async function setUpUI(game: Game): Promise<void> {
     };
 
     let lastPlayButtonClickTime = 0;
+    function setupPlayButtonWithCooldown(buttonSelector: string, teamSize: TeamSize, label: string) {
+        let isCooldown = false;
 
-    // Join server when play buttons are clicked
-    $("#btn-play-solo").on("click", _ => {
-        if (!game.account.address) {
-            warningAlert("Please connect your wallet to continue!");
-            return;
-        }
-        const now = Date.now();
-        if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit
-        lastPlayButtonClickTime = now;
+        $(buttonSelector).on("click", () => {
+            if (!game.account.address) {
+                warningAlert("Please connect your wallet to continue!");
+                return;
+            }
 
-        joinGame(TeamSize.Solo);
-    });
-    // Join server when play buttons are clicked
-    $("#btn-play-squad").on("click", event => {
-        if (!game.account.address) {
-            warningAlert("Please connect your wallet to continue!");
-            return;
-        }
-        const now = Date.now();
-        if (now - lastPlayButtonClickTime < 1500) return; // Play button rate limit
-        lastPlayButtonClickTime = now;
-        joinGame(TeamSize.Squad);
-    });
+            if (isCooldown) return;
+
+            isCooldown = true;
+            let countdown = 10;
+
+            const $labelSpan = $(buttonSelector).find("span");
+
+            const updateButtonText = () => {
+                $labelSpan.text(`Wait ${countdown}s`);
+                countdown--;
+
+                if (countdown >= 0) {
+                    setTimeout(updateButtonText, 1000);
+                } else {
+                    isCooldown = false;
+                    $labelSpan.text(label);
+                }
+            };
+
+            updateButtonText();
+            joinGame(teamSize);
+        });
+    }
+
+    // Apply it to both buttons
+    setupPlayButtonWithCooldown("#btn-play-solo", TeamSize.Solo, getTranslatedString("play_solo"));
+    setupPlayButtonWithCooldown("#btn-play-squad", TeamSize.Squad, getTranslatedString("play_squad"));
 
     const createTeamMenu = $("#create-team-menu");
     $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", function () {
@@ -605,9 +617,7 @@ export async function setUpUI(game: Game): Promise<void> {
                         ).join("")
                     );
                     ui.createTeamToggles.toggleClass("disabled", !isLeader);
-                    ui.btnStartGame
-                        .toggle(isLeader) // Show button only for leader
-                        .toggleClass("btn-disabled", !isLeader);
+                    ui.btnStartGame.toggle(isLeader);
                     break;
                 }
                 case CustomTeamMessages.Settings: {
@@ -624,8 +634,7 @@ export async function setUpUI(game: Game): Promise<void> {
         };
 
         teamSocket.onerror = (): void => {
-            ui.splashMsgText.html(getTranslatedString("msg_error_joining_team"));
-            ui.splashMsg.show();
+            errorAlert(getTranslatedString("msg_error_joining_team"), 3000);
             resetPlayButtons();
             createTeamMenu.fadeOut(250);
 
@@ -634,16 +643,6 @@ export async function setUpUI(game: Game): Promise<void> {
         };
 
         teamSocket.onclose = (): void => {
-            // The socket is set to undefined in the close button listener
-            // If it's not undefined, the socket was closed by other means, so show an error message
-            if (teamSocket) {
-                ui.splashMsgText.html(
-                    joinedTeam
-                        ? getTranslatedString("msg_lost_team_connection")
-                        : getTranslatedString("msg_error_joining_team")
-                );
-                ui.splashMsg.show();
-            }
             resetPlayButtons();
             teamSocket = undefined;
             teamID = undefined;
@@ -754,11 +753,32 @@ export async function setUpUI(game: Game): Promise<void> {
         }));
     });
 
+    let isCooldown = false;
     ui.btnStartGame.on("click", () => {
+        if (isCooldown) return;
+
+        isCooldown = true;
+        let countdown = 10;
+        const originalText = "Start Game";
+
+        const updateButtonText = () => {
+            ui.btnStartGame.text(`Wait ${countdown}s`);
+            countdown--;
+
+            if (countdown >= 0) {
+                setTimeout(updateButtonText, 1000);
+            } else {
+                isCooldown = false;
+                ui.btnStartGame.text(originalText);
+            }
+        };
+
+        updateButtonText(); // Start countdown immediately
+
         $.get(`${selectedRegion?.mainAddress}/api/getGame?teamSize=${TeamSize.Squad}&teamID=${teamID}&token=${game.account.token}`,
             async (data: GetGameResponse) => {
                 if (data.success) {
-                    errorAlert("Teammate in game! Wait or leave to start.");
+                    errorAlert("A teammate is already in a game. Please wait or leave.");
                 } else {
                     teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Start }));
                 }
