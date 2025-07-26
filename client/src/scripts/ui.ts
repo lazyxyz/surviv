@@ -96,6 +96,14 @@ function updateUsersBadge(game: Game): void {
 }
 
 export async function setUpUI(game: Game): Promise<void> {
+    // verify token is expired
+    if(game.account.token){
+        const { exp } = parseJWT(game.account.token);
+        if (new Date().getTime() >= (exp * 1000)) {
+            game.account.sessionExpired();
+        }
+    }
+
     const { inputManager, uiManager: { ui } } = game;
 
     // Change the menu based on the mode.
@@ -439,12 +447,6 @@ export async function setUpUI(game: Game): Promise<void> {
         // shouldn't happen
         if (selectedRegion === undefined || !game.account.token?.length) return;
 
-        // token is expired
-        const { exp } = parseJWT(game.account.token);
-        if (new Date().getTime() >= (exp * 1000)) {
-            return game.account.sessionExpired();
-        }
-
         const target = selectedRegion;
         void $.get(
             `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}`,
@@ -516,20 +518,7 @@ export async function setUpUI(game: Game): Promise<void> {
 
         if (now - lastPlayButtonClickTime < 1500 || teamSocket || selectedRegion === undefined || !game.account.token?.length) return;
 
-        // token is expired
-        {
-            const { exp } = parseJWT(game.account.token);
-
-            if (new Date().getTime() >= (exp * 1000)) {
-                return game.account.sessionExpired();
-            }
-        }
-
         lastPlayButtonClickTime = now;
-
-        ui.splashOptions.addClass("loading");
-        ui.loadingText.text(getTranslatedString("loading_connecting"));
-
         const params = new URLSearchParams();
 
         if (this.id === "btn-join-team") {
@@ -564,9 +553,6 @@ export async function setUpUI(game: Game): Promise<void> {
 
         const badge = game.console.getBuiltInCVar("cv_loadout_badge");
         if (badge) params.set("badge", badge);
-
-        const role = game.console.getBuiltInCVar("dv_role");
-        if (role) params.set("role", role);
 
         const nameColor = game.console.getBuiltInCVar("dv_name_color");
         if (nameColor) {
@@ -800,18 +786,6 @@ export async function setUpUI(game: Game): Promise<void> {
         game.console.setBuiltInCVar("dv_lobby_clearing", lobbyClearing === "true");
     }
 
-    const devPassword = params.get("password");
-    if (devPassword) {
-        game.console.setBuiltInCVar("dv_password", devPassword);
-        location.search = "";
-    }
-
-    const roleParam = params.get("role");
-    if (roleParam) {
-        game.console.setBuiltInCVar("dv_role", roleParam);
-        location.search = "";
-    }
-
     const usernameField = $<HTMLInputElement>("#username-input");
 
     const toggleRotateMessage = (): JQuery =>
@@ -1026,41 +1000,6 @@ export async function setUpUI(game: Game): Promise<void> {
             return crosshairItem;
         })
     );
-
-    // Load special tab
-    if (game.console.getBuiltInCVar("dv_role") !== "") {
-        $("#tab-special").show();
-
-        $<HTMLInputElement>("#role-name")
-            .val(game.console.getBuiltInCVar("dv_role"))
-            .on("input", e => {
-                game.console.setBuiltInCVar("dv_role", e.target.value);
-            });
-
-        $<HTMLInputElement>("#role-password").on("input", e => {
-            game.console.setBuiltInCVar("dv_password", e.target.value);
-        });
-
-        addCheckboxListener("#toggle-lobbyclearing", "dv_lobby_clearing");
-
-        if (game.console.getBuiltInCVar("dv_name_color") === "") game.console.setBuiltInCVar("dv_name_color", "#FFFFFF");
-
-        $<HTMLInputElement>("#namecolor-color-picker")
-            .val(game.console.getBuiltInCVar("dv_name_color"))
-            .on("input", e => {
-                game.console.setBuiltInCVar("dv_name_color", e.target.value);
-            });
-
-        $<HTMLInputElement>("#weapon-preset")
-            .val(game.console.getBuiltInCVar("dv_weapon_preset"))
-            .on("input", e => {
-                game.console.setBuiltInCVar("dv_weapon_preset", e.target.value);
-            });
-    }
-
-    // load tabs
-    $("#tab-badges").show();
-    $("#tab-weapons").show();
 
     function addSliderListener(
         elementId: string,
