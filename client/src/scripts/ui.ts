@@ -429,41 +429,45 @@ export async function setUpUI(game: Game): Promise<void> {
                 `);
                 ui.splashMsg.show();
             }
-
             resetPlayButtons();
         }
     };
 
-    const joinGame = (teamSize: number): void => {
+    const joinGame = (teamSize: number, teamMode = false): void => {
         ui.splashOptions.addClass("loading");
         ui.loadingText.text(getTranslatedString("loading_finding_game"));
-        // ui.cancelFindingGame.css("display", "");
         // shouldn't happen
         if (selectedRegion === undefined || !game.account.token?.length) return;
 
         // token is expired
-        {
-            const { exp } = parseJWT(game.account.token);
-
-            if (new Date().getTime() >= (exp * 1000)) {
-                return game.account.sessionExpired();
-            }
+        const { exp } = parseJWT(game.account.token);
+        if (new Date().getTime() >= (exp * 1000)) {
+            return game.account.sessionExpired();
         }
 
         const target = selectedRegion;
-
         void $.get(
             `${target.mainAddress}/api/getGame?teamSize=${teamSize || 1}${teamID ? `&teamID=${teamID}` : ""}`,
             (data: GetGameResponse) => {
-                return readyConnect(data, target.gameAddress);
+                if (data.success) {
+                    if (data.gameID == -1) {
+                        ui.splashMsg.hide();
+                        resetPlayButtons();
+                        if (createTeamMenu.css("display") !== "none") createTeamMenu.hide(); // what the if condition doin
+                        warningAlert("Server full. Try another mode or check back later.", 5000)
+                        return;
+                    } else {
+                        return readyConnect(data, target.gameAddress);
+                    }
+                } else {
+                    warningAlert("Server full. Try another mode or check back later.", 5000)
+                    ui.splashMsg.hide();
+                    resetPlayButtons();
+                    if (teamMode) createTeamMenu.fadeIn(250);
+                }
             }
         ).fail(() => {
-            ui.splashMsgText.html(html`
-                ${getTranslatedString("msg_err_finding")}
-                <br>
-                ${getTranslatedString("msg_try_again")}
-            `);
-            ui.splashMsg.show();
+            errorAlert(getTranslatedString("msg_err_finding"), 3000);
             resetPlayButtons();
         });
     };
@@ -627,7 +631,7 @@ export async function setUpUI(game: Game): Promise<void> {
                 }
                 case CustomTeamMessages.Started: {
                     createTeamMenu.hide();
-                    joinGame(TeamSize.Squad);
+                    joinGame(TeamSize.Squad, true);
                     break;
                 }
             }
