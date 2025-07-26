@@ -140,7 +140,7 @@ export class CustomTeam {
                     if (result.success) {
                         this.gameID = result.gameID;
                         clearTimeout(this.resetTimeout);
-                        this.resetTimeout = setTimeout(() => this.gameID = undefined, 1000);
+                        this.resetTimeout = setTimeout(() => this.gameID = undefined, 500);
 
                         this._publishMessage({ type: CustomTeamMessages.Started });
                         this._publishPlayerUpdate();
