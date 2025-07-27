@@ -100,6 +100,7 @@ export class CustomTeam {
             type: CustomTeamMessages.Join,
             teamID: this.id,
             isLeader: player.isLeader,
+            ready: player.ready,
             autoFill: this.autoFill,
             locked: this.locked
         });
@@ -142,10 +143,15 @@ export class CustomTeam {
                         clearTimeout(this.resetTimeout);
                         this.resetTimeout = setTimeout(() => this.gameID = undefined, 500);
 
+                        for (const player of this.players) {
+                            player.ready = false;
+                        }
+
                         this._publishMessage({ type: CustomTeamMessages.Started });
                         this._publishPlayerUpdate();
                     }
                 } else {
+                    player.ready = !player.ready;
                     this._publishPlayerUpdate();
                 }
                 break;
@@ -156,6 +162,7 @@ export class CustomTeam {
     private _publishPlayerUpdate(): void {
         const players = this.players.map(p => ({
             isLeader: p.isLeader,
+            ready: p.ready,
             name: p.name,
             skin: p.skin,
             badge: p.badge,
@@ -167,6 +174,7 @@ export class CustomTeam {
                 type: CustomTeamMessages.Update,
                 players,
                 isLeader: player.isLeader,
+                ready: player.ready,
             });
         }
     }
@@ -184,6 +192,7 @@ export class CustomTeamPlayer {
     get id(): number { return this.team.players.indexOf(this); }
     get isLeader(): boolean { return this.id === 0; }
     name: string;
+    ready: boolean;
     skin: string;
     badge?: string;
     nameColor?: number;
@@ -198,6 +207,7 @@ export class CustomTeamPlayer {
         this.team = team;
         team.players.push(this);
         this.name = name;
+        this.ready = false;
         this.skin = skin;
         this.badge = badge;
         this.nameColor = nameColor;

@@ -97,7 +97,7 @@ function updateUsersBadge(game: Game): void {
 
 export async function setUpUI(game: Game): Promise<void> {
     // verify token is expired
-    if(game.account.token){
+    if (game.account.token) {
         const { exp } = parseJWT(game.account.token);
         if (new Date().getTime() >= (exp * 1000)) {
             game.account.sessionExpired();
@@ -581,11 +581,12 @@ export async function setUpUI(game: Game): Promise<void> {
                     break;
                 }
                 case CustomTeamMessages.Update: {
-                    const { players, isLeader } = data;
+                    const { players, isLeader, ready } = data;
                     ui.createTeamPlayers.html(
                         players.map(
                             ({
                                 isLeader,
+                                ready,
                                 name,
                                 skin,
                                 badge,
@@ -593,6 +594,8 @@ export async function setUpUI(game: Game): Promise<void> {
                             }: CustomTeamPlayerInfo): string => `
                 <div class="create-team-player-container">
                     <i class="fa-solid fa-crown"${isLeader ? "" : ' style="display: none"'}></i>
+                    <i class="fa-regular fa-circle-check"${ready ? "" : ' style="display: none"'}></i>
+
                     <div class="skin">
                         <div class="skin-base" style="background-image: url('./img/game/shared/skins/${skin}_base.svg')"></div>
                         <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${skin}_fist.svg')"></div>
@@ -607,7 +610,8 @@ export async function setUpUI(game: Game): Promise<void> {
                         ).join("")
                     );
                     ui.createTeamToggles.toggleClass("disabled", !isLeader);
-                    ui.btnStartGame.toggle(isLeader);
+                    ui.btnStartGame
+                        .text(getTranslatedString(isLeader ? "create_team_play" : ready ? "create_team_waiting" : "create_team_ready"));
                     break;
                 }
                 case CustomTeamMessages.Settings: {
@@ -743,28 +747,7 @@ export async function setUpUI(game: Game): Promise<void> {
         }));
     });
 
-    let isCooldown = false;
     ui.btnStartGame.on("click", () => {
-        if (isCooldown) return;
-
-        isCooldown = true;
-        let countdown = 10;
-        const originalText = "Start Game";
-
-        const updateButtonText = () => {
-            ui.btnStartGame.text(`Wait ${countdown}s`);
-            countdown--;
-
-            if (countdown >= 0) {
-                setTimeout(updateButtonText, 1000);
-            } else {
-                isCooldown = false;
-                ui.btnStartGame.text(originalText);
-            }
-        };
-
-        updateButtonText(); // Start countdown immediately
-
         $.get(`${selectedRegion?.mainAddress}/api/getGame?teamSize=${TeamSize.Squad}&teamID=${teamID}&token=${game.account.token}`,
             async (data: GetGameResponse) => {
                 if (data.success) {
