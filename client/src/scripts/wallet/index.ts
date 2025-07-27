@@ -52,11 +52,36 @@ export function onConnectWallet(game: Game): void {
         turnstileToken = null;
         $("#turnstile-widget").empty();
 
-        await renderTurnstile().then(value => {
+        renderTurnstile().then(value => {
             turnstileToken = value;
         }).catch(_ => {
             errorAlert("Could not load bot verification. Please refresh!");
         });
+
+        // Get the wallet list container
+        const $walletList = $(".connect-wallet-list");
+        // Get all wallet items
+        const $walletItems = $walletList.children(".connect-wallet-item").get();
+
+        // Sort wallet items: installed wallets first
+        $walletItems.sort((a, b) => {
+            const paragraphA = a.children[1]?.textContent;
+            const paragraphB = b.children[1]?.textContent;
+
+            const isExistedA = game.eip6963.providers?.find(
+                provider => provider?.info?.name === paragraphA
+            );
+            const isExistedB = game.eip6963.providers?.find(
+                provider => provider?.info?.name === paragraphB
+            );
+
+            // Prioritize installed wallets (isExistedA/B is truthy)
+            return isExistedB ? 1 : isExistedA ? -1 : 0;
+        });
+
+        // Clear the current list and append sorted items
+        $walletList.empty();
+        $walletItems.forEach(item => $walletList.append(item));
     });
 
     // Close connect wallet modal
@@ -64,7 +89,7 @@ export function onConnectWallet(game: Game): void {
         $(".connect-wallet-portal").css("display", "none");
     });
 
-    // handler click to login...
+    // Handler click to login for each wallet item
     for (const elements of $(".connect-wallet-item")) {
         const paragraphElement = elements.children[1];
         const logoElement = elements.children[0];
@@ -74,8 +99,8 @@ export function onConnectWallet(game: Game): void {
         );
 
         if (isExisted) {
+            $(elements).addClass("wallet-installed");
             elements.onclick = async () => {
-
                 // Check if Turnstile token exists
                 if (!turnstileToken) {
                     warningAlert("Please complete the bot verification.");
@@ -83,23 +108,20 @@ export function onConnectWallet(game: Game): void {
                 }
 
                 try {
-                    // hidden to show loading ICON
+                    // Hide logo to show loading icon
                     $(logoElement).css("display", "none");
 
-                    // append loading ICON
-                    {
-                        const newNode = document.createElement("div");
+                    // Append loading icon
+                    const newNode = document.createElement("div");
+                    newNode.className = "loading-icon";
+                    newNode.style.width = "36px";
+                    newNode.style.height = "36px";
+                    newNode.style.display = "flex";
+                    newNode.style.alignItems = "center";
+                    newNode.style.justifyContent = "center";
+                    newNode.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
+                    logoElement.after(newNode);
 
-                        newNode.className = "loading-icon";
-                        newNode.style.width = "36px";
-                        newNode.style.height = "36px";
-                        newNode.style.display = "flex";
-                        newNode.style.alignItems = "center";
-                        newNode.style.justifyContent = "center";
-                        newNode.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
-
-                        logoElement.after(newNode);
-                    }
                     return await game.account.connect(isExisted, turnstileToken);
                 } catch (error) {
                     console.log(error);
@@ -108,11 +130,8 @@ export function onConnectWallet(game: Game): void {
                     $(logoElement).css("display", "block");
                 }
             };
-        }
-
-        if (!isExisted) {
+        } else {
             $(paragraphElement).css({ color: "#93C5FD" });
-
             paragraphElement.insertAdjacentText("afterbegin", "Install ");
 
             elements.onclick = () => {
@@ -121,10 +140,7 @@ export function onConnectWallet(game: Game): void {
                 }
 
                 if (paragraphElement?.textContent?.includes(WalletType.CoinbaseWallet)) {
-                    return window.open(
-                        "https://www.coinbase.com/wallet/downloads",
-                        "_blank"
-                    );
+                    return window.open("https://www.coinbase.com/wallet/downloads", "_blank");
                 }
 
                 if (paragraphElement?.textContent?.includes(WalletType.TrustWallet)) {
@@ -141,7 +157,7 @@ export function onConnectWallet(game: Game): void {
             };
         }
     }
-};
+}
 
 export function showWallet(game: Game): void {
     if (!game.account.address) $("#connect-wallet-btn").trigger("click");
