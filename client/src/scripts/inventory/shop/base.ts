@@ -193,40 +193,42 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
         }
         return `./img/game/shared/skins/${assetName}_base.svg`; // Default fallback
     };
+    const isSkinItem = (address: string) => {
+        return [SilverSkinsMapping, GoldSkinsMapping, DivineSkinsMapping].some(pattern => pattern.address.toLowerCase() === address.toLowerCase());
+    };
 
     const alertDiv = document.createElement('div');
     alertDiv.className = "minted-items-alert";
 
     const idRandom = Math.floor(Math.random() * 10000000);
-    const totalItems = mintedItems.flatMap(item => item.values).length;
-    const maxDisplay = 11; // 2 rows x 6 items
     const popupContent = mintedItems.length > 0
         ? mintedItems.flatMap(item => {
             const mapping = Object.values(collectionMappings).find(m => m.address.toLowerCase() === item.address.toLowerCase());
             if (mapping) return item.values.map(([tokenId, value]) => {
                 const assetName = mapping && mapping.assets[tokenId] ? mapping.assets[tokenId] : `unknown_${tokenId}`;
                 const imageUrl = getImagePath(mapping.address, assetName);
+                const rotationClass = isSkinItem(item.address) ? ' rotated' : '';
                 return `
                     <div class="minted-item">
-                        <img src="${imageUrl}" alt="${assetName}" data-balance="${value}">
+                        <img src="${imageUrl}" alt="${assetName}" data-balance="${value}" class="minted-item-image${rotationClass}">
                         <span class="balance">x${value}</span>
                     </div>
                 `;
-            });
-        }).slice(0, maxDisplay).join("") + (totalItems > maxDisplay ? '<div class="more-items">More</div>' : '')
+            }).join("")
+        }).join("")
         : "<div class='no-items'>Items not found. Check explorer instead.</div>";
 
     const alertChild = $(`
-        <div class="minted-items-modal" id="${idRandom}">
-            <div class="minted-items-header">Items claimed successfully!</div>
-            <div class="minted-items-body">
-                <div class="minted-items-grid">${popupContent}</div>
+            <div class="minted-items-modal" id="${idRandom}">
+                <div class="minted-items-header" style="font-family: Survivant">claimed successfully!</div>
+                <div class="minted-items-body">
+                    <div class="minted-items-grid">${popupContent}</div>
+                </div>
+                <div class="minted-items-footer">
+                    <a href="${explorerLink}" target="_blank" class="view-on-explorer">View on Explorer</a>
+                </div>
+                <span class="minted-items-close fa-solid fa-xmark close-popup" id="close-customize"></span>
             </div>
-            <div class="minted-items-footer">
-                <a href="${explorerLink}" target="_blank" class="view-on-explorer">View on Explorer</a>
-            </div>
-            <span class="minted-items-close fa-solid fa-xmark close-popup" id="close-customize"></span>
-        </div>
     `);
 
     alertDiv.append(alertChild[0]);
@@ -240,6 +242,7 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
         }
     });
 }
+
 
 async function updateClaimButton(game: Game): Promise<void> {
     const claimButton = await renderClaimButton(game);
