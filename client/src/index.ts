@@ -11,6 +11,7 @@ import { GameConsole } from "./scripts/utils/console/gameConsole";
 import { onConnectWallet, showWallet } from "./scripts/wallet";
 import "./scss/pages/client.scss";
 import { Buffer } from "buffer";
+import { initTranslation } from "./translations";
 
 if (typeof window !== "undefined") {
     // Polyfill for Buffer
@@ -22,6 +23,8 @@ if (typeof window !== "undefined") {
 export let GAME_CONSOLE = new GameConsole();
 
 void (async () => {
+    initTranslation();
+    
     const account = new Account();    
     const game = await Game.init();
 

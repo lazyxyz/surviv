@@ -36,7 +36,7 @@ export const TRANSLATIONS: {
 };
 
 let setup = false;
-export async function initTranslation(game: Game): Promise<void> {
+export async function initTranslation(): Promise<void> {
     if (setup) {
         console.error("Translation API already setup");
         return;

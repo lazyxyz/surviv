@@ -103,9 +103,12 @@ export class Game {
     readonly bullets = new Set<Bullet>();
     readonly planes = new Set<Plane>();
 
-    ambience?: GameSound;
 
     readonly spinningImages = new Map<SuroiSprite, number>();
+    readonly tweens = new Set<Tween<unknown>>();
+    private readonly _timeouts = new Set<Timeout>();
+
+    ambience?: GameSound;
 
     readonly playerNames = new Map<number, {
         readonly name: string
@@ -143,22 +146,21 @@ export class Game {
 
     disconnectReason = "";
 
-    readonly uiManager = new UIManager(this);
-    readonly pixi = new Application();
-    readonly particleManager = new ParticleManager(this);
-    readonly map = new Minimap(this);
-    readonly camera = new Camera(this);
-    readonly inputManager = new InputManager(this);
+    // readonly uiManager = new UIManager(this);
+    readonly uiManager: UIManager;
+    readonly gas: Gas;
+    readonly map: Minimap;
+    readonly camera: Camera;
     readonly soundManager: SoundManager;
+    readonly gasRender: GasRender;
+    readonly particleManager: ParticleManager;
 
-    readonly gasRender = new GasRender(PIXI_SCALE, this.gameMode);
-    readonly gas = new Gas(this);
+    readonly pixi: Application;
+    readonly inputManager: InputManager;
+
 
     music!: Sound;
 
-    readonly tweens = new Set<Tween<unknown>>();
-
-    private readonly _timeouts = new Set<Timeout>();
 
     addTimeout(callback: () => void, delay?: number): Timeout {
         const timeout = new Timeout(callback, Date.now() + (delay ?? 0));
@@ -167,10 +169,29 @@ export class Game {
     }
 
     constructor() {
+        this.inputManager =  new InputManager(this);
         GAME_CONSOLE.setInputManager(this.inputManager);
         GAME_CONSOLE.readFromLocalStorage();
+        this.pixi = new Application()
+
+        this.uiManager = new UIManager(this);
+        this.gas = new Gas(this);
+        this.map = new Minimap(this);
+        this.camera = new Camera(this);
+        this.gasRender = new GasRender(PIXI_SCALE, this.gameMode);
+        this.particleManager  = new ParticleManager(this);
 
         this.soundManager = new SoundManager(this);
+        this.inputManager.generateBindsConfigScreen();
+        this.inputManager.setupInputs();
+
+        this.music = sound.add("menu_music", {
+            url: `./audio/music/menu_music${GAME_CONSOLE.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : getRandomMode() ? `_${getRandomMode()}` : ""}.mp3`,
+            singleInstance: true,
+            preload: true,
+            autoPlay: true,
+            volume: GAME_CONSOLE.getBuiltInCVar("cv_music_volume")
+        });
     }
 
     private static _instantiated = false;
@@ -182,28 +203,13 @@ export class Game {
         Game._instantiated = true;
 
         const game = new Game();
-        await initTranslation(game);
-        game.inputManager.setupInputs();
 
-
-        setUpCommands(game);
-        game.inputManager.generateBindsConfigScreen();
-
-        game.music = sound.add("menu_music", {
-            url: `./audio/music/menu_music${GAME_CONSOLE.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : getRandomMode() ? `_${getRandomMode()}` : ""}.mp3`,
-            singleInstance: true,
-            preload: true,
-            autoPlay: true,
-            volume: GAME_CONSOLE.getBuiltInCVar("cv_music_volume")
-        });
         return game;
     }
 
     initPixi = async (gameMode: Mode): Promise<void> => {
         const renderMode = GAME_CONSOLE.getBuiltInCVar("cv_renderer");
         const renderRes = GAME_CONSOLE.getBuiltInCVar("cv_renderer_res");
-
-        console.log("gameMode: ", gameMode);
 
         // Check if Pixi.js is already initialized
         if (this.pixi.stage.children.length == 0) {

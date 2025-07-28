@@ -24,10 +24,11 @@ import { html, requestFullscreen } from "../utils/misc";
 import type { TranslationKeys } from "../../typings/translations";
 import { errorAlert } from "../modal";
 import { joinGame, teamSocket } from "./play";
+import { setUpCommands } from "../utils/console/commands";
 
 export let autoPickup = true;
 
-function setupConsoleListener(game: Game): void {
+function setupConsoleListener(): void {
     GAME_CONSOLE.variables.addChangeListener(
         "cv_console_open",
         (_, val) => GAME_CONSOLE.isOpen = val
@@ -84,8 +85,6 @@ function setupMenuButtons(game: Game): void {
         customizeMenu.fadeToggle(250);
     });
     $<HTMLButtonElement>("#close-customize").on("click", () => customizeMenu.fadeOut(250));
-
-    $<HTMLButtonElement>("#close-report").on("click", () => ui.reportingModal.fadeOut(250));
 }
 
 function setupSpectateControls(game: Game): void {
@@ -113,9 +112,6 @@ function setupSpectateControls(game: Game): void {
         sendSpectatePacket(SpectateActions.SpectateKillLeader);
     });
 
-    ui.btnReport.on("click", () => {
-        sendSpectatePacket(SpectateActions.Report);
-    });
     ui.spectateNext.on("click", () => {
         sendSpectatePacket(SpectateActions.SpectateNext);
     });
@@ -621,7 +617,6 @@ function setupMobileControls(game: Game): void {
             left: "5rem"
         });
 
-        ui.btnReport.html("<i class=\"fa-solid fa-flag\"></i>");
         ui.btnPlayAgainSpectating.html("<i class=\"fa-solid fa-rotate-right\"></i>");
         ui.spectateKillLeader.html("<i class=\"fa-solid fa-crown\"></i>");
         ui.spectateKillLeader.addClass("btn-spectate-kill-leader");
@@ -1125,9 +1120,9 @@ function setupGameInteraction(game: Game): void {
 }
 
 export async function setupGame(game: Game): Promise<void> {
-    setupConsoleListener(game);
+    setupConsoleListener();
     setupMenuButtons(game);
-    // setupSpectateControls(game);
+    setupSpectateControls(game);
     setupKeyboardControls(game);
     setupGameModeStyles(game);
     setupCrosshair(game);
@@ -1147,4 +1142,7 @@ export async function setupGame(game: Game): Promise<void> {
     setupRangeInputs();
     setupTabNavigation();
     setupGameInteraction(game);
+
+    // Setup outside
+    setUpCommands(game);
 }
