@@ -1461,122 +1461,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         return this.perks.mapOrDefault<Name, U>(perk, mapper, defaultValue);
     }
 
-    // spectate(packet: SpectatePacketData): void {
-    //     if (!this.dead) return;
-    //     const game = this.game;
-    //     if (game.now - this.lastSpectateActionTime < 200) return;
-    //     this.lastSpectateActionTime = game.now;
-
-    //     let toSpectate: Player | undefined;
-
-    //     const { spectatablePlayers } = game;
-    //     switch (packet.spectateAction) {
-    //         case SpectateActions.BeginSpectating: {
-    //             if (this.game.teamMode && this._team?.hasLivingPlayers()) {
-    //                 // Find closest teammate
-    //                 toSpectate = this._team.getLivingPlayers()
-    //                     .reduce((a, b) => Geometry.distanceSquared(a.position, this.position) < Geometry.distanceSquared(b.position, this.position) ? a : b);
-    //             } else if (this.killedBy !== undefined && !this.killedBy.dead) {
-    //                 toSpectate = this.killedBy;
-    //             } else if (spectatablePlayers.length > 1) {
-    //                 toSpectate = pickRandomInArray(spectatablePlayers);
-    //             }
-    //             break;
-    //         }
-    //         case SpectateActions.SpectatePrevious:
-    //             if (this.spectating !== undefined) {
-    //                 toSpectate = spectatablePlayers[
-    //                     Numeric.absMod(spectatablePlayers.indexOf(this.spectating) - 1, spectatablePlayers.length)
-    //                 ];
-    //             }
-    //             break;
-    //         case SpectateActions.SpectateNext:
-    //             if (this.spectating !== undefined) {
-    //                 toSpectate = spectatablePlayers[
-    //                     Numeric.absMod(spectatablePlayers.indexOf(this.spectating) + 1, spectatablePlayers.length)
-    //                 ];
-    //             }
-    //             break;
-    //         case SpectateActions.SpectateSpecific: {
-    //             toSpectate = spectatablePlayers.find(player => player.id === packet.playerID);
-    //             break;
-    //         }
-    //         case SpectateActions.SpectateKillLeader: {
-    //             toSpectate = game.killLeader;
-    //             break;
-    //         }
-    //         case SpectateActions.Report: {
-    //             const reportID = randomBytes(4).toString("hex");
-    //             // SERVER HOSTERS assign your custom server an ID somewhere then pass it into the report body region: region
-    //             const reportJson = {
-    //                 id: reportID,
-    //                 reporterName: this.name,
-    //                 suspectName: this.spectating?.name,
-    //                 suspectIP: this.spectating?.ip,
-    //                 reporterIP: this.ip
-    //             };
-
-    //             this.sendPacket(ReportPacket.create({
-    //                 playerName: this.spectating?.name ?? "",
-    //                 reportID: reportID
-    //             }));
-    //             if (Config.protection) {
-    //                 const reportURL = String(Config.protection?.ipChecker?.logURL);
-    //                 const reportData = {
-    //                     embeds: [
-    //                         {
-    //                             title: "Report Received",
-    //                             description: `Report ID: \`${reportID}\``,
-    //                             color: 16711680,
-    //                             fields: [
-    //                                 {
-    //                                     name: "Username",
-    //                                     value: `\`${this.spectating?.name}\``
-    //                                 },
-    //                                 {
-    //                                     name: "Time reported",
-    //                                     value: this.game.now
-    //                                 },
-    //                                 {
-    //                                     name: "Reporter",
-    //                                     value: this.name
-    //                                 }
-
-    //                             ]
-    //                         }
-    //                     ]
-    //                 };
-
-    //                 // Send report to Discord
-    //                 fetch(reportURL, {
-    //                     method: "POST",
-    //                     headers: { "Content-Type": "application/json" },
-    //                     body: JSON.stringify(reportData)
-    //                 }).catch(error => {
-    //                     console.error("Error: ", error);
-    //                 });
-
-    //                 // Post the report to the server
-    //                 fetch(`${Config.protection?.punishments?.url}/reports`, {
-    //                     method: "POST",
-    //                     headers: { "Content-Type": "application/json", "api-key": Config?.protection?.punishments?.password || "" },
-    //                     body: JSON.stringify(reportJson)
-    //                 }).then(response => response.json())
-    //                     .then(console.log)
-    //                     .catch((e: unknown) => console.error(e));
-    //             }
-    //         }
-    //     }
-
-    //     if (toSpectate === undefined) return;
-
-    //     this.spectating?.spectators.delete(this);
-    //     this.updateObjects = true;
-    //     this.startedSpectating = true;
-    //     this.spectating = toSpectate;
-    //     toSpectate.spectators.add(this);
-    // }
-
     disableInvulnerability(): void {
         if (this.invulnerable) {
             this.invulnerable = false;
@@ -1644,16 +1528,19 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     piercingDamage(params: DamageParams): void {
         const { source, weaponUsed } = params;
         let { amount } = params;
-        if (
-            this.invulnerable
-            || (
-                this.game.teamMode
-                && source instanceof Player
-                && source.teamID === this.teamID
-                && source.id !== this.id
-                && !this.disconnected
-            )
-        ) return;
+
+        if (this.invulnerable) return;
+
+        // Team mode not allow using gun and melee attack teammate
+        if (this.game.teamMode
+            && source instanceof Player
+            && source.teamID === this.teamID
+            && source.id !== this.id
+            && !this.disconnected) {
+            if (params.weaponUsed instanceof GunItem || params.weaponUsed instanceof MeleeItem) {
+                return;
+            }
+        }
 
         amount = this._clampDamageAmount(amount);
 
@@ -2170,11 +2057,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             c4.damage({ amount: Infinity });
         }
 
-        // Send game over to dead player
-        if (!this.disconnected) {
-            this.handleGameOver();
-        }
-
         // Remove player from kill leader
         if (this === this.game.killLeader) {
             this.game.killLeaderDead(sourceIsPlayer ? source : undefined);
@@ -2268,47 +2150,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this.setDirty();
         reviver.animation = AnimationType.Revive;
         reviver.executeAction(new ReviveAction(reviver, this));
-    }
-
-    handleGameOver(won = false): void {
-        const rank = won ? 1 : this.game.aliveCount + 1;
-
-        const gameOverPacket = GameOverPacket.create({
-            won,
-            playerID: this.id,
-            kills: this.kills,
-            damageDone: this.damageDone,
-            damageTaken: this.damageTaken,
-            timeAlive: (this.game.now - this.joinTime) / 1000,
-            rank,
-        } as unknown as GameOverData);
-        this.sendPacket(gameOverPacket);
-        for (const spectator of this.spectators) {
-            spectator.sendPacket(gameOverPacket);
-        }
-
-        if (this.address) {
-            if (rank <= Config.assetsConfig.rank) {
-                saveGameResult(this.address, rank, this.kills, this.game.teamMode, this.game.gameId).then((data: any) => {
-                    let rewards = 0;
-                    let eligible = false;
-
-                    if (data.success && data.rewards.success) {
-                        rewards = data.rewards.amount;
-                        eligible = true;
-                    }
-
-                    const rewardsPacket = RewardsPacket.create({
-                        eligible,
-                        rank,
-                        rewards: rewards,
-                    } as unknown as RewardsData);
-                    this.sendPacket(rewardsPacket);
-                }).catch(err => {
-                    console.log("Error claim rewards: ", err);
-                })
-            }
-        }
     }
 
     processInputs(packet: PlayerInputData): void {

@@ -1,4 +1,4 @@
-import { EMOTE_SLOTS, GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
 import { type ExplosionDefinition } from "@common/definitions/explosions";
 import { Loots, type LootDefinition } from "@common/definitions/loots";
 import { MapPings, type MapPing } from "@common/definitions/mapPings";
@@ -52,14 +52,11 @@ import { Ninja } from "./objects/bots/ninja";
 import { Mode, ModeToNumber } from "@common/definitions/modes";
 import { PlayerData, ReadyPacket } from "@common/packets/readyPacket";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
-import { Badges } from "@common/definitions/badges";
-import { EmoteDefinition, Emotes } from "@common/definitions/emotes";
-import { Skins, DEFAULT_SKIN } from "@common/definitions/skins";
 import { validateJWT } from "./api/api";
-import { getIP, forbidden, createServer } from "./utils/serverHelpers";
-import { Guns } from "@common/definitions/guns";
-import { Melees } from "@common/definitions/melees";
-import { verifyEmotes, verifySkin, verifyMelee, verifyGun } from "./api/balances";
+import { getIP, createServer } from "./utils/serverHelpers";
+import { verifyAllAssets } from "./api/balances";
+import { Armors } from "@common/definitions/armors";
+
 
 /*
     eslint-disable
@@ -145,7 +142,7 @@ export class Game implements GameData {
     private _nextTeamID = -1;
     get nextTeamID(): number { return ++this._nextTeamID; }
 
-    readonly customTeams: globalThis.Map<string, Team> = new globalThis.Map<string, Team>();
+    readonly teamsMapping: globalThis.Map<string, Team> = new globalThis.Map<string, Team>();
 
     readonly explosions: Explosion[] = [];
     readonly emotes: Emote[] = [];
@@ -520,7 +517,6 @@ export class Game implements GameData {
             }
             this.pluginManager.emit("player_did_win", player);
         }
-
         this.pluginManager.emit("game_end", this);
 
         // End the game in 10 seconds
@@ -531,7 +527,6 @@ export class Game implements GameData {
             this.connectingPlayers.clear();
             this.spectatablePlayers.length = 0;
             this.teams.clear();
-            this.customTeams.clear();
             this.airdrops.length = 0;
             this.detectors.length = 0;
             this.bullets.clear();
@@ -551,7 +546,7 @@ export class Game implements GameData {
             this.app.close();
             Logger.log(`Game ${this.port} | Ended`);
             parentPort?.postMessage({ type: WorkerMessages.GameEnded });
-        }, 10000);
+        }, 5000);
     }
 
     setGameData(data: Partial<Omit<GameData, "aliveCount">>): void {
@@ -656,14 +651,14 @@ export class Game implements GameData {
             const { teamID, autoFill } = socket.getUserData();
 
             if (teamID) {
-                team = this.customTeams.get(teamID);
+                team = this.teamsMapping.get(teamID);
                 if (
                     !team // team doesn't exist
                     || (team.players.length && !team.hasLivingPlayers()) // team isn't empty but has no living players
                     || team.players.length >= (this.maxTeamSize as number) // team is full
                 ) {
                     this.teams.add(team = new Team(this.nextTeamID, autoFill));
-                    this.customTeams.set(teamID, team);
+                    this.teamsMapping.set(teamID, team);
                 }
             } else {
                 const vacantTeams = this.teams.valueArray.filter(
@@ -916,6 +911,7 @@ export class Game implements GameData {
 
         this.addTimeout(() => { player.disableInvulnerability(); }, 5000);
 
+        // Start the game
         if (
             (this.teamMode ? this.teams.size : this.aliveCount) > (Config.startImmediately ? 0 : 1)
             && !this._started
@@ -969,7 +965,9 @@ export class Game implements GameData {
                 if (team) {
                     team.removePlayer(player);
 
-                    if (!team.players.length) this.teams.delete(team);
+                    if (!team.players.length) {
+                        this.teams.delete(team);
+                    };
                 }
                 player.teamWipe();
                 player.beingRevivedBy?.action?.cancel();
@@ -1435,50 +1433,26 @@ export class Game implements GameData {
                         return;
                     }
 
-                    let emotes: readonly (EmoteDefinition | undefined)[] = [];
-                    // await verifyEmotes(data.address, data.emotes.split(','), 2000).then((validEmotes) => {
-                    //     emotes = validEmotes.map(emoteId => Emotes.fromStringSafe(emoteId));
-                    // }).catch(err => {
-                    //     console.log("Verify melee failed: ", err);
-                    //     emotes = EMOTE_SLOTS.map(slot => undefined);
-                    // })
-
-                    // Verify Skin
-                    let skin = Skins.fromStringSafe(DEFAULT_SKIN); // Default skins
-                    // await verifySkin(data.address, data.skin, 2000).then((isValid) => {
-                    //     if (isValid) skin = Skins.fromStringSafe(data.skin);
-                    // }).catch(err => {
-                    //     console.log("Verify skin failed: ", err);
-                    // })
-
-                    // Verify Melee
-                    let melee = undefined;
-                    await verifyMelee(data.address, data.melee, 2000).then((isValid) => {
-                        if (isValid) melee = Melees.fromStringSafe(data.melee);
-                    }).catch(err => {
-                        console.log("Verify melee failed: ", err);
+                    const assets = await verifyAllAssets(data.address, {
+                        badge: data.badge,
+                        skin: data.skin,
+                        melee: data.melee,
+                        gun: data.gun,
+                        emotes: data.emotes,
                     })
-
-                    // Verify Gun
-                    let gun = undefined;
-                    // await verifyGun(data.address, data.gun, 2000).then((isValid) => {
-                    //     if (isValid) gun = Guns.fromStringSafe(data.gun);
-                    // }).catch(err => {
-                    //     console.log("Verify gun failed: ", err);
-                    // })
 
                     const stream = new PacketStream(new ArrayBuffer(128));
                     stream.serializeServerPacket(
                         ReadyPacket.create({
                             isMobile: false,
                             address: data.address ? data.address : "",
-                            emotes: emotes,
-                            name: data.name,
-                            skin: skin,
-                            badge: Badges.fromStringSafe(data.badge),
-                            melee: melee,
-                            gun: gun,
                             gameMode: ModeToNumber[game.gameMode],
+                            emotes: assets.emotes,
+                            name: data.name,
+                            badge: assets.badge,
+                            skin: assets.skin,
+                            melee: assets.melee,
+                            gun: assets.gun,
                         })
                     );
                     socket.send(stream.getBuffer(), true, false);

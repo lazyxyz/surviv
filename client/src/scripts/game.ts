@@ -1,9 +1,7 @@
-import { EMOTE_SLOTS, GameConstants, InputActions, InventoryMessages, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { GameConstants, InputActions, InventoryMessages, Layer, ObjectCategory, TeamSize } from "@common/constants";
 import { ArmorType } from "@common/definitions/armors";
-import { Badges, type BadgeDefinition } from "@common/definitions/badges";
-import { Emotes } from "@common/definitions/emotes";
-import { Guns, type DualGunNarrowing } from "@common/definitions/guns";
-import { Loots } from "@common/definitions/loots";
+import { type BadgeDefinition } from "@common/definitions/badges";
+import { type DualGunNarrowing } from "@common/definitions/guns";
 import { Scopes } from "@common/definitions/scopes";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { GameOverPacket } from "@common/packets/gameOverPacket";
@@ -15,7 +13,6 @@ import { type InputPacket, type OutputPacket } from "@common/packets/packet";
 import { PacketStream } from "@common/packets/packetStream";
 import { PickupPacket } from "@common/packets/pickupPacket";
 import { PingPacket } from "@common/packets/pingPacket";
-import { ReportPacket } from "@common/packets/reportPacket";
 import { UpdatePacket, type UpdatePacketDataOut } from "@common/packets/updatePacket";
 import { CircleHitbox } from "@common/utils/hitbox";
 import { adjacentOrEqualLayer } from "@common/utils/layer";
@@ -526,14 +523,6 @@ export class Game {
                     this.sendPacket(PingPacket.create());
                     this.lastPingDate = Date.now();
                 }, 5000);
-                break;
-            }
-            case packet instanceof ReportPacket: {
-                const ui = this.uiManager.ui;
-                const { output } = packet;
-                ui.reportingName.text(output.playerName);
-                ui.reportingId.text(output.reportID);
-                ui.reportingModal.fadeIn(250);
                 break;
             }
             case packet instanceof PickupPacket: {

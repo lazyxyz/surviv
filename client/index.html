@@ -192,8 +192,8 @@
               <button class="btn btn-lg btn-darken btn-primary" id="btn-play-squad">
                 <span translation="play_squad"></span>
               </button>
-
             </div>
+
             <div id="team-option-btns" class="team-btns-container">
               <button class="btn btn-lg btn-darken btn-purple" id="btn-join-team" translation="join_team"></button>
               <button class="btn btn-lg btn-darken btn-purple" id="btn-create-team" translation="create_team"></button>
@@ -220,7 +220,7 @@
             </a>
             <a href="https://app.galxe.com/quest/SurvivFun?sort=Trending" target="_blank">
               <button class="btn btn-lg btn-darken btn-event btn-quests" id="btn-rules" style="display: none">
-                <div class="pulsating-circle" style="display: blobk"></div>
+                <div class="pulsating-circle" style="display: block"></div>
                 <img src="public/img/misc/galxe.svg" alt="">
                 <span>Galxe quests</span>
               </button>
@@ -322,11 +322,12 @@
               <div id="coordinates-hud">X: -- Y: -- Z: --</div>
             </div>
           </div>
+
           <div id="spectating-container">
             <button id="btn-spectate-previous" class="btn btn-lg btn-primary">
               <i class="fa-solid fa-arrow-left"></i>
             </button>
-            <button id="btn-report" class="btn btn-lg btn-danger" translation="btn_report"></button>
+            <div style="display: inline-block; width: 80px;"></div>
             <button id="btn-spectate-next" class="btn btn-lg btn-primary">
               <i class="fa-solid fa-arrow-right"></i>
             </button>
@@ -335,27 +336,31 @@
             <button id="btn-spectate-replay" class="btn btn-lg btn-primary" translation="btn_play_again"></button>
             <button id="btn-spectate-menu" class="btn btn-lg btn-secondary" translation="btn_menu"></button>
           </div>
+
         </div>
       </div>
 
       <div id="team-container"></div>
 
       <div class="ui-leaderboard">
-        <div id="ui-kill-leader">
-          <div id="kill-leader-leader-container">
-            <span id="kill-leader-leader" translation="msg_waiting_for_leader"></span>
-            <i class="fa-solid fa-crown" style="margin-left: 5px; margin-right: 5px"></i>
-            <span id="kill-leader-kills-counter">0</span>
+        <div id="group-child">
+          <div id="ui-kill-leader">
+            <div id="kill-leader-leader-container">
+              <span id="kill-leader-leader" translation="msg_waiting_for_leader"></span>
+              <i class="fa-solid fa-crown" style="margin-left: 5px; margin-right: 5px"></i>
+              <span id="kill-leader-kills-counter">0</span>
+            </div>
           </div>
+          <div id="badges-container"></div>
         </div>
         <div id="counter-holder">
-          <div class="counter" id="kill-counter">
-            <img src="./img/misc/skull_icon.svg" />
-            <div class="counter-text" id="ui-kills">0</div>
-          </div>
           <div class="counter">
             <img src="./img/misc/player_icon.svg" />
             <div class="counter-text" id="ui-players-alive">1</div>
+          </div>
+          <div class="counter" id="kill-counter">
+            <img src="./img/misc/skull_icon.svg" />
+            <div class="counter-text" id="ui-kills">0</div>
           </div>
         </div>
         <div id="kill-feed"></div>
@@ -536,22 +541,7 @@
       </button>
     </div>
   </div>
-
-  <div class="modal dialog" id="report-modal" style="display: none">
-    <div class="dialog-header">
-      <h3>
-        <span style="font-weight: 600" translation="report_reporting"></span><span id="reporting-name"></span>
-      </h3>
-      <span class="dialog-close-btn fa-solid fa-xmark" id="close-report"></span>
-    </div>
-    <div id="report-modal-content">
-      <div id="report-id-container">
-        <span translation="report_id"></span>
-        <span id="report-id"></span>
-      </div>
-      <span translation="report_instructions" use-html></span>
-    </div>
-  </div>
+  
   <div class="modal dialog" id="warning-modal" style="display: none">
     <div id="warning-modal-content">
       <h1 id="warning-modal-title"></h1>
@@ -900,13 +890,13 @@
         <button class="tab" id="tab-skins">
           <i class="fa-solid fa-shirt"></i><span translation="loadout_skins"></span>
         </button>
-        <button class="tab" id="tab-weapons" style="display: none">
+        <button class="tab" id="tab-weapons">
           <i class="fa-solid fa-gun"></i><span>Weapons</span>
         </button>
         <button class="tab" id="tab-emotes">
           <img src="./img/misc/emotes_icon.svg" /><span translation="loadout_emotes"></span>
         </button>
-        <button class="tab" id="tab-badges" style="display: none">
+        <button class="tab" id="tab-badges">
           <i class="fa-solid fa-certificate"></i><span translation="loadout_badges"></span>
         </button>
         <button class="tab" id="tab-crosshairs">
@@ -1156,25 +1146,33 @@
         <div class="connect-wallet-list">
           <div class="connect-wallet-item">
             <img src="./img/wallet/metamask.png" alt="metamask" />
-
             <p>MetaMask</p>
           </div>
 
           <div class="connect-wallet-item">
-            <img src="./img/wallet/coinbase-wallet.png" alt="metamask" />
+            <img src="./img/wallet/trust-wallet.png" alt="trust-wallet" />
+            <p>Trust Wallet</p>
+          </div>
 
+          <div class="connect-wallet-item">
+            <img src="./img/wallet/coinbase-wallet.png" alt="coinbase-wallet" />
             <p>Coinbase Wallet</p>
           </div>
 
           <div class="connect-wallet-item">
-            <img src="./img/wallet/trust-wallet.png" alt="metamask" />
+            <img src="./img/wallet/okx-wallet.png" alt="okx-wallet" />
+            <p>OKX Wallet</p>
+          </div>
 
-            <p>Trust Wallet</p>
+          <div class="connect-wallet-item">
+            <img src="./img/wallet/brave-wallet.png" alt="brave-wallet" />
+            <p>Brave Wallet</p>
           </div>
         </div>
       </div>
     </div>
   </div>
+
 
   <script src="./src/index.ts" type="module"></script>
 </body>

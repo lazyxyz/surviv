@@ -1127,7 +1127,7 @@ function setupGameInteraction(game: Game): void {
 export async function setupGame(game: Game): Promise<void> {
     setupConsoleListener(game);
     setupMenuButtons(game);
-    setupSpectateControls(game);
+    // setupSpectateControls(game);
     setupKeyboardControls(game);
     setupGameModeStyles(game);
     setupCrosshair(game);

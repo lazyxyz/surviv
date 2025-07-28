@@ -1,153 +1,159 @@
-$primary-bg: #70722f;
-$modal-bg: #b5b789; // Slightly lighter shade for contrast
-$white: #fff;
-$gray: #666;
-$red: #ff4444;
-$shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-$spacing: 15px;
+@use "utils/scrollbar.scss";
+@use "./palette.scss";
+
+$spacing: 16px;
 $transition: all 0.3s ease;
 
+.minted-item-image.rotated {
+  transform: rotate(90deg);
+}
+
 .minted-items-alert {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    width: 80%;
-    max-width: 800px;
-    padding: $spacing;
-    background: $primary-bg;
-    border-radius: 15px;
-    box-shadow: $shadow;
+  position: fixed;
+  z-index: 1000;
+  width: 100vw;
+  height: 100vh;
+  background: #0000009d;
 }
 
 .minted-items-modal {
-    background: $modal-bg; // Use lighter shade to integrate with primary-bg
-    // padding: $spacing;
-    border-radius: 10px;
-    text-align: center;
-    overflow: hidden;
-    color: $white; // Ensure text is readable against $modal-bg
-    padding-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 75%;
+  max-width: 800px;
+  border-radius: 12px;
+  gap: 24px;
+  color: palette.$light; // Ensure text is readable against $modal-bg
+  background-color: palette.$grass_bg;
+  padding: 24px;
 }
 
 .minted-items-header {
-    font-size: 20px;
-    font-weight: bold;
-    color: $white;
-    padding-bottom: $spacing;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+  font-size: 20px;
+  font-weight: bold;
+  color: palette.$light;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 .minted-items-body {
-    display: flex;
-    align-items: center;
-    gap: $spacing;
-    justify-content: center;
-    padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: $spacing;
+  justify-content: center;
 }
 
 .minted-items-body i {
-    font-size: 20px;
-    color: #28a745;
-    margin-bottom: $spacing / 2;
+  font-size: 20px;
+  color: #28a745;
+  margin-bottom: $spacing / 2;
 }
 
 .minted-items-close {
-    cursor: pointer;
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    color: $white; // Changed from $gray to contrast with $primary-bg
-    transition: $transition;
+  cursor: pointer;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 24px;
+  color: palette.$light; // Changed from $gray to contrast with $primary-bg
+  transition: $transition;
 
-    &:hover {
-        color: $red;
-    }
+  &:hover {
+    color: palette.$orange;
+  }
 }
 
 .minted-items-grid {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    grid-template-rows: repeat(2, minmax(0, 100px)); // Limit to 2 rows
-    gap: $spacing;
-    padding: $spacing / 2 0;
-    justify-content: center;
-    max-height: 220px; // 2 rows x 100px + gap
-    overflow: hidden;
+  display: grid;
+  overflow-y: auto;
+  grid-template-columns: repeat(auto-fit, minmax(100px, auto));
+  max-width: calc(122px * 5 + 48px); // 5 items with 12px gap
+  max-height: 300px;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+
+    &-track {
+      background: #ffffff35;
+      border-radius: 10px;
+    }
+
+    &-thumb {
+      background: #ffffffaa;
+      border-radius: 10px;
+    }
+  }
 }
 
-
 .minted-item {
-    position: relative;
-    width: 100px;
-    height: 100px;
-    background: transparent; // Removed light gray to blend with $modal-bg
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: $transition;
+  background-image: url("./img/game/shared/patterns/silver.svg"); // Use the background image
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: $transition;
 
-    &:hover {
-        transform: scale(1.05);
-    }
+  img {
+    width: 100%;
+    height: 100%;
+  }
 
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .balance {
-        position: absolute;
-        bottom: 5px;
-        right: 5px;
-        font-size: 14px;
-        font-weight: bold;
-        color: $white;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 2px 8px;
-        border-radius: 3px;
-    }
+  .balance {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #fdd842;
+    background-color: #fdd84240;
+    padding: 2px 8px;
+    border-radius: 6px;
+    backdrop-filter: blur(10px);
+  }
 }
 
 .no-items {
-    color: $white;
-    font-size: 18px;
-    padding: $spacing;
-}
-
-.more-items {
-    font-size: 18px;
-    color: $white;
-    text-align: center;
-    margin: auto;
-    padding-top: $spacing / 2;
-    cursor: pointer;
-
-    &:hover {
-        color: lighten($white, 20%);
-    }
+  color: palette.$light;
+  font-size: 18px;
+  padding: $spacing;
 }
 
 .minted-item img {
-    background: #737636;
+  background-size: cover;
+  background-repeat: no-repeat;
+  padding: 16px;
 }
 
 .view-on-explorer {
-    display: inline-block;
-    padding: 10px 16px; // Increased vertical padding from 8px to 10px
-    background-color: darken($primary-bg, 10%);
-    color: $white;
-    text-decoration: none;
-    border-radius: 5px;
-    font-size: 14px;
-    transition: $transition;
-    padding-bottom: 10px;
+  display: inline-block;
+  padding: 10px 16px; // Increased vertical padding from 8px to 10px
+  background-color: palette.$orange;
+  color: palette.$light;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: $transition;
+  padding-bottom: 10px;
+  font-weight: 600;
+  border-bottom: 3px solid palette.$orange_bg;
 
-    &:hover {
-        background-color: darken($primary-bg, 20%);
-    }
+  &:hover {
+    background-color: palette.$orange_bg;
+    border-bottom: 3px solid palette.$reddit_bg;
+  }
 }

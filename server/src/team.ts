@@ -3,12 +3,12 @@ import { random } from "@common/utils/random";
 import { type WebSocket } from "uWebSockets.js";
 import { findGame } from "./gameManager";
 import { type Player } from "./objects/player";
-import { customTeams } from "./server";
+import { CUSTOM_TEAMS } from "./server";
 import { removeFrom } from "./utils/misc";
 import { TeamSize } from "@common/constants";
 
 export class Team {
-    readonly id: number;
+    readonly id: number; // team index in a game
 
     private readonly _players: Player[] = [];
     get players(): readonly Player[] { return this._players; }
@@ -37,68 +37,12 @@ export class Team {
             this._players.splice(index, 1);
             this._indexMapping.delete(player);
 
-            /*
-                [a, b, c, d, e, f] // -> player array
-                [
-                    a -> 0,
-                    b -> 1,
-                    c -> 2,
-                    d -> 3,
-                    e -> 4,
-                    f -> 5
-                ]
-
-                remove player c
-
-                [a, b, d, e, f]
-                [
-                    a -> 0,
-                    b -> 1,
-                    c -> 2,
-                    d -> 3,
-                    e -> 4,
-                    f -> 5
-                ]
-
-                now we just need to refresh the mappings, but we skip 0, 1, and 2
-
-                [a, b, d, e, f]
-                [
-                    a -> 0,
-                    b -> 1,
-                    d -> 3 - 1,
-                    e -> 4 - 1,
-                    f -> 5 - 1
-                ]
-
-                which gives
-                [a, b, d, e, f]
-                [
-                    a -> 0,
-                    b -> 1,
-                    d -> 2,
-                    e -> 3,
-                    f -> 4
-                ]
-
-                which is correct
-
-                this obviously only works with a specific configuration of the array and map (that
-                being the one used in the example), but since we control the insertion of data into
-                those collections, we can ensure that it always finds itself in such a configuration
-                (which also just so happens to be the easiest and simplest)
-
-                it could possibly to use a sparse array with a list of vacant indices in order to
-                minimize array resizes with push and splice, but i can't be bothered to implement that
-                haha
-            */
             for (const [player, mapped] of this._indexMapping.entries()) { // refresh mapping
                 if (mapped <= index) continue;
                 this._indexMapping.set(player, mapped - 1);
                 this.reassignColorIndexes();
             }
         }
-
         return exists;
     }
 
@@ -156,6 +100,7 @@ export class CustomTeam {
             type: CustomTeamMessages.Join,
             teamID: this.id,
             isLeader: player.isLeader,
+            ready: player.ready,
             autoFill: this.autoFill,
             locked: this.locked
         });
@@ -168,7 +113,7 @@ export class CustomTeam {
 
         if (!this.players.length) {
             clearTimeout(this.resetTimeout);
-            customTeams.delete(this.id);
+            CUSTOM_TEAMS.delete(this.id);
             return;
         }
 
@@ -196,7 +141,7 @@ export class CustomTeam {
                     if (result.success) {
                         this.gameID = result.gameID;
                         clearTimeout(this.resetTimeout);
-                        // this.resetTimeout = setTimeout(() => this.gameID = undefined, 10000);
+                        this.resetTimeout = setTimeout(() => this.gameID = undefined, 500);
 
                         for (const player of this.players) {
                             player.ready = false;
@@ -206,7 +151,7 @@ export class CustomTeam {
                         this._publishPlayerUpdate();
                     }
                 } else {
-                    player.ready = true;
+                    player.ready = !player.ready;
                     this._publishPlayerUpdate();
                 }
                 break;
@@ -229,7 +174,7 @@ export class CustomTeam {
                 type: CustomTeamMessages.Update,
                 players,
                 isLeader: player.isLeader,
-                ready: player.ready
+                ready: player.ready,
             });
         }
     }
@@ -246,8 +191,8 @@ export class CustomTeamPlayer {
     team: CustomTeam;
     get id(): number { return this.team.players.indexOf(this); }
     get isLeader(): boolean { return this.id === 0; }
-    ready: boolean;
     name: string;
+    ready: boolean;
     skin: string;
     badge?: string;
     nameColor?: number;
@@ -261,8 +206,8 @@ export class CustomTeamPlayer {
     ) {
         this.team = team;
         team.players.push(this);
-        this.ready = false;
         this.name = name;
+        this.ready = false;
         this.skin = skin;
         this.badge = badge;
         this.nameColor = nameColor;

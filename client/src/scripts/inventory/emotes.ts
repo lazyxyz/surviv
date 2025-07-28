@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import { EMOTE_SLOTS } from "@common/constants";
-import type { Game } from "../game";
 import { EmoteCategory, Emotes, type EmoteDefinition } from "@common/definitions/emotes";
 import { getTranslatedString } from "../../translations";
 import type { ReferenceTo } from "@common/utils/objectDefinitions";
@@ -19,7 +18,7 @@ export async function showEmotes(account: Account) {
 
     const userEmoteBalance = Object.entries(await account.getBalances(SurvivAssets.SurvivMemes));
     const userEmotes = userEmoteBalance.map(e => e[0]);
-   
+
     // Cache jQuery selectors for performance
     const emoteList = $("#emotes-list");
     const customizeEmote = $("#emote-customize-wheel");
@@ -49,6 +48,13 @@ export async function showEmotes(account: Account) {
     function updateEmotesList(): void {
         emoteList.empty();
 
+        // Add category header
+        emoteList.append(
+            $<HTMLDivElement>(
+                `<div class="emote-list-header">Emotes</div>`
+            )
+        );
+
         const emotes = Emotes.definitions;
 
         // Group emotes by category
@@ -62,19 +68,47 @@ export async function showEmotes(account: Account) {
 
         // Loop through each category
         for (const [category, emoteDefs] of categoryMap.entries()) {
+
+            // None emote
+            const nonEmoteItem = $<HTMLDivElement>(
+                `<div id="emote-none" class="emotes-list-item-container">
+                    <div id="none-emote" class="emotes-list-item"style="opacity: 0.5"><i class="fa-solid fa-ban"></i></div>
+                    <span class="emote-name">None</span>
+                </div>`
+            );
+
+            // Add click handler for the none-emote
+            nonEmoteItem.on("click", () => {
+                if (selectedEmoteSlot === undefined) return;
+
+                // Clear only the selected emote slot
+                $(".emotes-list-item-container").removeClass("selected");
+                nonEmoteItem.addClass("selected");
+
+                // Clear the console variable for the selected slot
+                game.console.setBuiltInCVar(`cv_loadout_${selectedEmoteSlot}_emote`, "");
+
+                // Update only the selected emote slot UI
+                const wheelElement = emoteWheelUiCache[selectedEmoteSlot];
+                const bottomElement = bottomEmoteUiCache[selectedEmoteSlot];
+
+                if (wheelElement) {
+                    wheelElement.css("background-image", "none");
+                }
+                if (bottomElement) {
+                    bottomElement.hide();
+                }
+            });
+
+            emoteList.append(nonEmoteItem);
+
+
             // Sort: owned first, then unowned
             const sortedEmotes = [...emoteDefs].sort((a, b) => {
                 const aOwned = userEmotes.includes(a.idString);
                 const bOwned = userEmotes.includes(b.idString);
                 return Number(bOwned) - Number(aOwned); // owned = true -> 1
             });
-
-            // Add category header
-            emoteList.append(
-                $<HTMLDivElement>(
-                    `<div class="emote-list-header">${getTranslatedString(`emotes_category_${EmoteCategory[category]}` as TranslationKeys)}</div>`
-                )
-            );
 
             for (const emote of sortedEmotes) {
                 const idString = emote.idString;
@@ -153,11 +187,15 @@ export async function showEmotes(account: Account) {
             );
 
             (emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)).addClass("selected");
-            $(`.emotes-list-item-container`).removeClass("selected").css(
-                "cursor",
-                userEmotes.includes(GAME_CONSOLE.getBuiltInCVar(cvar) || "none") ? "pointer" : "not-allowed"
-            );
-            $(`#emote-${GAME_CONSOLE.getBuiltInCVar(cvar) || "none"}`).addClass("selected");
+            $(`.emotes-list-item-container`).removeClass("selected");
+
+            // Handle selection state for current emote or none option
+            const currentEmote = GAME_CONSOLE.getBuiltInCVar(cvar);
+            if (currentEmote) {
+                $(`#emote-${currentEmote}`).addClass("selected");
+            } else {
+                $("#emote-none").addClass("selected");
+            }
         });
 
         (emoteWheelUiCache[slot] ??= $(`#emote-wheel-container .emote-${slot}`)).children(".remove-emote-btn").on("click", () => {
@@ -166,3 +204,5 @@ export async function showEmotes(account: Account) {
         });
     }
 }
+
+

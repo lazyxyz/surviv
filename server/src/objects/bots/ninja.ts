@@ -89,17 +89,18 @@ export class Ninja extends Player {
      * Setup the Ninja's inventory.
      */
     private initializeInventory(): void {
-        this.inventory.weapons[2] = new MeleeItem("steelfang", this);
-
         const roll = Math.random(); // random number between 0 and 1
-
+        
         if (roll < 0.5) {
             // 50% chance
+            this.inventory.weapons[2] = new MeleeItem("steelfang", this);
             this.inventory.items.setItem('cola', 2);
         } else if (roll < 0.8) {
             // 30% chance (0.5 - 0.8)
+            this.inventory.weapons[2] = new MeleeItem("feral_claws", this);
             this.inventory.items.setItem('cola', 3);
         } else {
+            this.inventory.weapons[2] = new MeleeItem("sickle", this);
             // 20% chance (0.8 - 1.0)
             this.inventory.items.setItem('tablets', 2);
         }
@@ -147,7 +148,7 @@ export class Ninja extends Player {
             if (obj instanceof Gamer && !obj.dead) {
                 const distance = Vec.length(Vec.sub(obj.position, this.position));
                 if (distance < this.chaseRadius) {
-                    this.attackNearestPlayer();
+                    this.attackNearestPlayer(obj);
                     return true;
                 }
             }
@@ -155,14 +156,10 @@ export class Ninja extends Player {
         return false;
     }
 
-    private attackNearestPlayer(): void {
-        const nearestPlayer = this.findNearestObject<Gamer>(Gamer);
-
-        if (nearestPlayer) {
-            // Attack nearest player with melee
-            this.baseSpeed = this.attackSpeed;
-            this.moveToTarget(nearestPlayer.position, Ninja.SAFE_DISTANCE_PLAYER, !this.attacking);
-        }
+    private attackNearestPlayer(player: Gamer): void {
+        // Attack nearest player with melee
+        this.baseSpeed = this.attackSpeed;
+        this.moveToTarget(player.position, Ninja.SAFE_DISTANCE_PLAYER, !this.attacking);
     }
 
     private holdPositionPreGame(): void {

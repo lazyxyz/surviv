@@ -11,146 +11,40 @@ import {
 } from "@common/mappings";
 import { ethers } from "ethers";
 import { Config } from "../config";
+import { EMOTE_SLOTS } from "@common/constants";
+import { BadgeDefinition, Badges } from "@common/definitions/badges";
+import { EmoteDefinition, Emotes } from "@common/definitions/emotes";
+import { GunDefinition, Guns } from "@common/definitions/guns";
+import { MeleeDefinition, Melees } from "@common/definitions/melees";
+import { SkinDefinition, Skins, DEFAULT_SKIN } from "@common/definitions/skins";
 
-export async function verifySkin(player: string, item: string, timeout: number = 7000): Promise<boolean> {
-    const rpc = Config.assetsConfig?.rpc;
-    if (!rpc) throw new Error("RPC configuration not found");
-
-    // Initialize provider
-    const provider = new ethers.JsonRpcProvider(rpc);
-
-    // List of skin mappings to check
-    const skinMappings = [
-        { mapping: SilverSkinsMapping },
-        { mapping: GoldSkinsMapping },
-        { mapping: DivineSkinsMapping },
-    ];
-
-    // Iterate through each mapping
-    for (const { mapping } of skinMappings) {
-        if (mapping.assets.includes(item)) {
-            // Get token ID (index of item in assets array)
-            const tokenId = mapping.assets.indexOf(item);
-
-            try {
-                // Create contract instance
-                const contract = new ethers.Contract(
-                    mapping.address,
-                    ["function balanceOf(address account, uint256 id) view returns (uint256)"],
-                    provider
-                );
-
-                // Set up timeout
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-                try {
-                    // Get balance with timeout
-                    const balance = await Promise.race([
-                        contract.balanceOf(player, tokenId),
-                        new Promise((_, reject) => {
-                            controller.signal.addEventListener('abort', () => {
-                                reject(new Error('Request timed out'));
-                            });
-                        })
-                    ]);
-
-                    clearTimeout(timeoutId);
-                    // Convert balance to number and check if player owns at least 1
-                    return balance > 0n;
-                } catch (error: any) {
-                    clearTimeout(timeoutId);
-                    if (error.message === 'Request timed out') {
-                        throw error;
-                    }
-                    throw error;
-                }
-            } catch (error) {
-                console.error(`Error checking item ${item}:`, error);
-                return false;
-            }
-        }
-    }
-
-    // Item not found in any mapping
-    return false;
+interface Mapping {
+    address: string;
+    assets: string[];
 }
 
-export async function verifyMelee(player: string, item: string, timeout: number = 5000): Promise<boolean> {
-    const rpc = Config.assetsConfig?.rpc;
-    if (!rpc) throw new Error("RPC configuration not found");
-
-    // Initialize provider
-    const provider = new ethers.JsonRpcProvider(rpc);
-
-    // List of melee mappings to check
-    const meleeMappings = [
-        { mapping: SilverArmsMapping },
-        { mapping: GoldArmsMapping },
-        { mapping: DivineArmsMapping },
-    ];
-
-    // Iterate through each mapping
-    for (const { mapping } of meleeMappings) {
-        if (mapping.assets.includes(item)) {
-            // Get token ID (index of item in assets array)
-            const tokenId = mapping.assets.indexOf(item);
-
-            try {
-                // Create contract instance
-                const contract = new ethers.Contract(
-                    mapping.address,
-                    ["function balanceOf(address account, uint256 id) view returns (uint256)"],
-                    provider
-                );
-
-                // Set up timeout
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-                try {
-                    // Get balance with timeout
-                    const balance = await Promise.race([
-                        contract.balanceOf(player, tokenId),
-                        new Promise((_, reject) => {
-                            controller.signal.addEventListener('abort', () => {
-                                reject(new Error('Request timed out'));
-                            });
-                        })
-                    ]);
-
-                    clearTimeout(timeoutId);
-                    // Convert balance to number and check if player owns at least 1
-                    return balance > 0n;
-                } catch (error: any) {
-                    clearTimeout(timeoutId);
-                    if (error.message === 'Request timed out') {
-                        throw error;
-                    }
-                    throw error;
-                }
-            } catch (error) {
-                console.error(`Error checking for item ${item}:`, error);
-                return false;
-            }
-        }
-    }
-
-    // Item not found in any mapping
-    return false;
+interface AssetCheckResult {
+    isValid: boolean;
+    validItems: string[];
 }
 
-export async function verifyEmotes(player: string, items: string[], timeout: number = 5000): Promise<string[]> {
+/**
+ * Common function to check asset balances for a player
+ * @param player - The player's address
+ * @param items - Array of items to check
+ * @param mappings - Array of mappings to check against
+ * @param timeout - Timeout in milliseconds
+ */
+async function getAssetsBalance(
+    player: string,
+    items: string[],
+    mappings: { mapping: Mapping }[],
+    timeout: number = 3000
+): Promise<AssetCheckResult> {
     const rpc = Config.assetsConfig?.rpc;
     if (!rpc) throw new Error("RPC configuration not found");
 
-    // Initialize provider
     const provider = new ethers.JsonRpcProvider(rpc);
-
-    // List of emote mappings to check
-    const emoteMappings = [
-        { mapping: SurvivMemesMapping, type: "SurvivMemes" },
-    ];
 
     // Initialize result array
     const result = new Array(items.length).fill("");
@@ -161,11 +55,11 @@ export async function verifyEmotes(player: string, items: string[], timeout: num
         const item = items[i];
         let itemFound = false;
 
-        for (const { mapping, type } of emoteMappings) {
+        for (const { mapping } of mappings) {
             if (mapping.assets.includes(item)) {
                 itemFound = true;
                 const tokenId = mapping.assets.indexOf(item);
-                const key = `${type}-${mapping.address}`;
+                const key = mapping.address;
 
                 if (!itemsByMapping.has(key)) {
                     itemsByMapping.set(key, { items: [], indices: [] });
@@ -176,33 +70,27 @@ export async function verifyEmotes(player: string, items: string[], timeout: num
             }
         }
 
-        // If item not found in any mapping, keep empty string in result
         if (!itemFound) {
-            console.log(`Item ${item} not found in any emote mapping`);
+            console.log(`Item ${item} not found in any mapping`);
         }
     }
 
     // Process each mapping's items in batch
-    for (const [key, { items: mappingItems, indices }] of itemsByMapping) {
-        const [, address] = key.split('-');
+    for (const [address, { items: mappingItems, indices }] of itemsByMapping) {
         try {
-            // Create contract instance
             const contract = new ethers.Contract(
                 address,
                 ["function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])"],
                 provider
             );
 
-            // Prepare batch inputs
-            const tokenIds = mappingItems.map(item => SurvivMemesMapping.assets.indexOf(item));
+            const tokenIds = mappingItems.map(item => mappings.find(m => m.mapping.address === address)!.mapping.assets.indexOf(item));
             const accounts = new Array(mappingItems.length).fill(player);
 
-            // Set up timeout
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), timeout);
 
             try {
-                // Get balances with timeout
                 const balances = await Promise.race([
                     contract.balanceOfBatch(accounts, tokenIds),
                     new Promise((_, reject) => {
@@ -214,7 +102,6 @@ export async function verifyEmotes(player: string, items: string[], timeout: num
 
                 clearTimeout(timeoutId);
 
-                // Update result array based on balances
                 balances.forEach((balance: bigint, index: number) => {
                     if (balance > 0n) {
                         result[indices[index]] = mappingItems[index];
@@ -227,73 +114,111 @@ export async function verifyEmotes(player: string, items: string[], timeout: num
                 }
                 throw error;
             }
-        } catch (error) {
-            console.error(`Error checking items for mapping ${key}:`, error);
-            // Keep empty strings for failed checks
+        } catch (error: any) {
+            console.error(`Error checking items for mapping ${address}:`, error.message);
         }
     }
 
-    return result;
+    return {
+        isValid: result.some(item => item !== ""),
+        validItems: result
+    };
 }
 
-export async function verifyGun(player: string, item: string, timeout: number = 5000): Promise<boolean> {
-    const rpc = Config.assetsConfig?.rpc;
-    if (!rpc) throw new Error("RPC configuration not found");
+interface VerifiedAssets {
+    skin: SkinDefinition | undefined;
+    melee: MeleeDefinition | undefined;
+    gun: GunDefinition | undefined;
+    emotes: readonly (EmoteDefinition | undefined)[];
+    badge: BadgeDefinition | undefined;
+}
 
-    // Initialize provider
-    const provider = new ethers.JsonRpcProvider(rpc);
-
-    // List of gun mappings to check
+/**
+ * Verify all assets for a player in a single call
+ * @param player - The player's address
+ * @param assets - Object containing skin, melee, gun, emotes, and badge
+ * @param timeout - Timeout in milliseconds
+ */
+export async function verifyAllAssets(
+    player: string,
+    assets: {
+        skin: string;
+        melee: string;
+        gun: string;
+        emotes: string;
+        badge: string;
+    },
+    timeout: number = 2000
+): Promise<VerifiedAssets> {
+    const skinMappings = [
+        { mapping: SilverSkinsMapping },
+        { mapping: GoldSkinsMapping },
+        { mapping: DivineSkinsMapping },
+    ];
+    const meleeMappings = [
+        { mapping: SilverArmsMapping },
+        { mapping: GoldArmsMapping },
+        { mapping: DivineArmsMapping },
+    ];
     const gunMappings = [
         { mapping: DivineGunsMapping },
     ];
+    const emoteMappings = [
+        { mapping: SurvivMemesMapping },
+    ];
+    const badgeMappings = [
+        { mapping: SurvivCardsMapping },
+    ];
 
-    // Iterate through each mapping
-    for (const { mapping } of gunMappings) {
-        if (mapping.assets.includes(item)) {
-            // Get token ID (index of item in assets array)
-            const tokenId = mapping.assets.indexOf(item);
+    // Default values
+    let result: VerifiedAssets = {
+        skin: Skins.fromStringSafe(DEFAULT_SKIN),
+        melee: undefined,
+        gun: undefined,
+        emotes: EMOTE_SLOTS.map(() => undefined),
+        badge: undefined,
+    };
 
-            try {
-                // Create contract instance
-                const contract = new ethers.Contract(
-                    mapping.address,
-                    ["function balanceOf(address account, uint256 id) view returns (uint256)"],
-                    provider
-                );
+    try {
+        // Verify all assets in parallel
+        const [
+            badgeResult,
+            skinResult,
+            meleeResult,
+            gunResult,
+            emotesResult,
+        ] = await Promise.all([
+            assets.badge ? getAssetsBalance(player, [assets.badge], badgeMappings, timeout) : null,
+            assets.skin ? getAssetsBalance(player, [assets.skin], skinMappings, timeout) : null,
+            assets.melee ? getAssetsBalance(player, [assets.melee], meleeMappings, timeout) : null,
+            assets.gun ? getAssetsBalance(player, [assets.gun], gunMappings, timeout) : null,
+            assets.emotes ? getAssetsBalance(player, assets.emotes.split(',').filter(e => e), emoteMappings, timeout) : null,
+        ]);
 
-                // Set up timeout
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-                try {
-                    // Get balance with timeout
-                    const balance = await Promise.race([
-                        contract.balanceOf(player, tokenId),
-                        new Promise((_, reject) => {
-                            controller.signal.addEventListener('abort', () => {
-                                reject(new Error('Request timed out'));
-                            });
-                        })
-                    ]);
-
-                    clearTimeout(timeoutId);
-                    // Convert balance to number and check if player owns at least 1
-                    return balance > 0n;
-                } catch (error: any) {
-                    clearTimeout(timeoutId);
-                    if (error.message === 'Request timed out') {
-                        throw error;
-                    }
-                    throw error;
-                }
-            } catch (error) {
-                console.error(`Error checkingr item ${item}:`, error);
-                return false;
-            }
+        // Process results
+        if (badgeResult?.isValid && badgeResult.validItems[0]) {
+            result.badge = Badges.fromStringSafe(badgeResult.validItems[0]);
         }
+
+        if (skinResult?.isValid && skinResult.validItems[0]) {
+            result.skin = Skins.fromStringSafe(skinResult.validItems[0]);
+        }
+
+        if (meleeResult?.isValid && meleeResult.validItems[0]) {
+            result.melee = Melees.fromStringSafe(meleeResult.validItems[0]);
+        }
+
+        if (gunResult?.isValid && gunResult.validItems[0]) {
+            result.gun = Guns.fromStringSafe(gunResult.validItems[0]);
+        }
+
+        if (emotesResult) {
+            result.emotes = emotesResult.validItems.map(emoteId => Emotes.fromStringSafe(emoteId));
+        }
+    } catch (err) {
+        console.error("Asset verification failed:", err);
+        // Return defaults on error
     }
 
-    // Item not found in any mapping
-    return false;
+    return result;
 }

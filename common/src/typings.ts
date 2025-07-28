@@ -23,7 +23,7 @@ export const enum CustomTeamMessages {
 
 export interface CustomTeamPlayerInfo {
     isLeader?: boolean
-    ready: boolean
+    ready: boolean,
     name: string
     skin: string
     badge?: string
@@ -35,6 +35,7 @@ export type CustomTeamMessage =
         type: CustomTeamMessages.Join
         teamID: string
         isLeader: boolean
+        ready: boolean
         autoFill: boolean
         locked: boolean
     }
@@ -42,7 +43,7 @@ export type CustomTeamMessage =
         type: CustomTeamMessages.Update
         players: CustomTeamPlayerInfo[]
         isLeader: boolean
-        ready: boolean
+        ready: boolean,
     }
     | {
         type: CustomTeamMessages.Settings

@@ -171,6 +171,10 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
                 renderStoreItems(account, storeItems);
                 setupPurchaseInteractions(account, storeItems);
                 successAlert("Purchase successful!");
+
+                if (item?.itemType == "Cards") {
+                    game.console.setBuiltInCVar("cv_loadout_badge", "cards"); // Set card as badge after purchased
+                }
             } catch (err: any) {
                 errorAlert("Transaction Failed: Please check your wallet balance or try again.", 3000);
             } finally {

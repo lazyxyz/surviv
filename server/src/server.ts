@@ -12,7 +12,7 @@ import { initTeamRoutes } from "./api/team";
 
 export let teamsCreated: Record<string, number> = {};
 
-export const customTeams: Map<string, CustomTeam> = new Map<string, CustomTeam>();
+export const CUSTOM_TEAMS: Map<string, CustomTeam> = new Map<string, CustomTeam>();
 export let maxTeamSize = typeof Config.maxTeamSize === "number" ? Config.maxTeamSize : Config.maxTeamSize.rotation[0];
 
 if (isMainThread) {
