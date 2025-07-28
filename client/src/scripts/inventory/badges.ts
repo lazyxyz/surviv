@@ -81,7 +81,6 @@ export async function showBadges(game: Game) {
         const isActive = userBadges.includes(idString);
         const inactiveStyle = isActive ? "" : " style=\"opacity: 0.5; filter: saturate(0.15); \"";
         const isSelected = idString === currentBadge;
-        console.log(`Badge ${idString}: isActive=${isActive}, isSelected=${isSelected}`);
 
         const badgeItem = $<HTMLDivElement>(
             html`<div id="badge-${idString}" class="badges-list-item-container${isSelected ? " selected" : ""}">

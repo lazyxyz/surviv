@@ -139,7 +139,6 @@ export async function setUpUI(game: Game): Promise<void> {
 
     // Buy Card directly in Home
     $(".home-buy-card-button").on("click", async () => {
-
         try {
             // Check if wallet is connected
             if (!game.account?.address) {
@@ -149,8 +148,8 @@ export async function setUpUI(game: Game): Promise<void> {
 
             const price = await game.account.queryPrice("Cards", "NativeToken");
             await game.account.buyItems("Cards", 1, "NativeToken", price);
-
             successAlert("Purchase successful!");
+            game.console.setBuiltInCVar("cv_loadout_badge", "cards"); // Set card as badge after purchased
         } catch (err) {
             console.error("Purchase error:", err);
             errorAlert("Something went wrong, please try again.");
