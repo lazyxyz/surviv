@@ -602,7 +602,7 @@ export async function setUpUI(game: Game): Promise<void> {
                     </div>
                     <div class="create-team-player-name-container">
                         <span class="create-team-player-name"${nameColor ? ` style="color: ${new Color(nameColor).toHex()}"` : ""}>${name}</span>
-                        ${badge?.length ? `<img class="create-team-player-badge" draggable="false" src="${""}" />` : ""}
+                        ${badge?.length ? `<img class="create-team-player-badge" draggable="false" src="./img/game/shared/badges/${badge}.svg" />` : ""}
                     </div>
                 </div>
             `
