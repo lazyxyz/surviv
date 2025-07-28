@@ -59,7 +59,7 @@ export async function showBadges(game: Game) {
     {
         const noBadgeItem = $<HTMLDivElement>(
             html`<div id="badge-" class="badges-list-item-container${currentBadge === "" ? " selected" : ""}">
-                <div class="badges-list-item"></div>
+                <div class="badges-list-item"><i class="fa-solid fa-ban" style="opacity: 0.65"></i></div>
                 <span class="badge-name">${getTranslatedString("none")}</span>
             </div>`
         );
@@ -85,7 +85,7 @@ export async function showBadges(game: Game) {
         const badgeItem = $<HTMLDivElement>(
             html`<div id="badge-${idString}" class="badges-list-item-container${isSelected ? " selected" : ""}">
                 <div class="badges-list-item badge${isActive ? " active" : " inactive"}" ${inactiveStyle}>
-                    <div class="badge-image" style="background-image: url('./img/misc/card.gif'); border-radius: 12px"></div>
+                    <div class="badge-image" style="background-image: url('./img/misc/card.gif')"></div>
                 </div>
                 <span class="badge-name">${"Surviv Card"}</span>
             </div>`
