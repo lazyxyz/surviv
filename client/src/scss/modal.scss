@@ -100,8 +100,7 @@ $transition: all 0.3s ease;
 }
 
 .minted-item {
-  background-color: black;
-
+  background-image: url("./img/game/shared/patterns/silver.svg"); // Use the background image
   position: relative;
   width: 120px;
   height: 120px;
@@ -135,7 +134,6 @@ $transition: all 0.3s ease;
 }
 
 .minted-item img {
-  background-image: url("./img/game/shared/patterns/silver.svg"); // Use the background image
   background-size: cover;
   background-repeat: no-repeat;
   padding: 16px;
