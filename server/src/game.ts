@@ -54,6 +54,7 @@ import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { validateJWT } from "./api/api";
 import { getIP, createServer } from "./utils/serverHelpers";
 import { verifyAllAssets } from "./api/balances";
+import { Armors } from "@common/definitions/armors";
 
 
 /*

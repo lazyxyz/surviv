@@ -11,7 +11,6 @@ import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { type SpectatePacketData } from "@common/packets/spectatePacket";
 import { Geometry, Numeric } from "@common/utils/math";
 import { pickRandomInArray } from "@common/utils/random";
-import { randomBytes } from "crypto";
 import { Config } from "../config";
 import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
 import { saveGameResult } from "../api/api";
@@ -99,7 +98,7 @@ export class Gamer extends Player {
         super.die(params);
 
         // Send game over to dead player
-        if (!this.disconnected) {
+        if (!this.disconnected && !this.gameOver) {
             this.handleGameOver();
         }
     }
@@ -212,63 +211,78 @@ export class Gamer extends Player {
             return
         };
 
-        // Prepare game over packet data
-        const createGameOverPacket = (player: any) => GameOverPacket.create({
-            won,
-            playerID: player.id,
-            kills: player.kills,
-            damageDone: player.damageDone,
-            damageTaken: player.damageTaken,
-            timeAlive: (this.game.now - player.joinTime) / 1000,
-            rank,
-        } as unknown as GameOverData);
-
         // Send game over packets
         if (this.game.teamMode && this.team) {
             for (const teammate of this.team.players) {
-                teammate.sendPacket(createGameOverPacket(teammate));
+                if (teammate instanceof Gamer) teammate.sendGameOverPacket(rank);
             }
         } else {
-            this.sendPacket(createGameOverPacket(this));
+            this.sendGameOverPacket(rank);
         }
 
         // Handle rewards if rank qualifies
         if (rank < Config.assetsConfig.rank) {
-            const sendRewardsPacket = (player: any, eligible: boolean, rewards: number) => {
-                player.sendPacket(RewardsPacket.create({
-                    eligible,
-                    rank,
-                    rewards,
-                } as unknown as RewardsData));
-            };
-
-            const processRewards = async (player: any) => {
-                if (player.loadout.badge) {
-                    try {
-                        const data = await saveGameResult(
-                            player.address,
-                            rank,
-                            player.kills,
-                            this.game.teamMode,
-                            this.game.gameId
-                        );
-                        sendRewardsPacket(player, data.success && data.rewards.success, data.rewards.amount || 0);
-                    } catch (err) {
-                        console.log("Error claiming rewards:", err);
-                        sendRewardsPacket(player, false, 0);
-                    }
-                } else {
-                    sendRewardsPacket(player, false, 0);
-                }
-            };
-
             if (this.game.teamMode && this.team) {
                 for (const teammate of this.team.players) {
-                    processRewards(teammate);
+                    if (teammate instanceof Gamer) teammate.sendRewardsPacket(rank);
                 }
             } else {
-                processRewards(this);
+                this.sendRewardsPacket(rank);
             }
         }
     }
+
+    isGameOverSend = false; // Prevent resent
+    sendGameOverPacket(rank: number): void {
+        if (this.isGameOverSend) return;
+        this.isGameOverSend = true;
+
+        const gameOverPacket = GameOverPacket.create({
+            won: rank == 1,
+            playerID: this.id,
+            kills: this.kills,
+            damageDone: this.damageDone,
+            damageTaken: this.damageTaken,
+            timeAlive: (this.game.now - this.joinTime) / 1000,
+            rank,
+        } as unknown as GameOverData);
+
+        this.sendPacket(gameOverPacket);
+    }
+
+    isRewardsSend = false; // Prevent resent
+    async sendRewardsPacket(rank: number): Promise<void> {
+        if (this.isRewardsSend) {
+            return;
+        }
+        this.isRewardsSend = true;
+
+        const processRewardsPacket = (eligible: boolean, rewards: number) => {
+            this.sendPacket(RewardsPacket.create({
+                eligible,
+                rank,
+                rewards,
+            } as unknown as RewardsData));
+        };
+
+        if (!this.loadout.badge) {
+            processRewardsPacket(false, 0);
+            return;
+        }
+
+        try {
+            const data = await saveGameResult(
+                this.address,
+                rank,
+                this.kills,
+                this.game.teamMode,
+                this.game.gameId
+            );
+            processRewardsPacket(data.success && data.rewards.success, data.rewards.amount || 0);
+        } catch (err) {
+            console.log("Error claiming rewards:", err);
+            processRewardsPacket(false, 0);
+        }
+    }
+
 }
