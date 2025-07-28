@@ -1865,6 +1865,16 @@
   height: 286px;
 }
 
+#none-emote {
+  i {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    padding-top: 10px;
+    font-size: 64px;
+  }
+}
+
 #game-over-overlay {
   display: flex;
   flex-direction: column;
