@@ -439,84 +439,101 @@ export class UIManager {
         this.gameOverScreenTimeout = window.setTimeout(() => gameOverOverlay.fadeIn(500), 500);
     }
 
-
     showRewardsScreen(packet: RewardsData): void {
         const { eligible, rank, rewards } = packet;
 
-        // Create rewards modal with enhanced styling
-        const rewardsModal = $<HTMLDivElement>(
-            '<div class="modal dialog persistent-scrollbar" id="rewards-modal" style="display: none; width: 600px; height: 400px; background: #222; border-radius: 10px; opacity: 1; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); overflow-y: auto; text-align: center;">'
-        );
+        // Define random content options for sharing
+        const rank1Content = [
+            "Chicken Dinner Winner #1 🔥🔥",
+            "GGWP #1 🎉",
+            "Game is easy #1 🏆",
+            "Unstoppable #1 💥",
+            "Carried the squad to #1 💪😂",
+            "1st Place Loot King 🌟 - GG!"
+        ];
 
-        // Header with title and close button
-        const header = $<HTMLDivElement>('<div class="dialog-header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #333; background: #1a1a1a; border-radius: 10px 10px 0 0;"></div>');
-        const title = $<HTMLHeadingElement>('<h3 style="margin: 0; font-size: 24px; color: #fff; text-transform: uppercase; text-align: center; width: 100%;"></h3>').text(
-            eligible ? (rank === 1 ? "Chicken Dinner #1!" : `Rank #${rank}`) : "Oh No!"
-        );
-        const closeButton = $<HTMLSpanElement>('<span class="dialog-close-btn fa-solid fa-xmark" style="color: #fff; font-size: 20px; cursor: pointer;"></span>')
-            .on("click", () => rewardsModal.fadeOut(350, () => rewardsModal.remove()));
+        const otherContent = [
+            "Missed #1, but I'm a survivor! 👾💪",
+            "GGWP! 🎉",
+            "Just warming up 💪🎮",
+            "One step closer to #1! 🏃‍♂️💨",
+            "No crown, still proud! 🧢🏅"
+        ];
 
-        header.append(title, closeButton);
+        const randomContent = rank === 1
+            ? rank1Content[Math.floor(Math.random() * rank1Content.length)]
+            : otherContent[Math.floor(Math.random() * otherContent.length)];
 
-        // Content
-        const content = $<HTMLDivElement>('<div class="rewards-content" style="padding: 30px; text-align: center; color: #fff;"></div>');
-        const body = $<HTMLParagraphElement>('<p style="font-size: 22px; margin: 15px 0; font-weight: bold; text-align: center;"></p>').text(
-            eligible ? "Your Rewards" : `You Missed Your Rewards`
-        );
-        const rewardsInfo = $<HTMLDivElement>('<div style="margin: 25px 0; font-size: 20px; text-align: center;"></div>').html(
-            eligible
-                ? `${rewards}x <img src="./img/misc/crate.png" alt="Crate" style="width: 40px; vertical-align: middle; margin-right: 10px;">`
-                : "No Surviv Card or campaign not started. Grab a Surviv Card or check back soon!"
-        );
-        const footer = $<HTMLDivElement>('<div style="margin-top: 25px; text-align: center;"></div>').text(
-            eligible ? "Claim your rewards in Inventory!" : ""
-        );
+        const tweetTextRaw = `${randomContent}\nI just earned ${rewards} awesome @SurvivFun Crates on @Somnia_Network!\nCheck this out 👇`;
 
-        // Share button for eligible players with dynamic content
+        // Rewards title style
+        const headerStyle = eligible
+            ? `
+            background: linear-gradient(180deg, #f2770f 0%, #ffd23a 50%, #fde57d 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            `
+            : `color: white;`;
+
+        // Rewards modal
+        const modalHtml = html`
+        <div class="rewards-modal-overlay">
+            <div class="modal dialog persistent-scrollbar" id="rewards-modal">
+            <div class="dialog-header" style="background-image: ${eligible ? `url('./img/game/shared/patterns/green_rewards_banner.svg')` : `url('./img/game/shared/patterns/red_rewards_banner.svg')`};">
+                <span class="dialog-close-btn fa-solid fa-xmark" aria-label="Close modal" role="button" tabindex="0"></span>
+            </div>
+            <div class="rewards-content">
+                <div class="rewards-header">
+                    <p class="rewards-header-title" style="${headerStyle}">
+                        ${eligible ? (rank === 1 ? "Chicken Dinner #1!" : `Rank #${rank}`) : "Missed rewards"}
+                    </p>
+                    <p class="rewards-header-subtitle">
+                        ${eligible ? "Claim your rewards in Inventory!" : "No Surviv Card or campaign not started. Grab a Surviv Card or check back soon!"}
+                    </p>
+                </div>
+                ${eligible ? html`
+                    <p class="rewards-title">Your Rewards</p>
+                    <div class="rewards-amount">
+                        <img src="./img/misc/crate.png" alt="Reward Crate" loading="lazy">
+                        <p>${rewards}X</p>
+                    </div>
+                    <div class="rewards-share">
+                        <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/1943679417730883992"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="btn btn-lg btn-darken btn-primary"
+                           id="share-btn">
+                            Share on <img src="./img/misc/x_logo.svg" alt="X (Twitter)" loading="lazy">
+                        </a>
+                    </div>
+                ` : html`
+                    <div class="rewards-amount">
+                        <img src="./img/game/shared/badges/cards.svg" alt="Surviv Cards" loading="lazy">
+                    </div>
+                `}
+            </div>
+        </div>
+    </div>
+    `;
+
+        // Create the modal element from the HTML string
+        const rewardsModal = $(modalHtml);
+
+        // Set up event handlers
+        rewardsModal.find('.dialog-close-btn').on("click", () => {
+            rewardsModal.fadeOut(350, () => rewardsModal.remove());
+        });
+
+        // Add hover effects for the share button if eligible
         if (eligible) {
-            // Define random content options
-            const rank1Content = [
-                "Chicken Dinner Winner #1 🔥🔥",
-                "GGWP #1 🎉",
-                "Game is easy #1 🏆",
-                "Unstoppable #1 💥",
-                "Carried the squad to #1 💪😂",
-                "1st Place Loot King 🌟 - GG!"
-            ];
-
-            const otherContent = [
-                "Missed #1, but I’m a survivor! 👾💪",
-                "GGWP! 🎉",
-                "Just warming up 💪🎮",
-                "One step closer to #1! 🏃‍♂️💨",
-                "No crown, still proud! 🧢🏅"
-            ];
-
-            const randomContent = rank === 1
-                ? rank1Content[Math.floor(Math.random() * rank1Content.length)]
-                : otherContent[Math.floor(Math.random() * otherContent.length)];
-
-            const tweetTextRaw = `${randomContent}\nI just earned ${rewards} awesome @SurvivFun Crates on @Somnia_Network!\nCheck this out 👇`;
-
-            const shareButton = $<HTMLAnchorElement>(
-                '<a class="btn btn-lg btn-darken btn-primary" style="padding: 12px 25px; font-size: 18px; background: #1DA1F2; color: #fff; text-decoration: none; border-radius: 5px; transition: background 0.3s; display: block; margin: 20px auto 0;"></a>'
-            )
-                .text("Share on X")
-                .attr(
-                    "href",
-                    `https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/1943679417730883992`
-                )
-                .attr("target", "_blank")
-                .hover(function () {
-                    $(this).css("background", "#1a8cd8");
-                }, function () {
-                    $(this).css("background", "#1DA1F2");
-                });
-            footer.append(shareButton);
+            const shareButton = rewardsModal.find('.btn-primary');
+            shareButton.hover(function () {
+                $(this).css("background", "#1a8cd8");
+            }, function () {
+                $(this).css("background", "#1DA1F2");
+            });
         }
-
-        content.append(body, rewardsInfo, footer);
-        rewardsModal.append(header, content);
 
         // Append to #game div to match other modals
         this.ui.game.append(rewardsModal);
@@ -524,6 +541,7 @@ export class UIManager {
         // Show modal
         rewardsModal.fadeIn();
     }
+
 
     // I'd rewrite this as MapPings.filter(…), but it's not really clear how
     // > 4 player pings is _meant_ to be handled, so I'll begrudgingly leave this alone
