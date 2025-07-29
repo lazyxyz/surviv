@@ -82,10 +82,6 @@ export function getTranslatedString(key: TranslationKeys, replacements?: Record<
     // Easter egg language
     if (selectedLanguage === "hp18") return "HP-18";
 
-    if (key.startsWith("badge_")) {
-        key = Badges.reify(key.slice("badge_".length)).idString.replace("bdg_", "badge_") as TranslationKeys;
-    }
-
     let foundTranslation: string;
     try {
         foundTranslation = TRANSLATIONS.translations[selectedLanguage]?.[key]
@@ -94,9 +90,6 @@ export function getTranslatedString(key: TranslationKeys, replacements?: Record<
     } catch {
         if (key.startsWith("emote_")) {
             return Emotes.reify(key.slice("emote_".length)).name as TranslationKeys;
-        }
-        if (key.startsWith("badge_")) {
-            return Badges.reify(`bdg_${key.slice("badge_".length)}`).name as TranslationKeys;
         }
         return key;
     }

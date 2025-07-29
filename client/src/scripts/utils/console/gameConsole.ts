@@ -245,8 +245,8 @@ export class GameConsole {
 
             // FIXME remove after one or two updates (transition code grace period)
             const badge = this.variables.get.builtIn("cv_loadout_badge").value;
-            if (!Badges.hasString(badge) && !badge.startsWith("bdg_")) {
-                this.variables.set.builtIn("cv_loadout_badge", `bdg_${badge}`);
+            if (!Badges.hasString(badge)) {
+                this.variables.set.builtIn("cv_loadout_badge", `${badge}`);
                 rewriteToLS = true;
             }
 
