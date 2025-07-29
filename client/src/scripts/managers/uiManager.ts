@@ -496,7 +496,7 @@ export class UIManager {
                     <p class="rewards-title">Your Rewards</p>
                     <div class="rewards-amount">
                         <img src="./img/misc/crate.png" alt="Reward Crate" loading="lazy">
-                        <p>${rewards}X</p>
+                        <p>X${rewards}</p>
                     </div>
                     <div class="rewards-share">
                         <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/1943679417730883992"
