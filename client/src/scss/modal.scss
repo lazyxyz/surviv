@@ -157,3 +157,123 @@ $transition: all 0.3s ease;
     border-bottom: 3px solid palette.$reddit_bg;
   }
 }
+
+// rewards modal
+
+.rewards-modal-overlay {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #0000009d;
+}
+
+#rewards-modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  width: 370px;
+  border-radius: 12px;
+
+  .dialog-header {
+    width: 370px;
+    height: 170px;
+    // background-image: url("./img/game/shared/patterns/green_rewards_banner.svg");
+
+    .dialog-close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 24px;
+      color: palette.$light;
+      cursor: pointer;
+      transition: $transition;
+      box-shadow: 0 0 0 1px transparent;
+
+      &:hover {
+        transform: rotate(15deg);
+      }
+    }
+  }
+  .rewards-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 20px 32px 32px 32px;
+    gap: 20px;
+    background-color: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(10px);
+
+    .rewards-header {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+
+      &-title {
+        margin: auto;
+        font-family: Survivant;
+        font-size: 24px;
+        font-style: normal;
+
+        background: linear-gradient(
+          180deg,
+          #f2770f 0%,
+          #ffd23a 50%,
+          #fde57d 100%
+        );
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      &-subtitle {
+        margin: auto;
+        font-size: 14px;
+        font-style: normal;
+        color: #9c9b99;
+      }
+    }
+    .rewards-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .rewards-amount {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      p {
+        margin: 0px;
+        font-size: 32px;
+        font-weight: bold;
+        color: white;
+      }
+      img {
+        width: 40px;
+        height: 40px;
+      }
+    }
+    #share-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+
+      img {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
