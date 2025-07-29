@@ -58,7 +58,7 @@ export type MultiResAtlasList = { readonly low: AtlasList, readonly high: AtlasL
  * Pack images spritesheets.
  * @param paths List of paths to the images.
  * @param options Options passed to the packer.
- * @param modeName The mode for which to build spritesheets ("fall", "winter", "normal", or "shared").
+ * @param modeName The mode for which to build spritesheets ("fall", "winter", or "shared").
  */
 export async function createSpritesheets(pathMap: Map<string, { lastModified: number, path: string }>, options: CompilerOptions, modeName: string): Promise<MultiResAtlasList> {
     const paths = Array.from(pathMap.values(), v => v.path);

@@ -1,3 +1,4 @@
+import $ from "jquery";
 import { ExtendedMap } from "@common/utils/misc";
 import { GAME_CONSOLE } from "../..";
 

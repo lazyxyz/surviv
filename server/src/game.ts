@@ -238,10 +238,8 @@ export class Game implements GameData {
 
     getRandomMode(): Mode {
         const random = Math.random() * 100;
-        if (random < 40) return "fall";
-        if (random < 80) return "winter";
-        if (random < 95) return "normal";
-        return "halloween";
+        if (random < 50) return "fall";
+        return "winter";
     }
 
 
@@ -250,9 +248,6 @@ export class Game implements GameData {
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
         this.gameMode = this.getRandomMode();
-        // this.gameMode = "halloween";
-        // this.gameMode = "fall";
-        // this.gameMode = "winter";
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
         this.updateGameData({
             aliveCount: 0,

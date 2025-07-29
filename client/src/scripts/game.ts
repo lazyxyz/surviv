@@ -152,7 +152,7 @@ export class Game {
     readonly map: Minimap;
     readonly camera: Camera;
     readonly soundManager: SoundManager;
-    readonly gasRender: GasRender;
+    gasRender: GasRender | undefined;
     readonly particleManager: ParticleManager;
 
     readonly pixi: Application;
@@ -169,7 +169,7 @@ export class Game {
     }
 
     constructor() {
-        this.inputManager =  new InputManager(this);
+        this.inputManager = new InputManager(this);
         GAME_CONSOLE.setInputManager(this.inputManager);
         GAME_CONSOLE.readFromLocalStorage();
         this.pixi = new Application()
@@ -178,8 +178,7 @@ export class Game {
         this.gas = new Gas(this);
         this.map = new Minimap(this);
         this.camera = new Camera(this);
-        this.gasRender = new GasRender(PIXI_SCALE, this.gameMode);
-        this.particleManager  = new ParticleManager(this);
+        this.particleManager = new ParticleManager(this);
 
         this.soundManager = new SoundManager(this);
         this.inputManager.generateBindsConfigScreen();
@@ -277,6 +276,51 @@ export class Game {
         }, 500);
     };
 
+
+    setupGame() {
+        this.gasRender = new GasRender(PIXI_SCALE, this.gameMode);
+
+        this.camera.addObject(this.gasRender.graphics);
+        this.map.indicator.setFrame("player_indicator");
+
+        const particleEffects = Modes[this.gameMode].particleEffects;
+        if (particleEffects !== undefined) {
+            const This = this;
+            const gravityOn = particleEffects.gravity;
+            this.particleManager.addEmitter(
+                {
+                    delay: particleEffects.delay,
+                    active: GAME_CONSOLE.getBuiltInCVar("cv_ambient_particles"),
+                    spawnOptions: () => ({
+                        frames: particleEffects.frames,
+                        get position(): Vector {
+                            const width = This.camera.width / PIXI_SCALE;
+                            const height = This.camera.height / PIXI_SCALE;
+                            const player = This.activePlayer;
+                            if (!player) return Vec.create(0, 0);
+                            const { x, y } = player.position;
+                            return randomVector(x - width, x + width, y - height, y + height);
+                        },
+                        speed: randomVector(-10, 10, gravityOn ? 10 : -10, 10),
+                        lifetime: randomFloat(12000, 50000),
+                        zIndex: Number.MAX_SAFE_INTEGER - 5,
+                        alpha: {
+                            start: this.layer === Layer.Ground ? 0.7 : 0,
+                            end: 0
+                        },
+                        rotation: {
+                            start: randomFloat(0, 36),
+                            end: randomFloat(40, 80)
+                        },
+                        scale: {
+                            start: randomFloat(0.8, 1.1),
+                            end: randomFloat(0.7, 0.8)
+                        }
+                    })
+                }
+            );
+        }
+    }
 
     resize(): void {
         this.map.resize();
@@ -451,49 +495,6 @@ export class Game {
         });
     }
 
-    setupUI() {
-        this.camera.addObject(this.gasRender.graphics);
-        this.map.indicator.setFrame("player_indicator");
-
-        const particleEffects = Modes[this.gameMode].particleEffects;
-        if (particleEffects !== undefined) {
-            const This = this;
-            const gravityOn = particleEffects.gravity;
-            this.particleManager.addEmitter(
-                {
-                    delay: particleEffects.delay,
-                    active: GAME_CONSOLE.getBuiltInCVar("cv_ambient_particles"),
-                    spawnOptions: () => ({
-                        frames: particleEffects.frames,
-                        get position(): Vector {
-                            const width = This.camera.width / PIXI_SCALE;
-                            const height = This.camera.height / PIXI_SCALE;
-                            const player = This.activePlayer;
-                            if (!player) return Vec.create(0, 0);
-                            const { x, y } = player.position;
-                            return randomVector(x - width, x + width, y - height, y + height);
-                        },
-                        speed: randomVector(-10, 10, gravityOn ? 10 : -10, 10),
-                        lifetime: randomFloat(12000, 50000),
-                        zIndex: Number.MAX_SAFE_INTEGER - 5,
-                        alpha: {
-                            start: this.layer === Layer.Ground ? 0.7 : 0,
-                            end: 0
-                        },
-                        rotation: {
-                            start: randomFloat(0, 36),
-                            end: randomFloat(40, 80)
-                        },
-                        scale: {
-                            start: randomFloat(0.8, 1.1),
-                            end: randomFloat(0.7, 0.8)
-                        }
-                    })
-                }
-            );
-        }
-    }
-
     inventoryMsgTimeout: number | undefined;
 
     onPacket(packet: OutputPacket): void {
@@ -502,7 +503,7 @@ export class Game {
                 this.gameMode = NumberToMode[packet.output.gameMode];
                 this.initPixi(this.gameMode).then(_ => {
                     this.ready(packet.output);
-                    this.setupUI();
+                    this.setupGame();
                 })
                 break;
             case packet instanceof JoinedPacket:
@@ -656,6 +657,8 @@ export class Game {
                 this.camera.container.removeChildren();
                 this.particleManager.clear();
                 this.uiManager.clearTeammateCache();
+                this.gasRender?.graphics.clear();
+                this.gasRender = undefined;
 
                 const map = this.map;
                 map.safeZone.clear();
@@ -755,7 +758,7 @@ export class Game {
         this.particleManager.update(delta);
 
         this.map.update();
-        this.gasRender.update(this.gas);
+        if (this.gasRender) this.gasRender.update(this.gas);
 
         for (const plane of this.planes) plane.update();
 

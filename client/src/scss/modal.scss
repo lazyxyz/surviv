@@ -57,7 +57,7 @@ $transition: all 0.3s ease;
 .minted-items-body i {
   font-size: 20px;
   color: #28a745;
-  margin-bottom: $spacing / 2;
+  margin-bottom: calc($spacing / 2);
 }
 
 .minted-items-close {

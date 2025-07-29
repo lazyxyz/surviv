@@ -11,10 +11,6 @@ import { atlases as fallHighRes } from "virtual:spritesheets-jsons-high-res-fall
 import { atlases as fallLowRes } from "virtual:spritesheets-jsons-low-res-fall";
 import { atlases as winterHighRes } from "virtual:spritesheets-jsons-high-res-winter";
 import { atlases as winterLowRes } from "virtual:spritesheets-jsons-low-res-winter";
-import { atlases as normalHighRes } from "virtual:spritesheets-jsons-high-res-normal";
-import { atlases as normalLowRes } from "virtual:spritesheets-jsons-low-res-normal";
-import { atlases as halloweenHighRes } from "virtual:spritesheets-jsons-high-res-halloween";
-import { atlases as halloweenLowRes } from "virtual:spritesheets-jsons-low-res-halloween";
 
 const textures: Record<string, Texture> = {};
 
@@ -31,9 +27,7 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean, 
 
     // Select the appropriate spritesheets based on modeName and resolution
     const modeAtlases: Record<string, SpritesheetData[]> = {
-        normal: highResolution ? normalHighRes : normalLowRes,
         fall: highResolution ? fallHighRes : fallLowRes,
-        halloween: highResolution ? halloweenHighRes : halloweenLowRes,
         winter: highResolution ? winterHighRes : winterLowRes
     };
 

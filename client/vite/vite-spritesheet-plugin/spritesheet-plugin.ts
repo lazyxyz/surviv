@@ -22,7 +22,7 @@ export type CacheData = {
     }
 };
 
-const gameModes = ["normal", "fall", "halloween", "winter", "shared"];
+const GAME_MODES = [ "fall", "winter", "shared"];
 
 const defaultGlob = "**/*.{png,gif,jpg,bmp,tiff,svg}";
 const imagesMatcher = new Minimatch(defaultGlob);
@@ -119,8 +119,7 @@ const getLowResVirtualModuleId = (modeName: string) => `virtual:spritesheets-jso
 const getLowResResolvedVirtualModuleId = (modeName: string) => `\0${getLowResVirtualModuleId(modeName)}`;
 
 const resolveId = (id: string): string | undefined => {
-    const modes = ["normal", "fall", "halloween", "winter", "shared"];
-    for (const mode of modes) {
+    for (const mode of GAME_MODES) {
         const highResId = getHighResVirtualModuleId(mode);
         const lowResId = getLowResVirtualModuleId(mode);
         if (id === highResId) return getHighResResolvedVirtualModuleId(mode);
@@ -135,16 +134,13 @@ export function spritesheet(): Plugin[] {
 
     const atlasesByMode: Record<string, MultiResAtlasList> = {};
     const exportedAtlasesByMode: Record<string, { low: SpritesheetData[], high: SpritesheetData[] }> = {
-        normal: { low: [], high: [] },
         fall: { low: [], high: [] },
-        halloween: { low: [], high: [] },
         winter: { low: [], high: [] },
         shared: { low: [], high: [] }
     };
 
     const load = (id: string): string | undefined => {
-        const modes = ["normal", "fall", "halloween", "winter", "shared"];
-        for (const mode of modes) {
+        for (const mode of GAME_MODES) {
             if (id === getHighResResolvedVirtualModuleId(mode)) {
                 return `
                     export const atlases = ${JSON.stringify(exportedAtlasesByMode[mode].high)};
@@ -166,8 +162,7 @@ export function spritesheet(): Plugin[] {
             name: `${PLUGIN_NAME}:build`,
             apply: "build",
             async buildStart() {
-                for (const mode of gameModes) {
-                    // for (const mode of ["normal", "fall", "halloween", "winter", "shared"]) {
+                for (const mode of GAME_MODES) {
                     const atlases = await buildSpritesheets(mode);
                     atlasesByMode[mode] = atlases;
                     exportedAtlasesByMode[mode].high = atlasesByMode[mode].high.map(sheet => sheet.json);
@@ -175,7 +170,7 @@ export function spritesheet(): Plugin[] {
                 }
             },
             generateBundle() {
-                for (const mode of ["normal", "fall", "halloween", "winter", "shared"]) {
+                for (const mode of GAME_MODES) {
                     if (atlasesByMode[mode]) {
                         for (const sheet of [...atlasesByMode[mode].low, ...atlasesByMode[mode].high]) {
                             this.emitFile({
@@ -203,7 +198,7 @@ export function spritesheet(): Plugin[] {
 
                     buildTimeout = setTimeout(() => {
                         buildSheets().then(() => {
-                            for (const mode of gameModes) {
+                            for (const mode of GAME_MODES) {
                                 const moduleHigh = server.moduleGraph.getModuleById(getHighResResolvedVirtualModuleId(mode));
                                 if (moduleHigh !== undefined) void server.reloadModule(moduleHigh);
                                 const moduleLow = server.moduleGraph.getModuleById(getLowResResolvedVirtualModuleId(mode));
@@ -224,7 +219,7 @@ export function spritesheet(): Plugin[] {
                 const files = new Map<string, Buffer | string>();
 
                 async function buildSheets(): Promise<void> {
-                    for (const mode of gameModes) {
+                    for (const mode of GAME_MODES) {
                         const cacheDir = getCacheDir(mode);
                         const cacheDataPath = path.join(cacheDir, "data.json");
                         let isCached = existsSync(cacheDir) && existsSync(cacheDataPath);
