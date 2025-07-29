@@ -188,8 +188,8 @@ $transition: all 0.3s ease;
 
     .dialog-close-btn {
       position: absolute;
-      top: 12px;
-      right: 12px;
+      top: 0px;
+      right: 0px;
       font-size: 24px;
       color: palette.$light;
       cursor: pointer;
@@ -260,10 +260,15 @@ $transition: all 0.3s ease;
         color: white;
       }
       img {
-        width: 40px;
-        height: 40px;
+        width: 36px;
+        height: 36px;
       }
     }
+
+    a:visited {
+      color: white;
+    }
+
     #share-btn {
       display: flex;
       justify-content: center;
