@@ -12,6 +12,7 @@ import { onConnectWallet, showWallet } from "./scripts/wallet";
 import "./scss/pages/client.scss";
 import { Buffer } from "buffer";
 import { initTranslation } from "./translations";
+import { setupConsoleListener, setupRangeInputs, setupSettingsImportExport, setupTabNavigation } from "./scripts/ui/setup";
 
 if (typeof window !== "undefined") {
     // Polyfill for Buffer
@@ -20,12 +21,13 @@ if (typeof window !== "undefined") {
     }
 }
 
+
 export let GAME_CONSOLE = new GameConsole();
 
 void (async () => {
     initTranslation();
-    
-    const account = new Account();    
+
+    const account = new Account();
     const game = await Game.init();
 
     void Promise.all([
@@ -37,5 +39,10 @@ void (async () => {
         setupPlay(game, account);
         showInventory(account);
     });
+
+    setupConsoleListener();
+    setupRangeInputs();
+    setupTabNavigation();
+    setupSettingsImportExport();
 
 })();

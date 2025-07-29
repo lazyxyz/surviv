@@ -42,7 +42,7 @@ async function promptTeamID(): Promise<string | null> {
 }
 
 
-function setTeamParameters(params: URLSearchParams, account: Account): void {
+function setTeamParameters(params: URLSearchParams): void {
     params.set("name", GAME_CONSOLE.getBuiltInCVar("cv_player_name"));
     params.set("skin", GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin"));
     
@@ -120,7 +120,7 @@ function setupTeamMenu(game: Game, account: Account): void {
             params.set("teamID", teamID);
         }
 
-        setTeamParameters(params, account);
+        setTeamParameters(params);
         const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
         teamSocket = new WebSocket(teamURL);
         setupTeamSocketHandlers(teamSocket, game, account);
