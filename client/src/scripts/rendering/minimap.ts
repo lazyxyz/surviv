@@ -743,6 +743,15 @@ export class Minimap {
             }, 10000);
         }
     }
+
+    clear(): void {
+        this.safeZone.clear();
+        this.pingGraphics.clear();
+        this.pings.clear();
+        this.pingsContainer.removeChildren();
+        this.teammateIndicators.clear();
+        this.teammateIndicatorContainer.removeChildren();
+    }
 }
 
 export class MapPing {

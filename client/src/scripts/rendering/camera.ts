@@ -1,4 +1,4 @@
-import { DEFAULT_SCOPE } from "@common/definitions/scopes";
+import { DEFAULT_SCOPE, Scopes } from "@common/definitions/scopes";
 import { EaseFunctions, Numeric } from "@common/utils/math";
 import { randomPointInsideCircle } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
@@ -113,6 +113,11 @@ export class Camera {
 
     addObject(...objects: Container[]): void {
         this.container.addChild(...objects);
+    }
+
+    clear(): void {
+        this.container.removeChildren();
+        this.zoom = Scopes.definitions[0].zoomLevel;
     }
 }
 

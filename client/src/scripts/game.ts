@@ -654,24 +654,18 @@ export class Game {
                 this.objects.clear();
                 this.bullets.clear();
                 this.planes.clear();
-                this.camera.container.removeChildren();
                 this.particleManager.clear();
                 this.uiManager.clearTeammateCache();
                 this.gasRender?.graphics.clear();
                 this.gasRender = undefined;
 
-                const map = this.map;
-                map.safeZone.clear();
-                map.pingGraphics.clear();
-                map.pings.clear();
-                map.pingsContainer.removeChildren();
-                map.teammateIndicators.clear();
-                map.teammateIndicatorContainer.removeChildren();
-
+                this.map.clear();
+                
                 this.playerNames.clear();
                 this._timeouts.clear();
 
-                this.camera.zoom = Scopes.definitions[0].zoomLevel;
+                this.camera.clear();
+
                 updateDisconnectTime();
                 resetPlayButtons();
                 if (teamSocket) ui.createTeamMenu.fadeIn(250, resolve);
