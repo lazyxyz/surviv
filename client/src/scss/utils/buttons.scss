@@ -114,6 +114,13 @@
   text-align: center;
 }
 
+#link-social {
+  transition: 300ms;
+  &:hover {
+    transform: rotate(4deg);
+  }
+}
+
 .btn-twitter {
   background-image: url("/img/socials/x.svg");
 }
@@ -124,6 +131,10 @@
 
 .btn-discord {
   background-image: url("/img/socials/discord.svg");
+}
+.btn-assets {
+  background-image: url("/img/socials/assets.svg");
+  width: 150px;
 }
 
 .btn-bind {
