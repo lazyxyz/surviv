@@ -363,6 +363,9 @@
 
   .splash-earn-learn-more {
     position: relative;
+    overflow: hidden;
+    height: 280px;
+    border-radius: 12px;
 
     a {
       position: absolute;

@@ -115,7 +115,12 @@
 }
 
 #link-social {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 9999;
   transition: 300ms;
+
   &:hover {
     transform: rotate(4deg);
   }
@@ -135,6 +140,7 @@
 .btn-assets {
   background-image: url("/img/socials/assets.svg");
   width: 150px;
+  height: 45px;
 }
 
 .btn-bind {
