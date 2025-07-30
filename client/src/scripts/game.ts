@@ -98,6 +98,7 @@ type ObjectMapping = {
 
 export class Game {
     private _socket?: WebSocket;
+    private _renderCallback: () => void; // Store bound callback
 
     readonly objects = new ObjectPool<ObjectMapping>();
     readonly bullets = new Set<Bullet>();
@@ -183,6 +184,7 @@ export class Game {
         this.soundManager = new SoundManager(this);
         this.inputManager.generateBindsConfigScreen();
         this.inputManager.setupInputs();
+        this._renderCallback = this.render.bind(this); // Bind once and store
 
         this.music = sound.add("menu_music", {
             url: `./audio/music/menu_music${GAME_CONSOLE.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : getRandomMode() ? `_${getRandomMode()}` : ""}.mp3`,
@@ -255,7 +257,7 @@ export class Game {
             }));
         });
 
-        pixi.ticker.add(this.render.bind(this));
+        pixi.ticker.add(this._renderCallback);
         pixi.stage.addChild(
             this.camera.container,
             this.map.container,
@@ -324,7 +326,7 @@ export class Game {
 
     resize(): void {
         this.map.resize();
-        this.camera.resize(true);
+        this.camera.resize(this.pixi.screen.width, this.pixi.screen.height, true);
     }
 
     ready(packet: PlayerData) {
@@ -660,11 +662,12 @@ export class Game {
                 this.gasRender = undefined;
 
                 this.map.clear();
-                
+
                 this.playerNames.clear();
                 this._timeouts.clear();
 
                 this.camera.clear();
+                this.pixi.ticker.remove(this._renderCallback);
 
                 updateDisconnectTime();
                 resetPlayButtons();

@@ -11,7 +11,6 @@ import { type Tween } from "../utils/tween";
 import { GAME_CONSOLE } from "../..";
 
 export class Camera {
-    readonly pixi: Application;
     readonly container: Container;
 
     position = Vec.create(0, 0);
@@ -20,7 +19,7 @@ export class Camera {
     get zoom(): number { return this._zoom; }
     set zoom(zoom: number) {
         this._zoom = zoom;
-        this.resize(true);
+        this.resize(this.width, this.height, true);
     }
 
     zoomTween?: Tween<Vector>;
@@ -42,7 +41,6 @@ export class Camera {
         }
         Camera._instantiated = true;
 
-        this.pixi = game.pixi;
         this.container = new Container({
             isRenderGroup: true,
             sortableChildren: true,
@@ -50,9 +48,9 @@ export class Camera {
         });
     }
 
-    resize(animation = false): void {
-        this.width = this.pixi.screen.width;
-        this.height = this.pixi.screen.height;
+    resize(width: number, height: number, animation = false): void {
+        this.width = width;
+        this.height = height;
 
         const minDimension = Numeric.min(this.width, this.height);
         const maxDimension = Numeric.max(this.width, this.height);
