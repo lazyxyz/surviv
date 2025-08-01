@@ -65,7 +65,7 @@ export async function showInventory(account: Account) {
     })
 
     $('#tab-badges').on('click', () => {
-        showBadges();
+        showBadges(account);
     })
 
     const idString = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
