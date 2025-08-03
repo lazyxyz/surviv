@@ -77,11 +77,13 @@ This file is a report of all errors and missing keys in the translation files of
 export async function buildTranslations(): Promise<void> {
     const languages: Record<string, Record<string, string>> = {};
 
+    
     await Promise.all(
         files.map(async file => {
             languages[file.slice(0, -".hjson".length)] = parse(await readFile(LANGUAGES_DIRECTORY + file, "utf8")) as Record<string, string>;
         })
     );
+    console.log("languages: ", languages);
 
     const manifest: TranslationsManifest = {};
 

@@ -25,7 +25,7 @@ if (typeof window !== "undefined") {
 export let GAME_CONSOLE = new GameConsole();
 
 void (async () => {
-    initTranslation();
+    await initTranslation();
 
     const account = new Account();
     const game = await Game.init();
@@ -35,9 +35,9 @@ void (async () => {
         onConnectWallet(account),
     ]).then(() => {
         setupHome(account);
+        showInventory(account);
         setupGame(game);
         setupPlay(game, account);
-        showInventory(account);
     });
 
     setupConsoleListener();
