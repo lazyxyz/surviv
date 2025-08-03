@@ -647,7 +647,11 @@ export class Game {
                 ui.killLeaderCount.text("0");
 
                 this.gameStarted = false;
-                this._socket?.close();
+
+                if (this._socket) {
+                    this._socket.close();
+                    this._socket = undefined; // Clear reference
+                }
 
                 // reset stuff
                 for (const object of this.objects) object.destroy();
