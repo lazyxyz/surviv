@@ -83,8 +83,6 @@ export async function buildTranslations(): Promise<void> {
             languages[file.slice(0, -".hjson".length)] = parse(await readFile(LANGUAGES_DIRECTORY + file, "utf8")) as Record<string, string>;
         })
     );
-    console.log("languages: ", languages);
-
     const manifest: TranslationsManifest = {};
 
     const filePromises: Array<Promise<void>> = [];

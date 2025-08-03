@@ -21,7 +21,6 @@ if (typeof window !== "undefined") {
     }
 }
 
-
 export let GAME_CONSOLE = new GameConsole();
 
 void (async () => {
