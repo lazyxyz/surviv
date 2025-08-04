@@ -211,6 +211,7 @@ export class Game {
     initPixi = async (gameMode: Mode): Promise<void> => {
         const renderMode = GAME_CONSOLE.getBuiltInCVar("cv_renderer");
         const renderRes = GAME_CONSOLE.getBuiltInCVar("cv_renderer_res");
+        const pixi = this.pixi;
 
         // Check if Pixi.js is already initialized
         if (this.pixi.stage.children.length == 0) {
@@ -233,9 +234,32 @@ export class Game {
                     click: true
                 }
             });
+
+
+            // HACK: the game ui covers the canvas
+            // so send pointer events manually to make clicking to spectate players work
+            this.uiManager.ui.gameUi[0].addEventListener("pointerdown", e => {
+                pixi.canvas.dispatchEvent(new PointerEvent("pointerdown", {
+                    pointerId: e.pointerId,
+                    button: e.button,
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                    screenY: e.screenY,
+                    screenX: e.screenX
+                }));
+            });
+
+            pixi.stage.addChild(
+                this.camera.container,
+                this.map.container,
+                this.map.mask
+            );
+
+            this.map.visible = !GAME_CONSOLE.getBuiltInCVar("cv_minimap_minimized");
+            this.map.expanded = GAME_CONSOLE.getBuiltInCVar("cv_map_expanded");
+            this.uiManager.ui.gameUi.toggle(GAME_CONSOLE.getBuiltInCVar("cv_draw_hud"));
         }
 
-        const pixi = this.pixi;
         await loadTextures(
             pixi.renderer,
             this.inputManager.isMobile
@@ -244,29 +268,7 @@ export class Game {
             , gameMode.toString()
         );
 
-        // HACK: the game ui covers the canvas
-        // so send pointer events manually to make clicking to spectate players work
-        this.uiManager.ui.gameUi[0].addEventListener("pointerdown", e => {
-            pixi.canvas.dispatchEvent(new PointerEvent("pointerdown", {
-                pointerId: e.pointerId,
-                button: e.button,
-                clientX: e.clientX,
-                clientY: e.clientY,
-                screenY: e.screenY,
-                screenX: e.screenX
-            }));
-        });
-
         pixi.ticker.add(this._renderCallback);
-        pixi.stage.addChild(
-            this.camera.container,
-            this.map.container,
-            this.map.mask
-        );
-
-        this.map.visible = !GAME_CONSOLE.getBuiltInCVar("cv_minimap_minimized");
-        this.map.expanded = GAME_CONSOLE.getBuiltInCVar("cv_map_expanded");
-        this.uiManager.ui.gameUi.toggle(GAME_CONSOLE.getBuiltInCVar("cv_draw_hud"));
 
         pixi.renderer.on("resize", () => this.resize());
         this.resize();
@@ -420,12 +422,9 @@ export class Game {
         if (this.gameStarted || !account.token?.length) return;
 
         // token is expired
-        {
-            const { exp } = parseJWT(account.token);
-
-            if (new Date().getTime() >= (exp * 1000)) {
-                return account.sessionExpired();
-            }
+        const { exp } = parseJWT(account.token);
+        if (new Date().getTime() >= (exp * 1000)) {
+            return account.sessionExpired();
         }
 
         // append token intro params
@@ -648,7 +647,11 @@ export class Game {
                 ui.killLeaderCount.text("0");
 
                 this.gameStarted = false;
-                this._socket?.close();
+
+                if (this._socket) {
+                    this._socket.close();
+                    this._socket = undefined; // Clear reference
+                }
 
                 // reset stuff
                 for (const object of this.objects) object.destroy();
