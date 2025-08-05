@@ -27,6 +27,27 @@ import { setUpCommands } from "../utils/console/commands";
 
 export let autoPickup = true;
 
+function updateUsersBadge(game: Game): void {
+    const selectedBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
+    const aliveUsersContainer = document.getElementById("badges-container");
+
+    if (!aliveUsersContainer) return;
+
+    // Clear existing badge content
+    aliveUsersContainer.innerHTML = "";
+
+    // Show badge image if "cards" is selected
+    if (selectedBadge === "cards") {
+        const badgeImage = document.createElement("img");
+        badgeImage.src = `./img/game/shared/badges/${selectedBadge}.svg`;
+        badgeImage.alt = "Cards Badge";
+        badgeImage.className = "badge-image";
+        badgeImage.draggable = false;
+
+        aliveUsersContainer.appendChild(badgeImage);
+    }
+}
+
 function setupMenuButtons(game: Game): void {
     const { ui } = game.uiManager;
     const gameMenu = ui.gameMenu;
@@ -106,6 +127,11 @@ function setupSpectateControls(game: Game): void {
 
     ui.spectateNext.on("click", () => {
         sendSpectatePacket(SpectateActions.SpectateNext);
+    });
+
+    // Update the user's badge
+    GAME_CONSOLE.variables.addChangeListener("cv_loadout_badge", () => {
+        updateUsersBadge(game);
     });
 }
 
@@ -250,41 +276,6 @@ function setupGameModeStyles(game: Game): void {
             "z-index": "-1"
         });
     }
-}
-
-function setupRoleSettings(game: Game): void {
-    if (GAME_CONSOLE.getBuiltInCVar("dv_role") !== "") {
-        $("#tab-special").show();
-
-        $<HTMLInputElement>("#role-name")
-            .val(GAME_CONSOLE.getBuiltInCVar("dv_role"))
-            .on("input", e => {
-                GAME_CONSOLE.setBuiltInCVar("dv_role", e.target.value);
-            });
-
-        $<HTMLInputElement>("#role-password").on("input", e => {
-            GAME_CONSOLE.setBuiltInCVar("dv_password", e.target.value);
-        });
-
-        addCheckboxListener("#toggle-lobbyclearing", "dv_lobby_clearing");
-
-        if (GAME_CONSOLE.getBuiltInCVar("dv_name_color") === "") GAME_CONSOLE.setBuiltInCVar("dv_name_color", "#FFFFFF");
-
-        $<HTMLInputElement>("#namecolor-color-picker")
-            .val(GAME_CONSOLE.getBuiltInCVar("dv_name_color"))
-            .on("input", e => {
-                GAME_CONSOLE.setBuiltInCVar("dv_name_color", e.target.value);
-            });
-
-        $<HTMLInputElement>("#weapon-preset")
-            .val(GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset"))
-            .on("input", e => {
-                GAME_CONSOLE.setBuiltInCVar("dv_weapon_preset", e.target.value);
-            });
-    }
-
-    $("#tab-badges").show();
-    $("#tab-weapons").show();
 }
 
 function addSliderListener(
@@ -1027,6 +1018,7 @@ export async function setupGame(game: Game): Promise<void> {
     setupInventorySlots(game);
     setupSpectateOptions(game);
     setupGameInteraction(game);
+    updateUsersBadge(game);
 
     // Setup outside
     setUpCommands(game);

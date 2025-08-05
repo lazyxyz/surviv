@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import { showBadges } from "./badges";
-import type { Game } from "../game";
 import { showEmotes } from "./emotes";
 import { showShop } from "./shop";
 import { showSkins } from "./skins";
