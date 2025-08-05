@@ -7,7 +7,7 @@ import type { Account } from "../account";
 import type { Game } from "../game";
 import { warningAlert } from "../modal";
 import { parseJWT } from "../utils/constants";
-import {  resetPlayButtons, selectedRegion } from "./home";
+import { resetPlayButtons, selectedRegion } from "./home";
 import { Color } from "pixi.js";
 import { GAME_CONSOLE } from "../..";
 import { Config } from "../../config";
@@ -45,7 +45,7 @@ async function promptTeamID(): Promise<string | null> {
 function setTeamParameters(params: URLSearchParams): void {
     params.set("name", GAME_CONSOLE.getBuiltInCVar("cv_player_name"));
     params.set("skin", GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin"));
-    
+
     const badge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
     if (badge) params.set("badge", badge);
 
@@ -124,7 +124,7 @@ function setupTeamMenu(game: Game, account: Account): void {
         const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
         teamSocket = new WebSocket(teamURL);
         setupTeamSocketHandlers(teamSocket, game, account);
-        
+
         $("#create-team-menu").fadeIn(250);
         ui.splashUi.css({ filter: "brightness(0.6)", pointerEvents: "none" });
     });
@@ -243,7 +243,7 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
 
 function handleTeamJoin(data: CustomTeamMessage, ui: Game['uiManager']['ui']): void {
     joinedTeam = true;
-    if(data.type != CustomTeamMessages.Join) throw Error("handleTeamJoin Failed");
+    if (data.type != CustomTeamMessages.Join) throw Error("handleTeamJoin Failed");
     teamID = data.teamID;
     window.location.hash = `#${teamID}`;
     ui.createTeamUrl.val(`${window.location.origin}/?region=${GAME_CONSOLE.getBuiltInCVar("cv_region") || Config.defaultRegion}#${teamID}`);
@@ -252,7 +252,7 @@ function handleTeamJoin(data: CustomTeamMessage, ui: Game['uiManager']['ui']): v
 }
 
 function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']): void {
-    if(data.type != CustomTeamMessages.Update) throw Error("handleTeamUpdate Failed");
+    if (data.type != CustomTeamMessages.Update) throw Error("handleTeamUpdate Failed");
 
     const { players, isLeader, ready } = data;
     ui.createTeamPlayers.html(players.map((player: CustomTeamPlayerInfo) => `
@@ -344,9 +344,9 @@ function setGameParameters(params: URLSearchParams, account: Account): void {
     if (name) params.set("name", name);
     if (account.address) params.set("address", account.address);
 
-    const playerSkin = Loots.fromStringSafe(GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin")) ?? 
-        Loots.fromString(typeof defaultClientCVars.cv_loadout_skin === "object" 
-            ? defaultClientCVars.cv_loadout_skin.value 
+    const playerSkin = Loots.fromStringSafe(GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin")) ??
+        Loots.fromString(typeof defaultClientCVars.cv_loadout_skin === "object"
+            ? defaultClientCVars.cv_loadout_skin.value
             : defaultClientCVars.cv_loadout_skin);
     if (playerSkin) params.set("skin", playerSkin.idString);
 
@@ -373,7 +373,7 @@ function setGameParameters(params: URLSearchParams, account: Account): void {
         }
     }
 
-    const emoteIds = EMOTE_SLOTS.map(slot => 
+    const emoteIds = EMOTE_SLOTS.map(slot =>
         Emotes.fromStringSafe(GAME_CONSOLE.getBuiltInCVar(`cv_loadout_${slot}_emote`))?.idString
     ).filter(Boolean);
     if (emoteIds.length > 0) params.set("emotes", emoteIds.join(","));
