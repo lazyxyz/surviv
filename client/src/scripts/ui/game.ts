@@ -252,41 +252,6 @@ function setupGameModeStyles(game: Game): void {
     }
 }
 
-function setupRoleSettings(game: Game): void {
-    if (GAME_CONSOLE.getBuiltInCVar("dv_role") !== "") {
-        $("#tab-special").show();
-
-        $<HTMLInputElement>("#role-name")
-            .val(GAME_CONSOLE.getBuiltInCVar("dv_role"))
-            .on("input", e => {
-                GAME_CONSOLE.setBuiltInCVar("dv_role", e.target.value);
-            });
-
-        $<HTMLInputElement>("#role-password").on("input", e => {
-            GAME_CONSOLE.setBuiltInCVar("dv_password", e.target.value);
-        });
-
-        addCheckboxListener("#toggle-lobbyclearing", "dv_lobby_clearing");
-
-        if (GAME_CONSOLE.getBuiltInCVar("dv_name_color") === "") GAME_CONSOLE.setBuiltInCVar("dv_name_color", "#FFFFFF");
-
-        $<HTMLInputElement>("#namecolor-color-picker")
-            .val(GAME_CONSOLE.getBuiltInCVar("dv_name_color"))
-            .on("input", e => {
-                GAME_CONSOLE.setBuiltInCVar("dv_name_color", e.target.value);
-            });
-
-        $<HTMLInputElement>("#weapon-preset")
-            .val(GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset"))
-            .on("input", e => {
-                GAME_CONSOLE.setBuiltInCVar("dv_weapon_preset", e.target.value);
-            });
-    }
-
-    $("#tab-badges").show();
-    $("#tab-weapons").show();
-}
-
 function addSliderListener(
     elementId: string,
     settingName: keyof CVarTypeMapping,

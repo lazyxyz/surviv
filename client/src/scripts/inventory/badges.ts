@@ -25,8 +25,8 @@ function selectBadge(idString: string): void {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function showBadges(account: Account) {
-    if (InventoryCache.weaponsLoaded) return;
-    InventoryCache.weaponsLoaded = true;
+    if (InventoryCache.badgesLoaded) return;
+    InventoryCache.badgesLoaded = true;
 
     const badgeList = $<HTMLDivElement>("#badges-list");
     const currentBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
@@ -46,9 +46,6 @@ export async function showBadges(account: Account) {
 
     // sort badges
     const sortedBadgeIds = [...userBadges, ...inactiveBadges];
-
-    // // clear list
-    // badgeList.empty();
 
     // custom no item (meaning click to reset badge)
     {

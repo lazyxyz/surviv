@@ -28,13 +28,6 @@ const selectWeapon = (value: object) => {
   }));
 };
 
-const resetAll = () => {
-  $(".weapons-container-list").empty();
-  $(".weapons-container-aside-assets").empty();
-  $(".weapons-container-card-melee").empty();
-  $(".weapons-container-aside-preview").empty();
-};
-
 const appendPreview = (images: Array<{
   zIndex: number
   rotate?: number
@@ -384,11 +377,8 @@ async function showMelees(account: Account, selectedMeleeId?: string) {
 
 // Main function to display weapons (melees and guns)
 export async function showWeapons(account: Account, highlightId?: string): Promise<void> {
-
   if (InventoryCache.weaponsLoaded) return;
   InventoryCache.weaponsLoaded = true;
-
-  resetAll();
 
   // Build tab UI
   const $container = $<HTMLDivElement>(".weapons-container-list").empty();
