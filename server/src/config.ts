@@ -1,6 +1,5 @@
 import { Layer, TeamSize } from "@common/constants";
 import { type Vector } from "@common/utils/vector";
-import { type Maps } from "./data/maps";
 import { type Game } from "./game";
 import { type GamePlugin } from "./pluginManager";
 
@@ -34,8 +33,7 @@ export const Config = {
     maxPlayersPerGame: 100,
 
     maxGames: 20,
-    // gameJoinTime: 60,
-    gameJoinTime: 0,
+    gameJoinTime: 60,
 
     gas: { mode: GasMode.Normal },
 
