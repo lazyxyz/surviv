@@ -62,6 +62,7 @@ export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, PlayerD
         if (hasGun) {
             Guns.writeToStream(stream, data.gun);
         }
+        stream.writeInt8(data.gameMode);
     },
 
     deserialize(stream) {
@@ -89,6 +90,7 @@ export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, PlayerD
             emotes: Array.from({ length: 6 }, (_, i) => emotes[i] ? Emotes.readFromStream(stream) : undefined),
             melee: hasMelee ? Melees.readFromStream(stream) : undefined,
             gun: hasGun ? Guns.readFromStream(stream) : undefined,
+            gameMode: stream.readInt8(),
         };
     }
 });
