@@ -26,42 +26,24 @@ export interface ModeDefinition {
     readonly modeLogoImage?: string | { solo: string, squads: string }
 }
 
-export type Mode = "normal" | "fall" | "halloween" | "winter";
+export type Mode = "fall" | "winter";
 
 export const ModeToNumber: Record<Mode, number> = {
-    normal: 0,
-    fall: 1,
-    halloween: 2,
-    winter: 3,
+    fall: 0,
+    winter: 1,
 };
 
 export const NumberToMode: Record<number, Mode> = {
-    0: "normal",
-    1: "fall",
-    2: "halloween",
-    3: "winter",
+    0: "fall",
+    1: "winter",
 };
 
 export function getRandomMode(): Mode {
-    const modes: Mode[] = ["normal", "fall", "halloween", "winter"];
+    const modes: Mode[] = ["fall", "winter"];
     return modes[Math.floor(Math.random() * modes.length)];
 }
 
 export const Modes: Record<Mode, ModeDefinition> = {
-    normal: {
-        idString: "normal",
-        colors: {
-            grass: "hsl(95, 41%, 38%)",
-            water: "hsl(211, 63%, 42%)",
-            border: "hsl(211, 63%, 30%)",
-            beach: "hsl(40, 39%, 55%)",
-            riverBank: "hsl(34, 41%, 32%)",
-            trail: "hsl(35, 50%, 40%)",
-            gas: "hsla(17, 100%, 50%, 0.55)",
-            void: "hsl(25, 80%, 6%)"
-        },
-        reskin: "normal"
-    },
     fall: {
         idString: "fall",
         colors: {
@@ -88,26 +70,6 @@ export const Modes: Record<Mode, ModeDefinition> = {
             squads: "./img/misc/user-group.svg"
         },
     },
-    halloween: {
-        idString: "halloween",
-        colors: {
-            grass: "hsl(65, 100%, 12%)",
-            water: "hsl(4, 100%, 14%)",
-            border: "hsl(4, 90%, 12%)",
-            beach: "hsl(33, 77%, 21%)",
-            riverBank: "hsl(33, 50%, 25%)",
-            trail: "hsl(35, 50%, 20%)",
-            gas: "hsla(17, 100%, 50%, 0.55)",
-            void: "hsl(25, 80%, 6%)"
-        },
-        inheritTexturesFrom: "fall",
-        defaultScope: "2x_scope",
-        specialMenuMusic: true,
-        darkShaders: true,
-        reskin: "fall",
-        specialPlayButtons: true,
-        modeLogoImage: "./img/game/halloween/obstacles/jack_o_lantern.svg"
-    },
     winter: {
         idString: "winter",
         colors: {
@@ -126,7 +88,6 @@ export const Modes: Record<Mode, ModeDefinition> = {
         ],
         reskin: "winter",
         ambience: "snowstorm",
-        inheritTexturesFrom: "normal",
         bulletTrailAdjust: "hsl(0, 50%, 80%)",
         particleEffects: {
             frames: ["snow_particle"],
