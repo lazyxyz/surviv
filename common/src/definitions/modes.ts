@@ -94,9 +94,7 @@ export const Modes: Record<Mode, ModeDefinition> = {
             delay: 800,
             gravity: true
         },
-        specialPlayButtons: true,
-        modeLogoImage: "./img/game/winter/obstacles/red_gift.svg"
-    }
+    },
 };
 export const ObstacleModeVariations: Partial<Record<Mode, string>> = {
     winter: "_winter"

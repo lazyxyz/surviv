@@ -81,131 +81,6 @@ export type ObstacleClump = {
 };
 
 const maps = {
-    normal: {
-        width: 1632,
-        height: 1632,
-        oceanSize: 128,
-        beachSize: 32,
-        rivers: {
-            minAmount: 2,
-            maxAmount: 3,
-            maxWideAmount: 1,
-            wideChance: 0.35,
-            minWidth: 12,
-            maxWidth: 18,
-            minWideWidth: 25,
-            maxWideWidth: 30
-        },
-        buildings: {
-            large_bridge: 2,
-            small_bridge: Infinity,
-            port_complex: 1,
-            sea_traffic_control: 1,
-            tugboat_red: 1,
-            tugboat_white: 5,
-            armory: 1,
-            headquarters: 1,
-            small_bunker: 1,
-            refinery: 1,
-            warehouse: 5,
-            // firework_warehouse: 1, // birthday mode
-            green_house: 3,
-            blue_house: 3,
-            red_house: 3,
-            red_house_v2: 3,
-            construction_site: 1,
-            mobile_home: 10,
-            porta_potty: 12,
-            container_3: 2,
-            container_4: 2,
-            container_5: 2,
-            container_6: 2,
-            container_7: 1,
-            container_8: 2,
-            container_9: 1,
-            container_10: 2
-        },
-        majorBuildings: ["armory", "refinery", "port_complex", "headquarters"],
-        quadBuildingLimit: {
-            red_house: 1,
-            red_house_v2: 1,
-            warehouse: 2,
-            green_house: 1,
-            blue_house: 1,
-            mobile_home: 3,
-            porta_potty: 3,
-            construction_site: 1
-        },
-        obstacles: {
-            oil_tank: 12,
-            oak_tree: 10,
-            small_oak_tree: 100,
-            birch_tree: 20,
-            pine_tree: 10,
-            loot_tree: 1,
-            regular_crate: 160,
-            flint_crate: 5,
-            aegis_crate: 5,
-            grenade_crate: 35,
-            rock: 150,
-            river_chest: 1,
-            river_rock: 45,
-            bush: 110,
-            // birthday_cake: 100, // birthday mode
-            lily_pad: 20,
-            blueberry_bush: 30,
-            barrel: 80,
-            viking_chest: 1,
-            super_barrel: 30,
-            melee_crate: 1,
-            gold_rock: 1,
-            loot_barrel: 1,
-            flint_stone: 1
-        },
-        obstacleClumps: [
-            {
-                clumpAmount: 100,
-                clump: {
-                    minAmount: 2,
-                    maxAmount: 3,
-                    jitter: 5,
-                    obstacles: ["small_oak_tree"],
-                    radius: 12
-                }
-            },
-            {
-                clumpAmount: 25,
-                clump: {
-                    minAmount: 2,
-                    maxAmount: 3,
-                    jitter: 5,
-                    obstacles: ["birch_tree"],
-                    radius: 12
-                }
-            },
-            {
-                clumpAmount: 4,
-                clump: {
-                    minAmount: 2,
-                    maxAmount: 3,
-                    jitter: 5,
-                    obstacles: ["pine_tree"],
-                    radius: 12
-                }
-            }
-        ],
-        loots: {
-            ground_loot: 60
-        },
-        places: [
-            { name: "Banana", position: Vec.create(0.23, 0.2) },
-            { name: "Takedown", position: Vec.create(0.23, 0.8) },
-            { name: "Lavlandet", position: Vec.create(0.75, 0.2) },
-            { name: "Noskin Narrows", position: Vec.create(0.72, 0.8) },
-            { name: "Mt. Sanger", position: Vec.create(0.5, 0.35) },
-            { name: "Deepwood", position: Vec.create(0.5, 0.65) }
-        ]
-    },
     fall: {
         width: 1924,
         height: 1924,
@@ -373,167 +248,6 @@ const maps = {
             { name: "Darkwood", position: Vec.create(0.5, 0.65) }
         ]
     },
-    halloween: {
-        width: 1924,
-        height: 1924,
-        oceanSize: 128,
-        beachSize: 32,
-        rivers: {
-            minAmount: 2,
-            maxAmount: 2,
-            wideChance: 0.35,
-            minWidth: 12,
-            maxWidth: 18,
-            minWideWidth: 25,
-            maxWideWidth: 28,
-            maxWideAmount: 1
-        },
-        trails: {
-            minAmount: 4,
-            maxAmount: 5,
-            wideChance: 0.2,
-            minWidth: 2,
-            maxWidth: 4,
-            minWideWidth: 3,
-            maxWideWidth: 5,
-            maxWideAmount: 1
-        },
-        clearings: {
-            minWidth: 200,
-            minHeight: 150,
-            maxWidth: 250,
-            maxHeight: 200,
-            count: 3,
-            allowedObstacles: ["clearing_boulder", "flint_crate", "rock", "plumpkin", "diseased_plumpkin", "vibrant_bush", "river_chest", "lily_pad", "grenade_crate", "oak_leaf_pile", "river_rock", "melee_crate", "flint_stone"],
-            obstacles: [
-                { idString: "clearing_boulder", min: 3, max: 6 },
-                { idString: "flint_crate", min: 0, max: 2 },
-                { idString: "grenade_crate", min: 0, max: 2 },
-                { idString: "melee_crate", min: 0, max: 1 },
-                { idString: "flint_stone", min: 0, max: 1 }
-            ]
-        },
-        buildings: {
-            small_bridge: Infinity,
-            plumpkin_bunker: 1,
-            sea_traffic_control: 1,
-            tugboat_red: 1,
-            tugboat_white: 7,
-            lodge: 1,
-            bombed_armory: 1,
-            barn: 2,
-            green_house: 4,
-            warehouse: 4,
-            red_house: 2,
-            red_house_v2: 2,
-            tent_big_1: 2,
-            tent_big_2: 2,
-            tent_big_3: 2,
-            tent_big_4: 2,
-            hay_shed_1: 1,
-            hay_shed_2: 3,
-            hay_shed_3: 3,
-            tent_1: 3,
-            tent_2: 3,
-            tent_3: 3,
-            tent_4: 3,
-            tent_5: 1,
-            outhouse: 10
-        },
-        majorBuildings: ["bombed_armory", "lodge", "plumpkin_bunker"],
-        quadBuildingLimit: {
-            barn: 1,
-            outhouse: 3,
-            red_house: 1,
-            red_house_v2: 1,
-            green_house: 2,
-            warehouse: 2,
-            bombed_armory: 1,
-            lodge: 1,
-            tent_1: 1,
-            tent_2: 1,
-            tent_3: 1,
-            tent_4: 1
-        },
-        obstacles: {
-            oak_tree: 40,
-            small_oak_tree: 100,
-            birch_tree: 60,
-            maple_tree: 50,
-            pine_tree: 80,
-            dormant_oak_tree: 100,
-            stump: 40,
-            hay_bale: 40,
-            diseased_plumpkin: 120,
-            hatchet_stump: 3,
-            regular_crate: 200,
-            flint_crate: 10,
-            grenade_crate: 50,
-            rock: 220,
-            clearing_boulder: 15,
-            river_chest: 1,
-            river_rock: 60,
-            vibrant_bush: 200,
-            oak_leaf_pile: 200,
-            lily_pad: 50,
-            barrel: 90,
-            jack_o_lantern: 75,
-            viking_chest: 1,
-            super_barrel: 35,
-            melee_crate: 1,
-            gold_rock: 1,
-            loot_tree: 1,
-            loot_barrel: 1,
-            flint_stone: 3,
-            pumpkin: 300,
-            large_pumpkin: 40,
-            plumpkin: 5,
-            pebble: 110
-        },
-        obstacleClumps: [
-            {
-                clumpAmount: 90,
-                clump: {
-                    minAmount: 2,
-                    maxAmount: 3,
-                    jitter: 5,
-                    obstacles: ["oak_tree"],
-                    radius: 12
-                }
-            },
-            {
-                clumpAmount: 50,
-                clump: {
-                    minAmount: 2,
-                    maxAmount: 3,
-                    jitter: 5,
-                    obstacles: ["dormant_oak_tree"],
-                    radius: 12
-                }
-            },
-            {
-                clumpAmount: 15,
-                clump: {
-                    minAmount: 2,
-                    maxAmount: 3,
-                    jitter: 5,
-                    obstacles: ["pine_tree"],
-                    radius: 12
-                }
-            }
-        ],
-        loots: {
-            ground_loot: 60
-        },
-        places: [
-            { name: "Pumpkin Patch", position: Vec.create(0.23, 0.2) },
-            { name: "Reaper", position: Vec.create(0.23, 0.8) },
-            { name: "Spøkelsesfelt", position: Vec.create(0.75, 0.2) },
-            { name: "Haunted Hollow", position: Vec.create(0.72, 0.8) },
-            { name: "Mt. Fang", position: Vec.create(0.5, 0.35) },
-            { name: "Darkwood", position: Vec.create(0.5, 0.65) }
-        ]
-    },
     winter: {
         width: 1632,
         height: 1632,
@@ -656,6 +370,173 @@ const maps = {
             { name: "Noskin Narrows", position: Vec.create(0.72, 0.8) },
             { name: "Mt. Sanger", position: Vec.create(0.5, 0.35) },
             { name: "Deepwood", position: Vec.create(0.5, 0.65) }
+        ]
+    },
+     warFall: {
+        width: 1924,
+        height: 1924,
+        oceanSize: 128,
+        beachSize: 32,
+        rivers: {
+            minAmount: 1,
+            maxAmount: 1,
+            wideChance: 0.35,
+            minWidth: 18,
+            maxWidth: 27,
+            minWideWidth: 35,
+            maxWideWidth: 40,
+            maxWideAmount: 1
+        },
+        trails: {
+            minAmount: 2,
+            maxAmount: 3,
+            wideChance: 0.2,
+            minWidth: 2,
+            maxWidth: 4,
+            minWideWidth: 3,
+            maxWideWidth: 5,
+            maxWideAmount: 1
+        },
+        clearings: {
+            minWidth: 200,
+            minHeight: 150,
+            maxWidth: 250,
+            maxHeight: 200,
+            count: 2,
+            allowedObstacles: ["clearing_boulder", "flint_crate", "rock", "vibrant_bush", "river_chest", "lily_pad", "grenade_crate", "oak_leaf_pile", "river_rock", "melee_crate", "flint_stone"],
+            obstacles: [
+                { idString: "clearing_boulder", min: 3, max: 6 },
+                { idString: "flint_crate", min: 0, max: 2 },
+                { idString: "grenade_crate", min: 0, max: 2 },
+                { idString: "melee_crate", min: 0, max: 1 },
+                { idString: "flint_stone", min: 0, max: 1 }
+            ]
+        },
+        buildings: {
+            small_bridge: Infinity,
+            plumpkin_bunker: 1,
+            sea_traffic_control: 1,
+            tugboat_red: 1,
+            tugboat_white: 7,
+            lodge: 1,
+            bombed_armory: 1,
+            barn: 3,
+            green_house: 2,
+            warehouse: 4,
+            red_house: 2,
+            red_house_v2: 2,
+            tent_big_1: 2,
+            tent_big_2: 2,
+            tent_big_3: 2,
+            tent_big_4: 2,
+            hay_shed_1: 1,
+            hay_shed_2: 3,
+            hay_shed_3: 3,
+            tent_1: 3,
+            tent_2: 3,
+            tent_3: 3,
+            tent_4: 3,
+            tent_5: 1,
+            outhouse: 10
+        },
+        majorBuildings: ["bombed_armory", "lodge", "plumpkin_bunker"],
+        quadBuildingLimit: {
+            barn: 1,
+            outhouse: 3,
+            red_house: 1,
+            green_house: 1,
+            red_house_v2: 1,
+            warehouse: 2,
+            bombed_armory: 1,
+            lodge: 1,
+            tent_1: 1,
+            tent_2: 1,
+            tent_3: 1,
+            tent_4: 1
+        },
+        obstacles: {
+            oak_tree: 230,
+            small_oak_tree: 50,
+            birch_tree: 25,
+            maple_tree: 70,
+            pine_tree: 95,
+            dormant_oak_tree: 25,
+            stump: 40,
+            hatchet_stump: 3,
+            regular_crate: 200,
+            flint_crate: 10,
+            grenade_crate: 50,
+            rock: 220,
+            clearing_boulder: 15,
+            river_chest: 1,
+            river_rock: 60,
+            vibrant_bush: 200,
+            oak_leaf_pile: 200,
+            lily_pad: 50,
+            barrel: 90,
+            viking_chest: 1,
+            super_barrel: 35,
+            melee_crate: 1,
+            gold_rock: 1,
+            loot_tree: 4,
+            loot_barrel: 1,
+            flint_stone: 1,
+            pumpkin: 200,
+            large_pumpkin: 5,
+            pebble: 110
+        },
+        obstacleClumps: [
+            {
+                clumpAmount: 110,
+                clump: {
+                    minAmount: 2,
+                    maxAmount: 3,
+                    jitter: 5,
+                    obstacles: ["oak_tree"],
+                    radius: 12
+                }
+            },
+            {
+                clumpAmount: 15,
+                clump: {
+                    minAmount: 2,
+                    maxAmount: 3,
+                    jitter: 5,
+                    obstacles: ["small_oak_tree"],
+                    radius: 12
+                }
+            },
+            {
+                clumpAmount: 15,
+                clump: {
+                    minAmount: 2,
+                    maxAmount: 3,
+                    jitter: 5,
+                    obstacles: ["birch_tree"],
+                    radius: 12
+                }
+            },
+            {
+                clumpAmount: 15,
+                clump: {
+                    minAmount: 2,
+                    maxAmount: 3,
+                    jitter: 5,
+                    obstacles: ["pine_tree"],
+                    radius: 12
+                }
+            }
+        ],
+        loots: {
+            ground_loot: 60
+        },
+        places: [
+            { name: "Antler", position: Vec.create(0.23, 0.2) },
+            { name: "Deadfall", position: Vec.create(0.23, 0.8) },
+            { name: "Beaverdam", position: Vec.create(0.75, 0.2) },
+            { name: "Crimson Hills", position: Vec.create(0.72, 0.8) },
+            { name: "Emerald Farms", position: Vec.create(0.5, 0.35) },
+            { name: "Darkwood", position: Vec.create(0.5, 0.65) }
         ]
     },
     debug: {

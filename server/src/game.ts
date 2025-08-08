@@ -107,6 +107,7 @@ export class Game implements GameData {
     readonly teamMode: boolean;
 
     readonly gameMode: Mode;
+    readonly gameMap: MapName;
 
     readonly teams = new (class SetArray<T> extends Set<T> {
         private _valueCache?: T[];
@@ -247,7 +248,8 @@ export class Game implements GameData {
         this.port = port;
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
-        this.gameMode = "winter";
+        this.gameMode = "fall";
+        this.gameMap = "warFall";
         // this.gameMode = this.getRandomMode();
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
         this.updateGameData({

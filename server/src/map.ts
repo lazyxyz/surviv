@@ -84,7 +84,7 @@ export class GameMap {
         this.game = game;
 
         // const [name, ...params] = mapData.split(":") as [MapName, ...string[]];
-        const mapDef: MapDefinition = Maps[game.gameMode];
+        const mapDef: MapDefinition = Maps[game.gameMap];
 
         // @ts-expect-error I don't know why this rule exists
         type PacketType = this["_packet"];
@@ -192,7 +192,7 @@ export class GameMap {
         const rivers: River[] = [];
         const amount = randomGenerator.getInt(minAmount, maxAmount);
 
-        // generate a list of widths and sort by biggest, to make sure wide rivers generate first
+        // Generate a list of widths and sort by biggest, to make sure wide rivers generate first
         let wideAmount = 0;
         const widths = Array.from(
             { length: amount },
@@ -223,23 +223,31 @@ export class GameMap {
         while (i < amount && attempts < 100) {
             attempts++;
             let start: Vector;
-
-            const horizontal = !!randomGenerator.getInt();
+            let startAngle: number;
+            const horizontal = amount === 1 ? true : !!randomGenerator.getInt();
             const reverse = !!randomGenerator.getInt();
 
-            if (horizontal) {
+            if (amount === 1) {
+                // For a single river, start at y = height/2 and flow horizontally
+                start = Vec.create(padding, halfHeight);
+                startAngle = reverse ? Math.PI : 0; // 0 for right, π for left
+            } else if (horizontal) {
                 const topHalf = randomGenerator.get(padding, halfHeight);
                 const bottomHalf = randomGenerator.get(halfHeight, height);
                 start = Vec.create(padding, reverse ? bottomHalf : topHalf);
+                startAngle = Angle.betweenPoints(center, start) + (reverse ? 0 : Math.PI);
             } else {
                 const leftHalf = randomGenerator.get(padding, halfWidth);
                 const rightHalf = randomGenerator.get(halfWidth, width);
                 start = Vec.create(reverse ? rightHalf : leftHalf, padding);
+                startAngle = Angle.betweenPoints(center, start) + (reverse ? 0 : Math.PI);
             }
 
-            const startAngle = Angle.betweenPoints(center, start) + (reverse ? 0 : Math.PI);
-
             const riverWidth = widths[i];
+
+            console.log("horizontal: ", horizontal);
+            console.log("start: ", start);
+            console.log("startAngle: ", startAngle);
 
             if (this._generateRiver(
                 start,
@@ -248,7 +256,8 @@ export class GameMap {
                 bounds,
                 isTrail,
                 rivers,
-                randomGenerator
+                randomGenerator,
+                amount === 1 // Pass flag to indicate single river
             )) i++;
         }
 
@@ -262,7 +271,8 @@ export class GameMap {
         bounds: RectangleHitbox,
         isTrail: boolean,
         rivers: River[],
-        randomGenerator: SeededRandom
+        randomGenerator: SeededRandom,
+        isSingleRiver: boolean = false // New parameter
     ): boolean {
         const riverPoints: Vector[] = [];
 
@@ -275,22 +285,24 @@ export class GameMap {
             const lastPoint = riverPoints[i - 1];
             const center = Vec.create(this.width / 2, this.height / 2);
 
-            const distFactor = Geometry.distance(lastPoint, center) / (this.width / 2);
-
-            const maxDeviation = Numeric.lerp(0.8, 0.1, distFactor);
-            const minDeviation = Numeric.lerp(0.3, 0.1, distFactor);
-
-            angle = angle + randomGenerator.get(
-                -randomGenerator.get(minDeviation, maxDeviation),
-                randomGenerator.get(minDeviation, maxDeviation)
-            );
+            if (!isSingleRiver) {
+                // Original logic for multiple rivers with angle deviation
+                const distFactor = Geometry.distance(lastPoint, center) / (this.width / 2);
+                const maxDeviation = Numeric.lerp(0.8, 0.1, distFactor);
+                const minDeviation = Numeric.lerp(0.3, 0.1, distFactor);
+                angle = angle + randomGenerator.get(
+                    -randomGenerator.get(minDeviation, maxDeviation),
+                    randomGenerator.get(minDeviation, maxDeviation)
+                );
+            }
+            // For single river, angle remains constant (0 or π) for straight path
 
             const pos = Vec.add(lastPoint, Vec.fromPolar(angle, randomGenerator.getInt(30, 80)));
 
-            // end the river if it collides with another river
+            // End the river if it collides with another river
             let collided = false;
             for (const river of rivers) {
-                if (river.isTrail !== isTrail) continue; // Trails should only end when colliding with other trails, same for rivers
+                if (river.isTrail !== isTrail) continue;
                 const points = river.points;
                 for (let j = 1; j < points.length; j++) {
                     const intersection = Collision.lineIntersectsLine(lastPoint, pos, points[j - 1], points[j]);
@@ -327,7 +339,6 @@ export class GameMap {
         return true;
     }
 
-    // TODO Move this to a utility class and use it in gas.ts as well
     getQuadrant(x: number, y: number, width: number, height: number): 1 | 2 | 3 | 4 {
         if (x < width / 2 && y < height / 2) {
             return 1;
