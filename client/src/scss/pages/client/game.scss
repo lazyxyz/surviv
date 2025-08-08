@@ -1529,6 +1529,11 @@
   @media screen and (max-width: 460px) {
     bottom: 300px;
   }
+
+  @media screen and (max-height: variables.$screen_xsmall) and (max-width: variables.$screen-large) {
+    bottom: 212px;
+    right: 5px;
+  }
 }
 
 #ammo-container,
