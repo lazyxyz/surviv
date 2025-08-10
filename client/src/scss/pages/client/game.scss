@@ -1145,6 +1145,8 @@
     @media screen and (max-width: variables.$screen_large) {
       width: 75px;
       height: 75px;
+      // width: 45px;
+      // height: 45px;
     }
 
     @media screen and (max-width: variables.$screen_medium) {
@@ -1375,14 +1377,16 @@
     opacity: 0.75;
 
     @media screen and (max-width: variables.$screen_large) {
-      height: 50px;
-      width: 140px;
+      // height: 50px;
+      // width: 140px;
+      height: 45px;
+      width: 120px;
     }
 
-    @media screen and (max-width: variables.$screen_medium) {
-      height: 40px;
-      width: 110px;
-    }
+    // @media screen and (max-width: variables.$screen_medium) {
+    //   height: 40px;
+    //   width: 110px;
+    // }
 
     .main-container {
       position: absolute;
@@ -1454,14 +1458,16 @@
     left: 5px;
 
     @media screen and (max-width: variables.$screen_large) {
-      width: 50px;
-      height: 50px;
+      // width: 50px;
+      // height: 50px;
+      width: 45px;
+      height: 45px;
     }
 
-    @media screen and (max-width: variables.$screen_medium) {
-      width: 35px;
-      height: 35px;
-    }
+    // @media screen and (max-width: variables.$screen_medium) {
+    //   width: 35px;
+    //   height: 35px;
+    // }
 
     &.is-fists {
       background-repeat: no-repeat space;
@@ -1530,7 +1536,7 @@
     bottom: 300px;
   }
 
-  @media screen and (max-height: variables.$screen_xsmall) and (max-width: variables.$screen-large) {
+  @include variables.mobile-device {
     bottom: 212px;
     right: 5px;
   }

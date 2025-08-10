@@ -3,6 +3,12 @@ $screen_small: 640px;
 $screen_medium: 768px;
 $screen_large: 1280px;
 
+@mixin mobile-device {
+  @media screen and (max-height: $screen_xsmall) and (max-width: $screen-large) {
+    @content;
+  }
+}
+
 @mixin text-shadow {
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
 }
@@ -10,6 +16,7 @@ $screen_large: 1280px;
 @mixin drop-shadow {
   filter: drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.6));
 }
+
 @mixin active {
   opacity: 1;
 }

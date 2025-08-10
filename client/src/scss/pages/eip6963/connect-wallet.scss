@@ -1,3 +1,5 @@
+@use "../../variables.scss";
+
 .connect-wallet-radial {
   position: absolute;
   inset: 0 0 auto 0;
@@ -35,6 +37,12 @@
   width: 350px;
   padding: 16px;
   position: relative;
+
+  @include variables.mobile-device {
+    display: flex;
+    width: auto;
+    gap: 24px;
+  }
 }
 
 .connect-wallet-overlay {
@@ -65,6 +73,10 @@
 
   span {
     color: #c5da38;
+  }
+
+  @include variables.mobile-device {
+    margin-top: 32px;
   }
 }
 
@@ -103,5 +115,5 @@
 }
 
 .wallet-installed {
-    background-color: #2b2d35;
+  background-color: #2b2d35;
 }

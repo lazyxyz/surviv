@@ -5,6 +5,7 @@
 @use "utils/inputs.scss";
 @use "utils/fonts.scss";
 @use "modal.scss";
+@use "variables.scss";
 
 * {
   box-sizing: border-box;
@@ -45,6 +46,12 @@ a:visited {
   margin-top: 10px;
   display: flex;
   justify-content: center;
+
+  @include variables.mobile-device {
+    height: 65px;
+    overflow: hidden;
+    border-radius: 8px;
+  }
 }
 
 #weapon-info {
