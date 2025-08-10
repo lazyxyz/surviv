@@ -638,7 +638,8 @@ export class Minimap {
         closeMinimap: $<HTMLButtonElement>("#btn-close-minimap"),
         killLeader: $<HTMLDivElement>("#ui-kill-leader"),
         centerBottom: $<HTMLDivElement>("#center-bottom-container"),
-        killCounter: $<HTMLDivElement>("#kill-counter")
+        killCounter: $<HTMLDivElement>("#kill-counter"),
+        survivbadge: $<HTMLDivElement>("#badges-container")
     });
 
     switchToBigMap(): void {
@@ -653,6 +654,7 @@ export class Minimap {
         ui.gasMsgInfo.hide();
         this._uiCache.closeMinimap.show();
         this._uiCache.killLeader.hide();
+        this._uiCache.survivbadge.hide();
         this._uiCache.centerBottom.hide();
         this._uiCache.killCounter.show();
         ui.killFeed.hide();
@@ -669,6 +671,7 @@ export class Minimap {
         this._uiCache.centerBottom.show();
         ui.gasMsgInfo.show();
         this._uiCache.scopes.show();
+        this._uiCache.survivbadge.show();
         ui.killFeed.show();
 
         if (this.game.spectating) ui.spectatingContainer.show();
