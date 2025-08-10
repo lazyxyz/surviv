@@ -555,6 +555,11 @@ input::-webkit-inner-spin-button {
         border-radius: 12px;
         width: 90px;
         height: 90px;
+
+        @include variables.mobile-device {
+          width: 64px;
+          height: 64px;
+        }
       }
       .crates-information {
         display: flex;
@@ -575,6 +580,10 @@ input::-webkit-inner-spin-button {
           color: white;
           font-size: 18px;
           font-weight: 700;
+
+          @include variables.mobile-device {
+            font-size: 16px;
+          }
         }
       }
 
