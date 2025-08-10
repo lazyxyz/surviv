@@ -43,6 +43,11 @@ input::-webkit-inner-spin-button {
   height: 340px;
   overflow: hidden;
   overflow-y: auto;
+
+  @include variables.mobile-device {
+    gap: 8px;
+    max-height: 235px;
+  }
 }
 .weapons-container-card.inactive {
   opacity: 0.4;
@@ -1137,6 +1142,11 @@ input::-webkit-inner-spin-button {
       align-content: flex-start;
       flex: 1;
       gap: 4px;
+
+      @include variables.mobile-device {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
 
       h2 {
         margin: unset;
