@@ -37,6 +37,12 @@ $transition: all 0.3s ease;
   color: palette.$light; // Ensure text is readable against $modal-bg
   background-color: palette.$grass_bg;
   padding: 24px;
+
+  @include variables.mobile-device {
+    width: 90%;
+    gap: 12px;
+    padding: 16px;
+  }
 }
 
 .minted-items-header {
@@ -84,6 +90,11 @@ $transition: all 0.3s ease;
   gap: 12px;
   justify-content: center;
   align-items: center;
+
+  @include variables.mobile-device {
+    max-width: calc(122px * 4 + 48px); // 5 items with 12px gap
+    max-height: 220px;
+  }
 
   &::-webkit-scrollbar {
     width: 10px;
