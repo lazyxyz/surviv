@@ -43,6 +43,11 @@
           font-size: 32px;
           line-height: 44px;
         }
+
+        @include variables.mobile-device {
+          font-size: 44px;
+          line-height: 52px;
+        }
       }
 
       &-body {
@@ -58,14 +63,14 @@
         }
 
         @media screen and (max-width: variables.$screen_small) {
+          text-align: center;
           font-size: 18px;
           line-height: 22px;
         }
 
-        @media screen and (max-width: variables.$screen_small) {
-          text-align: center;
-          font-size: 18px;
-          line-height: 22px;
+        @include variables.mobile-device {
+          font-size: 20px;
+          line-height: 24px;
         }
       }
     }
