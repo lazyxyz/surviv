@@ -1,5 +1,6 @@
 @use "utils/scrollbar.scss";
 @use "./palette.scss";
+@use "variables.scss";
 
 $spacing: 16px;
 $transition: all 0.3s ease;
@@ -180,6 +181,10 @@ $transition: all 0.3s ease;
 
   width: 370px;
   border-radius: 12px;
+
+  @include variables.mobile-device {
+    transform: translate(-50%, -50%) scale(0.75);
+  }
 
   .dialog-header {
     width: 370px;
