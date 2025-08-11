@@ -42,6 +42,9 @@ export const assetsMapping = {
     "ukraine",
     "vanuatu",
     "vietnam",
-    "world"
+    "world",
+    "somdudu",
+    "somini",
+    "somnia"
   ]
 };

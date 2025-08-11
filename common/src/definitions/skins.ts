@@ -44,11 +44,8 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
         return [
             ...(
                 [
-                    // with meme
                     ["Bitcoin", 0xf7931a],
                     ["Ethereum", 0x8198ee],
-                    // ["Solana", 0x9d0eb7],
-                    // ["Binance", 0xd08a02],
                     ["Shiba", 0xf00500],
                     ["Chill guy", 0x4b4b4b],
                     ["Doge", 0xa67a2e],
@@ -194,6 +191,11 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
                     ["Iran", 0x269F49],
                     ["Syria", 0xD80027],
                     ["World", 0xD80027],
+
+                    // partner
+                    ["Somdudu", 0xD80027],
+                    ["Somini", 0xD80027],
+                    ["Somnia", 0xD80027],
                 ] satisfies ReadonlyArray<readonly [string, number]>
             ).map(([name, tint]) => skin([name, tint]))
         ];
