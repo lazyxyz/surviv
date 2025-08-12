@@ -673,7 +673,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         this.emoteCount++;
 
-        // After constantly spamming more than 5 emotes, block for 5 seconds.
+        // After constantly spamming more than 5 emotes, block for 10 seconds.
         if (this.emoteCount > GameConstants.player.rateLimitPunishmentTrigger) {
             this.blockEmoting = true;
             this.setDirty();

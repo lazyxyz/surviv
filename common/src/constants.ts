@@ -67,8 +67,8 @@ export const GameConstants = freezeDeep({
         bleedOutDPMs: 0.002, // === 2 dps
         maxPerkCount: 1,
         rateLimitPunishmentTrigger: 10,
-        emotePunishmentTime: 5000, // ms
-        rateLimitInterval: 1000
+        emotePunishmentTime: 10000, // ms
+        rateLimitInterval: 5000
     },
     gas: {
         damageScaleFactor: 0.005, // Extra damage, linear per distance unit into the gas
