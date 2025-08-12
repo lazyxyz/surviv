@@ -109,26 +109,26 @@ export type CVarTypeMapping = {
 
 type SimpleCVarMapping = {
     [K in keyof typeof CVarCasters]: ExtractConVarValue<CVarTypeMapping[K]> extends infer Val
-        ? Val | (
+    ? Val | (
+        {
+            readonly value: Val
+        } & (
             {
-                readonly value: Val
-            } & (
-                {
-                    readonly changeListeners: CVarChangeListener<Val> | Array<CVarChangeListener<Val>>
-                } |
-                {
-                    readonly changeListeners?: never
-                }
-            ) & (
-                {
-                    readonly flags: Partial<CVarFlags>
-                } |
-                {
-                    readonly flags?: never
-                }
-            )
+                readonly changeListeners: CVarChangeListener<Val> | Array<CVarChangeListener<Val>>
+            } |
+            {
+                readonly changeListeners?: never
+            }
+        ) & (
+            {
+                readonly flags: Partial<CVarFlags>
+            } |
+            {
+                readonly flags?: never
+            }
         )
-        : never
+    )
+    : never
 };
 
 export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
@@ -143,10 +143,10 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
     cv_loadout_left_emote: "",
     cv_loadout_death_emote: "",
     cv_loadout_win_emote: "",
-    cv_master_volume: 0.1,
-    cv_sfx_volume: 0.1,
-    cv_ambience_volume: 0.1,
-    cv_music_volume: 0.1,
+    cv_master_volume: 0.3,
+    cv_sfx_volume: 0.3,
+    cv_ambience_volume: 0.3,
+    cv_music_volume: 0.3,
 
     cv_loop_scope_selection: false,
     cv_anonymize_player_names: false,
@@ -185,8 +185,8 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
             archive: false
         }
     },
-    cv_minimap_transparency: 0.8,
-    cv_map_transparency: 0.9,
+    cv_minimap_transparency: 0.6,
+    cv_map_transparency: 0.6,
 
     cv_console_width: window.innerWidth / 2,
     cv_console_height: window.innerWidth / 2,
