@@ -79,7 +79,7 @@ export class Zombie extends Player {
     update(): void {
         super.update();
         for (const obj of this.visibleObjects) {
-            if (obj instanceof Gamer && !obj.dead) {
+            if (obj instanceof Gamer && !obj.dead && !obj.downed) {
                 if (Vec.length(Vec.sub(obj.position, this.position)) < Zombie.CHASE_DISTANCE) {
                     // Chase nearest player
                     this.attackNearestPlayer(obj);

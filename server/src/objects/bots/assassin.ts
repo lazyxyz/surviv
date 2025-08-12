@@ -129,7 +129,7 @@ export class Assassin extends Player {
     update(): void {
         super.update();
         for (const obj of this.visibleObjects) {
-            if (obj instanceof Gamer && !obj.dead) {
+            if (obj instanceof Gamer && !obj.dead && !obj.downed) {
                 const distance = Vec.length(Vec.sub(obj.position, this.position));
                 if (distance < Assassin.ATTACK_RADIUS) {
                     // Initiate melee attack if player is too close
