@@ -31,6 +31,7 @@ function isClickAllowed(): boolean {
 
 async function promptTeamID(): Promise<string | null> {
     let teamID: string | null = null;
+    if (window.location.hash) teamID = window.location.hash.slice(1);;
     while (!teamID) {
         teamID = prompt(getTranslatedString("msg_enter_team_code"));
         if (!teamID) return null;
