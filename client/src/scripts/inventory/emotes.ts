@@ -86,7 +86,7 @@ export async function showEmotes(account: Account) {
                 nonEmoteItem.addClass("selected");
 
                 // Clear the console variable for the selected slot
-                game.console.setBuiltInCVar(`cv_loadout_${selectedEmoteSlot}_emote`, "");
+                GAME_CONSOLE.setBuiltInCVar(`cv_loadout_${selectedEmoteSlot}_emote`, "");
 
                 // Update only the selected emote slot UI
                 const wheelElement = emoteWheelUiCache[selectedEmoteSlot];
