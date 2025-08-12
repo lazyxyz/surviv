@@ -186,8 +186,20 @@ export class Game {
         this.inputManager.setupInputs();
         this._renderCallback = this.render.bind(this); // Bind once and store
 
+        const url = (() => {
+            // List of available music files
+            const musicFiles = [
+                "menu_music1.mp3",
+                "menu_music2.mp3",
+                "menu_music3.mp3"
+            ];
+            const randomFile = musicFiles[Math.floor(Math.random() * musicFiles.length)];
+            return `./audio/music/${randomFile}`;
+        })();
+
+
         this.music = sound.add("menu_music", {
-            url: `./audio/music/menu_music${GAME_CONSOLE.getBuiltInCVar("cv_use_old_menu_music") ? "_old" : getRandomMode() ? `_${getRandomMode()}` : ""}.mp3`,
+            url: url,
             singleInstance: true,
             preload: true,
             autoPlay: true,
