@@ -1496,19 +1496,23 @@ export class Game implements GameData {
 }
 
 function disconnect(socket: WebSocket<PlayerContainer>, reason: string): void {
-    const stream = new PacketStream(new ArrayBuffer(128));
-    stream.serializeServerPacket(
-        DisconnectPacket.create({
-            reason
-        })
-    );
-
     try {
-        socket.send(stream.getBuffer(), true, false);
+        const stream = new PacketStream(new ArrayBuffer(128));
+        stream.serializeServerPacket(
+            DisconnectPacket.create({
+                reason
+            })
+        );
+
+        const buffer = stream.getBuffer();
+        const sendResult = socket.send(buffer, true, false);
+        if (sendResult !== 1) {
+            console.warn(`Failed to send disconnect packet. Reason: ${reason}, Send result: ${sendResult}`);
+        }
+        socket.end(1000, reason); // Graceful close with code 1000
     } catch (e) {
-        console.warn("Error sending packet. Details:", e);
+        console.warn(`Error during disconnect. Reason: ${reason}, Details:`, e);
     }
-    socket.close();
 }
 
 const simultaneousConnections: Record<string, number> = {};
