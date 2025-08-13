@@ -608,7 +608,7 @@ export class Account extends EIP6963 {
                     0
                 );
                 let gasPrice;
-                const gasPriceMultiplier = 1 + 0.01 * numberOfCrates; // 1% increase per crate
+                const gasPriceMultiplier = 1.3 + 0.005 * numberOfCrates; // 30% base increase + 0.5% per crate
 
                 // Check if the network supports EIP-1559
                 if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas) {
@@ -737,7 +737,7 @@ export class Account extends EIP6963 {
         }
 
         try {
-             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
             // Fetch the transaction receipt using the provider
             const receipt = await ethersProvider.getTransactionReceipt(txnHash);
 
