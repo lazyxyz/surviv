@@ -193,9 +193,9 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
                     ["World", 0xD80027],
 
                     // partner
-                    ["Somdudu", 0xD80027],
-                    ["Somini", 0xD80027],
-                    ["Somnia", 0xD80027],
+                    ["Somdudu", 0xFDBB06],
+                    ["Somini", 0xD215C4],
+                    ["Somnia", 0xD215C4],
                 ] satisfies ReadonlyArray<readonly [string, number]>
             ).map(([name, tint]) => skin([name, tint]))
         ];
