@@ -51,6 +51,10 @@ export async function showInventory(account: Account) {
         showShop(account);
     })
 
+    $("#btn-inventory").on('click', () => {
+        showShop(account);
+    })
+
     $('#tab-skins').on('click', () => {
         showSkins(account);
     })
@@ -70,5 +74,3 @@ export async function showInventory(account: Account) {
     const idString = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
     updateSplashCustomize(idString);
 }
-
-

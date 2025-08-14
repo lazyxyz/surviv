@@ -97,6 +97,10 @@ function setupMenuButtons(game: Game): void {
         $(".dialog").hide();
         customizeMenu.fadeToggle(250);
     });
+    $<HTMLButtonElement>("#btn-inventory").on("click", () => {
+        customizeMenu.css("z-index", "9999");
+        customizeMenu.fadeToggle(250);
+    });
     $<HTMLButtonElement>("#close-customize").on("click", () => customizeMenu.fadeOut(250));
 }
 
