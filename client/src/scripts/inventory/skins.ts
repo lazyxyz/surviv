@@ -18,6 +18,16 @@ function selectSkin(idString: ReferenceTo<SkinDefinition>): void {
 
     GAME_CONSOLE.setBuiltInCVar("cv_loadout_skin", idString);
     updateSplashCustomize(idString);
+
+    const localName = GAME_CONSOLE.getBuiltInCVar("cv_player_name");
+    $(".create-team-player-name").each(function() {
+        if ($(this).text() === localName) {
+            const container = $(this).closest(".create-team-player-container");
+            container.find(".skin-base").css("background-image", `url('./img/game/shared/skins/${idString}_base.svg')`);
+            container.find(".skin-left-fist").css("background-image", `url('./img/game/shared/skins/${idString}_fist.svg')`);
+            container.find(".skin-right-fist").css("background-image", `url('./img/game/shared/skins/${idString}_fist.svg')`);
+        }
+    });
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type

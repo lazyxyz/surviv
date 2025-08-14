@@ -298,7 +298,7 @@ input::-webkit-inner-spin-button {
 
     #create-team-options {
       display: flex;
-      gap: 20px;
+      justify-content: space-between;
       align-items: center;
       padding-top: 12px;
 
@@ -326,9 +326,12 @@ input::-webkit-inner-spin-button {
           }
         }
       }
-
-      #btn-start-game {
-        margin-left: auto;
+      #btn-action-section {
+        display: flex;
+        gap: 8px;
+        #btn-start-game {
+          margin-left: auto;
+        }
       }
     }
   }

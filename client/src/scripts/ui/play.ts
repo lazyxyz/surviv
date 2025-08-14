@@ -15,6 +15,12 @@ import { html } from "../utils/misc";
 import { Loots } from "@common/definitions/loots";
 import { defaultClientCVars } from "../utils/console/defaultClientCVars";
 import { Emotes } from "@common/definitions/emotes";
+import { Skins, type SkinDefinition } from "@common/definitions/skins";
+import type { ReferenceTo } from "@common/utils/objectDefinitions";
+import { InventoryCache, updateSplashCustomize } from "/Users/phamtung/Documents/Development/Surviv/surviv/client/src/scripts/inventory/index";
+
+
+
 
 export let teamSocket: WebSocket | undefined;
 export let teamID: string | undefined | null;
@@ -256,21 +262,28 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
     if (data.type != CustomTeamMessages.Update) throw Error("handleTeamUpdate Failed");
 
     const { players, isLeader, ready } = data;
-    ui.createTeamPlayers.html(players.map((player: CustomTeamPlayerInfo) => `
+    ui.createTeamPlayers.html(players.map((player: CustomTeamPlayerInfo) => {
+        let skin = player.skin;
+        const localName = GAME_CONSOLE.getBuiltInCVar("cv_player_name");
+        if (player.name === localName) {
+            skin = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
+        }
+        return `
         <div class="create-team-player-container">
             <i class="fa-solid fa-crown"${player.isLeader ? "" : ' style="display: none"'}></i>
             <i class="fa-regular fa-circle-check"${player.ready ? "" : ' style="display: none"'}></i>
             <div class="skin">
-                <div class="skin-base" style="background-image: url('./img/game/shared/skins/${player.skin}_base.svg')"></div>
-                <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${player.skin}_fist.svg')"></div>
-                <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${player.skin}_fist.svg')"></div>
+                <div class="skin-base" style="background-image: url('./img/game/shared/skins/${skin}_base.svg')"></div>
+                <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${skin}_fist.svg')"></div>
+                <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${skin}_fist.svg')"></div>
             </div>
             <div class="create-team-player-name-container">
                 <span class="create-team-player-name"${player.nameColor ? ` style="color: ${new Color(player.nameColor).toHex()}"` : ""}>${player.name}</span>
                 ${player.badge?.length ? `<img class="create-team-player-badge" draggable="false" src="${""}" />` : ""}
             </div>
         </div>
-    `).join(""));
+        `;
+    }).join(""));
     ui.createTeamToggles.toggleClass("disabled", !isLeader);
     ui.btnStartGame.toggleClass("btn-disabled", !isLeader && ready)
         .text(getTranslatedString(isLeader ? "create_team_play" : ready ? "create_team_waiting" : "create_team_ready"));
