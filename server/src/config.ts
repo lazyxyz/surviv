@@ -49,7 +49,7 @@ export const Config = {
     assetsConfig: {
         rank: 5,
         api: "https://api.surviv.fun",
-        rpc: "https://enterprise.onerpc.com/somnia_testnet?apikey=e97af24c8759a6cad0acd837d853aac43bb0903dcdab411d08b77aaf5c4c38a7",
+        rpc: "",
     },
 } satisfies ConfigType as ConfigType;
 
