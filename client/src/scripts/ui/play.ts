@@ -15,12 +15,6 @@ import { html } from "../utils/misc";
 import { Loots } from "@common/definitions/loots";
 import { defaultClientCVars } from "../utils/console/defaultClientCVars";
 import { Emotes } from "@common/definitions/emotes";
-import { Skins, type SkinDefinition } from "@common/definitions/skins";
-import type { ReferenceTo } from "@common/utils/objectDefinitions";
-import { InventoryCache, updateSplashCustomize } from "/Users/phamtung/Documents/Development/Surviv/surviv/client/src/scripts/inventory/index";
-
-
-
 
 export let teamSocket: WebSocket | undefined;
 export let teamID: string | undefined | null;

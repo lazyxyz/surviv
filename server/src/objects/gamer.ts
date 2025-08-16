@@ -221,7 +221,7 @@ export class Gamer extends Player {
         }
 
         // Handle rewards if rank qualifies
-        if (rank < Config.assetsConfig.rank) {
+        if (rank < Config.earnConfig.rank) {
             if (this.game.teamMode && this.team) {
                 for (const teammate of this.team.players) {
                     if (teammate instanceof Gamer) teammate.sendRewardsPacket(rank);
