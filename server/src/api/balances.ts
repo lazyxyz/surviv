@@ -41,7 +41,7 @@ async function getAssetsBalance(
     mappings: { mapping: Mapping }[],
     timeout: number = 3000
 ): Promise<AssetCheckResult> {
-    const rpc = Config.assetsConfig?.rpc;
+    const rpc = process.env.RPC;
     if (!rpc) throw new Error("RPC configuration not found");
 
     const provider = new ethers.JsonRpcProvider(rpc);

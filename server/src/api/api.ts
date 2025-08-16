@@ -4,7 +4,7 @@ import { Config } from '../config';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export async function validateJWT(token: string, timeout: number = 5000): Promise<{ walletAddress: string }> {
-    const url = `${Config.assetsConfig?.api}/api/getJWTSigner`;
+    const url = `${Config.earnConfig?.api}/api/getJWTSigner`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -34,7 +34,7 @@ export async function validateJWT(token: string, timeout: number = 5000): Promis
 }
 
 export async function saveGameResult(player: string, rank: number, kills: number, teamMode: boolean, gameId: string, timeout: number = 10000): Promise<any> {
-    const url = `${Config.assetsConfig?.api}/admin/saveGameResult`;
+    const url = `${Config.earnConfig?.api}/admin/saveGameResult`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 

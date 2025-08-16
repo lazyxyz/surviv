@@ -46,10 +46,9 @@ export const Config = {
         address: "http://localhost:8080"
     },
 
-    assetsConfig: {
+    earnConfig: {
         rank: 5,
         api: "https://api.surviv.fun",
-        rpc: "",
     },
 } satisfies ConfigType as ConfigType;
 
@@ -251,9 +250,8 @@ export interface ConfigType {
     }
 
     
-    readonly assetsConfig: {
+    readonly earnConfig: {
         readonly rank: number, // Rank receive rewards
         readonly api: string,
-        readonly rpc: string,
     }; 
 }
