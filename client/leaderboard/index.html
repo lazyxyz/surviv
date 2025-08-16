@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-
   <meta name="title" content="Surviv - Leaderboard." />
   <meta name="description"
     content="The new 2D survival battle royale, inspired by a legendary game loved by millions! Win big with our play-and-earn model and tons of cool items for nonstop fun!" />
@@ -51,8 +50,8 @@
           </div>
 
           <div class="countdown">
-            <div class="pulse-ring" style="display: block"></div>
-            <p class="count-time">end in: 00:00 31 Aug 2025 GMT+7</p>
+            <div class="pulse-ring" id="pulse-ring" style="display: block"></div>
+            <p class="count-time" id="countdown-text">end in: 00:00 31 Aug 2025 GMT+7</p>
           </div>
 
           <div class="header">
@@ -126,9 +125,15 @@
   </div>
   <script>
     const API_URL = 'https://api.surviv.fun/api/playerRankings';
+    const API_URL_BY_DATE = 'https://api.surviv.fun/api/getPlayerRankingsByDate';
     let currentPage = 1;
     const limit = 100;
     let totalPages = 1;
+
+    // Get query parameters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const startDate = urlParams.get('startDate');
+    const endDate = urlParams.get('endDate');
 
     // Shorten Wallet Address
     function shortenAddress(address, chars = 10) {
@@ -139,6 +144,21 @@
     const pageInput = document.querySelector('.input-pagination');
     const prevButton = document.getElementById('prev-page');
     const nextButton = document.getElementById('next-page');
+    const countdownText = document.getElementById('countdown-text');
+    const pulseRing = document.getElementById('pulse-ring');
+
+    // Update countdown text if date range is provided
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start <= end) {
+        countdownText.textContent = `Rankings from ${start.toLocaleDateString('en-US', { timeZone: 'UTC' })} to ${end.toLocaleDateString('en-US', { timeZone: 'UTC' })}`;
+        pulseRing.style.display = 'none'; // Hide pulse ring for custom date range
+      } else {
+        countdownText.textContent = 'Invalid date range';
+        pulseRing.style.display = 'none';
+      }
+    }
 
     // Tooltip toggle functionality
     function toggleTooltip(tooltipId) {
@@ -189,7 +209,15 @@
       leaderboardBody.innerHTML = '';
 
       try {
-        const response = await fetch(`${API_URL}?page=${page}&limit=${limit}`);
+        // Choose API endpoint based on presence of date parameters
+        let apiUrl = API_URL;
+        let queryParams = `page=${page}&limit=${limit}`;
+        if (startDate && endDate) {
+          apiUrl = API_URL_BY_DATE;
+          queryParams += `&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
+        }
+
+        const response = await fetch(`${apiUrl}?${queryParams}`);
         const data = await response.json();
 
         if (!data.success) {
@@ -208,7 +236,7 @@
             <div class="w-[160px] h-[48px]" id="row-child">${player.totalPoints}</div>
             <div class="w-[160px] h-[48px]" id="row-child">${player.soloPoints}</div>
             <div class="w-[160px] h-[48px]" id="row-child">${player.squadPoints}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints || 0}</div>
             <div class="w-[110px] h-[48px]" id="row-child">${player.games}</div>
             <div class="w-[100px] h-[48px]" id="row-child">${player.games > 0 ? ((player.soloPoints + player.squadPoints) / player.games).toFixed(2) : '0.00'}</div>
           `;
