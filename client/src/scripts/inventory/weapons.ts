@@ -224,6 +224,16 @@ const selectGun = (weaponId: string) => {
   } else if (gun.ammoType) {
     ammoTypeHtml = gun.ammoType;
   }
+  // // Capacity of gun
+  let capacityAmout = "N/A";
+  if (typeof gun.capacity === "number" || typeof gun.extendedCapacity === "number") {
+    const base = gun.capacity ?? gun.extendedCapacity;
+    capacityAmout = String(base);
+    // Show extended capacity if available
+    if (typeof gun.extendedCapacity === "number" && gun.extendedCapacity !== base) {
+      capacityAmout += ` -> ${gun.extendedCapacity}`;
+    }
+  }
 
   // Update weapon info panel
   const dps = gun.ballistics.damage && gun.fireDelay ? (gun.ballistics.damage / (gun.fireDelay / 1000)).toFixed(2) : "N/A";
@@ -246,10 +256,13 @@ const selectGun = (weaponId: string) => {
               <p class="stat-type">Range:</p>
               <span class="stat-value">${gun.ballistics.range ?? "N/A"}</span>
       </div>
-    </div>
-    <div class="child-section">
-              <p class="stat-type">Ammo Type:</p>
+      <div class="row-section">
+              <p class="stat-type">Ammo:</p>
               <span class="stat-value">${ammoTypeHtml}</span>
+      </div>
+      <div class="row-section">
+              <p class="stat-type">Capacity:</p>
+              <span class="stat-value" id="capacity-text">${capacityAmout}</span>
       </div>
   `);
 
