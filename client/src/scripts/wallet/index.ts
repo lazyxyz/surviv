@@ -1,88 +1,55 @@
 import $ from "jquery";
-import type { Game } from "../game";
 import { createDropdown } from "../uiHelpers";
 import { WalletType, shorten } from "../utils/constants";
-import { errorAlert, warningAlert } from "../modal";
 import type { Account } from "../account";
 
-// Define Turnstile window interface
-interface TurnstileWindow extends Window {
-    turnstile: {
-        ready: (callback: () => void) => void;
-        render: (container: string, options: {
-            sitekey: string;
-            callback: (token: string) => void;
-            "error-callback"?: (error: string) => void;
-        }) => void;
-        reset: () => void;
-    };
-    turnstileToken: string | null;
+const walletPriority = [
+    WalletType.MetaMask,
+    WalletType.TrustWallet,
+    WalletType.CoinbaseWallet,
+    WalletType.OKXWallet,
+    WalletType.BraveWallet
+];
+
+// Reusable function to sort and render wallet list
+function sortAndRenderWalletList($walletList: JQuery, account: Account): void {
+    const $walletItems = $walletList.children(".connect-wallet-item").get();
+
+    $walletItems.sort((a, b) => {
+        const nameA = a.children[1]?.textContent?.trim() ?? "";
+        const nameB = b.children[1]?.textContent?.trim() ?? "";
+
+        // Check if installed
+        const isInstalledA = account.eip6963.providers?.some(
+            provider => provider?.info?.name === nameA
+        );
+        const isInstalledB = account.eip6963.providers?.some(
+            provider => provider?.info?.name === nameB
+        );
+
+        // First: installed wallets > not installed
+        if (isInstalledA && !isInstalledB) return -1;
+        if (!isInstalledA && isInstalledB) return 1;
+
+        // Second: respect enum priority order
+        const indexA = walletPriority.indexOf(nameA as WalletType);
+        const indexB = walletPriority.indexOf(nameB as WalletType);
+
+        return indexA - indexB;
+    });
+
+    // Clear the current list and append sorted items
+    $walletList.empty();
+    $walletItems.forEach(item => $walletList.append(item));
 }
 
-declare let window: TurnstileWindow;
-
-
-// Function to render Turnstile widget and return token
-const renderTurnstile = (): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        if (!window.turnstile) {
-            reject("Turnstile script not loaded");
-            return;
-        }
-
-        window.turnstile.ready(() => {
-            window.turnstile.render("#turnstile-widget", {
-                sitekey: "0x4AAAAAABksm6I-SBWksH-l", // Your Site Key
-                callback: (token: string) => {
-                    resolve(token);
-                },
-                "error-callback": (error: string) => {
-                    reject(error);
-                },
-            });
-        });
-    });
-};
-
-
 export function onConnectWallet(account: Account): void {
-    let turnstileToken: string | null = null;
-
     $("#connect-wallet-btn").on("click", async () => {
         $(".connect-wallet-portal").css("display", "block");
-        turnstileToken = null;
-        $("#turnstile-widget").empty();
 
-        renderTurnstile().then(value => {
-            turnstileToken = value;
-        }).catch(_ => {
-            errorAlert("Could not load bot verification. Please refresh!");
-        });
-
-        // Get the wallet list container
+        // Get the wallet list container and sort it
         const $walletList = $(".connect-wallet-list");
-        // Get all wallet items
-        const $walletItems = $walletList.children(".connect-wallet-item").get();
-
-        // Sort wallet items: installed wallets first
-        $walletItems.sort((a, b) => {
-            const paragraphA = a.children[1]?.textContent;
-            const paragraphB = b.children[1]?.textContent;
-
-            const isExistedA = account.eip6963.providers?.find(
-                provider => provider?.info?.name === paragraphA
-            );
-            const isExistedB = account.eip6963.providers?.find(
-                provider => provider?.info?.name === paragraphB
-            );
-
-            // Prioritize installed wallets (isExistedA/B is truthy)
-            return isExistedB ? 1 : isExistedA ? -1 : 0;
-        });
-
-        // Clear the current list and append sorted items
-        $walletList.empty();
-        $walletItems.forEach(item => $walletList.append(item));
+        sortAndRenderWalletList($walletList, account);
     });
 
     // Close connect wallet modal
@@ -102,12 +69,6 @@ export function onConnectWallet(account: Account): void {
         if (isExisted) {
             $(elements).addClass("wallet-installed");
             elements.onclick = async () => {
-                // Check if Turnstile token exists
-                if (!turnstileToken) {
-                    warningAlert("Please complete the bot verification.");
-                    return;
-                }
-
                 try {
                     // Hide logo to show loading icon
                     $(logoElement).css("display", "none");
@@ -123,7 +84,7 @@ export function onConnectWallet(account: Account): void {
                     newNode.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
                     logoElement.after(newNode);
 
-                    return await account.connect(isExisted, turnstileToken);
+                    return await account.connect(isExisted);
                 } catch (error) {
                     console.log(error);
                 } finally {
@@ -165,7 +126,12 @@ export function onConnectWallet(account: Account): void {
 };
 
 export function showWallet(account: Account): void {
-    if (!account.address) $("#connect-wallet-btn").trigger("click");
+    if (!account.address) {
+        $("#connect-wallet-btn").trigger("click");
+        // Ensure wallet list is sorted when modal is opened
+        const $walletList = $(".connect-wallet-list");
+        sortAndRenderWalletList($walletList, account);
+    }
 
     if (account.eip6963.provider?.provider && account.address?.length) {
         // handler first time you need visible container
@@ -187,7 +153,6 @@ export function showWallet(account: Account): void {
                 fieldName: "Copy Address",
                 icon: "./img/line/copy.svg",
                 onClick: () => {
-                    // https://dev.to/0shuvo0/copy-text-to-clipboard-in-jstwo-ways-1pn1
                     if (navigator.clipboard) {
                         return navigator.clipboard.writeText(String(account.address));
                     }
@@ -209,7 +174,14 @@ export function showWallet(account: Account): void {
                 key: "disconnect",
                 fieldName: "Disconnect",
                 icon: "./img/line/log-out.svg",
-                onClick: () => account.disconnect()
+                onClick: () => {
+                    account.disconnect();
+                    // Re-sort wallet list after disconnect
+                    const $walletList = $(".connect-wallet-list");
+                    sortAndRenderWalletList($walletList, account);
+                    // Optionally, reopen the connect wallet modal
+                    $("#connect-wallet-btn").trigger("click");
+                }
             }
         ];
 
