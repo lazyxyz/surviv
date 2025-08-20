@@ -41,12 +41,12 @@ export async function showShop(account: Account) {
         baseLoaded: false,
         assetsBalance: {
             crate: 0,
-            card: 0,
+            surviv_card: 0,
             key: 0
         },
         assetsPrice: {
             crate: "",
-            card: "",
+            surviv_card: "",
             key: ""
         }
     }

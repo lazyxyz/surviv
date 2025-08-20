@@ -176,7 +176,7 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
                 successAlert("Purchase successful!");
 
                 if (item?.itemType == SurvivBadges.Cards) {
-                    GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", "card"); // Set card as badge after purchased
+                    GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", "surviv_card"); // Set card as badge after purchased
                 }
             } catch (err: any) {
                 errorAlert("Transaction Failed: Please check your wallet balance or try again.", 3000);
