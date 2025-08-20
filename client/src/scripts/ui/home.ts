@@ -5,7 +5,7 @@ import { Config, type ServerInfo } from "../../config";
 import { createDropdown } from "../uiHelpers";
 import type { TranslationKeys } from "../../typings/translations";
 import { errorAlert, successAlert, warningAlert } from "../modal";
-import type { Account } from "../account";
+import { SurvivBadges, type Account } from "../account";
 import { GAME_CONSOLE } from "../..";
 import $ from "jquery";
 
@@ -45,8 +45,9 @@ async function handleBuyCard(account: Account): Promise<void> {
                 warningAlert("Please connect your wallet to continue.");
                 return;
             }
-            const price = await account.queryPrice("Cards", "NativeToken");
-            await account.buyItems("Cards", 1, "NativeToken", price);
+            const price = await account.queryPrice(SurvivBadges.Cards, "NativeToken");
+            await account.buyItems(SurvivBadges.Cards, 1, "NativeToken", price);
+            GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", "surviv_card");
             successAlert("Purchase successful!");
         } catch (err) {
             console.error("Purchase error:", err);

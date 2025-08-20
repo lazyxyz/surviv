@@ -27,19 +27,16 @@ import { setUpCommands } from "../utils/console/commands";
 
 export let autoPickup = true;
 
-function updateUsersBadge(game: Game): void {
-    const selectedBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
+export function updateUsersBadge(badgeId: string | undefined): void {
     const aliveUsersContainer = document.getElementById("badges-container");
-
     if (!aliveUsersContainer) return;
 
     // Clear existing badge content
     aliveUsersContainer.innerHTML = "";
 
-    // Show badge image if "cards" is selected
-    if (selectedBadge === "surviv_card") {
+    if (badgeId === "surviv_card") {
         const badgeImage = document.createElement("img");
-        badgeImage.src = `./img/game/shared/badges/${selectedBadge}.svg`;
+        badgeImage.src = `./img/game/shared/badges/${badgeId}.svg`;
         badgeImage.alt = "Card Badge";
         badgeImage.className = "badge-image";
         badgeImage.draggable = false;
@@ -1022,7 +1019,7 @@ export async function setupGame(game: Game): Promise<void> {
     setupInventorySlots(game);
     setupSpectateOptions(game);
     setupGameInteraction(game);
-    updateUsersBadge(game);
+    // updateUsersBadge(game);
 
     // Setup outside
     setUpCommands(game);
