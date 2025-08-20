@@ -1,15 +1,10 @@
 {
   "_format": "hh-sol-artifact-1",
   "contractName": "ICrateBase",
-  "sourceName": "contracts/interfaces/ICrateBase.sol",
+  "sourceName": "surviv-contracts/contracts/interfaces/ICrateBase.sol",
   "abi": [
     {
       "inputs": [
-        {
-          "internalType": "enum CrateTier",
-          "name": "tier",
-          "type": "uint8"
-        },
         {
           "internalType": "uint256",
           "name": "amount",
@@ -34,11 +29,6 @@
         {
           "components": [
             {
-              "internalType": "enum CrateTier",
-              "name": "tier",
-              "type": "uint8"
-            },
-            {
               "internalType": "uint256",
               "name": "amount",
               "type": "uint256"
@@ -58,29 +48,11 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "getItems",
-      "outputs": [
-        {
-          "internalType": "address[]",
-          "name": "",
-          "type": "address[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
-          "internalType": "enum CrateTier",
-          "name": "tier",
-          "type": "uint8"
-        },
-        {
-          "internalType": "address",
+          "internalType": "uint256",
           "name": "item",
-          "type": "address"
+          "type": "uint256"
         }
       ],
       "name": "getWeight",

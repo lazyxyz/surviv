@@ -1,9 +1,10 @@
 import $ from "jquery";
 import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
-import { Account, SurvivAssets } from "../account";
+import { Account } from "../account";
 import { InventoryCache } from ".";
 import { GAME_CONSOLE } from "../..";
+import { SurvivAssets } from "@common/mappings";
 
 // Constants for repeated strings
 const ASSET_PATH = "./img/game/shared";
@@ -282,7 +283,7 @@ async function showGuns(account: Account, selectedGunId?: string) {
 
   try {
 
-    let gunBalances = Object.entries(await account.getBalances(SurvivAssets.DivineGuns));
+    let gunBalances = Object.entries(await account.getAssetBalances(SurvivAssets.Guns));
     const userGuns = gunBalances.map(g => g[0]);
 
     const allGuns = Guns.definitions; // Show all guns, not just owned ones
@@ -340,11 +341,8 @@ async function showMelees(account: Account, selectedMeleeId?: string) {
   }
 
   try {
-
     const userArmsBalance = [
-      ...Object.entries(await account.getBalances(SurvivAssets.SilverArms)),
-      ...Object.entries(await account.getBalances(SurvivAssets.GoldArms)),
-      ...Object.entries(await account.getBalances(SurvivAssets.DivineArms)),
+      ...Object.entries(await account.getAssetBalances(SurvivAssets.Arms)),
     ];
     const userArms = userArmsBalance.map(s => s[0]);
     userArms.push("fists"); // Add default

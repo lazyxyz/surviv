@@ -1,128 +1,26 @@
-import {
-    SilverSkinsMapping,
-    GoldSkinsMapping,
-    DivineSkinsMapping,
-    SilverArmsMapping,
-    GoldArmsMapping,
-    DivineArmsMapping,
-    DivineGunsMapping,
-    SurvivMemesMapping,
-    SurvivCardsMapping,
-} from "@common/mappings";
-import { ethers } from "ethers";
-import { Config } from "../config";
-import { EMOTE_SLOTS } from "@common/constants";
-import { BadgeDefinition, Badges } from "@common/definitions/badges";
-import { EmoteDefinition, Emotes } from "@common/definitions/emotes";
-import { GunDefinition, Guns } from "@common/definitions/guns";
-import { MeleeDefinition, Melees } from "@common/definitions/melees";
-import { SkinDefinition, Skins, DEFAULT_SKIN } from "@common/definitions/skins";
+import { ethers } from 'ethers';
+import { SurvivAssetRanges, SurvivAssetsMapping, SurvivBadgesMapping } from '@common/mappings'; // Adjust path as needed
+import { EMOTE_SLOTS } from '@common/constants';
+import { BadgeDefinition, Badges } from '@common/definitions/badges';
+import { EmoteDefinition, Emotes } from '@common/definitions/emotes';
+import { GunDefinition, Guns } from '@common/definitions/guns';
+import { MeleeDefinition, Melees } from '@common/definitions/melees';
+import { SkinDefinition, Skins, DEFAULT_SKIN } from '@common/definitions/skins';
 
 interface Mapping {
     address: string;
-    assets: string[];
+    assets: string[] | string[][];
+}
+
+export enum SurvivBadges {
+    Cards = 0
 }
 
 interface AssetCheckResult {
     isValid: boolean;
     validItems: string[];
-}
-
-/**
- * Common function to check asset balances for a player
- * @param player - The player's address
- * @param items - Array of items to check
- * @param mappings - Array of mappings to check against
- * @param timeout - Timeout in milliseconds
- */
-async function getAssetsBalance(
-    player: string,
-    items: string[],
-    mappings: { mapping: Mapping }[],
-    timeout: number = 3000
-): Promise<AssetCheckResult> {
-    const rpc = process.env.RPC;
-    if (!rpc) throw new Error("RPC configuration not found");
-
-    const provider = new ethers.JsonRpcProvider(rpc);
-
-    // Initialize result array
-    const result = new Array(items.length).fill("");
-
-    // Group items by their mapping to optimize batch calls
-    const itemsByMapping = new Map<string, { items: string[], indices: number[] }>();
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        let itemFound = false;
-
-        for (const { mapping } of mappings) {
-            if (mapping.assets.includes(item)) {
-                itemFound = true;
-                const tokenId = mapping.assets.indexOf(item);
-                const key = mapping.address;
-
-                if (!itemsByMapping.has(key)) {
-                    itemsByMapping.set(key, { items: [], indices: [] });
-                }
-                itemsByMapping.get(key)!.items.push(item);
-                itemsByMapping.get(key)!.indices.push(i);
-                break;
-            }
-        }
-
-        if (!itemFound) {
-            console.log(`Item ${item} not found in any mapping`);
-        }
-    }
-
-    // Process each mapping's items in batch
-    for (const [address, { items: mappingItems, indices }] of itemsByMapping) {
-        try {
-            const contract = new ethers.Contract(
-                address,
-                ["function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])"],
-                provider
-            );
-
-            const tokenIds = mappingItems.map(item => mappings.find(m => m.mapping.address === address)!.mapping.assets.indexOf(item));
-            const accounts = new Array(mappingItems.length).fill(player);
-
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-            try {
-                const balances = await Promise.race([
-                    contract.balanceOfBatch(accounts, tokenIds),
-                    new Promise((_, reject) => {
-                        controller.signal.addEventListener('abort', () => {
-                            reject(new Error('Request timed out'));
-                        });
-                    })
-                ]);
-
-                clearTimeout(timeoutId);
-
-                balances.forEach((balance: bigint, index: number) => {
-                    if (balance > 0n) {
-                        result[indices[index]] = mappingItems[index];
-                    }
-                });
-            } catch (error: any) {
-                clearTimeout(timeoutId);
-                if (error.message === 'Request timed out') {
-                    throw error;
-                }
-                throw error;
-            }
-        } catch (error: any) {
-            console.error(`Error checking items for mapping ${address}:`, error.message);
-        }
-    }
-
-    return {
-        isValid: result.some(item => item !== ""),
-        validItems: result
-    };
+    tokenIds: number[];
+    balances: bigint[];
 }
 
 interface VerifiedAssets {
@@ -130,13 +28,210 @@ interface VerifiedAssets {
     melee: MeleeDefinition | undefined;
     gun: GunDefinition | undefined;
     emotes: readonly (EmoteDefinition | undefined)[];
-    badge: BadgeDefinition | undefined;
 }
 
 /**
- * Verify all assets for a player in a single call
+ * Check asset balances for a player using SurvivAssetsMapping.
  * @param player - The player's address
- * @param assets - Object containing skin, melee, gun, emotes, and badge
+ * @param items - Array of items to check
+ * @param timeout - Timeout in milliseconds
+ */
+async function getAssetsBalance(
+    player: string,
+    items: string[],
+    timeout: number = 3000
+): Promise<AssetCheckResult> {
+    const rpc = process.env.RPC;
+    if (!rpc) throw new Error('RPC configuration not found');
+
+    if (!SurvivAssetsMapping || !SurvivAssetsMapping.address || !Array.isArray(SurvivAssetsMapping.assets)) {
+        throw new Error('Invalid SurvivAssetsMapping configuration');
+    }
+
+    if (!ethers.isAddress(SurvivAssetsMapping.address)) {
+        throw new Error(`Invalid contract address: ${SurvivAssetsMapping.address}`);
+    }
+
+    const provider = new ethers.JsonRpcProvider(rpc);
+
+    // Initialize result arrays
+    const result: string[] = new Array(items.length).fill('');
+    const tokenIds: number[] = [];
+    const itemIndices: number[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        let itemFound = false;
+
+        for (const index of Object.values(SurvivAssetRanges).flatMap(r => r.mappingIndices)) {
+            const subArray = (SurvivAssetsMapping.assets[index] || []) as string[];
+            if (subArray.includes(item)) {
+                const tokenId = index * 1000 + subArray.indexOf(item);
+                tokenIds.push(tokenId);
+                itemIndices.push(i);
+                itemFound = true;
+                break;
+            }
+        }
+
+        if (!itemFound) {
+            console.log(`Item ${item} not found in SurvivAssetsMapping`);
+        }
+    }
+
+    if (tokenIds.length === 0) {
+        return { isValid: false, validItems: [], tokenIds: [], balances: [] };
+    }
+
+    try {
+        const contract = new ethers.Contract(
+            SurvivAssetsMapping.address,
+            ['function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])'],
+            provider
+        );
+
+        const accounts = new Array(tokenIds.length).fill(player);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        try {
+            const balances = await Promise.race([
+                contract.balanceOfBatch(accounts, tokenIds),
+                new Promise((_, reject) => {
+                    controller.signal.addEventListener('abort', () => {
+                        reject(new Error('Request timed out'));
+                    });
+                })
+            ]);
+
+            clearTimeout(timeoutId);
+
+            balances.forEach((balance: bigint, index: number) => {
+                if (balance > 0n) {
+                    result[itemIndices[index]] = items[itemIndices[index]];
+                }
+            });
+
+            return {
+                isValid: result.some(item => item !== ''),
+                validItems: result.filter(item => item !== ''),
+                tokenIds,
+                balances
+            };
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            if (error.message === 'Request timed out') {
+                throw error;
+            }
+            throw error;
+        }
+    } catch (error: any) {
+        console.error(`Error checking items for SurvivAssetsMapping:`, error.message);
+        return { isValid: false, validItems: [], tokenIds: [], balances: [] };
+    }
+}
+
+/**
+ * Check balances for a player using a generic mapping (e.g., SurvivBadgesMapping).
+ * @param player - The player's address
+ * @param items - Array of items to check
+ * @param mapping - The mapping to check against
+ * @param timeout - Timeout in milliseconds
+ */
+async function getBalance(
+    player: string,
+    items: string[],
+    mapping: Mapping,
+    timeout: number = 3000
+): Promise<AssetCheckResult> {
+    const rpc = process.env.RPC;
+    if (!rpc) throw new Error('RPC configuration not found');
+
+    if (!mapping || !mapping.address || !Array.isArray(mapping.assets)) {
+        throw new Error('Invalid mapping configuration');
+    }
+
+    if (!ethers.isAddress(mapping.address)) {
+        throw new Error(`Invalid contract address: ${mapping.address}`);
+    }
+
+    const provider = new ethers.JsonRpcProvider(rpc);
+
+    // Initialize result arrays
+    const result: string[] = new Array(items.length).fill('');
+    const tokenIds: number[] = [];
+    const itemIndices: number[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const assets = mapping.assets as string[];
+        if (assets.includes(item)) {
+            const tokenId = assets.indexOf(item);
+            tokenIds.push(tokenId);
+            itemIndices.push(i);
+        } else {
+            console.log(`Item ${item} not found in mapping`);
+        }
+    }
+
+    if (tokenIds.length === 0) {
+        return { isValid: false, validItems: [], tokenIds: [], balances: [] };
+    }
+
+    try {
+        const contract = new ethers.Contract(
+            mapping.address,
+            ['function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])'],
+            provider
+        );
+
+        const accounts = new Array(tokenIds.length).fill(player);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        try {
+            const balances = await Promise.race([
+                contract.balanceOfBatch(accounts, tokenIds),
+                new Promise((_, reject) => {
+                    controller.signal.addEventListener('abort', () => {
+                        reject(new Error('Request timed out'));
+                    });
+                })
+            ]);
+
+            clearTimeout(timeoutId);
+
+            balances.forEach((balance: bigint, index: number) => {
+                if (balance > 0n) {
+                    result[itemIndices[index]] = items[itemIndices[index]];
+                }
+            });
+
+            return {
+                isValid: result.some(item => item !== ''),
+                validItems: result.filter(item => item !== ''),
+                tokenIds,
+                balances
+            };
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            if (error.message === 'Request timed out') {
+                throw error;
+            }
+            throw error;
+        }
+    } catch (error: any) {
+        console.error(`Error checking items for mapping ${mapping.address}:`, error.message);
+        return { isValid: false, validItems: [], tokenIds: [], balances: [] };
+    }
+}
+
+/**
+ * Verify assets for a player using SurvivAssetsMapping.
+ * @param player - The player's address
+ * @param assets - Object containing skin, melee, gun, and emotes
  * @param timeout - Timeout in milliseconds
  */
 export async function verifyAllAssets(
@@ -146,79 +241,88 @@ export async function verifyAllAssets(
         melee: string;
         gun: string;
         emotes: string;
-        badge: string;
     },
     timeout: number = 2000
 ): Promise<VerifiedAssets> {
-    const skinMappings = [
-        { mapping: SilverSkinsMapping },
-        { mapping: GoldSkinsMapping },
-        { mapping: DivineSkinsMapping },
-    ];
-    const meleeMappings = [
-        { mapping: SilverArmsMapping },
-        { mapping: GoldArmsMapping },
-        { mapping: DivineArmsMapping },
-    ];
-    const gunMappings = [
-        { mapping: DivineGunsMapping },
-    ];
-    const emoteMappings = [
-        { mapping: SurvivMemesMapping },
-    ];
-    const badgeMappings = [
-        { mapping: SurvivCardsMapping },
-    ];
-
     // Default values
     let result: VerifiedAssets = {
         skin: Skins.fromStringSafe(DEFAULT_SKIN),
         melee: undefined,
         gun: undefined,
-        emotes: EMOTE_SLOTS.map(() => undefined),
-        badge: undefined,
+        emotes: EMOTE_SLOTS.map(() => undefined)
     };
 
     try {
-        // Verify all assets in parallel
-        const [
-            badgeResult,
-            skinResult,
-            meleeResult,
-            gunResult,
-            emotesResult,
-        ] = await Promise.all([
-            assets.badge ? getAssetsBalance(player, [assets.badge], badgeMappings, timeout) : null,
-            assets.skin ? getAssetsBalance(player, [assets.skin], skinMappings, timeout) : null,
-            assets.melee ? getAssetsBalance(player, [assets.melee], meleeMappings, timeout) : null,
-            assets.gun ? getAssetsBalance(player, [assets.gun], gunMappings, timeout) : null,
-            assets.emotes ? getAssetsBalance(player, assets.emotes.split(',').filter(e => e), emoteMappings, timeout) : null,
-        ]);
+        // Collect all items
+        const allItems = [
+            ...(assets.skin ? [{ type: 'skin', value: assets.skin }] : []),
+            ...(assets.melee ? [{ type: 'melee', value: assets.melee }] : []),
+            ...(assets.gun ? [{ type: 'gun', value: assets.gun }] : []),
+            ...(assets.emotes ? assets.emotes.split(',').filter(e => e).map(value => ({ type: 'emotes', value })) : [])
+        ];
+
+        // Prepare items for SurvivAssetsMapping
+        const items = allItems.map(item => item.value);
+        const itemTypes = allItems.map(item => item.type);
+
+        if (items.length === 0) {
+            return result;
+        }
+
+        // Verify balances
+        const checkResult = await getAssetsBalance(player, items, timeout);
 
         // Process results
-        if (badgeResult?.isValid && badgeResult.validItems[0]) {
-            result.badge = Badges.fromStringSafe(badgeResult.validItems[0]);
-        }
+        const emoteResults: string[] = [];
+        checkResult.validItems.forEach((validItem, index) => {
+            const itemIndex = items.indexOf(validItem);
+            const type = itemTypes[itemIndex];
+            if (type === 'skin') {
+                result.skin = Skins.fromStringSafe(validItem);
+            } else if (type === 'melee') {
+                result.melee = Melees.fromStringSafe(validItem);
+            } else if (type === 'gun') {
+                result.gun = Guns.fromStringSafe(validItem);
+            } else if (type === 'emotes') {
+                emoteResults.push(validItem);
+            }
+        });
 
-        if (skinResult?.isValid && skinResult.validItems[0]) {
-            result.skin = Skins.fromStringSafe(skinResult.validItems[0]);
-        }
-
-        if (meleeResult?.isValid && meleeResult.validItems[0]) {
-            result.melee = Melees.fromStringSafe(meleeResult.validItems[0]);
-        }
-
-        if (gunResult?.isValid && gunResult.validItems[0]) {
-            result.gun = Guns.fromStringSafe(gunResult.validItems[0]);
-        }
-
-        if (emotesResult) {
-            result.emotes = emotesResult.validItems.map(emoteId => Emotes.fromStringSafe(emoteId));
+        if (emoteResults.length > 0) {
+            result.emotes = EMOTE_SLOTS.map((_, i) => Emotes.fromStringSafe(emoteResults[i] || ''));
         }
     } catch (err) {
-        console.error("Asset verification failed:", err);
+        console.error('Asset verification failed:', err);
         // Return defaults on error
     }
 
     return result;
+}
+
+/**
+ * Verify badge for a player using SurvivBadgesMapping.
+ * @param player - The player's address
+ * @param badge - The badge item to verify
+ * @param timeout - Timeout in milliseconds
+ */
+export async function verifyBadges(
+    player: string,
+    badge: string,
+    timeout: number = 2000
+): Promise<BadgeDefinition | undefined> {
+    if (!badge) {
+        return undefined;
+    }
+
+    try {
+        const checkResult = await getBalance(player, [badge], SurvivBadgesMapping, timeout);
+
+        if (checkResult.isValid && checkResult.validItems[0]) {
+            return Badges.fromStringSafe(checkResult.validItems[0]);
+        }
+    } catch (err) {
+        console.error('Badge verification failed:', err);
+    }
+
+    return undefined;
 }

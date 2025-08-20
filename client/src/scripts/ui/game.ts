@@ -37,10 +37,10 @@ function updateUsersBadge(game: Game): void {
     aliveUsersContainer.innerHTML = "";
 
     // Show badge image if "cards" is selected
-    if (selectedBadge === "cards") {
+    if (selectedBadge === "surviv_card") {
         const badgeImage = document.createElement("img");
         badgeImage.src = `./img/game/shared/badges/${selectedBadge}.svg`;
-        badgeImage.alt = "Cards Badge";
+        badgeImage.alt = "Card Badge";
         badgeImage.className = "badge-image";
         badgeImage.draggable = false;
 
@@ -133,10 +133,10 @@ function setupSpectateControls(game: Game): void {
         sendSpectatePacket(SpectateActions.SpectateNext);
     });
 
-    // Update the user's badge
-    GAME_CONSOLE.variables.addChangeListener("cv_loadout_badge", () => {
-        updateUsersBadge(game);
-    });
+    // // Update the user's badge
+    // GAME_CONSOLE.variables.addChangeListener("cv_loadout_badge", () => {
+    //     updateUsersBadge(game);
+    // });
 }
 
 function setupKeyboardControls(game: Game): void {

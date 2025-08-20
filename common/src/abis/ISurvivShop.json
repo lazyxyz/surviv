@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
   "contractName": "ISurvivShop",
-  "sourceName": "contracts/interfaces/ISurvivShop.sol",
+  "sourceName": "surviv-contracts/contracts/interfaces/ISurvivShop.sol",
   "abi": [
     {
       "inputs": [
@@ -9,6 +9,11 @@
           "internalType": "address",
           "name": "item",
           "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
         },
         {
           "internalType": "uint256",
@@ -37,6 +42,11 @@
           "internalType": "address",
           "name": "item",
           "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
         }
       ],
       "name": "getPrice",

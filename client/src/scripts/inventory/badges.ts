@@ -3,9 +3,10 @@ import { getTranslatedString } from "../../translations";
 import $ from "jquery";
 import { html } from "../utils/misc";
 import { InventoryCache } from ".";
-import { Account, SurvivAssets } from "../account";
+import { Account, SurvivBadges, SurvivItems } from "../account";
 import { Badges } from "@common/definitions/badges"; // Assuming a Badges module exists
 import { GAME_CONSOLE } from "../..";
+import { SurvivAssets } from "@common/mappings";
 
 export function getBadgeImage(badgeId: string): string {
     if (!badgeId) return "";
@@ -32,8 +33,9 @@ export async function showBadges(account: Account) {
     const currentBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
 
     const userBadgeBalance = [
-        ...Object.entries(await account.getBalances(SurvivAssets.SurvivCards)),
+        ...Object.entries((await account.getItemBalances(SurvivItems.SurvivBadges))),
     ];
+
     const userBadges = userBadgeBalance.map(s => s[0]);
 
     // Badges list

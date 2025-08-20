@@ -33,7 +33,8 @@ export const Config = {
     maxPlayersPerGame: 100,
 
     maxGames: 20,
-    gameJoinTime: 90,
+    // gameJoinTime: 90,
+    gameJoinTime: 0,
 
     gas: { mode: GasMode.Normal },
 
@@ -48,8 +49,13 @@ export const Config = {
 
     earnConfig: {
         rank: 5,
-        api: "https://api.surviv.fun",
+        api: "http://localhost:3001",
     },
+
+    // earnConfig: {
+    //     rank: 5,
+    //     api: "https://api.surviv.fun",
+    // },
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {

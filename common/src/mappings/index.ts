@@ -1,12 +1,27 @@
-export { assetsMapping as SilverSkinsMapping } from "./SilverSkins";
-export { assetsMapping as GoldSkinsMapping } from "./GoldSkins";
-export { assetsMapping as DivineSkinsMapping } from "./DivineSkins";
-export { assetsMapping as SilverArmsMapping } from "./SilverArms";
-export { assetsMapping as GoldArmsMapping } from "./GoldArms";
-export { assetsMapping as DivineArmsMapping } from "./DivineArms";
-export { assetsMapping as DivineGunsMapping } from "./DivineGuns";
-export { assetsMapping as SurvivMemesMapping } from "./SurvivMemes";
-export { assetsMapping as SurvivCratesMapping } from "./SurvivCrates";
-export { assetsMapping as SurvivKeysMapping } from "./SurvivKeys";
-export { assetsMapping as SurvivCardsMapping } from "./SurvivCards";
+export { assetsMapping as SurvivAssetsMapping } from "./SurvivAssets";
+export { assetsMapping as SurvivKitsMapping } from "./SurvivKits";
+export { assetsMapping as SurvivBadgesMapping } from "./SurvivBages";
 export { assetsMapping as SurvivMapping } from "./Surviv";
+
+export enum SurvivAssets {
+    Skins,
+    Emotes,
+    Arms,
+    Guns
+}
+
+// Mapping of SurvivAssets to indices in SurvivAssetsMapping.assets
+export const SurvivAssetRanges: Record<SurvivAssets, { mappingIndices: number[] }> = {
+    [SurvivAssets.Skins]: {
+        mappingIndices: [0, 1, 2] // SilverSkins, GoldSkins, DivineSkins
+    },
+    [SurvivAssets.Emotes]: {
+        mappingIndices: [3] // SurvivMemes
+    },
+    [SurvivAssets.Arms]: {
+        mappingIndices: [4, 5, 6] // SilverArms, GoldArms, DivineArms
+    },
+    [SurvivAssets.Guns]: {
+        mappingIndices: [7, 8] // GoldGuns, DivineGuns
+    }
+};
