@@ -164,7 +164,7 @@ export class Account extends EIP6963 {
         // Check condition button
     }
 
-    async connect(getProvider: Provider6963Props, turnstileToken: string): Promise<void> {
+    async connect(getProvider: Provider6963Props): Promise<void> {
         // Check and switch network if necessary
         {
             const targetChainId = toBeHex(CHAIN_ID);
@@ -238,7 +238,6 @@ export class Account extends EIP6963 {
                 walletAddress: accounts[0],
                 signature,
                 nonce: requestNonce.nonce,
-                turnstileToken,
             }),
         });
 
