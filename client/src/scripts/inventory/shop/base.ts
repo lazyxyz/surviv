@@ -5,7 +5,7 @@ import {
     SurvivKitsMapping
 } from "@common/mappings";
 import { ShopCache } from ".";
-import { Account, SurvivAssets, SurvivKits, type MintResult } from "../../account";
+import { Account, SurvivAssets, SurvivItems, SurvivKits, type MintResult } from "../../account";
 
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
     const crateImages = new Array(userCrateBalances).fill({ image: "./img/misc/crate.png" });
@@ -288,8 +288,10 @@ export async function loadBase(account: Account): Promise<void> {
     }
 
     if (!ShopCache.baseLoaded) {
-        ShopCache.assetsBalance.key = (await account.getItemBalance(SurvivKits.Keys)) || 0;
-        ShopCache.assetsBalance.crate = (await account.getItemBalance(SurvivKits.Keys)) || 0;
+        const kitsBalance = await account.getItemBalances(SurvivItems.SurvivKits);
+
+        ShopCache.assetsBalance.key = Number(kitsBalance["key"]) || 0;
+        ShopCache.assetsBalance.crate = Number(kitsBalance["crate"]) || 0;
     };
 
     await Promise.all(

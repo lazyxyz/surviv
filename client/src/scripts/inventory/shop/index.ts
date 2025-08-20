@@ -3,7 +3,7 @@ import { InventoryCache } from "..";
 import { loadStore } from "./store";
 import { loadBase } from "./base";
 import { loadRewards } from "./rewards";
-import type { Account, SurvivItems } from "../../account";
+import type { Account, SaleItems, SurvivItems } from "../../account";
 
 
 function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeListOf<HTMLElement>) {
@@ -28,8 +28,8 @@ function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeL
 export let ShopCache: {
     storeLoaded: boolean,
     baseLoaded: boolean,
-    assetsBalance: Record<SurvivItems, number>;
-    assetsPrice: Record<SurvivItems, string>;
+    assetsBalance: Record<SaleItems, number>;
+    assetsPrice: Record<SaleItems, string>;
 }
 
 export async function showShop(account: Account) {

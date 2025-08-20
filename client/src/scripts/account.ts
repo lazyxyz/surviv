@@ -38,11 +38,20 @@ export enum SurvivKits {
 export enum SurvivBadges {
     Cards = "card",
 }
+export type SaleItems = SurvivKits | SurvivBadges;
 
-export type SurvivItems = SurvivKits | SurvivBadges;
+export enum SurvivItems {
+    SurvivKits,
+    SurvivBadges
+};
 
 // Mapping of SurvivItems enums to their contract mappings
 const itemMappings: Record<SurvivItems, { address: string; assets: string[] }> = {
+    [SurvivItems.SurvivKits]: SurvivKitsMapping,
+    [SurvivItems.SurvivBadges]: SurvivBadgesMapping
+};
+
+const saleMappings: Record<SaleItems, { address: string; assets: string[] }> = {
     [SurvivKits.Crates]: SurvivKitsMapping,
     [SurvivKits.Keys]: SurvivKitsMapping,
     [SurvivBadges.Cards]: SurvivBadgesMapping
@@ -63,14 +72,6 @@ const assetRanges: Record<SurvivAssets, { mappingIndices: number[] }> = {
         mappingIndices: [7, 8] // GoldGuns, DivineGuns
     }
 };
-
-// export const SaleItems = {
-//     Crates: SurvivKitsMapping.address,
-//     Keys: SurvivKitsMapping.address,
-//     Cards: SurvivBadgesMapping.address,
-// } as const;
-
-// export type SaleItemType = keyof typeof SaleItems;
 
 export const PaymentTokens = {
     NativeToken: SurvivMapping.NativeToken.address,
@@ -395,37 +396,6 @@ export class Account extends EIP6963 {
         return result;
     }
 
-
-
-    /**
-     * Retrieves balances for a specific asset type from SurvivKits or SurvivBadges.
-     * @param item - The type of item to query (e.g., SurvivKits.Crates, SurvivBadges.Cards).
-     * @returns A promise resolving to an object mapping asset names to their balances.
-     * @throws Error if the contract address is invalid, provider is unavailable, or mapping is invalid.
-     */
-    async getItemBalance(
-        item: SurvivItems,
-    ): Promise<number> {
-        if (!this.provider?.provider) {
-            throw new Error('Provider not available');
-        }
-
-        let itemAddress = itemMappings[item].address;
-        let itemIndex = itemMappings[item].assets.indexOf(item);
-        if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
-            throw new Error(`Invalid contract address or tokenId for ${item}`);
-        }
-
-        // Initialize the ethers contract
-        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-        const signer = await ethersProvider.getSigner();
-        const contract = new ethers.Contract(itemAddress, erc1155ABI, signer);
-
-        // Batch query balances
-        const balance = await contract.balanceOf(this.address, itemIndex);
-        return balance;
-    }
-
     /**
      * Retrieves balances for a specific asset type from SurvivKits or SurvivBadges.
      * @param assetType - The type of asset to query (e.g., SurvivKits.Crates, SurvivBadges.Cards).
@@ -675,16 +645,23 @@ export class Account extends EIP6963 {
             const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
             const cratesContract = new ethers.Contract(SurvivKitsMapping.address, erc1155ABI, signer);
 
-            const balance = await cratesContract.balanceOf(signer.address, 0);
+            const kitsMapping = itemMappings[SurvivItems.SurvivKits];
+            const crateIndex = kitsMapping.assets.indexOf("crate");
+            const keyIndex = kitsMapping.assets.indexOf("key");
 
-            if (Number(balance) >= amount) {
+
+            const tokenIds = [crateIndex, keyIndex];
+            const accounts = Array(tokenIds.length).fill(this.address);
+            const kitBalances = await cratesContract.balanceOfBatch(accounts, tokenIds);
+
+            if (kitBalances[crateIndex] >= amount && kitBalances[keyIndex] >= amount) {
                 // Execute claim transaction
-                const tx = await crateBaseContract.commitCrates(0, amount);
+                const tx = await crateBaseContract.commitCrates(amount);
                 const receipt = await tx.wait();
                 clearTimeout(timeoutId);
                 return receipt;
             } else {
-                throw new Error(`Insufficient crates balance: ${balance}`);
+                throw new Error(`Insufficient crates or keys: crates: ${kitBalances[crateIndex]}, keys: ${kitBalances[keyIndex]}`);
             }
 
         } catch (error: any) {
@@ -766,18 +743,17 @@ export class Account extends EIP6963 {
      * @returns A promise resolving to the API response.
      * @throws Error if the API request fails, authentication is invalid, or payment fails.
      */
-    async buyItems(item: SurvivItems, amount: number, paymentToken: PaymentTokenType, value: bigint): Promise<any> {
+    async buyItems(item: SaleItems, amount: number, paymentToken: PaymentTokenType, value: bigint): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
-        let paymentTokenValue = PaymentTokens[paymentToken];
-
-        let itemAddress = itemMappings[item].address;
-        let itemIndex = itemMappings[item].assets.indexOf(item);
+        let itemAddress = saleMappings[item].address;
+        let itemIndex = saleMappings[item].assets.indexOf(item);
         if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
             throw new Error(`Invalid contract address or tokenId for ${item}`);
         }
 
+        console.log("BUY");
         // Set fetch timeout
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -786,9 +762,12 @@ export class Account extends EIP6963 {
             // Initialize contract
             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
             const signer = await ethersProvider.getSigner();
+            let paymentTokenValue = PaymentTokens[paymentToken];
 
+            console.log("paymentToken: ", paymentToken);
             const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
             if (paymentTokenValue == PaymentTokens.NativeToken) {
+                console.log(`Buy items: ${itemAddress}, ${itemIndex}, ${amount}, ${paymentTokenValue}, ${value}`)
                 const tx = await survivShopContract.buyItems(itemAddress, itemIndex, amount, paymentTokenValue, { value });
                 const receipt = await tx.wait();
                 clearTimeout(timeoutId);
@@ -803,14 +782,14 @@ export class Account extends EIP6963 {
     }
 
     async queryPrice(
-        item: SurvivItems, // Use SaleItems key type ("Crates" | "Cards" | "Keys")
+        item: SaleItems, // Use SaleItems key type ("Crates" | "Cards" | "Keys")
         paymentToken: PaymentTokenType // Use PaymentTokens key type ("NativeToken")
     ): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
 
-        let itemValue = itemMappings[item];
+        let itemValue = saleMappings[item];
         let itemAddress = itemValue.address;
 
         let itemIndex = itemValue.assets.indexOf(item);
@@ -829,7 +808,6 @@ export class Account extends EIP6963 {
             const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
 
             const price = await survivShopContract.getPrice(PaymentTokens[paymentToken], itemAddress, itemIndex);
-            console.log("price: ", price);
             clearTimeout(timeoutId);
             return price;
         } catch (error: any) {

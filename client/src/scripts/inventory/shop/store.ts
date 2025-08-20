@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { formatEther } from "ethers";
-import { Account, SurvivAssets, SurvivBadges, SurvivKits, type PaymentTokenType, type SurvivItems } from "../../account";
+import { Account, SurvivAssets, SurvivBadges, SurvivItems, SurvivKits, type PaymentTokenType, type SaleItems } from "../../account";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 import { ShopCache } from ".";
 import { GAME_CONSOLE } from "../../..";
@@ -10,12 +10,12 @@ interface StoreItem {
     name: string;
     image: string;
     price: string;
-    itemType: SurvivItems;
+    itemType: SaleItems;
 }
 
 async function fetchPrice(
     account: Account,
-    itemType: SurvivItems,
+    itemType: SaleItems,
     paymentToken: PaymentTokenType = "NativeToken"
 ): Promise<string> {
     // Return cached price if available
@@ -86,7 +86,7 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
 
     $cards.each((index, card) => {
         const $card = $(card);
-        const itemType = $card.data("item-type") as SurvivItems;
+        const itemType = $card.data("item-type") as SaleItems;
         const $purchaseAmount = $card.find(".crates-input");
         const $addButton = $card.find(".crates-add");
         const $removeButton = $card.find(".crates-remove");
@@ -199,10 +199,13 @@ export async function loadStore(account: Account): Promise<void> {
     }
 
     if (!ShopCache.storeLoaded) {
+        const kitsBalance = await account.getItemBalances(SurvivItems.SurvivKits);
+        const badgesBalance = await account.getItemBalances(SurvivItems.SurvivBadges);
+
         ShopCache.storeLoaded = true;
-        ShopCache.assetsBalance["key"] = (await account.getItemBalance(SurvivKits.Keys)) || 0;
-        ShopCache.assetsBalance["crate"] = (await account.getItemBalance(SurvivKits.Crates)) || 0;
-        ShopCache.assetsBalance["card"] = (await account.getItemBalance(SurvivBadges.Cards)) || 0;
+        ShopCache.assetsBalance["key"] = kitsBalance["key"] || 0;
+        ShopCache.assetsBalance["crate"] = kitsBalance["crate"] || 0;
+        ShopCache.assetsBalance["card"] = badgesBalance["card"] || 0;
     };
 
     const storeItems: StoreItem[] = [
