@@ -126,6 +126,7 @@
   <script>
     const API_URL = 'https://api.surviv.fun/api/playerRankings';
     const API_URL_BY_DATE = 'https://api.surviv.fun/api/getPlayerRankingsByDate';
+    const API_PLAYER_POINTS = 'https://api.surviv.fun/api/playerPoints';
     let currentPage = 1;
     const limit = 100;
     let totalPages = 1;
@@ -135,10 +136,41 @@
     const startDate = urlParams.get('startDate');
     const endDate = urlParams.get('endDate');
 
+    // Resolve "my" address for highlighting (URL param or various keys)
+    const myAddressParam = urlParams.get('player') || urlParams.get('address') || urlParams.get('wallet');
+    const myStoredWallet =
+      localStorage.getItem('PUBLIC_KEY') ||
+      localStorage.getItem('walletAddress') ||
+      localStorage.getItem('account') ||
+      localStorage.getItem('wallet');
+    const myAddress = (myAddressParam || myStoredWallet || '').toLowerCase();
+
+    // Specifically read PUBLIC_KEY for the pinned "my" data
+    const myPublicKey = (localStorage.getItem('PUBLIC_KEY') || '').toLowerCase();
+
     // Shorten Wallet Address
     function shortenAddress(address, chars = 10) {
       if (!address) return '';
       return `${address.slice(0, 2 + chars)}...${address.slice(-chars)}`;
+    }
+
+    function asNumber(v, fallback = 0) {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    // Normalize player object keys from different endpoints
+    function normalizePlayer(raw, defaultAddress = '') {
+      if (!raw) raw = {};
+      const addr = (raw.walletAddress || raw.address || raw.player || defaultAddress || '').toString();
+      return {
+        player: addr,
+        totalPoints: asNumber(raw.totalPoints ?? raw.total ?? 0),
+        soloPoints: asNumber(raw.soloPoints ?? raw.solo ?? 0),
+        squadPoints: asNumber(raw.squadPoints ?? raw.squad ?? 0),
+        socialPoints: asNumber(raw.socialPoints ?? raw.social ?? 0),
+        games: asNumber(raw.games ?? raw.totalGames ?? raw.matches ?? 0),
+      };
     }
 
     const pageInput = document.querySelector('.input-pagination');
@@ -199,14 +231,115 @@
       nextButton.disabled = currentPage >= totalPages;
     }
 
+    // Helper to create a leaderboard row
+    function createRow(player, rankNumber, uniqueKey, highlight = false) {
+      const row = document.createElement('div');
+      row.className = 'leaderboard-body-row';
+
+      const total = asNumber(player.totalPoints, 0);
+      const solo = asNumber(player.soloPoints, 0);
+      const squad = asNumber(player.squadPoints, 0);
+      const social = asNumber(player.socialPoints, 0);
+      const games = asNumber(player.games, 0);
+      const rate = games > 0 ? ((solo + squad) / games).toFixed(2) : '0.00';
+
+      const addr = (player.player || '').toString();
+      row.innerHTML = `
+            <div class="w-[80px] h-[48px]" id="row-child">${rankNumber}</div>
+            <div class="w-[350px] h-[48px]" id="row-child">
+              ${shortenAddress(addr)}
+              <i id="copy-address-${uniqueKey}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i>
+            </div>
+            <div class="w-[160px] h-[48px]" id="row-child">${total}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${solo}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${squad}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${social}</div>
+            <div class="w-[110px] h-[48px]" id="row-child">${games}</div>
+            <div class="w-[100px] h-[48px]" id="row-child">${rate}</div>
+          `;
+
+      // Copy-to-clipboard handler
+      const copyIcon = row.querySelector(`#copy-address-${CSS.escape(uniqueKey)}`);
+      if (copyIcon) {
+        copyIcon.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(addr);
+
+            // Visual feedback
+            copyIcon.classList.remove('fa-copy');
+            copyIcon.classList.add('fa-circle-check', 'text-green-400');
+            copyIcon.title = 'Copied!';
+
+            setTimeout(() => {
+              copyIcon.classList.remove('fa-circle-check', 'text-green-400');
+              copyIcon.classList.add('fa-copy');
+              copyIcon.title = 'Copy full address';
+            }, 1500);
+          } catch (err) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = addr;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            copyIcon.classList.add('text-blue-400');
+            setTimeout(() => copyIcon.classList.remove('text-blue-400'), 500);
+          }
+        });
+      }
+
+      return row;
+    }
+
+    async function fetchMyPlayerPoints(address) {
+      if (!address) return null;
+      try {
+        const url = `${API_PLAYER_POINTS}?walletAddress=${encodeURIComponent(address)}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('playerPoints request failed');
+        const data = await res.json();
+        // Accept a variety of shapes
+        const payload = data?.data || data?.playerPoints || data;
+        return normalizePlayer(payload, address);
+      } catch (e) {
+        console.warn('Failed to fetch player points:', e);
+        return null;
+      }
+    }
+
+    function addYouBadgeToRow(row) {
+      // Try to pick the second cell (player cell)
+      const playerCell = row.children && row.children[1];
+      if (playerCell) {
+        const youBadge = document.createElement('span');
+        youBadge.textContent = 'You';
+        youBadge.className = 'ml-2 px-2 py-0.5 text-xs rounded-full bg-yellow-400/20 text-yellow-300 border border-yellow-400/60';
+        playerCell.appendChild(youBadge);
+      }
+    }
+
     async function fetchLeaderboard(page) {
       const loading = document.getElementById('loading');
       const error = document.getElementById('error');
       const leaderboardBody = document.getElementById('table-body');
+      const myRankingContainer = document.querySelector('.my-ranking-data');
+      myRankingContainer.className = `bg-yellow-400/25 border border-yellow-400/60 w-[1280px]`;
 
       loading.classList.remove('hidden');
       error.classList.add('hidden');
       leaderboardBody.innerHTML = '';
+      if (myRankingContainer) myRankingContainer.innerHTML = '';
+
+      // If PUBLIC_KEY is not present, show a prompt
+      if (myRankingContainer && !myPublicKey) {
+        const msg = document.createElement('div');
+        msg.textContent = 'Connect wallet to 📌 pin your ranking status here!';
+        msg.className = 'px-4 py-3 text-sm font-semibold text-white flex justify-center items-center';
+        myRankingContainer.classList.add('sticky-state');
+        myRankingContainer.appendChild(msg);
+      }
 
       try {
         // Choose API endpoint based on presence of date parameters
@@ -227,58 +360,38 @@
         totalPages = data.totalPages || 1;
         updatePaginationUI();
 
-        data.players.forEach((player, index) => {
-          const row = document.createElement('div');
-          row.className = 'leaderboard-body-row';
-          row.innerHTML = `
-            <div class="w-[80px] h-[48px]" id="row-child">${(page - 1) * limit + index + 1}</div>
-            <div class="w-[350px] h-[48px]" id="row-child">${shortenAddress(player.player)}<i id="copy-address-${index}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i></div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.totalPoints}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.soloPoints}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.squadPoints}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints || 0}</div>
-            <div class="w-[110px] h-[48px]" id="row-child">${player.games}</div>
-            <div class="w-[100px] h-[48px]" id="row-child">${player.games > 0 ? ((player.soloPoints + player.squadPoints) / player.games).toFixed(2) : '0.00'}</div>
-          `;
+        // Render table rows and keep the array in memory
+        const players = Array.isArray(data.players) ? data.players : [];
+        players.forEach((player, index) => {
+          const rankNumber = (page - 1) * limit + index + 1;
+          const playerAddr = (player.player || '').toLowerCase();
+          const isMy = myAddress && playerAddr === myAddress;
+
+          const row = createRow(player, rankNumber, `${page}-${index}`, isMy);
           leaderboardBody.appendChild(row);
-
-          // Add copy functionality for this specific row
-          const copyIcon = document.getElementById(`copy-address-${index}`);
-          copyIcon.addEventListener('click', async () => {
-            try {
-              await navigator.clipboard.writeText(player.player);
-
-              // Visual feedback
-              copyIcon.classList.remove('fa-copy');
-              copyIcon.classList.add('fa-circle-check', 'text-green-400');
-              copyIcon.title = 'Copied!';
-
-              // Reset icon after 1.5 seconds
-              setTimeout(() => {
-                copyIcon.classList.remove('fa-circle-check', 'text-green-400');
-                copyIcon.classList.add('fa-copy');
-                copyIcon.title = 'Copy full address';
-              }, 1500);
-
-            } catch (err) {
-              // Fallback for older browsers
-              const textArea = document.createElement('textarea');
-              textArea.value = player.player;
-              document.body.appendChild(textArea);
-              textArea.select();
-              document.execCommand('copy');
-              document.body.removeChild(textArea);
-
-              // Visual feedback for fallback
-              copyIcon.classList.add('text-blue-400');
-              setTimeout(() => copyIcon.classList.remove('text-blue-400'), 500);
-            }
-          });
         });
 
+        // Fetch and pin "my" row using PUBLIC_KEY only
+        if (myPublicKey && myRankingContainer) {
+          const myData = await fetchMyPlayerPoints(myPublicKey);
+          if (myData) {
+            // Determine rank based on current page if present; otherwise show "—"
+            const foundIdx = players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey);
+            const rankNumber = foundIdx >= 0 ? (page - 1) * limit + foundIdx + 1 : '—';
+
+            // Replace the prompt (if any) with the pinned row
+            myRankingContainer.innerHTML = '';
+            const pinned = createRow(myData, rankNumber, `my-${page}`, true);
+            addYouBadgeToRow(pinned);
+            myRankingContainer.appendChild(pinned);
+          }
+        }
+
       } catch (err) {
-        error.textContent = 'Error loading leaderboard. Please try again later.';
-        error.classList.remove('hidden');
+        console.error(err);
+        const errorEl = document.getElementById('error');
+        errorEl.textContent = 'Error loading leaderboard. Please try again later.';
+        errorEl.classList.remove('hidden');
       } finally {
         loading.classList.add('hidden');
       }
@@ -314,6 +427,7 @@
     // Fetch initial leaderboard
     fetchLeaderboard(currentPage);
   </script>
+
   <script src="../src/earn.ts" type="module"></script>
 </body>
 
