@@ -43,9 +43,7 @@ export async function showSkins(account: Account) {
     const currentSkin = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
 
     const userSkinBalance = [
-        ...Object.entries(await account.getBalances(SurvivAssets.SilverSkins)),
-        ...Object.entries(await account.getBalances(SurvivAssets.GoldSkins)),
-        ...Object.entries(await account.getBalances(SurvivAssets.DivineSkins)),
+        ...Object.entries(await account.getAssetBalances(SurvivAssets.Skins)),
     ];
     const userSkins = userSkinBalance.map(s => s[0]);
 

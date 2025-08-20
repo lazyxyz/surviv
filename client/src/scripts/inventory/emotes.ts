@@ -16,7 +16,7 @@ export async function showEmotes(account: Account) {
     if (InventoryCache.emotesLoaded) return;
     InventoryCache.emotesLoaded = true;
 
-    const userEmoteBalance = Object.entries(await account.getBalances(SurvivAssets.SurvivMemes));
+    const userEmoteBalance = Object.entries(await account.getAssetBalances(SurvivAssets.Emotes));
     const userEmotes = userEmoteBalance.map(e => e[0]);
 
     // Cache jQuery selectors for performance

@@ -51,10 +51,6 @@ export async function showInventory(account: Account) {
         showShop(account);
     })
 
-    $("#btn-inventory").on('click', () => {
-        showShop(account);
-    })
-
     $('#tab-skins').on('click', () => {
         showSkins(account);
     })

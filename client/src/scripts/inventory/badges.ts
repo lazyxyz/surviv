@@ -32,7 +32,7 @@ export async function showBadges(account: Account) {
     const currentBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
 
     const userBadgeBalance = [
-        ...Object.entries(await account.getBalances(SurvivAssets.SurvivCards)),
+        ...Object.entries(await account.getAssetBalances(SurvivAssets.Arms)),
     ];
     const userBadges = userBadgeBalance.map(s => s[0]);
 

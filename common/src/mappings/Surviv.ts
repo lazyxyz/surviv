@@ -1,13 +1,13 @@
 export const assetsMapping = {
     "ChainId": 50312,
     "SurvivRewards": {
-        "address": "0xb615B4ca12f58EdebA10B68Ee890f0ddd7B7e49A"
+        "address": "0xD98AD0dE5f8BBd5DF3DFF095681b82764B3A8f81"
     },
     "SurvivBase": {
-        "address": "0x816DBf52724c28E415e0715B216684b152Ae25C5"
+        "address": "0x867fbE114493A75bC4971C9186977CCeba593B77"
     },
     "SurvivShop": {
-        "address": "0x885141802335319dD0536a7928a6f304ECCd4Aa0"
+        "address": "0xFE957dc933d6756F9C1d9a2d8D90Ed4a3f242729"
     },
     "NativeToken": {
         "address": "0x0000000000000000000000000000000000000000"

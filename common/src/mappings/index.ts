@@ -1,12 +1,4 @@
-export { assetsMapping as SilverSkinsMapping } from "./SilverSkins";
-export { assetsMapping as GoldSkinsMapping } from "./GoldSkins";
-export { assetsMapping as DivineSkinsMapping } from "./DivineSkins";
-export { assetsMapping as SilverArmsMapping } from "./SilverArms";
-export { assetsMapping as GoldArmsMapping } from "./GoldArms";
-export { assetsMapping as DivineArmsMapping } from "./DivineArms";
-export { assetsMapping as DivineGunsMapping } from "./DivineGuns";
-export { assetsMapping as SurvivMemesMapping } from "./SurvivMemes";
-export { assetsMapping as SurvivCratesMapping } from "./SurvivCrates";
-export { assetsMapping as SurvivKeysMapping } from "./SurvivKeys";
-export { assetsMapping as SurvivCardsMapping } from "./SurvivCards";
+export { assetsMapping as SurvivAssetsMapping } from "./SurvivAssets";
+export { assetsMapping as SurvivKitsMapping } from "./SurvivKits";
+export { assetsMapping as SurvivBadgesMapping } from "./SurvivBages";
 export { assetsMapping as SurvivMapping } from "./Surviv";

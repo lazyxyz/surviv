@@ -2,17 +2,10 @@ import $ from "jquery";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 
 import {
-    SilverSkinsMapping,
-    GoldSkinsMapping,
-    DivineSkinsMapping,
-    SilverArmsMapping,
-    GoldArmsMapping,
-    DivineArmsMapping,
-    DivineGunsMapping,
-    SurvivMemesMapping,
+    SurvivKitsMapping
 } from "@common/mappings";
 import { ShopCache } from ".";
-import { Account, SurvivAssets, type MintResult } from "../../account";
+import { Account, SurvivAssets, SurvivKits, type MintResult } from "../../account";
 
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
     const crateImages = new Array(userCrateBalances).fill({ image: "./img/misc/crate.png" });
@@ -114,8 +107,8 @@ function setupCrateOpening(account: Account, crates: NodeListOf<Element>, totalS
                     // Perform contract interaction
                     await account.requestOpenCrates(selectedCount);
                     // Update local balances
-                    ShopCache.assetsBalance.Keys -= selectedCount;
-                    ShopCache.assetsBalance.Crates -= selectedCount;
+                    ShopCache.assetsBalance.key -= selectedCount;
+                    ShopCache.assetsBalance.crate -= selectedCount;
                     // Update UI
                     await updateBalancesUI(totalSelected, openNowButton);
                     setTimeout(() => renderClaimButton(account), 2000);
@@ -139,7 +132,7 @@ async function updateBalancesUI(
     // Remove opened crates
     document.querySelectorAll(".my-crates-child.active").forEach(crate => crate.remove());
     // Update total crates and keys display
-    $("#total-crates").text(`You have: ${ShopCache.assetsBalance.Crates} crates - ${ShopCache.assetsBalance.Keys} keys`);
+    $("#total-crates").text(`You have: ${ShopCache.assetsBalance.crate} crates - ${ShopCache.assetsBalance.key} keys`);
     // Reset selection
     if (totalSelected) {
         totalSelected.textContent = "0 selected";
@@ -166,80 +159,80 @@ async function renderClaimButton(account: Account): Promise<HTMLButtonElement | 
 }
 
 function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): void {
-    const collectionMappings: { [key: string]: { address: string; assets: string[] } } = {
-        SilverSkins: SilverSkinsMapping,
-        GoldSkins: GoldSkinsMapping,
-        DivineSkins: DivineSkinsMapping,
-        SilverArms: SilverArmsMapping,
-        GoldArms: GoldArmsMapping,
-        DivineArms: DivineArmsMapping,
-        DivineGuns: DivineGunsMapping,
-        SurvivMemes: SurvivMemesMapping
-    };
+    // const collectionMappings: { [key: string]: { address: string; assets: string[] } } = {
+    //     SilverSkins: ,
+    //     GoldSkins: GoldSkinsMapping,
+    //     DivineSkins: DivineSkinsMapping,
+    //     SilverArms: SilverArmsMapping,
+    //     GoldArms: GoldArmsMapping,
+    //     DivineArms: DivineArmsMapping,
+    //     DivineGuns: DivineGunsMapping,
+    //     SurvivMemes: SurvivMemesMapping
+    // };
 
-    const getImagePath = (address: string, assetName: string) => {
-        if ([SilverSkinsMapping, GoldSkinsMapping, DivineSkinsMapping].some(pattern => pattern.address == address)) {
-            return `./img/game/shared/skins/${assetName}_base.svg`;
-        }
-        if ([SilverArmsMapping, GoldArmsMapping, DivineArmsMapping].some(pattern => pattern.address == address)) {
-            return `./img/game/shared/weapons/${assetName}.svg`;
-        }
-        if (address == DivineGunsMapping.address) {
-            return `./img/game/shared/weapons/${assetName}_world.svg`;
-        }
-        if (address == SurvivMemesMapping.address) {
-            return `./img/game/shared/emotes/${assetName}.svg`;
-        }
-        return `./img/game/shared/skins/${assetName}_base.svg`; // Default fallback
-    };
-    const isSkinItem = (address: string) => {
-        return [SilverSkinsMapping, GoldSkinsMapping, DivineSkinsMapping].some(pattern => pattern.address.toLowerCase() === address.toLowerCase());
-    };
+    // const getImagePath = (address: string, assetName: string) => {
+    //     if ([SilverSkinsMapping, GoldSkinsMapping, DivineSkinsMapping].some(pattern => pattern.address == address)) {
+    //         return `./img/game/shared/skins/${assetName}_base.svg`;
+    //     }
+    //     if ([SilverArmsMapping, GoldArmsMapping, DivineArmsMapping].some(pattern => pattern.address == address)) {
+    //         return `./img/game/shared/weapons/${assetName}.svg`;
+    //     }
+    //     if (address == DivineGunsMapping.address) {
+    //         return `./img/game/shared/weapons/${assetName}_world.svg`;
+    //     }
+    //     if (address == SurvivMemesMapping.address) {
+    //         return `./img/game/shared/emotes/${assetName}.svg`;
+    //     }
+    //     return `./img/game/shared/skins/${assetName}_base.svg`; // Default fallback
+    // };
+    // const isSkinItem = (address: string) => {
+    //     return [SilverSkinsMapping, GoldSkinsMapping, DivineSkinsMapping].some(pattern => pattern.address.toLowerCase() === address.toLowerCase());
+    // };
 
-    const alertDiv = document.createElement('div');
-    alertDiv.className = "minted-items-alert";
+    // const alertDiv = document.createElement('div');
+    // alertDiv.className = "minted-items-alert";
 
-    const idRandom = Math.floor(Math.random() * 10000000);
-    const popupContent = mintedItems.length > 0
-        ? mintedItems.flatMap(item => {
-            const mapping = Object.values(collectionMappings).find(m => m.address.toLowerCase() === item.address.toLowerCase());
-            if (mapping) return item.values.map(([tokenId, value]) => {
-                const assetName = mapping && mapping.assets[tokenId] ? mapping.assets[tokenId] : `unknown_${tokenId}`;
-                const imageUrl = getImagePath(mapping.address, assetName);
-                const rotationClass = isSkinItem(item.address) ? ' rotated' : '';
-                return `
-                    <div class="minted-item">
-                        <img src="${imageUrl}" alt="${assetName}" data-balance="${value}" class="minted-item-image${rotationClass}">
-                        <span class="balance">x${value}</span>
-                    </div>
-                `;
-            }).join("")
-        }).join("")
-        : "<div class='no-items'>Items not found. Check explorer instead.</div>";
+    // const idRandom = Math.floor(Math.random() * 10000000);
+    // const popupContent = mintedItems.length > 0
+    //     ? mintedItems.flatMap(item => {
+    //         const mapping = Object.values(collectionMappings).find(m => m.address.toLowerCase() === item.address.toLowerCase());
+    //         if (mapping) return item.values.map(([tokenId, value]) => {
+    //             const assetName = mapping && mapping.assets[tokenId] ? mapping.assets[tokenId] : `unknown_${tokenId}`;
+    //             const imageUrl = getImagePath(mapping.address, assetName);
+    //             const rotationClass = isSkinItem(item.address) ? ' rotated' : '';
+    //             return `
+    //                 <div class="minted-item">
+    //                     <img src="${imageUrl}" alt="${assetName}" data-balance="${value}" class="minted-item-image${rotationClass}">
+    //                     <span class="balance">x${value}</span>
+    //                 </div>
+    //             `;
+    //         }).join("")
+    //     }).join("")
+    //     : "<div class='no-items'>Items not found. Check explorer instead.</div>";
 
-    const alertChild = $(`
-            <div class="minted-items-modal" id="${idRandom}">
-                <div class="minted-items-header" style="font-family: Survivant">claimed successfully!</div>
-                <div class="minted-items-body">
-                    <div class="minted-items-grid">${popupContent}</div>
-                </div>
-                <div class="minted-items-footer">
-                    <a href="${explorerLink}" target="_blank" class="view-on-explorer">View on Explorer</a>
-                </div>
-                <span class="minted-items-close fa-solid fa-xmark close-popup" id="close-customize"></span>
-            </div>
-    `);
+    // const alertChild = $(`
+    //         <div class="minted-items-modal" id="${idRandom}">
+    //             <div class="minted-items-header" style="font-family: Survivant">claimed successfully!</div>
+    //             <div class="minted-items-body">
+    //                 <div class="minted-items-grid">${popupContent}</div>
+    //             </div>
+    //             <div class="minted-items-footer">
+    //                 <a href="${explorerLink}" target="_blank" class="view-on-explorer">View on Explorer</a>
+    //             </div>
+    //             <span class="minted-items-close fa-solid fa-xmark close-popup" id="close-customize"></span>
+    //         </div>
+    // `);
 
-    alertDiv.append(alertChild[0]);
-    document.body.appendChild(alertDiv);
+    // alertDiv.append(alertChild[0]);
+    // document.body.appendChild(alertDiv);
 
-    // Close popup
-    $(".close-popup").on("click", (event) => {
-        event.target.parentElement?.remove();
-        if (!alertDiv.children.length) {
-            alertDiv.remove();
-        }
-    });
+    // // Close popup
+    // $(".close-popup").on("click", (event) => {
+    //     event.target.parentElement?.remove();
+    //     if (!alertDiv.children.length) {
+    //         alertDiv.remove();
+    //     }
+    // });
 }
 
 async function updateClaimButton(account: Account): Promise<void> {
@@ -295,13 +288,13 @@ export async function loadBase(account: Account): Promise<void> {
     }
 
     if (!ShopCache.baseLoaded) {
-        ShopCache.assetsBalance.Keys = (await account.getBalances(SurvivAssets.SurvivKeys))["keys"] || 0;
-        ShopCache.assetsBalance.Crates = (await account.getBalances(SurvivAssets.SurvivCrates))["crates"] || 0;
+        ShopCache.assetsBalance.key = (await account.getItemBalance(SurvivKits.Keys)) || 0;
+        ShopCache.assetsBalance.crate = (await account.getItemBalance(SurvivKits.Keys)) || 0;
     };
 
     await Promise.all(
         [
-            loadCrates(account, ShopCache.assetsBalance.Keys, ShopCache.assetsBalance.Crates),
+            loadCrates(account, ShopCache.assetsBalance.key, ShopCache.assetsBalance.crate),
             updateClaimButton(account)
         ]
     );
