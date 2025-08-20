@@ -58,7 +58,7 @@ const saleMappings: Record<SaleItems, { address: string; assets: string[] }> = {
 };
 
 // Mapping of SurvivAssets to indices in SurvivAssetsMapping.assets
-const assetRanges: Record<SurvivAssets, { mappingIndices: number[] }> = {
+export const SurvivAssetRanges: Record<SurvivAssets, { mappingIndices: number[] }> = {
     [SurvivAssets.Skins]: {
         mappingIndices: [0, 1, 2] // SilverSkins, GoldSkins, DivineSkins
     },
@@ -352,7 +352,7 @@ export class Account extends EIP6963 {
             throw new Error('Invalid contract address in SurvivAssetsMapping');
         }
 
-        const { mappingIndices } = assetRanges[assetType];
+        const { mappingIndices } = SurvivAssetRanges[assetType];
 
         // Flatten the asset names and token IDs for the selected category
         const assetNames: string[] = [];
@@ -753,7 +753,6 @@ export class Account extends EIP6963 {
             throw new Error(`Invalid contract address or tokenId for ${item}`);
         }
 
-        console.log("BUY");
         // Set fetch timeout
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -764,10 +763,8 @@ export class Account extends EIP6963 {
             const signer = await ethersProvider.getSigner();
             let paymentTokenValue = PaymentTokens[paymentToken];
 
-            console.log("paymentToken: ", paymentToken);
             const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
             if (paymentTokenValue == PaymentTokens.NativeToken) {
-                console.log(`Buy items: ${itemAddress}, ${itemIndex}, ${amount}, ${paymentTokenValue}, ${value}`)
                 const tx = await survivShopContract.buyItems(itemAddress, itemIndex, amount, paymentTokenValue, { value });
                 const receipt = await tx.wait();
                 clearTimeout(timeoutId);
