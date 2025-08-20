@@ -54,7 +54,7 @@ import { PlayerData, ReadyPacket } from "@common/packets/readyPacket";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { validateJWT } from "./api/api";
 import { getIP, createServer } from "./utils/serverHelpers";
-import { verifyAllAssets } from "./api/balances";
+import { verifyAllAssets, verifyBadges } from "./api/balances";
 import { Armors } from "@common/definitions/armors";
 
 
@@ -1429,13 +1429,14 @@ export class Game implements GameData {
                     }
 
                     const assets = await verifyAllAssets(data.address, {
-                        badge: data.badge,
                         skin: data.skin,
                         melee: data.melee,
                         gun: data.gun,
                         emotes: data.emotes,
                     })
 
+                    const badge = await verifyBadges(data.address, data.badge);
+                    
                     const stream = new PacketStream(new ArrayBuffer(128));
                     stream.serializeServerPacket(
                         ReadyPacket.create({
@@ -1444,7 +1445,7 @@ export class Game implements GameData {
                             gameMode: ModeToNumber[game.gameMode],
                             emotes: assets.emotes,
                             name: data.name,
-                            badge: assets.badge,
+                            badge: badge,
                             skin: assets.skin,
                             melee: assets.melee,
                             gun: assets.gun,

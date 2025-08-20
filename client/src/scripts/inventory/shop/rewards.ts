@@ -50,7 +50,7 @@ function renderRewardList(account: Account, rewardData: RewardData): void {
         try {
             await account.claimRewards();
             successAlert("Rewards claimed successfully!");
-            ShopCache.assetsBalance.Crates += totalCrates;
+            ShopCache.assetsBalance.crate += totalCrates;
         } catch (err) {
             console.error(`Failed to claim rewards: ${err}`);
             errorAlert("No valid crates found");

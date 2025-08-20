@@ -2,10 +2,12 @@ import $ from "jquery";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 
 import {
+    SurvivAssetRanges,
+    SurvivAssets,
     SurvivAssetsMapping,
 } from "@common/mappings";
 import { ShopCache } from ".";
-import { Account, SurvivAssetRanges, SurvivAssets, SurvivItems, type MintResult } from "../../account";
+import { Account, SurvivItems, type MintResult } from "../../account";
 
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
     const crateImages = new Array(userCrateBalances).fill({ image: "./img/misc/crate.png" });

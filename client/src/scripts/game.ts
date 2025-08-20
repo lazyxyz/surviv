@@ -517,7 +517,7 @@ export class Game {
                 this.initPixi(this.gameMode).then(_ => {
                     this.ready(packet.output);
                     this.setupGame();
-                })
+                });
                 break;
             case packet instanceof JoinedPacket:
                 this.startGame(packet.output);

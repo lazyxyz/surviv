@@ -1,9 +1,10 @@
 import $ from "jquery";
 import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
-import { Account, SurvivAssets } from "../account";
+import { Account } from "../account";
 import { InventoryCache } from ".";
 import { GAME_CONSOLE } from "../..";
+import { SurvivAssets } from "@common/mappings";
 
 // Constants for repeated strings
 const ASSET_PATH = "./img/game/shared";

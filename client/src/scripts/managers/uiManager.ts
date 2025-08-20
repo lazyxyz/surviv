@@ -511,7 +511,7 @@ export class UIManager {
                     </div>
                 ` : html`
                     <div class="rewards-amount">
-                        <img src="./img/game/shared/badges/cards.svg" alt="Surviv Cards" loading="lazy">
+                        <img src="./img/game/shared/badges/surviv_card.svg" alt="Surviv Cards" loading="lazy">
                     </div>
                 `}
             </div>

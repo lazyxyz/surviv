@@ -3,7 +3,7 @@ import { InventoryCache } from "..";
 import { loadStore } from "./store";
 import { loadBase } from "./base";
 import { loadRewards } from "./rewards";
-import type { Account, SaleItems, SurvivItems } from "../../account";
+import type { Account, SaleItems } from "../../account";
 
 
 function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeListOf<HTMLElement>) {

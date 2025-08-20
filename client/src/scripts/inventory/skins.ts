@@ -5,8 +5,9 @@ import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
 
 import { InventoryCache, updateSplashCustomize } from ".";
-import { Account, SurvivAssets } from "../account";
+import { Account } from "../account";
 import { GAME_CONSOLE } from "../..";
+import { SurvivAssets } from "@common/mappings";
 
 // handler select and save skin
 function selectSkin(idString: ReferenceTo<SkinDefinition>): void {

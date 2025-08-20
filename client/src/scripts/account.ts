@@ -8,7 +8,9 @@ import {
     SurvivAssetsMapping,
     SurvivKitsMapping,
     SurvivBadgesMapping,
-    SurvivMapping
+    SurvivMapping,
+    SurvivAssets,
+    SurvivAssetRanges
 } from "@common/mappings";
 
 import { abi as survivRewardsABI } from "@common/abis/ISurvivRewards.json";
@@ -23,20 +25,13 @@ const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
 const SURVIV_BASE_ADDRESS = SurvivMapping.SurvivBase.address;
 const SURVIV_SHOP_ADDRESS = SurvivMapping.SurvivShop.address;
 
-export enum SurvivAssets {
-    Skins,
-    Emotes,
-    Arms,
-    Guns
-}
-
 export enum SurvivKits {
     Crates = "crate",
     Keys = "key",
 }
 
 export enum SurvivBadges {
-    Cards = "card",
+    Cards = "surviv_card",
 }
 export type SaleItems = SurvivKits | SurvivBadges;
 
@@ -57,22 +52,6 @@ const saleMappings: Record<SaleItems, { address: string; assets: string[] }> = {
     [SurvivBadges.Cards]: SurvivBadgesMapping
 };
 
-// Mapping of SurvivAssets to indices in SurvivAssetsMapping.assets
-export const SurvivAssetRanges: Record<SurvivAssets, { mappingIndices: number[] }> = {
-    [SurvivAssets.Skins]: {
-        mappingIndices: [0, 1, 2] // SilverSkins, GoldSkins, DivineSkins
-    },
-    [SurvivAssets.Emotes]: {
-        mappingIndices: [3] // SurvivMemes
-    },
-    [SurvivAssets.Arms]: {
-        mappingIndices: [4, 5, 6] // SilverArms, GoldArms, DivineArms
-    },
-    [SurvivAssets.Guns]: {
-        mappingIndices: [7, 8] // GoldGuns, DivineGuns
-    }
-};
-
 export const PaymentTokens = {
     NativeToken: SurvivMapping.NativeToken.address,
 } as const;
@@ -84,7 +63,6 @@ export type PaymentTokenType = keyof typeof PaymentTokens;
 */
 interface Crate {
     to: string;
-    tier: number;
     amount: number;
     salt: string;
     expiry: number;
@@ -534,15 +512,13 @@ export class Account extends EIP6963 {
             const signatures: string[] = [];
 
             for (const claim of data.claims) {
-                if (!claim.crate?.to || !ethers.isAddress(claim.crate.to) ||
-                    !Number.isInteger(claim.crate.tier) || !Number.isInteger(claim.crate.amount) ||
+                if (!claim.crate?.to || !ethers.isAddress(claim.crate.to) || !Number.isInteger(claim.crate.amount) ||
                     !claim.crate.salt || !Number.isInteger(claim.crate.expiry) || !claim.signature) {
                     console.warn('Invalid claim data, skipping:', claim);
                     continue;
                 }
                 crates.push({
                     to: claim.crate.to,
-                    tier: Number(claim.crate.tier),
                     amount: Number(claim.crate.amount),
                     salt: claim.crate.salt,
                     expiry: Number(claim.crate.expiry),

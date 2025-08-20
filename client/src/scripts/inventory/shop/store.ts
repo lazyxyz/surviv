@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { formatEther } from "ethers";
-import { Account, SurvivAssets, SurvivBadges, SurvivItems, SurvivKits, type PaymentTokenType, type SaleItems } from "../../account";
+import { Account, SurvivBadges, SurvivItems, SurvivKits, type PaymentTokenType, type SaleItems } from "../../account";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 import { ShopCache } from ".";
 import { GAME_CONSOLE } from "../../..";
@@ -176,7 +176,7 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
                 successAlert("Purchase successful!");
 
                 if (item?.itemType == SurvivBadges.Cards) {
-                    GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", "cards"); // Set card as badge after purchased
+                    GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", "card"); // Set card as badge after purchased
                 }
             } catch (err: any) {
                 errorAlert("Transaction Failed: Please check your wallet balance or try again.", 3000);
@@ -205,7 +205,7 @@ export async function loadStore(account: Account): Promise<void> {
         ShopCache.storeLoaded = true;
         ShopCache.assetsBalance["key"] = kitsBalance["key"] || 0;
         ShopCache.assetsBalance["crate"] = kitsBalance["crate"] || 0;
-        ShopCache.assetsBalance["card"] = badgesBalance["card"] || 0;
+        ShopCache.assetsBalance["surviv_card"] = badgesBalance["surviv_card"] || 0;
     };
 
     const storeItems: StoreItem[] = [
