@@ -42,18 +42,6 @@ a:visited {
   text-decoration: none;
 }
 
-.cf-turnstile {
-  margin-top: 10px;
-  display: flex;
-  justify-content: center;
-
-  @include variables.mobile-device {
-    height: 65px;
-    overflow: hidden;
-    border-radius: 8px;
-  }
-}
-
 #weapon-info {
   background: rgba(0, 0, 0, 0.1);
   border-radius: 8px;
