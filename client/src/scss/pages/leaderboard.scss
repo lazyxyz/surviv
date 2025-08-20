@@ -225,6 +225,11 @@
         font-size: 14px;
         font-weight: 600;
       }
+      .sticky-state {
+        position: sticky;
+        width: 100%;
+        left: 0;
+      }
     }
   }
 
