@@ -232,7 +232,7 @@ const selectGun = (weaponId: string) => {
     capacityAmout = String(base);
     // Show extended capacity if available
     if (typeof gun.extendedCapacity === "number" && gun.extendedCapacity !== base) {
-      capacityAmout += ` -> ${gun.extendedCapacity}`;
+      capacityAmout += ` (${gun.extendedCapacity})`;
     }
   }
 
