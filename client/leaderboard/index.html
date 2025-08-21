@@ -68,15 +68,15 @@
         <div class="body-section">
           <div class="leaderboard">
             <div class="leaderboard-header">
-              <div class="w-[80px] h-[48px]" id="header-child">Rank</div>
-              <div class="w-[350px] h-[48px]" id="header-child">Player</div>
+              <div class="w-[110px] h-[48px]" id="header-child">Rank</div>
+              <div class="w-[320px] h-[48px]" id="header-child">Player</div>
               <div class="w-[160px] h-[48px]" id="header-child">Total Points</div>
               <div class="w-[160px] h-[48px] relative" id="header-child">
                 Solo Points
                 <i class="fa-solid fa-circle-question text-sm ml-1 cursor-pointer hover:text-yellow-400 transition-colors"
                   id="solo-tooltip-toggle"></i>
                 <div id="solo-tooltip"
-                  class="hidden absolute z-10 bg-gray-800 text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
+                  class="hidden absolute z-10 bg-[#5b8939] text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
                   <ul class="list-disc pl-5">
                     <li>Rank #1: 10 points</li>
                     <li>Rank #2: 5 points</li>
@@ -91,7 +91,7 @@
                 <i class="fa-solid fa-circle-question text-sm ml-1 cursor-pointer hover:text-yellow-400 transition-colors"
                   id="squad-tooltip-toggle"></i>
                 <div id="squad-tooltip"
-                  class="hidden absolute z-10 bg-gray-800 text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
+                  class="hidden absolute z-10 bg-[#5b8939] text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
                   <ul class="list-disc pl-5">
                     <li>Rank #1: 6 points </li>
                     <li>Rank #2: 3 points</li>
@@ -104,7 +104,7 @@
                 <i class="fa-solid fa-circle-question text-sm ml-1 cursor-pointer hover:text-yellow-400 transition-colors"
                   id="social-tooltip-toggle"></i>
                 <div id="social-tooltip"
-                  class="hidden absolute z-10 bg-gray-800 text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
+                  class="hidden absolute z-10 bg-[#5b8939] text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
                   <ul class="list-disc pl-5">
                     <li>Earned by completing tasks on Galxe.</li>
                   </ul>
@@ -360,14 +360,33 @@
         totalPages = data.totalPages || 1;
         updatePaginationUI();
 
-        // Render table rows and keep the array in memory
-        const players = Array.isArray(data.players) ? data.players : [];
-        players.forEach((player, index) => {
-          const rankNumber = (page - 1) * limit + index + 1;
-          const playerAddr = (player.player || '').toLowerCase();
-          const isMy = myAddress && playerAddr === myAddress;
+        // Badges in rank
+        function getRankBadge(rank) {
+          if (rank >= 1 && rank <= 10) {
+            return '<img src="../img/game/shared/badges/surviv_s1_gold.svg" alt="Gold Badge" class="filter drop-shadow-[0_0_2px_#facc15a6]">';
+          }
+          if (rank >= 11 && rank <= 50) {
+            return '<img src="../img/game/shared/badges/surviv_s1_silver.svg" alt="Silver Badge">';
+          }
+          return '';
+        }
 
-          const row = createRow(player, rankNumber, `${page}-${index}`, isMy);
+        data.players.forEach((player, index) => {
+          const row = document.createElement('div');
+          row.className = 'leaderboard-body-row';
+          row.innerHTML = `
+            <div class="w-[110px] h-[48px]" id="row-child">
+              ${getRankBadge((page - 1) * limit + index + 1)}
+              ${(page - 1) * limit + index + 1}
+            </div>
+            <div class="w-[320px] h-[48px]" id="row-child">${shortenAddress(player.player)}<i id="copy-address-${index}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i></div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.totalPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.soloPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.squadPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints || 0}</div>
+            <div class="w-[110px] h-[48px]" id="row-child">${player.games}</div>
+            <div class="w-[100px] h-[48px]" id="row-child">${player.games > 0 ? ((player.soloPoints + player.squadPoints) / player.games).toFixed(2) : '0.00'}</div>
+          `;
           leaderboardBody.appendChild(row);
         });
 
