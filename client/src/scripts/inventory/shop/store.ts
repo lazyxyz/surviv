@@ -211,19 +211,19 @@ export async function loadStore(account: Account): Promise<void> {
     const storeItems: StoreItem[] = [
         {
             name: "Surviv Keys",
-            image: "./img/misc/Keys.png",
+            image: "./img/misc/surviv_kit_key.png",
             price: "Loading...", // Placeholder, actual price fetched in renderStoreItems
             itemType: SurvivKits.Keys,
         },
         {
             name: "Surviv Crates",
-            image: "./img/misc/crate.png",
+            image: "./img/misc/surviv_kit_crate.png",
             price: "Loading...",
             itemType: SurvivKits.Crates,
         },
         {
             name: "Surviv Cards",
-            image: "./img/misc/card.gif",
+            image: "./img/game/shared/badges/surviv_card.svg",
             price: "Loading...",
             itemType: SurvivBadges.Cards,
         },

@@ -1,12 +1,10 @@
-import type { Game } from "../game";
 import { getTranslatedString } from "../../translations";
 import $ from "jquery";
 import { html } from "../utils/misc";
 import { InventoryCache } from ".";
-import { Account, SurvivBadges, SurvivItems } from "../account";
-import { Badges } from "@common/definitions/badges"; // Assuming a Badges module exists
+import { Account, SurvivItems } from "../account";
+import { Badges } from "@common/definitions/badges";
 import { GAME_CONSOLE } from "../..";
-import { SurvivAssets } from "@common/mappings";
 
 export function getBadgeImage(badgeId: string): string {
     if (!badgeId) return "";
@@ -77,9 +75,9 @@ export async function showBadges(account: Account) {
         const badgeItem = $<HTMLDivElement>(
             html`<div id="badge-${idString}" class="badges-list-item-container${isSelected ? " selected" : ""}">
                 <div class="badges-list-item badge${isActive ? " active" : " inactive"}" ${inactiveStyle}>
-                    <div class="badge-image" style="background-image: url('./img/misc/card.gif')"></div>
+                    <div class="badge-image" style="background-image: url('${getBadgeImage(idString)}')"></div>
                 </div>
-                <span class="badge-name">${"Surviv Card"}</span>
+                <span class="badge-name">${badgeDef.name}</span>
             </div>`
         );
 

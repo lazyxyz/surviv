@@ -19,7 +19,7 @@ function renderRewardList(account: Account, rewardData: RewardData): void {
         const secondsLeft = item.expiry - now;
         const daysLeft = Math.max(Math.floor(secondsLeft / (60 * 60 * 24)), 0);
         return {
-            image: "./img/misc/crate.png",
+            image: "./img/misc/surviv_kit_crate.png",
             amount: item.amount,
             time: `Expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
         };

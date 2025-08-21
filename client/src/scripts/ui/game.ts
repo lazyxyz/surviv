@@ -34,7 +34,7 @@ export function updateUsersBadge(badgeId: string | undefined): void {
     // Clear existing badge content
     aliveUsersContainer.innerHTML = "";
 
-    if (badgeId === "surviv_card") {
+    if (badgeId) {
         const badgeImage = document.createElement("img");
         badgeImage.src = `./img/game/shared/badges/${badgeId}.svg`;
         badgeImage.alt = "Card Badge";

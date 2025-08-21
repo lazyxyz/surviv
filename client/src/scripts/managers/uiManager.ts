@@ -497,7 +497,7 @@ export class UIManager {
                 ${eligible ? html`
                     <p class="rewards-title">Your Rewards</p>
                     <div class="rewards-amount">
-                        <img src="./img/misc/crate.png" alt="Reward Crate" loading="lazy">
+                        <img src="./img/misc/surviv_kit_crate" alt="Reward Crate" loading="lazy">
                         <p>X${rewards}</p>
                     </div>
                     <div class="rewards-share">
