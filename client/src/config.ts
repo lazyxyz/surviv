@@ -2,33 +2,33 @@ import { type TeamSize } from "@common/constants";
 
 export const Config = {
     regions: {
-        // dev: {
-        //     name: "Local Server",
-        //     mainAddress: "http://127.0.0.1:8000",
-        //     gameAddress: "ws://127.0.0.1:<ID>",
-        //     teamAddress: "ws://127.0.0.1:8000",
-        //     apiAddress: "http://localhost:3001",
-        // },
+        dev: {
+            name: "Local Server",
+            mainAddress: "http://127.0.0.1:8000",
+            gameAddress: "ws://127.0.0.1:<ID>",
+            teamAddress: "ws://127.0.0.1:8000",
+            apiAddress: "https://admin.surviv.fun",
+        },
         as: {
             name: "Asia",
             mainAddress: "https://as.surviv.fun",
             gameAddress: "wss://<ID>.as.surviv.fun",
             teamAddress: "wss://team.as.surviv.fun",
-            apiAddress: "https://api.surviv.fun",
+            apiAddress: "https://admin.surviv.fun",
         },
         na: {
             name: "North America",
             mainAddress: "https://na.surviv.fun",
             gameAddress: "wss://<ID>.na.surviv.fun",
             teamAddress: "wss://team.na.surviv.fun",
-            apiAddress: "https://api.surviv.fun",
+            apiAddress: "https://admin.surviv.fun",
         },
         eu: {
             name: "Europe",
             mainAddress: "https://eu.surviv.fun",
             gameAddress: "wss://<ID>.eu.surviv.fun",
             teamAddress: "wss://team.eu.surviv.fun",
-            apiAddress: "https://api.surviv.fun",
+            apiAddress: "https://admin.surviv.fun",
         },
     },
     defaultRegion: "as",
