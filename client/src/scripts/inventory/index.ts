@@ -7,6 +7,7 @@ import { showWeapons } from "./weapons";
 import type { Account } from '../account';
 import { GAME_CONSOLE } from '../..';
 import { SurvivAssets } from '@common/mappings';
+import { warningAlert } from '../modal';
 
 // handler display change preview
 export const updateSplashCustomize = (skinID: string): void => {
@@ -40,9 +41,12 @@ export let SurvivAssetBalances: Record<SurvivAssets, Record<string, number>> = {
 };
 
 export async function showInventory(account: Account) {
-    SurvivAssetBalances = await account.getAssetBalances();
-
     $("#btn-customize").on('click', async () => {
+        if (!account.address) {
+            warningAlert("Please connect your wallet to continue!", 3000);
+            return;
+        }
+        SurvivAssetBalances = await account.getAssetBalances();
         showShop(account);
     })
 

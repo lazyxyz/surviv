@@ -11,8 +11,14 @@ const walletPriority = [
     WalletType.BraveWallet
 ];
 
+// Flag to track if the wallet list has been sorted
+let isWalletListSorted = false;
+
 // Reusable function to sort and render wallet list
 function sortAndRenderWalletList($walletList: JQuery, account: Account): void {
+    // Skip if already sorted
+    if (isWalletListSorted) return;
+
     const $walletItems = $walletList.children(".connect-wallet-item").get();
 
     $walletItems.sort((a, b) => {
@@ -41,6 +47,9 @@ function sortAndRenderWalletList($walletList: JQuery, account: Account): void {
     // Clear the current list and append sorted items
     $walletList.empty();
     $walletItems.forEach(item => $walletList.append(item));
+
+    // Set flag to true after sorting
+    isWalletListSorted = true;
 }
 
 export function onConnectWallet(account: Account): void {
@@ -128,9 +137,6 @@ export function onConnectWallet(account: Account): void {
 export function showWallet(account: Account): void {
     if (!account.address) {
         $("#connect-wallet-btn").trigger("click");
-        // Ensure wallet list is sorted when modal is opened
-        const $walletList = $(".connect-wallet-list");
-        sortAndRenderWalletList($walletList, account);
     }
 
     if (account.eip6963.provider?.provider && account.address?.length) {
@@ -176,10 +182,6 @@ export function showWallet(account: Account): void {
                 icon: "./img/line/log-out.svg",
                 onClick: () => {
                     account.disconnect();
-                    // Re-sort wallet list after disconnect
-                    const $walletList = $(".connect-wallet-list");
-                    sortAndRenderWalletList($walletList, account);
-                    // Optionally, reopen the connect wallet modal
                     $("#connect-wallet-btn").trigger("click");
                 }
             }
