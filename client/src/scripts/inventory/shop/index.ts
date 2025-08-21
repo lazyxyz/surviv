@@ -1,5 +1,4 @@
 import $ from "jquery";
-import { InventoryCache } from "..";
 import { loadStore } from "./store";
 import { loadBase } from "./base";
 import { loadRewards } from "./rewards";
@@ -33,9 +32,6 @@ export let ShopCache: {
 }
 
 export async function showShop(account: Account) {
-    if (InventoryCache.shopLoaded) return;
-    InventoryCache.shopLoaded = true;
-
     ShopCache = {
         storeLoaded: false,
         baseLoaded: false,

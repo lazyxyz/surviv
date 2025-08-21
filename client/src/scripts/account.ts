@@ -305,17 +305,16 @@ export class Account extends EIP6963 {
     }
 
 
+
     /**
-     * Retrieves balances for SurvivAssets, mapping token IDs to asset names using dynamic indexing.
-     * @param assetType - The SurvivAssets type to query (e.g., Skins, Emotes, Arms, Guns).
+     * Retrieves balances for all SurvivAssets, mapping token IDs to asset names.
      * @param returnAll - If true, includes assets with zero balances; if false, only includes assets with balance > 0 (default: false).
-     * @returns A promise resolving to an object mapping asset names to their balances.
+     * @returns A promise resolving to a nested object mapping SurvivAssets to asset names and their balances.
      * @throws Error if the contract address is invalid, provider is unavailable, or SurvivAssetsMapping is invalid.
      */
     async getAssetBalances(
-        assetType: SurvivAssets,
         returnAll: boolean = false
-    ): Promise<Record<string, number>> {
+    ): Promise<Record<SurvivAssets, Record<string, number>>> {
         if (!this.provider?.provider) {
             throw new Error('Provider not available');
         }
@@ -329,43 +328,52 @@ export class Account extends EIP6963 {
             throw new Error('Invalid contract address in SurvivAssetsMapping');
         }
 
-        const { mappingIndices } = SurvivAssetRanges[assetType];
-
-        // Flatten the asset names and token IDs for the selected category
-        const assetNames: string[] = [];
-        const tokenIds: number[] = [];
-
-        for (const index of mappingIndices) {
-            const subArray = SurvivAssetsMapping.assets[index] || [];
-            const startId = index * 1000; // Derive startId from index
-            let currentTokenId = startId;
-            for (const name of subArray) {
-                assetNames.push(name);
-                tokenIds.push(currentTokenId++);
-            }
-        }
-
-        if (tokenIds.length === 0) {
-            return {};
-        }
-
         // Initialize the ethers contract
         const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
         const signer = await ethersProvider.getSigner();
         const contract = new ethers.Contract(assetsAddress, erc1155ABI, signer);
 
-        // Batch query balances
-        const accounts = Array(tokenIds.length).fill(this.address);
-        const balances = await contract.balanceOfBatch(accounts, tokenIds);
+        const result: Record<SurvivAssets, Record<string, number>> = {
+            [SurvivAssets.Skins]: {},
+            [SurvivAssets.Emotes]: {},
+            [SurvivAssets.Arms]: {},
+            [SurvivAssets.Guns]: {}
+        };
 
-        // Map token IDs to asset names with balances
-        const result: Record<string, number> = {};
-        for (let i = 0; i < tokenIds.length; i++) {
-            const balance = Number(balances[i]); // Convert BigNumber to number
-            if (returnAll || balance > 0) {
-                const assetName = assetNames[i];
-                if (assetName) {
-                    result[assetName] = balance;
+        // Iterate through all SurvivAssets enum values
+        for (const assetType of Object.values(SurvivAssets).filter(val => typeof val === 'number') as SurvivAssets[]) {
+            const { mappingIndices } = SurvivAssetRanges[assetType];
+
+            // Flatten the asset names and token IDs for the current category
+            const assetNames: string[] = [];
+            const tokenIds: number[] = [];
+
+            for (const index of mappingIndices) {
+                const subArray = SurvivAssetsMapping.assets[index] || [];
+                const startId = index * 1000; // Derive startId from index
+                let currentTokenId = startId;
+                for (const name of subArray) {
+                    assetNames.push(name);
+                    tokenIds.push(currentTokenId++);
+                }
+            }
+
+            if (tokenIds.length === 0) {
+                continue;
+            }
+
+            // Batch query balances
+            const accounts = Array(tokenIds.length).fill(this.address);
+            const balances = await contract.balanceOfBatch(accounts, tokenIds);
+
+            // Map token IDs to asset names with balances
+            for (let i = 0; i < tokenIds.length; i++) {
+                const balance = Number(balances[i]); // Convert BigNumber to number
+                if (returnAll || balance > 0) {
+                    const assetName = assetNames[i];
+                    if (assetName) {
+                        result[assetType][assetName] = balance;
+                    }
                 }
             }
         }

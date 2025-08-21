@@ -6,6 +6,7 @@ import { showSkins } from "./skins";
 import { showWeapons } from "./weapons";
 import type { Account } from '../account';
 import { GAME_CONSOLE } from '../..';
+import { SurvivAssets } from '@common/mappings';
 
 // handler display change preview
 export const updateSplashCustomize = (skinID: string): void => {
@@ -30,22 +31,16 @@ export const updateSplashCustomize = (skinID: string): void => {
     );
 };
 
-export let InventoryCache: {
-    shopLoaded: boolean,
-    skinsLoaded: boolean,
-    weaponsLoaded: boolean,
-    badgesLoaded: boolean,
-    emotesLoaded: boolean,
+// Store cached balances
+export let SurvivAssetBalances: Record<SurvivAssets, Record<string, number>> = {
+    [SurvivAssets.Skins]: {},
+    [SurvivAssets.Emotes]: {},
+    [SurvivAssets.Arms]: {},
+    [SurvivAssets.Guns]: {}
 };
 
 export async function showInventory(account: Account) {
-    InventoryCache = {
-        shopLoaded: false,
-        skinsLoaded: false,
-        weaponsLoaded: false,
-        badgesLoaded: false,
-        emotesLoaded: false,
-    }
+    SurvivAssetBalances = await account.getAssetBalances();
 
     $("#btn-customize").on('click', async () => {
         showShop(account);

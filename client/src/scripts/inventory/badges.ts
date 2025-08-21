@@ -1,7 +1,6 @@
 import { getTranslatedString } from "../../translations";
 import $ from "jquery";
 import { html } from "../utils/misc";
-import { InventoryCache } from ".";
 import { Account, SurvivItems } from "../account";
 import { Badges } from "@common/definitions/badges";
 import { GAME_CONSOLE } from "../..";
@@ -24,9 +23,6 @@ function selectBadge(idString: string): void {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function showBadges(account: Account) {
-    if (InventoryCache.badgesLoaded) return;
-    InventoryCache.badgesLoaded = true;
-
     const badgeList = $<HTMLDivElement>("#badges-list");
     const currentBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
 

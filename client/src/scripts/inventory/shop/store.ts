@@ -212,7 +212,7 @@ export async function loadStore(account: Account): Promise<void> {
         {
             name: "Surviv Keys",
             image: "./img/misc/surviv_kit_key.png",
-            price: "Loading...", // Placeholder, actual price fetched in renderStoreItems
+            price: "Loading...",
             itemType: SurvivKits.Keys,
         },
         {

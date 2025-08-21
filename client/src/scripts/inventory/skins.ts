@@ -4,7 +4,7 @@ import { Skins, type SkinDefinition } from "@common/definitions/skins";
 import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
 
-import { InventoryCache, updateSplashCustomize } from ".";
+import {  SurvivAssetBalances, updateSplashCustomize } from ".";
 import { Account } from "../account";
 import { GAME_CONSOLE } from "../..";
 import { SurvivAssets } from "@common/mappings";
@@ -35,16 +35,12 @@ function selectSkin(idString: ReferenceTo<SkinDefinition>): void {
 export async function showSkins(account: Account) {
     if (!account.address) return;
 
-    if (InventoryCache.skinsLoaded) return;
-    InventoryCache.skinsLoaded = true;
-
-
     const role = GAME_CONSOLE.getBuiltInCVar("dv_role");
     const skinList = $<HTMLDivElement>("#skins-list");
     const currentSkin = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
 
     const userSkinBalance = [
-        ...Object.entries(await account.getAssetBalances(SurvivAssets.Skins)),
+        ...Object.entries(SurvivAssetBalances[SurvivAssets.Skins]),
     ];
     const userSkins = userSkinBalance.map(s => s[0]);
 

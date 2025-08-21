@@ -4,20 +4,17 @@ import { EmoteCategory, Emotes, type EmoteDefinition } from "@common/definitions
 import { getTranslatedString } from "../../translations";
 import type { ReferenceTo } from "@common/utils/objectDefinitions";
 import type { TranslationKeys } from "../../typings/translations";
-import { InventoryCache } from '.';
 import { Account } from '../account';
 import { GAME_CONSOLE } from '../..';
 import { SurvivAssets } from '@common/mappings';
+import { SurvivAssetBalances } from '.';
 
 export async function showEmotes(account: Account) {
     if (!account.address) {
         return;
     }
 
-    if (InventoryCache.emotesLoaded) return;
-    InventoryCache.emotesLoaded = true;
-
-    const userEmoteBalance = Object.entries(await account.getAssetBalances(SurvivAssets.Emotes));
+    const userEmoteBalance = Object.entries(SurvivAssetBalances[SurvivAssets.Emotes]);
     const userEmotes = userEmoteBalance.map(e => e[0]);
 
     // Cache jQuery selectors for performance
