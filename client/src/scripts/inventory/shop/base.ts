@@ -124,6 +124,7 @@ function setupCrateOpening(account: Account, crates: NodeListOf<Element>, totalS
                 errorAlert("Failed to open crates. Please try again!");
             } finally {
                 isOpening = false;
+                selectedCount = 0;
                 openNowButton.disabled = selectedCount === 0;
             }
         });

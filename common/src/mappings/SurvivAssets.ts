@@ -49,7 +49,9 @@ export const assetsMapping = {
       "unknown",
       "vanuatu",
       "vietnam",
-      "world"
+      "world",
+      "indonesia",
+      "morocco"
     ],
     [
       "ahegao",
@@ -109,7 +111,9 @@ export const assetsMapping = {
       "wolverine",
       "woody",
       "yuno",
-      "zone"
+      "zone",
+      "radar",
+      "warrior"
     ],
     [
       "android",
