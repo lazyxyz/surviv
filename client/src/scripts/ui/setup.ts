@@ -31,7 +31,24 @@ export function setupRangeInputs(): void {
         .each((_, element) => {
             updateRangeInput(element);
         });
+
+    setTimeout(() => {
+        $<HTMLInputElement>("input[type=range]").each((_, element) => {
+            updateRangeInput(element);
+        });
+    }, 100);
+
+    // Additional fix: Listen for storage events in case values are restored from localStorage
+    window.addEventListener('storage', () => {
+        setTimeout(() => {
+            $<HTMLInputElement>("input[type=range]").each((_, element) => {
+                updateRangeInput(element);
+            });
+        }, 50);
+    });
 }
+
+
 
 export function setupTabNavigation(): void {
     const wrapperCache = new ExtendedMap<HTMLElement, JQuery>();
