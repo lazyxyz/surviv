@@ -21,10 +21,12 @@ function selectBadge(idString: string): void {
     GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", idString);
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function showBadges(account: Account) {
     const badgeList = $<HTMLDivElement>("#badges-list");
     const currentBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
+
+    // Clear the badge list before rendering new items
+    badgeList.empty();
 
     const userBadgeBalance = [
         ...Object.entries((await account.getItemBalances(SurvivItems.SurvivBadges))),

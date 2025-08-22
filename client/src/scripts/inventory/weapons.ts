@@ -92,16 +92,16 @@ const showViewBox = () => {
     {
       class: "assets-fist",
       url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
-      x: melee.fists.right.x,
-      y: melee.fists.right.y,
+      x: melee.fists?.right?.x | 0,
+      y: melee.fists?.right?.y | 0,
       zIndex: 3,
       rotate: 0,
     },
     {
       class: "assets-fist",
       url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
-      x: melee.fists.left.x,
-      y: melee.fists.left.y,
+      x: melee.fists?.left?.x | 0,
+      y: melee.fists?.left?.y | 0,
       zIndex: 4,
       rotate: 0,
     },
@@ -109,7 +109,7 @@ const showViewBox = () => {
       class: "assets-world",
       url: `${ASSET_PATH}/weapons/${melee.idString}.svg`,
       x: melee.image?.position.x ?? 0,
-      y: melee.fists.right.x,
+      y: melee.fists?.right?.x | 0,
       rotate: melee.image?.angle ?? 0,
       zIndex: 1,
     }
@@ -120,7 +120,7 @@ const showViewBox = () => {
     assets.push({
       class: "assets-world",
       url: `${ASSET_PATH}/weapons/${gun.idString}_world.svg`,
-      x: - gun.fists.right.x,
+      x: - gun.fists?.right?.x | 0,
       y: 0,
       rotate: 90,
       zIndex: 1,
