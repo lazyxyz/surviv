@@ -23,6 +23,7 @@ function selectBadge(idString: string): void {
 
 export async function showBadges(account: Account) {
     const badgeList = $<HTMLDivElement>("#badges-list");
+    badgeList.empty(); // Clear previous items
     const currentBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
 
     // Clear the badge list before rendering new items
