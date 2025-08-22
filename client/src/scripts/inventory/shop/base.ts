@@ -9,8 +9,10 @@ import {
 import { ShopCache } from ".";
 import { Account, SurvivItems, type MintResult } from "../../account";
 
+const MAX_RENDER_CRATES = 1000;
+
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
-    const maxCratesToRender = Math.min(userCrateBalances, 100);
+    const maxCratesToRender = Math.min(userCrateBalances, MAX_RENDER_CRATES);
     const crateImages = new Array(maxCratesToRender).fill({ image: "./img/misc/surviv_kit_crate.png" });
 
     $("#total-crates").text(`You have: ${userCrateBalances || 0} crates - ${keyBalances} keys`);

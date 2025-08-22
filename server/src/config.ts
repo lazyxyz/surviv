@@ -45,7 +45,7 @@ export const Config = {
     authServer: {
         address: "http://localhost:8080"
     },
-
+    
     earnConfig: {
         rank: 5,
         api: "https://admin.surviv.fun",

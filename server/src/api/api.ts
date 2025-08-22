@@ -37,7 +37,6 @@ export async function saveGameResult(player: string, rank: number, kills: number
     const url = `${Config.earnConfig?.api}/admin/saveGameResult`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
-
     try {
         const res = await fetch(url, {
             method: 'POST',

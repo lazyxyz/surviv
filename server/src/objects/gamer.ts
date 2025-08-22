@@ -278,6 +278,7 @@ export class Gamer extends Player {
                 this.game.teamMode,
                 this.game.gameId
             );
+            console.log("data: ", data);
             processRewardsPacket(data.success && data.rewards.success, data.rewards.amount || 0);
         } catch (err) {
             console.log("Error claiming rewards:", err);
