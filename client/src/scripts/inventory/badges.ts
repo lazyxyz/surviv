@@ -24,6 +24,7 @@ function selectBadge(idString: string): void {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function showBadges(account: Account) {
     const badgeList = $<HTMLDivElement>("#badges-list");
+    badgeList.empty(); // Clear previous items
     const currentBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
 
     const userBadgeBalance = [
