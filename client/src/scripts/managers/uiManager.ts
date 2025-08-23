@@ -501,7 +501,7 @@ export class UIManager {
                         <p>X${rewards}</p>
                     </div>
                     <div class="rewards-share">
-                        <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/1943679417730883992"
+                        <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/1958475325496504593"
                            target="_blank"
                            rel="noopener noreferrer"
                            class="btn btn-lg btn-darken btn-primary"
