@@ -1,5 +1,5 @@
 export const assetsMapping = {
-  "address": "0xcC548fdbC3e8DC1bd54a71cF8C573D2cEF4E6691",
+  "address": "0x0a65a380A5fc7E623F997ad81c4393C825F6329a",
   "assets": [
     "surviv_card",
     "surviv_s1_gold",

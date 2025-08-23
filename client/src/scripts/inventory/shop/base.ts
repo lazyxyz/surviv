@@ -8,8 +8,10 @@ import {
 } from "@common/mappings";
 import { ShopCache } from ".";
 import { Account, SurvivItems, type MintResult } from "../../account";
+import { ChainConfig } from "../../../config";
 
 const MAX_RENDER_CRATES = 1000;
+const TESTNET_EXPLORER = "https://shannon-explorer.somnia.network/";
 
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
     const maxCratesToRender = Math.min(userCrateBalances, MAX_RENDER_CRATES);
@@ -292,7 +294,7 @@ async function updateClaimButton(account: Account): Promise<void> {
                 errorAlert(result.error);
             } else {
                 if (result.hash) {
-                    const explorerLink = `https://shannon-explorer.somnia.network/tx/${result.hash}?tab=index"`;
+                    const explorerLink = `${ChainConfig.blockExplorerUrls?.[0] ?? TESTNET_EXPLORER}tx/${result.hash}?tab=index"`;
                     if (result.balances) {
                         showMintedItemsPopup(result.balances, explorerLink);
                     } else {

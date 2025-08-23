@@ -4,6 +4,7 @@ import { Account, SurvivBadges, SurvivItems, SurvivKits, type PaymentTokenType, 
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 import { ShopCache } from ".";
 import { GAME_CONSOLE } from "../../..";
+import { ChainConfig } from "../../../config";
 
 interface StoreItem {
     // balance: number;
@@ -61,7 +62,7 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
 
         // Fetch price asynchronously and update the UI
         fetchPrice(account, item.itemType).then(price => {
-            $card.find(".price-placeholder").text(`${formatEther(price)} STT`);
+            $card.find(".price-placeholder").text(`${formatEther(price)} ${ChainConfig.nativeCurrency.symbol}`);
         });
     });
 }
@@ -72,7 +73,7 @@ function updateTotalPurchase($card: JQuery<HTMLElement>, amount: number) {
     const priceValue = parseFloat(priceText);
     const $buyButton = $card.find(".buy-now-btn");
     if (!isNaN(priceValue) && amount > 0) {
-        $buyButton.text(`Buy ${(priceValue * amount).toFixed(1)} STT`);
+        $buyButton.text(`Buy ${(priceValue * amount).toFixed(1)} ${ChainConfig.nativeCurrency.symbol}`);
     } else {
         $buyButton.text("Buy now");
         $buyButton.prop("disabled", true).removeClass("active");

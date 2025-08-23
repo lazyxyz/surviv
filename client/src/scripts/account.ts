@@ -19,8 +19,8 @@ import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
 import { errorAlert } from "./modal";
 import { resetPlayButtons } from "./ui/home";
+import { ChainConfig } from "../config";
 
-const CHAIN_ID = SurvivMapping.ChainId;
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
 const SURVIV_BASE_ADDRESS = SurvivMapping.SurvivBase.address;
 const SURVIV_SHOP_ADDRESS = SurvivMapping.SurvivShop.address;
@@ -167,17 +167,16 @@ export class Account extends EIP6963 {
     async connect(getProvider: Provider6963Props): Promise<void> {
         // Check and switch network if necessary
         {
-            const targetChainId = toBeHex(CHAIN_ID);
             const currentChainId = await getProvider.provider.request({
                 method: "eth_chainId"
             }) as string;
 
-            if (currentChainId !== targetChainId) {
+            if (currentChainId !== ChainConfig.chainId) {
                 try {
                     // Attempt to switch to the target chain
                     await getProvider.provider.request({
                         method: "wallet_switchEthereumChain",
-                        params: [{ chainId: targetChainId }]
+                        params: [{ chainId: ChainConfig.chainId }]
                     });
                 } catch (switchError: any) {
                     // If the chain is not added (e.g., error code 4902), add it
@@ -185,17 +184,7 @@ export class Account extends EIP6963 {
                         try {
                             await getProvider.provider.request({
                                 method: "wallet_addEthereumChain",
-                                params: [{
-                                    chainId: targetChainId,
-                                    chainName: "Somnia Testnet",
-                                    rpcUrls: ["https://dream-rpc.somnia.network/"],
-                                    nativeCurrency: {
-                                        name: "Somnia Testnet Token",
-                                        symbol: "STT",
-                                        decimals: 18
-                                    },
-                                    blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
-                                }]
+                                params: [ChainConfig]
                             });
                         } catch (addError) {
                             console.error(`Failed to add network: ${addError}`);
