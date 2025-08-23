@@ -16,13 +16,13 @@ export const Config = {
             teamAddress: "wss://team.as.surviv.fun",
             apiAddress: "https://api.surviv.fun",
         },
-        na: {
-            name: "North America",
-            mainAddress: "https://na.surviv.fun",
-            gameAddress: "wss://<ID>.na.surviv.fun",
-            teamAddress: "wss://team.na.surviv.fun",
-            apiAddress: "https://api.surviv.fun",
-        },
+        // na: {
+        //     name: "North America",
+        //     mainAddress: "https://na.surviv.fun",
+        //     gameAddress: "wss://<ID>.na.surviv.fun",
+        //     teamAddress: "wss://team.na.surviv.fun",
+        //     apiAddress: "https://api.surviv.fun",
+        // },
         eu: {
             name: "Europe",
             mainAddress: "https://eu.surviv.fun",
