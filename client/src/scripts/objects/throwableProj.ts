@@ -24,8 +24,6 @@ export class ThrowableProjectile extends GameObject.derive(ObjectCategory.Throwa
 
     private _waterAnim?: Tween<SuroiSprite>;
 
-    halloweenSkin = false;
-
     radius?: number;
     hitbox: CircleHitbox;
     hitSound?: GameSound;
@@ -51,9 +49,7 @@ export class ThrowableProjectile extends GameObject.derive(ObjectCategory.Throwa
             this.radius = this._definition.hitboxRadius;
             this.c4 = true;
 
-            this.halloweenSkin = data.full.halloweenSkin;
-
-            this.image.setFrame(`${def.animation.liveImage}${this.halloweenSkin && !def.noSkin ? "_halloween" : ""}`);
+            this.image.setFrame(`${def.animation.liveImage}`);
 
             const throwerTeamID = data.throwerTeamID;
             const tintIndex = data.full.tintIndex;
@@ -66,11 +62,6 @@ export class ThrowableProjectile extends GameObject.derive(ObjectCategory.Throwa
 
         if (data.activated && this._definition?.animation.activatedImage) {
             let frame = this._definition.animation.activatedImage;
-
-            if (this.halloweenSkin) {
-                frame += "_halloween";
-            }
-
             this.image.setFrame(frame);
         }
 
@@ -145,7 +136,7 @@ export class ThrowableProjectile extends GameObject.derive(ObjectCategory.Throwa
 
             this.game.particleManager.spawnParticles(4, () => {
                 return {
-                    frames: this.halloweenSkin ? "plumpkin_particle" : "metal_particle",
+                    frames: "metal_particle",
                     position,
                     layer: this.layer,
                     zIndex: Numeric.max(ZIndexes.Players + 1, 4),

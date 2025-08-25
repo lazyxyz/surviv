@@ -26,24 +26,22 @@ export interface ModeDefinition {
     readonly modeLogoImage?: string | { solo: string, squads: string }
 }
 
-export type Mode = "normal" | "fall" | "halloween" | "winter";
+export type Mode = "normal" | "fall" | "winter";
 
 export const ModeToNumber: Record<Mode, number> = {
     normal: 0,
     fall: 1,
-    halloween: 2,
-    winter: 3,
+    winter: 2,
 };
 
 export const NumberToMode: Record<number, Mode> = {
     0: "normal",
     1: "fall",
-    2: "halloween",
-    3: "winter",
+    2: "winter",
 };
 
 export function getRandomMode(): Mode {
-    const modes: Mode[] = ["normal", "fall", "halloween", "winter"];
+    const modes: Mode[] = ["normal", "fall", "winter"];
     return modes[Math.floor(Math.random() * modes.length)];
 }
 
@@ -87,26 +85,6 @@ export const Modes: Record<Mode, ModeDefinition> = {
             solo: "./img/misc/user.svg",
             squads: "./img/misc/user-group.svg"
         },
-    },
-    halloween: {
-        idString: "halloween",
-        colors: {
-            grass: "hsl(65, 100%, 12%)",
-            water: "hsl(4, 100%, 14%)",
-            border: "hsl(4, 90%, 12%)",
-            beach: "hsl(33, 77%, 21%)",
-            riverBank: "hsl(33, 50%, 25%)",
-            trail: "hsl(35, 50%, 20%)",
-            gas: "hsla(17, 100%, 50%, 0.55)",
-            void: "hsl(25, 80%, 6%)"
-        },
-        inheritTexturesFrom: "fall",
-        defaultScope: "2x_scope",
-        specialMenuMusic: true,
-        darkShaders: true,
-        reskin: "fall",
-        specialPlayButtons: true,
-        modeLogoImage: "./img/game/halloween/obstacles/jack_o_lantern.svg"
     },
     winter: {
         idString: "winter",
