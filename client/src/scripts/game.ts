@@ -220,6 +220,7 @@ export class Game {
     }
 
     initPixi = async (gameMode: Mode): Promise<void> => {
+        console.log("gameMode: ", gameMode);
         const renderMode = GAME_CONSOLE.getBuiltInCVar("cv_renderer");
         const renderRes = GAME_CONSOLE.getBuiltInCVar("cv_renderer_res");
         const pixi = this.pixi;

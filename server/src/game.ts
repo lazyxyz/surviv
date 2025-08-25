@@ -247,7 +247,8 @@ export class Game implements GameData {
         this.port = port;
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
-        this.gameMode = this.getRandomMode();
+        this.gameMode = "winter";
+        // this.gameMode = this.getRandomMode();
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
         this.updateGameData({
             aliveCount: 0,

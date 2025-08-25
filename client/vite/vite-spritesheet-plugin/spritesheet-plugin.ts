@@ -208,7 +208,7 @@ export function spritesheet(): Plugin[] {
                     }, 500);
                 }
 
-                watcher = watch(getImageDirs("normal").map(pattern => resolve(pattern, defaultGlob)), {
+                watcher = watch(getImageDirs("fall").map(pattern => resolve(pattern, defaultGlob)), {
                     cwd: config.root,
                     ignoreInitial: true
                 })
