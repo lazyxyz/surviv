@@ -911,16 +911,6 @@ function setupInventorySlots(game: Game): void {
         });
     }
 
-    slotListener($<HTMLDivElement>("#c4-detonate-btn"), button => {
-        const isPrimary = button === 0;
-
-        if (isPrimary) {
-            inputManager.addAction({
-                type: InputActions.ExplodeC4
-            });
-        }
-    });
-
     for (
         const [ele, type] of [
             [$<HTMLDivElement>("#helmet-slot"), "helmet"],

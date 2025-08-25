@@ -73,7 +73,7 @@ export class MeleeItem extends InventoryItem<MeleeDefinition> {
                         .filter(
                             object => !object.dead
                                 && object !== owner
-                                && (object.damageable || (object.isThrowableProjectile && object.definition.c4))
+                                && object.damageable
                                 && (!object.isObstacle || (!object.definition.isStair))
                                 && object.hitbox?.collidesWith(hitbox)
                                 && adjacentOrEqualLayer(object.layer, this.owner.layer)
