@@ -53,6 +53,7 @@ import { type ThrowableProjectile } from "./throwableProj";
 import { weaponPresentType } from "@common/typings";
 import { saveGameResult } from "../api/api";
 import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
+import { Gamer } from "./gamer";
 
 export interface ActorContainer {
     readonly teamID?: string

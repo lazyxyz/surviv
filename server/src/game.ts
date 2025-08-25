@@ -1436,7 +1436,7 @@ export class Game implements GameData {
                     })
 
                     const badge = await verifyBadges(data.address, data.badge);
-                    
+
                     const stream = new PacketStream(new ArrayBuffer(128));
                     stream.serializeServerPacket(
                         ReadyPacket.create({

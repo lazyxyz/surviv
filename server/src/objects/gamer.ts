@@ -230,6 +230,25 @@ export class Gamer extends Player {
                 this.sendRewardsPacket(rank);
             }
         }
+
+        // Send game end for spectators
+        if (this.spectators.size) {
+            const gameOverPacket = {
+                won: rank == 1,
+                playerID: this.id,
+                kills: this.kills,
+                damageDone: this.damageDone,
+                damageTaken: this.damageTaken,
+                timeAlive: (this.game.now - this.joinTime) / 1000,
+                rank,
+            };
+
+            for (const spectator of this.spectators) {
+                if (spectator instanceof Gamer && spectator.teamID != this.teamID) {
+                    spectator.spectatorSendGameOverPacket(gameOverPacket)
+                };
+            }
+        }
     }
 
     isGameOverSend = false; // Prevent resent
@@ -247,6 +266,11 @@ export class Gamer extends Player {
             rank,
         } as unknown as GameOverData);
 
+        this.sendPacket(gameOverPacket);
+    }
+
+    spectatorSendGameOverPacket(data: any): void {
+        const gameOverPacket = GameOverPacket.create(data as unknown as GameOverData);
         this.sendPacket(gameOverPacket);
     }
 
