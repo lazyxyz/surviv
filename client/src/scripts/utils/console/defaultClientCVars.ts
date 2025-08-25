@@ -170,7 +170,7 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
     cv_rules_acknowledged: false,
     cv_hide_rules_button: false,
     cv_leave_warning: true,
-    cv_ui_scale: 1,
+    cv_ui_scale: 0.9,
     cv_draw_hud: true,
 
     cv_map_expanded: {
