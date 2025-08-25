@@ -952,9 +952,6 @@ export class UIManager {
                 const oldSrc = itemImage.attr("src");
 
                 let frame = definition.idString;
-                if (this.perks.hasItem(PerkIds.PlumpkinBomb) && definition.itemType === ItemType.Throwable && !definition.noSkin) {
-                    frame += "_halloween";
-                }
 
                 const location = definition.itemType === ItemType.Melee && definition.reskins?.includes(Modes[this.game.gameMode].idString) ? Modes[this.game.gameMode].idString : "shared";
                 const newSrc = `./img/game/${location}/weapons/${frame}.svg`;
@@ -1022,7 +1019,7 @@ export class UIManager {
         const container = this._perkSlots[index] ??= $<HTMLDivElement>(`#perk-slot-${index}`);
         container.attr("data-idString", perkDef.idString);
         container.children(".item-tooltip").html(`<strong>${perkDef.name}</strong><br>${perkDef.description}`);
-        container.children(".item-image").attr("src", `./img/game/${perkDef.category === PerkCategories.Halloween ? "halloween" : "fall"}/perks/${perkDef.idString}.svg`);
+        container.children(".item-image").attr("src", `./img/game/shared/perks/${perkDef.idString}.svg`);
         container.css("visibility", this.perks.hasItem(perkDef.idString) ? "visible" : "hidden");
 
         container.css("outline", !perkDef.noDrop ? "" : "none");
