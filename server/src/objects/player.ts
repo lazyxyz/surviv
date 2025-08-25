@@ -51,8 +51,6 @@ import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
 import { type ThrowableProjectile } from "./throwableProj";
 import { weaponPresentType } from "@common/typings";
-import { saveGameResult } from "../api/api";
-import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -2125,7 +2123,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                             (isLoot || (type === InputActions.Interact && isInteractable))
                             && object.hitbox?.collidesWith(detectionHitbox)
                             && adjacentOrEqualLayer(this.layer, object.layer)
-                            && !(isLoot && [ItemType.Throwable, ItemType.Gun].includes(object.definition.itemType))
                         ) {
                             const dist = Geometry.distanceSquared(object.position, this.position);
                             if (isInteractable) {
