@@ -935,10 +935,10 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         let toRegen = this._modifiers.hpRegen;
         if (this._adrenaline > 0) {
             // Drain adrenaline
-            this.adrenaline -= 0.0005 * this._modifiers.adrenDrain * dt;
+            this.adrenaline -= 0.00045 * this._modifiers.adrenDrain * dt;
 
             // Regenerate health
-            toRegen += (this.adrenaline / 80);
+            toRegen += (this.adrenaline / 70);
         }
 
         this.health += dt / 900 * toRegen;

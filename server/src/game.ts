@@ -1452,7 +1452,6 @@ export class Game implements GameData {
                         })
                     );
                     socket.send(stream.getBuffer(), true, false);
-                    // data.player.sendGameOverPacket(false); // uncomment to test game over screen
                 } catch (err: any) {
                     console.log("Open websocket failed: ", err);
                     disconnect(socket, "Unknown error. Please contact Surviv team.");
