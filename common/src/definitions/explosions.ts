@@ -31,7 +31,7 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
     () => [
         {
             name: "Barrel",
-            damage: 130,
+            damage: 90,
             obstacleMultiplier: 1,
             radius: {
                 min: 8,
@@ -58,7 +58,7 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
         },
         {
             name: "Stove",
-            damage: 130,
+            damage: 90,
             obstacleMultiplier: 2,
             radius: {
                 min: 8,
@@ -85,7 +85,7 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
         },
         {
             name: "Fireplace",
-            damage: 180,
+            damage: 130,
             obstacleMultiplier: 2,
             radius: {
                 min: 10,
@@ -112,7 +112,7 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
         },
         {
             name: "Control Panel",
-            damage: 130,
+            damage: 90,
             obstacleMultiplier: 1.5,
             radius: {
                 min: 8,
@@ -139,7 +139,7 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
         },
         {
             name: "Super Barrel",
-            damage: 160,
+            damage: 100,
             obstacleMultiplier: 1,
             radius: {
                 min: 8,
@@ -166,7 +166,7 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
         },
         {
             name: "Small Refinery Barrel",
-            damage: 200,
+            damage: 130,
             obstacleMultiplier: 2,
             radius: {
                 min: 16,
@@ -193,7 +193,7 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
         },
         {
             name: "Large Refinery Barrel",
-            damage: 10000,
+            damage: 1000,
             obstacleMultiplier: 3,
             radius: {
                 min: 48,
@@ -221,7 +221,7 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
         {
             idString: "propane_tank_explosion",
             name: "Propane Tank",
-            damage: 80,
+            damage: 50,
             obstacleMultiplier: 1,
             radius: {
                 min: 5,
@@ -340,7 +340,7 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
         },
         {
             name: "Confetti Grenade",
-            damage: 97,
+            damage: 60,
             obstacleMultiplier: 1,
             radius: {
                 min: 9,
@@ -383,7 +383,7 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
         },
         {
             name: "Frag Grenade",
-            damage: 120,
+            damage: 80,
             obstacleMultiplier: 1.15,
             radius: {
                 min: 10,
@@ -438,63 +438,6 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
             sound: "smoke_grenade",
             decal: "smoke_explosion_decal"
         },
-        {
-            name: "C4",
-            damage: 150,
-            obstacleMultiplier: 1.15,
-            radius: {
-                min: 10,
-                max: 25
-            },
-            cameraShake: {
-                duration: 200,
-                intensity: 30
-            },
-            animation: {
-                duration: 1000,
-                tint: 0x91140b,
-                scale: 1.5
-            },
-            shrapnelCount: 0,
-            ballistics: {
-                damage: 15,
-                obstacleMultiplier: 1,
-                speed: 0.08,
-                range: 20,
-                rangeVariance: 1,
-                shrapnel: true
-            },
-            sound: "frag_grenade",
-            decal: "frag_explosion_decal"
-        },
-        {
-            name: "Pumpkin",
-            damage: 100,
-            obstacleMultiplier: 1,
-            radius: {
-                min: 8,
-                max: 25
-            },
-            cameraShake: {
-                duration: 250,
-                intensity: 50
-            },
-            animation: {
-                duration: 1000,
-                tint: 0x91140b,
-                scale: 1.5
-            },
-            sound: "pumpkin_bomb",
-            shrapnelCount: 10,
-            ballistics: {
-                damage: 2,
-                obstacleMultiplier: 1,
-                speed: 0.08,
-                range: 20,
-                rangeVariance: 1,
-                shrapnel: true
-            }
-        }
     ].map(def => {
         return {
             idString: def.idString ?? `${def.name.toLowerCase().replace(/ /g, "_")}_explosion`,
