@@ -22,7 +22,6 @@ export type ThrowableDefinition = InventoryItemDefinition & {
      * Whether cooking the grenade will run down the fuse
      */
     readonly cookable: boolean
-    readonly c4: boolean
     readonly health?: number
     readonly noSkin?: boolean
     readonly cookSpeedMultiplier: number

@@ -73,8 +73,6 @@ export class UIManager {
         pos: $<HTMLSpanElement>("#coordinates-hud")
     });
 
-    public hasC4s = false;
-
     private static _instantiated = false;
     constructor(readonly game: Game) {
         if (UIManager._instantiated) {
@@ -277,7 +275,6 @@ export class UIManager {
         createTeamPlayers: $<HTMLDivElement>("#create-team-players"),
         closeCreateTeam: $<HTMLButtonElement>("#close-create-team"),
 
-        c4Button: $<HTMLButtonElement>("#c4-detonate-btn"),
         detonateKey: $<HTMLDivElement>("#detonate-key"),
 
         inventoryMsg: $<HTMLSpanElement>("#inventory-message")
@@ -765,30 +762,6 @@ export class UIManager {
             this.updateWeapons();
         }
 
-        if (activeC4s !== undefined) {
-            this.ui.c4Button.toggle(activeC4s);
-            this.hasC4s = activeC4s;
-        }
-
-        /* if (perks) {
-            const oldPerks = this.perks.asList();
-            this.perks.overwrite(perks);
-            const newPerks = this.perks.asList();
-
-            const length = Math.max(oldPerks.length, newPerks.length);
-
-            if (length === 0) {
-                this.resetPerkSlots();
-            }
-
-            for (let i = 0; i < length; i++) {
-                const perk = newPerks[i];
-
-                if (!oldPerks[i] && perk) {
-                    this.updatePerkSlot(perk, i);
-                }
-            }
-        } */
         if (perks) {
             const old = this.perks.asList();
             const oldLength = old.length;

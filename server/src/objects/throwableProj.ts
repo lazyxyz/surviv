@@ -94,10 +94,6 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
         for (const object of this.game.grid.intersectsHitbox(this.hitbox)) {
             this.handleCollision(object);
         }
-        if (this.definition.c4) {
-            this.source.owner.c4s.push(this);
-            this.source.owner.dirty.activeC4s = true;
-        }
         if (this.definition.health) this.health = this.definition.health;
     }
 
@@ -144,13 +140,6 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
     }
 
     update(): void {
-        if (this.definition.c4) {
-            this._airborne = false;
-            this.game.grid.updateObject(this);
-            this.setPartialDirty();
-            return;
-        }
-
         const halfDt = 0.5 * this.game.dt;
 
         // Create a copy of the original hitbox position.
@@ -517,12 +506,6 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
         if (!this.health) return;
 
         this.health = this.health - amount;
-        if (this.health <= 0) {
-            // use a Set instead
-            this.source.owner.c4s.splice(this.source.owner.c4s.indexOf(this), 1);
-            this.game.removeProjectile(this);
-            this.source.owner.dirty.activeC4s = true;
-        }
     }
 
     get data(): FullData<ObjectCategory.ThrowableProjectile> {

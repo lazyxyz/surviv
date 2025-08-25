@@ -73,7 +73,7 @@ export class MeleeItem extends InventoryItem<MeleeDefinition> {
                         .filter(
                             object => !object.dead
                                 && object !== owner
-                                && (object.damageable || (object.isThrowableProjectile && object.definition.c4))
+                                && (object.damageable)
                                 && (!object.isObstacle || (!object.definition.isStair))
                                 && object.hitbox?.collidesWith(hitbox)
                                 && adjacentOrEqualLayer(object.layer, this.owner.layer)
@@ -99,7 +99,6 @@ export class MeleeItem extends InventoryItem<MeleeDefinition> {
                     let multiplier = 1;
 
                     multiplier *= this.owner.mapPerkOrDefault(PerkIds.Berserker, ({ damageMod }) => damageMod, 1);
-                    multiplier *= this.owner.mapPerkOrDefault(PerkIds.Lycanthropy, ({ damageMod }) => damageMod, 1);
 
                     if (closestObject.isObstacle) {
                         multiplier *= definition.piercingMultiplier !== undefined && closestObject.definition.impenetrable
