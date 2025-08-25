@@ -188,9 +188,7 @@ export class Game {
         const url = (() => {
             // List of available music files
             const musicFiles = [
-                "menu_music1.mp3",
-                "menu_music2.mp3",
-                "menu_music3.mp3"
+                "menu_music1.mp3"
             ];
             const randomFile = musicFiles[Math.floor(Math.random() * musicFiles.length)];
             return `./audio/music/${randomFile}`;

@@ -133,6 +133,7 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
                     ["Dino", 0xb69837],
                     ["Sheep", 0xffffff],
                     ["Wolf", 0x917c6f],
+                    ["Werewolf", 0x917c6f],
                     ["Hippo", 0x963bb6],
                     ["Rhino", 0x74849d],
                     ["Bee", 0xffcd01],
