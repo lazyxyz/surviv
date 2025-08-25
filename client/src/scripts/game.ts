@@ -1254,7 +1254,7 @@ export class Game {
             // funny detonate button stuff
             const detonateKey = this.uiManager.ui.detonateKey;
             if (!this.inputManager.isMobile) {
-                const boomBind: string | undefined = this.inputManager.binds.getInputsBoundToAction("explode_c4")[0];
+                const boomBind: string | undefined = undefined;
 
                 if (funnyDetonateButtonCache.bind !== boomBind) {
                     funnyDetonateButtonCache.bind = bind;

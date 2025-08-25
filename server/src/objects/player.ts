@@ -395,8 +395,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     private readonly _mapPings: Game["mapPings"] = [];
 
-    c4s: ThrowableProjectile[] = [];
-
     readonly perks = new ServerPerkManager(this, Perks.defaults);
     perkUpdateMap?: Map<UpdatablePerkDefinition, number>; // key = perk, value = last updated
 
@@ -1235,11 +1233,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                     : {}
             ),
             ...(
-                player.dirty.activeC4s || forceInclude
-                    ? { activeC4s: this.c4s.length > 0 }
-                    : {}
-            ),
-            ...(
                 player.dirty.perks || forceInclude
                     ? { perks: this.perks }
                     : {}
@@ -1916,11 +1909,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         // Create death marker
         this.game.grid.addObject(new DeathMarker(this, layer));
 
-        // remove all c4s
-        for (const c4 of this.c4s) {
-            c4.damage({ amount: Infinity });
-        }
-
         // Remove player from kill leader
         if (this === this.game.killLeader) {
             this.game.killLeaderDead(sourceIsPlayer ? source : undefined);
@@ -2175,13 +2163,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                     break;
                 case InputActions.MapPing:
                     this.sendMapPing(action.ping, action.position);
-                    break;
-                case InputActions.ExplodeC4:
-                    for (const c4 of this.c4s) {
-                        c4.detonate(750);
-                    }
-                    this.c4s.length = 0;
-                    this.dirty.activeC4s = true;
                     break;
             }
         }

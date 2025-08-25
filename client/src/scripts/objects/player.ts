@@ -878,12 +878,10 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     Vec.rotate(toPixiCoords(def.animation.cook.rightFist), this.rotation)
                 );
 
-                const range = def.c4
-                    ? 0
-                    : Numeric.min(
-                        this.game.inputManager.distanceToMouse * 0.9, // <- this constant is defined server-side
-                        def.maxThrowDistance * PerkData[PerkIds.DemoExpert].rangeMod
-                    );
+                const range = Numeric.min(
+                    this.game.inputManager.distanceToMouse * 0.9, // <- this constant is defined server-side
+                    def.maxThrowDistance * PerkData[PerkIds.DemoExpert].rangeMod
+                );
 
                 const cookMod = def.cookable ? Date.now() - this.animationChangeTime : 0;
                 const drag = 0.001; // defined server-side
@@ -1517,7 +1515,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                                         (
                                             object.damageable
                                             && (object.isObstacle || object.isPlayer || object.isBuilding)
-                                        ) || (object.isThrowableProjectile && object.definition.c4)
+                                        )
                                     )
                                     && object.hitbox?.collidesWith(hitbox)
                                     && adjacentOrEqualLayer(object.layer, this.layer)
@@ -1756,7 +1754,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     return;
                 }
 
-                this.playSound(this.activeItem.c4 ? "c4_pin" : "throwable_pin");
+                this.playSound("throwable_pin");
 
                 const def = this.activeItem;
                 const projImage = this.images.weapon;
