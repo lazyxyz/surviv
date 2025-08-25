@@ -25,8 +25,6 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
 
     private health?: number;
 
-    readonly halloweenSkin: boolean;
-
     declare readonly hitbox: CircleHitbox;
 
     private _velocity = Vec.create(0, 0);
@@ -88,8 +86,6 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
         this.layer = layer;
         this._spawnTime = this.game.now;
         this.hitbox = new CircleHitbox(radius ?? 1, position);
-
-        this.halloweenSkin = this.source.owner.perks.hasItem(PerkIds.PlumpkinBomb);
 
         // Colored Teammate C4s
         this.tintIndex = this.source.owner.colorIndex;
@@ -539,7 +535,7 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
             throwerTeamID: this.throwerTeamID,
             full: {
                 definition: this.definition,
-                halloweenSkin: this.halloweenSkin,
+                halloweenSkin: false,
                 tintIndex: this.tintIndex
             }
         };

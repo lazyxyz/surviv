@@ -49,7 +49,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
     private activeDisguise?: ObstacleDefinition;
     private readonly disguiseContainer: Container;
-    halloweenThrowableSkin = false;
 
     private _oldItem = this.activeItem;
 
@@ -534,14 +533,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             this.container.visible = !dead;
             this.disguiseContainer.visible = this.container.visible;
 
-            const hadSkin = this.halloweenThrowableSkin;
-            if (
-                hadSkin !== (this.halloweenThrowableSkin = halloweenThrowableSkin)
-                && this.activeItem.itemType === ItemType.Throwable
-                && !this.activeItem.noSkin
-            ) {
-                this.images.weapon.setFrame(`${this.activeItem.idString}${this.halloweenThrowableSkin ? "_halloween" : ""}`);
-            }
+            this.images.weapon.setFrame(`${this.activeItem.idString}`);
 
             // Blood particles on death (cooler graphics only)
             if (
@@ -1097,7 +1089,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             const { image: { position, angle } } = reference;
 
             if (reference.itemType === ItemType.Throwable && !reference.noSkin) {
-                this.images.weapon.setFrame(`${reference.idString}${this.halloweenThrowableSkin ? "_halloween" : ""}`);
+                this.images.weapon.setFrame(`${reference.idString}`);
             }
 
             this.images.weapon.setPos(position.x, position.y + offset);
@@ -1128,10 +1120,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 ? "_world"
                 : ""
                 }`;
-
-            if (weaponDef.itemType === ItemType.Throwable && this.halloweenThrowableSkin && !weaponDef.noSkin) {
-                frame += "_halloween";
-            }
 
             const { angle, position: { x: pX, y: pY } } = image;
 
@@ -1778,10 +1766,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
                 let frame = def.animation.cook.cookingImage ?? def.animation.liveImage;
 
-                if (this.halloweenThrowableSkin && !def.noSkin) {
-                    frame += "_halloween";
-                }
-
                 this.updateFistsPosition(false);
                 projImage.setFrame(frame);
 
@@ -1887,7 +1871,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 const projImage = this.images.weapon;
                 projImage.visible = false;
 
-                projImage.setFrame(`${def.idString}${this.halloweenThrowableSkin && !def.noSkin ? "_halloween" : ""}`);
+                projImage.setFrame(`${def.idString}`);
 
                 if (!def.cookable && def.animation.leverImage !== undefined) {
                     this.game.particleManager.spawnParticle({
@@ -1923,7 +1907,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     onComplete: () => {
                         this.anims.leftFist = undefined;
                         projImage.setVisible(true);
-                        projImage.setFrame(`${def.idString}${this.halloweenThrowableSkin && !def.noSkin ? "_halloween" : ""}`);
+                        projImage.setFrame(`${def.idString}`);
                         this.updateFistsPosition(true);
                     }
                 });
