@@ -94,8 +94,6 @@ export const CVarCasters = Object.freeze({
     mb_haptics: Casters.toBoolean,
     mb_high_res_textures: Casters.toBoolean,
 
-    dv_password: Casters.toString,
-    dv_role: Casters.toString,
     dv_name_color: Casters.toString,
     dv_lobby_clearing: Casters.toBoolean,
     dv_weapon_preset: Casters.toString
@@ -223,8 +221,6 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
     mb_haptics: true,
     mb_high_res_textures: false,
 
-    dv_password: "",
-    dv_role: "",
     dv_name_color: "",
     dv_lobby_clearing: false,
     dv_weapon_preset: ""

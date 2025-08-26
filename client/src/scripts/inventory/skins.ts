@@ -35,7 +35,6 @@ function selectSkin(idString: ReferenceTo<SkinDefinition>): void {
 export async function showSkins(account: Account) {
     if (!account.address) return;
 
-    const role = GAME_CONSOLE.getBuiltInCVar("dv_role");
     const skinList = $<HTMLDivElement>("#skins-list");
     const currentSkin = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
 
@@ -46,9 +45,7 @@ export async function showSkins(account: Account) {
 
     /* */
     // Skins list
-    const allSkins = Skins.definitions.filter(argument =>
-        !(argument.hideFromLoadout || !(argument.rolesRequired ?? [role]).includes(role))
-    );
+    const allSkins = Skins.definitions;
 
     // inactive skins
     const inactiveSkins = allSkins

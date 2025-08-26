@@ -918,23 +918,6 @@ export class Game implements GameData {
         }
 
         Logger.log(`Game ${this.port} | "${player.name}" joined`);
-        // AccessLog to store usernames for this connection
-        if (Config.protection?.punishments) {
-            const username = player.name;
-            if (username) {
-                fetch(
-                    `${Config.protection.punishments.url}/accesslog/${player.ip || "none"}`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "api-key": Config.protection.punishments.password || "none"
-                        },
-                        body: `{ "username": "${username}" }`
-                    }
-                ).catch(console.error);
-            }
-        }
         this.pluginManager.emit("player_did_join", { player, joinPacket: packet });
     }
 
