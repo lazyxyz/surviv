@@ -13,7 +13,7 @@ import { Geometry, Numeric } from "@common/utils/math";
 import { pickRandomInArray } from "@common/utils/random";
 import { Config } from "../config";
 import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
-import { saveGameResult } from "../api/api";
+import { savePlayerGame, savePlayerRank } from "../api/api";
 import { GameOverData, GameOverPacket } from "@common/packets/gameOverPacket";
 import { DamageParams } from "./gameObject";
 
@@ -180,30 +180,31 @@ export class Gamer extends Player {
         toSpectate.spectators.add(this);
     }
 
+    private calculateRank(won: boolean): number | undefined {
+        if (this.game.teamMode && this.team) {
+            if (won) return 1;
+            const teammates = this.team.players;
+            const teamIsDead = teammates.every(player => !this.game.livingPlayers.has(player));
+            if (teamIsDead) {
+                const uniqueTeams = new Set(
+                    [...this.game.livingPlayers]
+                        .map(p => p.teamID)
+                        .filter(id => id !== undefined)
+                ).size;
+                return uniqueTeams + 1;
+            }
+            return undefined;
+        }
+        return won ? 1 : this.game.aliveCount + 1;
+    }
+
+
     handleGameOver(won = false): void {
         if (!this.address || this.gameOver) return; // Skip bot and recall
         this.gameOver = true;
 
         // Calculate rank
-        let rank: number | undefined;
-        if (this.game.teamMode && this.team) {
-            if (won) {
-                rank = 1; // Winning team gets rank 1
-            } else {
-                // Check if all teammates are dead
-                const teammates = this.team.players;
-                const teamIsDead = teammates.every(player => !this.game.livingPlayers.has(player));
-                if (teamIsDead) {
-                    // Count unique teams still alive
-                    const uniqueTeams = new Set(
-                        [...this.game.livingPlayers].map(p => p.teamID).filter(id => id !== undefined)
-                    ).size;
-                    rank = uniqueTeams + 1; // Rank is number of teams still alive + 1
-                }
-            }
-        } else {
-            rank = won ? 1 : this.game.aliveCount + 1; // Solo mode logic
-        }
+        const rank = this.calculateRank(won);
 
         // If no rank, exit early
         if (!rank) {
@@ -224,10 +225,10 @@ export class Gamer extends Player {
         if (rank < Config.earnConfig.rank) {
             if (this.game.teamMode && this.team) {
                 for (const teammate of this.team.players) {
-                    if (teammate instanceof Gamer) teammate.sendRewardsPacket(rank);
+                    if (teammate instanceof Gamer) teammate.handleRewards(rank);
                 }
             } else {
-                this.sendRewardsPacket(rank);
+                this.handleRewards(rank);
             }
         }
 
@@ -267,6 +268,7 @@ export class Gamer extends Player {
         } as unknown as GameOverData);
 
         this.sendPacket(gameOverPacket);
+        this.saveGame(rank);
     }
 
     spectatorSendGameOverPacket(data: any): void {
@@ -275,7 +277,7 @@ export class Gamer extends Player {
     }
 
     isRewardsSend = false; // Prevent resent
-    async sendRewardsPacket(rank: number): Promise<void> {
+    async handleRewards(rank: number): Promise<void> {
         if (this.isRewardsSend) {
             return;
         }
@@ -295,10 +297,9 @@ export class Gamer extends Player {
         }
 
         try {
-            const data = await saveGameResult(
+            const data = await savePlayerRank(
                 this.address,
                 rank,
-                this.kills,
                 this.game.teamMode,
                 this.game.gameId
             );
@@ -307,6 +308,16 @@ export class Gamer extends Player {
         } catch (err) {
             console.log("Error claiming rewards:", err);
             processRewardsPacket(false, 0);
+        }
+    }
+
+    async saveGame(rank: number): Promise<void> {
+        try {
+            const timeAlive = (this.game.now - this.joinTime) / 1000;
+            await savePlayerGame(this.address, rank, this.game.teamMode, this.game.gameId,
+                this.kills, timeAlive, this.damageDone, this.damageTaken, 3000);
+        } catch (err) {
+            console.log("Error save game:", err);
         }
     }
 

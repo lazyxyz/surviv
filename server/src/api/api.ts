@@ -33,8 +33,9 @@ export async function validateJWT(token: string, timeout: number = 5000): Promis
     }
 }
 
-export async function saveGameResult(player: string, rank: number, kills: number, teamMode: boolean, gameId: string, timeout: number = 10000): Promise<any> {
-    const url = `${Config.earnConfig?.api}/admin/saveGameResult`;
+export async function savePlayerRank(player: string, rank: number, teamMode: boolean,
+    gameId: string, timeout: number = 10000): Promise<any> {
+    const url = `${Config.earnConfig?.api}/admin/savePlayerRank`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
     try {
@@ -44,7 +45,37 @@ export async function saveGameResult(player: string, rank: number, kills: number
                 'Content-Type': 'application/json',
                 'x-api-key': process.env.X_API_KEY || '',
             },
-            body: JSON.stringify({ player, rank, kills, teamMode, gameId }),
+            body: JSON.stringify({ player, rank, teamMode, gameId }),
+            signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        const data = await res.json();
+        return data;
+    } catch (error: any) {
+        clearTimeout(timeoutId);
+        if (error.name === 'AbortError') {
+            throw new Error('Request timed out');
+        }
+        throw new Error(error);
+    }
+}
+
+export async function savePlayerGame(player: string, rank: number, teamMode: boolean,
+    gameId: string, kills: number, timeAlive: number, damageDone: number,
+    damageTaken: number, timeout: number = 10000): Promise<any> {
+    const url = `${Config.earnConfig?.api}/admin/savePlayerGame`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': process.env.X_API_KEY || '',
+            },
+            body: JSON.stringify({ player, rank, teamMode, gameId, kills, timeAlive, damageDone, damageTaken }),
             signal: controller.signal,
         });
 
