@@ -101,7 +101,8 @@ class GrenadeHandler {
     private _detonate(): void {
         const { explosion } = this.definition.detonation;
 
-        const particles = this.definition.detonation.spookyParticles ? this.definition.detonation.spookyParticles : this.definition.detonation.particles;
+        // const particles = this.definition.detonation.spookyParticles ? this.definition.detonation.spookyParticles : this.definition.detonation.particles;
+        const particles = this.definition.detonation.particles;
 
         const referencePosition = Vec.clone(this._projectile?.position ?? this.parent.owner.position);
         const game = this.game;
