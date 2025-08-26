@@ -4,7 +4,6 @@ import { Vector } from "@common/utils/vector";
 import { Game } from "../game";
 import { Team } from "../team";
 import { Player, ActorContainer } from "./player";
-
 import { PacketStream } from "@common/packets/packetStream";
 import { SuroiByteStream } from "@common/utils/suroiByteStream";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
@@ -25,7 +24,6 @@ export interface PlayerContainer {
     readonly address?: string
     readonly token?: string
     readonly ip: string | undefined
-
     readonly nameColor?: number
     readonly lobbyClearing: boolean
     readonly weaponPreset: string
@@ -38,7 +36,6 @@ export interface PlayerContainer {
 
 export class Gamer extends Player {
     private readonly _packetStream = new PacketStream(new SuroiByteStream(new ArrayBuffer(1 << 16)));
-
     readonly socket: WebSocket<PlayerContainer>;
     gameOver: boolean = false;
 
@@ -53,7 +50,6 @@ export class Gamer extends Player {
             weaponPreset: userData.weaponPreset,
         };
         super(game, actorData, position, layer, team);
-
         this.socket = socket;
     }
 
@@ -67,18 +63,14 @@ export class Gamer extends Player {
 
     secondUpdate(): void {
         super.secondUpdate();
-
         this._packetStream.stream.index = 0;
         for (const packet of this._packets) {
             this._packetStream.serializeServerPacket(packet);
         }
-
         for (const packet of this.game.packets) {
             this._packetStream.serializeServerPacket(packet);
         }
-
         this._packets.length = 0;
-
         this.sendData(this._packetStream.getBuffer());
     }
 
@@ -90,14 +82,11 @@ export class Gamer extends Player {
             })
         );
         this.sendData(stream.getBuffer());
-
         super.disconnect();
     }
 
     die(params: Omit<DamageParams, "amount">): void {
         super.die(params);
-
-        // Send game over to dead player
         if (!this.disconnected && !this.gameOver) {
             this.handleGameOver();
         }
@@ -110,12 +99,11 @@ export class Gamer extends Player {
         this.lastSpectateActionTime = game.now;
 
         let toSpectate: Player | undefined;
-
         const { spectatablePlayers } = game;
+
         switch (packet.spectateAction) {
             case SpectateActions.BeginSpectating: {
                 if (this.game.teamMode && this._team?.hasLivingPlayers()) {
-                    // Find closest teammate
                     toSpectate = this._team.getLivingPlayers()
                         .reduce((a, b) => Geometry.distanceSquared(a.position, this.position) < Geometry.distanceSquared(b.position, this.position) ? a : b);
                 } else if (this.killedBy !== undefined && !this.killedBy.dead) {
@@ -129,7 +117,6 @@ export class Gamer extends Player {
                 if (this.spectating !== undefined) {
                     let availablePlayers = spectatablePlayers;
                     if (this.game.teamMode && this._team?.hasLivingPlayers()) {
-                        // Filter to only living teammates who are spectatable
                         availablePlayers = this._team.players.filter(
                             player => this.game.livingPlayers.has(player) && spectatablePlayers.includes(player)
                         );
@@ -147,7 +134,6 @@ export class Gamer extends Player {
                 if (this.spectating !== undefined) {
                     let availablePlayers = spectatablePlayers;
                     if (this.game.teamMode && this._team?.hasLivingPlayers()) {
-                        // Filter to only living teammates who are spectatable
                         availablePlayers = this._team.players.filter(
                             player => this.game.livingPlayers.has(player) && spectatablePlayers.includes(player)
                         );
@@ -172,7 +158,6 @@ export class Gamer extends Player {
         }
 
         if (toSpectate === undefined) return;
-
         this.spectating?.spectators.delete(this);
         this.updateObjects = true;
         this.startedSpectating = true;
@@ -198,71 +183,68 @@ export class Gamer extends Player {
         return won ? 1 : this.game.aliveCount + 1;
     }
 
-
     handleGameOver(won = false): void {
-        if (!this.address || this.gameOver) return; // Skip bot and recall
+        if (!this.address || this.gameOver) return;
         this.gameOver = true;
 
-        // Calculate rank
         const rank = this.calculateRank(won);
-
-        // If no rank, exit early
         if (!rank) {
             this.spectate({ spectateAction: SpectateActions.BeginSpectating });
-            return
-        };
-
-        // Send game over packets
-        if (this.game.teamMode && this.team) {
-            for (const teammate of this.team.players) {
-                if (teammate instanceof Gamer) teammate.sendGameOverPacket(rank);
-            }
-        } else {
-            this.sendGameOverPacket(rank);
+            return;
         }
+
+        const gameOverData = {
+            won: rank === 1,
+            playerID: this.id,
+            kills: this.kills,
+            damageDone: this.damageDone,
+            damageTaken: this.damageTaken,
+            timeAlive: (this.game.now - this.joinTime) / 1000,
+            rank,
+        } as unknown as GameOverData;
+
+        // Notify players and spectators
+        this.notifyPlayers(gameOverData);
+        this.notifySpectators(gameOverData);
 
         // Handle rewards if rank qualifies
         if (rank < Config.earnConfig.rank) {
-            if (this.game.teamMode && this.team) {
-                for (const teammate of this.team.players) {
-                    if (teammate instanceof Gamer) teammate.handleRewards(rank);
-                }
-            } else {
-                this.handleRewards(rank);
-            }
+            this.handleRewards(rank);
         }
+    }
 
-        // Send game end for spectators
+    private notifyPlayers(gameOverData: GameOverData): void {
+        if (this.game.teamMode && this.team) {
+            for (const teammate of this.team.players) {
+                if (teammate instanceof Gamer) {
+                    teammate.sendGameOverPacket(gameOverData.rank);
+                }
+            }
+        } else {
+            this.sendGameOverPacket(gameOverData.rank);
+        }
+    }
+
+    private notifySpectators(gameOverData: GameOverData): void {
         if (this.spectators.size) {
-            const gameOverPacket = {
-                won: rank == 1,
-                playerID: this.id,
-                kills: this.kills,
-                damageDone: this.damageDone,
-                damageTaken: this.damageTaken,
-                timeAlive: (this.game.now - this.joinTime) / 1000,
-                rank,
-            };
-
             for (const spectator of this.spectators) {
-                if (spectator instanceof Gamer && spectator.teamID != this.teamID) {
-                    spectator.spectatorSendGameOverPacket(gameOverPacket)
-                };
+                if (spectator instanceof Gamer) {
+                    spectator.spectatorSendGameOverPacket(gameOverData);
+                }
             }
         }
     }
 
-    isGameOverSend = false; // Prevent resent
+    isGameOverSend = false;
     sendGameOverPacket(rank: number): void {
         if (this.isGameOverSend) return;
         this.isGameOverSend = true;
 
         const gameOverPacket = GameOverPacket.create({
-            won: rank == 1,
+            won: rank === 1,
             playerID: this.id,
             kills: this.kills,
             damageDone: this.damageDone,
-            damageTaken: this.damageTaken,
             timeAlive: (this.game.now - this.joinTime) / 1000,
             rank,
         } as unknown as GameOverData);
@@ -271,16 +253,14 @@ export class Gamer extends Player {
         this.saveGame(rank);
     }
 
-    spectatorSendGameOverPacket(data: any): void {
-        const gameOverPacket = GameOverPacket.create(data as unknown as GameOverData);
+    spectatorSendGameOverPacket(data: GameOverData): void {
+        const gameOverPacket = GameOverPacket.create(data);
         this.sendPacket(gameOverPacket);
     }
 
-    isRewardsSend = false; // Prevent resent
+    isRewardsSend = false;
     async handleRewards(rank: number): Promise<void> {
-        if (this.isRewardsSend) {
-            return;
-        }
+        if (this.isRewardsSend) return;
         this.isRewardsSend = true;
 
         const processRewardsPacket = (eligible: boolean, rewards: number) => {
@@ -303,7 +283,6 @@ export class Gamer extends Player {
                 this.game.teamMode,
                 this.game.gameId
             );
-            console.log("data: ", data);
             processRewardsPacket(data.success && data.rewards.success, data.rewards.amount || 0);
         } catch (err) {
             console.log("Error claiming rewards:", err);
@@ -314,11 +293,19 @@ export class Gamer extends Player {
     async saveGame(rank: number): Promise<void> {
         try {
             const timeAlive = (this.game.now - this.joinTime) / 1000;
-            await savePlayerGame(this.address, rank, this.game.teamMode, this.game.gameId,
-                this.kills, timeAlive, this.damageDone, this.damageTaken, 3000);
+            await savePlayerGame(
+                this.address,
+                rank,
+                this.game.teamMode,
+                this.game.gameId,
+                this.kills,
+                timeAlive,
+                this.damageDone,
+                this.damageTaken,
+                3000
+            );
         } catch (err) {
             console.log("Error save game:", err);
         }
     }
-
 }
