@@ -10,7 +10,8 @@ import {
     SurvivBadgesMapping,
     SurvivMapping,
     SurvivAssets,
-    SurvivAssetRanges
+    SurvivAssetRanges,
+    AssetTier
 } from "@common/mappings";
 
 import { abi as survivRewardsABI } from "@common/abis/ISurvivRewards.json";
@@ -296,14 +297,14 @@ export class Account extends EIP6963 {
 
 
     /**
-     * Retrieves balances for all SurvivAssets, mapping token IDs to asset names.
+     * Retrieves balances for all SurvivAssets, mapping token IDs to asset names and tiers.
      * @param returnAll - If true, includes assets with zero balances; if false, only includes assets with balance > 0 (default: false).
-     * @returns A promise resolving to a nested object mapping SurvivAssets to asset names and their balances.
+     * @returns A promise resolving to a nested object mapping SurvivAssets to Tiers to asset names and their balances.
      * @throws Error if the contract address is invalid, provider is unavailable, or SurvivAssetsMapping is invalid.
      */
     async getAssetBalances(
         returnAll: boolean = false
-    ): Promise<Record<SurvivAssets, Record<string, number>>> {
+    ): Promise<Record<SurvivAssets, Record<AssetTier, Record<string, number>>>> {
         if (!this.provider?.provider) {
             throw new Error('Provider not available');
         }
@@ -322,11 +323,45 @@ export class Account extends EIP6963 {
         const signer = await ethersProvider.getSigner();
         const contract = new ethers.Contract(assetsAddress, erc1155ABI, signer);
 
-        const result: Record<SurvivAssets, Record<string, number>> = {
-            [SurvivAssets.Skins]: {},
-            [SurvivAssets.Emotes]: {},
-            [SurvivAssets.Arms]: {},
-            [SurvivAssets.Guns]: {}
+        // Initialize result with nested structure: SurvivAssets -> Tier -> assetName -> balance
+        const result: Record<SurvivAssets, Record<AssetTier, Record<string, number>>> = {
+            [SurvivAssets.Skins]: {
+                [AssetTier.Silver]: {},
+                [AssetTier.Gold]: {},
+                [AssetTier.Divine]: {}
+            },
+            [SurvivAssets.Emotes]: {
+                [AssetTier.Silver]: {}, // Emotes may not use tiers, but included for consistency
+                [AssetTier.Gold]: {},
+                [AssetTier.Divine]: {}
+            },
+            [SurvivAssets.Arms]: {
+                [AssetTier.Silver]: {},
+                [AssetTier.Gold]: {},
+                [AssetTier.Divine]: {}
+            },
+            [SurvivAssets.Guns]: {
+                [AssetTier.Silver]: {}, // Guns may not have Silver, but included for consistency
+                [AssetTier.Gold]: {},
+                [AssetTier.Divine]: {}
+            }
+        };
+
+        // Mapping of mappingIndices to Tiers for Skins, Arms, and Guns
+        const tierMapping: Record<number, AssetTier> = {
+            // Skins
+            0: AssetTier.Silver, // SilverSkins
+            1: AssetTier.Gold,   // GoldSkins
+            2: AssetTier.Divine, // DivineSkins
+            // Emotes (no tier, default to Silver for simplicity)
+            3: AssetTier.Silver, // SurvivMemes
+            // Arms
+            4: AssetTier.Silver, // SilverArms
+            5: AssetTier.Gold,   // GoldArms
+            6: AssetTier.Divine, // DivineArms
+            // Guns
+            7: AssetTier.Gold,   // GoldGuns
+            8: AssetTier.Divine  // DivineGuns
         };
 
         // Iterate through all SurvivAssets enum values
@@ -336,14 +371,17 @@ export class Account extends EIP6963 {
             // Flatten the asset names and token IDs for the current category
             const assetNames: string[] = [];
             const tokenIds: number[] = [];
+            const tierIndices: AssetTier[] = [];
 
             for (const index of mappingIndices) {
                 const subArray = SurvivAssetsMapping.assets[index] || [];
                 const startId = index * 1000; // Derive startId from index
+                const tier = tierMapping[index] || AssetTier.Silver; // Default to Silver if not mapped
                 let currentTokenId = startId;
                 for (const name of subArray) {
                     assetNames.push(name);
                     tokenIds.push(currentTokenId++);
+                    tierIndices.push(tier);
                 }
             }
 
@@ -355,13 +393,14 @@ export class Account extends EIP6963 {
             const accounts = Array(tokenIds.length).fill(this.address);
             const balances = await contract.balanceOfBatch(accounts, tokenIds);
 
-            // Map token IDs to asset names with balances
+            // Map token IDs to asset names with balances, organized by tier
             for (let i = 0; i < tokenIds.length; i++) {
                 const balance = Number(balances[i]); // Convert BigNumber to number
                 if (returnAll || balance > 0) {
                     const assetName = assetNames[i];
+                    const tier = tierIndices[i];
                     if (assetName) {
-                        result[assetType][assetName] = balance;
+                        result[assetType][tier][assetName] = balance;
                     }
                 }
             }

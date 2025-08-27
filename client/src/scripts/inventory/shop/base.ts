@@ -2,6 +2,7 @@ import $ from "jquery";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 
 import {
+    AssetTier,
     SurvivAssetRanges,
     SurvivAssets,
     SurvivAssetsMapping,
@@ -176,6 +177,13 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
         SurvivAssets: SurvivAssetsMapping
     };
 
+    // Map tiers to background images
+    const tierBackgrounds: Record<AssetTier, string> = {
+        [AssetTier.Silver]: "./img/game/shared/patterns/silver.svg",
+        [AssetTier.Gold]: "./img/game/shared/patterns/gold.svg",
+        [AssetTier.Divine]: "./img/game/shared/patterns/divine.svg"
+    };
+
     const getImagePath = (address: string, tokenId: number, assetName: string): string => {
         if (address.toLowerCase() === SurvivAssetsMapping.address.toLowerCase()) {
             for (const [category, { mappingIndices }] of Object.entries(SurvivAssetRanges)) {
@@ -216,6 +224,35 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
         return false;
     };
 
+    const getTier = (tokenId: number): AssetTier => {
+        for (const [category, { mappingIndices }] of Object.entries(SurvivAssetRanges)) {
+            for (const index of mappingIndices) {
+                const startId = index * 1000;
+                const subArray = SurvivAssetsMapping.assets[index] || [];
+                if (tokenId >= startId && tokenId < startId + subArray.length) {
+                    // Map indices to tiers based on SurvivAssetRanges comments
+                    const tierMapping: Record<number, AssetTier> = {
+                        // Skins
+                        0: AssetTier.Silver, // SilverSkins
+                        1: AssetTier.Gold,   // GoldSkins
+                        2: AssetTier.Divine, // DivineSkins
+                        // Emotes (default to Silver)
+                        3: AssetTier.Silver, // SurvivMemes
+                        // Arms
+                        4: AssetTier.Silver, // SilverArms
+                        5: AssetTier.Gold,   // GoldArms
+                        6: AssetTier.Divine, // DivineArms
+                        // Guns
+                        7: AssetTier.Gold,   // GoldGuns
+                        8: AssetTier.Divine  // DivineGuns
+                    };
+                    return tierMapping[index] || AssetTier.Silver; // Default to Silver
+                }
+            }
+        }
+        return AssetTier.Silver; // Default fallback
+    };
+
     const alertDiv = document.createElement('div');
     alertDiv.className = 'minted-items-alert';
 
@@ -229,13 +266,11 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
             return item.values.map(([tokenId, value]) => {
                 let assetName: string = `unknown_${tokenId}`;
                 if (mapping === SurvivAssetsMapping) {
-                    let found = false;
                     for (const index of Object.values(SurvivAssetRanges).flatMap(r => r.mappingIndices)) {
                         const startId = index * 1000;
                         const subArray = mapping.assets[index] || [];
                         if (tokenId >= startId && tokenId < startId + subArray.length) {
                             assetName = subArray[tokenId - startId];
-                            found = true;
                             break;
                         }
                     }
@@ -243,8 +278,11 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
 
                 const imageUrl = getImagePath(item.address, tokenId, assetName);
                 const rotationClass = isSkinItem(item.address, tokenId) ? ' rotated' : '';
+                const tier = getTier(tokenId);
+                const backgroundImage = tierBackgrounds[tier];
+
                 return `
-            <div class="minted-item">
+            <div class="minted-item" style="background-image: url('${backgroundImage}')">
               <img src="${imageUrl}" alt="${assetName}" data-balance="${value}" class="minted-item-image${rotationClass}">
               <span class="balance">x${value}</span>
             </div>
@@ -277,6 +315,7 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
         }
     });
 }
+
 
 async function updateClaimButton(account: Account): Promise<void> {
     const claimButton = await renderClaimButton(account);
