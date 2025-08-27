@@ -56,6 +56,7 @@ import { validateJWT } from "./api/api";
 import { getIP, createServer } from "./utils/serverHelpers";
 import { verifyAllAssets } from "./api/balances";
 import { Armors } from "@common/definitions/armors";
+import { Badges } from "@common/definitions/badges";
 
 
 /*
@@ -1444,7 +1445,7 @@ export class Game implements GameData {
                             gameMode: ModeToNumber[game.gameMode],
                             emotes: assets.emotes,
                             name: data.name,
-                            badge: assets.badge,
+                            badge: Badges.fromStringSafe(data.badge),  // fix always use surviv card in Inventory
                             skin: assets.skin,
                             melee: assets.melee,
                             gun: assets.gun,
