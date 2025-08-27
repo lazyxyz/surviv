@@ -53,6 +53,6 @@ export const Emotes = ObjectDefinitions.create<EmoteDefinition>("Emotes", [
         "Somnia Speed",
         "Somnia Troll",
         "Rice Troll",
-        "Ak Shiba",
+        "ShibAK",
     ].map(name => emote([name, EmoteCategory.Memes]))
 ]);

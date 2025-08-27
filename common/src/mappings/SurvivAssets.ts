@@ -114,8 +114,6 @@ export const assetsMapping = {
       "zone",
       "radar",
       "warrior",
-      "vn_soldier",
-      "farmer"
     ],
     [
       "android",
@@ -149,7 +147,9 @@ export const assetsMapping = {
       "turle",
       "wojax",
       "zebra",
-      "zombie"
+      "zombie",
+      "viet_soldier",
+      "asian_farmer",
     ],
     [
       "abuse",
@@ -187,7 +187,7 @@ export const assetsMapping = {
       "thumbs_down",
       "thumbs_up",
       "rice_troll",
-      "ak_shiba"
+      "shibak"
     ],
     [
       "baseball_bat",
