@@ -514,11 +514,9 @@ export class Game implements GameData {
         }
         this.pluginManager.emit("game_end", this);
 
-        // End the game in 10 seconds
+        // Clear game in 3 seconds
         this.addTimeout(() => {
-            // Clear all collections
             this.livingPlayers.clear();
-            this.connectedPlayers.clear();
             this.connectingPlayers.clear();
             this.spectatablePlayers.length = 0;
             this.teams.clear();
@@ -536,12 +534,26 @@ export class Game implements GameData {
             this._timeouts.forEach(timeout => timeout.kill());
             this._timeouts.clear();
             this.grid.pool.clear();
+        }, 3000);
+
+        // Close the game in 10 seconds
+        this.addTimeout(() => {
+            for (const player of this.connectedPlayers) {
+                if (player instanceof Gamer) {
+                    try {
+                        player.socket.close();
+                    } catch (e) {
+                        console.log("error: ", e);
+                    }
+                }
+            }
+            this.connectedPlayers.clear();
 
             this.setGameData({ stopped: true });
-            this.app.close();
             Logger.log(`Game ${this.port} | Ended`);
             parentPort?.postMessage({ type: WorkerMessages.GameEnded });
-        }, 5000);
+            this.app.close();
+        }, 10000);
     }
 
     setGameData(data: Partial<Omit<GameData, "aliveCount">>): void {

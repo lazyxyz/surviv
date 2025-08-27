@@ -281,7 +281,8 @@ export class Gamer extends Player {
                 this.address,
                 rank,
                 this.game.teamMode,
-                this.game.gameId
+                this.game.gameId,
+                3000
             );
             processRewardsPacket(data.success && data.rewards.success, data.rewards.amount || 0);
         } catch (err) {
