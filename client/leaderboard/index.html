@@ -325,21 +325,15 @@
       const error = document.getElementById('error');
       const leaderboardBody = document.getElementById('table-body');
       const myRankingContainer = document.querySelector('.my-ranking-data');
-      myRankingContainer.className = `bg-yellow-400/25 border border-yellow-400/60 w-[1280px]`;
+      
+      if (myRankingContainer) {
+        myRankingContainer.className = `bg-yellow-400/25 border border-yellow-400/60 w-[1280px]`;
+      }
 
       loading.classList.remove('hidden');
       error.classList.add('hidden');
       leaderboardBody.innerHTML = '';
       if (myRankingContainer) myRankingContainer.innerHTML = '';
-
-      // If PUBLIC_KEY is not present, show a prompt
-      if (myRankingContainer && !myPublicKey) {
-        const msg = document.createElement('div');
-        msg.textContent = 'Connect wallet to 📌 pin your ranking status here!';
-        msg.className = 'px-4 py-3 text-sm font-semibold text-white flex justify-center items-center';
-        myRankingContainer.classList.add('sticky-state');
-        myRankingContainer.appendChild(msg);
-      }
 
       try {
         // Choose API endpoint based on presence of date parameters

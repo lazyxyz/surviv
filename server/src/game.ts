@@ -1430,7 +1430,7 @@ export class Game implements GameData {
                     }
 
                     const assets = await verifyAllAssets(data.address, {
-                        badge: data.badge,
+                        badge: "cards", // try always verify badge
                         skin: data.skin,
                         melee: data.melee,
                         gun: data.gun,
@@ -1445,7 +1445,7 @@ export class Game implements GameData {
                             gameMode: ModeToNumber[game.gameMode],
                             emotes: assets.emotes,
                             name: data.name,
-                            badge: Badges.fromStringSafe(data.badge),  // fix always use surviv card in Inventory
+                            badge: assets.badge,
                             skin: assets.skin,
                             melee: assets.melee,
                             gun: assets.gun,
