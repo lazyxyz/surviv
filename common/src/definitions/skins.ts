@@ -88,11 +88,13 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
                     ["Pizza", 0xfed29a],
                     ["Brush", 0x784421],
                     ["Cash", 0x71c837],
+                    ["Radar", 0x000000],
                     ["Unknown", 0xd7e3f4],
                     ["Martyrs", 0x718954],
                     ["Lemon", 0xf4fadb],
                     ["Root", 0x95d786],
                     ["Cookie", 0xd69241],
+                    ["Warrior", 0xf4f3f3],
                     ["Catton", 0xd38d5f],
                     ["Sphere", 0x1d667f],
                     ["Ghost", 0x000000],
@@ -131,6 +133,7 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
                     ["Dino", 0xb69837],
                     ["Sheep", 0xffffff],
                     ["Wolf", 0x917c6f],
+                    ["Werewolf", 0x917c6f],
                     ["Hippo", 0x963bb6],
                     ["Rhino", 0x74849d],
                     ["Bee", 0xffcd01],
@@ -191,6 +194,8 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
                     ["Somdudu", 0xFDBB06],
                     ["Somini", 0xD215C4],
                     ["Somnia", 0xD215C4],
+                    ["Viet Soldier", 0x49662C],
+                    ["Asian Farmer", 0xFBCC3F],
                 ] satisfies ReadonlyArray<readonly [string, number]>
             ).map(([name, tint]) => skin([name, tint]))
         ];

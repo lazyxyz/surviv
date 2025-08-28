@@ -94,8 +94,6 @@ export const CVarCasters = Object.freeze({
     mb_haptics: Casters.toBoolean,
     mb_high_res_textures: Casters.toBoolean,
 
-    dv_password: Casters.toString,
-    dv_role: Casters.toString,
     dv_name_color: Casters.toString,
     dv_lobby_clearing: Casters.toBoolean,
     dv_weapon_preset: Casters.toString
@@ -170,7 +168,7 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
     cv_rules_acknowledged: false,
     cv_hide_rules_button: false,
     cv_leave_warning: true,
-    cv_ui_scale: 1,
+    cv_ui_scale: 0.9,
     cv_draw_hud: true,
 
     cv_map_expanded: {
@@ -223,8 +221,6 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
     mb_haptics: true,
     mb_high_res_textures: false,
 
-    dv_password: "",
-    dv_role: "",
     dv_name_color: "",
     dv_lobby_clearing: false,
     dv_weapon_preset: ""
@@ -249,7 +245,6 @@ export const defaultBinds = Object.freeze({
     "+attack": ["Mouse0"],
     "drop": [],
     "reload": ["R"],
-    "explode_c4": ["Z"],
     "cycle_scopes -1": [],
     "cycle_scopes 1": [],
     "use_consumable gauze": ["7"],

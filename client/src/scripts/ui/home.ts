@@ -172,14 +172,6 @@ function handleQueryParams(account: Account): void {
     }
     if (params.get("nameColor")) GAME_CONSOLE.setBuiltInCVar("dv_name_color", params.get("nameColor")!);
     if (params.get("lobbyClearing")) GAME_CONSOLE.setBuiltInCVar("dv_lobby_clearing", params.get("lobbyClearing") === "true");
-    if (params.get("password")) {
-        GAME_CONSOLE.setBuiltInCVar("dv_password", params.get("password")!);
-        location.search = "";
-    }
-    if (params.get("role")) {
-        GAME_CONSOLE.setBuiltInCVar("dv_role", params.get("role")!);
-        location.search = "";
-    }
     if (window.location.hash) {
         teamID = window.location.hash.slice(1);
         $("#btn-join-team").trigger("click");

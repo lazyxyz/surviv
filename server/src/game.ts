@@ -514,11 +514,9 @@ export class Game implements GameData {
         }
         this.pluginManager.emit("game_end", this);
 
-        // End the game in 10 seconds
+        // Clear game in 3 seconds
         this.addTimeout(() => {
-            // Clear all collections
             this.livingPlayers.clear();
-            this.connectedPlayers.clear();
             this.connectingPlayers.clear();
             this.spectatablePlayers.length = 0;
             this.teams.clear();
@@ -536,12 +534,26 @@ export class Game implements GameData {
             this._timeouts.forEach(timeout => timeout.kill());
             this._timeouts.clear();
             this.grid.pool.clear();
+        }, 3000);
+
+        // Close the game in 10 seconds
+        this.addTimeout(() => {
+            for (const player of this.connectedPlayers) {
+                if (player instanceof Gamer) {
+                    try {
+                        player.socket.close();
+                    } catch (e) {
+                        console.log("error: ", e);
+                    }
+                }
+            }
+            this.connectedPlayers.clear();
 
             this.setGameData({ stopped: true });
-            this.app.close();
             Logger.log(`Game ${this.port} | Ended`);
             parentPort?.postMessage({ type: WorkerMessages.GameEnded });
-        }, 5000);
+            this.app.close();
+        }, 10000);
     }
 
     setGameData(data: Partial<Omit<GameData, "aliveCount">>): void {
@@ -918,23 +930,6 @@ export class Game implements GameData {
         }
 
         Logger.log(`Game ${this.port} | "${player.name}" joined`);
-        // AccessLog to store usernames for this connection
-        if (Config.protection?.punishments) {
-            const username = player.name;
-            if (username) {
-                fetch(
-                    `${Config.protection.punishments.url}/accesslog/${player.ip || "none"}`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "api-key": Config.protection.punishments.password || "none"
-                        },
-                        body: `{ "username": "${username}" }`
-                    }
-                ).catch(console.error);
-            }
-        }
         this.pluginManager.emit("player_did_join", { player, joinPacket: packet });
     }
 
@@ -1436,7 +1431,7 @@ export class Game implements GameData {
                     })
 
                     const badge = await verifyBadges(data.address, data.badge);
-                    
+
                     const stream = new PacketStream(new ArrayBuffer(128));
                     stream.serializeServerPacket(
                         ReadyPacket.create({
@@ -1452,7 +1447,6 @@ export class Game implements GameData {
                         })
                     );
                     socket.send(stream.getBuffer(), true, false);
-                    // data.player.sendGameOverPacket(false); // uncomment to test game over screen
                 } catch (err: any) {
                     console.log("Open websocket failed: ", err);
                     disconnect(socket, "Unknown error. Please contact Surviv team.");

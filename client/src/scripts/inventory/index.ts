@@ -6,7 +6,7 @@ import { showSkins } from "./skins";
 import { showWeapons } from "./weapons";
 import type { Account } from '../account';
 import { GAME_CONSOLE } from '../..';
-import { SurvivAssets } from '@common/mappings';
+import { AssetTier, SurvivAssets } from '@common/mappings';
 import { warningAlert } from '../modal';
 
 // handler display change preview
@@ -33,11 +33,27 @@ export const updateSplashCustomize = (skinID: string): void => {
 };
 
 // Store cached balances
-export let SurvivAssetBalances: Record<SurvivAssets, Record<string, number>> = {
-    [SurvivAssets.Skins]: {},
-    [SurvivAssets.Emotes]: {},
-    [SurvivAssets.Arms]: {},
-    [SurvivAssets.Guns]: {}
+export let SurvivAssetBalances: Record<SurvivAssets, Record<AssetTier, Record<string, number>>> = {
+    [SurvivAssets.Skins]: {
+        [AssetTier.Silver]: {},
+        [AssetTier.Gold]: {},
+        [AssetTier.Divine]: {}
+    },
+    [SurvivAssets.Emotes]: {
+        [AssetTier.Silver]: {},
+        [AssetTier.Gold]: {},
+        [AssetTier.Divine]: {}
+    },
+    [SurvivAssets.Arms]: {
+        [AssetTier.Silver]: {},
+        [AssetTier.Gold]: {},
+        [AssetTier.Divine]: {}
+    },
+    [SurvivAssets.Guns]: {
+        [AssetTier.Silver]: {},
+        [AssetTier.Gold]: {},
+        [AssetTier.Divine]: {}
+    }
 };
 
 export async function showInventory(account: Account) {

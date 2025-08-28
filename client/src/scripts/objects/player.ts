@@ -49,7 +49,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
     private activeDisguise?: ObstacleDefinition;
     private readonly disguiseContainer: Container;
-    halloweenThrowableSkin = false;
 
     private _oldItem = this.activeItem;
 
@@ -534,13 +533,11 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             this.container.visible = !dead;
             this.disguiseContainer.visible = this.container.visible;
 
-            const hadSkin = this.halloweenThrowableSkin;
             if (
-                hadSkin !== (this.halloweenThrowableSkin = halloweenThrowableSkin)
-                && this.activeItem.itemType === ItemType.Throwable
+                this.activeItem.itemType === ItemType.Throwable
                 && !this.activeItem.noSkin
             ) {
-                this.images.weapon.setFrame(`${this.activeItem.idString}${this.halloweenThrowableSkin ? "_halloween" : ""}`);
+                this.images.weapon.setFrame(`${this.activeItem.idString}`);
             }
 
             // Blood particles on death (cooler graphics only)
@@ -881,12 +878,10 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     Vec.rotate(toPixiCoords(def.animation.cook.rightFist), this.rotation)
                 );
 
-                const range = def.c4
-                    ? 0
-                    : Numeric.min(
-                        this.game.inputManager.distanceToMouse * 0.9, // <- this constant is defined server-side
-                        def.maxThrowDistance * PerkData[PerkIds.DemoExpert].rangeMod
-                    );
+                const range = Numeric.min(
+                    this.game.inputManager.distanceToMouse * 0.9, // <- this constant is defined server-side
+                    def.maxThrowDistance * PerkData[PerkIds.DemoExpert].rangeMod
+                );
 
                 const cookMod = def.cookable ? Date.now() - this.animationChangeTime : 0;
                 const drag = 0.001; // defined server-side
@@ -1097,7 +1092,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             const { image: { position, angle } } = reference;
 
             if (reference.itemType === ItemType.Throwable && !reference.noSkin) {
-                this.images.weapon.setFrame(`${reference.idString}${this.halloweenThrowableSkin ? "_halloween" : ""}`);
+                this.images.weapon.setFrame(`${reference.idString}`);
             }
 
             this.images.weapon.setPos(position.x, position.y + offset);
@@ -1128,10 +1123,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 ? "_world"
                 : ""
                 }`;
-
-            if (weaponDef.itemType === ItemType.Throwable && this.halloweenThrowableSkin && !weaponDef.noSkin) {
-                frame += "_halloween";
-            }
 
             const { angle, position: { x: pX, y: pY } } = image;
 
@@ -1524,7 +1515,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                                         (
                                             object.damageable
                                             && (object.isObstacle || object.isPlayer || object.isBuilding)
-                                        ) || (object.isThrowableProjectile && object.definition.c4)
+                                        )
                                     )
                                     && object.hitbox?.collidesWith(hitbox)
                                     && adjacentOrEqualLayer(object.layer, this.layer)
@@ -1763,7 +1754,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     return;
                 }
 
-                this.playSound(this.activeItem.c4 ? "c4_pin" : "throwable_pin");
+                this.playSound("throwable_pin");
 
                 const def = this.activeItem;
                 const projImage = this.images.weapon;
@@ -1777,10 +1768,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 }
 
                 let frame = def.animation.cook.cookingImage ?? def.animation.liveImage;
-
-                if (this.halloweenThrowableSkin && !def.noSkin) {
-                    frame += "_halloween";
-                }
 
                 this.updateFistsPosition(false);
                 projImage.setFrame(frame);
@@ -1887,7 +1874,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 const projImage = this.images.weapon;
                 projImage.visible = false;
 
-                projImage.setFrame(`${def.idString}${this.halloweenThrowableSkin && !def.noSkin ? "_halloween" : ""}`);
+                projImage.setFrame(`${def.idString}`);
 
                 if (!def.cookable && def.animation.leverImage !== undefined) {
                     this.game.particleManager.spawnParticle({
@@ -1923,7 +1910,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     onComplete: () => {
                         this.anims.leftFist = undefined;
                         projImage.setVisible(true);
-                        projImage.setFrame(`${def.idString}${this.halloweenThrowableSkin && !def.noSkin ? "_halloween" : ""}`);
+                        projImage.setFrame(`${def.idString}`);
                         this.updateFistsPosition(true);
                     }
                 });

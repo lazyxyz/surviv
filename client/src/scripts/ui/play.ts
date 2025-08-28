@@ -50,9 +50,6 @@ function setTeamParameters(params: URLSearchParams): void {
     const badge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
     if (badge) params.set("badge", badge);
 
-    const role = GAME_CONSOLE.getBuiltInCVar("dv_role");
-    if (role) params.set("role", role);
-
     const nameColor = GAME_CONSOLE.getBuiltInCVar("dv_name_color");
     if (nameColor) {
         try {

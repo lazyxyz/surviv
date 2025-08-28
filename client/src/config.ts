@@ -1,4 +1,5 @@
 import { type TeamSize } from "@common/constants";
+import { toBeHex } from "ethers";
 
 export const Config = {
     regions: {
@@ -33,6 +34,30 @@ export const Config = {
     },
     defaultRegion: "dev",
 } satisfies ConfigType as ConfigType;
+
+// export const ChainConfig = {
+//     chainId: toBeHex(50312),
+//     chainName: "Somnia Testnet",
+//     rpcUrls: ["https://dream-rpc.somnia.network/"],
+//     nativeCurrency: {
+//         name: "Somnia Testnet Token",
+//         symbol: "STT",
+//         decimals: 18
+//     },
+//     blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
+// } satisfies ChainInfo as ChainInfo;
+
+export const ChainConfig = {
+    chainId: toBeHex(5031),
+    chainName: "Somnia Mainnet",
+    rpcUrls: ["https://api.infra.mainnet.somnia.network/"],
+    nativeCurrency: {
+        name: "Somnia Token",
+        symbol: "SOMI",
+        decimals: 18
+    },
+    blockExplorerUrls: ["https://mainnet.somnia.w3us.site/"]
+} satisfies ChainInfo as ChainInfo;
 
 export interface ConfigType {
     readonly regions: Record<string, Region>
@@ -69,3 +94,15 @@ export interface ServerInfo {
     readonly maxTeamSize: TeamSize
     readonly nextSwitchTime: number
 };
+
+export interface ChainInfo {
+    readonly chainId: string
+    readonly chainName: string
+    readonly rpcUrls: string[]
+    readonly nativeCurrency: {
+        name: string,
+        symbol: string,
+        decimals: number,
+    }
+    readonly blockExplorerUrls: string[]
+}

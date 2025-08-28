@@ -1,5 +1,5 @@
 export const assetsMapping = {
-  "address": "0xE83f46f91425f87F0Ef8Ee5BE1155f44536F792b",
+  "address": "0x32d2FbF76E0B43A77C92429433a5BfB9b5addCd4",
   "assets": [
     [
       "algeria",
@@ -49,7 +49,9 @@ export const assetsMapping = {
       "unknown",
       "vanuatu",
       "vietnam",
-      "world"
+      "world",
+      "indonesia",
+      "morocco"
     ],
     [
       "ahegao",
@@ -109,7 +111,9 @@ export const assetsMapping = {
       "wolverine",
       "woody",
       "yuno",
-      "zone"
+      "zone",
+      "radar",
+      "warrior",
     ],
     [
       "android",
@@ -143,7 +147,9 @@ export const assetsMapping = {
       "turle",
       "wojax",
       "zebra",
-      "zombie"
+      "zombie",
+      "viet_soldier",
+      "asian_farmer",
     ],
     [
       "abuse",
@@ -179,7 +185,9 @@ export const assetsMapping = {
       "stare_dad",
       "the_pain",
       "thumbs_down",
-      "thumbs_up"
+      "thumbs_up",
+      "rice_troll",
+      "shibak"
     ],
     [
       "baseball_bat",

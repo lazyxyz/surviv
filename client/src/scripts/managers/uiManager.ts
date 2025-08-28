@@ -73,8 +73,6 @@ export class UIManager {
         pos: $<HTMLSpanElement>("#coordinates-hud")
     });
 
-    public hasC4s = false;
-
     private static _instantiated = false;
     constructor(readonly game: Game) {
         if (UIManager._instantiated) {
@@ -277,7 +275,6 @@ export class UIManager {
         createTeamPlayers: $<HTMLDivElement>("#create-team-players"),
         closeCreateTeam: $<HTMLButtonElement>("#close-create-team"),
 
-        c4Button: $<HTMLButtonElement>("#c4-detonate-btn"),
         detonateKey: $<HTMLDivElement>("#detonate-key"),
 
         inventoryMsg: $<HTMLSpanElement>("#inventory-message")
@@ -497,11 +494,11 @@ export class UIManager {
                 ${eligible ? html`
                     <p class="rewards-title">Your Rewards</p>
                     <div class="rewards-amount">
-                        <img src="./img/misc/surviv_kit_crate" alt="Reward Crate" loading="lazy">
+                        <img src="./img/misc/surviv_kit_crate.png" alt="Reward Crate" loading="lazy">
                         <p>X${rewards}</p>
                     </div>
                     <div class="rewards-share">
-                        <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/1943679417730883992"
+                        <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/1958475325496504593"
                            target="_blank"
                            rel="noopener noreferrer"
                            class="btn btn-lg btn-darken btn-primary"
@@ -765,30 +762,6 @@ export class UIManager {
             this.updateWeapons();
         }
 
-        if (activeC4s !== undefined) {
-            this.ui.c4Button.toggle(activeC4s);
-            this.hasC4s = activeC4s;
-        }
-
-        /* if (perks) {
-            const oldPerks = this.perks.asList();
-            this.perks.overwrite(perks);
-            const newPerks = this.perks.asList();
-
-            const length = Math.max(oldPerks.length, newPerks.length);
-
-            if (length === 0) {
-                this.resetPerkSlots();
-            }
-
-            for (let i = 0; i < length; i++) {
-                const perk = newPerks[i];
-
-                if (!oldPerks[i] && perk) {
-                    this.updatePerkSlot(perk, i);
-                }
-            }
-        } */
         if (perks) {
             const old = this.perks.asList();
             const oldLength = old.length;
@@ -952,9 +925,6 @@ export class UIManager {
                 const oldSrc = itemImage.attr("src");
 
                 let frame = definition.idString;
-                if (this.perks.hasItem(PerkIds.PlumpkinBomb) && definition.itemType === ItemType.Throwable && !definition.noSkin) {
-                    frame += "_halloween";
-                }
 
                 const location = definition.itemType === ItemType.Melee && definition.reskins?.includes(Modes[this.game.gameMode].idString) ? Modes[this.game.gameMode].idString : "shared";
                 const newSrc = `./img/game/${location}/weapons/${frame}.svg`;
@@ -1022,7 +992,7 @@ export class UIManager {
         const container = this._perkSlots[index] ??= $<HTMLDivElement>(`#perk-slot-${index}`);
         container.attr("data-idString", perkDef.idString);
         container.children(".item-tooltip").html(`<strong>${perkDef.name}</strong><br>${perkDef.description}`);
-        container.children(".item-image").attr("src", `./img/game/${perkDef.category === PerkCategories.Halloween ? "halloween" : "fall"}/perks/${perkDef.idString}.svg`);
+        container.children(".item-image").attr("src", `./img/game/shared/perks/${perkDef.idString}.svg`);
         container.css("visibility", this.perks.hasItem(perkDef.idString) ? "visible" : "hidden");
 
         container.css("outline", !perkDef.noDrop ? "" : "none");

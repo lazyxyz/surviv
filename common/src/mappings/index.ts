@@ -10,6 +10,12 @@ export enum SurvivAssets {
     Guns
 }
 
+export enum AssetTier {
+    Silver,
+    Gold,
+    Divine
+}
+
 // Mapping of SurvivAssets to indices in SurvivAssetsMapping.assets
 export const SurvivAssetRanges: Record<SurvivAssets, { mappingIndices: number[] }> = {
     [SurvivAssets.Skins]: {

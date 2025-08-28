@@ -22,7 +22,6 @@ export type ThrowableDefinition = InventoryItemDefinition & {
      * Whether cooking the grenade will run down the fuse
      */
     readonly cookable: boolean
-    readonly c4: boolean
     readonly health?: number
     readonly noSkin?: boolean
     readonly cookSpeedMultiplier: number
@@ -74,7 +73,6 @@ export const Throwables = ObjectDefinitions.withDefault<ThrowableDefinition>()(
         cookable: false,
         fuseTime: 4000,
         cookTime: 150,
-        c4: false,
         throwTime: 150,
         noDrop: false,
         cookSpeedMultiplier: 0.7,
@@ -197,31 +195,6 @@ export const Throwables = ObjectDefinitions.withDefault<ThrowableDefinition>()(
                     cookingImage: "proj_confetti_nopin",
                     leftFist: Vec.create(2.5, 0),
                     rightFist: Vec.create(-0.5, 2.15)
-                },
-                throw: {
-                    leftFist: Vec.create(1.9, -1.75),
-                    rightFist: Vec.create(4, 2.15)
-                }
-            }
-        },
-        {
-            idString: "c4",
-            name: "C4",
-            c4: true,
-            health: 40,
-            image: {
-                position: Vec.create(60, 43),
-                angle: 60
-            },
-            detonation: {
-                explosion: "c4_explosion"
-            },
-            animation: {
-                liveImage: "proj_c4",
-                activatedImage: "proj_c4_activated",
-                cook: {
-                    leftFist: Vec.create(2, -1),
-                    rightFist: Vec.create(3, 0)
                 },
                 throw: {
                     leftFist: Vec.create(1.9, -1.75),

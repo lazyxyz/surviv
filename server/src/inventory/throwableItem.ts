@@ -101,7 +101,8 @@ class GrenadeHandler {
     private _detonate(): void {
         const { explosion } = this.definition.detonation;
 
-        const particles = (this.owner.halloweenThrowableSkin && this.definition.detonation.spookyParticles) ? this.definition.detonation.spookyParticles : this.definition.detonation.particles;
+        // const particles = this.definition.detonation.spookyParticles ? this.definition.detonation.spookyParticles : this.definition.detonation.particles;
+        const particles = this.definition.detonation.particles;
 
         const referencePosition = Vec.clone(this._projectile?.position ?? this.parent.owner.position);
         const game = this.game;
@@ -113,7 +114,7 @@ class GrenadeHandler {
                 this.parent.owner,
                 this._projectile?.layer ?? this.parent.owner.layer,
                 this.parent,
-                (this._projectile?.halloweenSkin ?? false) ? PerkData[PerkIds.PlumpkinBomb].damageMod : 1
+                1
             );
         }
 
@@ -144,7 +145,7 @@ class GrenadeHandler {
         recoil.multiplier = this.definition.cookSpeedMultiplier;
         recoil.time = Infinity;
 
-        if (this.definition.cookable && !this.definition.c4) {
+        if (this.definition.cookable) {
             this._timer = this.game.addTimeout(
                 () => {
                     if (!this._thrown) {
@@ -199,15 +200,13 @@ class GrenadeHandler {
 
         this._resetAnimAndRemoveFromInv();
 
-        if (!this.definition.c4) {
-            this._timer ??= this.game.addTimeout(
-                () => {
-                    this.destroy();
-                    this._detonate();
-                },
-                this.definition.fuseTime
-            );
-        }
+        this._timer ??= this.game.addTimeout(
+            () => {
+                this.destroy();
+                this._detonate();
+            },
+            this.definition.fuseTime
+        );
 
         const projectile = this._projectile = this.game.addProjectile(
             definition,
@@ -219,23 +218,21 @@ class GrenadeHandler {
             this.parent
         );
 
-        if (!this.definition.c4) {
-            projectile.velocity = Vec.add(
-                Vec.fromPolar(
-                    this.owner.rotation,
-                    soft
-                        ? 0
-                        : Numeric.min(
-                            definition.maxThrowDistance * this.owner.mapPerkOrDefault(PerkIds.DemoExpert, ({ rangeMod }) => rangeMod, 1),
-                            0.9 * this.owner.distanceToMouse
+        projectile.velocity = Vec.add(
+            Vec.fromPolar(
+                this.owner.rotation,
+                soft
+                    ? 0
+                    : Numeric.min(
+                        definition.maxThrowDistance * this.owner.mapPerkOrDefault(PerkIds.DemoExpert, ({ rangeMod }) => rangeMod, 1),
+                        0.9 * this.owner.distanceToMouse
                         //  ^^^ Grenades will consistently undershoot the mouse by 10% in order to make long-range shots harder
                         //      while not really affecting close-range shots
-                        ) / 985
-                        //  ^^^ Heuristics says that dividing desired range by this number makes the grenade travel roughly that distance
-                ),
-                this.owner.movementVector
-            );
-        }
+                    ) / 985
+                //  ^^^ Heuristics says that dividing desired range by this number makes the grenade travel roughly that distance
+            ),
+            this.owner.movementVector
+        );
     }
 
     destroy(): void {

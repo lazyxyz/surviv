@@ -188,9 +188,7 @@ export class Game {
         const url = (() => {
             // List of available music files
             const musicFiles = [
-                "menu_music1.mp3",
-                "menu_music2.mp3",
-                "menu_music3.mp3"
+                "menu_music1.mp3"
             ];
             const randomFile = musicFiles[Math.floor(Math.random() * musicFiles.length)];
             return `./audio/music/${randomFile}`;
@@ -1254,7 +1252,7 @@ export class Game {
             // funny detonate button stuff
             const detonateKey = this.uiManager.ui.detonateKey;
             if (!this.inputManager.isMobile) {
-                const boomBind: string | undefined = this.inputManager.binds.getInputsBoundToAction("explode_c4")[0];
+                const boomBind: string | undefined = undefined;
 
                 if (funnyDetonateButtonCache.bind !== boomBind) {
                     funnyDetonateButtonCache.bind = bind;
