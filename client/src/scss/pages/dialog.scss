@@ -1064,14 +1064,15 @@ input::-webkit-inner-spin-button {
       div {
         position: relative;
         align-items: center;
-        width: 140px;
-        height: 140px;
+        width: 120px;
+        height: 120px;
         background-size: cover;
       }
     }
 
     .badge-name {
       font-weight: bold;
+      font-size: 14px;
       @include variables.text-shadow;
       text-align: center;
       background-color: #22222267;
