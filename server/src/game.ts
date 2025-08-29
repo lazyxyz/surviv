@@ -56,6 +56,7 @@ import { validateJWT } from "./api/api";
 import { getIP, createServer } from "./utils/serverHelpers";
 import { verifyAllAssets, verifyBadges } from "./api/balances";
 import { Armors } from "@common/definitions/armors";
+import { Badges } from "@common/definitions/badges";
 
 
 /*

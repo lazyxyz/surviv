@@ -8,7 +8,8 @@ const walletPriority = [
     WalletType.TrustWallet,
     WalletType.CoinbaseWallet,
     WalletType.OKXWallet,
-    WalletType.BraveWallet
+    WalletType.BraveWallet,
+    WalletType.RabbyWallet,
 ];
 
 // Flag to track if the wallet list has been sorted
@@ -124,6 +125,10 @@ export function onConnectWallet(account: Account): void {
 
                 if (paragraphElement?.textContent?.includes(WalletType.BraveWallet)) {
                     return window.open("https://brave.com/wallet/", "_blank");
+                }
+               
+                if (paragraphElement?.textContent?.includes(WalletType.RabbyWallet)) {
+                    return window.open("https://rabby.io/", "_blank");
                 }
             };
         }
