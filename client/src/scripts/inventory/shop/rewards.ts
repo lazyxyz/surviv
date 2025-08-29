@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { successAlert, errorAlert } from "../../modal";
-import { ShopCache } from ".";
+import { PlayerValidRewards, ShopCache } from ".";
 import type { Account } from "../../account";
 
 interface RewardItem {
@@ -63,9 +63,5 @@ function renderRewardList(account: Account, rewardData: RewardData): void {
 }
 
 export async function loadRewards(account: Account): Promise<void> {
-    const rewardData = await account.getValidRewards().catch((err: any) => {
-        console.error(`Failed to load rewards: ${err}`);
-        return { validCrates: [] };
-    });
-    renderRewardList(account, rewardData);
+    renderRewardList(account, PlayerValidRewards);
 }

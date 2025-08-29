@@ -1423,6 +1423,8 @@ export class Game implements GameData {
                         disconnect(socket, `Authentication failed. Please reconnect your wallet.`);
                         return;
                     }
+                    
+                    const badge = await verifyBadges(data.address, data.badge);
 
                     const assets = await verifyAllAssets(data.address, {
                         skin: data.skin,
@@ -1431,7 +1433,6 @@ export class Game implements GameData {
                         emotes: data.emotes,
                     })
 
-                    const badge = await verifyBadges(data.address, data.badge);
 
                     const stream = new PacketStream(new ArrayBuffer(128));
                     stream.serializeServerPacket(

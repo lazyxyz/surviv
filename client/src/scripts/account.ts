@@ -83,7 +83,7 @@ interface ClaimResponse {
 /**
  * Interface for valid rewards return type
  */
-interface ValidRewards {
+export interface ValidRewards {
     validCrates: Crate[];
     validSignatures: string[];
 }
@@ -525,7 +525,7 @@ export class Account extends EIP6963 {
 
         try {
             // Fetch available crates
-            const response = await fetch(`${this.api}/api/getCrates`, {
+            const response = await fetch(`${this.api}/api/getValidRewards`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -610,7 +610,7 @@ export class Account extends EIP6963 {
 
         try {
             const body = signatures?.length ? { signatures } : {};
-            const response = await fetch(`${this.api}/api/removeCrates`, {
+            const response = await fetch(`${this.api}/reward/claimRewards`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

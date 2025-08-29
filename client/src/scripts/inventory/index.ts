@@ -63,23 +63,23 @@ export async function showInventory(account: Account) {
             return;
         }
         SurvivAssetBalances = await account.getAssetBalances();
-        showShop(account);
+        await showShop(account);
     })
 
-    $('#tab-skins').on('click', () => {
-        showSkins(account);
+    $('#tab-skins').on('click', async () => {
+        await showSkins(account);
     })
 
-    $('#tab-weapons').on('click', () => {
-        showWeapons(account);
+    $('#tab-emotes').on('click', async () => {
+        await showEmotes(account);
     })
 
-    $('#tab-emotes').on('click', () => {
-        showEmotes(account);
+    $('#tab-weapons').on('click', async () => {
+        await showWeapons(account);
     })
 
-    $('#tab-badges').on('click', () => {
-        showBadges(account);
+    $('#tab-badges').on('click', async () => {
+        await showBadges(account);
     })
 
     const idString = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");

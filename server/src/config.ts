@@ -50,6 +50,10 @@ export const Config = {
         rank: 5,
         api: "https://admin.surviv.fun",
     },
+    // earnConfig: {
+    //     rank: 5,
+    //     api: "http://localhost:3001",
+    // },
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {
