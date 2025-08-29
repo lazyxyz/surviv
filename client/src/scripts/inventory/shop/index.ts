@@ -2,7 +2,7 @@ import $ from "jquery";
 import { loadStore } from "./store";
 import { loadBase } from "./base";
 import { loadRewards } from "./rewards";
-import type { Account, SaleItems } from "../../account";
+import type { Account, SaleItems, ValidRewards } from "../../account";
 
 
 function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeListOf<HTMLElement>) {
@@ -31,7 +31,11 @@ export let ShopCache: {
     assetsPrice: Record<SaleItems, string>;
 }
 
+export let PlayerValidRewards: ValidRewards;
+
 export async function showShop(account: Account) {
+    PlayerValidRewards = await account.getValidRewards();
+
     ShopCache = {
         storeLoaded: false,
         baseLoaded: false,
@@ -51,6 +55,14 @@ export async function showShop(account: Account) {
     const tabButtons = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
     const tabContents = document.querySelectorAll<HTMLElement>(".crates-customize-child");
     setupTabs(tabButtons, tabContents);
+
+    // Update rewards tab text
+    const rewardsTab = document.querySelector("#rewards-tab") as HTMLButtonElement;
+    if (PlayerValidRewards.validCrates.length > 0) {
+        rewardsTab.textContent = `Rewards(${PlayerValidRewards.validCrates.length})`;
+    } else {
+        rewardsTab.textContent = "Rewards";
+    }
 
     $("#store-tab").on('click', () => {
         loadStore(account);
