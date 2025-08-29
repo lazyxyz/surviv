@@ -305,9 +305,10 @@ async function showGuns(account: Account, selectedGunId?: string) {
 
       $gunList.append(`
         <div class="weapons-container-card weapons-container-card-gun"
-             id="weapons-list-${idString}" data-id="${idString}"
-             style="background-image: url('${backgroundImage}')">
+             id="weapons-list-${idString}" data-id="${idString}">
+             <div class="weapons-tier-background" style="background-image: url('${backgroundImage}')">
           <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+          </div>
           <p class="weapons-container-paragraph">${name}</p>
         </div>
       `);
@@ -315,9 +316,10 @@ async function showGuns(account: Account, selectedGunId?: string) {
     for (const { idString, name } of unownedGuns) {
       $gunList.append(`
         <div class="weapons-container-card weapons-container-card-gun inactive"
-             id="weapons-list-${idString}" data-id="${idString}"
-             style="background-image: url('${tierBackgrounds[AssetTier.Silver]}')">
+             id="weapons-list-${idString}" data-id="${idString}">
+             <div class="weapons-tier-background" style="background-image: url('${tierBackgrounds[AssetTier.Silver]}')">
           <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+          </div>
           <p class="weapons-container-paragraph">${name}</p>
         </div>
       `);
@@ -382,9 +384,10 @@ async function showMelees(account: Account, selectedMeleeId?: string) {
 
       $meleeList.append(`
         <div class="weapons-container-card weapons-container-card-melee" 
-             id="weapons-list-${idString}" data-id="${idString}"
-             style="background-image: url('${backgroundImage}')">
-          <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+             id="weapons-list-${idString}" data-id="${idString}">
+             <div class="weapons-tier-background" style="background-image: url('${backgroundImage}')">
+             <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+             </div>
           <p class="weapons-container-paragraph">${name}</p>
         </div>
       `);
@@ -392,9 +395,10 @@ async function showMelees(account: Account, selectedMeleeId?: string) {
     for (const { idString, name } of unownedMelees) {
       $meleeList.append(`
         <div class="weapons-container-card weapons-container-card-melee inactive" 
-             id="weapons-list-${idString}" data-id="${idString}"
-             style="background-image: url('${tierBackgrounds[AssetTier.Silver]}')">
-          <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+             id="weapons-list-${idString}" data-id="${idString}">
+             <div class="weapons-tier-background" style="background-image: url('${tierBackgrounds[AssetTier.Silver]}')">
+             <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+             </div>
           <p class="weapons-container-paragraph">${name}</p>
         </div>
       `);

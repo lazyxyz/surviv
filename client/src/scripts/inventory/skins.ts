@@ -94,12 +94,14 @@ export async function showSkins(account: Account) {
 
         const skinItem = $<HTMLDivElement>(`
           <div id="skin-${idString}" class="skins-list-item-container${isSelected ? " selected" : ""}">
-            <div class="skin${isActive ? " active" : " inactive"}" style="background-image: url('${backgroundImage}')">
-              <div class="skin-base" style="background-image: url('./img/game/shared/skins/${idString}_base.svg')"></div>
-              <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
-              <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
-            </div>
-            <span class="skin-name">${getTranslatedString(idString as TranslationKeys)}</span>
+          <div class="skin-tier-background" style="background-image: url('${backgroundImage}')">       
+          <div class="skin${isActive ? " active" : " inactive"}">
+            <div class="skin-base" style="background-image: url('./img/game/shared/skins/${idString}_base.svg')"></div>
+            <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
+            <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${idString}_fist.svg')"></div>
+          </div>
+          </div>
+          <span class="skin-name">${getTranslatedString(idString as TranslationKeys)}</span>
           </div>
         `);
 
