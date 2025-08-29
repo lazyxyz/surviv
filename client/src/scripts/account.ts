@@ -174,9 +174,9 @@ export class Account extends EIP6963 {
                 method: "eth_chainId"
             }) as string;
 
+            // Attempt to switch to the target chain
             if (currentChainId !== targetChainId) {
                 try {
-                    // Attempt to switch to the target chain
                     await getProvider.provider.request({
                         method: "wallet_switchEthereumChain",
                         params: [{ chainId: targetChainId }]
@@ -200,12 +200,12 @@ export class Account extends EIP6963 {
                                 }]
                             });
                         } catch (addError) {
-                            console.error(`Failed to add network: ${addError}`);
-                            // throw new Error("Failed to add the Somnia Testnet. Please add it manually in your wallet.");
+                            errorAlert("Failed to add the Somnia Testnet. Please add it manually in your wallet.");
+                            return;
                         }
                     } else {
-                        console.error(`Failed to switch network: ${switchError}`);
-                        throw new Error("Failed to switch to the Somnia Testnet. Please switch networks in your wallet.");
+                        errorAlert("Failed to switch to the Somnia Testnet. Please switch networks in your wallet.", 3000);
+                        return;
                     }
                 }
             }
