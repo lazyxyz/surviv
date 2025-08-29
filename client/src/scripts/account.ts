@@ -610,7 +610,7 @@ export class Account extends EIP6963 {
 
         try {
             const body = signatures?.length ? { signatures } : {};
-            const response = await fetch(`${this.api}/reward/claimRewards`, {
+            const response = await fetch(`${this.api}/api/claimRewards`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

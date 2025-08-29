@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { successAlert, errorAlert } from "../../modal";
-import { PlayerValidRewards, ShopCache } from ".";
+import { ShopCache } from ".";
 import type { Account } from "../../account";
 
 interface RewardItem {
@@ -13,7 +13,7 @@ interface RewardData {
     validCrates?: Array<{ amount: number; expiry: number }>;
 }
 
-function renderRewardList(account: Account, rewardData: RewardData): void {
+function renderRewardList(account: Account, rewardData: RewardData | undefined): void {
     const now = Math.floor(Date.now() / 1000);
     const rewards: RewardItem[] = rewardData?.validCrates?.map(item => {
         const secondsLeft = item.expiry - now;
@@ -51,6 +51,7 @@ function renderRewardList(account: Account, rewardData: RewardData): void {
             await account.claimRewards();
             successAlert("Rewards claimed successfully!");
             ShopCache.assetsBalance.crate += totalCrates;
+            ShopCache.PlayerValidRewards = undefined;
         } catch (err) {
             console.error(`Failed to claim rewards: ${err}`);
             errorAlert("No valid crates found");
@@ -63,5 +64,5 @@ function renderRewardList(account: Account, rewardData: RewardData): void {
 }
 
 export async function loadRewards(account: Account): Promise<void> {
-    renderRewardList(account, PlayerValidRewards);
+    renderRewardList(account, ShopCache.PlayerValidRewards);
 }

@@ -29,13 +29,11 @@ export let ShopCache: {
     baseLoaded: boolean,
     assetsBalance: Record<SaleItems, number>;
     assetsPrice: Record<SaleItems, string>;
+    PlayerValidRewards: ValidRewards | undefined;
 }
 
-export let PlayerValidRewards: ValidRewards;
 
 export async function showShop(account: Account) {
-    PlayerValidRewards = await account.getValidRewards();
-
     ShopCache = {
         storeLoaded: false,
         baseLoaded: false,
@@ -48,8 +46,13 @@ export async function showShop(account: Account) {
             crate: "",
             surviv_card: "",
             key: ""
-        }
+        },
+        PlayerValidRewards: undefined
     }
+
+    try {
+        ShopCache.PlayerValidRewards = await account.getValidRewards();
+    } catch (err) { };
 
     // Setup tabs
     const tabButtons = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
@@ -58,8 +61,8 @@ export async function showShop(account: Account) {
 
     // Update rewards tab text
     const rewardsTab = document.querySelector("#rewards-tab") as HTMLButtonElement;
-    if (PlayerValidRewards.validCrates.length > 0) {
-        rewardsTab.textContent = `Rewards(${PlayerValidRewards.validCrates.length})`;
+    if (ShopCache.PlayerValidRewards?.validCrates.length) {
+        rewardsTab.textContent = `Rewards(${ShopCache.PlayerValidRewards.validCrates.length})`;
     } else {
         rewardsTab.textContent = "Rewards";
     }
