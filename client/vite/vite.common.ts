@@ -12,6 +12,7 @@ const config: UserConfig = {
                 main: resolve(__dirname, "../index.html"),
                 earn: resolve(__dirname, "../earn/index.html"),
                 leaderboard: resolve(__dirname, "../leaderboard/index.html"),
+                wiki: resolve(__dirname, "../wiki/index.html"),
             }
         }
     },
