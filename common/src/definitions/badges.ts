@@ -13,6 +13,7 @@ const badge = createTemplate<BadgeDefinition>()((name: string, roles: string[] =
     roles
 }));
 
+export const DEFAULT_BADGE = "surviv_card";
 export const Badges = ObjectDefinitions.create<BadgeDefinition>("Badges", [
     badge(["surviv_card", ["Genesis Survivor"]]),
     badge(["surviv_s1_gold", ["Survivor S1 Gold"]]),

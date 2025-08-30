@@ -1423,7 +1423,6 @@ export class Game implements GameData {
                         disconnect(socket, `Authentication failed. Please reconnect your wallet.`);
                         return;
                     }
-                    
                     const badge = await verifyBadges(data.address, data.badge);
 
                     const assets = await verifyAllAssets(data.address, {

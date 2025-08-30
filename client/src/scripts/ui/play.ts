@@ -15,6 +15,7 @@ import { html } from "../utils/misc";
 import { Loots } from "@common/definitions/loots";
 import { defaultClientCVars } from "../utils/console/defaultClientCVars";
 import { Emotes } from "@common/definitions/emotes";
+import { DEFAULT_BADGE } from "@common/definitions/badges";
 
 export let teamSocket: WebSocket | undefined;
 export let teamID: string | undefined | null;
@@ -356,7 +357,11 @@ function setGameParameters(params: URLSearchParams, account: Account): void {
     if (playerSkin) params.set("skin", playerSkin.idString);
 
     const badge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
-    if (badge) params.set("badge", badge);
+    if (badge) {
+        params.set("badge", badge)
+    } else {
+        params.set("badge", DEFAULT_BADGE)
+    };
 
     const weaponPreset = GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset");
     if (weaponPreset) {

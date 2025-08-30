@@ -46,19 +46,6 @@ export async function showBadges(account: Account) {
     // sort badges
     const sortedBadgeIds = [...userBadges, ...inactiveBadges];
 
-    // custom no item (meaning click to reset badge)
-    {
-        const noBadgeItem = $<HTMLDivElement>(
-            html`<div id="badge-" class="badges-list-item-container${currentBadge === "" ? " selected" : ""}">
-                <div class="badges-list-item"><i class="fa-solid fa-ban" style="opacity: 0.65"></i></div>
-                <span class="badge-name">${getTranslatedString("none")}</span>
-            </div>`
-        );
-
-        noBadgeItem.on("click", () => selectBadge(""));
-        badgeList.append(noBadgeItem);
-    }
-
     // render badges
     for (const idString of sortedBadgeIds) {
         const badgeDef = allBadges.find(b => b.idString === idString);
