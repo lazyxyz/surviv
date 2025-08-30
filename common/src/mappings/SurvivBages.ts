@@ -4,5 +4,6 @@ export const assetsMapping = {
     "surviv_card",
     "surviv_s1_gold",
     "surviv_s1_silver",
+    "somnia_s1",
   ]
 };
