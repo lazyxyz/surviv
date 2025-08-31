@@ -138,8 +138,16 @@
         </div>
       </div>
 
-      <a href="https://surviv-fun.notion.site/23e5955bf67e802f8b3bc92549693a85?v=23e5955bf67e80c0aa31000cd929f6ac"
-        rel="noopener noreferrer" class="btn btn-darken btn-assets" id="link-social" target="_blank"></a>
+      <div id="link-social">
+        <a href="/wiki/" target="_blank">
+          <button class="btn btn-alert btn-darken btn-special" id="btn-guide">
+            <i class="fa-solid fa-book"></i>
+            How to play?
+          </button>
+        </a>
+        <a href="https://surviv-fun.notion.site/23e5955bf67e802f8b3bc92549693a85?v=23e5955bf67e80c0aa31000cd929f6ac"
+          rel="noopener noreferrer" class="btn btn-darken btn-assets btn-special" target="_blank"></a>
+      </div>
 
       <!-- <div id="splash-news" class="persistent-scrollbar">
         <h2>
@@ -217,13 +225,11 @@
                 <span>Leaderboard</span>
               </button>
             </a>
-            <a href="/wiki/" target="_blank">
-              <button class="btn btn-lg btn-darken btn-event btn-quests" id="btn-rules" style="display: none">
-                <!-- <div class="pulsating-circle" style="display: block"></div> -->
-                <!-- <img src="public/img/misc/galxe.svg" alt=""> -->
-                <span>How to Play</span>
-              </button>
-            </a>
+            <button class="btn btn-lg btn-darken btn-event btn-quests" id="btn-rules" style="display: none" disabled>
+              <!-- <div class="pulsating-circle" style="display: block"></div> -->
+              <img src="public/img/misc/galxe.svg" alt="">
+              <span>Galxe Quests</span>
+            </button>
           </div>
         </div>
         <div id="splash-socials">
@@ -1162,7 +1168,7 @@
             <img src="./img/wallet/brave-wallet.png" alt="brave-wallet" />
             <p>Brave Wallet</p>
           </div>
-          
+
           <div class="connect-wallet-item">
             <img src="./img/wallet/rabby-wallet.png" alt="rabby-wallet" />
             <p>Rabby Wallet</p>

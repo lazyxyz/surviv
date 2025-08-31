@@ -484,6 +484,12 @@
     color: white;
   }
 
+  .btn-quests:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
   .btn-leaderboard {
     color: white;
   }
