@@ -3,14 +3,14 @@ import { toBeHex } from "ethers";
 
 export const Config = {
     regions: {
-        // dev: {
-        //     name: "Local Server",
-        //     mainAddress: "http://127.0.0.1:8000",
-        //     gameAddress: "ws://127.0.0.1:<ID>",
-        //     teamAddress: "ws://127.0.0.1:8000",
-        //     apiAddress: "https://admin.surviv.fun",
-        //     // apiAddress: "http://localhost:3001",
-        // },
+        dev: {
+            name: "Local Server",
+            mainAddress: "http://127.0.0.1:8000",
+            gameAddress: "ws://127.0.0.1:<ID>",
+            teamAddress: "ws://127.0.0.1:8000",
+            apiAddress: "https://admin.surviv.fun",
+            // apiAddress: "http://localhost:3001",
+        },
         // as: {
         //     name: "Asia",
         //     mainAddress: "https://as.surviv.fun",
