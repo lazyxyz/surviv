@@ -62,8 +62,7 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
                 // Claim season rewards first (one-time claim)
                 const seasonRewards = await account.getSeasonRewards();
                 // Then claim crates
-                const tx = await account.claimSeasonRewards(seasonRewards);
-                console.log("tx: ", tx.hash);
+                await account.claimSeasonRewards(seasonRewards);
                 successAlert("Season rewards and crates claimed successfully!");
             } else {
                 // Only claim crates if no season rewards
