@@ -8,57 +8,57 @@ export const Config = {
             mainAddress: "http://127.0.0.1:8000",
             gameAddress: "ws://127.0.0.1:<ID>",
             teamAddress: "ws://127.0.0.1:8000",
-            apiAddress: "https://admin.surviv.fun",
-            // apiAddress: "http://localhost:3001",
+            // apiAddress: "https://api.surviv.fun",
+            apiAddress: "http://localhost:3001",
         },
-        // as: {
-        //     name: "Asia",
-        //     mainAddress: "https://as.surviv.fun",
-        //     gameAddress: "wss://<ID>.as.surviv.fun",
-        //     teamAddress: "wss://team.as.surviv.fun",
-        //     apiAddress: "https://admin.surviv.fun",
-        // },
-        na: {
-            name: "North America",
-            mainAddress: "https://na.surviv.fun",
-            gameAddress: "wss://<ID>.na.surviv.fun",
-            teamAddress: "wss://team.na.surviv.fun",
-            apiAddress: "https://admin.surviv.fun",
+        as: {
+            name: "Asia",
+            mainAddress: "https://as.surviv.fun",
+            gameAddress: "wss://<ID>.as.surviv.fun",
+            teamAddress: "wss://team.as.surviv.fun",
+            apiAddress: "https://api.surviv.fun",
         },
-        // eu: {
-        //     name: "Europe",
-        //     mainAddress: "https://eu.surviv.fun",
-        //     gameAddress: "wss://<ID>.eu.surviv.fun",
-        //     teamAddress: "wss://team.eu.surviv.fun",
+        eu: {
+            name: "Europe",
+            mainAddress: "https://eu.surviv.fun",
+            gameAddress: "wss://<ID>.eu.surviv.fun",
+            teamAddress: "wss://team.eu.surviv.fun",
+            apiAddress: "https://api.surviv.fun",
+        },
+        // na: {
+        //     name: "North America",
+        //     mainAddress: "https://na.surviv.fun",
+        //     gameAddress: "wss://<ID>.na.surviv.fun",
+        //     teamAddress: "wss://team.na.surviv.fun",
         //     apiAddress: "https://admin.surviv.fun",
         // },
     },
-    defaultRegion: "na",
+    defaultRegion: "as",
 } satisfies ConfigType as ConfigType;
 
-// export const ChainConfig = {
-//     chainId: toBeHex(50312),
-//     chainName: "Somnia Testnet",
-//     rpcUrls: ["https://dream-rpc.somnia.network/"],
-//     nativeCurrency: {
-//         name: "Somnia Testnet Token",
-//         symbol: "STT",
-//         decimals: 18
-//     },
-//     blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
-// } satisfies ChainInfo as ChainInfo;
-
 export const ChainConfig = {
-    chainId: toBeHex(5031),
-    chainName: "Somnia Mainnet",
-    rpcUrls: ["https://api.infra.mainnet.somnia.network/"],
+    chainId: toBeHex(50312),
+    chainName: "Somnia Testnet",
+    rpcUrls: ["https://dream-rpc.somnia.network/"],
     nativeCurrency: {
-        name: "Somnia Token",
-        symbol: "SOMI",
+        name: "Somnia Testnet Token",
+        symbol: "STT",
         decimals: 18
     },
-    blockExplorerUrls: ["https://mainnet.somnia.w3us.site/"]
+    blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
 } satisfies ChainInfo as ChainInfo;
+
+// export const ChainConfig = {
+//     chainId: toBeHex(5031),
+//     chainName: "Somnia Mainnet",
+//     rpcUrls: ["https://api.infra.mainnet.somnia.network/"],
+//     nativeCurrency: {
+//         name: "Somnia Token",
+//         symbol: "SOMI",
+//         decimals: 18
+//     },
+//     blockExplorerUrls: ["https://mainnet.somnia.w3us.site/"]
+// } satisfies ChainInfo as ChainInfo;
 
 export interface ConfigType {
     readonly regions: Record<string, Region>
