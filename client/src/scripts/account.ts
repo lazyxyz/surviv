@@ -939,6 +939,7 @@ export class Account extends EIP6963 {
             return [];
         }
     }
+    
     async getSeasonRewards(season: string = "1"): Promise<SeasonRewardsData> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
@@ -964,9 +965,6 @@ export class Account extends EIP6963 {
             if (rewardsData.success) {
                 const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
                 const signer = await ethersProvider.getSigner();
-
-                const balance = await ethersProvider.getBalance(signer.address);
-                console.log("Balance: ", balance);
 
                 const distributionContract = new ethers.Contract(
                     rewardsData.distributionContract,

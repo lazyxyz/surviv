@@ -210,7 +210,7 @@
       countdownText.textContent = `Season ${season} Ended! Check Inventory and Claim Your Rewards.`;
       pulseRing.style.display = 'none';
     } else if (isEnded) {
-      countdownText.textContent = 'Season Ended';
+      countdownText.textContent = 'The season has ended. Waiting for the next one!';
       pulseRing.style.display = 'none';
     } else {
       countdownText.textContent = 'Season 1'; // Adjust based on API response if needed
@@ -371,28 +371,9 @@
 
       try {
         if (!season && isEnded) {
-          // When season has ended and no season parameter, show only user points
+          // When season has ended and no season parameter
           leaderboardTable.classList.add('hidden');
           rewardsImage.classList.remove('hidden');
-          if (myPublicKey && myRankingContainer) {
-            const myData = await fetchMyPlayerPoints(myPublicKey);
-            if (myData) {
-              // Show only the user's row with rank as '—' since leaderboard is not available
-              const pinned = createRow(myData, '—', `my-${page}`, true);
-              addYouBadgeToRow(pinned);
-              myRankingContainer.appendChild(pinned);
-            } else {
-              error.textContent = 'No data found for your account.';
-              error.classList.remove('hidden');
-            }
-          } else {
-            error.textContent = 'Please connect your wallet to view your points.';
-            error.classList.remove('hidden');
-          }
-          // Disable pagination when season has ended
-          totalPages = 1;
-          currentPage = 1;
-          updatePaginationUI();
         } else {
           // Normal leaderboard or season-specific fetching logic
           const apiUrl = season ? API_URL_SEASON : API_URL_CURRENT;

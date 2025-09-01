@@ -15,7 +15,7 @@ export async function showEmotes(account: Account) {
     }
 
     const userEmoteBalance = Object.entries(SurvivAssetBalances[SurvivAssets.Emotes]);
-    const userEmotes = userEmoteBalance.map(e => e[0]);
+    const userEmotes = Object.keys(userEmoteBalance.find(([index, _]) => index === "0")?.[1] || {});
 
     // Cache jQuery selectors for performance
     const emoteList = $("#emotes-list");
