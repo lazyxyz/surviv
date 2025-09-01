@@ -30,8 +30,33 @@
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<style>
+  section {
+    padding: 32px;
+    background: #0000008d;
+    clip-path: polygon(0% 1%, 100% 0%, 99% 100%, 0% 100%);
+    border-left: 5px solid #ffd23a;
+  }
+
+  h2 {
+    font-family: survivant;
+  }
+
+  .image-eagle {
+    position: fixed;
+    right: 0;
+    bottom: 0px;
+    width: 450px;
+    z-index: 9999;
+  }
+</style>
 
 <body>
+  <!-- soldier eagle -->
+  <div class="image-eagle">
+    <img src="../img/backgrounds/eagle.png" alt="">
+  </div>
+
   <div id="splash-ui">
     <div style="position: relative; backdrop-filter: blur(40px);">
       <div class="container-table">
@@ -48,120 +73,115 @@
             </div>
           </div>
 
-          <div class="countdown">
-            <div class="pulse-ring" id="pulse-ring" style="display: block"></div>
-            <p class="count-time" id="countdown-text">Master Surviv.fun and Conquer the Battle Royale!</p>
-          </div>
-        </div>
+          <!-- content section -->
+          <div class="body-section mt-16">
+            <div class="wiki-content mx-auto max-w-3xl">
+              <section class="mb-6">
+                <h2 class="text-2xl font-semibold text-yellow-400 mb-3 text-align-left">How to Play 🎮
+                </h2>
+                <p class="text-white">
+                  Surviv.fun is a fast-paced 2D battle royale, like PUBG or Fortnite. Your mission? Be the last one
+                  standing! Outsmart enemies by hiding, shooting, trolling, and using smart items to survive the chaos.
+                </p>
+              </section>
 
-        <!-- content section -->
-        <div class="body-section">
-          <div class="wiki-content mx-auto max-w-3xl">
-            <h1 class="text-3xl font-bold text-white mb-6 text-center">Surviv.fun Game Guide 🫡</h1>
+              <section class="mb-6">
+                <h2 class="text-2xl font-semibold text-yellow-400 mb-3 text-align-left">Controls 🎮</h2>
+                <ul class="list-disc pl-5 text-white max-w-lg">
+                  <li><strong>Move:</strong> W, A, S, D</li>
+                  <li><strong>Aim:</strong> Mouse</li>
+                  <li><strong>Melee/Shoot:</strong> Left-Click</li>
+                  <li><strong>Switch Weapons:</strong> 1–4 or Scroll Wheel</li>
+                  <li><strong>Reload:</strong> R</li>
+                  <li><strong>Scope Zoom:</strong> Left-Click on Zoom</li>
+                  <li><strong>Pickup/Loot/Revive:</strong> F</li>
+                  <li><strong>Use Meds:</strong> Left-Click on Item or 7–0</li>
+                  <li><strong>Drop Item:</strong> Right-Click on Item</li>
+                  <li><strong>Cancel Action:</strong> X</li>
+                  <li><strong>Map:</strong> M or G</li>
+                  <li><strong>Switch Gun Slots:</strong> T or drag gun</li>
+                  <li>Check Settings for more control options.</li>
+                </ul>
+              </section>
 
-            <section class="mb-8">
-              <h2 class="text-2xl font-semibold text-yellow-400 mb-3 text-center">How to Play 🎮</h2>
-              <p class="text-white">
-                Surviv.fun is a fast-paced 2D battle royale, like PUBG or Fortnite. Your mission? Be the last one standing! Outsmart enemies by hiding, shooting, trolling, and using smart items to survive the chaos.
-              </p>
-            </section>
-
-            <section class="mb-8">
-              <h2 class="text-2xl font-semibold text-yellow-400 mb-3 text-center">Controls 🎮</h2>
-              <ul class="list-disc pl-5 text-white max-w-lg">
-                <li><strong>Move:</strong> W, A, S, D</li>
-                <li><strong>Aim:</strong> Mouse</li>
-                <li><strong>Melee/Shoot:</strong> Left-Click</li>
-                <li><strong>Switch Weapons:</strong> 1–4 or Scroll Wheel</li>
-                <li><strong>Reload:</strong> R</li>
-                <li><strong>Scope Zoom:</strong> Left-Click on Zoom</li>
-                <li><strong>Pickup/Loot/Revive:</strong> F</li>
-                <li><strong>Use Meds:</strong> Left-Click on Item or 7–0</li>
-                <li><strong>Drop Item:</strong> Right-Click on Item</li>
-                <li><strong>Cancel Action:</strong> X</li>
-                <li><strong>Map:</strong> M or G</li>
-                <li><strong>Switch Gun Slots:</strong> T or drag gun</li>
-                <li>Check Settings for more control options.</li>
-              </ul>
-            </section>
-
-            <section class="mb-8">
-              <h2 class="text-2xl font-semibold text-yellow-400 mb-3 text-center">Earning Points 🏴‍☠️</h2>
-              <p class="text-white mb-3">
-                Points depend on your rank in a match. You need a Surviv Card NFT to earn points.
-              </p>
-              <div class="flex flex-col md:flex-row gap-6">
-                <div class="w-full md:w-1/2">
-                  <h3 class="text-xl font-semibold text-white mb-2">Solo Mode</h3>
-                  <ul class="list-disc pl-5 text-white max-w-sm">
-                    <li>1st Place: 10 points</li>
-                    <li>2nd Place: 5 points</li>
-                    <li>3rd Place: 3 points</li>
-                    <li>4th Place: 2 points</li>
-                    <li>5th Place: 1 point</li>
-                  </ul>
+              <section class="mb-6">
+                <h2 class="text-2xl font-semibold text-yellow-400 mb-3 text-align-left">Earning Points 🏴‍☠️</h2>
+                <p class="text-white mb-3">
+                  Points depend on your rank in a match. You need a Surviv Card NFT to earn points.
+                </p>
+                <div class="flex flex-col md:flex-row gap-6">
+                  <div class="w-full md:w-1/2">
+                    <h3 class="text-xl font-semibold text-white mb-2">Solo Mode</h3>
+                    <ul class="list-disc pl-5 text-white max-w-sm">
+                      <li>1st Place: 10 points</li>
+                      <li>2nd Place: 5 points</li>
+                      <li>3rd Place: 3 points</li>
+                      <li>4th Place: 2 points</li>
+                      <li>5th Place: 1 point</li>
+                    </ul>
+                  </div>
+                  <div class="w-full md:w-1/2">
+                    <h3 class="text-xl font-semibold text-white mb-2">Squad Mode (Per Player)</h3>
+                    <ul class="list-disc pl-5 text-white max-w-sm">
+                      <li>1st Place: 6 points</li>
+                      <li>2nd Place: 3 points</li>
+                      <li>3rd Place: 1 point</li>
+                    </ul>
+                  </div>
                 </div>
-                <div class="w-full md:w-1/2">
-                  <h3 class="text-xl font-semibold text-white mb-2">Squad Mode (Per Player)</h3>
-                  <ul class="list-disc pl-5 text-white max-w-sm">
-                    <li>1st Place: 6 points</li>
-                    <li>2nd Place: 3 points</li>
-                    <li>3rd Place: 1 point</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
+              </section>
 
-            <section class="mb-8">
-              <h2 class="text-2xl font-semibold text-yellow-400 mb-3 text-center">Squad Mode Tips 🤝</h2>
-              <h3 class="text-xl font-semibold text-white mb-2">Spot Your Teammates</h3>
-              <ul class="list-disc pl-5 text-white max-w-lg">
-                <li>Their name shows above their character.</li>
-                <li>Their color appears on the mini-map.</li>
-                <li>You can’t shoot or attack them.</li>
-              </ul>
-              <h3 class="text-xl font-semibold text-white mb-2 mt-4">Make Your Team Unstoppable</h3>
-              <ul class="list-disc pl-5 text-white max-w-lg">
-                <li><strong>Stick together:</strong> Stay close for strength in numbers.</li>
-                <li><strong>Share gear:</strong> Pass around weapons, armor, or meds.</li>
-                <li><strong>Cover each other:</strong> Watch their backs in fights.</li>
-                <li><strong>Watch explosions:</strong> Grenades and bombs can hurt teammates, so be careful!</li>
-              </ul>
-            </section>
+              <section class="mb-6">
+                <h2 class="text-2xl font-semibold text-yellow-400 mb-3 text-align-left">Squad Mode Tips 🤝</h2>
+                <h3 class="text-xl font-semibold text-white mb-2">Spot Your Teammates</h3>
+                <ul class="list-disc pl-5 text-white max-w-lg">
+                  <li>Their name shows above their character.</li>
+                  <li>Their color appears on the mini-map.</li>
+                  <li>You can’t shoot or attack them.</li>
+                </ul>
+                <h3 class="text-xl font-semibold text-white mb-2 mt-4">Make Your Team Unstoppable</h3>
+                <ul class="list-disc pl-5 text-white max-w-lg">
+                  <li><strong>Stick together:</strong> Stay close for strength in numbers.</li>
+                  <li><strong>Share gear:</strong> Pass around weapons, armor, or meds.</li>
+                  <li><strong>Cover each other:</strong> Watch their backs in fights.</li>
+                  <li><strong>Watch explosions:</strong> Grenades and bombs can hurt teammates, so be careful!</li>
+                </ul>
+              </section>
 
-            <section class="mb-8">
-              <h2 class="text-2xl font-semibold text-yellow-400 mb-3 text-center">Pro Tips 😎</h2>
-              <h3 class="text-xl font-semibold text-white mb-2">Dodge the Gas</h3>
-              <ul class="list-disc pl-5 text-white max-w-lg">
-                <li>Check the top-left mini-map for gas timers.</li>
-                <li>Keep an eye on the safe zone and gas circle.</li>
-                <li>The longer the game, the deadlier the gas. MOVE!</li>
-              </ul>
-              <h3 class="text-xl font-semibold text-white mb-2 mt-4">Check Mini-Map Often</h3>
-              <ul class="list-disc pl-5 text-white max-w-lg">
-                <li>Hit M or G regularly to open the mini-map.</li>
-                <li>Track enemies, teammates, and the safe zone to stay one step ahead.</li>
-                <li>Quick peeks at the mini-map can save your life!</li>
-              </ul>
-              <h3 class="text-xl font-semibold text-white mb-2 mt-4">Master Your Inventory</h3>
-              <ul class="list-disc pl-5 text-white max-w-lg">
-                <li>Crates hold the best loot—open them for a big advantage.</li>
-                <li>Check weapon details (damage, bullet type) in your inventory to pick the best gear.</li>
-                <li>Be a pro: know your tools!</li>
-              </ul>
-              <h3 class="text-xl font-semibold text-white mb-2 mt-4">Loot Like a Champ</h3>
-              <ul class="list-disc pl-5 text-white max-w-lg">
-                <li>Better scopes, armor, and gear give you an edge.</li>
-                <li>Use your melee weapon to loot faster and stay ahead.</li>
-              </ul>
-            </section>
+              <section class="mb-6">
+                <h2 class="text-2xl font-semibold text-yellow-400 mb-3 text-align-left">Pro Tips 😎</h2>
+                <h3 class="text-xl font-semibold text-white mb-2">Dodge the Gas</h3>
+                <ul class="list-disc pl-5 text-white max-w-lg">
+                  <li>Check the top-left mini-map for gas timers.</li>
+                  <li>Keep an eye on the safe zone and gas circle.</li>
+                  <li>The longer the game, the deadlier the gas. MOVE!</li>
+                </ul>
+                <h3 class="text-xl font-semibold text-white mb-2 mt-4">Check Mini-Map Often</h3>
+                <ul class="list-disc pl-5 text-white max-w-lg">
+                  <li>Hit M or G regularly to open the mini-map.</li>
+                  <li>Track enemies, teammates, and the safe zone to stay one step ahead.</li>
+                  <li>Quick peeks at the mini-map can save your life!</li>
+                </ul>
+                <h3 class="text-xl font-semibold text-white mb-2 mt-4">Master Your Inventory</h3>
+                <ul class="list-disc pl-5 text-white max-w-lg">
+                  <li>Crates hold the best loot—open them for a big advantage.</li>
+                  <li>Check weapon details (damage, bullet type) in your inventory to pick the best gear.</li>
+                  <li>Be a pro: know your tools!</li>
+                </ul>
+                <h3 class="text-xl font-semibold text-white mb-2 mt-4">Loot Like a Champ</h3>
+                <ul class="list-disc pl-5 text-white max-w-lg">
+                  <li>Better scopes, armor, and gear give you an edge.</li>
+                  <li>Use your melee weapon to loot faster and stay ahead.</li>
+                </ul>
+              </section>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script src="../src/earn.ts" type="module"></script>
+    <script src="../src/earn.ts" type="module"></script>
+  </div>
 </body>
 
 </html>
