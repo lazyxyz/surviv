@@ -18,6 +18,7 @@ import { abi as survivRewardsABI } from "@common/abis/ISurvivRewards.json";
 import { abi as crateBaseABI } from "@common/abis/ICrateBase.json";
 import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
+import { abi as seasonRewardsABI } from "@common/abis/INFTDistribution.json";
 import { errorAlert } from "./modal";
 import { resetPlayButtons } from "./ui/home";
 import { ChainConfig } from "../config";
@@ -93,6 +94,15 @@ export interface MintResult {
     values: [number, number][];
 }
 
+interface SeasonRewardsData {
+    success: boolean;
+    distributionContract: string;
+    claimFee: string;
+    collections: string[];
+    merkleProofs: string[][];
+    tokenIds: number[][];
+    amounts: number[][];
+}
 
 // ABI for the TransferSingle event
 const TRANSFER_SINGLE_ABI = [
@@ -927,6 +937,116 @@ export class Account extends EIP6963 {
         } catch (error) {
             console.log("error: ", error);
             return [];
+        }
+    }
+    async getSeasonRewards(season: string = "1"): Promise<SeasonRewardsData> {
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        try {
+            // Fetch available crates
+            const response = await fetch(`${this.api}/season/proof/${this.address}/?season=${season}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`,
+                },
+                signal: controller.signal,
+            });
+
+            const rewardsData: SeasonRewardsData = await response.json();
+
+            if (rewardsData.success) {
+                const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+                const signer = await ethersProvider.getSigner();
+
+                const balance = await ethersProvider.getBalance(signer.address);
+                console.log("Balance: ", balance);
+
+                const distributionContract = new ethers.Contract(
+                    rewardsData.distributionContract,
+                    seasonRewardsABI,
+                    signer
+                );
+
+                // Store valid rewards
+                let validRewards: SeasonRewardsData = {
+                    success: true,
+                    distributionContract: rewardsData.distributionContract,
+                    claimFee: rewardsData.claimFee,
+                    collections: [],
+                    merkleProofs: [],
+                    tokenIds: [],
+                    amounts: []
+                };
+
+                // Filter rewards
+                for (let i = 0; i < rewardsData.collections.length; i++) {
+                    const isValid = await distributionContract.verifyRewards(
+                        signer.address,
+                        rewardsData.collections[i],
+                        rewardsData.merkleProofs[i],
+                        rewardsData.tokenIds[i],
+                        rewardsData.amounts[i]
+                    );
+
+                    if (isValid) {
+                        validRewards.collections.push(rewardsData.collections[i]);
+                        validRewards.merkleProofs.push(rewardsData.merkleProofs[i]);
+                        validRewards.tokenIds.push(rewardsData.tokenIds[i]);
+                        validRewards.amounts.push(rewardsData.amounts[i]);
+                    }
+                }
+
+                // Update rewardsData with only valid rewards
+                rewardsData.collections = validRewards.collections;
+                rewardsData.merkleProofs = validRewards.merkleProofs;
+                rewardsData.tokenIds = validRewards.tokenIds;
+                rewardsData.amounts = validRewards.amounts;
+
+                // Set success to false if no valid rewards
+                rewardsData.success = validRewards.collections.length > 0;
+            }
+
+            return rewardsData;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            throw error;
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
+    async claimSeasonRewards(rewardsData: SeasonRewardsData): Promise<any> {
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+            const distributionContract = new ethers.Contract(rewardsData.distributionContract, seasonRewardsABI, signer);
+
+            const tx = await distributionContract.claimAll(rewardsData.collections, rewardsData.merkleProofs, rewardsData.tokenIds, rewardsData.amounts, {
+                value: rewardsData.claimFee,
+            });
+            const receipt = await tx.wait();
+            clearTimeout(timeoutId);
+            return receipt;
+
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
         }
     }
 }

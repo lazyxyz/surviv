@@ -32,7 +32,6 @@ export let ShopCache: {
     PlayerValidRewards: ValidRewards | undefined;
 }
 
-
 export async function showShop(account: Account) {
     ShopCache = {
         storeLoaded: false,
