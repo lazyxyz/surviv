@@ -1,8 +1,7 @@
-import { GameConstants, InputActions, InventoryMessages, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { InputActions, InventoryMessages, Layer, ObjectCategory, TeamSize } from "@common/constants";
 import { ArmorType } from "@common/definitions/armors";
 import { type BadgeDefinition } from "@common/definitions/badges";
 import { type DualGunNarrowing } from "@common/definitions/guns";
-import { Scopes } from "@common/definitions/scopes";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { GameOverPacket } from "@common/packets/gameOverPacket";
 import { JoinedPacket, type JoinedPacketData } from "@common/packets/joinedPacket";
@@ -58,10 +57,10 @@ import { Account } from "./account";
 import { ReadyPacket, type PlayerData } from "@common/packets/readyPacket";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { errorAlert } from "./modal";
-import { getRandomMode, Modes, NumberToMode, type Mode } from "@common/definitions/modes";
+import { Modes, NumberToMode, type Mode } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "..";
 import { resetPlayButtons, updateDisconnectTime } from "./ui/home";
-import { autoPickup } from "./ui/game";
+import { autoPickup, updateUsersBadge } from "./ui/game";
 import { teamSocket } from "./ui/play";
 
 /* eslint-disable @stylistic/indent */
@@ -189,9 +188,7 @@ export class Game {
         const url = (() => {
             // List of available music files
             const musicFiles = [
-                "menu_music1.mp3",
-                "menu_music2.mp3",
-                "menu_music3.mp3"
+                "menu_music1.mp3"
             ];
             const randomFile = musicFiles[Math.floor(Math.random() * musicFiles.length)];
             return `./audio/music/${randomFile}`;
@@ -345,6 +342,7 @@ export class Game {
 
     ready(packet: PlayerData) {
         this.sendPacket(JoinPacket.create(packet));
+        updateUsersBadge(packet.badge?.idString)
     }
 
     async connectWebSocket(
@@ -517,7 +515,7 @@ export class Game {
                 this.initPixi(this.gameMode).then(_ => {
                     this.ready(packet.output);
                     this.setupGame();
-                })
+                });
                 break;
             case packet instanceof JoinedPacket:
                 this.startGame(packet.output);
@@ -1254,7 +1252,7 @@ export class Game {
             // funny detonate button stuff
             const detonateKey = this.uiManager.ui.detonateKey;
             if (!this.inputManager.isMobile) {
-                const boomBind: string | undefined = this.inputManager.binds.getInputsBoundToAction("explode_c4")[0];
+                const boomBind: string | undefined = undefined;
 
                 if (funnyDetonateButtonCache.bind !== boomBind) {
                     funnyDetonateButtonCache.bind = bind;

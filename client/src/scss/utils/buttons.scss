@@ -116,13 +116,33 @@
 
 #link-social {
   position: fixed;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
   bottom: 16px;
   right: 16px;
   z-index: 9999;
-  transition: 300ms;
 
-  &:hover {
-    transform: rotate(4deg);
+  .btn-special {
+    transition: 300ms;
+    &:hover {
+      transform: rotate(2deg);
+    }
+  }
+
+  #btn-guide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    color: white;
+    font-size: 20px;
+    font-family: survivant;
+    font-size: 15px;
+    height: 48px;
   }
 }
 
@@ -139,8 +159,9 @@
 }
 .btn-assets {
   background-image: url("/img/socials/assets.svg");
-  width: 150px;
-  height: 45px;
+  width: 169px;
+  height: 50px;
+  background-size: 169px;
 }
 
 .btn-bind {

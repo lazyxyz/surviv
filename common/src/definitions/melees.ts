@@ -436,7 +436,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             idString: "falchion",
             name: "Falchion",
             default: true,
-            damage: 41,
+            damage: 50,
             swingSound: "soft_swing",
             obstacleMultiplier: 1.1,
             radius: 4.1,

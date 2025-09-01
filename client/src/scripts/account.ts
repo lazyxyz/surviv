@@ -5,18 +5,13 @@ import { EIP6963, type Provider6963Props } from "./eip6963";
 import { ethers, toBeHex } from "ethers";
 
 import {
-    SilverSkinsMapping,
-    GoldSkinsMapping,
-    DivineSkinsMapping,
-    SilverArmsMapping,
-    GoldArmsMapping,
-    DivineArmsMapping,
-    DivineGunsMapping,
-    SurvivMemesMapping,
-    SurvivCratesMapping,
-    SurvivKeysMapping,
-    SurvivCardsMapping,
-    SurvivMapping
+    SurvivAssetsMapping,
+    SurvivKitsMapping,
+    SurvivBadgesMapping,
+    SurvivMapping,
+    SurvivAssets,
+    SurvivAssetRanges,
+    AssetTier
 } from "@common/mappings";
 
 import { abi as survivRewardsABI } from "@common/abis/ISurvivRewards.json";
@@ -25,33 +20,38 @@ import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
 import { errorAlert } from "./modal";
 import { resetPlayButtons } from "./ui/home";
+import { ChainConfig } from "../config";
 
-const CHAIN_ID = SurvivMapping.ChainId;
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
 const SURVIV_BASE_ADDRESS = SurvivMapping.SurvivBase.address;
 const SURVIV_SHOP_ADDRESS = SurvivMapping.SurvivShop.address;
 
-export enum SurvivAssets {
-    SilverSkins,
-    GoldSkins,
-    DivineSkins,
-    SilverArms,
-    GoldArms,
-    DivineArms,
-    DivineGuns,
-    SurvivMemes,
-    SurvivCrates,
-    SurvivKeys,
-    SurvivCards
+export enum SurvivKits {
+    Crates = "crate",
+    Keys = "key",
 }
 
-export const SaleItems = {
-    Crates: SurvivCratesMapping.address,
-    Cards: SurvivCardsMapping.address,
-    Keys: SurvivKeysMapping.address
-} as const;
+export enum SurvivBadges {
+    Cards = "surviv_card",
+}
+export type SaleItems = SurvivKits | SurvivBadges;
 
-export type SaleItemType = keyof typeof SaleItems;
+export enum SurvivItems {
+    SurvivKits,
+    SurvivBadges
+};
+
+// Mapping of SurvivItems enums to their contract mappings
+const itemMappings: Record<SurvivItems, { address: string; assets: string[] }> = {
+    [SurvivItems.SurvivKits]: SurvivKitsMapping,
+    [SurvivItems.SurvivBadges]: SurvivBadgesMapping
+};
+
+const saleMappings: Record<SaleItems, { address: string; assets: string[] }> = {
+    [SurvivKits.Crates]: SurvivKitsMapping,
+    [SurvivKits.Keys]: SurvivKitsMapping,
+    [SurvivBadges.Cards]: SurvivBadgesMapping
+};
 
 export const PaymentTokens = {
     NativeToken: SurvivMapping.NativeToken.address,
@@ -64,7 +64,6 @@ export type PaymentTokenType = keyof typeof PaymentTokens;
 */
 interface Crate {
     to: string;
-    tier: number;
     amount: number;
     salt: string;
     expiry: number;
@@ -84,7 +83,7 @@ interface ClaimResponse {
 /**
  * Interface for valid rewards return type
  */
-interface ValidRewards {
+export interface ValidRewards {
     validCrates: Crate[];
     validSignatures: string[];
 }
@@ -169,17 +168,15 @@ export class Account extends EIP6963 {
     async connect(getProvider: Provider6963Props): Promise<void> {
         // Check and switch network if necessary
         {
-            const targetChainId = toBeHex(CHAIN_ID);
             const currentChainId = await getProvider.provider.request({
                 method: "eth_chainId"
             }) as string;
 
-            // Attempt to switch to the target chain
-            if (currentChainId !== targetChainId) {
+            if (currentChainId !== ChainConfig.chainId) {
                 try {
                     await getProvider.provider.request({
                         method: "wallet_switchEthereumChain",
-                        params: [{ chainId: targetChainId }]
+                        params: [{ chainId: ChainConfig.chainId }]
                     });
                 } catch (switchError: any) {
                     // If the chain is not added (e.g., error code 4902), add it
@@ -187,17 +184,7 @@ export class Account extends EIP6963 {
                         try {
                             await getProvider.provider.request({
                                 method: "wallet_addEthereumChain",
-                                params: [{
-                                    chainId: targetChainId,
-                                    chainName: "Somnia Testnet",
-                                    rpcUrls: ["https://dream-rpc.somnia.network/"],
-                                    nativeCurrency: {
-                                        name: "Somnia Testnet Token",
-                                        symbol: "STT",
-                                        decimals: 18
-                                    },
-                                    blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
-                                }]
+                                params: [ChainConfig]
                             });
                         } catch (addError) {
                             errorAlert("Failed to add the Somnia Testnet. Please add it manually in your wallet.");
@@ -306,45 +293,159 @@ export class Account extends EIP6963 {
         window.dispatchEvent(new Event("eip6963:requestProvider"));
     }
 
+
+
     /**
- * Retrieves balances for a specific asset type, mapping token IDs to asset names.
- * @param assetType - The type of asset to query (e.g., SilverSkins, DivineArms).
- * @param returnAll - If true, includes assets with zero balances; if false, only includes assets with balance > 0 (default: false).
- * @returns A promise resolving to an object mapping asset names to their balances.
- * @throws Error if the contract address is invalid or provider is unavailable.
- */
-    async getBalances(assetType: SurvivAssets, returnAll: boolean = false): Promise<Record<string, number>> {
-        const assetMappings = {
-            [SurvivAssets.SilverSkins]: SilverSkinsMapping,
-            [SurvivAssets.GoldSkins]: GoldSkinsMapping,
-            [SurvivAssets.DivineSkins]: DivineSkinsMapping,
-            [SurvivAssets.SilverArms]: SilverArmsMapping,
-            [SurvivAssets.GoldArms]: GoldArmsMapping,
-            [SurvivAssets.DivineArms]: DivineArmsMapping,
-            [SurvivAssets.DivineGuns]: DivineGunsMapping,
-            [SurvivAssets.SurvivMemes]: SurvivMemesMapping,
-            [SurvivAssets.SurvivCrates]: SurvivCratesMapping,
-            [SurvivAssets.SurvivKeys]: SurvivKeysMapping,
-            [SurvivAssets.SurvivCards]: SurvivCardsMapping,
-        };
-
-        const selectedMapping = assetMappings[assetType];
-
-        if (!ethers.isAddress(selectedMapping.address)) {
-            throw new Error(`Invalid contract address: ${selectedMapping.address}`);
-        }
-
+     * Retrieves balances for all SurvivAssets, mapping token IDs to asset names and tiers.
+     * @param returnAll - If true, includes assets with zero balances; if false, only includes assets with balance > 0 (default: false).
+     * @returns A promise resolving to a nested object mapping SurvivAssets to Tiers to asset names and their balances.
+     * @throws Error if the contract address is invalid, provider is unavailable, or SurvivAssetsMapping is invalid.
+     */
+    async getAssetBalances(
+        returnAll: boolean = false
+    ): Promise<Record<SurvivAssets, Record<AssetTier, Record<string, number>>>> {
         if (!this.provider?.provider) {
-            throw new Error("Provider not available");
+            throw new Error('Provider not available');
         }
 
+        if (!SurvivAssetsMapping || !SurvivAssetsMapping.address || !Array.isArray(SurvivAssetsMapping.assets)) {
+            throw new Error('Invalid SurvivAssetsMapping configuration');
+        }
+
+        const assetsAddress = SurvivAssetsMapping.address;
+        if (!ethers.isAddress(assetsAddress)) {
+            throw new Error('Invalid contract address in SurvivAssetsMapping');
+        }
+
+        // Initialize the ethers contract
         const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
         const signer = await ethersProvider.getSigner();
-        const contract = new ethers.Contract(selectedMapping.address, erc1155ABI, signer);
+        const contract = new ethers.Contract(assetsAddress, erc1155ABI, signer);
+
+        // Initialize result with nested structure: SurvivAssets -> Tier -> assetName -> balance
+        const result: Record<SurvivAssets, Record<AssetTier, Record<string, number>>> = {
+            [SurvivAssets.Skins]: {
+                [AssetTier.Silver]: {},
+                [AssetTier.Gold]: {},
+                [AssetTier.Divine]: {}
+            },
+            [SurvivAssets.Emotes]: {
+                [AssetTier.Silver]: {}, // Emotes may not use tiers, but included for consistency
+                [AssetTier.Gold]: {},
+                [AssetTier.Divine]: {}
+            },
+            [SurvivAssets.Arms]: {
+                [AssetTier.Silver]: {},
+                [AssetTier.Gold]: {},
+                [AssetTier.Divine]: {}
+            },
+            [SurvivAssets.Guns]: {
+                [AssetTier.Silver]: {}, // Guns may not have Silver, but included for consistency
+                [AssetTier.Gold]: {},
+                [AssetTier.Divine]: {}
+            }
+        };
+
+        // Mapping of mappingIndices to Tiers for Skins, Arms, and Guns
+        const tierMapping: Record<number, AssetTier> = {
+            // Skins
+            0: AssetTier.Silver, // SilverSkins
+            1: AssetTier.Gold,   // GoldSkins
+            2: AssetTier.Divine, // DivineSkins
+            // Emotes (no tier, default to Silver for simplicity)
+            3: AssetTier.Silver, // SurvivMemes
+            // Arms
+            4: AssetTier.Silver, // SilverArms
+            5: AssetTier.Gold,   // GoldArms
+            6: AssetTier.Divine, // DivineArms
+            // Guns
+            7: AssetTier.Gold,   // GoldGuns
+            8: AssetTier.Divine  // DivineGuns
+        };
+
+        // Iterate through all SurvivAssets enum values
+        for (const assetType of Object.values(SurvivAssets).filter(val => typeof val === 'number') as SurvivAssets[]) {
+            const { mappingIndices } = SurvivAssetRanges[assetType];
+
+            // Flatten the asset names and token IDs for the current category
+            const assetNames: string[] = [];
+            const tokenIds: number[] = [];
+            const tierIndices: AssetTier[] = [];
+
+            for (const index of mappingIndices) {
+                const subArray = SurvivAssetsMapping.assets[index] || [];
+                const startId = index * 1000; // Derive startId from index
+                const tier = tierMapping[index] || AssetTier.Silver; // Default to Silver if not mapped
+                let currentTokenId = startId;
+                for (const name of subArray) {
+                    assetNames.push(name);
+                    tokenIds.push(currentTokenId++);
+                    tierIndices.push(tier);
+                }
+            }
+
+            if (tokenIds.length === 0) {
+                continue;
+            }
+
+            // Batch query balances
+            const accounts = Array(tokenIds.length).fill(this.address);
+            const balances = await contract.balanceOfBatch(accounts, tokenIds);
+
+            // Map token IDs to asset names with balances, organized by tier
+            for (let i = 0; i < tokenIds.length; i++) {
+                const balance = Number(balances[i]); // Convert BigNumber to number
+                if (returnAll || balance > 0) {
+                    const assetName = assetNames[i];
+                    const tier = tierIndices[i];
+                    if (assetName) {
+                        result[assetType][tier][assetName] = balance;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Retrieves balances for a specific asset type from SurvivKits or SurvivBadges.
+     * @param assetType - The type of asset to query (e.g., SurvivKits.Crates, SurvivBadges.Cards).
+     * @param returnAll - If true, includes assets with zero balances; if false, only includes assets with balance > 0 (default: false).
+     * @returns A promise resolving to an object mapping asset names to their balances.
+     * @throws Error if the contract address is invalid, provider is unavailable, or mapping is invalid.
+     */
+    async getItemBalances(
+        assetType: SurvivItems,
+        returnAll: boolean = false
+    ): Promise<Record<string, number>> {
+        if (!this.provider?.provider) {
+            throw new Error('Provider not available');
+        }
+        const selectedMapping = itemMappings[assetType];
+        if (!selectedMapping || !selectedMapping.address || !Array.isArray(selectedMapping.assets)) {
+            throw new Error(`Invalid mapping configuration for asset type ${assetType}`);
+        }
+
+        const assetsAddress = selectedMapping.address;
+        if (!ethers.isAddress(assetsAddress)) {
+            throw new Error(`Invalid contract address: ${assetsAddress}`);
+        }
 
         const tokenIds = Array.from({ length: selectedMapping.assets.length }, (_, i) => i);
-        const accounts = Array(tokenIds.length).fill(this.address);
+        const assetNames = selectedMapping.assets;
 
+        if (tokenIds.length === 0) {
+            return {};
+        }
+
+        // Initialize the ethers contract
+        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+        const signer = await ethersProvider.getSigner();
+        const contract = new ethers.Contract(assetsAddress, erc1155ABI, signer);
+
+        // Batch query balances
+        const accounts = Array(tokenIds.length).fill(this.address);
         const balances = await contract.balanceOfBatch(accounts, tokenIds);
 
         // Map token IDs to asset names with balances
@@ -352,7 +453,7 @@ export class Account extends EIP6963 {
         for (let i = 0; i < tokenIds.length; i++) {
             const balance = Number(balances[i]); // Convert BigNumber to number
             if (returnAll || balance > 0) {
-                const assetName = selectedMapping.assets[tokenIds[i]];
+                const assetName = assetNames[i];
                 if (assetName) {
                     result[assetName] = balance;
                 }
@@ -361,7 +462,6 @@ export class Account extends EIP6963 {
 
         return result;
     }
-
     /**
      * Claims all available rewards (crates) for the authenticated user.
      * @returns A promise resolving to the transaction receipt.
@@ -425,7 +525,7 @@ export class Account extends EIP6963 {
 
         try {
             // Fetch available crates
-            const response = await fetch(`${this.api}/api/getCrates`, {
+            const response = await fetch(`${this.api}/api/getValidRewards`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -446,15 +546,13 @@ export class Account extends EIP6963 {
             const signatures: string[] = [];
 
             for (const claim of data.claims) {
-                if (!claim.crate?.to || !ethers.isAddress(claim.crate.to) ||
-                    !Number.isInteger(claim.crate.tier) || !Number.isInteger(claim.crate.amount) ||
+                if (!claim.crate?.to || !ethers.isAddress(claim.crate.to) || !Number.isInteger(claim.crate.amount) ||
                     !claim.crate.salt || !Number.isInteger(claim.crate.expiry) || !claim.signature) {
                     console.warn('Invalid claim data, skipping:', claim);
                     continue;
                 }
                 crates.push({
                     to: claim.crate.to,
-                    tier: Number(claim.crate.tier),
                     amount: Number(claim.crate.amount),
                     salt: claim.crate.salt,
                     expiry: Number(claim.crate.expiry),
@@ -512,7 +610,7 @@ export class Account extends EIP6963 {
 
         try {
             const body = signatures?.length ? { signatures } : {};
-            const response = await fetch(`${this.api}/api/removeCrates`, {
+            const response = await fetch(`${this.api}/api/claimRewards`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -555,18 +653,25 @@ export class Account extends EIP6963 {
             const signer = await ethersProvider.getSigner();
 
             const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
-            const cratesContract = new ethers.Contract(SurvivCratesMapping.address, erc1155ABI, signer);
+            const cratesContract = new ethers.Contract(SurvivKitsMapping.address, erc1155ABI, signer);
 
-            const balance = await cratesContract.balanceOf(signer.address, 0);
+            const kitsMapping = itemMappings[SurvivItems.SurvivKits];
+            const crateIndex = kitsMapping.assets.indexOf("crate");
+            const keyIndex = kitsMapping.assets.indexOf("key");
 
-            if (Number(balance) >= amount) {
+
+            const tokenIds = [crateIndex, keyIndex];
+            const accounts = Array(tokenIds.length).fill(this.address);
+            const kitBalances = await cratesContract.balanceOfBatch(accounts, tokenIds);
+
+            if (kitBalances[crateIndex] >= amount && kitBalances[keyIndex] >= amount) {
                 // Execute claim transaction
-                const tx = await crateBaseContract.commitCrates(0, amount);
+                const tx = await crateBaseContract.commitCrates(amount);
                 const receipt = await tx.wait();
                 clearTimeout(timeoutId);
                 return receipt;
             } else {
-                throw new Error(`Insufficient crates balance: ${balance}`);
+                throw new Error(`Insufficient crates or keys: crates: ${kitBalances[crateIndex]}, keys: ${kitBalances[keyIndex]}`);
             }
 
         } catch (error: any) {
@@ -648,12 +753,15 @@ export class Account extends EIP6963 {
      * @returns A promise resolving to the API response.
      * @throws Error if the API request fails, authentication is invalid, or payment fails.
      */
-    async buyItems(item: SaleItemType, amount: number, paymentToken: PaymentTokenType, value: bigint): Promise<any> {
+    async buyItems(item: SaleItems, amount: number, paymentToken: PaymentTokenType, value: bigint): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
-        let itemValue = SaleItems[item];
-        let paymentTokenValue = PaymentTokens[paymentToken];
+        let itemAddress = saleMappings[item].address;
+        let itemIndex = saleMappings[item].assets.indexOf(item);
+        if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
+            throw new Error(`Invalid contract address or tokenId for ${item}`);
+        }
 
         // Set fetch timeout
         const controller = new AbortController();
@@ -663,10 +771,11 @@ export class Account extends EIP6963 {
             // Initialize contract
             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
             const signer = await ethersProvider.getSigner();
+            let paymentTokenValue = PaymentTokens[paymentToken];
 
             const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
             if (paymentTokenValue == PaymentTokens.NativeToken) {
-                const tx = await survivShopContract.buyItems(itemValue, amount, paymentTokenValue, { value });
+                const tx = await survivShopContract.buyItems(itemAddress, itemIndex, amount, paymentTokenValue, { value });
                 const receipt = await tx.wait();
                 clearTimeout(timeoutId);
                 return receipt;
@@ -680,11 +789,19 @@ export class Account extends EIP6963 {
     }
 
     async queryPrice(
-        item: SaleItemType, // Use SaleItems key type ("Crates" | "Cards" | "Keys")
+        item: SaleItems, // Use SaleItems key type ("Crates" | "Cards" | "Keys")
         paymentToken: PaymentTokenType // Use PaymentTokens key type ("NativeToken")
     ): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
+        }
+
+        let itemValue = saleMappings[item];
+        let itemAddress = itemValue.address;
+
+        let itemIndex = itemValue.assets.indexOf(item);
+        if (!ethers.isAddress(itemValue.address) || itemIndex === -1) {
+            throw new Error(`Invalid contract address or tokenId for ${item}`);
         }
 
         // Set fetch timeout
@@ -695,10 +812,9 @@ export class Account extends EIP6963 {
             // Initialize contract
             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
             const signer = await ethersProvider.getSigner();
-
             const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
 
-            const price = await survivShopContract.getPrice(PaymentTokens[paymentToken], SaleItems[item]);
+            const price = await survivShopContract.getPrice(PaymentTokens[paymentToken], itemAddress, itemIndex);
             clearTimeout(timeoutId);
             return price;
         } catch (error: any) {

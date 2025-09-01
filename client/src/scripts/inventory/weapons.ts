@@ -1,9 +1,10 @@
 import $ from "jquery";
 import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
-import { Account, SurvivAssets } from "../account";
-import { InventoryCache } from ".";
+import { Account } from "../account";
 import { GAME_CONSOLE } from "../..";
+import { SurvivAssets, AssetTier } from "@common/mappings";
+import { SurvivAssetBalances } from ".";
 
 // Constants for repeated strings
 const ASSET_PATH = "./img/game/shared";
@@ -17,7 +18,6 @@ interface AssetConfig {
   zIndex: number;
   rotate: number;
 }
-
 
 const selectWeapon = (value: object) => {
   const weaponPreset = GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset");
@@ -87,20 +87,19 @@ const showViewBox = () => {
       zIndex: 2,
       rotate: 0,
     },
-
     {
       class: "assets-fist",
       url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
-      x: melee.fists.right.x,
-      y: melee.fists.right.y,
+      x: melee.fists?.right?.x | 0,
+      y: melee.fists?.right?.y | 0,
       zIndex: 3,
       rotate: 0,
     },
     {
       class: "assets-fist",
       url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
-      x: melee.fists.left.x,
-      y: melee.fists.left.y,
+      x: melee.fists?.left?.x | 0,
+      y: melee.fists?.left?.y | 0,
       zIndex: 4,
       rotate: 0,
     },
@@ -108,7 +107,7 @@ const showViewBox = () => {
       class: "assets-world",
       url: `${ASSET_PATH}/weapons/${melee.idString}.svg`,
       x: melee.image?.position.x ?? 0,
-      y: melee.fists.right.x,
+      y: melee.fists?.right?.x | 0,
       rotate: melee.image?.angle ?? 0,
       zIndex: 1,
     }
@@ -119,7 +118,7 @@ const showViewBox = () => {
     assets.push({
       class: "assets-world",
       url: `${ASSET_PATH}/weapons/${gun.idString}_world.svg`,
-      x: - gun.fists.right.x,
+      x: - (gun.fists?.right?.x | 0),
       y: 0,
       rotate: 90,
       zIndex: 1,
@@ -175,26 +174,6 @@ const selectMelee = (weaponId: string) => {
   showViewBox();
 };
 
-/*
-======================================================
-======================================================
-*/
-
-// ammo mapping
-const AMMO_TYPE_IMAGES: Record<string, string> = {
-  "762mm": `${ASSET_PATH}/loot/762mm.svg`,
-  "556mm": `${ASSET_PATH}/loot/556mm.svg`,
-  "9mm": `${ASSET_PATH}/loot/9mm.svg`,
-  "12g": `${ASSET_PATH}/loot/12g.svg`,
-  "50cal": `${ASSET_PATH}/loot/50cal.svg`,
-  "338lap": `${ASSET_PATH}/loot/338lap.svg`,
-  "power_cell": `${ASSET_PATH}/loot/power_cell.svg`,
-  "firework_rocket": `${ASSET_PATH}/loot/firework_rocket.svg`,
-  "bb": `${ASSET_PATH}/loot/bb.svg`,
-  "curadell": `${ASSET_PATH}/loot/curadell.svg`,
-};
-
-
 // Function to select a gun
 const selectGun = (weaponId: string) => {
   // Store the selected weapon
@@ -224,6 +203,16 @@ const selectGun = (weaponId: string) => {
   } else if (gun.ammoType) {
     ammoTypeHtml = gun.ammoType;
   }
+  // Capacity of gun
+  let capacityAmout = "N/A";
+  if (typeof gun.capacity === "number" || typeof gun.extendedCapacity === "number") {
+    const base = gun.capacity ?? gun.extendedCapacity;
+    capacityAmout = String(base);
+    // Show extended capacity if available
+    if (typeof gun.extendedCapacity === "number" && gun.extendedCapacity !== base) {
+      capacityAmout += ` (${gun.extendedCapacity})`;
+    }
+  }
 
   // Update weapon info panel
   const dps = gun.ballistics.damage && gun.fireDelay ? (gun.ballistics.damage / (gun.fireDelay / 1000)).toFixed(2) : "N/A";
@@ -246,10 +235,13 @@ const selectGun = (weaponId: string) => {
               <p class="stat-type">Range:</p>
               <span class="stat-value">${gun.ballistics.range ?? "N/A"}</span>
       </div>
-    </div>
-    <div class="child-section">
-              <p class="stat-type">Ammo Type:</p>
+      <div class="row-section">
+              <p class="stat-type">Ammo:</p>
               <span class="stat-value">${ammoTypeHtml}</span>
+      </div>
+      <div class="row-section">
+              <p class="stat-type">Capacity:</p>
+              <span class="stat-value" id="capacity-text">${capacityAmout}</span>
       </div>
   `);
 
@@ -268,30 +260,55 @@ async function showGuns(account: Account, selectedGunId?: string) {
   }
 
   try {
-
-    let gunBalances = Object.entries(await account.getBalances(SurvivAssets.DivineGuns));
-    const userGuns = gunBalances.map(g => g[0]);
+    // Collect all owned guns from all tiers
+    const gunBalances: [string, number][] = [];
+    for (const tier of Object.values(AssetTier).filter(val => typeof val === 'number') as AssetTier[]) {
+      const gunsInTier = Object.entries(SurvivAssetBalances[SurvivAssets.Guns][tier]);
+      gunBalances.push(...gunsInTier);
+    }
+    const userGuns = gunBalances
+      .filter(([_, balance]) => balance > 0)
+      .map(([id]) => id);
 
     const allGuns = Guns.definitions; // Show all guns, not just owned ones
     // Split guns into owned and unowned
     const ownedGuns = allGuns.filter((gun) => isOwned(gun.idString, userGuns));
     const unownedGuns = allGuns.filter((gun) => !isOwned(gun.idString, userGuns));
 
+    // Map tiers to background images
+    const tierBackgrounds: Record<AssetTier, string> = {
+      [AssetTier.Silver]: `${ASSET_PATH}/patterns/silver.svg`,
+      [AssetTier.Gold]: `${ASSET_PATH}/patterns/gold.svg`,
+      [AssetTier.Divine]: `${ASSET_PATH}/patterns/divine.svg`
+    };
+
     // Render gun items (owned first, then unowned)
     const $gunList = $("#list-gun").empty();
     $gunList.append(`
-    <div class="weapons-container-card weapons-container-card-gun"
-        id="weapons-list-no-gun" data-id="no-gun">
-      <img src="${ASSET_PATH}/weapons/empty_slot.svg" alt="No Gun" width="72px" height="72px" />
-      <p class="weapons-container-paragraph">No Gun</p>
-    </div>
-  `);
+      <div class="weapons-container-card weapons-container-card-gun"
+           id="weapons-list-no-gun" data-id="no-gun">
+        <img src="${ASSET_PATH}/weapons/empty_slot.svg" alt="No Gun" width="72px" height="72px" />
+        <p class="weapons-container-paragraph">No Gun</p>
+      </div>
+    `);
 
     for (const { idString, name } of ownedGuns) {
+      // Determine the tier of the gun
+      let tier: AssetTier | undefined;
+      for (const t of Object.values(AssetTier).filter(val => typeof val === 'number') as AssetTier[]) {
+        if (Object.keys(SurvivAssetBalances[SurvivAssets.Guns][t]).includes(idString)) {
+          tier = t;
+          break;
+        }
+      }
+      const backgroundImage = tier !== undefined ? tierBackgrounds[tier] : tierBackgrounds[AssetTier.Silver];
+
       $gunList.append(`
         <div class="weapons-container-card weapons-container-card-gun"
              id="weapons-list-${idString}" data-id="${idString}">
+             <div class="weapons-tier-background" style="background-image: url('${backgroundImage}')">
           <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+          </div>
           <p class="weapons-container-paragraph">${name}</p>
         </div>
       `);
@@ -300,7 +317,9 @@ async function showGuns(account: Account, selectedGunId?: string) {
       $gunList.append(`
         <div class="weapons-container-card weapons-container-card-gun inactive"
              id="weapons-list-${idString}" data-id="${idString}">
+             <div class="weapons-tier-background" style="background-image: url('${tierBackgrounds[AssetTier.Silver]}')">
           <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+          </div>
           <p class="weapons-container-paragraph">${name}</p>
         </div>
       `);
@@ -327,13 +346,15 @@ async function showMelees(account: Account, selectedMeleeId?: string) {
   }
 
   try {
-
-    const userArmsBalance = [
-      ...Object.entries(await account.getBalances(SurvivAssets.SilverArms)),
-      ...Object.entries(await account.getBalances(SurvivAssets.GoldArms)),
-      ...Object.entries(await account.getBalances(SurvivAssets.DivineArms)),
-    ];
-    const userArms = userArmsBalance.map(s => s[0]);
+    // Collect all owned arms from all tiers
+    const userArmsBalance: [string, number][] = [];
+    for (const tier of Object.values(AssetTier).filter(val => typeof val === 'number') as AssetTier[]) {
+      const armsInTier = Object.entries(SurvivAssetBalances[SurvivAssets.Arms][tier]);
+      userArmsBalance.push(...armsInTier);
+    }
+    const userArms = userArmsBalance
+      .filter(([_, balance]) => balance > 0)
+      .map(([id]) => id);
     userArms.push("fists"); // Add default
 
     const allMelees = Melees.definitions;
@@ -341,13 +362,32 @@ async function showMelees(account: Account, selectedMeleeId?: string) {
     const ownedMelees = allMelees.filter((melee) => isOwned(melee.idString, userArms));
     const unownedMelees = allMelees.filter((melee) => !isOwned(melee.idString, userArms));
 
+    // Map tiers to background images
+    const tierBackgrounds: Record<AssetTier, string> = {
+      [AssetTier.Silver]: `${ASSET_PATH}/patterns/silver.svg`,
+      [AssetTier.Gold]: `${ASSET_PATH}/patterns/gold.svg`,
+      [AssetTier.Divine]: `${ASSET_PATH}/patterns/divine.svg`
+    };
+
     // Render melee items (owned first, then unowned)
     const $meleeList = $("#list-melee").empty();
     for (const { idString, name } of ownedMelees) {
+      // Determine the tier of the melee
+      let tier: AssetTier | undefined;
+      for (const t of Object.values(AssetTier).filter(val => typeof val === 'number') as AssetTier[]) {
+        if (Object.keys(SurvivAssetBalances[SurvivAssets.Arms][t]).includes(idString)) {
+          tier = t;
+          break;
+        }
+      }
+      const backgroundImage = tier !== undefined ? tierBackgrounds[tier] : tierBackgrounds[AssetTier.Silver];
+
       $meleeList.append(`
         <div class="weapons-container-card weapons-container-card-melee" 
              id="weapons-list-${idString}" data-id="${idString}">
-          <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+             <div class="weapons-tier-background" style="background-image: url('${backgroundImage}')">
+             <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+             </div>
           <p class="weapons-container-paragraph">${name}</p>
         </div>
       `);
@@ -356,7 +396,9 @@ async function showMelees(account: Account, selectedMeleeId?: string) {
       $meleeList.append(`
         <div class="weapons-container-card weapons-container-card-melee inactive" 
              id="weapons-list-${idString}" data-id="${idString}">
-          <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+             <div class="weapons-tier-background" style="background-image: url('${tierBackgrounds[AssetTier.Silver]}')">
+             <img src="${ASSET_PATH}/weapons/${idString}.svg" alt="${name}" width="72px" height="72px" />
+             </div>
           <p class="weapons-container-paragraph">${name}</p>
         </div>
       `);
@@ -377,9 +419,6 @@ async function showMelees(account: Account, selectedMeleeId?: string) {
 
 // Main function to display weapons (melees and guns)
 export async function showWeapons(account: Account, highlightId?: string): Promise<void> {
-  if (InventoryCache.weaponsLoaded) return;
-  InventoryCache.weaponsLoaded = true;
-
   // Build tab UI
   const $container = $<HTMLDivElement>(".weapons-container-list").empty();
   $container.append(`
@@ -501,3 +540,17 @@ export async function showWeapons(account: Account, highlightId?: string): Promi
     }
   }
 }
+
+// ammo mapping
+const AMMO_TYPE_IMAGES: Record<string, string> = {
+  "762mm": `${ASSET_PATH}/loot/762mm.svg`,
+  "556mm": `${ASSET_PATH}/loot/556mm.svg`,
+  "9mm": `${ASSET_PATH}/loot/9mm.svg`,
+  "12g": `${ASSET_PATH}/loot/12g.svg`,
+  "50cal": `${ASSET_PATH}/loot/50cal.svg`,
+  "338lap": `${ASSET_PATH}/loot/338lap.svg`,
+  "power_cell": `${ASSET_PATH}/loot/power_cell.svg`,
+  "firework_rocket": `${ASSET_PATH}/loot/firework_rocket.svg`,
+  "bb": `${ASSET_PATH}/loot/bb.svg`,
+  "curadell": `${ASSET_PATH}/loot/curadell.svg`,
+};

@@ -6,6 +6,8 @@ import { showSkins } from "./skins";
 import { showWeapons } from "./weapons";
 import type { Account } from '../account';
 import { GAME_CONSOLE } from '../..';
+import { AssetTier, SurvivAssets } from '@common/mappings';
+import { warningAlert } from '../modal';
 
 // handler display change preview
 export const updateSplashCustomize = (skinID: string): void => {
@@ -30,45 +32,54 @@ export const updateSplashCustomize = (skinID: string): void => {
     );
 };
 
-export let InventoryCache: {
-    shopLoaded: boolean,
-    skinsLoaded: boolean,
-    weaponsLoaded: boolean,
-    badgesLoaded: boolean,
-    emotesLoaded: boolean,
+// Store cached balances
+export let SurvivAssetBalances: Record<SurvivAssets, Record<AssetTier, Record<string, number>>> = {
+    [SurvivAssets.Skins]: {
+        [AssetTier.Silver]: {},
+        [AssetTier.Gold]: {},
+        [AssetTier.Divine]: {}
+    },
+    [SurvivAssets.Emotes]: {
+        [AssetTier.Silver]: {},
+        [AssetTier.Gold]: {},
+        [AssetTier.Divine]: {}
+    },
+    [SurvivAssets.Arms]: {
+        [AssetTier.Silver]: {},
+        [AssetTier.Gold]: {},
+        [AssetTier.Divine]: {}
+    },
+    [SurvivAssets.Guns]: {
+        [AssetTier.Silver]: {},
+        [AssetTier.Gold]: {},
+        [AssetTier.Divine]: {}
+    }
 };
 
 export async function showInventory(account: Account) {
-    InventoryCache = {
-        shopLoaded: false,
-        skinsLoaded: false,
-        weaponsLoaded: false,
-        badgesLoaded: false,
-        emotesLoaded: false,
-    }
-
     $("#btn-customize").on('click', async () => {
-        showShop(account);
+        if (!account.address) {
+            warningAlert("Please connect your wallet to continue!", 3000);
+            return;
+        }
+        SurvivAssetBalances = await account.getAssetBalances();
+        await showShop(account);
     })
 
-    $("#btn-inventory").on('click', () => {
-        showShop(account);
+    $('#tab-skins').on('click', async () => {
+        await showSkins(account);
     })
 
-    $('#tab-skins').on('click', () => {
-        showSkins(account);
+    $('#tab-emotes').on('click', async () => {
+        await showEmotes(account);
     })
 
-    $('#tab-weapons').on('click', () => {
-        showWeapons(account);
+    $('#tab-weapons').on('click', async () => {
+        await showWeapons(account);
     })
 
-    $('#tab-emotes').on('click', () => {
-        showEmotes(account);
-    })
-
-    $('#tab-badges').on('click', () => {
-        showBadges(account);
+    $('#tab-badges').on('click', async () => {
+        await showBadges(account);
     })
 
     const idString = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");

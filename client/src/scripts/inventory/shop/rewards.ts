@@ -13,13 +13,13 @@ interface RewardData {
     validCrates?: Array<{ amount: number; expiry: number }>;
 }
 
-function renderRewardList(account: Account, rewardData: RewardData): void {
+function renderRewardList(account: Account, rewardData: RewardData | undefined): void {
     const now = Math.floor(Date.now() / 1000);
     const rewards: RewardItem[] = rewardData?.validCrates?.map(item => {
         const secondsLeft = item.expiry - now;
         const daysLeft = Math.max(Math.floor(secondsLeft / (60 * 60 * 24)), 0);
         return {
-            image: "./img/misc/crate.png",
+            image: "./img/misc/surviv_kit_crate.png",
             amount: item.amount,
             time: `Expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
         };
@@ -50,7 +50,8 @@ function renderRewardList(account: Account, rewardData: RewardData): void {
         try {
             await account.claimRewards();
             successAlert("Rewards claimed successfully!");
-            ShopCache.assetsBalance.Crates += totalCrates;
+            ShopCache.assetsBalance.crate += totalCrates;
+            ShopCache.PlayerValidRewards = undefined;
         } catch (err) {
             console.error(`Failed to claim rewards: ${err}`);
             errorAlert("No valid crates found");
@@ -63,9 +64,5 @@ function renderRewardList(account: Account, rewardData: RewardData): void {
 }
 
 export async function loadRewards(account: Account): Promise<void> {
-    const rewardData = await account.getValidRewards().catch((err: any) => {
-        console.error(`Failed to load rewards: ${err}`);
-        return { validCrates: [] };
-    });
-    renderRewardList(account, rewardData);
+    renderRewardList(account, ShopCache.PlayerValidRewards);
 }

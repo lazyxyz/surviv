@@ -75,8 +75,6 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
                     ["Ahegao", 0xf4a5aa],
                     ["Melonpan", 0xf8e7b9],
 
-                    ["Elon", 0xcfb66c],
-                    ["Vitalik", 0x708ff2],
                     ["Satoshi", 0x4f8205],
                     ["Sakura", 0xfee8ce],
                     ["Azumi", 0xf9cfae],
@@ -91,10 +89,7 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
                     ["Brush", 0x784421],
                     ["Cash", 0x71c837],
                     ["Radar", 0x000000],
-                    ["Pigeon", 0x0000ff],
-                    ["Mortal", 0xff3d00],
                     ["Unknown", 0xd7e3f4],
-                    ["Spaceship", 0xff88cc],
                     ["Martyrs", 0x718954],
                     ["Lemon", 0xf4fadb],
                     ["Root", 0x95d786],
@@ -138,6 +133,7 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
                     ["Dino", 0xb69837],
                     ["Sheep", 0xffffff],
                     ["Wolf", 0x917c6f],
+                    ["Werewolf", 0x917c6f],
                     ["Hippo", 0x963bb6],
                     ["Rhino", 0x74849d],
                     ["Bee", 0xffcd01],
@@ -190,12 +186,16 @@ export const Skins = ObjectDefinitions.withDefault<SkinDefinition>()(
                     ["Philippines", 0xE31B23],
                     ["Iran", 0x269F49],
                     ["Syria", 0xD80027],
+                    ["Morocco", 0xD80027],
+                    ["Indonesia", 0xD80027],
                     ["World", 0xD80027],
 
                     // partner
                     ["Somdudu", 0xFDBB06],
                     ["Somini", 0xD215C4],
                     ["Somnia", 0xD215C4],
+                    ["Viet Soldier", 0x49662C],
+                    ["Asian Farmer", 0xFBCC3F],
                 ] satisfies ReadonlyArray<readonly [string, number]>
             ).map(([name, tint]) => skin([name, tint]))
         ];

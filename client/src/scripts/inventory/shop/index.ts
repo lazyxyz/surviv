@@ -1,9 +1,8 @@
 import $ from "jquery";
-import { InventoryCache } from "..";
 import { loadStore } from "./store";
 import { loadBase } from "./base";
 import { loadRewards } from "./rewards";
-import type { Account, SaleItemType } from "../../account";
+import type { Account, SaleItems, ValidRewards } from "../../account";
 
 
 function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeListOf<HTMLElement>) {
@@ -28,33 +27,45 @@ function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeL
 export let ShopCache: {
     storeLoaded: boolean,
     baseLoaded: boolean,
-    assetsBalance: Record<SaleItemType, number>;
-    assetsPrice: Record<SaleItemType, string>;
+    assetsBalance: Record<SaleItems, number>;
+    assetsPrice: Record<SaleItems, string>;
+    PlayerValidRewards: ValidRewards | undefined;
 }
 
-export async function showShop(account: Account) {
-    if (InventoryCache.shopLoaded) return;
-    InventoryCache.shopLoaded = true;
 
+export async function showShop(account: Account) {
     ShopCache = {
         storeLoaded: false,
         baseLoaded: false,
         assetsBalance: {
-            Crates: 0,
-            Cards: 0,
-            Keys: 0
+            crate: 0,
+            surviv_card: 0,
+            key: 0
         },
         assetsPrice: {
-            Crates: "",
-            Cards: "",
-            Keys: ""
-        }
+            crate: "",
+            surviv_card: "",
+            key: ""
+        },
+        PlayerValidRewards: undefined
     }
+
+    try {
+        ShopCache.PlayerValidRewards = await account.getValidRewards();
+    } catch (err) { };
 
     // Setup tabs
     const tabButtons = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
     const tabContents = document.querySelectorAll<HTMLElement>(".crates-customize-child");
     setupTabs(tabButtons, tabContents);
+
+    // Update rewards tab text
+    const rewardsTab = document.querySelector("#rewards-tab") as HTMLButtonElement;
+    if (ShopCache.PlayerValidRewards?.validCrates.length) {
+        rewardsTab.textContent = `Rewards(${ShopCache.PlayerValidRewards.validCrates.length})`;
+    } else {
+        rewardsTab.textContent = "Rewards";
+    }
 
     $("#store-tab").on('click', () => {
         loadStore(account);

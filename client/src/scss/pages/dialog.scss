@@ -39,7 +39,7 @@ input::-webkit-inner-spin-button {
 .weapon-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  // gap: 12px;
   height: 340px;
   overflow: hidden;
   overflow-y: auto;
@@ -404,8 +404,7 @@ input::-webkit-inner-spin-button {
   z-index: 101;
 
   .skin.inactive {
-    filter: saturate(0.15);
-    opacity: 0.5;
+    filter: saturate(0.15) brightness(0.65);
     cursor: not-allowed;
   }
   .skin.active {
@@ -452,32 +451,42 @@ input::-webkit-inner-spin-button {
     font-size: 35px;
     font-weight: bold;
   }
+  .skin-tier-background {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-  .skin {
-    position: relative;
-    width: 102px;
-    height: 98px;
-
-    .skin-base {
+    width: 130px;
+    height: 130px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 130px;
+    .skin {
       position: relative;
-      top: 0;
-      left: 6px;
-      width: 90px;
-      height: 90px;
-      transform: rotate(90deg);
-    }
+      width: 102px;
+      height: 98px;
 
-    .skin-left-fist,
-    .skin-right-fist {
-      position: absolute;
-      top: 64px;
-      width: 34px;
-      height: 34px;
-      transform: rotate(90deg);
-    }
+      .skin-base {
+        position: relative;
+        top: 0;
+        left: 6px;
+        width: 90px;
+        height: 90px;
+        transform: rotate(90deg);
+      }
 
-    .skin-right-fist {
-      left: 68px;
+      .skin-left-fist,
+      .skin-right-fist {
+        position: absolute;
+        top: 64px;
+        width: 34px;
+        height: 34px;
+        transform: rotate(90deg);
+      }
+
+      .skin-right-fist {
+        left: 68px;
+      }
     }
   }
 
@@ -488,16 +497,13 @@ input::-webkit-inner-spin-button {
     height: 100%;
 
     .skins-list-item-container {
-      width: 140px;
-      height: 170px;
       padding: 8px;
-      margin: 8px;
       border: 5px solid transparent;
       border-radius: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
       cursor: pointer;
 
       &.selected {
@@ -1064,14 +1070,15 @@ input::-webkit-inner-spin-button {
       div {
         position: relative;
         align-items: center;
-        width: 140px;
-        height: 140px;
+        width: 120px;
+        height: 120px;
         background-size: cover;
       }
     }
 
     .badge-name {
       font-weight: bold;
+      font-size: 14px;
       @include variables.text-shadow;
       text-align: center;
       background-color: #22222267;
@@ -1082,15 +1089,35 @@ input::-webkit-inner-spin-button {
       }
     }
   }
+  #weapons-list-no-gun {
+    img {
+      width: 94px;
+      height: 94px;
+      padding: 12px;
+      background: #0000002b;
+      border-radius: 10px;
+    }
+  }
+
+  .weapons-tier-background {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 94px;
+    height: 94px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 94px;
+  }
 
   .weapons-container {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     height: 100%;
 
     &-card {
-      background: #16161626;
-      padding: 8px;
+      padding: 4px;
       border-radius: 8px;
 
       display: flex;
@@ -1102,7 +1129,6 @@ input::-webkit-inner-spin-button {
       border: 3px solid transparent;
 
       cursor: pointer;
-      width: 100px;
       height: fit-content;
 
       &.selected {

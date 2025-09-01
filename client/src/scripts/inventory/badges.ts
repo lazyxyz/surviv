@@ -1,10 +1,8 @@
-import type { Game } from "../game";
 import { getTranslatedString } from "../../translations";
 import $ from "jquery";
 import { html } from "../utils/misc";
-import { InventoryCache } from ".";
-import { Account, SurvivAssets } from "../account";
-import { Badges } from "@common/definitions/badges"; // Assuming a Badges module exists
+import { Account, SurvivItems } from "../account";
+import { Badges } from "@common/definitions/badges";
 import { GAME_CONSOLE } from "../..";
 
 export function getBadgeImage(badgeId: string): string {
@@ -23,17 +21,18 @@ function selectBadge(idString: string): void {
     GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", idString);
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function showBadges(account: Account) {
-    if (InventoryCache.badgesLoaded) return;
-    InventoryCache.badgesLoaded = true;
-
     const badgeList = $<HTMLDivElement>("#badges-list");
+    badgeList.empty(); // Clear previous items
     const currentBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
 
+    // Clear the badge list before rendering new items
+    badgeList.empty();
+
     const userBadgeBalance = [
-        ...Object.entries(await account.getBalances(SurvivAssets.SurvivCards)),
+        ...Object.entries((await account.getItemBalances(SurvivItems.SurvivBadges))),
     ];
+
     const userBadges = userBadgeBalance.map(s => s[0]);
 
     // Badges list
@@ -46,19 +45,6 @@ export async function showBadges(account: Account) {
 
     // sort badges
     const sortedBadgeIds = [...userBadges, ...inactiveBadges];
-
-    // custom no item (meaning click to reset badge)
-    {
-        const noBadgeItem = $<HTMLDivElement>(
-            html`<div id="badge-" class="badges-list-item-container${currentBadge === "" ? " selected" : ""}">
-                <div class="badges-list-item"><i class="fa-solid fa-ban" style="opacity: 0.65"></i></div>
-                <span class="badge-name">${getTranslatedString("none")}</span>
-            </div>`
-        );
-
-        noBadgeItem.on("click", () => selectBadge(""));
-        badgeList.append(noBadgeItem);
-    }
 
     // render badges
     for (const idString of sortedBadgeIds) {
@@ -75,9 +61,9 @@ export async function showBadges(account: Account) {
         const badgeItem = $<HTMLDivElement>(
             html`<div id="badge-${idString}" class="badges-list-item-container${isSelected ? " selected" : ""}">
                 <div class="badges-list-item badge${isActive ? " active" : " inactive"}" ${inactiveStyle}>
-                    <div class="badge-image" style="background-image: url('./img/misc/card.gif')"></div>
+                    <div class="badge-image" style="background-image: url('${getBadgeImage(idString)}')"></div>
                 </div>
-                <span class="badge-name">${"Surviv Card"}</span>
+                <span class="badge-name">${badgeDef.name}</span>
             </div>`
         );
 

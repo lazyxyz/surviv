@@ -45,11 +45,15 @@ export const Config = {
     authServer: {
         address: "http://localhost:8080"
     },
-
+    
     earnConfig: {
         rank: 5,
-        api: "https://api.surviv.fun",
+        api: "https://admin.surviv.fun",
     },
+    // earnConfig: {
+    //     rank: 5,
+    //     api: "http://localhost:3001",
+    // },
 } satisfies ConfigType as ConfigType;
 
 export interface ConfigType {
@@ -188,18 +192,6 @@ export interface ConfigType {
         readonly maxJoinAttempts?: {
             readonly count: number
             readonly duration: number
-        }
-
-        /**
-         * If this option is present, a list of punishments will be loaded, either from a local file or from a remote source.
-         * If `url` is specified, the list is loaded from the specified URL (e.g. https://surviv.fun). Trailing slash not allowed.
-         * The specified `password` is sent in the `Password` header.
-         * If `url` is not specified, the list is loaded from `punishments.json`, and it's accessible from `/api/punishments`.
-         * To access the list, the specified `password` must be provided in the `Password` header.
-         */
-        readonly punishments?: {
-            readonly password: string
-            readonly url?: string
         }
 
         /**

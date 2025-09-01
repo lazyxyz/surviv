@@ -1,20 +1,22 @@
 import $ from "jquery";
 import { formatEther } from "ethers";
-import { Account, SurvivAssets, type PaymentTokenType, type SaleItemType } from "../../account";
+import { Account, SurvivBadges, SurvivItems, SurvivKits, type PaymentTokenType, type SaleItems } from "../../account";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 import { ShopCache } from ".";
+import { GAME_CONSOLE } from "../../..";
+import { ChainConfig } from "../../../config";
 
 interface StoreItem {
     // balance: number;
     name: string;
     image: string;
     price: string;
-    itemType: SaleItemType;
+    itemType: SaleItems;
 }
 
 async function fetchPrice(
     account: Account,
-    itemType: SaleItemType,
+    itemType: SaleItems,
     paymentToken: PaymentTokenType = "NativeToken"
 ): Promise<string> {
     // Return cached price if available
@@ -23,7 +25,9 @@ async function fetchPrice(
     }
 
     try {
+        // console.log("itemType: ", itemType);
         const price = await account.queryPrice(itemType, paymentToken);
+        // console.log("price: ", price);
         ShopCache.assetsPrice[itemType] = price; // Cache the formatted price
         return price;
     } catch (err) {
@@ -58,7 +62,7 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
 
         // Fetch price asynchronously and update the UI
         fetchPrice(account, item.itemType).then(price => {
-            $card.find(".price-placeholder").text(`${formatEther(price)} STT`);
+            $card.find(".price-placeholder").text(`${formatEther(price)} ${ChainConfig.nativeCurrency.symbol}`);
         });
     });
 }
@@ -69,7 +73,7 @@ function updateTotalPurchase($card: JQuery<HTMLElement>, amount: number) {
     const priceValue = parseFloat(priceText);
     const $buyButton = $card.find(".buy-now-btn");
     if (!isNaN(priceValue) && amount > 0) {
-        $buyButton.text(`Buy ${(priceValue * amount).toFixed(1)} STT`);
+        $buyButton.text(`Buy ${(priceValue * amount).toFixed(1)} ${ChainConfig.nativeCurrency.symbol}`);
     } else {
         $buyButton.text("Buy now");
         $buyButton.prop("disabled", true).removeClass("active");
@@ -83,7 +87,7 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
 
     $cards.each((index, card) => {
         const $card = $(card);
-        const itemType = $card.data("item-type") as SaleItemType;
+        const itemType = $card.data("item-type") as SaleItems;
         const $purchaseAmount = $card.find(".crates-input");
         const $addButton = $card.find(".crates-add");
         const $removeButton = $card.find(".crates-remove");
@@ -172,8 +176,8 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
                 setupPurchaseInteractions(account, storeItems);
                 successAlert("Purchase successful!");
 
-                if (item?.itemType == "Cards") {
-                    game.console.setBuiltInCVar("cv_loadout_badge", "cards"); // Set card as badge after purchased
+                if (item?.itemType == SurvivBadges.Cards) {
+                    GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", "surviv_card"); // Set card as badge after purchased
                 }
             } catch (err: any) {
                 errorAlert("Transaction Failed: Please check your wallet balance or try again.", 3000);
@@ -196,30 +200,33 @@ export async function loadStore(account: Account): Promise<void> {
     }
 
     if (!ShopCache.storeLoaded) {
+        const kitsBalance = await account.getItemBalances(SurvivItems.SurvivKits);
+        const badgesBalance = await account.getItemBalances(SurvivItems.SurvivBadges);
+
         ShopCache.storeLoaded = true;
-        ShopCache.assetsBalance["Keys"] = (await account.getBalances(SurvivAssets.SurvivKeys))["keys"] || 0;
-        ShopCache.assetsBalance["Crates"] = (await account.getBalances(SurvivAssets.SurvivCrates))["crates"] || 0;
-        ShopCache.assetsBalance["Cards"] = (await account.getBalances(SurvivAssets.SurvivCards))["cards"] || 0;
+        ShopCache.assetsBalance["key"] = kitsBalance["key"] || 0;
+        ShopCache.assetsBalance["crate"] = kitsBalance["crate"] || 0;
+        ShopCache.assetsBalance["surviv_card"] = badgesBalance["surviv_card"] || 0;
     };
 
     const storeItems: StoreItem[] = [
         {
             name: "Surviv Keys",
-            image: "./img/misc/Keys.png",
-            price: "Loading...", // Placeholder, actual price fetched in renderStoreItems
-            itemType: "Keys",
+            image: "./img/misc/surviv_kit_key.png",
+            price: "Loading...",
+            itemType: SurvivKits.Keys,
         },
         {
             name: "Surviv Crates",
-            image: "./img/misc/crate.png",
+            image: "./img/misc/surviv_kit_crate.png",
             price: "Loading...",
-            itemType: "Crates",
+            itemType: SurvivKits.Crates,
         },
         {
             name: "Surviv Cards",
-            image: "./img/misc/card.gif",
+            image: "./img/game/shared/badges/surviv_card.svg",
             price: "Loading...",
-            itemType: "Cards",
+            itemType: SurvivBadges.Cards,
         },
     ];
 

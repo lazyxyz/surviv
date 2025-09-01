@@ -27,20 +27,17 @@ import { setUpCommands } from "../utils/console/commands";
 
 export let autoPickup = true;
 
-function updateUsersBadge(game: Game): void {
-    const selectedBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
+export function updateUsersBadge(badgeId: string | undefined): void {
     const aliveUsersContainer = document.getElementById("badges-container");
-
     if (!aliveUsersContainer) return;
 
     // Clear existing badge content
     aliveUsersContainer.innerHTML = "";
 
-    // Show badge image if "cards" is selected
-    if (selectedBadge === "cards") {
+    if (badgeId) {
         const badgeImage = document.createElement("img");
-        badgeImage.src = `./img/game/shared/badges/${selectedBadge}.svg`;
-        badgeImage.alt = "Cards Badge";
+        badgeImage.src = `./img/game/shared/badges/${badgeId}.svg`;
+        badgeImage.alt = "Card Badge";
         badgeImage.className = "badge-image";
         badgeImage.draggable = false;
 
@@ -133,10 +130,10 @@ function setupSpectateControls(game: Game): void {
         sendSpectatePacket(SpectateActions.SpectateNext);
     });
 
-    // Update the user's badge
-    GAME_CONSOLE.variables.addChangeListener("cv_loadout_badge", () => {
-        updateUsersBadge(game);
-    });
+    // // Update the user's badge
+    // GAME_CONSOLE.variables.addChangeListener("cv_loadout_badge", () => {
+    //     updateUsersBadge(game);
+    // });
 }
 
 function setupKeyboardControls(game: Game): void {
@@ -914,16 +911,6 @@ function setupInventorySlots(game: Game): void {
         });
     }
 
-    slotListener($<HTMLDivElement>("#c4-detonate-btn"), button => {
-        const isPrimary = button === 0;
-
-        if (isPrimary) {
-            inputManager.addAction({
-                type: InputActions.ExplodeC4
-            });
-        }
-    });
-
     for (
         const [ele, type] of [
             [$<HTMLDivElement>("#helmet-slot"), "helmet"],
@@ -1022,7 +1009,7 @@ export async function setupGame(game: Game): Promise<void> {
     setupInventorySlots(game);
     setupSpectateOptions(game);
     setupGameInteraction(game);
-    updateUsersBadge(game);
+    // updateUsersBadge(game);
 
     // Setup outside
     setUpCommands(game);

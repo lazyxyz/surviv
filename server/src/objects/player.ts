@@ -5,29 +5,27 @@ import { Backpacks } from "@common/definitions/backpacks";
 import { type BadgeDefinition } from "@common/definitions/badges";
 import { Emotes, type EmoteDefinition } from "@common/definitions/emotes";
 import { Guns, type GunDefinition } from "@common/definitions/guns";
-import { HealingItems } from "@common/definitions/healingItems";
 import { Loots, type WeaponDefinition } from "@common/definitions/loots";
 import { type PlayerPing } from "@common/definitions/mapPings";
 import { Melees, type MeleeDefinition } from "@common/definitions/melees";
 import { Modes } from "@common/definitions/modes";
 import { Obstacles, type ObstacleDefinition } from "@common/definitions/obstacles";
-import { PerkCategories, PerkIds, Perks, type PerkDefinition, type PerkNames } from "@common/definitions/perks";
+import { PerkIds, Perks, type PerkDefinition, type PerkNames } from "@common/definitions/perks";
 import { DEFAULT_SCOPE, Scopes, type ScopeDefinition } from "@common/definitions/scopes";
 import { type SkinDefinition } from "@common/definitions/skins";
-import { SyncedParticles, type SyncedParticleDefinition } from "@common/definitions/syncedParticles";
+import {  type SyncedParticleDefinition } from "@common/definitions/syncedParticles";
 import { Throwables, type ThrowableDefinition } from "@common/definitions/throwables";
-import { GameOverPacket, type GameOverData } from "@common/packets/gameOverPacket";
 import { type AllowedEmoteSources, type NoMobile, type PlayerInputData } from "@common/packets/inputPacket";
 import { createKillfeedMessage, KillFeedPacket, type ForEventType } from "@common/packets/killFeedPacket";
 import { type InputPacket } from "@common/packets/packet";
 import { UpdatePacket, type PlayerData, type UpdatePacketDataCommon, type UpdatePacketDataIn } from "@common/packets/updatePacket";
 import { CircleHitbox, RectangleHitbox, type Hitbox } from "@common/utils/hitbox";
 import { adjacentOrEqualLayer, isVisibleFromLayer } from "@common/utils/layer";
-import { Collision, EaseFunctions, Geometry, Numeric } from "@common/utils/math";
+import { Collision, Geometry, Numeric } from "@common/utils/math";
 import { ExtendedMap, type SDeepMutable, type SMutable, type Timeout } from "@common/utils/misc";
 import { defaultModifiers, ItemType, type EventModifiers, type ExtendedWearerAttributes, type PlayerModifiers, type ReferenceTo, type ReifiableDef, type WearerAttributes } from "@common/utils/objectDefinitions";
 import { type FullData } from "@common/utils/objectsSerializations";
-import { pickRandomInArray, randomPointInsideCircle, weightedRandom } from "@common/utils/random";
+import { pickRandomInArray } from "@common/utils/random";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
 import { Config } from "../config";
@@ -49,10 +47,7 @@ import { BaseGameObject, type DamageParams, type GameObject } from "./gameObject
 import { type Loot } from "./loot";
 import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
-import { type ThrowableProjectile } from "./throwableProj";
 import { weaponPresentType } from "@common/typings";
-import { saveGameResult } from "../api/api";
-import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -77,7 +72,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     address: string = "";
     readonly ip?: string;
 
-    halloweenThrowableSkin = false;
     activeBloodthirstEffect = false;
     activeDisguise?: ObstacleDefinition;
 
@@ -396,8 +390,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     private readonly _mapPings: Game["mapPings"] = [];
 
-    c4s: ThrowableProjectile[] = [];
-
     readonly perks = new ServerPerkManager(this, Perks.defaults);
     perkUpdateMap?: Map<UpdatablePerkDefinition, number>; // key = perk, value = last updated
 
@@ -521,8 +513,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     swapWeaponRandomly(itemOrSlot: InventoryItem | number = this.activeItem, force = false): void {
-        if (this.perks.hasItem(PerkIds.Lycanthropy)) return; // womp womp
-
         let slot = itemOrSlot === this.activeItem
             ? this.activeItemIndex
             : typeof itemOrSlot === "number"
@@ -800,62 +790,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 if (this.game.now - lastUpdated <= perk.updateInterval) continue;
 
                 this.perkUpdateMap.set(perk, this.game.now);
-                // ! evil starts here
-                switch (perk.idString) {
-                    case PerkIds.Bloodthirst: {
-                        this.piercingDamage({
-                            amount: perk.healthLoss
-                        });
-                        break;
-                    }
-                    case PerkIds.BabyPlumpkinPie: {
-                        this.swapWeaponRandomly(undefined, true);
-                        break;
-                    }
-                    case PerkIds.TornPockets: {
-                        const items = this.inventory.items;
-                        const candidates = new Set(Ammos.definitions.filter(({ ephemeral }) => !ephemeral).map(({ idString }) => idString));
-
-                        const counts = Object.entries(items.asRecord()).filter(
-                            ([str, count]) => Ammos.hasString(str) && candidates.has(str) && count !== 0
-                        );
-
-                        // no ammo at all
-                        if (counts.length === 0) break;
-
-                        const chosenAmmo = Ammos.fromString(
-                            weightedRandom(
-                                counts.map(([str]) => str),
-                                counts.map(([, cnt]) => cnt)
-                            )
-                        );
-
-                        const amountToDrop = Numeric.min(
-                            this.inventory.items.getItem(chosenAmmo.idString),
-                            perk.dropCount
-                        );
-
-                        this.game.addLoot(chosenAmmo, this.position, this.layer, { count: amountToDrop })
-                            ?.push(this.rotation + Math.PI, 0.025);
-                        items.decrementItem(chosenAmmo.idString, amountToDrop);
-                        this.dirty.items = true;
-                        break;
-                    }
-                    case PerkIds.RottenPlumpkin: {
-                        this.sendEmote(Emotes.fromStringSafe(perk.emote));
-                        this.piercingDamage({
-                            amount: perk.healthLoss
-                        });
-                        this.adrenaline -= this.adrenaline * (perk.adrenLoss / 100);
-                        break;
-                    }
-                    case PerkIds.Shrouded: {
-                        this.game.addSyncedParticle(SyncedParticles.fromString("shrouded_particle"), this.position, this.layer, this.id)
-                            .setTarget(randomPointInsideCircle(this.position, 5), 1000, EaseFunctions.circOut);
-                        break;
-                    }
-                }
-                // ! evil ends here
             }
         }
 
@@ -895,11 +829,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                         * (depleters.size !== 0 ? smokeSpeedMod : 1)
                     );
                 },
-                1
-            )
-            * this.mapPerkOrDefault(
-                PerkIds.Claustrophobic,
-                ({ speedMod }) => isInsideBuilding ? speedMod : 1,
                 1
             );
 
@@ -1001,14 +930,10 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         let toRegen = this._modifiers.hpRegen;
         if (this._adrenaline > 0) {
             // Drain adrenaline
-            this.adrenaline -= 0.0005 * this._modifiers.adrenDrain * dt;
+            this.adrenaline -= 0.00045 * this._modifiers.adrenDrain * dt;
 
             // Regenerate health
-            toRegen += (this.adrenaline / 40 + 0.35) * this.mapPerkOrDefault(
-                PerkIds.LacedStimulants,
-                ({ healDmgRate, lowerHpLimit }) => (this.health <= lowerHpLimit ? 1 : -healDmgRate),
-                1
-            );
+            toRegen += (this.adrenaline / 70);
         }
 
         this.health += dt / 900 * toRegen;
@@ -1300,11 +1225,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             ...(
                 player.dirty.layer || forceInclude
                     ? { layer: player.layer }
-                    : {}
-            ),
-            ...(
-                player.dirty.activeC4s || forceInclude
-                    ? { activeC4s: this.c4s.length > 0 }
                     : {}
             ),
             ...(
@@ -1672,39 +1592,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         // ! evil starts here
         for (const perk of this.perks) {
             switch (perk.idString) {
-                case PerkIds.PlumpkinGamble: { // AW DANG IT
-                    this.perks.removeItem(perk);
-
-                    const halloweenPerks = Perks.definitions.filter(perkDef => {
-                        return !perkDef.plumpkinGambleIgnore && perkDef.category === PerkCategories.Halloween;
-                    });
-                    this.perks.addItem(pickRandomInArray(halloweenPerks));
-                    break;
-                }
-                case PerkIds.Lycanthropy: {
-                    newModifiers.baseSpeed *= perk.speedMod;
-                    newModifiers.maxHealth *= perk.healthMod;
-                    newModifiers.hpRegen += perk.regenRate;
-                    break;
-                }
-                case PerkIds.SecondWind: {
-                    newModifiers.baseSpeed *= this._health / this._maxHealth < 0.5 ? perk.speedMod : 1;
-                    break;
-                }
-                case PerkIds.ExperimentalTreatment: {
-                    newModifiers.adrenDrain *= perk.adrenDecay;
-                    newModifiers.minAdrenaline += perk.adrenSet * newModifiers.maxAdrenaline * GameConstants.player.maxAdrenaline;
-                    newModifiers.maxHealth *= perk.healthMod;
-                    break;
-                }
-                case PerkIds.Engorged: {
-                    const base = newModifiers.maxHealth * GameConstants.player.defaultHealth;
-                    (eventMods.kill as ExtendedWearerAttributes[]).push({
-                        maxHealth: (base + perk.hpMod) / base,
-                        sizeMod: perk.sizeMod
-                    });
-                    break;
-                }
                 case PerkIds.Berserker: {
                     if (this.activeItem instanceof MeleeItem) {
                         newModifiers.baseSpeed *= perk.speedMod;
@@ -1791,39 +1678,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         if (sourceIsPlayer) {
             this.killedBy = source;
             if (source !== this && (!this.game.teamMode || source.teamID !== this.teamID)) source.kills++;
-
-            for (const perk of source.perks) {
-                switch (perk.idString) {
-                    case PerkIds.BabyPlumpkinPie: {
-                        source.swapWeaponRandomly(undefined, true);
-                        break;
-                    }
-
-                    case PerkIds.Engorged: {
-                        if (source.kills <= perk.killsLimit) {
-                            source.sizeMod *= perk.sizeMod;
-                            source.maxHealth *= perk.hpMod;
-                            source.updateAndApplyModifiers();
-                        }
-                        break;
-                    }
-
-                    case PerkIds.Bloodthirst: {
-                        if (source.activeBloodthirstEffect) break;
-
-                        source.activeBloodthirstEffect = true;
-                        source.health += perk.healBonus;
-                        source.adrenaline += perk.adrenalineBonus;
-                        source.baseSpeed *= perk.speedMod;
-
-                        this.game.addTimeout(() => {
-                            source.baseSpeed /= perk.speedMod;
-                            source.activeBloodthirstEffect = false;
-                        }, perk.speedBoostDuration);
-                        break;
-                    }
-                }
-            }
         }
 
         if (
@@ -2026,8 +1880,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         for (const perk of this.perks) {
             if (!perk.noDrop) {
                 this.game.addLoot(perk, position, layer);
-            } else if (perk.noDrop && perk.category === PerkCategories.Halloween) {
-                this.game.addLoot(PerkIds.PlumpkinGamble, position, layer);
             }
         }
 
@@ -2051,11 +1903,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         // Create death marker
         this.game.grid.addObject(new DeathMarker(this, layer));
-
-        // remove all c4s
-        for (const c4 of this.c4s) {
-            c4.damage({ amount: Infinity });
-        }
 
         // Remove player from kill leader
         if (this === this.game.killLeader) {
@@ -2221,7 +2068,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                     break;
                 }
                 case InputActions.UnlockSlot: {
-                    if (this.hasPerk(PerkIds.Lycanthropy)) break;
                     inventory.unlock(action.slot);
                     break;
                 }
@@ -2229,9 +2075,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                     const slot = action.slot;
 
                     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                    inventory.isLocked(slot)
-                        ? (this.hasPerk(PerkIds.Lycanthropy) || inventory.unlock(slot))
-                        : inventory.lock(slot);
+                    inventory.isLocked(slot)? inventory.unlock(slot): inventory.lock(slot);
                     break;
                 }
                 case InputActions.Loot:
@@ -2260,7 +2104,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                             (isLoot || (type === InputActions.Interact && isInteractable))
                             && object.hitbox?.collidesWith(detectionHitbox)
                             && adjacentOrEqualLayer(this.layer, object.layer)
-                            && !(isLoot && [ItemType.Throwable, ItemType.Gun].includes(object.definition.itemType) && this.perks.hasItem(PerkIds.Lycanthropy))
+                            // && !(isLoot && [ItemType.Throwable, ItemType.Gun].includes(object.definition.itemType) && this.perks.hasItem(PerkIds.Lycanthropy))
                         ) {
                             const dist = Geometry.distanceSquared(object.position, this.position);
                             if (isInteractable) {
@@ -2315,13 +2159,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 case InputActions.MapPing:
                     this.sendMapPing(action.ping, action.position);
                     break;
-                case InputActions.ExplodeC4:
-                    for (const c4 of this.c4s) {
-                        c4.detonate(750);
-                    }
-                    this.c4s.length = 0;
-                    this.dirty.activeC4s = true;
-                    break;
             }
         }
 
@@ -2353,7 +2190,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 helmet: this.inventory.helmet,
                 vest: this.inventory.vest,
                 backpack: this.inventory.backpack,
-                halloweenThrowableSkin: this.halloweenThrowableSkin,
+                halloweenThrowableSkin: false,
                 activeDisguise: this.activeDisguise,
                 blockEmoting: this.blockEmoting
             }
