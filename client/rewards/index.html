@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta name="title" content="Surviv - Leaderboard." />
+  <meta name="description"
+    content="The new 2D survival battle royale, inspired by a legendary game loved by millions! Win big with our play-and-earn model and tons of cool items for nonstop fun!" />
+  <meta name="keywords" content="battle royale, io game, browser game, open source" />
+
+  <meta property="og:title" content="Surviv Fun - Leaderboard" />
+  <meta property="og:description"
+    content="The new 2D survival battle royale, inspired by a legendary game loved by millions! Win big with our play-and-earn model and tons of cool items for nonstop fun!" />
+  <meta property="og:site_name" content="surviv.fun" />
+  <meta property="og:image" content="https://surviv.fun/img/socials/thumbnail.png" />
+
+  <title>Surviv Fun - Leaderboard</title>
+
+  <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+  <link rel="icon" type="image/svg+xml" sizes="any" href="../img/logos/surviv_favicon.svg" />
+
+  <link rel="icon" type="image/x-icon" sizes="16x16" href="../img/logos/surviv_favicon_16x16.png" />
+  <link rel="icon" type="image/x-icon" sizes="32x32" href="../img/logos/surviv_favicon_32x32.png" />
+  <link rel="icon" type="image/x-icon" sizes="96x96" href="../img/logos/surviv_favicon_96x96.png" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+  <div id="splash-ui">
+    <div style="position: relative;backdrop-filter: blur(40px);">
+      <div class="container-table">
+        <!-- table header -->
+        <div class="header-section">
+          <div class="logo">
+            <a href="../" title="Play Game (Return Home)">
+              <img src="../img/logos/surviv.fun.png" alt="Surviv logo" draggable="false" style="width: 190px;" />
+            </a>
+
+            <div>
+              <div class="logo-heading">LEADERBOARD</div>
+
+              <div class="logo-body text-xs">Surviv Play-and-Earn on Somnia - Season <span id="season-number">1</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="countdown">
+            <div class="pulse-ring" id="pulse-ring" style="display: block"></div>
+            <p class="count-time" id="countdown-text">Loading...</p>
+          </div>
+
+          <div class="header">
+            <p class="header-title">top survivors</p>
+            <div class="header-pagination">
+              <button class="btn-pagination" id="prev-page" disabled><i class="fa-solid fa-chevron-left"></i></button>
+              <input class="input-pagination" type="text">
+              <button class="btn-pagination" id="next-page" disabled><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!--table body -->
+        <div class="body-section">
+          <div class="leaderboard" id="leaderboard-table">
+            <div class="leaderboard-header">
+              <div class="w-[110px] h-[48px]" id="header-child">Rank</div>
+              <div class="w-[320px] h-[48px]" id="header-child">Player</div>
+              <div class="w-[160px] h-[48px]" id="header-child">Total Points</div>
+              <div class="w-[160px] h-[48px] relative" id="header-child">
+                Solo Points
+                <i class="fa-solid fa-circle-question text-sm ml-1 cursor-pointer hover:text-yellow-400 transition-colors"
+                  id="solo-tooltip-toggle"></i>
+                <div id="solo-tooltip"
+                  class="hidden absolute z-10 bg-[#5b8939] text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
+                  <ul class="list-disc pl-5">
+                    <li>Rank #1: 10 points</li>
+                    <li>Rank #2: 5 points</li>
+                    <li>Rank #3: 3 points</li>
+                    <li>Rank #4: 2 points</li>
+                    <li>Rank #5: 1 point</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="w-[160px] h-[48px] relative" id="header-child">
+                Squad Points
+                <i class="fa-solid fa-circle-question text-sm ml-1 cursor-pointer hover:text-yellow-400 transition-colors"
+                  id="squad-tooltip-toggle"></i>
+                <div id="squad-tooltip"
+                  class="hidden absolute z-10 bg-[#5b8939] text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
+                  <ul class="list-disc pl-5">
+                    <li>Rank #1: 6 points </li>
+                    <li>Rank #2: 3 points</li>
+                    <li>Rank #3: 1 point</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="w-[160px] h-[48px] relative" id="header-child">
+                Social Points
+                <i class="fa-solid fa-circle-question text-sm ml-1 cursor-pointer hover:text-yellow-400 transition-colors"
+                  id="social-tooltip-toggle"></i>
+                <div id="social-tooltip"
+                  class="hidden absolute z-10 bg-[#5b8939] text-white text-sm p-4 rounded-lg shadow-lg w-64 left-0 top-12">
+                  <ul class="list-disc pl-5">
+                    <li>Earned by completing tasks on Galxe.</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="w-[110px] h-[48px]" id="header-child">Games</div>
+              <div class="w-[100px] h-[48px]" id="header-child">Rate</div>
+            </div>
+            <div class="my-ranking-data"></div>
+            <div class="leaderboard-body" id="table-body">
+            </div>
+          </div>
+          <div id="rewards-image" class="hidden text-center mt-6">
+            <img src="../img/news/rewards_s1.png" alt="Season 1 Rewards" class="max-w-full h-auto mx-auto" />
+          </div>
+          <div id="loading" class="text-center text-[#ffd23a] font-semibold mt-6 hidden">Loading...</div>
+          <div id="error" class="text-center text-red-400 font-semibold mt-6 hidden"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Get query parameters from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const season = urlParams.get('season') || '1'; // Default to season 1 if not specified
+
+    // Resolve "my" address for highlighting (URL param or various keys)
+    const myAddressParam = urlParams.get('player') || urlParams.get('address') || urlParams.get('wallet');
+    const myStoredWallet =
+      localStorage.getItem('PUBLIC_KEY') ||
+      localStorage.getItem('walletAddress') ||
+      localStorage.getItem('account') ||
+      localStorage.getItem('wallet');
+    const myAddress = (myAddressParam || myStoredWallet || '').toLowerCase();
+
+    // Specifically read PUBLIC_KEY for the pinned "my" data
+    const myPublicKey = (localStorage.getItem('PUBLIC_KEY') || '').toLowerCase();
+
+    const API_URL = `http://localhost:3001/season/rankings`;
+    const API_PLAYER_POINTS = `http://localhost:3001/season/player/${myPublicKey}`;
+    let currentPage = 1;
+    const limit = 100;
+    let totalPages = 1;
+
+
+    // Shorten Wallet Address
+    function shortenAddress(address, chars = 10) {
+      if (!address) return '';
+      return `${address.slice(0, 2 + chars)}...${address.slice(-chars)}`;
+    }
+
+    function asNumber(v, fallback = 0) {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    // Normalize player object keys from different endpoints
+    function normalizePlayer(raw, defaultAddress = '') {
+      if (!raw) raw = {};
+      const addr = (raw.walletAddress || raw.address || raw.player || defaultAddress || '').toString();
+      return {
+        player: addr,
+        totalPoints: asNumber(raw.totalPoints ?? raw.total ?? 0),
+        soloPoints: asNumber(raw.soloPoints ?? raw.solo ?? 0),
+        squadPoints: asNumber(raw.squadPoints ?? raw.squad ?? 0),
+        socialPoints: asNumber(raw.socialPoints ?? raw.social ?? 0),
+        games: asNumber(raw.games ?? raw.totalGames ?? raw.matches ?? 0),
+      };
+    }
+
+    const pageInput = document.querySelector('.input-pagination');
+    const prevButton = document.getElementById('prev-page');
+    const nextButton = document.getElementById('next-page');
+    const countdownText = document.getElementById('countdown-text');
+    const pulseRing = document.getElementById('pulse-ring');
+    const seasonNumber = document.getElementById('season-number');
+
+    // Update season display
+    seasonNumber.textContent = season;
+
+    // Tooltip toggle functionality
+    function toggleTooltip(tooltipId) {
+      const tooltips = ['solo-tooltip', 'squad-tooltip', 'social-tooltip'];
+      tooltips.forEach(id => {
+        const tooltip = document.getElementById(id);
+        if (tooltip) {
+          tooltip.classList.add('hidden');
+        }
+      });
+
+      const tooltip = document.getElementById(tooltipId);
+      tooltip.classList.toggle('hidden');
+    }
+
+    // Initialize tooltip listeners
+    document.getElementById('solo-tooltip-toggle').addEventListener('click', () => toggleTooltip('solo-tooltip'));
+    document.getElementById('squad-tooltip-toggle').addEventListener('click', () => toggleTooltip('squad-tooltip'));
+    document.getElementById('social-tooltip-toggle').addEventListener('click', () => toggleTooltip('social-tooltip'));
+
+    // Close all tooltips when clicking outside
+    document.addEventListener('click', (e) => {
+      const tooltips = ['solo-tooltip', 'squad-tooltip', 'social-tooltip'];
+      const toggleIds = ['solo-tooltip-toggle', 'squad-tooltip-toggle', 'social-tooltip-toggle'];
+      if (!toggleIds.includes(e.target.id) && !e.target.closest('.fa-circle-question')) {
+        tooltips.forEach(id => {
+          const tooltip = document.getElementById(id);
+          if (tooltip && !tooltip.classList.contains('hidden')) {
+            tooltip.classList.add('hidden');
+          }
+        });
+      }
+    });
+
+    function updatePaginationUI() {
+      pageInput.value = `${currentPage}/${totalPages}`;
+      prevButton.disabled = currentPage <= 1;
+      nextButton.disabled = currentPage >= totalPages;
+    }
+
+    // Helper to create a leaderboard row
+    function createRow(player, rankNumber, uniqueKey, highlight = false) {
+      const row = document.createElement('div');
+      row.className = 'leaderboard-body-row';
+
+      const total = asNumber(player.totalPoints, 0);
+      const solo = asNumber(player.soloPoints, 0);
+      const squad = asNumber(player.squadPoints, 0);
+      const social = asNumber(player.socialPoints, 0);
+      const games = asNumber(player.games, 0);
+      const rate = games > 0 ? ((solo + squad) / games).toFixed(2) : '0.00';
+
+      const addr = (player.player || '').toString();
+      row.innerHTML = `
+            <div class="w-[80px] h-[48px]" id="row-child">${rankNumber}</div>
+            <div class="w-[350px] h-[48px]" id="row-child">
+              ${shortenAddress(addr)}
+              <i id="copy-address-${uniqueKey}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i>
+            </div>
+            <div class="w-[160px] h-[48px]" id="row-child">${total}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${solo}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${squad}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${social}</div>
+            <div class="w-[110px] h-[48px]" id="row-child">${games}</div>
+            <div class="w-[100px] h-[48px]" id="row-child">${rate}</div>
+          `;
+
+      // Copy-to-clipboard handler
+      const copyIcon = row.querySelector(`#copy-address-${CSS.escape(uniqueKey)}`);
+      if (copyIcon) {
+        copyIcon.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(addr);
+
+            // Visual feedback
+            copyIcon.classList.remove('fa-copy');
+            copyIcon.classList.add('fa-circle-check', 'text-green-400');
+            copyIcon.title = 'Copied!';
+
+            setTimeout(() => {
+              copyIcon.classList.remove('fa-circle-check', 'text-green-400');
+              copyIcon.classList.add('fa-copy');
+              copyIcon.title = 'Copy full address';
+            }, 1500);
+          } catch (err) {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = addr;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            copyIcon.classList.add('text-blue-400');
+            setTimeout(() => copyIcon.classList.remove('text-blue-400'), 500);
+          }
+        });
+      }
+
+      return row;
+    }
+
+    async function fetchMyPlayerPoints(address) {
+      if (!address) return null;
+      try {
+        const url = `${API_PLAYER_POINTS}?walletAddress=${encodeURIComponent(address)}&season=${season}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('playerPoints request failed');
+        const data = await res.json();
+        return data;
+      } catch (e) {
+        console.warn('Failed to fetch player points:', e);
+        return null;
+      }
+    }
+
+    function addYouBadgeToRow(row) {
+      // Try to pick the second cell (player cell)
+      const playerCell = row.children && row.children[1];
+      if (playerCell) {
+        const youBadge = document.createElement('span');
+        youBadge.textContent = 'You';
+        youBadge.className = 'ml-2 px-2 py-0.5 text-xs rounded-full bg-yellow-400/20 text-yellow-300 border border-yellow-400/60';
+        playerCell.appendChild(youBadge);
+      }
+    }
+
+    async function fetchLeaderboard(page) {
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
+      const leaderboardBody = document.getElementById('table-body');
+      const myRankingContainer = document.querySelector('.my-ranking-data');
+      const leaderboardTable = document.getElementById('leaderboard-table');
+      const rewardsImage = document.getElementById('rewards-image');
+
+      if (myRankingContainer) {
+        myRankingContainer.className = `bg-yellow-400/25 border border-yellow-400/60 w-[1280px]`;
+      }
+
+      loading.classList.remove('hidden');
+      error.classList.add('hidden');
+      leaderboardBody.innerHTML = '';
+      if (myRankingContainer) myRankingContainer.innerHTML = '';
+      leaderboardTable.classList.remove('hidden');
+      rewardsImage.classList.add('hidden');
+
+      try {
+        const queryParams = `page=${page}&limit=${limit}&season=${encodeURIComponent(season)}`;
+        const response = await fetch(`${API_URL}?${queryParams}`);
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error('Failed to fetch leaderboard data');
+        }
+
+        totalPages = data.totalPages || 1;
+        updatePaginationUI();
+
+        // Update countdown text based on API response (assuming API returns season status)
+        countdownText.textContent = `Season ${season}`;
+        pulseRing.style.display = 'none'; // Adjust based on API response if needed
+
+        // Badges in rank
+        function getRankBadge(rank) {
+          if (rank >= 1 && rank <= 10) {
+            return '<img src="../img/game/shared/badges/surviv_s1_gold.svg" alt="Gold Badge" class="filter drop-shadow-[0_0_2px_#facc15a6]">';
+          }
+          if (rank >= 11 && rank <= 50) {
+            return '<img src="../img/game/shared/badges/surviv_s1_silver.svg" alt="Silver Badge">';
+          }
+          return '';
+        }
+
+        const players = data.players;
+        players.forEach((player, index) => {
+          const row = document.createElement('div');
+          row.className = 'leaderboard-body-row';
+          row.innerHTML = `
+            <div class="w-[110px] h-[48px]" id="row-child">
+              ${getRankBadge((page - 1) * limit + index + 1)}
+              ${(page - 1) * limit + index + 1}
+            </div>
+            <div class="w-[320px] h-[48px]" id="row-child">${shortenAddress(player.player)}<i id="copy-address-${index}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i></div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.totalPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.soloPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.squadPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints || 0}</div>
+            <div class="w-[110px] h-[48px]" id="row-child">${player.games}</div>
+            <div class="w-[100px] h-[48px]" id="row-child">${player.games > 0 ? ((player.soloPoints + player.squadPoints) / player.games).toFixed(2) : '0.00'}</div>
+          `;
+          leaderboardBody.appendChild(row);
+        });
+
+        // Fetch and pin "my" row using PUBLIC_KEY only
+        if (myPublicKey && myRankingContainer) {
+          const myData = await fetchMyPlayerPoints(myPublicKey);
+          if (myData) {
+            console.log("myData: ", myData);
+            // Determine rank based on current page if present; otherwise show "—"
+            const rankNumber = myData.rank;
+
+            // Replace the prompt (if any) with the pinned row
+            myRankingContainer.innerHTML = '';
+            const pinned = createRow(myData.player, rankNumber, `my-${page}`, true);
+            addYouBadgeToRow(pinned);
+            myRankingContainer.appendChild(pinned);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        error.textContent = 'Error loading leaderboard. Please try again later.';
+        error.classList.remove('hidden');
+      } finally {
+        loading.classList.add('hidden');
+      }
+    }
+
+    prevButton.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        fetchLeaderboard(currentPage);
+      }
+    });
+
+    nextButton.addEventListener('click', () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        fetchLeaderboard(currentPage);
+      }
+    });
+
+    // Input page navigation
+    pageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        let val = parseInt(pageInput.value.split('/')[0]);
+        if (!isNaN(val) && val >= 1 && val <= totalPages) {
+          currentPage = val;
+          fetchLeaderboard(currentPage);
+        } else {
+          pageInput.value = `${currentPage}/${totalPages}`; // Reset to valid value
+        }
+      }
+    });
+
+    // Fetch initial leaderboard
+    fetchLeaderboard(currentPage);
+  </script>
+
+  <script src="../src/earn.ts" type="module"></script>
+</body>
+
+</html>
