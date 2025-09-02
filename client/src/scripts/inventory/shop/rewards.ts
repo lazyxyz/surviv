@@ -18,11 +18,15 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
     const rewards: RewardItem[] = [];
 
     let seasonRewards: SeasonRewardsData | undefined;
+
     try {
         seasonRewards = await account.getSeasonRewards();
     } catch (err) {
         console.error(`Failed to fetch season rewards: ${err}`);
     }
+
+    console.log("seasonRewards: ", seasonRewards);
+
     if (seasonRewards && seasonRewards.success) {
         let seasonImage = "../img/game/shared/badges/surviv_card.svg";
         if (seasonRewards.tokenIds[1][0] == 1) {
@@ -37,6 +41,14 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
             amount: 1,
             time: "Season I Reward",
         });
+
+        if (seasonRewards.tokenIds[0][0] == 0 && seasonRewards.amounts[0][0] > 0) {
+            rewards.push({
+                image: "./img/misc/surviv_kit_crate.png",
+                amount: seasonRewards.amounts[0][0],
+                time: "Season I Reward",
+            });
+        }
     }
 
     if (rewardData?.validCrates) {
