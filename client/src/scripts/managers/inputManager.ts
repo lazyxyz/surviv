@@ -116,6 +116,35 @@ export class InputManager {
 
     update(): void {
         if (this.game.gameOver) return;
+
+
+        /* 
+            If mobile, convert angle into WASD-like flags,
+            actually this logic could't be here, handle in the server please.
+
+            rules:
+                desktop: WADS moving keyboard
+                mobile: joystick instead WADS
+        */
+        {
+            if (this.isMobile && this.movement.moving) {
+                const x = Math.cos(this.movementAngle); // horizontal
+                const y = Math.sin(this.movementAngle); // vertical
+
+                this.movement.left = x < -0.1;
+                this.movement.right = x > 0.1;
+                this.movement.up = y < -0.1;
+                this.movement.down = y > 0.1;
+            
+            } else {
+                // reset movement keys if not moving
+                this.movement.left = false;
+                this.movement.right = false;
+                this.movement.up = false;
+                this.movement.down = false;
+            }
+        }
+
         const packet = {
             movement: { ...this.movement },
             attacking: this.attacking,
@@ -266,6 +295,7 @@ export class InputManager {
         });
 
         // Mobile joysticks
+        // thank you so much: https://github.com/HasangerGames/suroi/pull/420
         if (this.isMobile) {
             const size = GAME_CONSOLE.getBuiltInCVar("mb_joystick_size");
             const transparency = GAME_CONSOLE.getBuiltInCVar("mb_joystick_transparency");
@@ -273,20 +303,24 @@ export class InputManager {
             const leftJoyStick = nipplejs.create({
                 zone: $("#left-joystick-container")[0],
                 size,
-                color: `rgba(255, 255, 255, ${transparency})`
+                color: `rgba(255, 255, 255, ${transparency})`,
+                position: { top: "50%", left: "25%" },
+                mode: "static"
             });
 
             const rightJoyStick = nipplejs.create({
                 zone: $("#right-joystick-container")[0],
                 size,
-                color: `rgba(255, 255, 255, ${transparency})`
+                color: `rgba(255, 255, 255, ${transparency})`,
+                position: { top: "50%", right: "-25%" },
+                mode: "static"
             });
 
             let rightJoyStickUsed = false;
             let shootOnRelease = false;
 
-            leftJoyStick.on("move", (_, data: JoystickOutputData) => {
-                const movementAngle = -Math.atan2(data.vector.y, data.vector.x);
+         leftJoyStick.on("move", (_, data: JoystickOutputData) => {
+                const movementAngle = -data.angle.radian;
 
                 this.movementAngle = movementAngle;
                 this.movement.moving = true;
