@@ -1,3 +1,5 @@
+sudo chattr -R -i /opt/client/dist
 sudo mkdir -p /opt/client/dist
 sudo cp -r ./client/dist/* /opt/client/dist/
 sudo chmod -R u-w,g-w /opt/client/dist
+sudo chattr -R +i /opt/client/dist

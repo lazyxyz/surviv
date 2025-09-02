@@ -272,7 +272,7 @@ export class Gamer extends Player {
         };
 
         if (!this.loadout.badge) {
-            processRewardsPacket(true, 0);
+            processRewardsPacket(false, 0);
             return;
         }
 
