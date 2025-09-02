@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { successAlert, errorAlert } from "../../modal";
 import { ShopCache } from ".";
-import type { Account } from "../../account";
+import type { Account, SeasonRewardsData } from "../../account";
 
 interface RewardItem {
     image: string;
@@ -15,24 +15,41 @@ interface RewardData {
 
 async function renderRewardList(account: Account, rewardData: RewardData | undefined): Promise<void> {
     const now = Math.floor(Date.now() / 1000);
-    const rewards: RewardItem[] = rewardData?.validCrates?.map(item => {
-        const secondsLeft = item.expiry - now;
-        const daysLeft = Math.max(Math.floor(secondsLeft / (60 * 60 * 24)), 0);
-        return {
-            image: "./img/misc/surviv_kit_crate.png",
-            amount: item.amount,
-            time: `Expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
-        };
-    }) || [];
+    const rewards: RewardItem[] = [];
 
-    // Check for season rewards
-    const hasSeasonRewards = (await account.getSeasonRewards()).success;
-    if (hasSeasonRewards) {
+    let seasonRewards: SeasonRewardsData | undefined;
+    try {
+        seasonRewards = await account.getSeasonRewards();
+    } catch (err) {
+        console.error(`Failed to fetch season rewards: ${err}`);
+    }
+    if (seasonRewards && seasonRewards.success) {
+        let seasonImage = "../img/game/shared/badges/surviv_card.svg";
+        if (seasonRewards.tokenIds[1][0] == 1) {
+            seasonImage = "../img/game/shared/badges/surviv_s1_gold.svg";
+        } else if (seasonRewards.tokenIds[1][0] == 2) {
+            seasonImage = "../img/game/shared/badges/surviv_s1_silver.svg";
+        } else if (seasonRewards.tokenIds[1][0] == 3) {
+            seasonImage = "../img/game/shared/badges/somnia_s1.svg";
+        }
         rewards.push({
-            image: "../img/game/shared/badges/surviv_s1_gold.svg",
+            image: seasonImage,
             amount: 1,
             time: "Season I Reward",
         });
+    }
+
+    if (rewardData?.validCrates) {
+        const crateRewards = rewardData.validCrates.map(item => {
+            const secondsLeft = item.expiry - now;
+            const daysLeft = Math.max(Math.floor(secondsLeft / (60 * 60 * 24)), 0);
+            return {
+                image: "./img/misc/surviv_kit_crate.png",
+                amount: item.amount,
+                time: `Expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
+            };
+        });
+        rewards.push(...crateRewards);
     }
 
     const $rewardGrid = $(".rewards-grid-group");
@@ -41,7 +58,7 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
     let isProcessing = false;
 
     const totalCrates = rewards.reduce((sum, item) => sum + (item.image.includes("surviv_kit_crate.png") ? item.amount : 0), 0);
-    $totalReward.text(`You have ${totalCrates} crates${hasSeasonRewards ? " and season rewards" : ""} to claim`);
+    $totalReward.text(`You have ${totalCrates} crates to claim`);
     $rewardGrid.empty();
     rewards.forEach(item => {
         $rewardGrid.append(`
@@ -58,7 +75,7 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
         isProcessing = true;
         $claimButton.prop("disabled", true);
         try {
-            if (hasSeasonRewards) {
+            if (seasonRewards && seasonRewards.success) {
                 // Claim season rewards first (one-time claim)
                 const seasonRewards = await account.getSeasonRewards();
                 // Then claim crates
@@ -73,7 +90,7 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
             ShopCache.PlayerValidRewards = undefined;
         } catch (err) {
             console.error(`Failed to claim rewards: ${err}`);
-            errorAlert(hasSeasonRewards ? "Failed to claim season rewards or crates" : "No valid crates found");
+            errorAlert("No valid rewards found");
         } finally {
             isProcessing = false;
             $claimButton.prop("disabled", false);

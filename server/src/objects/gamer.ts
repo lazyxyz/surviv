@@ -272,7 +272,7 @@ export class Gamer extends Player {
         };
 
         if (!this.loadout.badge) {
-            processRewardsPacket(false, 0);
+            processRewardsPacket(true, 0);
             return;
         }
 
@@ -284,10 +284,12 @@ export class Gamer extends Player {
                 this.game.gameId,
                 3000
             );
-            processRewardsPacket(data.success && data.rewards.success, data.rewards.amount || 0);
+
+            if (data.success && data.rewards.success && data.rewards.amount > 0) {
+                processRewardsPacket(data.success && data.rewards.success, data.rewards.amount);
+            }
         } catch (err) {
             console.log("Error claiming rewards:", err);
-            processRewardsPacket(false, 0);
         }
     }
 

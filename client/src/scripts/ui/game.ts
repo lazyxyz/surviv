@@ -129,11 +129,6 @@ function setupSpectateControls(game: Game): void {
     ui.spectateNext.on("click", () => {
         sendSpectatePacket(SpectateActions.SpectateNext);
     });
-
-    // // Update the user's badge
-    // GAME_CONSOLE.variables.addChangeListener("cv_loadout_badge", () => {
-    //     updateUsersBadge(game);
-    // });
 }
 
 function setupKeyboardControls(game: Game): void {
@@ -1009,7 +1004,6 @@ export async function setupGame(game: Game): Promise<void> {
     setupInventorySlots(game);
     setupSpectateOptions(game);
     setupGameInteraction(game);
-    // updateUsersBadge(game);
 
     // Setup outside
     setUpCommands(game);
