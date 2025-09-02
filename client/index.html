@@ -223,11 +223,10 @@
                 <span>Leaderboard</span>
               </button>
             </a>
-            <a href="https://app.galxe.com/quest/SurvivFun?sort=Trending" target="_blank"
-              class="btn btn-lg btn-darken btn-event btn-quests" id="btn-rules" style="display: none">
+            <button class="btn btn-lg btn-darken btn-event btn-quests" id="btn-rules" style="display: none" disabled>
               <img src="public/img/misc/galxe.svg" alt="">
               <span>Galxe Quests</span>
-            </a>
+            </button>
 
           </div>
         </div>
@@ -943,7 +942,10 @@
               <div class="my-crates-select">
                 <h3 class="total-selected">0 seleted</h3>
                 <button class="btn btn-alert btn-darken open-now" disabled>Open Now</button>
-                <button class="btn btn-alert btn-darken claim-items" disabled>Claim Items</button>
+                <button class="btn btn-alert btn-darken claim-items" disabled>
+                  <div class="pulsating-circle" id="pulse-animation"></div>
+                  Claim Items
+                </button>
               </div>
             </div>
             <!-- Rewards -->
