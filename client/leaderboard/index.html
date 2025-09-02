@@ -45,7 +45,8 @@
             <div>
               <div class="logo-heading" id="logo-heading">LEADERBOARD</div>
 
-              <div class="logo-body text-xs">Surviv Play-and-Earn on Somnia - Season <span id="season-number">1</span></div>
+              <div class="logo-body text-xs">Surviv Play-and-Earn on Somnia - Season <span id="season-number">1</span>
+              </div>
             </div>
           </div>
 
@@ -57,8 +58,11 @@
           <div class="header flex items-center justify-between">
             <div class="flex items-center space-x-4">
               <p class="header-title">top survivors</p>
-              <button class="btn-season flex items-center space-x-2 px-3 py-1 text-sm bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors" id="season-1-button">
-                <img src="../img/game/shared/badges/surviv_s1_gold.svg" alt="Gold Badge" class="w-8 h-8 filter drop-shadow-[0_0_2px_#facc15a6]">
+              <button
+                class="btn-season flex items-center space-x-2 px-3 py-1 text-sm bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+                id="season-1-button">
+                <img src="../img/game/shared/badges/surviv_s1_gold.svg" alt="Gold Badge"
+                  class="w-8 h-8 filter drop-shadow-[0_0_2px_#facc15a6]">
                 <span>Season I</span>
               </button>
             </div>
@@ -138,7 +142,7 @@
     const API_PLAYER_POINTS_CURRENT = 'https://admin.surviv.fun/api/playerPoints';
     const API_PLAYER_POINTS_SEASON = 'https://admin.surviv.fun/season/player/';
     const API_REWARDS_PROOF = 'https://admin.surviv.fun/season/player/';
-    const isEnded = true; 
+    const isEnded = true;
 
     let currentPage = 1;
     const limit = 100;

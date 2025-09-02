@@ -155,6 +155,7 @@ async function updateBalancesUI(
 
 async function renderClaimButton(account: Account): Promise<HTMLButtonElement | null> {
     const claimButton = document.querySelector<HTMLButtonElement>(".claim-items");
+    const pulseAnimation = document.getElementById("pulse-animation");
     if (!claimButton) return claimButton;
 
     const hasCommits = (await account.getCommits().catch(err => {
@@ -164,6 +165,17 @@ async function renderClaimButton(account: Account): Promise<HTMLButtonElement | 
 
     claimButton.disabled = !hasCommits;
     claimButton.classList.toggle("active", hasCommits);
+
+    // Control pulse animation visibility based on claim button state
+    if (pulseAnimation) {
+        if (hasCommits) {
+            pulseAnimation.style.display = "block";
+        } else {
+            pulseAnimation.style.display = "none";
+        }
+    }
+
+
     return claimButton;
 }
 
@@ -343,6 +355,12 @@ async function updateClaimButton(account: Account): Promise<void> {
 
                 claimButton.classList.remove("active");
                 claimButton.disabled = true;
+
+                // Hide pulse animation
+                const pulseAnimation = document.getElementById("pulse-animation");
+                if (pulseAnimation) {
+                    pulseAnimation.style.display = "none";
+                }
             }
         } catch (err) {
             console.error(`Failed to claim items: ${err}`);
