@@ -94,7 +94,7 @@ export interface MintResult {
     values: [number, number][];
 }
 
-interface SeasonRewardsData {
+export interface SeasonRewardsData {
     success: boolean;
     distributionContract: string;
     claimFee: string;
