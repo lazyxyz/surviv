@@ -939,7 +939,7 @@ export class Account extends EIP6963 {
             return [];
         }
     }
-    
+
     async getSeasonRewards(season: string = "1"): Promise<SeasonRewardsData> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
@@ -961,11 +961,9 @@ export class Account extends EIP6963 {
             });
 
             const rewardsData: SeasonRewardsData = await response.json();
-
             if (rewardsData.success) {
                 const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
                 const signer = await ethersProvider.getSigner();
-
                 const distributionContract = new ethers.Contract(
                     rewardsData.distributionContract,
                     seasonRewardsABI,
@@ -1033,8 +1031,13 @@ export class Account extends EIP6963 {
             // Initialize contract
             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
             const signer = await ethersProvider.getSigner();
-            const distributionContract = new ethers.Contract(rewardsData.distributionContract, seasonRewardsABI, signer);
+            const playerBalance = await ethersProvider.getBalance(signer.address);
+            if (playerBalance < BigInt(rewardsData.claimFee)) {
+                errorAlert(`You need ${ethers.formatEther(rewardsData.claimFee)} ${ChainConfig.nativeCurrency.symbol} tokens!`);
+                throw new Error('Insufficient balance');
+            }
 
+            const distributionContract = new ethers.Contract(rewardsData.distributionContract, seasonRewardsABI, signer);
             const tx = await distributionContract.claimAll(rewardsData.collections, rewardsData.merkleProofs, rewardsData.tokenIds, rewardsData.amounts, {
                 value: rewardsData.claimFee,
             });
