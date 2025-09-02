@@ -127,21 +127,23 @@ export class InputManager {
                 mobile: joystick instead WADS
         */
         {
-            if (this.isMobile && this.movement.moving) {
-                const x = Math.cos(this.movementAngle); // horizontal
-                const y = Math.sin(this.movementAngle); // vertical
+            if (this.isMobile) {
+                if(this.movement.moving){
+                    const x = Math.cos(this.movementAngle); // horizontal
+                    const y = Math.sin(this.movementAngle); // vertical
 
-                this.movement.left = x < -0.1;
-                this.movement.right = x > 0.1;
-                this.movement.up = y < -0.1;
-                this.movement.down = y > 0.1;
+                    this.movement.left = x < -0.1;
+                    this.movement.right = x > 0.1;
+                    this.movement.up = y < -0.1;
+                    this.movement.down = y > 0.1;
+                }else{
+                    // reset movement keys if not moving
+                    this.movement.left = false;
+                    this.movement.right = false;
+                    this.movement.up = false;
+                    this.movement.down = false;
+                }
             
-            } else {
-                // reset movement keys if not moving
-                this.movement.left = false;
-                this.movement.right = false;
-                this.movement.up = false;
-                this.movement.down = false;
             }
         }
 
