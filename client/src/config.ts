@@ -8,8 +8,7 @@ export const Config = {
             mainAddress: "http://127.0.0.1:8000",
             gameAddress: "ws://127.0.0.1:<ID>",
             teamAddress: "ws://127.0.0.1:8000",
-            // apiAddress: "https://api.surviv.fun",
-            apiAddress: "http://localhost:3001",
+            apiAddress: "https://api.surviv.fun",
         },
         as: {
             name: "Asia",
@@ -30,10 +29,10 @@ export const Config = {
         //     mainAddress: "https://na.surviv.fun",
         //     gameAddress: "wss://<ID>.na.surviv.fun",
         //     teamAddress: "wss://team.na.surviv.fun",
-        //     apiAddress: "https://admin.surviv.fun",
+        //     apiAddress: "https://api.surviv.fun",
         // },
     },
-    defaultRegion: "as",
+    defaultRegion: "dev",
 } satisfies ConfigType as ConfigType;
 
 export const ChainConfig = {
