@@ -42,10 +42,6 @@ export const Config = {
     plugins: [],
     disableLobbyClearing: true,
 
-    authServer: {
-        address: "http://localhost:8080"
-    },
-    
     earnConfig: {
         rank: 5,
         api: "https://admin.surviv.fun",
@@ -228,16 +224,6 @@ export interface ConfigType {
      */
     readonly disableLobbyClearing?: boolean
 
-    /**
-     * Options for the authentication server
-     *
-     * Optional; If not specified, the server will not use an authentication server
-     */
-    readonly authServer?: {
-        readonly address: string
-    }
-
-    
     readonly earnConfig: {
         readonly rank: number, // Rank receive rewards
         readonly api: string,
