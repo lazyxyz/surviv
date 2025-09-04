@@ -8,31 +8,17 @@ export const Config = {
             mainAddress: "http://127.0.0.1:8000",
             gameAddress: "ws://127.0.0.1:<ID>",
             teamAddress: "ws://127.0.0.1:8000",
-            apiAddress: "https://api.surviv.fun",
+            apiAddress: "https://test-api.grindy.io",
         },
-        as: {
-            name: "Asia",
-            mainAddress: "https://as.surviv.fun",
-            gameAddress: "wss://<ID>.as.surviv.fun",
-            teamAddress: "wss://team.as.surviv.fun",
-            apiAddress: "https://api.surviv.fun",
+        test: {
+            name: "Test",
+            mainAddress: "https://as.grindy.io",
+            gameAddress: "wss://<ID>.as.grindy.io",
+            teamAddress: "wss://team.as.grindy.io",
+            apiAddress: "https://test-api.grindy.io",
         },
-        eu: {
-            name: "Europe",
-            mainAddress: "https://eu.surviv.fun",
-            gameAddress: "wss://<ID>.eu.surviv.fun",
-            teamAddress: "wss://team.eu.surviv.fun",
-            apiAddress: "https://api.surviv.fun",
-        },
-        // na: {
-        //     name: "North America",
-        //     mainAddress: "https://na.surviv.fun",
-        //     gameAddress: "wss://<ID>.na.surviv.fun",
-        //     teamAddress: "wss://team.na.surviv.fun",
-        //     apiAddress: "https://api.surviv.fun",
-        // },
     },
-    defaultRegion: "dev",
+    defaultRegion: "test",
 } satisfies ConfigType as ConfigType;
 
 export const ChainConfig = {
@@ -46,18 +32,6 @@ export const ChainConfig = {
     },
     blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
 } satisfies ChainInfo as ChainInfo;
-
-// export const ChainConfig = {
-//     chainId: toBeHex(5031),
-//     chainName: "Somnia Mainnet",
-//     rpcUrls: ["https://api.infra.mainnet.somnia.network/"],
-//     nativeCurrency: {
-//         name: "Somnia Token",
-//         symbol: "SOMI",
-//         decimals: 18
-//     },
-//     blockExplorerUrls: ["https://mainnet.somnia.w3us.site/"]
-// } satisfies ChainInfo as ChainInfo;
 
 export interface ConfigType {
     readonly regions: Record<string, Region>
