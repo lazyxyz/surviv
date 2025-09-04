@@ -691,7 +691,7 @@ input::-webkit-inner-spin-button {
     }
     .my-crates-select {
       position: fixed;
-      bottom: 12px;
+      bottom: 8px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -700,6 +700,7 @@ input::-webkit-inner-spin-button {
       padding: 8px 8px 8px 16px;
       background-color: #50722f;
       border-radius: 10px;
+
       h3 {
         margin: 0px;
         font-size: 16px;
@@ -740,6 +741,11 @@ input::-webkit-inner-spin-button {
         padding: 12px;
         border-radius: 12px;
         opacity: 100%;
+
+        @include variables.mobile-device {
+          padding: 10px;
+        }
+
         &.active {
           box-shadow: inset 0px 0px 0px 2px white;
         }
