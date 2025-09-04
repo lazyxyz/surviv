@@ -1398,74 +1398,6 @@
   }
 }
 
-#healing-items-container {
-  bottom: 50px;
-  left: 10px;
-
-  .item-slot.has-item {
-    cursor: pointer;
-  }
-
-  @media screen and (max-width: variables.$screen_large) {
-    left: 5px;
-  }
-
-  @media screen and (max-width: variables.$screen_medium) {
-    bottom: 43px;
-  }
-
-  @media screen and (max-width: 500px) {
-    bottom: 128px;
-  }
-}
-
-#ammos-container {
-  position: absolute;
-  bottom: 406px;
-  right: 5px;
-  transform: scale(0.9);
-
-  display: flex;
-  gap: 5px;
-
-  @media screen and (min-width: variables.$screen_large) and (max-height: 720px) {
-    bottom: 370px;
-  }
-
-  @media screen and (max-width: variables.$screen_large) {
-    bottom: 248px;
-    right: 5px;
-  }
-
-  @media screen and (max-width: variables.$screen_medium) {
-    bottom: 208px;
-    right: 0;
-  }
-
-  @media screen and (max-width: 460px) {
-    bottom: 300px;
-  }
-
-  @include variables.mobile-device {
-    bottom: 212px;
-    right: 5px;
-  }
-}
-
-#ammo-container,
-#special-ammo-container {
-  position: relative;
-  justify-content: flex-start;
-}
-
-#ammos-container,
-#healing-items-container {
-  &.active .item-slot {
-    opacity: 1;
-    cursor: pointer !important;
-  }
-}
-
 #perk-container {
   position: absolute;
   bottom: 10px;
@@ -1955,9 +1887,8 @@
   }
 }
 
+.ui-inventory,
 #weapons-container,
-#healing-items-container,
-#ammos-container,
 #center-top-container,
 #game-menu,
 #mobile-options,
