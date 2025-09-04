@@ -50,7 +50,6 @@
 
 #game-misc-stats {
   display: flex;
-  flex-wrap: wrap;
 }
 
 #minimap-border {
@@ -81,17 +80,6 @@
 }
 
 #gas-timer {
-  width: 80px;
-  height: 30px;
-  padding: 6px 9px 6px 9px;
-  margin: 8px 0 8px 0;
-  display: flex;
-  border-radius: 6px;
-  align-items: center;
-  background-color: palette.$transparent_bg;
-  font-size: 17px;
-  @include variables.text-shadow;
-
   &.advancing {
     animation: advancing 2s linear infinite;
   }
@@ -110,28 +98,38 @@
     }
   }
 
-  #gas-timer-text {
-    float: right;
-    margin-left: auto;
-  }
-
   #gas-timer-image {
-    position: relative;
-    bottom: 1px;
     @include variables.drop-shadow;
+  }
+}
 
-    @media screen and (max-width: variables.$screen_large) {
-      width: 14px;
-      height: 14px;
-    }
+.gas-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  border-radius: 6px;
+  padding: 6px 9px;
+  background-color: palette.$transparent_bg;
+
+  @include variables.text-shadow;
+  width: fit-content;
+
+  &:not(:first-child){
+    margin-top: 6px;
   }
 
-  @media screen and (max-width: variables.$screen_large) {
-    padding: 4px 6px 4px 6px;
-    margin: 4px 0 4px 0;
+  img {
+    width: 14px;
+    height: 14px;
+  }
+
+  span {
     font-size: 14px;
-    width: 60px;
-    height: fit-content;
+
+    @media screen and (max-width: variables.$screen_medium) {
+      font-size: 10px;
+    }
   }
 }
 
@@ -361,46 +359,6 @@
   @media screen and (max-width: variables.$screen_large) {
     top: 5px;
     right: 5px;
-  }
-
-  .counter {
-    margin-left: auto;
-    width: fit-content;
-    display: flex;
-    background: palette.$transparent_bg;
-    border-radius: 8px;
-    justify-content: center;
-    align-items: center;
-    padding: 8px 10px 8px 16px;
-    gap: 10px;
-    @include variables.text-shadow;
-
-    @media screen and (max-width: variables.$screen_large) {
-      padding: 4px 5px 4px 8px;
-      gap: 5px;
-    }
-
-    img {
-      filter: drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.6));
-      width: 32px;
-      height: 32px;
-
-      @media screen and (max-width: variables.$screen_large) {
-        width: 16px;
-        height: 16px;
-      }
-    }
-
-    .counter-text {
-      padding-left: 5px;
-      padding-right: 8px;
-      font-weight: bold;
-      font-size: 25px;
-
-      @media screen and (max-width: variables.$screen_large) {
-        font-size: 25px;
-      }
-    }
   }
 
   #kill-feed {
