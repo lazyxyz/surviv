@@ -18,7 +18,7 @@ export const Config = {
             apiAddress: "https://test-api.grindy.io",
         },
     },
-    defaultRegion: "dev",
+    defaultRegion: "test",
 } satisfies ConfigType as ConfigType;
 
 export const ChainConfig = {
