@@ -48,7 +48,7 @@ export const Config = {
     
     earnConfig: {
         rank: 5,
-        api: "https://api.surviv.fun",
+        api: "https://test-api.grindy.io",
     },
 } satisfies ConfigType as ConfigType;
 
