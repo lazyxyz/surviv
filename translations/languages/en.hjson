@@ -316,4 +316,5 @@
   "region_sa": "South America"
   "region_as": "Asia"
   "region_us": "United States"
+  "region_test": "Test"
 }
