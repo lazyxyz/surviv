@@ -448,7 +448,15 @@ export class UIManager {
             "Game is easy #1 🏆",
             "Unstoppable #1 💥",
             "Carried the squad to #1 💪😂",
-            "1st Place Loot King 🌟 - GG!"
+            "1st Place Loot King 🌟 - GG!",
+            "You play to kill zombies, I play for Chicken Dinner #1. We are not the same. 😎",
+            "Make chicken dinner great again #1 😂",
+            "Top #1 or out, noobs! 😜🏆",
+            "Warzone proven warrior #1 💪",
+            "GGWP, easy peasy #1 😎🍋",
+            "Clutched #1, time for a nap 😴🏆",
+            "Winner takes all, #1 vibes! 🥇🔥",
+            "This is MY game, #1 GG! 😤👑"
         ];
 
         const otherContent = [
@@ -456,7 +464,15 @@ export class UIManager {
             "GGWP! 🎉",
             "Just warming up 💪🎮",
             "One step closer to #1! 🏃‍♂️💨",
-            "No crown, still proud! 🧢🏅"
+            "No crown, still proud! 🧢🏅",
+            "Zombies got me, but I’m too cool 😎🧟",
+            "Mom called mid-game, oops! 😅📱",
+            "No scope, still dope! 😜",
+            "Bots hate me, I’m too good 😤🤖",
+            "No chicken, but I’m winning vibes! 😎✨",
+            "Nothing to see, my team carried me! 😂🙌",
+            "My strategy? Nothing! 😂😜",
+            "Hid till the end, still GG! 🫣🎉"
         ];
 
         const randomContent = rank === 1
