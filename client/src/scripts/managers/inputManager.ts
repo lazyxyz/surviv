@@ -117,36 +117,6 @@ export class InputManager {
     update(): void {
         if (this.game.gameOver) return;
 
-
-        /* 
-            If mobile, convert angle into WASD-like flags,
-            actually this logic could't be here, handle in the server please.
-
-            rules:
-                desktop: WADS moving keyboard
-                mobile: joystick instead WADS
-        */
-        {
-            if (this.isMobile) {
-                if(this.movement.moving){
-                    const x = Math.cos(this.movementAngle); // horizontal
-                    const y = Math.sin(this.movementAngle); // vertical
-
-                    this.movement.left = x < -0.1;
-                    this.movement.right = x > 0.1;
-                    this.movement.up = y < -0.1;
-                    this.movement.down = y > 0.1;
-                }else{
-                    // reset movement keys if not moving
-                    this.movement.left = false;
-                    this.movement.right = false;
-                    this.movement.up = false;
-                    this.movement.down = false;
-                }
-            
-            }
-        }
-
         const packet = {
             movement: { ...this.movement },
             attacking: this.attacking,
