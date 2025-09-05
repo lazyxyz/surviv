@@ -19,7 +19,7 @@ import { Config } from "../../config";
  */
 export class Assassin extends Player {
     private static ATTACK_RADIUS = 20; // Use melee attack when gamer too close
-    private static SHOT_RADIUS = 70; // Use ranged attack within this radius
+    private static SHOT_RADIUS = 60; // Use ranged attack within this radius
 
     private static readonly ATTACK_ROTATION_RATE = 0.35; // Maximum rotation speed per update
     private static readonly SHOT_ROTATION_RATE = 0.2; // Maximum rotation speed for shooting
@@ -65,10 +65,10 @@ export class Assassin extends Player {
      */
     private getRandomHideDuration(): number {
         let duration = Math.random() * (Assassin.MAX_HIDE_DURATION - Assassin.MIN_HIDE_DURATION) + Assassin.MIN_HIDE_DURATION;
-        const distanceToGasCenter = Vec.squaredLength(Vec.sub(this.game.gas.newPosition, this.position));
+        const distanceToGasCenter = Vec.length(Vec.sub(this.game.gas.newPosition, this.position));
         // If outside gas newRadius, cut half time
-        if (distanceToGasCenter > this.game.gas.newRadius * this.game.gas.newRadius) {
-            duration /= 3; // when outside safe zone, move faster
+        if (distanceToGasCenter > this.game.gas.newRadius) {
+            duration /= 3;
         }
         return duration;
     }
@@ -133,19 +133,19 @@ export class Assassin extends Player {
         super.update();
         for (const obj of this.visibleObjects) {
             if (obj instanceof Gamer && !obj.dead && !obj.downed) {
-                const squaredDistance = Vec.squaredLength(Vec.sub(obj.position, this.position));
-                if (squaredDistance < Assassin.ATTACK_RADIUS * Assassin.ATTACK_RADIUS) {
+                const distance = Vec.length(Vec.sub(obj.position, this.position));
+                if (distance < Assassin.ATTACK_RADIUS) {
                     // Initiate melee attack if player is too close
                     this.initiateMeleeAttack(obj);
                     this.movingToRadius = false;
                     return;
-                } else if (squaredDistance < this.shotRadius * this.shotRadius) {
+                } else if (distance < this.shotRadius) {
                     this.inventory.setActiveWeaponIndex(0);
                     if (this.canFire()) {
                         // Shoot if player is within shot radius and can fire
                         this.shotNearestPlayer(obj);
                         this.movingToRadius = false;
-                    } else if (squaredDistance < Assassin.ATTACK_RADIUS * Assassin.ATTACK_RADIUS) {
+                    } else if (distance < Assassin.ATTACK_RADIUS) {
                         // Fallback to melee if out of ammo
                         this.initiateMeleeAttack(obj);
                         this.movingToRadius = false;
@@ -192,7 +192,7 @@ export class Assassin extends Player {
 
         const packet: PlayerInputData = {
             movement: { up: false, down: false, left: false, right: false },
-            attacking: true,
+            attacking: !this.attacking,
             actions: [],
             isMobile: true,
             turning: true,
@@ -211,7 +211,7 @@ export class Assassin extends Player {
     private attackNearestPlayer(player: Gamer): void {
         // Attack nearest player with melee
         this.baseSpeed = Assassin.BASE_ATTACK_SPEED;
-        this.moveToTarget(player.position, Assassin.SAFE_DISTANCE_PLAYER, true);
+        this.moveToTarget(player.position, Assassin.SAFE_DISTANCE_PLAYER, !this.attacking);
     }
 
     private holdPositionPreGame(): void {
@@ -260,10 +260,10 @@ export class Assassin extends Player {
         }
 
         this.hideTimer += 1 / Config.tps; // Assuming 60 FPS
-        const currentDistanceToGas = Vec.squaredLength(Vec.sub(this.game.gas.newPosition, this.position));
+        const currentDistanceToGas = Vec.length(Vec.sub(this.game.gas.newPosition, this.position));
 
         // If bot is within safe zone proximity, find nearest bush or tree
-        if (currentDistanceToGas <= Assassin.CENTER_PROXIMITY * Assassin.CENTER_PROXIMITY) {
+        if (currentDistanceToGas <= Assassin.CENTER_PROXIMITY) {
             const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
                 ["bush", "tree"].includes(obj.definition.material) &&
                 !obj.dead &&
@@ -293,8 +293,8 @@ export class Assassin extends Player {
                 ["bush", "tree"].includes(obj.definition.material) &&
                 !obj.dead &&
                 !this.game.gas.isInGas(obj.position) &&
-                Vec.squaredLength(Vec.sub(this.game.gas.newPosition, obj.position)) <= currentDistanceToGas - Assassin.MIN_DISTANCE_TO_GAS * Assassin.MIN_DISTANCE_TO_GAS &&
-                (!this.lastHideSpot || Vec.squaredLength(Vec.sub(obj.position, this.lastHideSpot)) > 2 * Assassin.SAFE_DISTANCE_HIDE_SPOT * Assassin.SAFE_DISTANCE_HIDE_SPOT)
+                Vec.length(Vec.sub(this.game.gas.newPosition, obj.position)) <= currentDistanceToGas - Assassin.MIN_DISTANCE_TO_GAS &&
+                (!this.lastHideSpot || Vec.length(Vec.sub(obj.position, this.lastHideSpot)) > 2 * Assassin.SAFE_DISTANCE_HIDE_SPOT)
             );
 
             if (nearestHideSpot) {
@@ -365,7 +365,7 @@ export class Assassin extends Player {
             Vec.squaredLength(Vec.sub(this.position, this.lastCachePosition)) < 25 * 25 &&
             (!filter || filter(this.cachedHideSpot as unknown as T))
         ) {
-            return this.cachedHideSpot as unknown as T;
+            return this.cachedHideSpot as T;
         }
 
         let nearestObject: T | null = null;
@@ -373,7 +373,7 @@ export class Assassin extends Player {
 
         for (const obj of this.visibleObjects) {
             if (obj instanceof type && (!filter || filter(obj))) {
-                const distance = Vec.squaredLength(Vec.sub(obj.position, this.position));
+                const distance = Vec.length(Vec.sub(obj.position, this.position));
                 if (distance < nearestDistance) {
                     nearestDistance = distance;
                     nearestObject = obj;
@@ -386,6 +386,7 @@ export class Assassin extends Player {
             this.lastCacheUpdate = this.game.now;
             this.lastCachePosition = Vec.clone(this.position);
         }
+
         return nearestObject;
     }
 
@@ -399,7 +400,7 @@ export class Assassin extends Player {
                 ["bush", "tree"].includes(obj.definition.material) &&
                 !obj.dead &&
                 !this.game.gas.isInGas(obj.position) &&
-                Vec.squaredLength(Vec.sub(this.game.gas.newPosition, obj.position)) <= Vec.squaredLength(Vec.sub(this.game.gas.newPosition, this.position))
+                Vec.length(Vec.sub(this.game.gas.newPosition, obj.position)) <= Vec.length(Vec.sub(this.game.gas.newPosition, this.position))
             );
 
             if (nearestHideSpot) {
@@ -443,14 +444,14 @@ export class Assassin extends Player {
 
     private moveToSafePosition(): void {
         this.inventory.setActiveWeaponIndex(2);
-        const currentDistanceToGas = Vec.squaredLength(Vec.sub(this.game.gas.newPosition, this.position));
+        const currentDistanceToGas = Vec.length(Vec.sub(this.game.gas.newPosition, this.position));
 
         // Find a nearby hiding spot closer to the gas center
         const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
             ["bush", "tree"].includes(obj.definition.material) &&
             !obj.dead &&
             !this.game.gas.isInGas(obj.position) &&
-            Vec.squaredLength(Vec.sub(this.game.gas.newPosition, obj.position)) < currentDistanceToGas
+            Vec.length(Vec.sub(this.game.gas.newPosition, obj.position)) < currentDistanceToGas
         );
 
         if (nearestHideSpot) {
@@ -460,7 +461,7 @@ export class Assassin extends Player {
             this.currentHideDuration = this.getRandomHideDuration();
             this.baseSpeed = GameConstants.player.baseSpeed;
             this.movingToRadius = false;
-            this.moveToTarget(nearestHideSpot.position, Assassin.SAFE_DISTANCE_HIDE_SPOT, false);
+            this.moveToTarget(nearestHideSpot.position, Assassin.SAFE_DISTANCE_HIDE_SPOT, !this.attacking);
         } else {
             // Move to random point on gas radius
             this.lastHideSpot = null;
@@ -469,7 +470,7 @@ export class Assassin extends Player {
             this.baseSpeed = GameConstants.player.baseSpeed;
             this.movingToRadius = true;
             const radiusTarget = this.getRandomRadiusPosition();
-            this.moveToTarget(radiusTarget, 0, false);
+            this.moveToTarget(radiusTarget, 0, !this.attacking);
         }
     }
 }
