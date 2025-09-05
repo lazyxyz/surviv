@@ -313,22 +313,26 @@
       <div id="top-left-container">
         <div id="game-misc-stats">
           <div id="minimap-border"></div>
-          <div id="mobile-options" style="display: none">
-            <button id="btn-game-menu" class="btn btn-lg btn-primary fa-solid fa-bars"></button>
-            <button id="btn-emotes" class="btn btn-lg btn-primary">
-              <img src="./img/misc/emotes_icon.svg" style="margin-bottom: -3px" />
-            </button>
-            <button id="btn-toggle-ping" class="btn btn-lg btn-primary fa-solid fa-tower-broadcast"></button>
-          </div>
+
           <div id="gas-and-debug">
-            <div id="gas-timer">
+            <div class="gas-card" id="gas-timer">
               <img id="gas-timer-image" src="./img/misc/gas-waiting-icon.svg" />
               <span id="gas-timer-text">0:00</span>
             </div>
+
+            <div class="gas-card">
+              <img src="./img/misc/player_icon.svg" />
+              <span id="ui-players-alive">1</span>
+            </div>
+
+            <div class="gas-card" id="kill-counter">
+              <img src="./img/misc/skull_icon.svg" />
+              <span class="counter-text" id="ui-kills">0</span>
+            </div>
+
             <div id="debug-hud">
               <div id="fps-counter"></div>
               <div id="ping-counter"></div>
-              <!-- The placeholder text is needed -->
               <div id="coordinates-hud">X: -- Y: -- Z: --</div>
             </div>
           </div>
@@ -352,29 +356,6 @@
 
       <div id="team-container"></div>
 
-      <div class="ui-leaderboard">
-        <div id="group-child">
-          <div id="ui-kill-leader">
-            <div id="kill-leader-leader-container">
-              <span id="kill-leader-leader" translation="msg_waiting_for_leader"></span>
-              <i class="fa-solid fa-crown" style="margin-left: 5px; margin-right: 5px"></i>
-              <span id="kill-leader-kills-counter">0</span>
-            </div>
-          </div>
-          <div id="badges-container"></div>
-        </div>
-        <div id="counter-holder">
-          <div class="counter">
-            <img src="./img/misc/player_icon.svg" />
-            <div class="counter-text" id="ui-players-alive">1</div>
-          </div>
-          <div class="counter" id="kill-counter">
-            <img src="./img/misc/skull_icon.svg" />
-            <div class="counter-text" id="ui-kills">0</div>
-          </div>
-        </div>
-        <div id="kill-feed"></div>
-      </div>
       <div id="action-container" style="display: none">
         <div id="action-timer">
           <h2 id="action-time">0.0</h2>
@@ -432,10 +413,17 @@
         <div id="kill-msg-cont"></div>
       </div>
 
-      <div class="inventory-container items-container" id="healing-items-container"></div>
-      <div id="ammos-container">
-        <div class="inventory-container items-container" id="special-ammo-container"></div>
-        <div class="inventory-container items-container" id="ammo-container"></div>
+      <div class="inventory">
+        <div class="inventory-items">
+          <div class="inventory-items-medicals" id="medicals-container"></div>
+  
+          <div class="inventory-items-ammos" id="ammos-container">
+            <div id="special-ammo-container"></div>
+            <div id="ammo-container"></div>
+          </div>
+        </div>
+
+        <div class="inventory-weapons" id="weapons-container"></div>
       </div>
 
       <div class="inventory-container" id="equipment-container">
@@ -470,7 +458,6 @@
           <div class="item-tooltip"></div>
         </div>
       </div>
-      <div class="inventory-container" id="weapons-container"></div>
       <div id="emote-wheel" style="display: none">
         <div class="emote-top"></div>
         <div class="emote-right"></div>
