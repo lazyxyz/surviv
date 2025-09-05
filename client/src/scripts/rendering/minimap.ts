@@ -638,7 +638,6 @@ export class Minimap {
         closeMinimap: $<HTMLButtonElement>("#btn-close-minimap"),
         killLeader: $<HTMLDivElement>("#ui-kill-leader"),
         centerBottom: $<HTMLDivElement>("#center-bottom-container"),
-        killCounter: $<HTMLDivElement>("#kill-counter"),
         survivbadge: $<HTMLDivElement>("#badges-container")
     });
 
@@ -656,7 +655,6 @@ export class Minimap {
         this._uiCache.killLeader.hide();
         this._uiCache.survivbadge.hide();
         this._uiCache.centerBottom.hide();
-        this._uiCache.killCounter.show();
         ui.killFeed.hide();
 
         this.resize();
@@ -677,7 +675,6 @@ export class Minimap {
         if (this.game.spectating) ui.spectatingContainer.show();
         const width = window.innerWidth;
         if (width > 768) this._uiCache.killLeader.show();
-        this._uiCache.killCounter.hide();
 
         // We check again for the mobile spectating stuff due to a bug
         if (this.game.inputManager.isMobile && this.game.spectating && this._visible) {

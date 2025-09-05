@@ -608,7 +608,6 @@ function setupMobileControls(game: Game): void {
         ui.interactKey.html('<img src="./img/misc/tap-icon.svg" alt="Tap">');
         ui.activeAmmo.on("click", () => GAME_CONSOLE.handleQuery("reload", "never"));
         ui.emoteWheel.css("top", "50%").css("left", "50%");
-        $("#mobile-options").show();
         ui.menuButton.on("click", () => ui.gameMenu.toggle());
         ui.emoteButton.on("click", () => ui.emoteWheel.show());
 
@@ -720,53 +719,7 @@ function setupInventorySlots(game: Game): void {
             e.stopPropagation();
         });
     };
-    const step = 1;
 
-    $<HTMLDivElement>("#weapons-container").append(
-        ...Array.from(
-            { length: GameConstants.player.maxWeapons },
-            (_, slot) => {
-                const ele = $<HTMLDivElement>(
-                    `<div class="inventory-slot" id="weapon-slot-${slot + 1}">\
-                        <div class="main-container">\
-                            <span class="slot-number">${slot + 1}</span>\
-                            <span class="item-ammo"></span>\
-                            <img class="item-image" draggable="false" />\
-                            <span class="item-name"></span>\
-                        </div>\
-                        <img class="lock-icon" src="./img/misc/lock.svg"></span>\
-                    </div>`
-                );
-
-                const isGrenadeSlot = GameConstants.player.inventorySlotTypings[slot] === ItemType.Throwable;
-                const element = ele[0];
-
-                element.addEventListener("pointerup", () => clearTimeout(dropTimer));
-
-                element.addEventListener("pointerdown", e => {
-                    if (!ele.hasClass("has-item")) return;
-
-                    e.stopImmediatePropagation();
-
-                    inputManager.addAction({
-                        type: e.button === 2 ? InputActions.DropWeapon : InputActions.EquipItem,
-                        slot
-                    });
-
-                    if (
-                        isGrenadeSlot
-                        && game.activePlayer?.activeItem.itemType === ItemType.Throwable
-                        && e.button !== 2
-                    ) {
-                        inputManager.cycleThrowable(step);
-                    }
-
-                    mobileDropItem(e.button, true, undefined, slot);
-                });
-                return ele;
-            }
-        )
-    );
 
     $<HTMLDivElement>("#scopes-container").append(
         Scopes.definitions.map(scope => {
@@ -807,103 +760,148 @@ function setupInventorySlots(game: Game): void {
         })
     );
 
-    $<HTMLDivElement>("#healing-items-container").append(
-        HealingItems.definitions.map(item => {
+    // render ui-inventory
+    {
+        // medicals
+        $<HTMLDivElement>("#medicals-container").append(
+            HealingItems.definitions.map(item => {
+                const ele = $<HTMLDivElement>(
+                    html`<div class="inventory-items-card inventory-items-medicals-card" id="${item.idString}-slot">
+                        <img class="item-image" src="./img/game/shared/loot/${item.idString}.svg" draggable="false">
+                        <span class="item-count" id="${item.idString}-count">0</span>
+                    </div>`
+                );
+
+                ele[0].addEventListener("pointerup", () => clearTimeout(dropTimer));
+
+                slotListener(ele, button => {
+                    const isPrimary = button === 0;
+                    const isSecondary = button === 2;
+                    const isTeamMode = game.teamMode;
+
+                    if (isPrimary) {
+                        if (inputManager.pingWheelActive) {
+                            inputManager.addAction({
+                                type: InputActions.Emote,
+                                emote: HealingItems.fromString(item.idString)
+                            });
+                        } else {
+                            inputManager.addAction({
+                                type: InputActions.UseItem,
+                                item
+                            });
+                        }
+
+                        mobileDropItem(button, isTeamMode, item);
+                    }
+
+                    if (isSecondary && isTeamMode) {
+                        inputManager.addAction({
+                            type: InputActions.DropItem,
+                            item
+                        });
+                    }
+                });
+
+                return ele;
+            })
+        );
+        
+        // ammos
+        for (const ammo of Ammos) {
+            if (ammo.ephemeral) continue;
+    
             const ele = $<HTMLDivElement>(
-                html`<div class="inventory-slot item-slot active" id="${item.idString}-slot">
-                    <img class="item-image" src="./img/game/shared/loot/${item.idString}.svg" draggable="false">
-                    <span class="item-count" id="${item.idString}-count">0</span>
-                    <div class="item-tooltip">
-                        ${getTranslatedString("tt_restores", {
-                    item: `<b>${getTranslatedString(item.idString as TranslationKeys)}</b><br>`,
-                    amount: item.restoreAmount.toString(),
-                    type: item.healType === HealType.Adrenaline
-                        ? getTranslatedString("adrenaline")
-                        : getTranslatedString("health")
-                })}
-                    </div>
+                `<div class="inventory-items-card inventory-items-ammos-card" id="${ammo.idString}-slot">
+                    <img class="item-image" src="./img/game/shared/loot/${ammo.idString}.svg" draggable="false">
+                    <span class="item-count" id="${ammo.idString}-count">0</span>
                 </div>`
             );
+    
+            if(ammo.hideUnlessPresent){
+                $<HTMLDivElement>("#special-ammo-container").append(ele);
+            }
 
-            ele[0].addEventListener("pointerup", () => clearTimeout(dropTimer));
-
+            if(!ammo.hideUnlessPresent){
+                $<HTMLDivElement>("#ammo-container").append(ele);
+            }
+    
+            ele[0].addEventListener("pointerup", () => {
+                clearTimeout(dropTimer);
+            });
+    
             slotListener(ele, button => {
                 const isPrimary = button === 0;
                 const isSecondary = button === 2;
                 const isTeamMode = game.teamMode;
-
+    
                 if (isPrimary) {
                     if (inputManager.pingWheelActive) {
                         inputManager.addAction({
                             type: InputActions.Emote,
-                            emote: HealingItems.fromString(item.idString)
-                        });
-                    } else {
-                        inputManager.addAction({
-                            type: InputActions.UseItem,
-                            item
+                            emote: Ammos.fromString(ammo.idString)
                         });
                     }
-
-                    mobileDropItem(button, isTeamMode, item);
+    
+                    mobileDropItem(button, isTeamMode, ammo);
                 }
-
+    
                 if (isSecondary && isTeamMode) {
                     inputManager.addAction({
                         type: InputActions.DropItem,
-                        item
+                        item: ammo
                     });
                 }
             });
+        }
 
-            return ele;
-        })
-    );
+        // weapons
+        $<HTMLDivElement>("#weapons-container").append(
+            ...Array.from(
+                { length: GameConstants.player.maxWeapons },
+                (_, slot) => {
+                    const ele = $<HTMLDivElement>(
+                        `<div class="inventory-weapons-container" id="weapon-slot-${slot + 1}">
+                            <div class="inventory-weapons-container-card main-container">
+                                <img class="item-image" draggable="false" />
 
-    const ammoContainers = {
-        true: $<HTMLDivElement>("#special-ammo-container"),
-        false: $<HTMLDivElement>("#ammo-container")
-    } as const;
+                                <div class="inventory-weapons-container-card-slot">
+                                    <span class="slot-number">${slot + 1}</span>\
+                                    <span class="item-name"></span>
+                                </div>
+                            </div>
+                        </div>`
+                    );
 
-    for (const ammo of Ammos) {
-        if (ammo.ephemeral) continue;
+                    const isGrenadeSlot = GameConstants.player.inventorySlotTypings[slot] === ItemType.Throwable;
+                    const element = ele[0];
 
-        const ele = $<HTMLDivElement>(
-            `<div class="inventory-slot item-slot ammo-slot active" id="${ammo.idString}-slot">
-                <img class="item-image" src="./img/game/shared/loot/${ammo.idString}.svg" draggable="false">
-                <span class="item-count" id="${ammo.idString}-count">0</span>
-            </div>`
-        );
+                    element.addEventListener("pointerup", () => clearTimeout(dropTimer));
 
-        ammoContainers[`${ammo.hideUnlessPresent}`].append(ele);
+                    element.addEventListener("pointerdown", e => {
+                        if (!ele.hasClass("has-item")) return;
 
-        ele[0].addEventListener("pointerup", () => {
-            clearTimeout(dropTimer);
-        });
+                        e.stopImmediatePropagation();
 
-        slotListener(ele, button => {
-            const isPrimary = button === 0;
-            const isSecondary = button === 2;
-            const isTeamMode = game.teamMode;
+                        inputManager.addAction({
+                            type: e.button === 2 ? InputActions.DropWeapon : InputActions.EquipItem,
+                            slot
+                        });
 
-            if (isPrimary) {
-                if (inputManager.pingWheelActive) {
-                    inputManager.addAction({
-                        type: InputActions.Emote,
-                        emote: Ammos.fromString(ammo.idString)
+                        if (
+                            isGrenadeSlot
+                            && game.activePlayer?.activeItem.itemType === ItemType.Throwable
+                            && e.button !== 2
+                        ) {
+                            inputManager.cycleThrowable(1);
+                        }
+
+                        mobileDropItem(e.button, true, undefined, slot);
                     });
+                    return ele;
                 }
-
-                mobileDropItem(button, isTeamMode, ammo);
-            }
-
-            if (isSecondary && isTeamMode) {
-                inputManager.addAction({
-                    type: InputActions.DropItem,
-                    item: ammo
-                });
-            }
-        });
+            )
+        );
     }
 
     for (

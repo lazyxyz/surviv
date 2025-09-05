@@ -1,0 +1,40 @@
+@use "../main.scss";
+@use "../pages/client/splash.scss";
+@use "../palette.scss";
+@use "../variables.scss";
+
+section {
+  padding: 32px;
+  background: #0000008d;
+  clip-path: polygon(0% 1%, 100% 0%, 99% 100%, 0% 100%);
+  border-left: 5px solid #ffd23a;
+}
+
+h2 {
+  font-family: survivant;
+}
+
+.image-eagle {
+  position: fixed;
+  right: 0;
+  bottom: 0px;
+  width: 450px;
+  z-index: 9999;
+}
+
+@include variables.mobile-device {
+  .image-eagle {
+    width: 250px;
+  }
+}
+
+@media screen and (max-width: variables.$screen_small) {
+  .image-eagle {
+    display: none;
+  }
+}
+@media screen and (max-width: variables.$screen_medium) {
+  .image-eagle {
+    display: none;
+  }
+}

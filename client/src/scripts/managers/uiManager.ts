@@ -171,8 +171,6 @@ export class UIManager {
         killStreakIndicator: $<HTMLDivElement>("#killstreak-indicator-container"),
         killStreakCounter: $<HTMLSpanElement>("#killstreak-indicator-counter"),
 
-        weaponsContainer: $<HTMLDivElement>("#weapons-container"),
-
         minMaxAdren: $<HTMLSpanElement>("#adrenaline-bar-min-max"),
         maxHealth: $<HTMLSpanElement>("#health-bar-max"),
 
@@ -287,7 +285,6 @@ export class UIManager {
             readonly inner: JQuery<HTMLDivElement>
             readonly name: JQuery<HTMLSpanElement>
             readonly image: JQuery<HTMLImageElement>
-            readonly ammo: JQuery<HTMLSpanElement>
         }
     >();
 
@@ -296,7 +293,6 @@ export class UIManager {
         readonly inner: JQuery<HTMLDivElement>
         readonly name: JQuery<HTMLSpanElement>
         readonly image: JQuery<HTMLImageElement>
-        readonly ammo: JQuery<HTMLSpanElement>
     } {
         return this._weaponSlotCache.getAndGetDefaultIfAbsent(
             slot,
@@ -307,9 +303,8 @@ export class UIManager {
                 return {
                     container,
                     inner,
-                    name: inner.children(".item-name"),
-                    image: inner.children(".item-image"),
-                    ammo: inner.children(".item-ammo")
+                    name: inner.find(".item-name"),
+                    image: inner.find(".item-image"),
                 };
             }
         );
@@ -448,7 +443,15 @@ export class UIManager {
             "Game is easy #1 🏆",
             "Unstoppable #1 💥",
             "Carried the squad to #1 💪😂",
-            "1st Place Loot King 🌟 - GG!"
+            "1st Place Loot King 🌟 - GG!",
+            "You play to kill zombies, I play for Chicken Dinner #1. We are not the same. 😎",
+            "Make chicken dinner great again #1 😂",
+            "Top #1 or out, noobs! 😜🏆",
+            "Warzone proven warrior #1 💪",
+            "GGWP, easy peasy #1 😎🍋",
+            "Clutched #1, time for a nap 😴🏆",
+            "Winner takes all, #1 vibes! 🥇🔥",
+            "This is MY game, #1 GG! 😤👑"
         ];
 
         const otherContent = [
@@ -456,7 +459,15 @@ export class UIManager {
             "GGWP! 🎉",
             "Just warming up 💪🎮",
             "One step closer to #1! 🏃‍♂️💨",
-            "No crown, still proud! 🧢🏅"
+            "No crown, still proud! 🧢🏅",
+            "Zombies got me, but I’m too cool 😎🧟",
+            "Mom called mid-game, oops! 😅📱",
+            "No scope, still dope! 😜",
+            "Bots hate me, I’m too good 😤🤖",
+            "No chicken, but I’m winning vibes! 😎✨",
+            "Nothing to see, my team carried me! 😂🙌",
+            "My strategy? Nothing! 😂😜",
+            "Hid till the end, still GG! 🫣🎉"
         ];
 
         const randomContent = rank === 1
@@ -554,7 +565,7 @@ export class UIManager {
     updateEmoteWheel(): void {
         const { pingWheelActive } = this.game.inputManager;
         if (this.game.teamMode) {
-            $("#ammos-container, #healing-items-container").toggleClass("active", pingWheelActive);
+            $("#ammos-container, #medicals-container").toggleClass("active", pingWheelActive);
             for (const ammo of Ammos) {
                 const itemSlot = this._itemSlotCache[ammo.idString] ??= $(`#${ammo.idString}-slot`);
                 if (pingWheelActive && ammo.hideUnlessPresent) itemSlot.css("visibility", "visible");
@@ -875,42 +886,20 @@ export class UIManager {
             const {
                 container,
                 image: itemImage,
-                ammo: ammoCounter,
                 name: itemName
             } = this._getSlotUI(i + 1);
 
             const weapon = inventory.weapons[i];
             const isActive = this.inventory.activeWeaponIndex === i;
 
-            const ammoText = ammoCounter.text();
-            const ammoDirty = !ammoText.length
-                ? weapon?.count !== undefined
-                : +ammoText !== weapon?.count;
-
             const hadItem = container.hasClass(ClassNames.HasItem);
             const activityChanged = container.hasClass(ClassNames.IsActive) !== isActive;
 
             if (weapon) {
                 const definition = weapon.definition;
-                const isGun = "ammoType" in definition;
-                const color = isGun
-                    ? Ammos.fromString((definition as GunDefinition).ammoType).characteristicColor
-                    : { hue: 0, saturation: 0, lightness: 0 };
 
                 if (!hadItem) container.addClass(ClassNames.HasItem);
                 if (activityChanged) container.toggleClass(ClassNames.IsActive, isActive);
-
-                container.css(isGun && GAME_CONSOLE.getBuiltInCVar("cv_weapon_slot_style") === "colored"
-                    ? {
-                        "outline-color": `hsl(${color.hue}, ${color.saturation}%, ${(color.lightness + 50) / 3}%)`,
-                        "background-color": `hsla(${color.hue}, ${color.saturation}%, ${color.lightness / 2}%, 50%)`,
-                        "color": `hsla(${color.hue}, ${color.saturation}%, 90%)`
-                    }
-                    : {
-                        "outline-color": "",
-                        "background-color": "",
-                        "color": ""
-                    });
 
                 itemName.text(
                     definition.itemType === ItemType.Gun && definition.isDual
@@ -945,12 +934,6 @@ export class UIManager {
                     .toggleClass("is-fists", isFists)
                     .show();
 
-                const count = weapon.count;
-                if (ammoDirty && count !== undefined) {
-                    ammoCounter
-                        .text(count)
-                        .css("color", count > 0 ? "unset" : "red");
-                }
             } else {
                 container.removeClass(ClassNames.HasItem)
                     .removeClass(ClassNames.IsActive)
@@ -962,7 +945,6 @@ export class UIManager {
 
                 itemName.css("color", "").text("");
                 itemImage.removeAttr("src").hide();
-                ammoCounter.text("");
             }
         }
     }

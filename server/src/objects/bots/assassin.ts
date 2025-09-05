@@ -19,7 +19,7 @@ import { Config } from "../../config";
  */
 export class Assassin extends Player {
     private static ATTACK_RADIUS = 20; // Use melee attack when gamer too close
-    private static SHOT_RADIUS = 70; // Use ranged attack within this radius
+    private static SHOT_RADIUS = 60; // Use ranged attack within this radius
 
     private static readonly ATTACK_ROTATION_RATE = 0.35; // Maximum rotation speed per update
     private static readonly SHOT_ROTATION_RATE = 0.2; // Maximum rotation speed for shooting
@@ -28,8 +28,8 @@ export class Assassin extends Player {
     private static readonly AIM_DEVIATION = 0.07; // 7% aim deviation for shooting
     private static readonly BASE_ATTACK_SPEED = GameConstants.player.baseSpeed * 0.6; // Attack speed 60% of base
     private static readonly RADIUS_INCREMENT: number = 0.07; // Increase shot radius per gas stage
-    private static readonly MIN_HIDE_DURATION = 10; // Minimum seconds to stay in a hiding spot
-    private static readonly MAX_HIDE_DURATION = 30; // Maximum seconds to stay in a hiding spot
+    private static readonly MIN_HIDE_DURATION = 5; // Minimum seconds to stay in a hiding spot
+    private static readonly MAX_HIDE_DURATION = 15; // Maximum seconds to stay in a hiding spot
     private static readonly MIN_DISTANCE_TO_GAS = 30; // Minimum distance closer to gas safe zone
     private static readonly CENTER_PROXIMITY = 200; // Distance to consider bot "at" the gas safe zone
 
@@ -39,6 +39,9 @@ export class Assassin extends Player {
     private lastHideSpot: Vector | null = null; // Tracks the current hiding spot position
     private currentHideDuration: number = this.getRandomHideDuration(); // Current random hide duration
     private movingToRadius: boolean = false; // Tracks if bot is moving to a random radius position
+    private cachedHideSpot: Obstacle | null = null;
+    private lastCacheUpdate: number = 0;
+    private lastCachePosition: Vector | null = null;
 
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team) {
         super(game, userData, position, layer, team);
@@ -65,7 +68,7 @@ export class Assassin extends Player {
         const distanceToGasCenter = Vec.length(Vec.sub(this.game.gas.newPosition, this.position));
         // If outside gas newRadius, cut half time
         if (distanceToGasCenter > this.game.gas.newRadius) {
-            duration /= 2;
+            duration /= 3;
         }
         return duration;
     }
@@ -355,6 +358,16 @@ export class Assassin extends Player {
      * Find the nearest object of a specific type.
      */
     private findNearestObject<T>(type: new (...args: any[]) => T, filter?: (obj: T) => boolean): T | null {
+        if (
+            this.cachedHideSpot &&
+            this.game.now - this.lastCacheUpdate < 1000 &&
+            this.lastCachePosition &&
+            Vec.squaredLength(Vec.sub(this.position, this.lastCachePosition)) < 25 * 25 &&
+            (!filter || filter(this.cachedHideSpot as unknown as T))
+        ) {
+            return this.cachedHideSpot as T;
+        }
+
         let nearestObject: T | null = null;
         let nearestDistance = Infinity;
 
@@ -366,6 +379,12 @@ export class Assassin extends Player {
                     nearestObject = obj;
                 }
             }
+        }
+
+        if (nearestObject instanceof Obstacle) {
+            this.cachedHideSpot = nearestObject;
+            this.lastCacheUpdate = this.game.now;
+            this.lastCachePosition = Vec.clone(this.position);
         }
 
         return nearestObject;

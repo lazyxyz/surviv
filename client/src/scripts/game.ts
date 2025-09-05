@@ -341,7 +341,10 @@ export class Game {
     }
 
     ready(packet: PlayerData) {
-        this.sendPacket(JoinPacket.create(packet));
+        this.sendPacket(JoinPacket.create({
+            ...packet,
+            isMobile: this.inputManager.isMobile
+        }));
         updateUsersBadge(packet.badge?.idString)
     }
 
