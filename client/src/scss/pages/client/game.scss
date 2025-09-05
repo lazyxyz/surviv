@@ -1849,7 +1849,6 @@
 #weapons-container,
 #center-top-container,
 #game-menu,
-#mobile-options,
 #emote-wheel,
 #weapon-ammo-container,
 #interact-message,
@@ -1857,42 +1856,6 @@
 #btn-spectate-options,
 #btn-close-minimap {
   z-index: 1001;
-}
-
-#mobile-options {
-  display: flex;
-  flex-direction: column;
-
-  @media screen and (max-width: variables.$screen_large) {
-    position: relative;
-    bottom: 3px;
-  }
-
-  button {
-    width: 50px;
-  }
-
-  #btn-game-menu {
-    font-size: 16px;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  #btn-emotes {
-    border-radius: 0;
-    height: 34px;
-    img {
-      width: 18px;
-      position: relative;
-      bottom: 5px;
-    }
-  }
-
-  #btn-toggle-ping {
-    font-size: 16px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
 }
 
 .pickup-pulse {
