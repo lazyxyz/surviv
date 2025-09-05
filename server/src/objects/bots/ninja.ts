@@ -15,62 +15,51 @@ import { Config } from "../../config";
  * Represents a specialized player character with unique traits and behaviors.
  */
 export class Ninja extends Player {
-    private static readonly BASE_CHASE_RADIUS: number = 30; // Distance within which the Ninja will chase players
-    private static readonly ROTATION_RATE: number = 0.35; // Maximum rotation speed per update
-    private static readonly SAFE_DISTANCE_PLAYER: number = 5; // Minimum distance to maintain from players
-    private static readonly SAFE_DISTANCE_HIDE_SPOT: number = 0.5; // Minimum distance to maintain from hiding spots
-    private static readonly BASE_ATTACK_SPEED: number = GameConstants.player.baseSpeed * 0.6; // Attack speed 70% of base speed
-    private static readonly RADIUS_INCREMENT: number = 0.05; // Increase chase radius per gas stage
-    private static readonly SPEED_INCREMENT: number = 0.05; // Increase attack speed per gas stage
-    private static readonly MIN_HIDE_DURATION = 10; // Minimum seconds to stay in a hiding spot
-    private static readonly MAX_HIDE_DURATION = 30; // Maximum seconds to stay in a hiding spot
-    private static readonly MIN_DISTANCE_TO_GAS = 30; // Minimum distance closer to gas safe zone
-    private static readonly CENTER_PROXIMITY = 150; // Distance to consider bot "at" the gas safe zone
-    private static readonly NAMES = ["Shinobi", "Kage", "Ronin", "Shuriken", "Sai", "Katana", "Nighthawk", "Mist"]; // Thematic names for Ninja
+    private static readonly BASE_CHASE_RADIUS: number = 30;
+    private static readonly ROTATION_RATE: number = 0.35;
+    private static readonly SAFE_DISTANCE_PLAYER: number = 5;
+    private static readonly SAFE_DISTANCE_HIDE_SPOT: number = 0.5;
+    private static readonly BASE_ATTACK_SPEED: number = GameConstants.player.baseSpeed * 0.6;
+    private static readonly RADIUS_INCREMENT: number = 0.05;
+    private static readonly SPEED_INCREMENT: number = 0.05;
+    private static readonly MIN_HIDE_DURATION = 5;
+    private static readonly MAX_HIDE_DURATION = 15;
+    private static readonly MIN_DISTANCE_TO_GAS = 30;
+    private static readonly CENTER_PROXIMITY = 100;
+    private static readonly NAMES = ["Shinobi", "Kage", "Ronin", "Shuriken", "Sai", "Katana", "Nighthawk", "Mist"];
 
-    private hideTimer: number = 0; // Tracks time spent in current hiding spot
-    private lastHideSpot: Vector | null = null; // Tracks the current hiding spot position
-    private currentHideDuration: number = this.getRandomHideDuration(); // Current random hide duration
-    private movingToRadius: boolean = false; // Tracks if bot is moving to a random radius position
+    private hideTimer: number = 0;
+    private lastHideSpot: Vector | null = null;
+    private currentHideDuration: number = this.getRandomHideDuration();
+    private movingToRadius: boolean = false;
+    private cachedHideSpot: Obstacle | null = null;
+    private lastCacheUpdate: number = 0;
+    private lastCachePosition: Vector | null = null;
 
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team) {
         super(game, userData, position, layer, team);
-        this.health = this.health * 0.7; // Reduce health by 30%
-
+        this.health = this.health * 0.7;
         this.isMobile = true;
-        this.name = this.getRandomName(); // Assign random name
-
+        this.name = this.getRandomName();
         this.initializeLoadout();
         this.initializeInventory();
     }
 
-    /**
-     * Generate a random name from the NAMES list.
-     */
     private getRandomName(): string {
         const index = Math.floor(Math.random() * Ninja.NAMES.length);
         return Ninja.NAMES[index];
     }
 
-    /**
-     * Generate a random hide duration or 0 if outside gas radius.
-     */
     private getRandomHideDuration(): number {
         let duration = Math.random() * (Ninja.MAX_HIDE_DURATION - Ninja.MIN_HIDE_DURATION) + Ninja.MIN_HIDE_DURATION;
-        const distanceToGasCenter = Vec.length(Vec.sub(this.game.gas.newPosition, this.position));
-        // If outside gas newRadius, cut half time
-        if (distanceToGasCenter > this.game.gas.newRadius) {
-            duration /= 2;
+        const distanceToGasCenter = Vec.squaredLength(Vec.sub(this.game.gas.newPosition, this.position));
+        if (distanceToGasCenter > this.game.gas.newRadius * this.game.gas.newRadius) {
+            duration /= 3; // when outside safe zone, move faster
         }
-        // Generate random duration between MIN_HIDE_DURATION and MAX_HIDE_DURATION
         return duration;
     }
 
-    /**
-     * Generate a random position on the gas newRadius circle.
-     */
     private getRandomRadiusPosition(): Vector {
-        // Generate random angle for a point on the gas radius circle
         const randomAngle = Math.random() * 2 * Math.PI;
         return Vec.add(this.game.gas.newPosition, {
             x: Math.cos(randomAngle) * this.game.gas.newRadius,
@@ -78,30 +67,20 @@ export class Ninja extends Player {
         });
     }
 
-    /**
-     * Setup the initial loadout for the Ninja.
-     */
     private initializeLoadout(): void {
         this.loadout.skin = Skins.fromString("ninja");
     }
 
-    /**
-     * Setup the Ninja's inventory.
-     */
     private initializeInventory(): void {
-        const roll = Math.random(); // random number between 0 and 1
-        
-        if (roll < 0.5) {
-            // 50% chance
+        const roll = Math.random();
+        if (roll < 0.2) {
             this.inventory.weapons[2] = new MeleeItem("steelfang", this);
             this.inventory.items.setItem('cola', 2);
-        } else if (roll < 0.8) {
-            // 30% chance (0.5 - 0.8)
+        } else if (roll < 0.6) {
             this.inventory.weapons[2] = new MeleeItem("feral_claws", this);
             this.inventory.items.setItem('cola', 3);
         } else {
             this.inventory.weapons[2] = new MeleeItem("sickle", this);
-            // 20% chance (0.8 - 1.0)
             this.inventory.items.setItem('tablets', 2);
         }
     }
@@ -109,45 +88,33 @@ export class Ninja extends Player {
     update(): void {
         super.update();
         if (this.chasePlayer()) {
-            // Chasing player
             this.movingToRadius = false;
             return;
         }
 
         if (this.game.gas.isInGas(this.position)) {
-            // Move to safe position if in gas
             this.moveToSafePosition();
             return;
         }
 
-        // Hide in a safe spot
         this.hideInSafeSpot();
     }
 
-    /**
-     * Calculate chase radius based on gas stage.
-     */
     private get chaseRadius(): number {
         const stageMultiplier = 1 + Ninja.RADIUS_INCREMENT * this.game.gas.stage;
         return Ninja.BASE_CHASE_RADIUS * stageMultiplier;
     }
 
-    /**
-     * Calculate attack speed based on gas stage.
-     */
     private get attackSpeed(): number {
         const stageMultiplier = 1 + Ninja.SPEED_INCREMENT * this.game.gas.stage;
         return Ninja.BASE_ATTACK_SPEED * stageMultiplier;
     }
 
-    /**
-     * Chase the nearest visible player if within range.
-     */
     private chasePlayer(): boolean {
         for (const obj of this.visibleObjects) {
             if (obj instanceof Gamer && !obj.dead && !obj.downed) {
-                const distance = Vec.length(Vec.sub(obj.position, this.position));
-                if (distance < this.chaseRadius) {
+                const squaredDistance = Vec.squaredLength(Vec.sub(obj.position, this.position));
+                if (squaredDistance < this.chaseRadius * this.chaseRadius) {
                     this.attackNearestPlayer(obj);
                     return true;
                 }
@@ -157,34 +124,28 @@ export class Ninja extends Player {
     }
 
     private attackNearestPlayer(player: Gamer): void {
-        // Attack nearest player with melee
         this.baseSpeed = this.attackSpeed;
         this.moveToTarget(player.position, Ninja.SAFE_DISTANCE_PLAYER, !this.attacking);
     }
 
     private holdPositionPreGame(): void {
         if (this.lastHideSpot) {
-            // Stay at current hiding spot
             this.baseSpeed = GameConstants.player.baseSpeed;
             this.movingToRadius = false;
             this.moveToTarget(this.lastHideSpot, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
         } else {
-            // Find nearest bush or tree to hide in
             const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
                 ["bush", "tree"].includes(obj.definition.material) &&
                 !obj.dead &&
                 !this.game.gas.isInGas(obj.position)
             );
             if (nearestHideSpot) {
-                // Move to initial hiding spot
                 this.lastHideSpot = Vec.clone(nearestHideSpot.position);
                 this.baseSpeed = GameConstants.player.baseSpeed;
                 this.movingToRadius = false;
                 this.moveToTarget(nearestHideSpot.position, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
             } else {
-                // If no hiding spot, stay put
                 this.movingToRadius = false;
-
                 const packet: PlayerInputData = {
                     movement: { up: false, down: false, left: false, right: false },
                     attacking: false,
@@ -195,7 +156,6 @@ export class Ninja extends Player {
                     rotation: this.rotation,
                     distanceToMouse: undefined,
                 };
-
                 this.processInputs(packet);
             }
         }
@@ -207,112 +167,79 @@ export class Ninja extends Player {
             return;
         }
 
-
         this.hideTimer += 1 / Config.tps;
+        const currentDistanceToGas = Vec.squaredLength(Vec.sub(this.game.gas.newPosition, this.position));
 
-        const currentDistanceToGas = Vec.length(Vec.sub(this.game.gas.newPosition, this.position));
-
-        // If bot is within safe zone proximity, find nearest bush or tree
-        if (currentDistanceToGas <= Ninja.CENTER_PROXIMITY) {
-            const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
-                ["bush", "tree"].includes(obj.definition.material) &&
-                !obj.dead &&
-                !this.game.gas.isInGas(obj.position)
-            );
-
-            if (nearestHideSpot) {
-                // Move to nearest hiding spot
-                this.lastHideSpot = Vec.clone(nearestHideSpot.position);
-                this.hideTimer = 0;
-                this.currentHideDuration = this.getRandomHideDuration();
-                this.baseSpeed = GameConstants.player.baseSpeed;
-                this.movingToRadius = false;
-                this.moveToTarget(nearestHideSpot.position, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
-            } else {
-                // No hiding spot found, stay put
-                this.hideTimer = 0;
-                this.lastHideSpot = Vec.clone(this.position);
-                this.movingToRadius = false;
-            }
-            return;
-        }
-
-        // Check if it's time to move to a new hiding spot
-        if (this.hideTimer >= this.currentHideDuration || !this.lastHideSpot) {
-            const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
-                ["bush", "tree"].includes(obj.definition.material) &&
-                !obj.dead &&
-                !this.game.gas.isInGas(obj.position) &&
-                Vec.length(Vec.sub(this.game.gas.newPosition, obj.position)) <= currentDistanceToGas - Ninja.MIN_DISTANCE_TO_GAS &&
-                (!this.lastHideSpot || Vec.length(Vec.sub(obj.position, this.lastHideSpot)) > 2 * Ninja.SAFE_DISTANCE_HIDE_SPOT)
-            );
-
-            if (nearestHideSpot) {
-                // Move to new hiding spot
-                this.lastHideSpot = Vec.clone(nearestHideSpot.position);
-                this.hideTimer = 0;
-                this.currentHideDuration = this.getRandomHideDuration();
-                this.baseSpeed = GameConstants.player.baseSpeed;
-                this.movingToRadius = false;
-                this.moveToTarget(nearestHideSpot.position, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
-            } else {
-                // Move to random point on gas radius, checking for hiding spots along the way
-                this.lastHideSpot = null;
-                this.hideTimer = 0;
-                this.currentHideDuration = 0;
-                this.baseSpeed = GameConstants.player.baseSpeed;
-                this.movingToRadius = true;
-                const radiusTarget = this.getRandomRadiusPosition();
-                this.moveToTarget(radiusTarget, 0, false);
-            }
-        } else {
-            // Stay at or move to current hiding spot
-            if (this.lastHideSpot) {
-                this.baseSpeed = GameConstants.player.baseSpeed;
-                this.movingToRadius = false;
-                this.moveToTarget(this.lastHideSpot, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
-            } else {
-                const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
-                    ["bush", "tree"].includes(obj.definition.material) &&
-                    !obj.dead &&
-                    !this.game.gas.isInGas(obj.position)
-                );
-
-                if (nearestHideSpot) {
-                    // Move to initial hiding spot
-                    this.lastHideSpot = Vec.clone(nearestHideSpot.position);
-                    this.hideTimer = 0;
-                    this.currentHideDuration = this.getRandomHideDuration();
-                    this.baseSpeed = GameConstants.player.baseSpeed;
-                    this.movingToRadius = false;
-                    this.moveToTarget(nearestHideSpot.position, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
-                } else {
-                    // Move to random point on gas radius
-                    this.lastHideSpot = null;
-                    this.hideTimer = 0;
-                    this.currentHideDuration = 0;
-                    this.baseSpeed = GameConstants.player.baseSpeed;
-                    this.movingToRadius = true;
-                    const radiusTarget = this.getRandomRadiusPosition();
-                    this.moveToTarget(radiusTarget, 0, false);
-                }
-            }
+        if (currentDistanceToGas <= Ninja.CENTER_PROXIMITY * Ninja.CENTER_PROXIMITY) {
+            this.moveToNearestHideSpot(currentDistanceToGas);
+        } else if (this.hideTimer >= this.currentHideDuration || !this.lastHideSpot) {
+            this.moveToNewHideSpot(currentDistanceToGas);
+        } else if (this.lastHideSpot) {
+            this.baseSpeed = GameConstants.player.baseSpeed;
+            this.movingToRadius = false;
+            this.moveToTarget(this.lastHideSpot, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
         }
     }
 
-    private moveToSafePosition(): void {
-        const currentDistanceToGas = Vec.length(Vec.sub(this.game.gas.newPosition, this.position));
+    private moveToNearestHideSpot(currentDistanceToGas: number): void {
+        const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
+            ["bush", "tree"].includes(obj.definition.material) &&
+            !obj.dead &&
+            !this.game.gas.isInGas(obj.position)
+        );
 
-        // Find a nearby hiding spot closer to the gas center
+        if (nearestHideSpot) {
+            this.lastHideSpot = Vec.clone(nearestHideSpot.position);
+            this.hideTimer = 0;
+            this.currentHideDuration = this.getRandomHideDuration();
+            this.baseSpeed = GameConstants.player.baseSpeed;
+            this.movingToRadius = false;
+            this.moveToTarget(nearestHideSpot.position, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
+        } else {
+            this.hideTimer = 0;
+            this.lastHideSpot = Vec.clone(this.position);
+            this.movingToRadius = false;
+        }
+    }
+
+    private moveToNewHideSpot(currentDistanceToGas: number): void {
         const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
             ["bush", "tree"].includes(obj.definition.material) &&
             !obj.dead &&
             !this.game.gas.isInGas(obj.position) &&
-            Vec.length(Vec.sub(this.game.gas.newPosition, obj.position)) < currentDistanceToGas
+            Vec.squaredLength(Vec.sub(this.game.gas.newPosition, obj.position)) <= currentDistanceToGas - Ninja.MIN_DISTANCE_TO_GAS * Ninja.MIN_DISTANCE_TO_GAS &&
+            (!this.lastHideSpot || Vec.squaredLength(Vec.sub(obj.position, this.lastHideSpot)) > 2 * Ninja.SAFE_DISTANCE_HIDE_SPOT * Ninja.SAFE_DISTANCE_HIDE_SPOT)
         );
 
         if (nearestHideSpot) {
-            // Move to hiding spot
+            this.lastHideSpot = Vec.clone(nearestHideSpot.position);
+            this.hideTimer = 0;
+            this.currentHideDuration = this.getRandomHideDuration();
+            this.baseSpeed = GameConstants.player.baseSpeed;
+            this.movingToRadius = false;
+            this.moveToTarget(nearestHideSpot.position, Ninja.SAFE_DISTANCE_HIDE_SPOT, false);
+        } else {
+            this.lastHideSpot = null;
+            this.hideTimer = 0;
+            this.currentHideDuration = 0;
+            this.baseSpeed = GameConstants.player.baseSpeed;
+            this.movingToRadius = true;
+            const radiusTarget = this.getRandomRadiusPosition();
+            this.moveToTarget(radiusTarget, 0, false);
+        }
+    }
+
+    private moveToSafePosition(): void {
+        const currentDistanceToGas = Vec.squaredLength(Vec.sub(this.game.gas.newPosition, this.position));
+
+        const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
+            ["bush", "tree"].includes(obj.definition.material) &&
+            !obj.dead &&
+            !this.game.gas.isInGas(obj.position) &&
+            Vec.squaredLength(Vec.sub(this.game.gas.newPosition, obj.position)) < currentDistanceToGas
+        );
+
+        if (nearestHideSpot) {
             this.lastHideSpot = Vec.clone(nearestHideSpot.position);
             this.hideTimer = 0;
             this.currentHideDuration = this.getRandomHideDuration();
@@ -320,7 +247,6 @@ export class Ninja extends Player {
             this.movingToRadius = false;
             this.moveToTarget(nearestHideSpot.position, Ninja.SAFE_DISTANCE_HIDE_SPOT, !this.attacking);
         } else {
-            // Move to random point on gas radius
             this.lastHideSpot = null;
             this.hideTimer = 0;
             this.currentHideDuration = this.getRandomHideDuration();
@@ -331,21 +257,16 @@ export class Ninja extends Player {
         }
     }
 
-    /**
-     * Generic function to move towards a target position while rotating appropriately.
-     */
     private moveToTarget(targetPosition: Vector, safeDistance: number, isAttacking: boolean): void {
-        // If moving to a random radius position, check for hiding spots along the way
         if (this.movingToRadius) {
             const nearestHideSpot = this.findNearestObject<Obstacle>(Obstacle, (obj) =>
                 ["bush", "tree"].includes(obj.definition.material) &&
                 !obj.dead &&
                 !this.game.gas.isInGas(obj.position) &&
-                Vec.length(Vec.sub(this.game.gas.newPosition, obj.position)) <= Vec.length(Vec.sub(this.game.gas.newPosition, this.position))
+                Vec.squaredLength(Vec.sub(this.game.gas.newPosition, obj.position)) <= Vec.squaredLength(Vec.sub(this.game.gas.newPosition, this.position))
             );
 
             if (nearestHideSpot) {
-                // Found a hiding spot, switch to hiding there
                 this.lastHideSpot = Vec.clone(nearestHideSpot.position);
                 this.hideTimer = 0;
                 this.currentHideDuration = this.getRandomHideDuration();
@@ -363,7 +284,6 @@ export class Ninja extends Player {
         const rotationDifference = desiredRotation - this.rotation;
         const adjustedRotation = this.rotation + Math.min(Math.abs(rotationDifference), Ninja.ROTATION_RATE) * Math.sign(rotationDifference);
 
-        // Move if not within safe distance
         const shouldMove = distanceToTarget > safeDistance;
 
         const packet: PlayerInputData = {
@@ -380,20 +300,26 @@ export class Ninja extends Player {
             distanceToMouse: undefined,
         };
 
-        // Process movement input
         this.processInputs(packet);
     }
 
-    /**
-     * Find the nearest object of a specific type.
-     */
     private findNearestObject<T>(type: new (...args: any[]) => T, filter?: (obj: T) => boolean): T | null {
+        if (
+            this.cachedHideSpot &&
+            this.game.now - this.lastCacheUpdate < 1000 &&
+            this.lastCachePosition &&
+            Vec.squaredLength(Vec.sub(this.position, this.lastCachePosition)) < 25 * 25 &&
+            (!filter || filter(this.cachedHideSpot as unknown as T))
+        ) {
+            return this.cachedHideSpot as unknown as T;
+        }
+
         let nearestObject: T | null = null;
         let nearestDistance = Infinity;
 
         for (const obj of this.visibleObjects) {
             if (obj instanceof type && (!filter || filter(obj))) {
-                const distance = Vec.length(Vec.sub(obj.position, this.position));
+                const distance = Vec.squaredLength(Vec.sub(obj.position, this.position));
                 if (distance < nearestDistance) {
                     nearestDistance = distance;
                     nearestObject = obj;
@@ -401,6 +327,12 @@ export class Ninja extends Player {
             }
         }
 
+        if (nearestObject instanceof Obstacle) {
+            this.cachedHideSpot = nearestObject;
+            this.lastCacheUpdate = this.game.now;
+            this.lastCachePosition = Vec.clone(this.position);
+        }
         return nearestObject;
     }
+
 }
