@@ -115,7 +115,7 @@
   @include variables.text-shadow;
   width: fit-content;
 
-  &:not(:first-child){
+  &:not(:first-child) {
     margin-top: 6px;
   }
 
@@ -258,13 +258,13 @@
 #group-child {
   position: absolute;
   display: flex;
-  right: 130px;
+  left: 0px;
   justify-content: center;
   align-items: center;
   gap: 8px;
 
   @media screen and (max-width: variables.$screen_large) {
-    right: 100px;
+    left: 0px;
   }
 
   #badges-container {
@@ -286,16 +286,60 @@
       }
     }
   }
+  // #ui-kill-leader {
+  //   display: flex;
+  //   top: 15px;
+  //   right: 245px;
+  //   margin-left: auto;
+  //   width: max-content;
+  //   background: palette.$transparent_bg;
+  //   border-radius: 8px;
+  //   padding: 8px 12px 8px 12px;
+  //   gap: 10px;
+  //   @media screen and (max-width: variables.$screen_large) {
+  //     top: 7px;
+  //     right: 140px;
+  //     padding: 4px 5px 4px 8px;
+  //     gap: 5px;
+  //     height: 26px;
+  //     border-radius: 4px;
+  //   }
+
+  //   @media screen and (max-width: variables.$screen_medium) {
+  //     display: none;
+  //   }
+
+  //   #kill-leader-leader-container {
+  //     font-weight: bold;
+  //     font-size: 25px;
+  //     @include variables.text-shadow;
+
+  //     .badge-icon {
+  //       width: 25px;
+  //       margin-left: 5px;
+  //       margin-bottom: -4px;
+  //     }
+
+  //     @media screen and (max-width: variables.$screen_large) {
+  //       font-size: 16px;
+
+  //       .badge-icon {
+  //         width: 12px;
+  //       }
+  //     }
+  //   }
+  // }
   #ui-kill-leader {
     display: flex;
     top: 15px;
-    right: 245px;
+    left: 0px;
     margin-left: auto;
     width: max-content;
     background: palette.$transparent_bg;
     border-radius: 8px;
     padding: 8px 12px 8px 12px;
     gap: 10px;
+
     @media screen and (max-width: variables.$screen_large) {
       top: 7px;
       right: 140px;
@@ -333,8 +377,12 @@
 
 .ui-leaderboard {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 230px;
+  left: 0px;
+
+  @media screen and (max-width: variables.$screen_large) {
+    top: 145px;
+  }
 
   #counter-holder {
     display: flex;
@@ -356,33 +404,29 @@
     }
   }
 
-  @media screen and (max-width: variables.$screen_large) {
-    top: 5px;
-    right: 5px;
-  }
-
   #kill-feed {
-    margin-right: 130px;
-    margin-top: 0px;
+    margin-top: 50px;
     @media screen and (max-width: variables.$screen_large) {
-      margin-right: 100px;
-      margin-top: 0px;
+      margin-top: 32px;
     }
     @media screen and (max-width: variables.$screen_medium) {
-      margin-right: 5px;
+      margin-top: 20px;
+
+      // margin-right: 5px;
     }
     @media screen and (max-width: variables.$screen_medium) and (max-height: 500px) {
       margin-top: -40px;
-      margin-right: 80px;
+      // margin-right: 80px;
     }
     .kill-feed-item {
+      left: 0px;
       max-width: fit-content;
       padding: 8px 10px 8px 10px;
       margin: 5px 0 5px auto;
       background: palette.$transparent_bg;
       border-radius: 4px;
       font-weight: 600;
-      position: relative;
+      // position: relative;a
       display: flex;
       align-items: center;
       gap: 4px;
