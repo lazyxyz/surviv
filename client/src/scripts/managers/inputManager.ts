@@ -306,7 +306,7 @@ export class InputManager {
                 zone: $("#left-joystick-container")[0],
                 size,
                 color: `rgba(255, 255, 255, ${transparency})`,
-                position: { top: "50%", left: "25%" },
+                position: { top: "60%", left: "25%" },
                 mode: "static"
             });
 
@@ -314,7 +314,7 @@ export class InputManager {
                 zone: $("#right-joystick-container")[0],
                 size,
                 color: `rgba(255, 255, 255, ${transparency})`,
-                position: { top: "50%", right: "-25%" },
+                position: { top: "60%", right: "-25%" },
                 mode: "static"
             });
 

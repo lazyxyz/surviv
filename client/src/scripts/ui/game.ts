@@ -719,53 +719,7 @@ function setupInventorySlots(game: Game): void {
             e.stopPropagation();
         });
     };
-    const step = 1;
 
-    $<HTMLDivElement>("#weapons-container").append(
-        ...Array.from(
-            { length: GameConstants.player.maxWeapons },
-            (_, slot) => {
-                const ele = $<HTMLDivElement>(
-                    `<div class="inventory-slot" id="weapon-slot-${slot + 1}">\
-                        <div class="main-container">\
-                            <span class="slot-number">${slot + 1}</span>\
-                            <span class="item-ammo"></span>\
-                            <img class="item-image" draggable="false" />\
-                            <span class="item-name"></span>\
-                        </div>\
-                        <img class="lock-icon" src="./img/misc/lock.svg"></span>\
-                    </div>`
-                );
-
-                const isGrenadeSlot = GameConstants.player.inventorySlotTypings[slot] === ItemType.Throwable;
-                const element = ele[0];
-
-                element.addEventListener("pointerup", () => clearTimeout(dropTimer));
-
-                element.addEventListener("pointerdown", e => {
-                    if (!ele.hasClass("has-item")) return;
-
-                    e.stopImmediatePropagation();
-
-                    inputManager.addAction({
-                        type: e.button === 2 ? InputActions.DropWeapon : InputActions.EquipItem,
-                        slot
-                    });
-
-                    if (
-                        isGrenadeSlot
-                        && game.activePlayer?.activeItem.itemType === ItemType.Throwable
-                        && e.button !== 2
-                    ) {
-                        inputManager.cycleThrowable(step);
-                    }
-
-                    mobileDropItem(e.button, true, undefined, slot);
-                });
-                return ele;
-            }
-        )
-    );
 
     $<HTMLDivElement>("#scopes-container").append(
         Scopes.definitions.map(scope => {
@@ -808,6 +762,7 @@ function setupInventorySlots(game: Game): void {
 
     // render ui-inventory
     {
+        // medicals
         $<HTMLDivElement>("#medicals-container").append(
             HealingItems.definitions.map(item => {
                 const ele = $<HTMLDivElement>(
@@ -852,6 +807,7 @@ function setupInventorySlots(game: Game): void {
             })
         );
         
+        // ammos
         for (const ammo of Ammos) {
             if (ammo.ephemeral) continue;
     
@@ -898,6 +854,54 @@ function setupInventorySlots(game: Game): void {
                 }
             });
         }
+
+        // weapons
+        $<HTMLDivElement>("#weapons-container").append(
+            ...Array.from(
+                { length: GameConstants.player.maxWeapons },
+                (_, slot) => {
+                    const ele = $<HTMLDivElement>(
+                        `<div class="inventory-weapons-container" id="weapon-slot-${slot + 1}">
+                            <div class="inventory-weapons-container-card main-container">
+                                <img class="item-image" draggable="false" />
+
+                                <div class="inventory-weapons-container-card-slot">
+                                    <span class="slot-number">${slot + 1}</span>\
+                                    <span class="item-name"></span>
+                                </div>
+                            </div>
+                        </div>`
+                    );
+
+                    const isGrenadeSlot = GameConstants.player.inventorySlotTypings[slot] === ItemType.Throwable;
+                    const element = ele[0];
+
+                    element.addEventListener("pointerup", () => clearTimeout(dropTimer));
+
+                    element.addEventListener("pointerdown", e => {
+                        if (!ele.hasClass("has-item")) return;
+
+                        e.stopImmediatePropagation();
+
+                        inputManager.addAction({
+                            type: e.button === 2 ? InputActions.DropWeapon : InputActions.EquipItem,
+                            slot
+                        });
+
+                        if (
+                            isGrenadeSlot
+                            && game.activePlayer?.activeItem.itemType === ItemType.Throwable
+                            && e.button !== 2
+                        ) {
+                            inputManager.cycleThrowable(1);
+                        }
+
+                        mobileDropItem(e.button, true, undefined, slot);
+                    });
+                    return ele;
+                }
+            )
+        );
     }
 
     for (
