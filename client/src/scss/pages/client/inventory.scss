@@ -1,73 +1,76 @@
 @use "../../palette.scss";
 @use "../../variables";
 
-.ui-inventory {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-
-  &-card {
-    display: flex;
-    align-items: center;
-
-    background-color: rgba(0, 0, 0, 0.30);
-    opacity: 0.35;
-    padding: 6px;
-
-    // when you pick something, we should display this item available
-    &.has-item {
-      opacity: 1;
-    }
-
-    .item-image {
-      width: 28px;
-      height: 28px;
+.inventory {
   
-      @media screen and (max-width: variables.$screen_medium) {
-        width: 20px;
-        height: 20px;
-      }
-    }
+  // items meaning medicals & ammos
+  &-items {
+    position: absolute;
+    top: 5px;
+    right: 5px;
   
-    .item-count {
-      font-size: 14px;
-      color: white;
-      
-      @media screen and (max-width: variables.$screen_medium) {
-        font-size: 10px;
-      }
-    }
-  }
-
-
-  .inventory-medicals {
     display: flex;
-    height: fit-content;
-    gap: 6px;
+    flex-direction: row;
+    gap: 8px;
 
     &-card {
-      gap: 24px;
-
-      @media screen and (max-width: variables.$screen_medium) {
-        gap: 16px;
+      display: flex;
+      align-items: center;
+  
+      background-color: rgba(0, 0, 0, 0.30);
+      opacity: 0.35;
+      padding: 6px;
+  
+      // when you pick something, we should display this item available
+      &.has-item {
+        opacity: 1;
+      }
+  
+      .item-image {
+        width: 28px;
+        height: 28px;
+    
+        @media screen and (max-width: variables.$screen_medium) {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    
+      .item-count {
+        font-size: 14px;
+        color: white;
+        
+        @media screen and (max-width: variables.$screen_medium) {
+          font-size: 10px;
+        }
       }
     }
-  }
 
-  .inventory-ammos {
-    display: flex;
-    gap: 6px;
-
-    &-card {
-      flex-direction: column;
-
-      // instead wrapper using flex and gap to space items
-      &:not(:first-child) {
-        margin-top: 6px;
+    &-medicals {
+      display: flex;
+      height: fit-content;
+      gap: 6px;
+  
+      &-card {
+        gap: 24px;
+  
+        @media screen and (max-width: variables.$screen_medium) {
+          gap: 16px;
+        }
+      }
+    }
+  
+    &-ammos {
+      display: flex;
+      gap: 6px;
+  
+      &-card {
+        flex-direction: column;
+  
+        // instead wrapper using flex and gap to space items
+        &:not(:first-child) {
+          margin-top: 6px;
+        }
       }
     }
   }

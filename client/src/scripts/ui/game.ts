@@ -811,7 +811,7 @@ function setupInventorySlots(game: Game): void {
         $<HTMLDivElement>("#medicals-container").append(
             HealingItems.definitions.map(item => {
                 const ele = $<HTMLDivElement>(
-                    html`<div class="ui-inventory-card inventory-medicals-card" id="${item.idString}-slot">
+                    html`<div class="inventory-items-card inventory-items-medicals-card" id="${item.idString}-slot">
                         <img class="item-image" src="./img/game/shared/loot/${item.idString}.svg" draggable="false">
                         <span class="item-count" id="${item.idString}-count">0</span>
                     </div>`
@@ -856,7 +856,7 @@ function setupInventorySlots(game: Game): void {
             if (ammo.ephemeral) continue;
     
             const ele = $<HTMLDivElement>(
-                `<div class="ui-inventory-card inventory-ammos-card" id="${ammo.idString}-slot">
+                `<div class="inventory-items-card inventory-items-ammos-card" id="${ammo.idString}-slot">
                     <img class="item-image" src="./img/game/shared/loot/${ammo.idString}.svg" draggable="false">
                     <span class="item-count" id="${ammo.idString}-count">0</span>
                 </div>`
