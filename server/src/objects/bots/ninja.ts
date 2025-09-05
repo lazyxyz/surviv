@@ -19,7 +19,7 @@ export class Ninja extends Player {
     private static readonly ROTATION_RATE: number = 0.35; // Maximum rotation speed per update
     private static readonly SAFE_DISTANCE_PLAYER: number = 5; // Minimum distance to maintain from players
     private static readonly SAFE_DISTANCE_HIDE_SPOT: number = 0.5; // Minimum distance to maintain from hiding spots
-    private static readonly BASE_ATTACK_SPEED: number = GameConstants.player.baseSpeed * 0.7; // Attack speed 70% of base speed
+    private static readonly BASE_ATTACK_SPEED: number = GameConstants.player.baseSpeed * 0.6; // Attack speed 70% of base speed
     private static readonly RADIUS_INCREMENT: number = 0.05; // Increase chase radius per gas stage
     private static readonly SPEED_INCREMENT: number = 0.05; // Increase attack speed per gas stage
     private static readonly MIN_HIDE_DURATION = 10; // Minimum seconds to stay in a hiding spot
