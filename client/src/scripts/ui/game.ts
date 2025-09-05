@@ -751,7 +751,7 @@ function setupInventorySlots(game: Game): void {
             if (UI_DEBUG_MODE) ele.show();
         }
 
-        for(const scope of Scopes.definitions){
+        for (const scope of Scopes.definitions) {
             if (game.inputManager.isMobile) {
                 const ele = $<HTMLDivElement>(
                     `<div class="card-scopes" id="${scope.idString}-slot" style="display: none;">
