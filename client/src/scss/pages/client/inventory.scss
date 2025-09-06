@@ -10,7 +10,7 @@
     right: 5px;
   
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     gap: 8px;
 
     &-card {
@@ -24,16 +24,6 @@
       // when you pick something, we should display this item available
       &.has-item {
         opacity: 1;
-      }
-  
-      .item-image {
-        width: 28px;
-        height: 28px;
-          
-        @media screen and (max-width: variables.$screen_medium) {
-          width: 16px;
-          height: 16px;
-        }
       }
     
       .item-count {
@@ -55,6 +45,16 @@
 
       &-card {
         gap: 24px;
+
+        .item-image {
+          width: 28px;
+          height: 28px;
+            
+          @media screen and (max-width: variables.$screen_medium) {
+            width: 16px;
+            height: 16px;
+          }
+        }
   
         @media screen and (max-width: variables.$screen_medium) {
           gap: 6px;
@@ -80,6 +80,16 @@
         // instead wrapper using flex and gap to space items
         &:not(:first-child) {
           margin-top: 6px;
+        }
+
+        .item-image {
+          width: 20px;
+          height: 20px;
+            
+          @media screen and (max-width: variables.$screen_medium) {
+            width: 16px;
+            height: 16px;
+          }
         }
 
         @media screen and (max-width: variables.$screen_medium) {
