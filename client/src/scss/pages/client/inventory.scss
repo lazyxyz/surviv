@@ -51,8 +51,8 @@
           height: 28px;
             
           @media screen and (max-width: variables.$screen_medium) {
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
           }
         }
   
@@ -83,8 +83,8 @@
         }
 
         .item-image {
-          width: 20px;
-          height: 20px;
+          width: 28px;
+          height: 28px;
             
           @media screen and (max-width: variables.$screen_medium) {
             width: 16px;
@@ -104,7 +104,7 @@
     }
 
     @media screen and (max-width: variables.$screen_xsmall) {
-      flex-direction: column;
+      flex-direction: column-reverse;
     }
   }
 
@@ -118,41 +118,53 @@
     flex-direction: column;
 
     &-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 48px;
+
+      padding: 6px;
+      min-height: 56px;
+
       opacity: 0.65;
       border-radius: 6px;
-      min-height: 32px;
       
       &.active {
         background-color: rgba(0, 0, 0, 0.40);
         opacity: 1;
       }
       
-      &-card {
-        display: flex;
-        justify-content: space-between;
-        gap: 72px;
+      .item-image {
+        width: 48px;
+        height: 48px;
 
-        padding: 6px;
-        min-height: 40px;
-  
-        .item-image {
-          width: 40px;
-          height: 40px;
-  
-          &.is-fists {
-            background-repeat: no-repeat space;
-            background-position-x: 50%;
-            background-size: 19px;
-            transform: rotate(90deg);
-          }
-
-          @media screen and (max-width: variables.$screen_medium) {
-              width: 20px;
-              height: 20px;
-          }
+        @media screen and (max-width: variables.$screen_medium) {
+          width: 28px;
+          height: 28px;
         }
+      }
 
-        .slot-number {
+      &-slot {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        flex: 1;
+        gap: 8px;
+
+        &-container {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+
+          .item-ammo {
+            display: none;
+            width: 24px;
+            height: 24px;
+
+            &[src] {
+              display: block;
+            }
+          }
+
           @media screen and (max-width: variables.$screen_medium) {
             display: none;
           }
@@ -162,41 +174,25 @@
           font-size: 12px;
           font-weight: bold;
 
-          // why handle absolute? that support for no-distort
-          position: absolute;
-          inset: auto 0 0 auto; 
-          white-space: pre;
-
           @media screen and (max-width: variables.$screen_medium) {
             font-size: 10px;
-
-            bottom: 50%;
-            transform: translateY(50%);
           }
         }
-        
-        &-slot {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          flex: 1;
-          position: relative;
-        }
+      }
 
-        @media screen and (max-width: variables.$screen_medium) {
-          align-items: center;
-          min-height: unset;
-          gap: 40px;
-        }
+      @media screen and (max-width: variables.$screen_medium) {
+        align-items: center;
+        min-height: 40px;
+        gap: 28px;
       }
     }
 
     @media screen and (max-width: variables.$screen_medium) {
-      bottom: calc(80px + 5px); // 5px meaning offset
+      bottom: calc(50px + 5px); // 5px meaning offset
     }
 
     @media screen and (max-width: variables.$screen_xsmall) {
-      bottom: calc(230px + 5px); // 5px meaning offset
+      bottom: calc(190px + 5px); // 5px meaning offset
     }
   }
 }
