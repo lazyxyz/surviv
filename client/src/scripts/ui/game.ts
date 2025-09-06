@@ -721,15 +721,9 @@ function setupInventorySlots(game: Game): void {
     };
 
 
-    $<HTMLDivElement>("#scopes-container").append(
-        Scopes.definitions.map(scope => {
-            const ele = $<HTMLDivElement>(
-                `<div class="inventory-slot item-slot" id="${scope.idString}-slot" style="display: none;">
-                    <img class="item-image" src="./img/game/shared/loot/${scope.idString}.svg" draggable="false">
-                    <div class="item-tooltip">${scope.name.split(" ")[0]}</div>
-                </div>`
-            );
-
+    // render scopes
+    {
+        const listenerEvent = (ele: JQuery<HTMLDivElement>, scope: ScopeDefinition) => {
             ele[0].addEventListener("pointerup", () => clearTimeout(dropTimer));
 
             slotListener(ele, button => {
@@ -755,10 +749,33 @@ function setupInventorySlots(game: Game): void {
             });
 
             if (UI_DEBUG_MODE) ele.show();
+        }
 
-            return ele;
-        })
-    );
+        for (const scope of Scopes.definitions) {
+            if (game.inputManager.isMobile) {
+                const ele = $<HTMLDivElement>(
+                    `<div class="card-scopes" id="${scope.idString}-slot" style="display: none;">
+                        ${scope.name.split(" ")[0]}
+                    </div>`
+                );
+                
+                $<HTMLDivElement>("#scopes-container-mobile").append(ele);
+                
+                listenerEvent(ele, scope);
+            } else {
+                const ele = $<HTMLDivElement>(
+                    `<div class="inventory-slot item-slot" id="${scope.idString}-slot" style="display: none;">
+                        <img class="item-image" src="./img/game/shared/loot/${scope.idString}.svg" draggable="false">
+                        <div class="item-tooltip">${scope.name.split(" ")[0]}</div>
+                    </div>`
+                );
+
+                $<HTMLDivElement>("#scopes-container").append(ele);
+
+                listenerEvent(ele, scope);
+            }
+        }
+    }
 
     // render ui-inventory
     {
@@ -862,13 +879,14 @@ function setupInventorySlots(game: Game): void {
                 (_, slot) => {
                     const ele = $<HTMLDivElement>(
                         `<div class="inventory-weapons-container" id="weapon-slot-${slot + 1}">
-                            <div class="inventory-weapons-container-card main-container">
-                                <img class="item-image" draggable="false" />
+                            <img class="item-image" draggable="false" />
 
-                                <div class="inventory-weapons-container-card-slot">
-                                    <span class="slot-number">${slot + 1}</span>\
-                                    <span class="item-name"></span>
+                            <div class="inventory-weapons-container-slot">
+                                <div class="inventory-weapons-container-slot-container">
+                                    <img class="item-ammo" />
+                                    <span class="slot-number">${slot + 1}</span>
                                 </div>
+                                <span class="item-name"></span>
                             </div>
                         </div>`
                     );

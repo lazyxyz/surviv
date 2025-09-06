@@ -282,29 +282,28 @@ export class UIManager {
         number,
         {
             readonly container: JQuery<HTMLDivElement>
-            readonly inner: JQuery<HTMLDivElement>
             readonly name: JQuery<HTMLSpanElement>
             readonly image: JQuery<HTMLImageElement>
+            readonly ammo: JQuery<HTMLImageElement>
         }
     >();
 
     private _getSlotUI(slot: number): {
         readonly container: JQuery<HTMLDivElement>
-        readonly inner: JQuery<HTMLDivElement>
         readonly name: JQuery<HTMLSpanElement>
         readonly image: JQuery<HTMLImageElement>
+        readonly ammo: JQuery<HTMLImageElement>
     } {
         return this._weaponSlotCache.getAndGetDefaultIfAbsent(
             slot,
             () => {
                 const container = $<HTMLDivElement>(`#weapon-slot-${slot}`);
-                const inner = container.children<HTMLDivElement>(".main-container");
 
                 return {
                     container,
-                    inner,
-                    name: inner.find(".item-name"),
-                    image: inner.find(".item-image"),
+                    name: container.find(".item-name"),
+                    image: container.find(".item-image"),
+                    ammo: container.find(".item-ammo"),
                 };
             }
         );
@@ -886,7 +885,8 @@ export class UIManager {
             const {
                 container,
                 image: itemImage,
-                name: itemName
+                name: itemName,
+                ammo: itemAmmo
             } = this._getSlotUI(i + 1);
 
             const weapon = inventory.weapons[i];
@@ -901,39 +901,60 @@ export class UIManager {
                 if (!hadItem) container.addClass(ClassNames.HasItem);
                 if (activityChanged) container.toggleClass(ClassNames.IsActive, isActive);
 
-                itemName.text(
-                    definition.itemType === ItemType.Gun && definition.isDual
+                // handle display image
+                {
+                    const isFists = definition.idString === "fists";
+                    const location = definition.itemType === ItemType.Melee && definition.reskins?.includes(Modes[this.game.gameMode].idString) ? Modes[this.game.gameMode].idString : "shared";
+                    const newSrc = `./img/game/${location}/weapons/${isFists ? 'fists-hand' : definition.idString}.svg`;
+                    const oldSrc = itemImage.attr("src");
+
+                    if (oldSrc !== newSrc) {
+                        this._playSlotAnimation(container);
+                        itemImage.attr("src", newSrc);
+                    }
+
+                    itemImage.show();
+                }
+
+                // handle display itemName
+                if(!itemName.text()){
+                    const weaponName = definition.itemType === ItemType.Gun && definition.isDual
                         ? getTranslatedString(
                             "dual_template",
                             { gun: getTranslatedString(definition.singleVariant as TranslationKeys) }
                         )
-                        : getTranslatedString(definition.idString as TranslationKeys)
-                );
+                        : getTranslatedString(definition.idString as TranslationKeys);
 
-                const isFists = definition.idString === "fists";
-                const oldSrc = itemImage.attr("src");
+                    // ["Frag", "Grenade"]
+                    const splitWeaponName = weaponName.split(" ");
 
-                let frame = definition.idString;
-
-                const location = definition.itemType === ItemType.Melee && definition.reskins?.includes(Modes[this.game.gameMode].idString) ? Modes[this.game.gameMode].idString : "shared";
-                const newSrc = `./img/game/${location}/weapons/${frame}.svg`;
-                if (oldSrc !== newSrc) {
-                    this._playSlotAnimation(container);
-                    itemImage.attr("src", newSrc);
+                    itemName.text(splitWeaponName[0]);
+                }
+                
+                // handle display background represent ammo
+                {
+                    const isGun = "ammoType" in definition;
+                    const color = isGun
+                        ? Ammos.fromString((definition as GunDefinition).ammoType).characteristicColor
+                        : { hue: 0, saturation: 0, lightness: 0 };
+                    
+                    container.css(isGun && GAME_CONSOLE.getBuiltInCVar("cv_weapon_slot_style") === "colored"
+                        ? {
+                            "outline-color": `hsl(${color.hue}, ${color.saturation}%, ${(color.lightness + 50) / 3}%)`,
+                            "background-color": `hsla(${color.hue}, ${color.saturation}%, ${color.lightness / 2}%, 50%)`,
+                            "color": `hsla(${color.hue}, ${color.saturation}%, 90%)`
+                        }
+                        : {
+                            "outline-color": "",
+                            "background-color": "",
+                            "color": ""
+                    });
                 }
 
-                const backgroundImage
-                    = isFists
-                        ? this.skinID !== undefined && Skins.fromStringSafe(this.skinID)?.grassTint
-                            ? `url("data:image/svg+xml,${encodeURIComponent(`<svg width="34" height="34" viewBox="0 0 8.996 8.996" xmlns="http://www.w3.org/2000/svg"><circle fill="${getGhillieTint(this.game.gameMode).toHex()}" stroke="${new Color(getGhillieTint(this.game.gameMode)).multiply("#111").toHex()}" stroke-width="1.05833" cx="4.498" cy="4.498" r="3.969"/></svg>`)}")`
-                            : `url(./img/game/shared/skins/${this.skinID ?? GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin")}_fist.svg)`
-                        : "none";
-
-                itemImage
-                    .css("background-image", backgroundImage)
-                    .toggleClass("is-fists", isFists)
-                    .show();
-
+                // handle display shape ammo
+                if("ammoType" in definition) {
+                    itemAmmo.attr("src", `./img/game/shared/loot/${definition.ammoType}.svg`);
+                }
             } else {
                 container.removeClass(ClassNames.HasItem)
                     .removeClass(ClassNames.IsActive)
@@ -945,6 +966,7 @@ export class UIManager {
 
                 itemName.css("color", "").text("");
                 itemImage.removeAttr("src").hide();
+                itemAmmo.removeAttr("src")
             }
         }
     }

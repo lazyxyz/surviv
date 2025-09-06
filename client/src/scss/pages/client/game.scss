@@ -1465,6 +1465,31 @@
       }
     }
   }
+
+  &-mobile {
+    position: relative;
+    display: flex;
+    gap: 6px;
+
+    .card-scopes {
+      background: rgba(0, 0, 0, 0.3);
+      opacity: 0.35;
+      padding: 6px;
+      border-radius: 100%;
+
+      &.active {
+        opacity: 1;
+      }
+
+      @media screen and (max-width: variables.$screen_medium) {
+        font-size: 16px;
+      }
+
+      @media screen and (max-width: variables.$screen_small) {
+        font-size: 20px;
+      }
+    }
+  }
 }
 
 #healing-items-container,
@@ -1713,6 +1738,7 @@
 }
 
 .inventory-items,
+#scopes-container-mobile,
 #weapons-container,
 #center-top-container,
 #game-menu,
