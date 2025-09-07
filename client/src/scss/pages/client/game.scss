@@ -53,6 +53,7 @@
 }
 
 #minimap-border {
+  position: relative;
   display: inline-block;
   width: 220px;
   height: 220px;
@@ -1525,32 +1526,46 @@
   z-index: 1;
   //noinspection CssUnknownTarget
   background-image: url("/img/misc/emote_wheel.svg");
+  background-size: 100%;
+  background-repeat: no-repeat;
 
   & > div {
     width: 84px;
     height: 84px;
-    background-size: 84px 84px;
+    background-size: 100%;
+    background-repeat: no-repeat;
     position: absolute;
   }
 
   .emote-top {
-    top: 14px;
-    left: 101px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    margin-top: 14px;
   }
 
   .emote-right {
-    right: 14px;
-    top: 101px;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+
+    margin-right: 14px;
   }
 
   .emote-bottom {
-    bottom: 14px;
-    left: 101px;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+
+    margin-bottom: 14px;
   }
 
   .emote-left {
-    left: 14px;
-    top: 101px;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+
+    margin-left: 14px;
   }
 
   .button-center {
@@ -1559,6 +1574,16 @@
     left: calc(143px - calc(42px / 2));
     top: calc(101px + calc(42px / 2));
   }
+
+    @media screen and (max-width: variables.$screen_medium) {
+      width: 228px;
+      height: 228px;
+
+      > div {
+        width: 58px;
+        height: 58px;
+      }
+    }
 }
 
 #emote-wheel-highlight,
