@@ -52,7 +52,6 @@ export async function savePlayerRank(player: string, rank: number, teamMode: boo
         clearTimeout(timeoutId);
 
         const data = await res.json();
-        console.log("data: ", data);
         return data;
     } catch (error: any) {
         clearTimeout(timeoutId);

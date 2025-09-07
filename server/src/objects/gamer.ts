@@ -286,9 +286,12 @@ export class Gamer extends Player {
                 3000
             );
 
+            console.log("data: ", data);
             if (data.success && data.rewards.success) {
-                if (data.rewards.crates > 0 || data.rewards.keys > 0) {
-                    processRewardsPacket(true, rank, data.rewards.crates, data.rewards.keys);
+                const rewards = data.rewards.rewards;
+                console.log("rewards: ", rewards);
+                if (rewards.crates > 0 || rewards.keys > 0) {
+                    processRewardsPacket(true, rank, rewards.crates, rewards.keys);
                 }
             }
         } catch (err) {
