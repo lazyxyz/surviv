@@ -932,23 +932,14 @@ export class UIManager {
                 }
                 
                 // handle display background represent ammo
-                {
-                    const isGun = "ammoType" in definition;
-                    const color = isGun
-                        ? Ammos.fromString((definition as GunDefinition).ammoType).characteristicColor
-                        : { hue: 0, saturation: 0, lightness: 0 };
-                    
-                    container.css(isGun && GAME_CONSOLE.getBuiltInCVar("cv_weapon_slot_style") === "colored"
-                        ? {
-                            "outline-color": `hsl(${color.hue}, ${color.saturation}%, ${(color.lightness + 50) / 3}%)`,
-                            "background-color": `hsla(${color.hue}, ${color.saturation}%, ${color.lightness / 2}%, 50%)`,
-                            "color": `hsla(${color.hue}, ${color.saturation}%, 90%)`
-                        }
-                        : {
-                            "outline-color": "",
-                            "background-color": "",
-                            "color": ""
-                    });
+                if("ammoType" in definition) { 
+                    const color = Ammos.fromString((definition as GunDefinition).ammoType).characteristicColor;
+                    const getRGBA = (opacity: number) => `hsla(${color.hue}, ${color.saturation}%, ${color.lightness / 2}%, ${opacity}%)`;
+
+                    container.css({
+                        "outline": `${getRGBA(100)} solid 2px`,
+                        "background": `linear-gradient(90deg, ${getRGBA(65)} 0%, rgba(0, 0, 0, 0.35) 100%)`
+                    })
                 }
 
                 // handle display shape ammo
