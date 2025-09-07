@@ -608,7 +608,7 @@ function setupMobileControls(game: Game): void {
         ui.interactKey.html('<img src="./img/misc/tap-icon.svg" alt="Tap">');
         ui.activeAmmo.on("click", () => GAME_CONSOLE.handleQuery("reload", "never"));
         ui.emoteWheel.css("top", "50%").css("left", "50%");
-        ui.menuButton.on("click", () => ui.gameMenu.toggle());
+        ui.menuButton.on("click", () => ui.gameMenu.fadeToggle(250));
         ui.emoteButton.on("click", () => ui.emoteWheel.toggle());
 
     }

@@ -1762,6 +1762,7 @@
   }
 }
 
+#btn-game-menu,
 .emotes-container,
 .inventory-items,
 #scopes-container-mobile,
@@ -1876,5 +1877,14 @@
   
   @media screen and (max-width: variables.$screen_medium) {
     display: flex;
+  }
+}
+
+#btn-game-menu {
+  position: relative;
+  display: none;
+
+  @media screen and (max-width: variables.$screen_medium) {
+    display: block;
   }
 }
