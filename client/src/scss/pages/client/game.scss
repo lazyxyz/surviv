@@ -1737,6 +1737,7 @@
   }
 }
 
+.emotes-container,
 .inventory-items,
 #scopes-container-mobile,
 #weapons-container,
@@ -1824,5 +1825,31 @@
   100% {
     box-shadow: none;
     background-color: none;
+  }
+}
+
+.emotes-container {
+  position: fixed;
+  bottom: 5px;
+  right: 5px;
+  gap: 6px;
+  
+  display: none;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 6px;
+  background-color: palette.$transparent_bg;
+
+  width: 32px;
+  height: 32px;
+
+  img {
+    width: 16px;
+    height: 16px;
+  }
+  
+  @media screen and (max-width: variables.$screen_medium) {
+    display: flex;
   }
 }
