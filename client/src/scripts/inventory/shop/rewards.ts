@@ -10,41 +10,58 @@ interface RewardItem {
 }
 
 interface RewardData {
-    validCrates?: Array<{ amount: number; expiry: number }>;
+    validCrates?: Array<{ tokenId: number, amount: number; expiry: number }>;
 }
 
-async function renderRewardList(account: Account, rewardData: RewardData | undefined): Promise<void> {
-    const now = Math.floor(Date.now() / 1000);
+// Constant to enable/disable season rewards
+const ENABLE_SEASON_REWARDS = false;
+
+async function getSeasonRewards(account: Account): Promise<RewardItem[]> {
     const rewards: RewardItem[] = [];
 
-    let seasonRewards: SeasonRewardsData | undefined;
+    if (!ENABLE_SEASON_REWARDS) {
+        return rewards;
+    }
+
     try {
-        seasonRewards = await account.getSeasonRewards();
+        const seasonRewards = await account.getSeasonRewards();
+        if (seasonRewards?.success) {
+            let seasonImage = "../img/game/shared/badges/surviv_card.svg";
+            if (seasonRewards.tokenIds[1][0] === 1) {
+                seasonImage = "../img/game/shared/badges/surviv_s1_gold.svg";
+            } else if (seasonRewards.tokenIds[1][0] === 2) {
+                seasonImage = "../img/game/shared/badges/surviv_s1_silver.svg";
+            } else if (seasonRewards.tokenIds[1][0] === 3) {
+                seasonImage = "../img/game/shared/badges/somnia_s1.svg";
+            }
+            rewards.push({
+                image: seasonImage,
+                amount: 1,
+                time: "Season I Reward",
+            });
+        }
     } catch (err) {
         console.error(`Failed to fetch season rewards: ${err}`);
     }
-    if (seasonRewards && seasonRewards.success) {
-        let seasonImage = "../img/game/shared/badges/surviv_card.svg";
-        if (seasonRewards.tokenIds[1][0] == 1) {
-            seasonImage = "../img/game/shared/badges/surviv_s1_gold.svg";
-        } else if (seasonRewards.tokenIds[1][0] == 2) {
-            seasonImage = "../img/game/shared/badges/surviv_s1_silver.svg";
-        } else if (seasonRewards.tokenIds[1][0] == 3) {
-            seasonImage = "../img/game/shared/badges/somnia_s1.svg";
-        }
-        rewards.push({
-            image: seasonImage,
-            amount: 1,
-            time: "Season I Reward",
-        });
-    }
+
+    return rewards;
+}
+
+async function getCrateRewards(rewardData: RewardData | undefined): Promise<RewardItem[]> {
+    const rewards: RewardItem[] = [];
+    const now = Math.floor(Date.now() / 1000);
 
     if (rewardData?.validCrates) {
         const crateRewards = rewardData.validCrates.map(item => {
             const secondsLeft = item.expiry - now;
             const daysLeft = Math.max(Math.floor(secondsLeft / (60 * 60 * 24)), 0);
+            let image = "./img/misc/surviv_kit_crate.png";
+            if (item.tokenId == 1) {
+                image = "./img/misc/surviv_kit_key.png";
+            }
+
             return {
-                image: "./img/misc/surviv_kit_crate.png",
+                image,
                 amount: item.amount,
                 time: `Expires in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
             };
@@ -52,14 +69,23 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
         rewards.push(...crateRewards);
     }
 
+    return rewards;
+}
+
+async function renderRewardList(account: Account, rewardData: RewardData | undefined): Promise<void> {
+    const seasonRewards = await getSeasonRewards(account);
+    const crateRewards = await getCrateRewards(rewardData);
+    const rewards = [...seasonRewards, ...crateRewards];
+
     const $rewardGrid = $(".rewards-grid-group");
     const $totalReward = $("#total-reward");
     const $claimButton = $("#claim-btn");
     let isProcessing = false;
 
-    const totalCrates = rewards.reduce((sum, item) => sum + (item.image.includes("surviv_kit_crate.png") ? item.amount : 0), 0);
+    const totalCrates = crateRewards.reduce((sum, item) => sum + item.amount, 0);
     $totalReward.text(`You have ${totalCrates} crates to claim`);
     $rewardGrid.empty();
+
     rewards.forEach(item => {
         $rewardGrid.append(`
             <div class="reward-child">
@@ -74,15 +100,14 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
         if (isProcessing) return;
         isProcessing = true;
         $claimButton.prop("disabled", true);
+
         try {
-            if (seasonRewards && seasonRewards.success) {
-                // Claim season rewards first (one-time claim)
-                const seasonRewards = await account.getSeasonRewards();
-                // Then claim crates
-                await account.claimSeasonRewards(seasonRewards);
+            if (ENABLE_SEASON_REWARDS && seasonRewards.length > 0) {
+                const seasonData = await account.getSeasonRewards();
+                await account.claimSeasonRewards(seasonData);
+                await account.claimRewards();
                 successAlert("Season rewards and crates claimed successfully!");
             } else {
-                // Only claim crates if no season rewards
                 await account.claimRewards();
                 successAlert("Crates claimed successfully!");
             }
@@ -100,5 +125,5 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
 }
 
 export async function loadRewards(account: Account): Promise<void> {
-    renderRewardList(account, ShopCache.PlayerValidRewards);
+    await renderRewardList(account, ShopCache.PlayerValidRewards);
 }

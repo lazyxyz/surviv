@@ -433,10 +433,10 @@ export class UIManager {
     }
 
     showRewardsScreen(packet: RewardsData): void {
-        const { eligible, rank, rewards } = packet;
+        const { eligible, rank, crates, keys } = packet;
 
         // Define random content options for sharing
-        const rank1Content = [
+        const rank1TitleContent = [
             "Chicken Dinner Winner #1 🔥🔥",
             "GGWP #1 🎉",
             "Game is easy #1 🏆",
@@ -453,7 +453,7 @@ export class UIManager {
             "This is MY game, #1 GG! 😤👑"
         ];
 
-        const otherContent = [
+        const otherTitleContent = [
             "Missed #1, but I'm a survivor! 👾💪",
             "GGWP! 🎉",
             "Just warming up 💪🎮",
@@ -469,20 +469,67 @@ export class UIManager {
             "Hid till the end, still GG! 🫣🎉"
         ];
 
-        const randomContent = rank === 1
-            ? rank1Content[Math.floor(Math.random() * rank1Content.length)]
-            : otherContent[Math.floor(Math.random() * otherContent.length)];
+        const randomContent =
+            rank === 1
+                ? rank1TitleContent[Math.floor(Math.random() * rank1TitleContent.length)]
+                : otherTitleContent[Math.floor(Math.random() * otherTitleContent.length)];
 
-        const tweetTextRaw = `${randomContent}\nI just earned ${rewards} awesome @SurvivFun Crates on @Somnia_Network!\nCheck this out 👇`;
+        // pool of CTA phrases with pointing icons
+        const ctaPhrases = [
+            "Check this out 👇",
+            "See for yourself 👇",
+            "Have a look 👇",
+            "More details below 👇",
+            "Look what I found 👇"
+        ];
+        const getCTA = () => ctaPhrases[Math.floor(Math.random() * ctaPhrases.length)];
+
+        let tweetTextRaw: string | undefined;
+
+        // === Main logic ===
+        if (!eligible) {
+            // not eligible → Missed rewards
+            tweetTextRaw = undefined;
+        } else if (eligible && crates === 0 && keys === 0) {
+            // eligible but nothing earned → just return
+            return;
+        } else {
+            // eligible and has rewards
+            if (crates > 0 && keys > 0) {
+                const rewardContent = [
+                    `${randomContent}\nI just played and earned awesome @SurvivFun rewards on @Somnia_Network!\n${getCTA()}`,
+                    `${randomContent}\nJust earned ${crates} crates and ${keys} keys baby!\n${getCTA()}`,
+                    `${randomContent}\nLoot secured: ${crates} crates + ${keys} keys\n${getCTA()}`,
+                    `${randomContent}\nTreasure hunt success → ${crates} crates, ${keys} keys\n${getCTA()}`,
+                ];
+                tweetTextRaw = rewardContent[Math.floor(Math.random() * rewardContent.length)];
+            } else if (crates > 0) {
+                const cratesContent = [
+                    `${randomContent}\nClaimed ${crates} shiny crates with @SurvivFun on @Somnia_Network!\n${getCTA()}`,
+                    `${randomContent}\nLoot box vibes → ${crates} crates earned today\n${getCTA()}`,
+                    `${randomContent}\nWho needs keys? ${crates} crates are enough\n${getCTA()}`,
+                    `${randomContent}\nJust stacked ${crates} crates — Somnia rewards hitting different!\n${getCTA()}`,
+                ];
+                tweetTextRaw = cratesContent[Math.floor(Math.random() * cratesContent.length)];
+            } else if (keys > 0) {
+                const keysContent = [
+                    `${randomContent}\nUnlocked ${keys} keys with @SurvivFun on @Somnia_Network!\n${getCTA()}`,
+                    `${randomContent}\nNo crates, but got ${keys} golden keys\n${getCTA()}`,
+                    `${randomContent}\nEarned ${keys} rare keys — time to unlock the future!\n${getCTA()}`,
+                    `${randomContent}\nKeys only run → ${keys} keys secured\n${getCTA()}`,
+                ];
+                tweetTextRaw = keysContent[Math.floor(Math.random() * keysContent.length)];
+            }
+        }
 
         // Rewards title style
         const headerStyle = eligible
             ? `
-            background: linear-gradient(180deg, #f2770f 0%, #ffd23a 50%, #fde57d 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            `
+        background: linear-gradient(180deg, #f2770f 0%, #ffd23a 50%, #fde57d 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        `
             : `color: white;`;
 
         // Rewards modal
@@ -501,18 +548,26 @@ export class UIManager {
                         ${eligible ? "Claim your rewards in Inventory!" : "No Surviv Card or campaign not started. Grab a Surviv Card or check back soon!"}
                     </p>
                 </div>
-                ${eligible ? html`
+                ${eligible && (crates > 0 || keys > 0) ? html`
                     <p class="rewards-title">Your Rewards</p>
-                    <div class="rewards-amount">
-                        <img src="./img/misc/surviv_kit_crate.png" alt="Reward Crate" loading="lazy">
-                        <p>X${rewards}</p>
+                    <div class="rewards-amounts" style="display: flex; justify-content: center; align-items: center; gap: 24px;">
+                        ${crates > 0 ? html`
+                            <div class="rewards-amount" style="display: inline-flex; flex-direction: column; align-items: center; transform: scale(0.75); transform-origin: center;">
+                                <img src="./img/misc/surviv_kit_crate.png" alt="Reward Crate" loading="lazy">
+                                <p>X${crates}</p>
+                            </div>` : ""}
+                        ${keys > 0 ? html`
+                            <div class="rewards-amount" style="display: inline-flex; flex-direction: column; align-items: center; transform: scale(0.75); transform-origin: center;">
+                                <img src="./img/misc/surviv_kit_key.png" alt="Reward Key" loading="lazy">
+                                <p>X${keys}</p>
+                            </div>` : ""}
                     </div>
                     <div class="rewards-share">
-                        <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/1958475325496504593"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           class="btn btn-lg btn-darken btn-primary"
-                           id="share-btn">
+                        <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw || "")}&url=https://x.com/SurvivFun/status/1958475325496504593"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn btn-lg btn-darken btn-primary"
+                        id="share-btn">
                             Share on <img src="./img/misc/x_logo.svg" alt="X (Twitter)" loading="lazy">
                         </a>
                     </div>
@@ -523,8 +578,8 @@ export class UIManager {
                 `}
             </div>
         </div>
-    </div>
-    `;
+        </div>
+        `;
 
         // Create the modal element from the HTML string
         const rewardsModal = $(modalHtml);
@@ -534,8 +589,8 @@ export class UIManager {
             rewardsModal.fadeOut(350, () => rewardsModal.remove());
         });
 
-        // Add hover effects for the share button if eligible
-        if (eligible) {
+        // Add hover effects for the share button if eligible and has rewards
+        if (eligible && (crates > 0 || keys > 0)) {
             const shareButton = rewardsModal.find('.btn-primary');
             shareButton.hover(function () {
                 $(this).css("background", "#1a8cd8");
@@ -552,8 +607,6 @@ export class UIManager {
     }
 
 
-    // I'd rewrite this as MapPings.filter(…), but it's not really clear how
-    // > 4 player pings is _meant_ to be handled, so I'll begrudgingly leave this alone
     readonly mapPings: readonly PlayerPing[] = [
         "warning_ping",
         "arrow_ping",
@@ -917,7 +970,7 @@ export class UIManager {
                 }
 
                 // handle display itemName
-                if(!itemName.text()){
+                if (!itemName.text()) {
                     const weaponName = definition.itemType === ItemType.Gun && definition.isDual
                         ? getTranslatedString(
                             "dual_template",
@@ -930,14 +983,14 @@ export class UIManager {
 
                     itemName.text(splitWeaponName[0]);
                 }
-                
+
                 // handle display background represent ammo
                 {
                     const isGun = "ammoType" in definition;
                     const color = isGun
                         ? Ammos.fromString((definition as GunDefinition).ammoType).characteristicColor
                         : { hue: 0, saturation: 0, lightness: 0 };
-                    
+
                     container.css(isGun && GAME_CONSOLE.getBuiltInCVar("cv_weapon_slot_style") === "colored"
                         ? {
                             "outline-color": `hsl(${color.hue}, ${color.saturation}%, ${(color.lightness + 50) / 3}%)`,
@@ -948,11 +1001,11 @@ export class UIManager {
                             "outline-color": "",
                             "background-color": "",
                             "color": ""
-                    });
+                        });
                 }
 
                 // handle display shape ammo
-                if("ammoType" in definition) {
+                if ("ammoType" in definition) {
                     itemAmmo.attr("src", `./img/game/shared/loot/${definition.ammoType}.svg`);
                 }
             } else {

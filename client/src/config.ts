@@ -9,6 +9,7 @@ export const Config = {
             gameAddress: "ws://127.0.0.1:<ID>",
             teamAddress: "ws://127.0.0.1:8000",
             apiAddress: "https://test-api.grindy.io",
+            // apiAddress: "http://localhost:3001",
         },
         test: {
             name: "Test",
