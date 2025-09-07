@@ -1,6 +1,6 @@
 export const assetsMapping = {
     "SurvivRewards": {
-        "address": "0xCAEf449fBA182EbEf63C47678C18A8CD3D4Ef792"
+        "address": "0x9e8557ABb6D9E27d565AA3029F4a54a25716f474"
     },
     "SurvivBase": {
         "address": "0x1B6E62dF1bfB09F2aa641131D012c18DE34BDdc4"

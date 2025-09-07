@@ -33,7 +33,8 @@ export const Config = {
     maxPlayersPerGame: 100,
 
     maxGames: 20,
-    gameJoinTime: 90,
+    gameJoinTime: 0,
+    // gameJoinTime: 90,
 
     gas: { mode: GasMode.Normal },
 
@@ -48,7 +49,8 @@ export const Config = {
     
     earnConfig: {
         rank: 5,
-        api: "https://test-api.grindy.io",
+        // api: "https://test-api.grindy.io",
+        api: "http://localhost:3001",
     },
 } satisfies ConfigType as ConfigType;
 
