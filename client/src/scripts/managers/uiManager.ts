@@ -552,12 +552,12 @@ export class UIManager {
                     <div class="rewards-amounts" style="display: flex; justify-content: center; align-items: center; gap: 24px;">
                         ${crates > 0 ? html`
                             <div class="rewards-amount" style="display: inline-flex; flex-direction: column; align-items: center; transform: scale(0.75); transform-origin: center;">
-                                <img src="./img/misc/surviv_kit_crate.png" alt="Reward Crate" loading="lazy">
+                                <img src="./img/assets/surviv_kit_crate.webp" alt="Reward Crate" loading="lazy">
                                 <p>X${crates}</p>
                             </div>` : ""}
                         ${keys > 0 ? html`
                             <div class="rewards-amount" style="display: inline-flex; flex-direction: column; align-items: center; transform: scale(0.75); transform-origin: center;">
-                                <img src="./img/misc/surviv_kit_key.png" alt="Reward Key" loading="lazy">
+                                <img src="./img/assets/surviv_kit_key.webp" alt="Reward Key" loading="lazy">
                                 <p>X${keys}</p>
                             </div>` : ""}
                     </div>
