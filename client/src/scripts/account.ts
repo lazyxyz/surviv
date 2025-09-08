@@ -63,8 +63,9 @@ export type PaymentTokenType = keyof typeof PaymentTokens;
 /**
 * Interface for crate data structure
 */
-interface Crate {
+interface Reward {
     to: string;
+    tokenId: number,
     amount: number;
     salt: string;
     expiry: number;
@@ -76,7 +77,7 @@ interface Crate {
 interface ClaimResponse {
     success: boolean;
     claims: Array<{
-        crate: Crate;
+        reward: Reward;
         signature: string;
     }>;
 }
@@ -85,7 +86,7 @@ interface ClaimResponse {
  * Interface for valid rewards return type
  */
 export interface ValidRewards {
-    validCrates: Crate[];
+    validCrates: Reward[];
     validSignatures: string[];
 }
 
@@ -515,94 +516,108 @@ export class Account extends EIP6963 {
         }
     }
 
-    /**
-     * Fetches and validates available rewards for the authenticated user.
-     * @returns A promise resolving to valid crates and signatures.
-     * @throws Error if the API request fails or no valid rewards are found.
-     */
-    async getValidRewards(): Promise<ValidRewards> {
-        if (!this.token) {
-            throw new Error('Authentication token is missing');
-        }
-
-        if (!this.provider?.provider) {
-            throw new Error('Web3 provider not initialized');
-        }
-
-        // Set fetch timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-        try {
-            // Fetch available crates
-            const response = await fetch(`${this.api}/api/getValidRewards`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`,
-                },
-                signal: controller.signal,
-            });
-
-            clearTimeout(timeoutId);
-            const data: ClaimResponse = await response.json();
-
-            if (!data.success || !data.claims?.length) {
-                throw new Error('No valid crates found');
-            }
-
-            // Validate and format claims
-            const crates: Crate[] = [];
-            const signatures: string[] = [];
-
-            for (const claim of data.claims) {
-                if (!claim.crate?.to || !ethers.isAddress(claim.crate.to) || !Number.isInteger(claim.crate.amount) ||
-                    !claim.crate.salt || !Number.isInteger(claim.crate.expiry) || !claim.signature) {
-                    console.warn('Invalid claim data, skipping:', claim);
-                    continue;
-                }
-                crates.push({
-                    to: claim.crate.to,
-                    amount: Number(claim.crate.amount),
-                    salt: claim.crate.salt,
-                    expiry: Number(claim.crate.expiry),
-                });
-                signatures.push(claim.signature);
-            }
-
-            // Initialize contract
-            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-            const signer = await ethersProvider.getSigner();
-            const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
-
-            // Filter out used signatures
-            const validIndices: number[] = [];
-            for (let i = 0; i < signatures.length; i++) {
-                try {
-                    const isUsed = await contract.isUsedSignature(signatures[i]);
-                    if (!isUsed) {
-                        validIndices.push(i);
-                    }
-                } catch (error) {
-                    console.warn(`Failed to check signature ${signatures[i]}:`, error);
-                }
-            }
-
-            const validCrates = validIndices.map(i => crates[i]);
-            const validSignatures = validIndices.map(i => signatures[i]);
-
-            // Remove invalid rewards
-            if (validIndices.length < signatures.length) {
-                const invalidSignatures = signatures.filter((_, i) => !validIndices.includes(i));
-                await this.removeRewards(invalidSignatures);
-            }
-
-            return { validCrates, validSignatures };
-        } catch (error: any) {
-            clearTimeout(timeoutId);
-            throw new Error(`Failed to get valid rewards: ${error.message || 'Unknown error'}`);
-        }
+   /**
+ * Fetches and validates available rewards for the authenticated user.
+ * @returns A promise resolving to valid crates and signatures.
+ * @throws Error if the API request fails or no valid rewards are found.
+ */
+async getValidRewards(): Promise<ValidRewards> {
+    if (!this.token) {
+        throw new Error('Authentication token is missing');
     }
+
+    if (!this.provider?.provider) {
+        throw new Error('Web3 provider not initialized');
+    }
+
+    // Set fetch timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    try {
+        // Fetch available crates
+        const response = await fetch(`${this.api}/api/getValidRewards`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${this.token}`,
+            },
+            signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+        const data: ClaimResponse = await response.json();
+
+        if (!data.success || !data.claims?.length) {
+            throw new Error('No valid crates found');
+        }
+
+        // Validate and format claims
+        const crates: Reward[] = [];
+        const signatures: string[] = [];
+
+        for (const claim of data.claims) {
+            if (!claim.reward?.to || !ethers.isAddress(claim.reward.to) || !Number.isInteger(claim.reward.amount) ||
+                !claim.reward.salt || !Number.isInteger(claim.reward.expiry) || !claim.signature) {
+                console.warn('Invalid claim data, skipping:', claim);
+                continue;
+            }
+            crates.push({
+                to: claim.reward.to,
+                tokenId: claim.reward.tokenId,
+                amount: Number(claim.reward.amount),
+                salt: claim.reward.salt,
+                expiry: Number(claim.reward.expiry),
+            });
+            signatures.push(claim.signature);
+        }
+
+        // Initialize contract
+        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+        const signer = await ethersProvider.getSigner();
+        const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
+
+        // Batch check used signatures
+        const validIndices: number[] = [];
+        if (signatures.length > 0) {
+            try {
+                const isUsedResults: boolean[] = await contract.isUsedSignatures(signatures);
+                isUsedResults.forEach((isUsed, index) => {
+                    if (!isUsed) {
+                        validIndices.push(index);
+                    }
+                });
+            } catch (error) {
+                console.warn('Failed to check signatures in batch:', error);
+                // Fallback to checking signatures individually
+                for (let i = 0; i < signatures.length; i++) {
+                    try {
+                        const isUsed = await contract.isUsedSignature(signatures[i]);
+                        if (!isUsed) {
+                            validIndices.push(i);
+                        }
+                    } catch (singleError) {
+                        console.warn(`Failed to check signature ${signatures[i]}:`, singleError);
+                    }
+                }
+            }
+        }
+
+        const validCrates = validIndices.map(i => crates[i]);
+        const validSignatures = validIndices.map(i => signatures[i]);
+
+        // Remove invalid rewards
+        if (validIndices.length < signatures.length) {
+            const invalidSignatures = signatures.filter((_, i) => !validIndices.includes(i));
+            await this.removeRewards(invalidSignatures);
+        }
+
+        return { validCrates, validSignatures };
+    } catch (error: any) {
+        clearTimeout(timeoutId);
+        throw new Error(`Failed to get valid rewards: ${error.message || 'Unknown error'}`);
+    }
+}
 
     /**
      * Updates reward signatures by removing specified signatures or all signatures for the user if none provided.

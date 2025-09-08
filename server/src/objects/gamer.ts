@@ -263,16 +263,17 @@ export class Gamer extends Player {
         if (this.isRewardsSend) return;
         this.isRewardsSend = true;
 
-        const processRewardsPacket = (eligible: boolean, rewards: number) => {
+        const processRewardsPacket = (eligible: boolean, rank: number, crates: number, keys: number) => {
             this.sendPacket(RewardsPacket.create({
                 eligible,
                 rank,
-                rewards,
+                crates,
+                keys,
             } as unknown as RewardsData));
         };
 
         if (!this.loadout.badge) {
-            processRewardsPacket(false, 0);
+            processRewardsPacket(false, rank, 0, 0);
             return;
         }
 
@@ -285,8 +286,13 @@ export class Gamer extends Player {
                 3000
             );
 
-            if (data.success && data.rewards.success && data.rewards.amount > 0) {
-                processRewardsPacket(data.success && data.rewards.success, data.rewards.amount);
+            console.log("data: ", data);
+            if (data.success && data.rewards.success) {
+                const rewards = data.rewards.rewards;
+                console.log("rewards: ", rewards);
+                if (rewards.crates > 0 || rewards.keys > 0) {
+                    processRewardsPacket(true, rank, rewards.crates, rewards.keys);
+                }
             }
         } catch (err) {
             console.log("Error claiming rewards:", err);

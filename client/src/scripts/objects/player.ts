@@ -1303,9 +1303,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     showEmote(type: AllowedEmoteSources): void {
         if (this.game.inputManager.isMobile) {
             this.game.inputManager.emoteWheelActive = false;
-            this.game.uiManager.ui.emoteButton
-                .removeClass("btn-alert")
-                .addClass("btn-primary");
         }
 
         this.anims.emote?.kill();
