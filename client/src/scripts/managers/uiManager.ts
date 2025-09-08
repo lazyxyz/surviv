@@ -193,7 +193,6 @@ export class UIManager {
         createTeamMenu: $<HTMLDivElement>("#create-team-menu"),
 
         emoteButton: $<HTMLButtonElement>("#btn-emotes"),
-        pingToggle: $<HTMLButtonElement>("#btn-toggle-ping"),
         menuButton: $<HTMLButtonElement>("#btn-game-menu"),
 
         emoteWheel: $<HTMLDivElement>("#emote-wheel"),
@@ -679,7 +678,6 @@ export class UIManager {
 
             if (this.game.inputManager.isMobile) {
                 this.ui.emoteButton.toggle(!spectating);
-                this.ui.pingToggle.toggle(!spectating);
                 this.ui.menuButton.toggle(!spectating);
             }
         }

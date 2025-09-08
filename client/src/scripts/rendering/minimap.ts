@@ -1,4 +1,4 @@
-import { GameConstants, GasState, Layer, ObjectCategory, ZIndexes } from "@common/constants";
+import { GameConstants, GasState, InputActions, Layer, ObjectCategory, ZIndexes } from "@common/constants";
 import { type MapPingDefinition } from "@common/definitions/mapPings";
 import { type MapPacketData } from "@common/packets/mapPacket";
 import { type PingSerialization, type PlayerPingSerialization } from "@common/packets/updatePacket";
@@ -110,6 +110,7 @@ export class Minimap {
         this.pingsContainer.zIndex = 998;
         this.teammateIndicatorContainer.zIndex = 999;
 
+
         this._objectsContainer.addChild(
             this.sprite,
             this.placesContainer,
@@ -122,14 +123,48 @@ export class Minimap {
         ).sortChildren();
 
         this._borderContainer.on("click", e => {
-            if (!this.game.inputManager.isMobile) return;
             this.switchToBigMap();
             e.stopImmediatePropagation();
         });
 
         this.sprite.eventMode = "static";
 
-        this.sprite.on("pointerdown", e => {
+        this.sprite.on("pointerdown", e => {  
+            if (this.game.inputManager.isMobile) {
+                if (!this.game.inputManager.pingWheelActive) return;
+
+                if (this.isClickMobile) {
+                    /* 
+                        why setTimeOut?:
+                        because in "game.ts" listening with "createEmoteWheelListener",
+                        so you need waiting for emote-${slot} clicked before hidden
+                    */
+                    setTimeout(() => {
+                        this.game.uiManager.ui.emoteWheel.hide();
+                    }, 100);
+                    
+                    this.isClickMobile = false;
+
+                    return;
+                }
+                
+                // handle show emoteWheel
+                {
+                    const [mouseX, mouseY] = [e.clientX, e.clientY]
+                    
+                    this.game.uiManager.ui.emoteWheel.css({
+                        left: `${mouseX}px`,
+                        top: `${mouseY}px`,
+                    }).show();
+                }
+
+                this.game.inputManager.pingWheelPosition = this.sprite.toLocal(e);
+                this.game.inputManager.pingWheelMinimap = true;
+                this.isClickMobile = true;
+
+                return;
+            }
+            
             this.game.inputManager.pingWheelPosition = this.sprite.toLocal(e);
             this.game.inputManager.pingWheelMinimap = true;
         });
@@ -541,6 +576,8 @@ export class Minimap {
     }
 
     private readonly _borderContainer = $("#minimap-border");
+    private readonly hiddenInMobile = $(".inventory, #top-left-container, #btn-emotes, #joysticks-containers");
+    private isClickMobile = false;
 
     resize(): void {
         this._border.visible = this._expanded;
@@ -643,7 +680,7 @@ export class Minimap {
 
     switchToBigMap(): void {
         this._expanded = true;
-
+        
         const ui = this.game.uiManager.ui;
         this.container.visible = true;
         this._borderContainer.hide();
@@ -656,6 +693,14 @@ export class Minimap {
         this._uiCache.survivbadge.hide();
         this._uiCache.centerBottom.hide();
         ui.killFeed.hide();
+
+        // handle emotes & pings
+        this.game.inputManager.pingWheelActive = true;
+        this.game.uiManager.updateEmoteWheel();
+
+        if (this.game.inputManager.isMobile) {
+            this.hiddenInMobile.hide();
+        }
 
         this.resize();
     }
@@ -683,6 +728,16 @@ export class Minimap {
             this.container.visible = this.game.uiManager.ui.spectatingContainer.hasClass("mobile-visible");
         }
 
+        // handle emotes & ping
+        ui.emoteWheel.css("top", "50%").css("left", "50%");
+        this.game.inputManager.pingWheelActive = false;
+        this.game.inputManager.pingWheelMinimap = false;
+        this.game.uiManager.updateEmoteWheel();
+
+        if (this.game.inputManager.isMobile) {
+            this.hiddenInMobile.show();
+        }
+
         if (!this._visible) {
             this.container.visible = false;
             return;
@@ -703,9 +758,6 @@ export class Minimap {
     addMapPing(data: PingSerialization): void {
         if (this.game.inputManager.isMobile) {
             this.game.inputManager.emoteWheelActive = false;
-            this.game.uiManager.ui.emoteButton
-                .removeClass("btn-alert")
-                .addClass("btn-primary");
         }
 
         const { position, definition } = data;
