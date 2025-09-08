@@ -55,9 +55,9 @@ async function getCrateRewards(rewardData: RewardData | undefined): Promise<Rewa
         const crateRewards = rewardData.validCrates.map(item => {
             const secondsLeft = item.expiry - now;
             const daysLeft = Math.max(Math.floor(secondsLeft / (60 * 60 * 24)), 0);
-            let image = "./img/misc/surviv_kit_crate.png";
+            let image = "./img/assets/surviv_kit_crate.webp";
             if (item.tokenId == 1) {
-                image = "./img/misc/surviv_kit_key.png";
+                image = "./img/assets/surviv_kit_key.webp";
             }
 
             return {
