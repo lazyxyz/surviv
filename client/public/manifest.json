@@ -6,7 +6,9 @@
   "start_url": ".",
   "display": "fullscreen",
   "orientation": "landscape",
-  "categories": ["games"],
+  "categories": [
+    "games"
+  ],
   "icons": [
     {
       "src": "./img/logos/surviv_favicon_16x16.png",
@@ -24,7 +26,7 @@
       "sizes": "96x96"
     },
     {
-      "src": "./img/logos/surviv_favicon_512x512.png",
+      "src": "./img/logos/surviv_favicon_512x512.webp",
       "type": "image/png",
       "sizes": "512x512"
     }

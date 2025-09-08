@@ -608,17 +608,9 @@ function setupMobileControls(game: Game): void {
         ui.interactKey.html('<img src="./img/misc/tap-icon.svg" alt="Tap">');
         ui.activeAmmo.on("click", () => GAME_CONSOLE.handleQuery("reload", "never"));
         ui.emoteWheel.css("top", "50%").css("left", "50%");
-        ui.menuButton.on("click", () => ui.gameMenu.toggle());
-        ui.emoteButton.on("click", () => ui.emoteWheel.show());
+        ui.menuButton.on("click", () => ui.gameMenu.fadeToggle(250));
+        ui.emoteButton.on("click", () => ui.emoteWheel.toggle());
 
-        ui.pingToggle.on("click", () => {
-            inputManager.pingWheelActive = !inputManager.pingWheelActive;
-            const { pingWheelActive } = inputManager;
-            ui.pingToggle
-                .toggleClass("btn-danger", pingWheelActive)
-                .toggleClass("btn-primary", !pingWheelActive);
-            game.uiManager.updateEmoteWheel();
-        });
     }
 
     $("#tab-mobile").toggle(isMobile.any);
@@ -630,44 +622,17 @@ function setupEmoteWheel(game: Game): void {
     const createEmoteWheelListener = (slot: typeof EMOTE_SLOTS[number], emoteSlot: number): void => {
         $(`#emote-wheel .emote-${slot}`).on("click", () => {
             ui.emoteWheel.hide();
-            let clicked = true;
 
             if (inputManager.pingWheelActive) {
                 const ping = game.uiManager.mapPings[emoteSlot];
-
-                setTimeout(() => {
-                    let gameMousePosition: Vector;
-
-                    if (game.map.expanded) {
-                        ui.game.one("click", () => {
-                            gameMousePosition = inputManager.pingWheelPosition;
-
-                            if (ping && inputManager.pingWheelActive && clicked) {
-                                inputManager.addAction({
-                                    type: InputActions.MapPing,
-                                    ping,
-                                    position: gameMousePosition
-                                });
-                                clicked = false;
-                            }
-                        });
-                    } else {
-                        ui.game.one("click", e => {
-                            const globalPos = Vec.create(e.clientX, e.clientY);
-                            const pixiPos = game.camera.container.toLocal(globalPos);
-                            gameMousePosition = Vec.scale(pixiPos, 1 / PIXI_SCALE);
-
-                            if (ping && inputManager.pingWheelActive && clicked) {
-                                inputManager.addAction({
-                                    type: InputActions.MapPing,
-                                    ping,
-                                    position: gameMousePosition
-                                });
-                                clicked = false;
-                            }
-                        });
-                    }
-                }, 100);
+                
+                if (game.map.expanded && ping && inputManager.pingWheelActive) {
+                    inputManager.addAction({
+                        type: InputActions.MapPing,
+                        ping,
+                        position: inputManager.pingWheelPosition
+                    });
+                }
             } else {
                 const emote = game.uiManager.emotes[emoteSlot];
                 if (emote) {
