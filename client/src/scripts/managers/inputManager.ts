@@ -277,7 +277,7 @@ export class InputManager {
                 size,
                 color: `rgba(255, 255, 255, ${transparency})`,
                 position: { top: "80%", left: "20%" },
-                mode: "static"
+                mode: "dynamic"
             });
 
             const rightJoyStick = nipplejs.create({
@@ -285,7 +285,7 @@ export class InputManager {
                 size,
                 color: `rgba(255, 255, 255, ${transparency})`,
                 position: { top: "80%", right: "-30%" },
-                mode: "static"
+                mode: "dynamic"
             });
 
             let rightJoyStickUsed = false;
