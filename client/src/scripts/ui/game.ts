@@ -609,8 +609,29 @@ function setupMobileControls(game: Game): void {
         ui.activeAmmo.on("click", () => GAME_CONSOLE.handleQuery("reload", "never"));
         ui.emoteWheel.css("top", "50%").css("left", "50%");
         ui.menuButton.on("click", () => ui.gameMenu.fadeToggle(250));
-        ui.emoteButton.on("click", () => ui.emoteWheel.toggle());
 
+        // handle emote-wheel for mobile
+        {
+            let isClicked = false;
+
+            ui.emoteButton.on("click", () => {
+    
+                ui.emoteWheel.toggle(150);
+                isClicked = !isClicked
+    
+                if (isClicked) {
+                    // to make sure isClicked will be reset
+                    ui.emoteWheel.one("click", () => {
+                        isClicked = false;
+                    });
+    
+                    // close button X to close emote-wheel
+                    $("#emote-wheel > .button-center").one("click", () => {
+                        ui.emoteWheel.hide();                            
+                    });
+                }
+            });
+        }
     }
 
     $("#tab-mobile").toggle(isMobile.any);
@@ -621,6 +642,7 @@ function setupEmoteWheel(game: Game): void {
 
     const createEmoteWheelListener = (slot: typeof EMOTE_SLOTS[number], emoteSlot: number): void => {
         $(`#emote-wheel .emote-${slot}`).on("click", () => {
+            // alert(emoteSlot)
             ui.emoteWheel.hide();
 
             if (inputManager.pingWheelActive) {
