@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { createDropdown } from "../uiHelpers";
-import { WalletType, shorten } from "../utils/constants";
+import { WalletType, parseJWT, shorten } from "../utils/constants";
 import type { Account } from "../account";
 import { errorAlert, warningAlert } from "../modal";
 
@@ -141,6 +141,14 @@ export function onConnectWallet(account: Account): void {
 };
 
 export function showWallet(account: Account): void {
+    // token is expired
+    if(account.token) {
+        const { exp } = parseJWT(account.token);
+        if (new Date().getTime() >= (exp * 1000)) {
+            return account.sessionExpired();
+        }
+    }
+
     if (!account.address) {
         $("#connect-wallet-btn").trigger("click");
     }

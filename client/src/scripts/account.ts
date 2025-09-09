@@ -289,7 +289,7 @@ export class Account extends EIP6963 {
     }
 
     sessionExpired(): void {
-        $("#loading-text").text("Session expired. Please log in.");
+        $("#loading-text").text("Your session has expired. Please log in again.");
 
         setTimeout(() => this.disconnect(), 1000);
     }
