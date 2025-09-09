@@ -133,16 +133,20 @@ export class Minimap {
             if (this.game.inputManager.isMobile) {
                 if (!this.game.inputManager.pingWheelActive) return;
 
+
                 if (this.isClickMobile) {
-                    /* 
-                        why setTimeOut?:
-                        because in "game.ts" listening with "createEmoteWheelListener",
-                        so you need waiting for emote-${slot} clicked before hidden
-                    */
-                    setTimeout(() => {
-                        this.game.uiManager.ui.emoteWheel.hide();
-                    }, 100);
-                    
+                    $(document).one("click", (event) => {
+                        // 1. click outside wheel
+                        if (!$(event.target).closest(this.game.uiManager.ui.emoteWheel).length) {
+                            this.game.uiManager.ui.emoteWheel.hide();                            
+                        }
+
+                        // 2. click button X
+                        if ($(event.target).closest(".button-center").length) {
+                            this.game.uiManager.ui.emoteWheel.hide();                            
+                        }
+                    })
+
                     this.isClickMobile = false;
 
                     return;
@@ -157,7 +161,7 @@ export class Minimap {
                         top: `${mouseY}px`,
                     }).show();
                 }
-
+                
                 this.game.inputManager.pingWheelPosition = this.sprite.toLocal(e);
                 this.game.inputManager.pingWheelMinimap = true;
                 this.isClickMobile = true;

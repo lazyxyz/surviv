@@ -127,7 +127,7 @@
             </div>
           </div>
           <div id="rewards-image" class="hidden text-center mt-6">
-            <img src="../img/news/rewards_s1.png" alt="Season 1 Rewards" class="max-w-full h-auto mx-auto" />
+            <img src="../img/news/rewards.png" alt="Season Rewards" class="max-w-full h-auto mx-auto" />
           </div>
           <div id="loading" class="text-center text-[#ffd23a] font-semibold mt-6 hidden">Loading...</div>
           <div id="error" class="text-center text-red-400 font-semibold mt-6 hidden"></div>
@@ -192,6 +192,8 @@
     const prevButton = document.getElementById('prev-page');
     const nextButton = document.getElementById('next-page');
     const countdownText = document.getElementById('countdown-text');
+    countdownText.style.fontFamily = 'Russo One';
+
     const pulseRing = document.getElementById('pulse-ring');
     const seasonNumber = document.getElementById('season-number');
     const logoHeading = document.getElementById('logo-heading');
@@ -205,7 +207,7 @@
     } else {
       document.title = 'Surviv Fun - Leaderboard';
       logoHeading.textContent = 'LEADERBOARD';
-      seasonNumber.textContent = '1'; // Default to season 1 if no season specified
+      seasonNumber.textContent = 'II'; // Default to season 1 if no season specified
     }
 
     // Update countdown text
@@ -213,8 +215,9 @@
       countdownText.textContent = `Season ${season} Ended! Check Inventory and Claim Your Rewards.`;
       pulseRing.style.display = 'none';
     } else if (isEnded) {
-      countdownText.textContent = 'The season has ended. Waiting for the next one!';
+      countdownText.textContent = '15th September, 2025 – 1st November, 2025 | 2:00 PM UTC';
       pulseRing.style.display = 'none';
+
     } else {
       countdownText.textContent = 'Season 1'; // Adjust based on API response if needed
       pulseRing.style.display = 'block';

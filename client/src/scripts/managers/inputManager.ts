@@ -208,13 +208,6 @@ export class InputManager {
         gameContainer.addEventListener("pointerup", this.handleInputEvent.bind(this, false));
         gameContainer.addEventListener("wheel", this.handleInputEvent.bind(this, true));
 
-        $("#emote-wheel > .button-center").on("click", () => {
-            this.emoteWheelActive = false;
-            this.selectedEmote = undefined;
-            this.pingWheelMinimap = false;
-            $("#emote-wheel").hide();
-        });
-
         const FIRST_EMOTE_ANGLE = Math.atan2(-1, -1);
         const SECOND_EMOTE_ANGLE = Math.atan2(1, 1);
         const THIRD_EMOTE_ANGLE = Math.atan2(-1, 1);
@@ -277,7 +270,7 @@ export class InputManager {
                 size,
                 color: `rgba(255, 255, 255, ${transparency})`,
                 position: { top: "80%", left: "20%" },
-                mode: "static"
+                mode: "dynamic"
             });
 
             const rightJoyStick = nipplejs.create({
@@ -285,7 +278,7 @@ export class InputManager {
                 size,
                 color: `rgba(255, 255, 255, ${transparency})`,
                 position: { top: "80%", right: "-30%" },
-                mode: "static"
+                mode: "dynamic"
             });
 
             let rightJoyStickUsed = false;
