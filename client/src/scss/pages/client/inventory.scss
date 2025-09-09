@@ -112,7 +112,6 @@
       justify-content: end;
       align-items: end;
       
-
       &-container {
         display: flex;
         padding: 6px;
@@ -128,6 +127,20 @@
 
         &.active {
           opacity: 1;
+          animation: 0.25s ease-in-out active-pulse;
+
+          @keyframes active-pulse {
+              0% {
+                  width: 100%;
+              }
+              50% {
+                  width: calc(100% + 2rem);
+                  outline-width: 4px;
+              }
+              100% {
+                  width: 100%;
+              }
+          }
         }
         
         .item-image {
