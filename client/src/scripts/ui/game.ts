@@ -677,10 +677,10 @@ function setupInventorySlots(game: Game): void {
     const { inputManager } = game;
     let dropTimer: number | undefined;
 
-    function mobileDropItem(button: number, condition: boolean, item?: AmmoDefinition | ArmorDefinition | ScopeDefinition | HealingItemDefinition, slot?: number): void {
+    function mobileDropItem(button: number, item?: AmmoDefinition | ArmorDefinition | ScopeDefinition | HealingItemDefinition, slot?: number): void {
         if (!inputManager.isMobile) return;
         dropTimer = window.setTimeout(() => {
-            if (button === 0 && condition) {
+            if (button === 0) {
                 if (slot !== undefined) {
                     inputManager.addAction({
                         type: InputActions.DropWeapon,
@@ -716,7 +716,6 @@ function setupInventorySlots(game: Game): void {
             slotListener(ele, button => {
                 const isPrimary = button === 0;
                 const isSecondary = button === 2;
-                const isTeamMode = game.teamMode;
 
                 if (isPrimary) {
                     inputManager.addAction({
@@ -724,10 +723,10 @@ function setupInventorySlots(game: Game): void {
                         item: scope
                     });
 
-                    mobileDropItem(button, isTeamMode, scope);
+                    mobileDropItem(button, scope);
                 }
 
-                if (isSecondary && isTeamMode) {
+                if (isSecondary) {
                     inputManager.addAction({
                         type: InputActions.DropItem,
                         item: scope
@@ -781,25 +780,17 @@ function setupInventorySlots(game: Game): void {
                 slotListener(ele, button => {
                     const isPrimary = button === 0;
                     const isSecondary = button === 2;
-                    const isTeamMode = game.teamMode;
 
                     if (isPrimary) {
-                        if (inputManager.pingWheelActive) {
-                            inputManager.addAction({
-                                type: InputActions.Emote,
-                                emote: HealingItems.fromString(item.idString)
-                            });
-                        } else {
-                            inputManager.addAction({
-                                type: InputActions.UseItem,
-                                item
-                            });
-                        }
+                        inputManager.addAction({
+                            type: InputActions.UseItem,
+                            item
+                        });
 
-                        mobileDropItem(button, isTeamMode, item);
+                        mobileDropItem(button, item);
                     }
 
-                    if (isSecondary && isTeamMode) {
+                    if (isSecondary) {
                         inputManager.addAction({
                             type: InputActions.DropItem,
                             item
@@ -837,7 +828,7 @@ function setupInventorySlots(game: Game): void {
             slotListener(ele, button => {
                 const isPrimary = button === 0;
                 const isSecondary = button === 2;
-                const isTeamMode = game.teamMode;
+
     
                 if (isPrimary) {
                     if (inputManager.pingWheelActive) {
@@ -847,10 +838,10 @@ function setupInventorySlots(game: Game): void {
                         });
                     }
     
-                    mobileDropItem(button, isTeamMode, ammo);
+                    mobileDropItem(button, ammo);
                 }
     
-                if (isSecondary && isTeamMode) {
+                if (isSecondary) {
                     inputManager.addAction({
                         type: InputActions.DropItem,
                         item: ammo
@@ -901,7 +892,7 @@ function setupInventorySlots(game: Game): void {
                             inputManager.cycleThrowable(1);
                         }
 
-                        mobileDropItem(e.button, true, undefined, slot);
+                        mobileDropItem(e.button, undefined, slot);
                     });
                     return ele;
                 }
@@ -919,10 +910,10 @@ function setupInventorySlots(game: Game): void {
 
         slotListener(ele, button => {
             const isSecondary = button === 2;
-            const shouldDrop = game.activePlayer && game.teamMode;
+            const shouldDrop = game.activePlayer;
 
             if (isSecondary && shouldDrop) {
-                const item = game.activePlayer.getEquipment(type);
+                const item = shouldDrop.getEquipment(type);
                 if (item) {
                     inputManager.addAction({
                         type: InputActions.DropItem,
@@ -932,7 +923,7 @@ function setupInventorySlots(game: Game): void {
             }
 
             if (shouldDrop !== undefined) {
-                mobileDropItem(button, shouldDrop, game.activePlayer?.getEquipment(type));
+                mobileDropItem(button, shouldDrop.getEquipment(type));
             }
         });
     }
