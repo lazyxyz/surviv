@@ -729,26 +729,29 @@ input::-webkit-inner-spin-button {
       }
     }
     .my-crates-customize {
-      display: grid;
+      display: flex;
+      flex-wrap: wrap;
       grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-      gap: 8px;
+      gap: 16px;
       width: 100%;
+
+      @include variables.mobile-device {
+        gap: 10px;
+      }
+
       .my-crates-child {
+        display: flex;
         justify-content: center;
         align-items: center;
 
-        background-color: #73a246;
-        padding: 12px;
-        border-radius: 12px;
+        overflow: hidden;
+        border-radius: 10px;
         opacity: 100%;
 
-        @include variables.mobile-device {
-          padding: 10px;
+        &.active {
+          box-shadow: 0px 0px 0px 2px palette.$lime;
         }
 
-        &.active {
-          box-shadow: inset 0px 0px 0px 2px white;
-        }
         &.inactive {
           opacity: 0.35;
           pointer-events: none;
@@ -756,8 +759,8 @@ input::-webkit-inner-spin-button {
         }
       }
       img {
-        width: 80px;
-        height: 80px;
+        width: 100px;
+        height: 100px;
       }
     }
   }

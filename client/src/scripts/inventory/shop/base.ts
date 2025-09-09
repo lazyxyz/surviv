@@ -16,7 +16,7 @@ const TESTNET_EXPLORER = "https://shannon-explorer.somnia.network/";
 
 function renderCrates(userCrateBalances: number, keyBalances: number): void {
     const maxCratesToRender = Math.min(userCrateBalances, MAX_RENDER_CRATES);
-    const crateImages = new Array(maxCratesToRender).fill({ image: "./img/misc/surviv_kit_crate.png" });
+    const crateImages = new Array(maxCratesToRender).fill({ image: "./img/assets/surviv_kit_crate.webp" });
 
     $("#total-crates").text(`You have: ${userCrateBalances || 0} crates - ${keyBalances} keys`);
     $(".my-crates-customize").empty();

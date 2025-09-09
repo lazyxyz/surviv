@@ -2,6 +2,7 @@ import $ from "jquery";
 import { createDropdown } from "../uiHelpers";
 import { WalletType, shorten } from "../utils/constants";
 import type { Account } from "../account";
+import { errorAlert, warningAlert } from "../modal";
 
 const walletPriority = [
     WalletType.MetaMask,
@@ -126,7 +127,7 @@ export function onConnectWallet(account: Account): void {
                 if (paragraphElement?.textContent?.includes(WalletType.BraveWallet)) {
                     return window.open("https://brave.com/wallet/", "_blank");
                 }
-               
+
                 if (paragraphElement?.textContent?.includes(WalletType.RabbyWallet)) {
                     return window.open("https://rabby.io/", "_blank");
                 }
@@ -182,6 +183,50 @@ export function showWallet(account: Account): void {
                 }
             },
             {
+                key: "connect-discord",
+                fieldName: "Connect Discord",
+                icon: "./img/socials/discord.svg",
+                onClick: async () => {
+                    if (!account.token) {
+                        errorAlert("Please reconnect your wallet to continue!")
+                        return;
+                    }
+
+                    const clientId = '1414536940207996928';
+                    const redirectUri = encodeURIComponent('https://roles.surviv.fun/discord/callback'); // Updated to match backend route
+                    const scope = encodeURIComponent('identify');
+
+                    // Secure nonce using crypto (128 bits entropy)
+                    const nonceBytes = new Uint8Array(16);
+                    window.crypto.getRandomValues(nonceBytes);
+                    const nonce = btoa(String.fromCharCode(...nonceBytes))
+                        .replace(/\+/g, "-")
+                        .replace(/\//g, "_")
+                        .replace(/=/g, ""); // Base64url encoding (URL-safe)
+
+
+                    // Step 1: Send JWT and nonce to backend to generate signed state
+                    try {
+                        const response = await fetch('https://roles.surviv.fun/discord/generate-state', { // Updated URL
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token: account.token, nonce })
+                        });
+                        if (!response.ok) {
+                            throw new Error('Failed to generate state: ' + response.statusText);
+                        }
+                        const { signedState } = await response.json();
+
+                        // Step 2: Redirect to Discord with signedState
+                        const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${encodeURIComponent(signedState)}&prompt=consent`;
+                        window.location.href = authUrl;
+                    } catch (error) {
+                        console.error('Error generating state:', error);
+                        alert('Failed to initiate Discord connection');
+                    }
+                }
+            },
+            {
                 key: "disconnect",
                 fieldName: "Disconnect",
                 icon: "./img/line/log-out.svg",
@@ -189,7 +234,7 @@ export function showWallet(account: Account): void {
                     account.disconnect();
                     $("#connect-wallet-btn").trigger("click");
                 }
-            }
+            },
         ];
 
         for (const fields of ListFieldSet) {
