@@ -611,27 +611,22 @@ function setupMobileControls(game: Game): void {
         ui.menuButton.on("click", () => ui.gameMenu.fadeToggle(250));
 
         // handle emote-wheel for mobile
-        {
-            let isClicked = false;
-
-            ui.emoteButton.on("click", () => {
-    
-                ui.emoteWheel.toggle(150);
-                isClicked = !isClicked
-    
-                if (isClicked) {
-                    // to make sure isClicked will be reset
-                    ui.emoteWheel.one("click", () => {
-                        isClicked = false;
-                    });
-    
-                    // close button X to close emote-wheel
-                    $("#emote-wheel > .button-center").one("click", () => {
-                        ui.emoteWheel.hide();                            
-                    });
+        ui.emoteButton.on("click", (event) => {
+            event.stopPropagation();
+            ui.emoteWheel.toggle(150);
+        
+            $(document).one("click", (event) => {
+                // 1. click outside wheel
+                if (!$(event.target).closest(ui.emoteWheel).length) {
+                    ui.emoteWheel.hide();                            
                 }
-            });
-        }
+
+                // 2. click button X
+                if ($(event.target).closest(".button-center").length) {
+                    ui.emoteWheel.hide();                            
+                }
+            })
+        });
     }
 
     $("#tab-mobile").toggle(isMobile.any);
