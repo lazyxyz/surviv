@@ -123,10 +123,8 @@
         opacity: 0.35;
         border-radius: 6px;
         
-        &.has-item {
-          background: linear-gradient(90deg, #c4c4c473 25%, #17171780);
-          outline: 2px solid #c4c4c473;
-        }
+        background: linear-gradient(90deg, #c4c4c473 25%, #17171780);
+        outline: 2px solid #c4c4c473;
 
         &.active {
           opacity: 1;

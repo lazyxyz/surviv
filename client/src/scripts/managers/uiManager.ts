@@ -968,7 +968,7 @@ export class UIManager {
                 }
 
                 // handle display itemName
-                if (!itemName.text()) {
+                {
                     const weaponName = definition.itemType === ItemType.Gun && definition.isDual
                         ? getTranslatedString(
                             "dual_template",
@@ -998,12 +998,12 @@ export class UIManager {
                     itemAmmo.attr("src", `./img/game/shared/loot/${definition.ammoType}.svg`);
                 }
             } else {
-                container.removeClass(ClassNames.HasItem)
+                container
+                    .removeClass(ClassNames.HasItem)
                     .removeClass(ClassNames.IsActive)
                     .css({
-                        "outline-color": "",
-                        "background-color": "",
-                        "color": ""
+                        "outline": "",
+                        "background": "",
                     });
 
                 itemName.css("color", "").text("");
