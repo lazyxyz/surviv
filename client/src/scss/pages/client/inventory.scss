@@ -6,11 +6,14 @@
   // items meaning medicals & ammos
   &-items {
     position: absolute;
-    top: 5px;
-    right: 5px;
-  
+    inset: 0 0 auto auto;
+    padding: 6px;
+
+    height: 100%;
+    
     display: flex;
-    flex-direction: column-reverse;
+    justify-content: start;
+    flex-direction: column;
     gap: 8px;
 
     &-card {
@@ -72,6 +75,7 @@
   
     &-ammos {
       display: flex;
+      justify-content: end;
       gap: 6px;
   
       &-card {
@@ -99,82 +103,51 @@
       }
     }
 
-    @media screen and (max-width: variables.$screen_medium) {
-      flex-direction: row;
-    }
-
-    @media screen and (max-width: variables.$screen_xsmall) {
-      flex-direction: column-reverse;
-    }
-  }
-
-  &-weapons {
-    position: absolute;
-    right: 5px;
-    bottom: 5px;
-
-    display: flex;
-    gap: 6px;
-    flex-direction: column;
-
-    &-container {
+    &-weapons {
       display: flex;
-      justify-content: space-between;
-      gap: 48px;
-
-      padding: 6px;
-      min-height: 56px;
-
-      opacity: 0.35;
-      border-radius: 6px;
+      flex: 1;
+      gap: 6px;
       
-      &.has-item {
-        background: linear-gradient(90deg, #c4c4c473 25%, #17171780);
-        outline: 2px solid #c4c4c473;
-      }
-
-      &.active {
-        opacity: 1;
-      }
+      flex-direction: column;
+      justify-content: end;
+      align-items: end;
       
-      .item-image {
-        width: 48px;
-        height: 48px;
 
-        @media screen and (max-width: variables.$screen_medium) {
-          width: 28px;
-          height: 28px;
-        }
-      }
-
-      &-slot {
+      &-container {
         display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        flex: 1;
-        gap: 8px;
+        padding: 6px;
+        height: 56px;
+        width: 140px;
+        
+        position: relative;
+        opacity: 0.35;
+        border-radius: 6px;
+        
+        &.has-item {
+          background: linear-gradient(90deg, #c4c4c473 25%, #17171780);
+          outline: 2px solid #c4c4c473;
+        }
 
-        &-container {
-          display: flex;
-          align-items: center;
-          gap: 6px;
+        &.active {
+          opacity: 1;
+        }
+        
+        .item-image {
+          position: absolute;
+          left: 6px;
 
-          .item-ammo {
-            display: none;
-            width: 24px;
-            height: 24px;
-
-            &[src] {
-              display: block;
-            }
-          }
+          width: 48px;
+          height: 48px;
 
           @media screen and (max-width: variables.$screen_medium) {
-            display: none;
+            width: 36px;
+            height: 36px;
           }
         }
 
         .item-name {
+          // why relative?, because item-image maybe "font" position
+          position: relative;
           font-size: 12px;
           font-weight: bold;
 
@@ -182,21 +155,46 @@
             font-size: 10px;
           }
         }
+
+        .item-ammo {
+          display: none;
+          width: 24px;
+          height: 24px;
+
+          &[src] {
+            display: block;
+          }
+        }
+
+        &-slot {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          flex: 1;
+          gap: 8px;
+
+          &-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            @media screen and (max-width: variables.$screen_medium) {
+              display: none;
+            }
+          }
+        }
+
+        @media screen and (max-width: variables.$screen_medium) {
+          align-items: center;
+
+          width: 96px;
+          height: 40px;
+        }
       }
 
       @media screen and (max-width: variables.$screen_medium) {
-        align-items: center;
-        min-height: 40px;
-        gap: 28px;
+        justify-content: start;
       }
-    }
-
-    @media screen and (max-width: variables.$screen_medium) {
-      bottom: calc(50px + 5px); // 5px meaning offset
-    }
-
-    @media screen and (max-width: variables.$screen_xsmall) {
-      bottom: calc(190px + 5px); // 5px meaning offset
     }
   }
 }

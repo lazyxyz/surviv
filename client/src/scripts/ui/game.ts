@@ -865,11 +865,11 @@ function setupInventorySlots(game: Game): void {
                 { length: GameConstants.player.maxWeapons },
                 (_, slot) => {
                     const ele = $<HTMLDivElement>(
-                        `<div class="inventory-weapons-container" id="weapon-slot-${slot + 1}">
+                        `<div class="inventory-items-weapons-container" id="weapon-slot-${slot + 1}">
                             <img class="item-image" draggable="false" />
 
-                            <div class="inventory-weapons-container-slot">
-                                <div class="inventory-weapons-container-slot-container">
+                            <div class="inventory-items-weapons-container-slot">
+                                <div class="inventory-items-weapons-container-slot-container">
                                     <img class="item-ammo" />
                                     <span class="slot-number">${slot + 1}</span>
                                 </div>
