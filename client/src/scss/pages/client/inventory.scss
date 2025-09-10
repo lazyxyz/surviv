@@ -8,6 +8,8 @@
     inset: 0 0 auto auto;
     padding: 6px;
 
+    // this make joystick can work, because width items don't hide it
+    width: 0px; 
     height: 100%;
 
     display: flex;
