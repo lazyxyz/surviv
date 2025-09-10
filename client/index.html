@@ -314,36 +314,49 @@
       </button>
       <div id="top-left-container">
         <div id="game-misc-stats">
-          <div>
+          <div class="minimap-container">
             <div id="minimap-border"></div>
-            <div id="scopes-container-mobile"></div>
-          </div>
+            <div id="gas-and-debug">
+              <div class="gas-card" id="gas-timer">
+                <img id="gas-timer-image" src="./img/misc/gas-waiting-icon.svg" />
+                <span id="gas-timer-text">0:00</span>
+              </div>
 
-          <div id="gas-and-debug">
-            <div class="gas-card" id="gas-timer">
-              <img id="gas-timer-image" src="./img/misc/gas-waiting-icon.svg" />
-              <span id="gas-timer-text">0:00</span>
-            </div>
+              <div class="gas-card">
+                <img src="./img/misc/player_icon.svg" />
+                <span id="ui-players-alive">1</span>
+              </div>
 
-            <div class="gas-card">
-              <img src="./img/misc/player_icon.svg" />
-              <span id="ui-players-alive">1</span>
-            </div>
+              <div class="gas-card" id="kill-counter">
+                <img src="./img/misc/skull_icon.svg" />
+                <span class="counter-text" id="ui-kills">0</span>
+              </div>
 
-            <div class="gas-card" id="kill-counter">
-              <img src="./img/misc/skull_icon.svg" />
-              <span class="counter-text" id="ui-kills">0</span>
-            </div>
+              <button id="btn-game-menu" class="gas-card fa-solid fa-bars"></button>
 
-            <button id="btn-game-menu" class="gas-card fa-solid fa-bars"></button>
-
-            <div id="debug-hud">
-              <div id="fps-counter"></div>
-              <div id="ping-counter"></div>
-              <div id="coordinates-hud">X: -- Y: -- Z: --</div>
+              <div id="debug-hud">
+                <div id="fps-counter"></div>
+                <div id="ping-counter"></div>
+                <div id="coordinates-hud">X: -- Y: -- Z: --</div>
+              </div>
             </div>
           </div>
-
+          <div id="scopes-container-mobile"></div>
+          <div class="ui-leaderboard">
+            <div id="group-child">
+              <div id="ui-kill-leader">
+                <div id="kill-leader-leader-container">
+                  <span id="kill-leader-leader" translation="msg_waiting_for_leader"></span>
+                  <i class="fa-solid fa-crown" style="margin-left: 5px; margin-right: 5px"></i>
+                  <span id="kill-leader-kills-counter">0</span>
+                </div>
+              </div>
+              <div id="badges-container"></div>
+            </div>
+            <div id="kill-feed">
+              <div class="kill-feed-item"></div>
+            </div>
+          </div>
           <div id="spectating-container">
             <button id="btn-spectate-previous" class="btn btn-lg btn-primary">
               <i class="fa-solid fa-arrow-left"></i>
@@ -367,7 +380,7 @@
 
       <div id="team-container"></div>
 
-      <div class="ui-leaderboard">
+      <!-- <div class="ui-leaderboard">
         <div id="group-child">
           <div id="ui-kill-leader">
             <div id="kill-leader-leader-container">
@@ -379,7 +392,7 @@
           <div id="badges-container"></div>
         </div>
         <div id="kill-feed"></div>
-      </div>
+      </div> -->
 
       <div id="action-container" style="display: none">
         <div id="action-timer">
