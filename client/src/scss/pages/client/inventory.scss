@@ -76,6 +76,7 @@
       height: fit-content;
 
       &-card {
+        position: relative;
         gap: 24px;
 
         .item-image {
@@ -87,6 +88,33 @@
             height: 16px;
             gap: 4px;
           }
+        }
+
+        .item-tooltip {
+          position: absolute;
+          transform: translateX(-100%);
+          left: -14px;
+
+          background-color: palette.$transparent_bg;
+          @include variables.text-shadow;
+
+          padding: 4px 16px;
+          border-radius: 5px;
+          transition: opacity 150ms linear;
+
+          opacity: 0;
+          text-align: center;
+          font-size: 14px;
+
+          pointer-events: none;
+
+          @media screen and (max-width: variables.$screen_large) {
+            font-size: 12px;
+          }
+        }
+
+        &:hover .item-tooltip {
+            opacity: 1;
         }
 
         @media screen and (max-width: variables.$screen_medium) {
