@@ -540,18 +540,6 @@
   font-weight: bold;
   @include variables.text-shadow;
 
-  &.has-reserve {
-    left: calc(50% + 32px);
-
-    @media screen and (max-width: variables.$screen_large) {
-      left: calc(50% + 24px);
-    }
-
-    @media screen and (max-width: 425px) {
-      left: calc(50% - 53px);
-    }
-  }
-
   div {
     display: flex;
     background: palette.$transparent_bg;
@@ -562,7 +550,6 @@
 
   @media screen and (max-width: variables.$screen_large) {
     bottom: 60px;
-    left: 50%;
   }
 
   #weapon-clip-ammo {

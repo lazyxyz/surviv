@@ -611,27 +611,22 @@ function setupMobileControls(game: Game): void {
         ui.menuButton.on("click", () => ui.gameMenu.fadeToggle(250));
 
         // handle emote-wheel for mobile
-        {
-            let isClicked = false;
-
-            ui.emoteButton.on("click", () => {
-    
-                ui.emoteWheel.toggle(150);
-                isClicked = !isClicked
-    
-                if (isClicked) {
-                    // to make sure isClicked will be reset
-                    ui.emoteWheel.one("click", () => {
-                        isClicked = false;
-                    });
-    
-                    // close button X to close emote-wheel
-                    $("#emote-wheel > .button-center").one("click", () => {
-                        ui.emoteWheel.hide();                            
-                    });
+        ui.emoteButton.on("click", (event) => {
+            event.stopPropagation();
+            ui.emoteWheel.toggle(150);
+        
+            $(document).one("click", (event) => {
+                // 1. click outside wheel
+                if (!$(event.target).closest(ui.emoteWheel).length) {
+                    ui.emoteWheel.hide();                            
                 }
-            });
-        }
+
+                // 2. click button X
+                if ($(event.target).closest(".button-center").length) {
+                    ui.emoteWheel.hide();                            
+                }
+            })
+        });
     }
 
     $("#tab-mobile").toggle(isMobile.any);
@@ -865,11 +860,11 @@ function setupInventorySlots(game: Game): void {
                 { length: GameConstants.player.maxWeapons },
                 (_, slot) => {
                     const ele = $<HTMLDivElement>(
-                        `<div class="inventory-weapons-container" id="weapon-slot-${slot + 1}">
+                        `<div class="inventory-items-weapons-container" id="weapon-slot-${slot + 1}">
                             <img class="item-image" draggable="false" />
 
-                            <div class="inventory-weapons-container-slot">
-                                <div class="inventory-weapons-container-slot-container">
+                            <div class="inventory-items-weapons-container-slot">
+                                <div class="inventory-items-weapons-container-slot-container">
                                     <img class="item-ammo" />
                                     <span class="slot-number">${slot + 1}</span>
                                 </div>

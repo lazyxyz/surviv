@@ -1,6 +1,6 @@
 import $ from "jquery";
 import { successAlert, errorAlert } from "../../modal";
-import { ShopCache } from ".";
+import { ShopCache, updateRewardsTab } from ".";
 import type { Account, SeasonRewardsData } from "../../account";
 
 interface RewardItem {
@@ -111,6 +111,7 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
                 await account.claimRewards();
                 successAlert("Crates claimed successfully!");
             }
+            await updateRewardsTab(0); // reset rewards count
             ShopCache.assetsBalance.crate += totalCrates;
             ShopCache.PlayerValidRewards = undefined;
         } catch (err) {

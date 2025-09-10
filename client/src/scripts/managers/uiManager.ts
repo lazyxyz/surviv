@@ -562,7 +562,7 @@ export class UIManager {
                             </div>` : ""}
                     </div>
                     <div class="rewards-share">
-                        <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw || "")}&url=https://x.com/SurvivFun/status/1958475325496504593"
+                        <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw || "")}&url=https://x.com/SurvivFun/status/1965608005204165083"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="btn btn-lg btn-darken btn-primary"
@@ -968,7 +968,7 @@ export class UIManager {
                 }
 
                 // handle display itemName
-                if (!itemName.text()) {
+                {
                     const weaponName = definition.itemType === ItemType.Gun && definition.isDual
                         ? getTranslatedString(
                             "dual_template",
@@ -998,12 +998,12 @@ export class UIManager {
                     itemAmmo.attr("src", `./img/game/shared/loot/${definition.ammoType}.svg`);
                 }
             } else {
-                container.removeClass(ClassNames.HasItem)
+                container
+                    .removeClass(ClassNames.HasItem)
                     .removeClass(ClassNames.IsActive)
                     .css({
-                        "outline-color": "",
-                        "background-color": "",
-                        "color": ""
+                        "outline": "",
+                        "background": "",
                     });
 
                 itemName.css("color", "").text("");

@@ -275,6 +275,7 @@ export class Account extends EIP6963 {
             resetPlayButtons();
         }
     }
+
     async eventListener(): Promise<void> {
         const getProvider = this.provider;
 

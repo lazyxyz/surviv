@@ -21,7 +21,7 @@ export interface GasStage {
 //     },
 //     {
 //         state: GasState.Waiting,
-//         duration: 10,
+//         duration: 15,
 //         oldRadius: 0.762,
 //         newRadius: 0.381,
 //         dps: 0,
@@ -36,7 +36,7 @@ export interface GasStage {
 //     },
 //     {
 //         state: GasState.Waiting,
-//         duration: 10,
+//         duration: 15,
 //         oldRadius: 0.381,
 //         newRadius: 0.238,
 //         dps: 1
@@ -50,7 +50,7 @@ export interface GasStage {
 //     },
 //     {
 //         state: GasState.Waiting,
-//         duration: 10,
+//         duration: 15,
 //         oldRadius: 0.238,
 //         newRadius: 0.095,
 //         dps: 2,
