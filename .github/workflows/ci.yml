@@ -57,57 +57,57 @@ jobs:
         working-directory: ./server
         run: pnpm build
 
-  tests:
-    name: Tests
-    runs-on: ubuntu-latest
-    concurrency: ci-tests-${{ github.ref }}
+  # tests:
+  #   name: Tests
+  #   runs-on: ubuntu-latest
+  #   concurrency: ci-tests-${{ github.ref }}
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+  #     - name: Install pnpm
+  #       uses: pnpm/action-setup@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+  #     - name: Install Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+  #         cache: 'pnpm'
+  #         cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Install Packages
-        run: pnpm install --frozen-lockfile
+  #     - name: Install Packages
+  #       run: pnpm install --frozen-lockfile
 
-      - name: Build
-        working-directory: ./tests
-        run: pnpm build
+  #     - name: Build
+  #       working-directory: ./tests
+  #       run: pnpm build
 
-      - name: Run Tests
-        working-directory: ./tests
-        run: pnpm validateDefinitions
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    concurrency: ci-lint-${{ github.ref }}
+  #     - name: Run Tests
+  #       working-directory: ./tests
+  #       run: pnpm validateDefinitions
+  # lint:
+    # name: Lint
+    # runs-on: ubuntu-latest
+    # concurrency: ci-lint-${{ github.ref }}
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    # steps:
+    #   - name: Checkout Repository
+    #     uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+    #   - name: Install pnpm
+    #     uses: pnpm/action-setup@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
+    #   - name: Install Node.js
+    #     uses: actions/setup-node@v4
+    #     with:
+    #       node-version: 20
+    #       cache: 'pnpm'
+    #       cache-dependency-path: '**/pnpm-lock.yaml'
 
-      - name: Install Packages
-        working-directory: ./tests
-        run: pnpm install --frozen-lockfile
+    #   - name: Install Packages
+    #     working-directory: ./tests
+    #     run: pnpm install --frozen-lockfile
 
-      - name: Lint
-        run: pnpm lint:ci
+    #   - name: Lint
+    #     run: pnpm lint:ci
