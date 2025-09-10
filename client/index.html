@@ -183,10 +183,6 @@
                   <img src="./img/misc/player_icon.svg" width="16" height="16" alt="Player count" />
                   <span id="server-player-count">-</span>
                 </span>
-                <!--<span style="margin-left: 5px">
-                    <img src="./img/misc/ping_icon.svg" width="16" height="16" alt="Ping">
-                    <span id="server-ping">-</span>
-                  </span>-->
                 <i class="fa-solid fa-caret-down"></i>
               </button>
               <ul class="dropdown-content" id="server-list"></ul>
@@ -315,6 +311,8 @@
       <div id="top-left-container">
         <div id="game-misc-stats">
           <div class="minimap-container">
+            <button id="btn-game-menu" class="gas-card fa-solid fa-bars"></button>
+
             <div id="minimap-border"></div>
             <div id="gas-and-debug">
               <div class="gas-card" id="gas-timer">
@@ -332,7 +330,6 @@
                 <span class="counter-text" id="ui-kills">0</span>
               </div>
 
-              <button id="btn-game-menu" class="gas-card fa-solid fa-bars"></button>
 
               <div id="debug-hud">
                 <div id="fps-counter"></div>
