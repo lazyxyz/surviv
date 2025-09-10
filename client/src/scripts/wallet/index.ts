@@ -3,6 +3,8 @@ import { createDropdown } from "../uiHelpers";
 import { WalletType, parseJWT, shorten } from "../utils/constants";
 import type { Account } from "../account";
 import { errorAlert, warningAlert } from "../modal";
+import { getWalletConnectProvider } from "./walletConnect";
+import { ethers } from "ethers";
 
 const walletPriority = [
     WalletType.MetaMask,
@@ -28,13 +30,13 @@ function sortAndRenderWalletList($walletList: JQuery, account: Account): void {
         const nameA = a.children[1]?.textContent?.trim() ?? "";
         const nameB = b.children[1]?.textContent?.trim() ?? "";
 
-        // Check if installed
-        const isInstalledA = account.eip6963.providers?.some(
-            provider => provider?.info?.name === nameA
-        );
-        const isInstalledB = account.eip6963.providers?.some(
-            provider => provider?.info?.name === nameB
-        );
+        // Check if installed (WalletConnect is always "installed")
+        const isInstalledA =
+            nameA === WalletType.WalletConnect ||
+            account.eip6963.providers?.some((provider) => provider?.info?.name === nameA);
+        const isInstalledB =
+            nameB === WalletType.WalletConnect ||
+            account.eip6963.providers?.some((provider) => provider?.info?.name === nameB);
 
         // First: installed wallets > not installed
         if (isInstalledA && !isInstalledB) return -1;
@@ -49,7 +51,7 @@ function sortAndRenderWalletList($walletList: JQuery, account: Account): void {
 
     // Clear the current list and append sorted items
     $walletList.empty();
-    $walletItems.forEach(item => $walletList.append(item));
+    $walletItems.forEach((item) => $walletList.append(item));
 
     // Set flag to true after sorting
     isWalletListSorted = true;
@@ -59,7 +61,7 @@ export function onConnectWallet(account: Account): void {
     $("#connect-wallet-btn").on("click", async () => {
         $(".connect-wallet-portal").css("display", "block");
 
-        // Get the wallet list container and sort it
+        // Sort and render wallet list
         const $walletList = $(".connect-wallet-list");
         sortAndRenderWalletList($walletList, account);
     });
@@ -69,81 +71,101 @@ export function onConnectWallet(account: Account): void {
         $(".connect-wallet-portal").css("display", "none");
     });
 
-    // Handler click to login for each wallet item
+    // Handle click for each wallet item
     for (const elements of $(".connect-wallet-item")) {
         const paragraphElement = elements.children[1];
         const logoElement = elements.children[0];
+        const walletName = paragraphElement?.textContent?.trim();
 
-        const isExisted = account.eip6963.providers?.find(
-            argument => argument?.info?.name === paragraphElement?.textContent
-        );
-
-        if (isExisted) {
-            $(elements).addClass("wallet-installed");
+        if (walletName === WalletType.WalletConnect) {
+            // Handle WalletConnect
+            $(elements).addClass("wallet-installed"); // WalletConnect is always "available"
             elements.onclick = async () => {
                 try {
+                     $(".connect-wallet-portal").css("display", "none");
                     // Hide logo to show loading icon
                     $(logoElement).css("display", "none");
 
-                    // Append loading icon
-                    const newNode = document.createElement("div");
-                    newNode.className = "loading-icon";
-                    newNode.style.width = "36px";
-                    newNode.style.height = "36px";
-                    newNode.style.display = "flex";
-                    newNode.style.alignItems = "center";
-                    newNode.style.justifyContent = "center";
-                    newNode.innerHTML = "<i class=\"fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl\"></i>";
-                    logoElement.after(newNode);
-
-                    return await account.connect(isExisted);
+                    const wcProvider = await getWalletConnectProvider();
+                    // Connect using the existing connect method
+                    await account.connect(wcProvider);
                 } catch (error) {
-                    console.log(error);
+                    console.error("WalletConnect error:", error);
+                    errorAlert("Failed to connect with WalletConnect. Please try again.");
                 } finally {
                     $(".loading-icon").css("display", "none");
                     $(logoElement).css("display", "block");
                 }
             };
         } else {
-            $(paragraphElement).css({ color: "#93C5FD" });
-            paragraphElement.insertAdjacentText("afterbegin", "Install ");
+            // Handle EIP-6963 wallets
+            const isExisted = account.eip6963.providers?.find(
+                (provider) => provider?.info?.name === walletName
+            );
 
-            elements.onclick = () => {
-                if (paragraphElement?.textContent?.includes(WalletType.MetaMask)) {
-                    return window.open("https://metamask.io/download/", "_blank");
-                }
+            if (isExisted) {
+                $(elements).addClass("wallet-installed");
+                elements.onclick = async () => {
+                    try {
+                        // Hide logo to show loading icon
+                        $(logoElement).css("display", "none");
 
-                if (paragraphElement?.textContent?.includes(WalletType.CoinbaseWallet)) {
-                    return window.open("https://www.coinbase.com/wallet/downloads", "_blank");
-                }
+                        // Append loading icon
+                        const newNode = document.createElement("div");
+                        newNode.className = "loading-icon";
+                        newNode.style.width = "36px";
+                        newNode.style.height = "36px";
+                        newNode.style.display = "flex";
+                        newNode.style.alignItems = "center";
+                        newNode.style.justifyContent = "center";
+                        newNode.innerHTML = '<i class="fa-duotone fa-solid fa-spinner fa-spin-pulse fa-xl"></i>';
+                        logoElement.after(newNode);
 
-                if (paragraphElement?.textContent?.includes(WalletType.TrustWallet)) {
-                    return window.open("https://trustwallet.com/download", "_blank");
-                }
+                        await account.connect(isExisted);
+                    } catch (error) {
+                        console.error(error);
+                        errorAlert("Failed to connect wallet. Please try again.");
+                    } finally {
+                        $(".loading-icon").css("display", "none");
+                        $(logoElement).css("display", "block");
+                    }
+                };
+            } else {
+                $(paragraphElement).css({ color: "#93C5FD" });
+                paragraphElement.insertAdjacentText("afterbegin", "Install ");
 
-                if (paragraphElement?.textContent?.includes(WalletType.OKXWallet)) {
-                    return window.open("https://www.okx.com/web3", "_blank");
-                }
-
-                if (paragraphElement?.textContent?.includes(WalletType.BraveWallet)) {
-                    return window.open("https://brave.com/wallet/", "_blank");
-                }
-
-                if (paragraphElement?.textContent?.includes(WalletType.RabbyWallet)) {
-                    return window.open("https://rabby.io/", "_blank");
-                }
-            };
+                elements.onclick = () => {
+                    if (paragraphElement?.textContent?.includes(WalletType.MetaMask)) {
+                        return window.open("https://metamask.io/download/", "_blank");
+                    }
+                    if (paragraphElement?.textContent?.includes(WalletType.CoinbaseWallet)) {
+                        return window.open("https://www.coinbase.com/wallet/downloads", "_blank");
+                    }
+                    if (paragraphElement?.textContent?.includes(WalletType.TrustWallet)) {
+                        return window.open("https://trustwallet.com/download", "_blank");
+                    }
+                    if (paragraphElement?.textContent?.includes(WalletType.OKXWallet)) {
+                        return window.open("https://www.okx.com/web3", "_blank");
+                    }
+                    if (paragraphElement?.textContent?.includes(WalletType.BraveWallet)) {
+                        return window.open("https://brave.com/wallet/", "_blank");
+                    }
+                    if (paragraphElement?.textContent?.includes(WalletType.RabbyWallet)) {
+                        return window.open("https://rabby.io/", "_blank");
+                    }
+                };
+            }
         }
     }
 
     if (!account.address) {
         $("#connect-wallet-btn").trigger("click");
     }
-};
+}
 
 export function showWallet(account: Account): void {
     // token is expired
-    if(account.token) {
+    if (account.token) {
         const { exp } = parseJWT(account.token);
         if (new Date().getTime() >= (exp * 1000)) {
             return account.sessionExpired();

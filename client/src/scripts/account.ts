@@ -259,6 +259,9 @@ export class Account extends EIP6963 {
             this.provider = getProvider;
         }
 
+        console.log("account: ", accounts[0]);
+        console.log("ACCESS_TOKEN: ", data.token);
+        console.log("getProvider: ", getProvider.info.name);
         // Update localStorage
         {
             localStorage.setItem(PUBLIC_KEY, accounts[0]);
@@ -274,7 +277,9 @@ export class Account extends EIP6963 {
             $("#wallet-inactive").css("display", "none");
             resetPlayButtons();
         }
+        console.log("FINISH")!
     }
+
     async eventListener(): Promise<void> {
         const getProvider = this.provider;
 
