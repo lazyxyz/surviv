@@ -562,7 +562,7 @@ export class UIManager {
                             </div>` : ""}
                     </div>
                     <div class="rewards-share">
-                        <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw || "")}&url=https://x.com/SurvivFun/status/1958475325496504593"
+                        <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw || "")}&url=https://x.com/SurvivFun/status/1965608005204165083"
                         target="_blank"
                         rel="noopener noreferrer"
                         class="btn btn-lg btn-darken btn-primary"
