@@ -11,6 +11,7 @@ const walletPriority = [
     WalletType.OKXWallet,
     WalletType.BraveWallet,
     WalletType.RabbyWallet,
+    WalletType.WalletConnect,
 ];
 
 // Flag to track if the wallet list has been sorted

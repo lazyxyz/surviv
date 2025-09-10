@@ -77,6 +77,7 @@ export enum WalletType {
     OKXWallet = "OKX Wallet",
     BraveWallet = "Brave Wallet",
     RabbyWallet = "Rabby Wallet",
+    WalletConnect = "WalletConnect",
 }
 
 /**
