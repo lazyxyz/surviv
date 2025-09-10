@@ -80,6 +80,8 @@ export function onConnectWallet(account: Account): void {
         if (walletName === WalletType.WalletConnect) {
             // Handle WalletConnect
             $(elements).addClass("wallet-installed"); // WalletConnect is always "available"
+            $("w3m-modal").css("display", "block");
+
             elements.onclick = async () => {
                 try {
                      $(".connect-wallet-portal").css("display", "none");
@@ -95,7 +97,7 @@ export function onConnectWallet(account: Account): void {
                 } finally {
                     $(".loading-icon").css("display", "none");
                     $(logoElement).css("display", "block");
-                    $("w3m-modal").remove();
+                    $("w3m-modal").css("display", "none");
                 }
             };
         } else {
