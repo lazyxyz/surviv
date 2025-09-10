@@ -32,6 +32,16 @@ export let ShopCache: {
     PlayerValidRewards: ValidRewards | undefined;
 }
 
+export async function updateRewardsTab(rewards: number) {
+    // Update rewards tab text
+    const rewardsTab = document.querySelector("#rewards-tab") as HTMLButtonElement;
+    if (rewards) {
+        rewardsTab.textContent = `Rewards(${rewards})`;
+    } else {
+        rewardsTab.textContent = "Rewards";
+    }
+}
+
 export async function showShop(account: Account) {
     ShopCache = {
         storeLoaded: false,
@@ -49,22 +59,13 @@ export async function showShop(account: Account) {
         PlayerValidRewards: undefined
     }
 
-    try {
-        ShopCache.PlayerValidRewards = await account.getValidRewards();
-    } catch (err) { };
+
 
     // Setup tabs
     const tabButtons = document.querySelectorAll<HTMLButtonElement>(".crates-tab-child");
     const tabContents = document.querySelectorAll<HTMLElement>(".crates-customize-child");
     setupTabs(tabButtons, tabContents);
 
-    // Update rewards tab text
-    const rewardsTab = document.querySelector("#rewards-tab") as HTMLButtonElement;
-    if (ShopCache.PlayerValidRewards?.validCrates.length) {
-        rewardsTab.textContent = `Rewards(${ShopCache.PlayerValidRewards.validCrates.length})`;
-    } else {
-        rewardsTab.textContent = "Rewards";
-    }
 
     $("#store-tab").on('click', () => {
         loadStore(account);
@@ -80,4 +81,8 @@ export async function showShop(account: Account) {
 
     // Trigger store tab click by default
     $("#store-tab").trigger('click');
+    try {
+        ShopCache.PlayerValidRewards = await account.getValidRewards();
+        await updateRewardsTab(ShopCache.PlayerValidRewards.validCrates.length);
+    } catch (err) { };
 }
