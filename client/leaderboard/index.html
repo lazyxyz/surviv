@@ -51,19 +51,13 @@
           </div>
 
           <div class="countdown">
-            <div class="pulse-ring" id="pulse-ring" style="display: block"></div>
+            <div class="pulse-ring" id="pulse-ring" style="display: none"></div>
             <p class="count-time" id="countdown-text">Loading...</p>
           </div>
 
           <div class="header flex items-center justify-between">
-            <div class="flex justify-center items-center space-x-4">
-              <p class="header-title">top survivors</p>
-              <button class="btn-alert flex p-1 pl-2 pr-4 items-center justify-center gap-1 rounded-[10px] m-auto]"
-                id="season-1-button">
-                <img src="../img/game/shared/badges/surviv_s1_gold.svg" alt="Gold Badge"
-                  class="w-[36px] h-[36px] filter drop-shadow-[0_0_2px_#facc15a6]">
-                Season I
-              </button>
+            <div class="flex justify-center items-center space-x-4" id="season-buttons">
+              <p class="header-title"></p>
             </div>
             <div class="header-pagination">
               <button class="btn-pagination" id="prev-page" disabled><i class="fa-solid fa-chevron-left"></i></button>
@@ -136,12 +130,33 @@
     </div>
   </div>
   <script>
-    const API_URL_CURRENT = 'https://admin.surviv.fun/api/playerRankings';
-    const API_URL_SEASON = 'https://admin.surviv.fun/season/rankings';
-    const API_PLAYER_POINTS_CURRENT = 'https://admin.surviv.fun/api/playerPoints';
-    const API_PLAYER_POINTS_SEASON = 'https://admin.surviv.fun/season/player/';
-    const API_REWARDS_PROOF = 'https://admin.surviv.fun/season/player/';
-    const isEnded = true;
+    // Seasons configuration
+    const seasons = [
+      {
+        id: "2",
+        name: "Season II",
+        title: "15th September, 2025 – 1st November, 2025 | 2:00 PM UTC",
+        api: "https://admin.surviv.fun/stats/playerRankingsByDate?startDate=2025-09-15T14:00:00Z&endDate=2025-11-01T14:00:00Z",
+        icon: "../img/logos/surviv_round.svg",
+        playerPointsApi: "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}&startDate=2025-09-15T14:00:00Z&endDate=2025-11-01T14:00:00Z"
+      },
+      {
+        id: "s1",
+        name: "TBA",
+        title: "TBA",
+        api: "https://admin.surviv.fun/stats/playerRankingsByDate?startDate=2025-09-18T00:00:00Z&endDate=2025-09-23T00:00:00Z",
+        icon: "../img/game/shared/badges/somnia_s1.svg",
+        playerPointsApi: "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}&startDate=2025-09-18T00:00:00Z&endDate=2025-09-23T00:00:00Z"
+      },
+      {
+        id: "1",
+        name: "Season I",
+        title: "Season I Ended! Check Inventory and Claim Your Rewards.",
+        api: "https://admin.surviv.fun/season/rankings?season=1",
+        icon: "../img/game/shared/badges/surviv_s1_gold.svg",
+        playerPointsApi: "https://admin.surviv.fun/season/playerPoints?walletAddress={walletAddress}&season=1"
+      }
+    ];
 
     let currentPage = 1;
     const limit = 100;
@@ -176,10 +191,8 @@
 
     // Normalize player object keys from different endpoints
     function normalizePlayer(raw, defaultAddress = '') {
-      if (!raw) raw = {};
-      const addr = (raw.walletAddress || raw.address || raw.player || defaultAddress || '').toString();
       return {
-        player: addr,
+        player: raw.player,
         totalPoints: asNumber(raw.totalPoints ?? raw.total ?? 0),
         soloPoints: asNumber(raw.soloPoints ?? raw.solo ?? 0),
         squadPoints: asNumber(raw.squadPoints ?? raw.squad ?? 0),
@@ -197,35 +210,52 @@
     const pulseRing = document.getElementById('pulse-ring');
     const seasonNumber = document.getElementById('season-number');
     const logoHeading = document.getElementById('logo-heading');
-    const seasonButton = document.getElementById('season-1-button');
+    const seasonButtonsContainer = document.getElementById('season-buttons');
+    const error = document.getElementById('error');
 
-    // Update title and season display based on season parameter
-    if (season) {
-      document.title = `Surviv Fun - Season ${season} Rewards`;
-      logoHeading.textContent = `SEASON ${season} LEADERBOARD`;
-      seasonNumber.textContent = season;
+    // Find current season and selected season
+    const currentSeason = seasons[0]; // First season is current
+    const selectedSeason = season ? seasons.find(s => s.id.toLowerCase() === season.toLowerCase()) : currentSeason;
+
+    // Update title and season display
+    if (selectedSeason) {
+      document.title = `Surviv Fun - ${selectedSeason.name} Rewards`;
+      logoHeading.textContent = `${selectedSeason.name.toUpperCase()} LEADERBOARD`;
+      seasonNumber.textContent = selectedSeason.name.split(' ')[1];
+      countdownText.textContent = selectedSeason.title;
+      pulseRing.style.display = 'none';
     } else {
       document.title = 'Surviv Fun - Leaderboard';
       logoHeading.textContent = 'LEADERBOARD';
-      seasonNumber.textContent = 'II'; // Default to season 1 if no season specified
+      seasonNumber.textContent = currentSeason.name.split(' ')[1];
+      countdownText.textContent = currentSeason.title;
+      pulseRing.style.display = 'none';
     }
 
-    // Update countdown text
-    if (season) {
-      countdownText.textContent = `Season ${season} Ended! Check Inventory and Claim Your Rewards.`;
-      pulseRing.style.display = 'none';
-    } else if (isEnded) {
-      countdownText.textContent = '15th September, 2025 – 1st November, 2025 | 2:00 PM UTC';
-      pulseRing.style.display = 'none';
-
-    } else {
-      countdownText.textContent = 'Season 1'; // Adjust based on API response if needed
-      pulseRing.style.display = 'block';
+    // Handle season not found
+    if (season && !selectedSeason) {
+      error.textContent = 'Season not found. Showing current season.';
+      error.classList.remove('hidden');
     }
 
-    // Season I button navigation
-    seasonButton.addEventListener('click', () => {
-      window.location.href = '/leaderboard/?season=1';
+    // Dynamically generate season buttons
+    seasons.forEach((s, index) => {
+      const button = document.createElement('button');
+      // Highlight selected season with yellow background and border
+      const isSelected = selectedSeason && s.id.toLowerCase() === selectedSeason.id.toLowerCase();
+      button.className = `btn-darken flex p-1 pl-2 pr-4 items-center justify-center gap-1 rounded-[10px] m-auto ${
+        isSelected ? 'bg-yellow-400/20 border border-yellow-400/60 text-yellow-300' : ''
+      }`;
+
+      button.id = `season-${s.id.toLowerCase()}-button`;
+      button.innerHTML = `
+        <img src="${s.icon}" alt="${s.name} Badge" class="w-[36px] h-[36px] filter drop-shadow-[0_0_2px_#facc15a6]">
+        ${s.name}
+      `;
+      button.addEventListener('click', () => {
+        window.location.href = `/leaderboard/?season=${s.id.toLowerCase()}`;
+      });
+      seasonButtonsContainer.appendChild(button);
     });
 
     // Tooltip toggle functionality
@@ -329,16 +359,15 @@
       return row;
     }
 
-    async function fetchMyPlayerPoints(address) {
+    async function fetchMyPlayerPoints(address, seasonConfig) {
       if (!address) return null;
       try {
-        const url = season
-          ? `${API_PLAYER_POINTS_SEASON}${encodeURIComponent(address)}?walletAddress=${encodeURIComponent(address)}&season=${season}`
-          : `${API_PLAYER_POINTS_CURRENT}?walletAddress=${encodeURIComponent(address)}`;
+        // Replace {walletAddress} with actual address
+        const url = seasonConfig.playerPointsApi.replace('{walletAddress}', encodeURIComponent(address));
         const res = await fetch(url);
         if (!res.ok) throw new Error('playerPoints request failed');
         const data = await res.json();
-        return season ? data : normalizePlayer(data?.data || data?.playerPoints || data, address);
+        return normalizePlayer(data?.data || data?.playerPoints || data, address);
       } catch (e) {
         console.warn('Failed to fetch player points:', e);
         return null;
@@ -375,77 +404,67 @@
       leaderboardTable.classList.remove('hidden');
       rewardsImage.classList.add('hidden');
 
+      // If season not found, show current season
+      if (season && !selectedSeason) {
+        return;
+      }
+
       try {
-        if (!season && isEnded) {
-          // When season has ended and no season parameter
+        // Select API based on season
+        const seasonConfig = selectedSeason || currentSeason;
+        const apiUrl = seasonConfig.api;
+        const queryParams = `page=${page}&limit=${limit}`;
+
+        const response = await fetch(`${apiUrl}${apiUrl.includes('?') ? '&' : '?'}${queryParams}`);
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error('Failed to fetch leaderboard data');
+        }
+
+        totalPages = data.totalPages || 1;
+        updatePaginationUI();
+
+        const players = data.players || [];
+        if (players.length === 0) {
           leaderboardTable.classList.add('hidden');
           rewardsImage.classList.remove('hidden');
-        } else {
-          // Normal leaderboard or season-specific fetching logic
-          const apiUrl = season ? API_URL_SEASON : API_URL_CURRENT;
-          const queryParams = season
-            ? `page=${page}&limit=${limit}&season=${encodeURIComponent(season)}`
-            : `page=${page}&limit=${limit}`;
+          return;
+        }
 
-          const response = await fetch(`${apiUrl}?${queryParams}`);
-          const data = await response.json();
+        players.forEach((player, index) => {
+          const row = document.createElement('div');
+          row.className = 'leaderboard-body-row';
+          row.innerHTML = `
+            <div class="w-[110px] h-[48px]" id="row-child">${(page - 1) * limit + index + 1}</div>
+            <div class="w-[320px] h-[48px]" id="row-child">${shortenAddress(player.player)}<i id="copy-address-${index}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i></div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.totalPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.soloPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.squadPoints}</div>
+            <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints || 0}</div>
+            <div class="w-[110px] h-[48px]" id="row-child">${player.games}</div>
+            <div class="w-[100px] h-[48px]" id="row-child">${player.games > 0 ? ((player.soloPoints + player.squadPoints) / player.games).toFixed(2) : '0.00'}</div>
+          `;
+          leaderboardBody.appendChild(row);
+        });
 
-          if (!data.success) {
-            throw new Error('Failed to fetch leaderboard data');
-          }
+        // Fetch and pin "my" row using PUBLIC_KEY only
+        if (myPublicKey && myRankingContainer) {
+          const myData = await fetchMyPlayerPoints(myPublicKey, seasonConfig);
+          if (myData) {
+            // Determine rank based on current page if present; otherwise show "—"
+            const rankNumber = players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) >= 0 ? (page - 1) * limit + players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) + 1 : '—';
 
-          totalPages = data.totalPages || 1;
-          updatePaginationUI();
-
-          // Badges in rank
-          function getRankBadge(rank) {
-            if (rank >= 1 && rank <= 10) {
-              return '<img src="../img/game/shared/badges/surviv_s1_gold.svg" alt="Gold Badge" class="filter drop-shadow-[0_0_2px_#facc15a6]">';
-            }
-            if (rank >= 11 && rank <= 50) {
-              return '<img src="../img/game/shared/badges/surviv_s1_silver.svg" alt="Silver Badge">';
-            }
-            return '';
-          }
-
-          const players = data.players;
-          players.forEach((player, index) => {
-            const row = document.createElement('div');
-            row.className = 'leaderboard-body-row';
-            row.innerHTML = `
-              <div class="w-[110px] h-[48px]" id="row-child">
-                ${getRankBadge((page - 1) * limit + index + 1)}
-                ${(page - 1) * limit + index + 1}
-              </div>
-              <div class="w-[320px] h-[48px]" id="row-child">${shortenAddress(player.player)}<i id="copy-address-${index}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i></div>
-              <div class="w-[160px] h-[48px]" id="row-child">${player.totalPoints}</div>
-              <div class="w-[160px] h-[48px]" id="row-child">${player.soloPoints}</div>
-              <div class="w-[160px] h-[48px]" id="row-child">${player.squadPoints}</div>
-              <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints || 0}</div>
-              <div class="w-[110px] h-[48px]" id="row-child">${player.games}</div>
-              <div class="w-[100px] h-[48px]" id="row-child">${player.games > 0 ? ((player.soloPoints + player.squadPoints) / player.games).toFixed(2) : '0.00'}</div>
-            `;
-            leaderboardBody.appendChild(row);
-          });
-
-          // Fetch and pin "my" row using PUBLIC_KEY only
-          if (myPublicKey && myRankingContainer) {
-            const myData = await fetchMyPlayerPoints(myPublicKey);
-            if (myData) {
-              // Determine rank based on current page if present; otherwise show "—"
-              const rankNumber = season ? myData.rank : (players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) >= 0 ? (page - 1) * limit + players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) + 1 : '—');
-
-              // Replace the prompt (if any) with the pinned row
-              myRankingContainer.innerHTML = '';
-              const pinned = createRow(myData.player || myData, rankNumber, `my-${page}`, true);
-              addYouBadgeToRow(pinned);
-              myRankingContainer.appendChild(pinned);
-            }
+            // Replace the prompt (if any) with the pinned row
+            myRankingContainer.innerHTML = '';
+            const pinned = createRow(myData, rankNumber, `my-${page}`, true);
+            addYouBadgeToRow(pinned);
+            myRankingContainer.appendChild(pinned);
           }
         }
       } catch (err) {
         console.error(err);
-        error.textContent = season ? 'Error loading season rewards. Please try again later.' : (isEnded ? 'Error loading your points. Please try again later.' : 'Error loading leaderboard. Please try again later.');
+        error.textContent = season ? 'Error loading season rewards. Please try again later.' : 'Error loading leaderboard. Please try again later.';
         error.classList.remove('hidden');
       } finally {
         loading.classList.add('hidden');
