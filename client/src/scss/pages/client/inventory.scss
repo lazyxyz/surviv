@@ -2,7 +2,6 @@
 @use "../../variables";
 
 .inventory {
-  
   // items meaning medicals & ammos
   &-items {
     position: absolute;
@@ -10,32 +9,60 @@
     padding: 6px;
 
     height: 100%;
-    
+
     display: flex;
     justify-content: start;
     flex-direction: column;
     gap: 8px;
 
+    @media screen and (max-width: variables.$screen_xsmall) {
+      gap: 4px;
+      height: auto;
+    }
+
     &-card {
       display: flex;
       align-items: center;
-  
-      background-color: rgba(0, 0, 0, 0.30);
+
+      background-color: rgba(0, 0, 0, 0.35);
       opacity: 0.35;
       padding: 6px;
-  
+      border-radius: 6px;
+
+      @media screen and (max-width: variables.$screen_medium) {
+        padding: 4px;
+        border-radius: 4px;
+        gap: 4px;
+      }
+
       // when you pick something, we should display this item available
       &.has-item {
         opacity: 1;
       }
-    
+
       .item-count {
         font-size: 14px;
         color: white;
-        
+
         @media screen and (max-width: variables.$screen_medium) {
           font-size: 10px;
         }
+      }
+    }
+
+    &-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      @media screen and (max-width: variables.$screen_medium) {
+        flex-direction: row-reverse;
+        gap: 4px;
+      }
+
+      @media screen and (max-width: variables.$screen_xsmall) {
+        flex-direction: column;
+        gap: 4px;
       }
     }
 
@@ -52,15 +79,16 @@
         .item-image {
           width: 28px;
           height: 28px;
-            
+
           @media screen and (max-width: variables.$screen_medium) {
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
+            gap: 4px;
           }
         }
-  
+
         @media screen and (max-width: variables.$screen_medium) {
-          gap: 6px;
+          gap: 4px;
         }
       }
 
@@ -70,26 +98,43 @@
 
       @media screen and (max-width: variables.$screen_xsmall) {
         flex-direction: column;
+        gap: 4px;
       }
     }
-  
+
     &-ammos {
       display: flex;
       justify-content: end;
       gap: 6px;
-  
-      &-card {
+
+      @media screen and (max-width: variables.$screen_medium) {
+        gap: 4px;
+      }
+
+      &-container {
+        display: flex;
         flex-direction: column;
-  
-        // instead wrapper using flex and gap to space items
-        &:not(:first-child) {
-          margin-top: 6px;
+        gap: 4px;
+
+        @media screen and (max-width: variables.$screen_medium) {
+          flex-direction: column;
+          gap: 4px;
         }
+      }
+      &-card {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        // instead wrapper using flex and gap to space items
+        // &:not(:first-child) {
+        //   margin-top: 6px;
+        // }
 
         .item-image {
           width: 28px;
           height: 28px;
-            
+
           @media screen and (max-width: variables.$screen_medium) {
             width: 16px;
             height: 16px;
@@ -98,7 +143,7 @@
 
         @media screen and (max-width: variables.$screen_medium) {
           flex-direction: row;
-          gap: 6px;
+          gap: 4px;
         }
       }
     }
@@ -107,21 +152,33 @@
       display: flex;
       flex: 1;
       gap: 6px;
-      
+      width: fit-content;
+      align-self: end;
+
       flex-direction: column;
       justify-content: end;
       align-items: end;
-      
+
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+
+      @media screen and (max-width: variables.$screen_medium) {
+        position: relative;
+        bottom: 0;
+        right: 0;
+      }
+
       &-container {
         display: flex;
         padding: 6px;
         height: 56px;
         width: 140px;
-        
+
         position: relative;
         opacity: 0.35;
         border-radius: 6px;
-        
+
         background: linear-gradient(90deg, #c4c4c473 25%, #17171780);
         outline: 2px solid #c4c4c473;
 
@@ -130,19 +187,19 @@
           animation: 0.25s ease-in-out active-pulse;
 
           @keyframes active-pulse {
-              0% {
-                  width: 100%;
-              }
-              50% {
-                  width: calc(100% + 2rem);
-                  outline-width: 4px;
-              }
-              100% {
-                  width: 100%;
-              }
+            0% {
+              width: 100%;
+            }
+            50% {
+              width: calc(100% + 2rem);
+              outline-width: 4px;
+            }
+            100% {
+              width: 100%;
+            }
           }
         }
-        
+
         .item-image {
           position: absolute;
           left: 6px;
