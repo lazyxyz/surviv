@@ -95,6 +95,7 @@ export function onConnectWallet(account: Account): void {
                 } finally {
                     $(".loading-icon").css("display", "none");
                     $(logoElement).css("display", "block");
+                    $("w3m-modal").remove();
                 }
             };
         } else {
