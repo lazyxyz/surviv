@@ -166,6 +166,7 @@ export class UIManager {
 
         ammoCounterContainer: $<HTMLDivElement>("#weapon-ammo-container"),
         activeAmmo: $<HTMLSpanElement>("#weapon-clip-ammo-count"),
+        weaponClipAmmo: $<HTMLSpanElement>("#weapon-clip-ammo"),
         reserveAmmo: $<HTMLDivElement>("#weapon-inventory-ammo"),
         reloadIcon: $("#weapon-clip-reload-icon"),
         killStreakIndicator: $<HTMLDivElement>("#killstreak-indicator-container"),
