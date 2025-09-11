@@ -112,12 +112,12 @@
     featured_streamr: "Streamr in evidenza"
 
     btn_report: "Segnala"
-    btn_spectate_kill_leader: "Osserva il Leader delle Uccisioni"
+    btn_spectate_kill_leader: "Leader"
     btn_spectate: "Osserva"
     btn_play_again: "Gioca ancora"
     btn_menu: "Menù"
 
-    msg_waiting_for_leader: "In attesa del Leader"
+    msg_waiting_for_leader: "Leader"
     msg_you_died: "Sei morto/a."
     msg_player_died: "<player> è morto/a."
     msg_win: "Winner Winner Chicken Dinner!"

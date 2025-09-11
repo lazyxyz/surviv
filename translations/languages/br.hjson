@@ -118,12 +118,12 @@
   "featured_streamr": "Streamr em destaque"
 
   "btn_report": "Reportar"
-  "btn_spectate_kill_leader": "Assistir Líder de Mortes"
+  "btn_spectate_kill_leader": "Líder"
   "btn_spectate": "Assistir"
   "btn_play_again": "Jogar Novamente"
   "btn_menu": "Menu"
 
-  "msg_waiting_for_leader": "Esperando pelo líder"
+  "msg_waiting_for_leader": "Líder"
   "msg_you_died": "Você morreu."
   "msg_player_died": "<player> morreu."
   "msg_win": "Vitória! Frango no jantar!"
