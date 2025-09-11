@@ -113,7 +113,7 @@
   "btn_spectate": "Spectate"
   "btn_play_again": "Play Again"
   "btn_menu": "Menu"
-  "msg_waiting_for_leader": "Waiting for leader"
+  "msg_waiting_for_leader": "Leader"
   "msg_you_died": "You died."
   "msg_player_died": "<player> died."
   "msg_win": "Winner winner chicken dinner!"

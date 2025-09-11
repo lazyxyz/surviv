@@ -50,6 +50,11 @@
 
 #game-misc-stats {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  .minimap-container {
+    display: flex;
+  }
 }
 
 #minimap-border {
@@ -57,7 +62,7 @@
   display: inline-block;
   width: 220px;
   height: 220px;
-  margin-right: 5px;
+  margin-right: 6px;
 
   border: 10px solid palette.$transparent_bg;
   border-radius: 10px;
@@ -108,9 +113,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  border: none;
 
   border-radius: 6px;
-  padding: 6px 9px;
+  padding: 8px 9px;
   background-color: palette.$transparent_bg;
 
   @include variables.text-shadow;
@@ -257,16 +263,12 @@
 }
 
 #group-child {
-  position: absolute;
   display: flex;
-  right: 130px;
   justify-content: center;
   align-items: center;
   gap: 8px;
 
-  @media screen and (max-width: variables.$screen_large) {
-    right: 100px;
-  }
+  width: fit-content;
 
   #badges-container {
     display: flex;
@@ -276,22 +278,19 @@
     opacity: 0.7;
 
     .badge-image {
-      width: 36px;
-      height: 36px;
-      margin: 6px;
+      width: 32px;
+      height: 32px;
+      margin: 5px;
 
       @media screen and (max-width: variables.$screen_large) {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
         margin: 4px;
       }
     }
   }
   #ui-kill-leader {
     display: flex;
-    top: 15px;
-    right: 245px;
-    margin-left: auto;
     width: max-content;
     background: palette.$transparent_bg;
     border-radius: 8px;
@@ -306,17 +305,13 @@
       border-radius: 4px;
     }
 
-    @media screen and (max-width: variables.$screen_medium) {
-      display: none;
-    }
-
     #kill-leader-leader-container {
       font-weight: bold;
-      font-size: 25px;
+      font-size: 20px;
       @include variables.text-shadow;
 
       .badge-icon {
-        width: 25px;
+        width: 20px;
         margin-left: 5px;
         margin-bottom: -4px;
       }
@@ -328,28 +323,19 @@
           width: 12px;
         }
       }
+      @media screen and (max-width: variables.$screen_xsmall) {
+        font-size: 12px;
+
+        .badge-icon {
+          width: 10px;
+        }
+      }
     }
   }
 }
 
 .ui-leaderboard {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-
-  @media screen and (max-width: variables.$screen_large) {
-    top: 5px;
-    right: 5px;
-  }
-
-  #counter-holder {
-    display: flex;
-    align-items: center;
-
-    @media screen and (max-width: variables.$screen_large) {
-      display: flex;
-    }
-  }
+  width: fit-content;
 
   #kill-counter {
     margin-right: 5px;
@@ -363,37 +349,31 @@
   }
 
   #kill-feed {
-    margin-right: 130px;
-    margin-top: 50px;
-    @media screen and (max-width: variables.$screen_large) {
-      margin-right: 100px;
-      margin-top: 32px;
-    }
-    @media screen and (max-width: variables.$screen_medium) {
-      scroll-margin-right: 5px;
-    }
-    @media screen and (max-width: variables.$screen_medium) and (max-height: 500px) {
-      margin-top: -40px;
-      margin-right: 80px;
-    }
     .kill-feed-item {
       left: 0px;
+      align-self: left;
       max-width: fit-content;
-      padding: 8px 10px 8px 10px;
-      margin: 5px 0 5px auto;
+      padding: 8px;
+      margin: 5px 0 5px 0;
       background: palette.$transparent_bg;
       border-radius: 4px;
       font-weight: 600;
-      position: relative;
+      font-size: 12px;
       display: flex;
       align-items: center;
       gap: 4px;
       @include variables.text-shadow;
-
       @media screen and (max-width: variables.$screen_large) {
         font-size: 12px;
         padding: 4px 5px 4px 5px;
-        margin: 3px 0 3px auto;
+        margin: 3px 0 3px 0;
+      }
+      @media screen and (max-width: variables.$screen_xsmall) {
+        font-size: 10px;
+        padding: 4px 5px 4px 5px;
+        margin: 3px 0 3px 0;
+        gap: 2px;
+        font-weight: 600;
       }
 
       .fa-solid {
@@ -925,8 +905,6 @@
 }
 
 #gas-and-debug {
-  margin-left: 5px;
-
   .hidden-prop {
     visibility: hidden;
   }
@@ -942,6 +920,10 @@
 
     @media screen and (max-width: variables.$screen_large) {
       font-size: 16px;
+    }
+
+    @media screen and (max-width: variables.$screen_xsmall) {
+      font-size: 12px;
     }
   }
 }
@@ -1457,12 +1439,11 @@
   &-mobile {
     position: relative;
     display: flex;
-    gap: 6px;
+    gap: 4px;
 
     .card-scopes {
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.35);
       opacity: 0.35;
-      padding: 6px;
       border-radius: 100%;
 
       &.active {
@@ -1470,11 +1451,14 @@
       }
 
       @media screen and (max-width: variables.$screen_medium) {
-        font-size: 16px;
-      }
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        font-weight: 600;
 
-      @media screen and (max-width: variables.$screen_small) {
-        font-size: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
     }
   }
@@ -1564,15 +1548,15 @@
     transform: translate(-50%, -50%);
   }
 
-    @media screen and (max-width: variables.$screen_medium) {
-      width: 228px;
-      height: 228px;
+  @media screen and (max-width: variables.$screen_medium) {
+    width: 228px;
+    height: 228px;
 
-      > div {
-        width: 58px;
-        height: 58px;
-      }
+    > div {
+      width: 58px;
+      height: 58px;
     }
+  }
 }
 
 #emote-wheel-highlight,
@@ -1751,7 +1735,6 @@
   }
 }
 
-#btn-game-menu,
 .emotes-container,
 .inventory-items,
 #scopes-container-mobile,
@@ -1848,7 +1831,8 @@
   bottom: 5px;
   right: 5px;
   gap: 6px;
-  
+  border: none;
+
   display: none;
   justify-content: center;
   align-items: center;
@@ -1863,15 +1847,18 @@
     width: 16px;
     height: 16px;
   }
-  
+
   @media screen and (max-width: variables.$screen_medium) {
     display: flex;
   }
 }
 
 #btn-game-menu {
-  position: relative;
+  position: absolute;
+  top: 8px;
+  left: 8px;
   display: none;
+  z-index: 1002;
 
   @media screen and (max-width: variables.$screen_medium) {
     display: block;

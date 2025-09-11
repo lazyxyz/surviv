@@ -606,7 +606,7 @@ function setupMobileControls(game: Game): void {
             inputManager.addAction(game.uiManager.action.active ? InputActions.Cancel : InputActions.Interact);
         });
         ui.interactKey.html('<img src="./img/misc/tap-icon.svg" alt="Tap">');
-        ui.activeAmmo.on("click", () => GAME_CONSOLE.handleQuery("reload", "never"));
+        ui.weaponClipAmmo.on("click", () => GAME_CONSOLE.handleQuery("reload", "never"));
         ui.emoteWheel.css("top", "50%").css("left", "50%");
         ui.menuButton.on("click", () => ui.gameMenu.fadeToggle(250));
 
@@ -768,6 +768,18 @@ function setupInventorySlots(game: Game): void {
                     html`<div class="inventory-items-card inventory-items-medicals-card" id="${item.idString}-slot">
                         <img class="item-image" src="./img/game/shared/loot/${item.idString}.svg" draggable="false">
                         <span class="item-count" id="${item.idString}-count">0</span>
+                         <div class="item-tooltip">
+                            ${getTranslatedString(
+                            'tt_restores',
+                            {
+                                item: `<b>${getTranslatedString(item.idString as TranslationKeys)}</b><br>`,
+                                amount: item.restoreAmount.toString(),
+                                type: item.healType === HealType.Adrenaline
+                                    ? getTranslatedString("adrenaline")
+                                    : getTranslatedString("health"),
+                                desc: getTranslatedString(`${item.idString}_desc` as TranslationKeys)
+                            })}
+                        </div>
                     </div>`
                 );
 
