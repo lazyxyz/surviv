@@ -4,7 +4,6 @@ import { halfπ, τ } from "@common/utils/math";
 import { NullString, type ObjectDefinition, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { weightedRandom } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
-import { Config } from "../config";
 
 export const Logger = {
     log(...message: string[]): void {
@@ -25,16 +24,19 @@ function internalLog(...message: string[]): void {
 }
 
 export function cleanUsername(name?: string | null): string {
-    return (
-        !name?.length
-        // this rule is stupid
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-        || name.length > Constants.PLAYER_NAME_MAX_LENGTH
-        || Config.protection?.usernameFilters?.some((regex: RegExp) => regex.test(name))
-        || /[^\x20-\x7E]/g.test(name) // extended ASCII chars
-    )
-        ? GameConstants.player.defaultName
-        : name;
+    if (!name?.length || /[^\x20-\x7E]/g.test(name)) {
+        return GameConstants.player.defaultName;
+    }
+
+    const uppercaseCount = (name.match(/[A-Z]/g) || []).length;
+    let maxLength = Constants.PLAYER_NAME_MAX_LENGTH as number;
+    if (uppercaseCount >= 6) {
+        maxLength = 10;
+    } else if (uppercaseCount >= 1) {
+        maxLength = 14;
+    }
+
+    return name.length > maxLength ? name.slice(0, maxLength) : name;
 }
 
 export function getRandomIDString<
