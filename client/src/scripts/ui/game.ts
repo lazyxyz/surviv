@@ -606,7 +606,7 @@ function setupMobileControls(game: Game): void {
             inputManager.addAction(game.uiManager.action.active ? InputActions.Cancel : InputActions.Interact);
         });
         ui.interactKey.html('<img src="./img/misc/tap-icon.svg" alt="Tap">');
-        ui.activeAmmo.on("click", () => GAME_CONSOLE.handleQuery("reload", "never"));
+        ui.weaponClipAmmo.on("click", () => GAME_CONSOLE.handleQuery("reload", "never"));
         ui.emoteWheel.css("top", "50%").css("left", "50%");
         ui.menuButton.on("click", () => ui.gameMenu.fadeToggle(250));
 
