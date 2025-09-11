@@ -201,6 +201,29 @@
       };
     }
 
+    // Fetch primary domain for a wallet address
+    async function fetchPrimaryDomain(walletAddress) {
+      if (!walletAddress) return null;
+      try {
+        // Create a timeout promise that rejects after 500ms
+        const timeout = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Request timed out')), 500);
+        });
+
+        // Race the fetch call against the timeout
+        const response = await Promise.race([
+          fetch(`https://api.somnia.domains/api/primary-domain/${encodeURIComponent(walletAddress)}`),
+          timeout
+        ]);
+
+        if (!response.ok) throw new Error('Failed to fetch domain');
+        const data = await response.json();
+        return data.hasPrimary ? data.primaryDomain : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
     const pageInput = document.querySelector('.input-pagination');
     const prevButton = document.getElementById('prev-page');
     const nextButton = document.getElementById('next-page');
@@ -243,9 +266,8 @@
       const button = document.createElement('button');
       // Highlight selected season with yellow background and border
       const isSelected = selectedSeason && s.id.toLowerCase() === selectedSeason.id.toLowerCase();
-      button.className = `btn-darken flex p-1 pl-2 pr-4 items-center justify-center gap-1 rounded-[10px] m-auto ${
-        isSelected ? 'bg-yellow-400/20 border border-yellow-400/60 text-yellow-300' : ''
-      }`;
+      button.className = `btn-darken flex p-1 pl-2 pr-4 items-center justify-center gap-1 rounded-[10px] m-auto ${isSelected ? 'bg-yellow-400/20 border border-yellow-400/60 text-yellow-300' : ''
+        }`;
 
       button.id = `season-${s.id.toLowerCase()}-button`;
       button.innerHTML = `
@@ -298,7 +320,7 @@
     }
 
     // Helper to create a leaderboard row
-    function createRow(player, rankNumber, uniqueKey, highlight = false) {
+    function createRow(player, rankNumber, uniqueKey, highlight = false, domain = null) {
       const row = document.createElement('div');
       row.className = 'leaderboard-body-row';
 
@@ -310,19 +332,20 @@
       const rate = games > 0 ? ((solo + squad) / games).toFixed(2) : '0.00';
 
       const addr = (player.player || '').toString();
+      const displayName = domain || shortenAddress(addr);
       row.innerHTML = `
-            <div class="w-[80px] h-[48px]" id="row-child">${rankNumber}</div>
-            <div class="w-[350px] h-[48px]" id="row-child">
-              ${shortenAddress(addr)}
-              <i id="copy-address-${uniqueKey}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i>
-            </div>
-            <div class="w-[160px] h-[48px]" id="row-child">${total}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${solo}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${squad}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${social}</div>
-            <div class="w-[110px] h-[48px]" id="row-child">${games}</div>
-            <div class="w-[100px] h-[48px]" id="row-child">${rate}</div>
-          `;
+        <div class="w-[80px] h-[48px]" id="row-child">${rankNumber}</div>
+        <div class="w-[350px] h-[48px]" id="row-child">
+          ${displayName}
+          <i id="copy-address-${uniqueKey}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i>
+        </div>
+        <div class="w-[160px] h-[48px]" id="row-child">${total}</div>
+        <div class="w-[160px] h-[48px]" id="row-child">${solo}</div>
+        <div class="w-[160px] h-[48px]" id="row-child">${squad}</div>
+        <div class="w-[160px] h-[48px]" id="row-child">${social}</div>
+        <div class="w-[110px] h-[48px]" id="row-child">${games}</div>
+        <div class="w-[100px] h-[48px]" id="row-child">${rate}</div>
+      `;
 
       // Copy-to-clipboard handler
       const copyIcon = row.querySelector(`#copy-address-${CSS.escape(uniqueKey)}`);
@@ -367,7 +390,10 @@
         const res = await fetch(url);
         if (!res.ok) throw new Error('playerPoints request failed');
         const data = await res.json();
-        return normalizePlayer(data?.data || data?.playerPoints || data, address);
+        const playerData = normalizePlayer(data?.data || data?.playerPoints || data, address);
+        // Fetch domain for the pinned player
+        playerData.domain = await fetchPrimaryDomain(address);
+        return playerData;
       } catch (e) {
         console.warn('Failed to fetch player points:', e);
         return null;
@@ -432,19 +458,18 @@
           return;
         }
 
+        // Fetch domains for all players on the current page (lazy loading)
+        const domainPromises = players.map(player => fetchPrimaryDomain(player.player));
+        const domains = await Promise.all(domainPromises);
+
         players.forEach((player, index) => {
-          const row = document.createElement('div');
-          row.className = 'leaderboard-body-row';
-          row.innerHTML = `
-            <div class="w-[110px] h-[48px]" id="row-child">${(page - 1) * limit + index + 1}</div>
-            <div class="w-[320px] h-[48px]" id="row-child">${shortenAddress(player.player)}<i id="copy-address-${index}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i></div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.totalPoints}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.soloPoints}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.squadPoints}</div>
-            <div class="w-[160px] h-[48px]" id="row-child">${player.socialPoints || 0}</div>
-            <div class="w-[110px] h-[48px]" id="row-child">${player.games}</div>
-            <div class="w-[100px] h-[48px]" id="row-child">${player.games > 0 ? ((player.soloPoints + player.squadPoints) / player.games).toFixed(2) : '0.00'}</div>
-          `;
+          const row = createRow(
+            normalizePlayer(player),
+            (page - 1) * limit + index + 1,
+            index,
+            (player.player || '').toLowerCase() === myAddress,
+            domains[index]
+          );
           leaderboardBody.appendChild(row);
         });
 
@@ -453,11 +478,13 @@
           const myData = await fetchMyPlayerPoints(myPublicKey, seasonConfig);
           if (myData) {
             // Determine rank based on current page if present; otherwise show "—"
-            const rankNumber = players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) >= 0 ? (page - 1) * limit + players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) + 1 : '—';
+            const rankNumber = players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) >= 0
+              ? (page - 1) * limit + players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) + 1
+              : '—';
 
             // Replace the prompt (if any) with the pinned row
             myRankingContainer.innerHTML = '';
-            const pinned = createRow(myData, rankNumber, `my-${page}`, true);
+            const pinned = createRow(myData, rankNumber, `my-${page}`, true, myData.domain);
             addYouBadgeToRow(pinned);
             myRankingContainer.appendChild(pinned);
           }

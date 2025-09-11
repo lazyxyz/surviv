@@ -2,9 +2,8 @@ import $ from "jquery";
 import { createDropdown } from "../uiHelpers";
 import { WalletType, parseJWT, shorten } from "../utils/constants";
 import type { Account } from "../account";
-import { errorAlert, warningAlert } from "../modal";
+import { errorAlert } from "../modal";
 import { getWalletConnectProvider } from "./walletConnect";
-import { ethers } from "ethers";
 
 const walletPriority = [
     WalletType.MetaMask,

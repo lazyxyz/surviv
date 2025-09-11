@@ -22,6 +22,7 @@ import { abi as seasonRewardsABI } from "@common/abis/INFTDistribution.json";
 import { errorAlert } from "./modal";
 import { resetPlayButtons } from "./ui/home";
 import { ChainConfig } from "../config";
+import { GAME_CONSOLE } from "..";
 
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
 const SURVIV_BASE_ADDRESS = SurvivMapping.SurvivBase.address;
@@ -264,6 +265,8 @@ export class Account extends EIP6963 {
             localStorage.setItem(PUBLIC_KEY, accounts[0]);
             localStorage.setItem(ACCESS_TOKEN, data.token);
             localStorage.setItem(SELECTOR_WALLET, getProvider.info.name);
+            const userName = await this.getPrimaryDomain();
+            GAME_CONSOLE.setBuiltInCVar("cv_player_name", userName);
         }
 
         // Visible elements
@@ -275,6 +278,29 @@ export class Account extends EIP6963 {
             resetPlayButtons();
         }
     }
+
+    async getPrimaryDomain(): Promise<string> {
+        if (!this.address) return "";
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 500);
+
+        try {
+            const response = await fetch(
+                `https://api.somnia.domains/api/primary-domain/${encodeURIComponent(this.address)}`,
+                { signal: controller.signal }
+            );
+
+            if (!response.ok) throw new Error(`Failed to fetch domain: ${response.status}`);
+            const data: { hasPrimary: boolean; primaryDomain?: string } = await response.json();
+            return data.hasPrimary ? data.primaryDomain ?? "" : "";
+        } catch (e) {
+            return "";
+        } finally {
+            clearTimeout(timeoutId);
+        }
+    }
+
 
     async eventListener(): Promise<void> {
         const getProvider = this.provider;
@@ -517,108 +543,108 @@ export class Account extends EIP6963 {
         }
     }
 
-   /**
- * Fetches and validates available rewards for the authenticated user.
- * @returns A promise resolving to valid crates and signatures.
- * @throws Error if the API request fails or no valid rewards are found.
- */
-async getValidRewards(): Promise<ValidRewards> {
-    if (!this.token) {
-        throw new Error('Authentication token is missing');
-    }
-
-    if (!this.provider?.provider) {
-        throw new Error('Web3 provider not initialized');
-    }
-
-    // Set fetch timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    try {
-        // Fetch available crates
-        const response = await fetch(`${this.api}/api/getValidRewards`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.token}`,
-            },
-            signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-        const data: ClaimResponse = await response.json();
-
-        if (!data.success || !data.claims?.length) {
-            throw new Error('No valid crates found');
+    /**
+  * Fetches and validates available rewards for the authenticated user.
+  * @returns A promise resolving to valid crates and signatures.
+  * @throws Error if the API request fails or no valid rewards are found.
+  */
+    async getValidRewards(): Promise<ValidRewards> {
+        if (!this.token) {
+            throw new Error('Authentication token is missing');
         }
 
-        // Validate and format claims
-        const crates: Reward[] = [];
-        const signatures: string[] = [];
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
 
-        for (const claim of data.claims) {
-            if (!claim.reward?.to || !ethers.isAddress(claim.reward.to) || !Number.isInteger(claim.reward.amount) ||
-                !claim.reward.salt || !Number.isInteger(claim.reward.expiry) || !claim.signature) {
-                console.warn('Invalid claim data, skipping:', claim);
-                continue;
-            }
-            crates.push({
-                to: claim.reward.to,
-                tokenId: claim.reward.tokenId,
-                amount: Number(claim.reward.amount),
-                salt: claim.reward.salt,
-                expiry: Number(claim.reward.expiry),
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Fetch available crates
+            const response = await fetch(`${this.api}/api/getValidRewards`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`,
+                },
+                signal: controller.signal,
             });
-            signatures.push(claim.signature);
-        }
 
-        // Initialize contract
-        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-        const signer = await ethersProvider.getSigner();
-        const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
+            clearTimeout(timeoutId);
+            const data: ClaimResponse = await response.json();
 
-        // Batch check used signatures
-        const validIndices: number[] = [];
-        if (signatures.length > 0) {
-            try {
-                const isUsedResults: boolean[] = await contract.isUsedSignatures(signatures);
-                isUsedResults.forEach((isUsed, index) => {
-                    if (!isUsed) {
-                        validIndices.push(index);
-                    }
+            if (!data.success || !data.claims?.length) {
+                throw new Error('No valid crates found');
+            }
+
+            // Validate and format claims
+            const crates: Reward[] = [];
+            const signatures: string[] = [];
+
+            for (const claim of data.claims) {
+                if (!claim.reward?.to || !ethers.isAddress(claim.reward.to) || !Number.isInteger(claim.reward.amount) ||
+                    !claim.reward.salt || !Number.isInteger(claim.reward.expiry) || !claim.signature) {
+                    console.warn('Invalid claim data, skipping:', claim);
+                    continue;
+                }
+                crates.push({
+                    to: claim.reward.to,
+                    tokenId: claim.reward.tokenId,
+                    amount: Number(claim.reward.amount),
+                    salt: claim.reward.salt,
+                    expiry: Number(claim.reward.expiry),
                 });
-            } catch (error) {
-                console.warn('Failed to check signatures in batch:', error);
-                // Fallback to checking signatures individually
-                for (let i = 0; i < signatures.length; i++) {
-                    try {
-                        const isUsed = await contract.isUsedSignature(signatures[i]);
+                signatures.push(claim.signature);
+            }
+
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+            const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
+
+            // Batch check used signatures
+            const validIndices: number[] = [];
+            if (signatures.length > 0) {
+                try {
+                    const isUsedResults: boolean[] = await contract.isUsedSignatures(signatures);
+                    isUsedResults.forEach((isUsed, index) => {
                         if (!isUsed) {
-                            validIndices.push(i);
+                            validIndices.push(index);
                         }
-                    } catch (singleError) {
-                        console.warn(`Failed to check signature ${signatures[i]}:`, singleError);
+                    });
+                } catch (error) {
+                    console.warn('Failed to check signatures in batch:', error);
+                    // Fallback to checking signatures individually
+                    for (let i = 0; i < signatures.length; i++) {
+                        try {
+                            const isUsed = await contract.isUsedSignature(signatures[i]);
+                            if (!isUsed) {
+                                validIndices.push(i);
+                            }
+                        } catch (singleError) {
+                            console.warn(`Failed to check signature ${signatures[i]}:`, singleError);
+                        }
                     }
                 }
             }
+
+            const validCrates = validIndices.map(i => crates[i]);
+            const validSignatures = validIndices.map(i => signatures[i]);
+
+            // Remove invalid rewards
+            if (validIndices.length < signatures.length) {
+                const invalidSignatures = signatures.filter((_, i) => !validIndices.includes(i));
+                await this.removeRewards(invalidSignatures);
+            }
+
+            return { validCrates, validSignatures };
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            throw new Error(`Failed to get valid rewards: ${error.message || 'Unknown error'}`);
         }
-
-        const validCrates = validIndices.map(i => crates[i]);
-        const validSignatures = validIndices.map(i => signatures[i]);
-
-        // Remove invalid rewards
-        if (validIndices.length < signatures.length) {
-            const invalidSignatures = signatures.filter((_, i) => !validIndices.includes(i));
-            await this.removeRewards(invalidSignatures);
-        }
-
-        return { validCrates, validSignatures };
-    } catch (error: any) {
-        clearTimeout(timeoutId);
-        throw new Error(`Failed to get valid rewards: ${error.message || 'Unknown error'}`);
     }
-}
 
     /**
      * Updates reward signatures by removing specified signatures or all signatures for the user if none provided.
@@ -955,7 +981,7 @@ async getValidRewards(): Promise<ValidRewards> {
             return [];
         }
     }
-    
+
     async getSeasonRewards(season: string = "1"): Promise<SeasonRewardsData> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
