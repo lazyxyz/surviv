@@ -284,11 +284,9 @@ export class InputManager {
             let rightJoyStickUsed = false;
             let shootOnRelease = false;
 
-         leftJoyStick.on("move", (_, data: JoystickOutputData) => {
+            leftJoyStick.on("move", (_, data: JoystickOutputData) => {
                 // when you move, need remove emoteWheel
-                if (this.game.uiManager.ui.emoteWheel.css("display") !== 'none') {
-                    this.game.uiManager.ui.emoteWheel.hide();
-                }
+                this.game.uiManager.ui.emoteWheel.hide();
 
                 const movementAngle = -data.angle.radian;
 
@@ -310,9 +308,7 @@ export class InputManager {
 
             rightJoyStick.on("move", (_, data) => {
                 // when you attack, need remove emoteWheel
-                if (this.game.uiManager.ui.emoteWheel.css("display") !== 'none') {
-                    this.game.uiManager.ui.emoteWheel.hide();
-                }
+                this.game.uiManager.ui.emoteWheel.hide();
 
                 rightJoyStickUsed = true;
                 this.rotation = -Math.atan2(data.vector.y, data.vector.x);
