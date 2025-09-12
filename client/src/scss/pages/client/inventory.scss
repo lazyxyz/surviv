@@ -9,7 +9,7 @@
     padding: 6px;
 
     // this make joystick can work, because width items don't hide it
-    width: 0px; 
+    width: 0px;
     height: 100%;
 
     display: flex;
@@ -114,7 +114,7 @@
         }
 
         &:hover .item-tooltip {
-            opacity: 1;
+          opacity: 1;
         }
 
         @media screen and (max-width: variables.$screen_medium) {
@@ -212,6 +212,13 @@
         background: linear-gradient(90deg, #c4c4c473 25%, #17171780);
         outline: 2px solid #c4c4c473;
 
+        @media screen and (max-width: variables.$screen_medium) {
+          align-items: center;
+
+          width: 64px;
+          height: 34px;
+        }
+
         &.active {
           opacity: 1;
           animation: 0.25s ease-in-out active-pulse;
@@ -241,6 +248,11 @@
             width: 36px;
             height: 36px;
           }
+
+          @media screen and (max-width: variables.$screen_medium) {
+            width: 24px;
+            height: 24px;
+          }
         }
 
         .item-name {
@@ -250,7 +262,7 @@
           font-weight: bold;
 
           @media screen and (max-width: variables.$screen_medium) {
-            font-size: 10px;
+            font-size: 9px;
           }
         }
 
@@ -280,13 +292,6 @@
               display: none;
             }
           }
-        }
-
-        @media screen and (max-width: variables.$screen_medium) {
-          align-items: center;
-
-          width: 96px;
-          height: 40px;
         }
       }
 

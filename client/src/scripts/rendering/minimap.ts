@@ -129,7 +129,7 @@ export class Minimap {
 
         this.sprite.eventMode = "static";
 
-        this.sprite.on("pointerdown", e => {  
+        this.sprite.on("pointerdown", e => {
             if (this.game.inputManager.isMobile) {
                 if (!this.game.inputManager.pingWheelActive) return;
 
@@ -138,12 +138,12 @@ export class Minimap {
                     $(document).one("click", (event) => {
                         // 1. click outside wheel
                         if (!$(event.target).closest(this.game.uiManager.ui.emoteWheel).length) {
-                            this.game.uiManager.ui.emoteWheel.hide();                            
+                            this.game.uiManager.ui.emoteWheel.hide();
                         }
 
                         // 2. click button X
                         if ($(event.target).closest(".button-center").length) {
-                            this.game.uiManager.ui.emoteWheel.hide();                            
+                            this.game.uiManager.ui.emoteWheel.hide();
                         }
                     })
 
@@ -151,24 +151,24 @@ export class Minimap {
 
                     return;
                 }
-                
+
                 // handle show emoteWheel
                 {
                     const [mouseX, mouseY] = [e.clientX, e.clientY]
-                    
+
                     this.game.uiManager.ui.emoteWheel.css({
                         left: `${mouseX}px`,
                         top: `${mouseY}px`,
                     }).show();
                 }
-                
+
                 this.game.inputManager.pingWheelPosition = this.sprite.toLocal(e);
                 this.game.inputManager.pingWheelMinimap = true;
                 this.isClickMobile = true;
 
                 return;
             }
-            
+
             this.game.inputManager.pingWheelPosition = this.sprite.toLocal(e);
             this.game.inputManager.pingWheelMinimap = true;
         });
@@ -684,7 +684,7 @@ export class Minimap {
 
     switchToBigMap(): void {
         this._expanded = true;
-        
+
         const ui = this.game.uiManager.ui;
         this.container.visible = true;
         this._borderContainer.hide();
@@ -723,7 +723,7 @@ export class Minimap {
 
         if (this.game.spectating) ui.spectatingContainer.show();
         const width = window.innerWidth;
-        if (width > 768) this._uiCache.killLeader.show();
+        if (width > 320) this._uiCache.killLeader.show();
 
         // We check again for the mobile spectating stuff due to a bug
         if (this.game.inputManager.isMobile && this.game.spectating && this._visible) {
