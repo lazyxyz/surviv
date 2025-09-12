@@ -162,7 +162,6 @@ export class UIManager {
 
     readonly ui = Object.freeze({
         loadingText: $<HTMLDivElement>("#loading-text"),
-        // cancelFindingGame: $<HTMLButtonElement>("#btn-cancel-finding-game"),
 
         ammoCounterContainer: $<HTMLDivElement>("#weapon-ammo-container"),
         activeAmmo: $<HTMLSpanElement>("#weapon-clip-ammo-count"),

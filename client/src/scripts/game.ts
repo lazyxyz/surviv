@@ -1007,14 +1007,7 @@ export class Game {
          */
         let bindChangeAcknowledged = false;
 
-        // same idea as above
-        const funnyDetonateButtonCache: {
-            bind?: string
-        } = {};
-
         // keep image thingy around to consult (and therefore lazily change) src
-        let detonateBindIcon: JQuery<HTMLImageElement> | undefined;
-
         return () => {
             if (!this.gameStarted || (this.gameOver && !this.spectating)) return;
             this.inputManager.update();
@@ -1025,6 +1018,7 @@ export class Game {
 
             const isAction = this.uiManager.action.active;
             const showCancel = isAction && !this.uiManager.action.fake;
+
             let canInteract = true;
 
             if (isAction) {
