@@ -1251,42 +1251,6 @@ export class Game {
                     }
                 }
             }
-
-            // funny detonate button stuff
-            const detonateKey = this.uiManager.ui.detonateKey;
-            if (!this.inputManager.isMobile) {
-                const boomBind: string | undefined = undefined;
-
-                if (funnyDetonateButtonCache.bind !== boomBind) {
-                    funnyDetonateButtonCache.bind = bind;
-
-                    if (boomBind !== undefined) {
-                        const bindImg = InputManager.getIconFromInputName(boomBind);
-
-                        detonateKey.show();
-
-                        if (bindImg === undefined) {
-                            detonateKey.text(boomBind ?? "");
-                            if (detonateBindIcon !== undefined) {
-                                detonateKey.empty();
-                                detonateBindIcon = undefined;
-                            }
-                        } else {
-                            if (detonateBindIcon === undefined) {
-                                detonateKey.children().add(detonateBindIcon = $(`<img src="${bindImg}" alt=${boomBind} />`));
-                            }
-
-                            if (detonateBindIcon.attr("src") !== bindImg) {
-                                detonateBindIcon.attr("src", bindImg);
-                            }
-                        }
-                    } else {
-                        detonateKey.hide();
-                    }
-                }
-            } else {
-                detonateKey.hide();
-            }
         };
     })();
 }

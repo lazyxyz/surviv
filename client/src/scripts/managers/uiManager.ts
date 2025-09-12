@@ -273,8 +273,6 @@ export class UIManager {
         createTeamPlayers: $<HTMLDivElement>("#create-team-players"),
         closeCreateTeam: $<HTMLButtonElement>("#close-create-team"),
 
-        detonateKey: $<HTMLDivElement>("#detonate-key"),
-
         inventoryMsg: $<HTMLSpanElement>("#inventory-message")
     });
 
