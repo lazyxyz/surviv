@@ -1017,7 +1017,8 @@ export class Game {
             if (!player) return;
 
             const isAction = this.uiManager.action.active;
-            const showCancel = isAction && !this.uiManager.action.fake;
+            // const showCancel = isAction && !this.uiManager.action.fake;
+            const showCancel = isAction && !this.uiManager.action.fake && !this.inputManager.isMobile;
 
             let canInteract = true;
 
