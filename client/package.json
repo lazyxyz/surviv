@@ -9,7 +9,9 @@
     "build": "vite build",
     "dev": "vite",
     "preview": "vite preview",
-    "start": "sirv dist --no-clear -p 3000"
+    "start": "sirv dist --no-clear -p 3000",
+    "clean:sprites": "rm -rf .spritesheet-cache-* node_modules/.vite dist",
+    "dev:clean": "pnpm run clean:sprites && pnpm dev"
   },
   "keywords": [
     "nodejs",
