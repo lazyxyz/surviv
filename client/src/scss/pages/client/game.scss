@@ -351,7 +351,7 @@
           width: 12px;
         }
       }
-      @media screen and (max-width: variables.$screen_xsmall) {
+      @media screen and (max-width: variables.$screen_medium) {
         font-size: 12px;
 
         .badge-icon {
@@ -398,7 +398,7 @@
         padding: 4px 5px 4px 5px;
         margin: 3px 0 3px 0;
       }
-      @media screen and (max-width: variables.$screen_xsmall) {
+      @media screen and (max-width: variables.$screen_medium) {
         font-size: 8px;
         padding: 4px 5px 4px 5px;
         margin: 3px 0 3px 0;
@@ -986,11 +986,24 @@
     width: 220px;
     bottom: 60px;
     font-size: 12px;
+    padding: 6px;
 
     .badge-icon {
       width: 14px;
       margin-bottom: -3px;
       margin-left: 2px;
+    }
+  }
+
+  @media screen and (max-width: variables.$screen_medium) {
+    width: 180px;
+    bottom: 75px;
+    font-size: 10px;
+
+    .badge-icon {
+      width: 10px;
+      margin-bottom: -2px;
+      margin-left: 1px;
     }
   }
 
@@ -1008,6 +1021,9 @@
 
     @media screen and (max-width: variables.$screen_large) {
       font-size: 22px;
+    }
+    @media screen and (max-width: variables.$screen_medium) {
+      font-size: 14px;
     }
   }
 }
