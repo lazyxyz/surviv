@@ -1007,14 +1007,7 @@ export class Game {
          */
         let bindChangeAcknowledged = false;
 
-        // same idea as above
-        const funnyDetonateButtonCache: {
-            bind?: string
-        } = {};
-
         // keep image thingy around to consult (and therefore lazily change) src
-        let detonateBindIcon: JQuery<HTMLImageElement> | undefined;
-
         return () => {
             if (!this.gameStarted || (this.gameOver && !this.spectating)) return;
             this.inputManager.update();
@@ -1025,6 +1018,7 @@ export class Game {
 
             const isAction = this.uiManager.action.active;
             const showCancel = isAction && !this.uiManager.action.fake;
+
             let canInteract = true;
 
             if (isAction) {
@@ -1250,42 +1244,6 @@ export class Game {
                         this.inputManager.addAction(InputActions.Interact);
                     }
                 }
-            }
-
-            // funny detonate button stuff
-            const detonateKey = this.uiManager.ui.detonateKey;
-            if (!this.inputManager.isMobile) {
-                const boomBind: string | undefined = undefined;
-
-                if (funnyDetonateButtonCache.bind !== boomBind) {
-                    funnyDetonateButtonCache.bind = bind;
-
-                    if (boomBind !== undefined) {
-                        const bindImg = InputManager.getIconFromInputName(boomBind);
-
-                        detonateKey.show();
-
-                        if (bindImg === undefined) {
-                            detonateKey.text(boomBind ?? "");
-                            if (detonateBindIcon !== undefined) {
-                                detonateKey.empty();
-                                detonateBindIcon = undefined;
-                            }
-                        } else {
-                            if (detonateBindIcon === undefined) {
-                                detonateKey.children().add(detonateBindIcon = $(`<img src="${bindImg}" alt=${boomBind} />`));
-                            }
-
-                            if (detonateBindIcon.attr("src") !== bindImg) {
-                                detonateBindIcon.attr("src", bindImg);
-                            }
-                        }
-                    } else {
-                        detonateKey.hide();
-                    }
-                }
-            } else {
-                detonateKey.hide();
             }
         };
     })();

@@ -1,6 +1,6 @@
 ## About
 
-Fully On-Chain Web3 2D Battle Royale Game Inspired by [suroi.io](https://github.com/HasangerGames/suroi) and [surviv.io](https://survivio.fandom.com/wiki/Surviv.io_Wiki).
+A Web3 2D Battle Royale Game Inspired by [suroi.io](https://github.com/HasangerGames/suroi) and [surviv.io](https://survivio.fandom.com/wiki/Surviv.io_Wiki).
 
 ## Play the game!
 
