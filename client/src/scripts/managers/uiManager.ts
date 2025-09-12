@@ -1232,7 +1232,7 @@ export class UIManager {
             removeAnimation.onfinish = () => {
                 killFeedItem.remove();
             };
-        }, 7000);
+        }, 3000);
     }
 
     private _getKillFeedElements(): Array<{
