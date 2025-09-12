@@ -351,7 +351,7 @@
           width: 12px;
         }
       }
-      @media screen and (max-width: variables.$screen_xsmall) {
+      @media screen and (max-width: variables.$screen_medium) {
         font-size: 12px;
 
         .badge-icon {
@@ -398,7 +398,7 @@
         padding: 4px 5px 4px 5px;
         margin: 3px 0 3px 0;
       }
-      @media screen and (max-width: variables.$screen_xsmall) {
+      @media screen and (max-width: variables.$screen_medium) {
         font-size: 8px;
         padding: 4px 5px 4px 5px;
         margin: 3px 0 3px 0;
@@ -464,6 +464,12 @@
   transform: translate(-50%, -50%);
   z-index: 1;
 
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+
   #action-timer {
     position: relative;
     top: -10%;
@@ -489,6 +495,7 @@
     background: palette.$transparent_bg;
     @include variables.text-shadow;
 
+    display: flex;
     text-align: center;
     align-items: center;
     justify-content: center;
@@ -497,6 +504,14 @@
     padding: 10px;
 
     font-size: 20px;
+    width: fit-content;
+
+    @media screen and (max-width: variables.$screen_medium) {
+      opacity: 65%;
+      font-size: 14px;
+      padding: 6px 10px;
+      border-radius: 4px;
+    }
   }
 }
 
@@ -504,12 +519,20 @@
   position: absolute;
   top: 60%;
   left: 50%;
-  text-align: center;
   vertical-align: middle;
   transform: translateX(-50%);
   background-color: palette.$transparent_bg;
   padding: 8px;
-  border-radius: 5px;
+  border-radius: 8px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
+  @media screen and (max-height: variables.$screen_medium) {
+    opacity: 65%;
+  }
 }
 
 #interact-key {
@@ -531,11 +554,26 @@
   padding: 2px 4px;
   margin-right: 3px;
   white-space: nowrap;
+
+  @media screen and (max-height: variables.$screen_medium) {
+    width: 20px;
+    height: 20px;
+    font-size: 16px;
+    padding: 4px;
+    margin-right: 2px;
+  }
 }
 
 #interact-text {
+  text-align: center;
   font-size: 20px;
+  font-weight: 600;
   @include variables.text-shadow;
+
+  @media screen and (max-height: variables.$screen_medium) {
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
 }
 
 #interact-key.active + #interact-text {
@@ -948,11 +986,24 @@
     width: 220px;
     bottom: 60px;
     font-size: 12px;
+    padding: 6px;
 
     .badge-icon {
       width: 14px;
       margin-bottom: -3px;
       margin-left: 2px;
+    }
+  }
+
+  @media screen and (max-width: variables.$screen_medium) {
+    width: 180px;
+    bottom: 75px;
+    font-size: 10px;
+
+    .badge-icon {
+      width: 10px;
+      margin-bottom: -2px;
+      margin-left: 1px;
     }
   }
 
@@ -970,6 +1021,9 @@
 
     @media screen and (max-width: variables.$screen_large) {
       font-size: 22px;
+    }
+    @media screen and (max-width: variables.$screen_medium) {
+      font-size: 14px;
     }
   }
 }
