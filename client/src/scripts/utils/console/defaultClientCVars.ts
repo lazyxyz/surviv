@@ -183,7 +183,7 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
             archive: false
         }
     },
-    cv_minimap_transparency: 0.8,
+    cv_minimap_transparency: 0.5,
     cv_map_transparency: 0.9,
 
     cv_console_width: window.innerWidth / 2,
