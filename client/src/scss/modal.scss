@@ -38,6 +38,12 @@ $transition: all 0.3s ease;
   background-color: palette.$grass_bg;
   padding: 24px;
 
+  @media screen and (max-width: variables.$screen_xsmall) {
+    width: 100%;
+    gap: 12px;
+    padding: 16px;
+  }
+
   @include variables.mobile-device {
     width: 90%;
     gap: 12px;
@@ -52,6 +58,10 @@ $transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
   text-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+
+  @media screen and (max-width: variables.$screen_xsmall) {
+    font-size: 16px;
+  }
 }
 
 .minted-items-body {
@@ -76,6 +86,12 @@ $transition: all 0.3s ease;
   color: palette.$light; // Changed from $gray to contrast with $primary-bg
   transition: $transition;
 
+  @media screen and (max-width: variables.$screen_xsmall) {
+    top: 16px;
+    right: 16px;
+    font-size: 20px;
+  }
+
   &:hover {
     color: palette.$orange;
   }
@@ -96,8 +112,19 @@ $transition: all 0.3s ease;
     max-height: 220px;
   }
 
+  @media screen and (max-width: variables.$screen_xsmall) {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
   &::-webkit-scrollbar {
     width: 10px;
+
+    @media screen and (max-width: variables.$screen_xsmall) {
+      width: 5px;
+    }
 
     &-track {
       background: #ffffff35;
@@ -122,6 +149,12 @@ $transition: all 0.3s ease;
   background-repeat: no-repeat;
   background-position: center;
   background-size: 120px;
+
+  @media screen and (max-width: variables.$screen_xsmall) {
+    width: 100px;
+    height: 100px;
+    background-size: 100px;
+  }
 
   img {
     width: 100%;

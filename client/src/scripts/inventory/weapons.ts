@@ -154,7 +154,7 @@ const selectMelee = (weaponId: string) => {
   // Update weapon info panel
   const dps = melee.damage && melee.cooldown ? (melee.damage / (melee.cooldown / 1000)).toFixed(2) : "N/A";
   $("#weapon-info").html(`
-     <div class="weapon-title">${melee.name}${isUnowned ? ' <span style="color: #ffc107;font-size: 14px;">(Locked)</span>' : ''}</div>
+     <div class="weapon-title">${melee.name}${isUnowned ? ' <span class="weapon-title-state">(Locked)</span>' : ''}</div>
     <div class="row-stats">
       <div class="row-section">
               <p class="stat-type">DPS:</p>

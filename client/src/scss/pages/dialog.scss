@@ -540,6 +540,16 @@ input::-webkit-inner-spin-button {
     text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
   }
 
+  #crates-tab {
+    @media screen and (max-width: variables.$screen_xsmall) {
+      display: flex;
+      overflow: hidden;
+      overflow-x: auto;
+      width: fit-content;
+      gap: 4px;
+    }
+  }
+
   // Crate styles
   .crates-tab-child,
   .weapon-tab-child {
@@ -551,6 +561,11 @@ input::-webkit-inner-spin-button {
     border-radius: 8px;
     border: none;
     cursor: pointer;
+
+    @media screen and (max-width: variables.$screen_xsmall) {
+      padding: 8px 10px;
+    }
+
     &.active {
       box-shadow: inset 0px 0px 0px 2px palette.$orange;
     }
@@ -661,9 +676,13 @@ input::-webkit-inner-spin-button {
           opacity: 1;
         }
       }
-      .buy-now-btn,
-      .buy-crate-btn {
+      .buy-now-btn {
         opacity: 0.35;
+
+        @media screen and (max-width: variables.$screen_xsmall) {
+          font-size: 16px;
+          font-weight: 600;
+        }
       }
       .active {
         opacity: 1;
@@ -697,12 +716,21 @@ input::-webkit-inner-spin-button {
           width: 18px;
           height: 18px;
           accent-color: #f2770f;
+
+          @media screen and (max-width: variables.$screen_xsmall) {
+            width: 16px;
+            height: 16px;
+          }
         }
 
         p {
           align-self: center;
           font-size: 14px;
           font-weight: 500;
+
+          @media screen and (max-width: variables.$screen_xsmall) {
+            font-size: 12px;
+          }
         }
       }
     }
@@ -718,16 +746,32 @@ input::-webkit-inner-spin-button {
       background-color: #50722f;
       border-radius: 10px;
 
+      @media screen and (max-width: variables.$screen_xsmall) {
+        padding: 8px 8px 8px 12px;
+
+        gap: 10px;
+      }
+
       h3 {
         margin: 0px;
         font-size: 16px;
         font-weight: 500;
+
+        @media screen and (max-width: variables.$screen_xsmall) {
+          font-size: 12px;
+          font-weight: 600;
+        }
       }
       button {
         margin-top: 0px;
         height: 36px;
         text-align: center;
         font-size: 16px;
+
+        @media screen and (max-width: variables.$screen_xsmall) {
+          font-size: 12px;
+          font-weight: 600;
+        }
       }
       .open-now,
       #claim-btn,
@@ -778,6 +822,11 @@ input::-webkit-inner-spin-button {
       img {
         width: 100px;
         height: 100px;
+
+        @media screen and (max-width: variables.$screen_xsmall) {
+          width: 90px;
+          height: 90px;
+        }
       }
     }
   }
@@ -803,6 +852,12 @@ input::-webkit-inner-spin-button {
     overflow: hidden;
     width: 100%;
     transition: 300ms;
+
+    @media screen and (max-width: variables.$screen_xsmall) {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
     &:hover {
       overflow-y: auto;
     }
@@ -817,9 +872,20 @@ input::-webkit-inner-spin-button {
       padding: 12px;
       background-color: #73a246;
       border-radius: 14px;
+
+      @media screen and (max-width: variables.$screen_xsmall) {
+        border-radius: 8px;
+      }
+
       img {
         width: 72px;
         height: 72px;
+        border-radius: 8px;
+
+        @media screen and (max-width: variables.$screen_xsmall) {
+          width: 56px;
+          height: 56px;
+        }
       }
       h3 {
         margin: 0px;
@@ -828,14 +894,22 @@ input::-webkit-inner-spin-button {
         padding: 8px 12px;
         background: #608939;
         border-radius: 12px;
+
+        @media screen and (max-width: variables.$screen_xsmall) {
+          border-radius: 8px;
+        }
       }
       h5 {
         margin: 0px;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
         align-self: center;
         color: white;
         font-size: 14px;
+
+        @media screen and (max-width: variables.$screen_xsmall) {
+          font-size: 12px;
+        }
       }
     }
   }
@@ -851,6 +925,13 @@ input::-webkit-inner-spin-button {
 
     #claim-btn {
       margin-top: 0;
+      height: 36px;
+      text-align: center;
+      font-size: 16px;
+
+      @media screen and (max-width: variables.$screen_xsmall) {
+        font-weight: 600;
+      }
     }
   }
 
@@ -858,6 +939,13 @@ input::-webkit-inner-spin-button {
     display: flex;
     gap: 10px;
     height: 100%;
+  }
+
+  #emote-wheel-container {
+    @media screen and (max-width: variables.$screen_xsmall) {
+      display: flex;
+      gap: 8px;
+    }
   }
 
   #emote-customize-wheel {
@@ -879,6 +967,11 @@ input::-webkit-inner-spin-button {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+
+    @media screen and (max-width: variables.$screen_xsmall) {
+      flex-direction: column;
+      gap: 8px;
+    }
 
     .emote-win,
     .emote-death {
@@ -1131,6 +1224,10 @@ input::-webkit-inner-spin-button {
       padding: 12px;
       background: #0000002b;
       border-radius: 10px;
+      @media screen and (max-width: variables.$screen_xsmall) {
+        width: 60px;
+        height: 60px;
+      }
     }
   }
 
@@ -1144,6 +1241,17 @@ input::-webkit-inner-spin-button {
     background-repeat: no-repeat;
     background-position: center;
     background-size: 94px;
+
+    @media screen and (max-width: variables.$screen_xsmall) {
+      width: 60px;
+      height: 60px;
+      background-size: 60px;
+
+      img {
+        width: 48px;
+        height: auto; /* giữ tỉ lệ ảnh */
+      }
+    }
   }
 
   .weapons-container {
@@ -1176,6 +1284,11 @@ input::-webkit-inner-spin-button {
       font-size: 12px;
       font-weight: bold;
       margin: unset;
+
+      @media screen and (max-width: variables.$screen_xsmall) {
+        font-size: 9px;
+        font-weight: 600;
+      }
     }
 
     // left
@@ -1245,8 +1358,8 @@ input::-webkit-inner-spin-button {
       }
 
       .emotes-list-item {
-        width: 42px;
-        height: 42px;
+        width: 64px;
+        height: 64px;
         background-size: contain;
       }
     }
@@ -1286,32 +1399,32 @@ input::-webkit-inner-spin-button {
 
   @media screen and (max-width: 530px) {
     #emote-customize-wheel {
-      width: 143px;
-      height: 143px;
+      width: 165px;
+      height: 165px;
 
       & > div {
         width: 42px;
         height: 42px;
       }
-
+      // top: 7px; left: 51px;
       .emote-top {
-        top: 7px;
-        left: 51px;
+        top: 0px;
+        left: 80px;
       }
 
       .emote-right {
-        right: 7px;
-        top: 51px;
+        right: 0px;
+        top: 80px;
       }
 
       .emote-bottom {
-        bottom: 7px;
-        left: 51px;
+        bottom: 0px;
+        left: 80px;
       }
 
       .emote-left {
-        left: 7px;
-        top: 51px;
+        left: 0px;
+        top: 80px;
       }
     }
   }
@@ -1377,17 +1490,13 @@ input::-webkit-inner-spin-button {
 
   #customize-tab-bar .tab {
     @include variables.text-shadow;
-    padding-top: 7px;
+
+    @media screen and (max-width: variables.$screen_xsmall) {
+      height: 40px;
+    }
 
     &.active {
       background: #5b8939;
-    }
-
-    & > img {
-      position: relative;
-      top: 3px;
-      margin-right: 5px;
-      @include variables.drop-shadow;
     }
   }
 
