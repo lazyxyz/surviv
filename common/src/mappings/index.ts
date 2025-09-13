@@ -3,6 +3,8 @@ export { assetsMapping as SurvivKitsMapping } from "./SurvivKits";
 export { assetsMapping as SurvivBadgesMapping } from "./SurvivBages";
 export { assetsMapping as SurvivMapping } from "./Surviv";
 
+export const SURVIV_SHOP_VERSION = 2;
+
 export enum SurvivAssets {
     Skins,
     Emotes,

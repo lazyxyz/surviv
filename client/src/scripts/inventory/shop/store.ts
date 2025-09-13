@@ -5,8 +5,8 @@ import { successAlert, errorAlert, warningAlert } from "../../modal";
 import { ShopCache } from ".";
 import { GAME_CONSOLE } from "../../..";
 import { ChainConfig } from "../../../config";
+import { SURVIV_SHOP_VERSION } from "@common/mappings";
 
-const VERSION = 2;
 
 interface StoreItem {
     // balance: number;
@@ -28,7 +28,7 @@ async function fetchPrice(
 
     try {
         let price = "";
-        if (VERSION == 2) {
+        if (SURVIV_SHOP_VERSION == 2) {
             let actualPrice = await account.queryPriceV2(itemType);
             // Add 3% offset
             actualPrice = (actualPrice * 103n) / 100n;
@@ -70,7 +70,10 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
 
         // Fetch price asynchronously and update the UI
         fetchPrice(account, item.itemType).then(price => {
-            const formatted = parseFloat(formatEther(price)).toFixed(2);
+            const formatted = Number(formatEther(price)).toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
             $card.find(".price-placeholder").text(`${formatted} ${ChainConfig.nativeCurrency.symbol}`);
         });
     });
@@ -169,7 +172,7 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
             try {
                 const value = BigInt(ShopCache.assetsPrice[itemType]) * BigInt(amount);
 
-                if (VERSION == 2) {
+                if (SURVIV_SHOP_VERSION == 2) {
                     await account.buyItemsV2(itemType, amount, value);
                 } else {
                     await account.buyItems(itemType, amount, "NativeToken", value);
