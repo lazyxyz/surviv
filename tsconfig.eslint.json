@@ -17,7 +17,6 @@
   "include": [
     "common/src/**/*.ts",
     "client/src/**/*.ts",
-    "client/editor/src/**/*.ts",
     "client/vite/*.ts",
     "client/vite.config.ts",
     "client/postcss.config.js",

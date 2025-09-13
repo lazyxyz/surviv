@@ -8,6 +8,7 @@ import { errorAlert, successAlert, warningAlert } from "../modal";
 import { SurvivBadges, type Account } from "../account";
 import { GAME_CONSOLE } from "../..";
 import $ from "jquery";
+import { SURVIV_SHOP_VERSION } from "@common/mappings";
 
 export interface RegionInfo {
     readonly name: string;
@@ -45,8 +46,15 @@ async function handleBuyCard(account: Account): Promise<void> {
                 warningAlert("Please connect your wallet to continue.");
                 return;
             }
-            const price = await account.queryPrice(SurvivBadges.Cards, "NativeToken");
-            await account.buyItems(SurvivBadges.Cards, 1, "NativeToken", price);
+
+            if (SURVIV_SHOP_VERSION == 2) {
+                const price = await account.queryPriceV2(SurvivBadges.Cards);
+                await account.buyItemsV2(SurvivBadges.Cards, 1, price);
+            } else {
+                const price = await account.queryPrice(SurvivBadges.Cards, "NativeToken");
+                await account.buyItems(SurvivBadges.Cards, 1, "NativeToken", price);
+            }
+
             GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", "surviv_card");
             successAlert("Purchase successful!");
         } catch (err) {
