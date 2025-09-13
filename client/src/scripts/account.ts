@@ -18,6 +18,7 @@ import { abi as survivRewardsABI } from "@common/abis/ISurvivRewards.json";
 import { abi as crateBaseABI } from "@common/abis/ICrateBase.json";
 import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
+import { abi as survivShopV2ABI } from "@common/abis/ISurvivShopV2.json";
 import { abi as seasonRewardsABI } from "@common/abis/INFTDistribution.json";
 import { errorAlert } from "./modal";
 import { resetPlayButtons } from "./ui/home";
@@ -26,6 +27,7 @@ import { ChainConfig } from "../config";
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
 const SURVIV_BASE_ADDRESS = SurvivMapping.SurvivBase.address;
 const SURVIV_SHOP_ADDRESS = SurvivMapping.SurvivShop.address;
+const SURVIV_SHOPV2_ADDRESS = SurvivMapping.SurvivShopV2.address;
 
 export enum SurvivKits {
     Crates = "crate",
@@ -52,6 +54,12 @@ const saleMappings: Record<SaleItems, { address: string; assets: string[] }> = {
     [SurvivKits.Crates]: SurvivKitsMapping,
     [SurvivKits.Keys]: SurvivKitsMapping,
     [SurvivBadges.Cards]: SurvivBadgesMapping
+};
+
+const saleUSDPrices: Record<SaleItems, string> = {
+    [SurvivKits.Crates]: "2000000000000000000",
+    [SurvivKits.Keys]: "2000000000000000000",
+    [SurvivBadges.Cards]: "149000000000000000000"
 };
 
 export const PaymentTokens = {
@@ -517,108 +525,108 @@ export class Account extends EIP6963 {
         }
     }
 
-   /**
- * Fetches and validates available rewards for the authenticated user.
- * @returns A promise resolving to valid crates and signatures.
- * @throws Error if the API request fails or no valid rewards are found.
- */
-async getValidRewards(): Promise<ValidRewards> {
-    if (!this.token) {
-        throw new Error('Authentication token is missing');
-    }
-
-    if (!this.provider?.provider) {
-        throw new Error('Web3 provider not initialized');
-    }
-
-    // Set fetch timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    try {
-        // Fetch available crates
-        const response = await fetch(`${this.api}/api/getValidRewards`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.token}`,
-            },
-            signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-        const data: ClaimResponse = await response.json();
-
-        if (!data.success || !data.claims?.length) {
-            throw new Error('No valid crates found');
+    /**
+  * Fetches and validates available rewards for the authenticated user.
+  * @returns A promise resolving to valid crates and signatures.
+  * @throws Error if the API request fails or no valid rewards are found.
+  */
+    async getValidRewards(): Promise<ValidRewards> {
+        if (!this.token) {
+            throw new Error('Authentication token is missing');
         }
 
-        // Validate and format claims
-        const crates: Reward[] = [];
-        const signatures: string[] = [];
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
 
-        for (const claim of data.claims) {
-            if (!claim.reward?.to || !ethers.isAddress(claim.reward.to) || !Number.isInteger(claim.reward.amount) ||
-                !claim.reward.salt || !Number.isInteger(claim.reward.expiry) || !claim.signature) {
-                console.warn('Invalid claim data, skipping:', claim);
-                continue;
-            }
-            crates.push({
-                to: claim.reward.to,
-                tokenId: claim.reward.tokenId,
-                amount: Number(claim.reward.amount),
-                salt: claim.reward.salt,
-                expiry: Number(claim.reward.expiry),
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Fetch available crates
+            const response = await fetch(`${this.api}/api/getValidRewards`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`,
+                },
+                signal: controller.signal,
             });
-            signatures.push(claim.signature);
-        }
 
-        // Initialize contract
-        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-        const signer = await ethersProvider.getSigner();
-        const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
+            clearTimeout(timeoutId);
+            const data: ClaimResponse = await response.json();
 
-        // Batch check used signatures
-        const validIndices: number[] = [];
-        if (signatures.length > 0) {
-            try {
-                const isUsedResults: boolean[] = await contract.isUsedSignatures(signatures);
-                isUsedResults.forEach((isUsed, index) => {
-                    if (!isUsed) {
-                        validIndices.push(index);
-                    }
+            if (!data.success || !data.claims?.length) {
+                throw new Error('No valid crates found');
+            }
+
+            // Validate and format claims
+            const crates: Reward[] = [];
+            const signatures: string[] = [];
+
+            for (const claim of data.claims) {
+                if (!claim.reward?.to || !ethers.isAddress(claim.reward.to) || !Number.isInteger(claim.reward.amount) ||
+                    !claim.reward.salt || !Number.isInteger(claim.reward.expiry) || !claim.signature) {
+                    console.warn('Invalid claim data, skipping:', claim);
+                    continue;
+                }
+                crates.push({
+                    to: claim.reward.to,
+                    tokenId: claim.reward.tokenId,
+                    amount: Number(claim.reward.amount),
+                    salt: claim.reward.salt,
+                    expiry: Number(claim.reward.expiry),
                 });
-            } catch (error) {
-                console.warn('Failed to check signatures in batch:', error);
-                // Fallback to checking signatures individually
-                for (let i = 0; i < signatures.length; i++) {
-                    try {
-                        const isUsed = await contract.isUsedSignature(signatures[i]);
+                signatures.push(claim.signature);
+            }
+
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+            const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
+
+            // Batch check used signatures
+            const validIndices: number[] = [];
+            if (signatures.length > 0) {
+                try {
+                    const isUsedResults: boolean[] = await contract.isUsedSignatures(signatures);
+                    isUsedResults.forEach((isUsed, index) => {
                         if (!isUsed) {
-                            validIndices.push(i);
+                            validIndices.push(index);
                         }
-                    } catch (singleError) {
-                        console.warn(`Failed to check signature ${signatures[i]}:`, singleError);
+                    });
+                } catch (error) {
+                    console.warn('Failed to check signatures in batch:', error);
+                    // Fallback to checking signatures individually
+                    for (let i = 0; i < signatures.length; i++) {
+                        try {
+                            const isUsed = await contract.isUsedSignature(signatures[i]);
+                            if (!isUsed) {
+                                validIndices.push(i);
+                            }
+                        } catch (singleError) {
+                            console.warn(`Failed to check signature ${signatures[i]}:`, singleError);
+                        }
                     }
                 }
             }
+
+            const validCrates = validIndices.map(i => crates[i]);
+            const validSignatures = validIndices.map(i => signatures[i]);
+
+            // Remove invalid rewards
+            if (validIndices.length < signatures.length) {
+                const invalidSignatures = signatures.filter((_, i) => !validIndices.includes(i));
+                await this.removeRewards(invalidSignatures);
+            }
+
+            return { validCrates, validSignatures };
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            throw new Error(`Failed to get valid rewards: ${error.message || 'Unknown error'}`);
         }
-
-        const validCrates = validIndices.map(i => crates[i]);
-        const validSignatures = validIndices.map(i => signatures[i]);
-
-        // Remove invalid rewards
-        if (validIndices.length < signatures.length) {
-            const invalidSignatures = signatures.filter((_, i) => !validIndices.includes(i));
-            await this.removeRewards(invalidSignatures);
-        }
-
-        return { validCrates, validSignatures };
-    } catch (error: any) {
-        clearTimeout(timeoutId);
-        throw new Error(`Failed to get valid rewards: ${error.message || 'Unknown error'}`);
     }
-}
 
     /**
      * Updates reward signatures by removing specified signatures or all signatures for the user if none provided.
@@ -814,6 +822,39 @@ async getValidRewards(): Promise<ValidRewards> {
         }
     }
 
+
+    async buyItemsV2(item: SaleItems, amount: number, value: bigint): Promise<any> {
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
+        let itemAddress = saleMappings[item].address;
+        let itemIndex = saleMappings[item].assets.indexOf(item);
+        if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
+            throw new Error(`Invalid contract address or tokenId for ${item}`);
+        }
+
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+            const survivShopContract = new ethers.Contract(SURVIV_SHOPV2_ADDRESS, survivShopV2ABI, signer);
+
+            const tx = await survivShopContract.buyItems(itemAddress, itemIndex, amount, { value });
+            const receipt = await tx.wait();
+            clearTimeout(timeoutId);
+            return receipt;
+
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
+        }
+    }
+
     async queryPrice(
         item: SaleItems, // Use SaleItems key type ("Crates" | "Cards" | "Keys")
         paymentToken: PaymentTokenType // Use PaymentTokens key type ("NativeToken")
@@ -844,6 +885,41 @@ async getValidRewards(): Promise<ValidRewards> {
             clearTimeout(timeoutId);
             return price;
         } catch (error: any) {
+            clearTimeout(timeoutId);
+            throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
+        }
+    }
+
+    async queryPriceV2(
+        item: SaleItems, // Use SaleItems key type ("Crates" | "Cards" | "Keys")
+    ): Promise<any> {
+        if (!this.provider?.provider) {
+            throw new Error('Web3 provider not initialized');
+        }
+
+        let itemValue = saleMappings[item];
+        let itemAddress = itemValue.address;
+
+        let itemIndex = itemValue.assets.indexOf(item);
+        if (!ethers.isAddress(itemValue.address) || itemIndex === -1) {
+            throw new Error(`Invalid contract address or tokenId for ${item}`);
+        }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Initialize contract
+            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            const signer = await ethersProvider.getSigner();
+            const survivShopContract = new ethers.Contract(SURVIV_SHOPV2_ADDRESS, survivShopV2ABI, signer);
+            const price = await survivShopContract.getPrice(itemAddress, itemIndex);
+
+            clearTimeout(timeoutId);
+            return price;
+        } catch (error: any) {
+            console.log("error: ", error);
             clearTimeout(timeoutId);
             throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
         }
@@ -955,7 +1031,7 @@ async getValidRewards(): Promise<ValidRewards> {
             return [];
         }
     }
-    
+
     async getSeasonRewards(season: string = "1"): Promise<SeasonRewardsData> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');

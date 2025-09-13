@@ -6,6 +6,8 @@ import { ShopCache } from ".";
 import { GAME_CONSOLE } from "../../..";
 import { ChainConfig } from "../../../config";
 
+const VERSION = 2;
+
 interface StoreItem {
     // balance: number;
     name: string;
@@ -25,9 +27,15 @@ async function fetchPrice(
     }
 
     try {
-        // console.log("itemType: ", itemType);
-        const price = await account.queryPrice(itemType, paymentToken);
-        // console.log("price: ", price);
+        let price = "";
+        if (VERSION == 2) {
+            let actualPrice = await account.queryPriceV2(itemType);
+            // Add 3% offset
+            actualPrice = (actualPrice * 103n) / 100n;
+            price = actualPrice.toString();
+        } else {
+            price = await account.queryPrice(itemType, paymentToken);
+        }
         ShopCache.assetsPrice[itemType] = price; // Cache the formatted price
         return price;
     } catch (err) {
@@ -62,7 +70,8 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
 
         // Fetch price asynchronously and update the UI
         fetchPrice(account, item.itemType).then(price => {
-            $card.find(".price-placeholder").text(`${formatEther(price)} ${ChainConfig.nativeCurrency.symbol}`);
+            const formatted = parseFloat(formatEther(price)).toFixed(2);
+            $card.find(".price-placeholder").text(`${formatted} ${ChainConfig.nativeCurrency.symbol}`);
         });
     });
 }
@@ -159,7 +168,12 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
             $buyButton.prop("disabled", true);
             try {
                 const value = BigInt(ShopCache.assetsPrice[itemType]) * BigInt(amount);
-                await account.buyItems(itemType, amount, "NativeToken", value);
+
+                if (VERSION == 2) {
+                    await account.buyItemsV2(itemType, amount, value);
+                } else {
+                    await account.buyItems(itemType, amount, "NativeToken", value);
+                }
                 // Update balance locally
                 const item = storeItems.find(item => item.itemType === itemType);
                 if (item) {
