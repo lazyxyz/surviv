@@ -1,44 +1,62 @@
 @use "../palette.scss";
+@use "../variables";
 
 .tab-bar {
-    user-select: none;
-    width: 140px;
-    flex-direction: column;
+  user-select: none;
+  width: 140px;
+  flex-direction: column;
+
+  @media screen and (max-width: variables.$screen_xsmall) {
+    width: 40px;
+  }
 }
 
 .tab {
-    background: none;
-    border: none;
-    outline: none;
-    padding: 10px;
-    cursor: pointer;
-    width: 140px;
-    text-align: left;
-    border-left: 2px solid transparent;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 10px;
+  cursor: pointer;
+  width: 140px;
+  text-align: left;
+  border-left: 3px solid transparent;
 
-    &.active {
-        border-color: palette.$orange;
-        background: palette.$transparent_bg;
-    }
+  @media screen and (max-width: variables.$screen_xsmall) {
+    display: flex;
+    flex-direction: column;
+    width: 40px;
+  }
 
-    i {
-        margin-right: 10px;
-        width: 15px;
-    }
+  &.active {
+    border-color: palette.$orange;
+    background: palette.$transparent_bg;
+  }
 
-    span, i {
-        pointer-events: none;
-    }
+  i {
+    margin-right: 10px;
+    width: 15px;
+  }
 
-    &:focus {
-        text-decoration: underline;
-        text-decoration-color: palette.$blue;
-        text-decoration-thickness: 3px;
-        text-underline-offset: 3px;
-    }
+  span,
+  i {
+    pointer-events: none;
+  }
+
+  &:focus {
+    text-decoration: underline;
+    text-decoration-color: palette.$blue;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 3px;
+  }
 }
 
 .tab-content {
-    border-radius: 10px;
-    padding: 10px;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.tab-child {
+  @media screen and (max-width: variables.$screen_xsmall) {
+    display: none;
+  }
 }

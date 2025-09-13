@@ -91,7 +91,7 @@
     settings_joystick_opacity: "Opacità del joystick"
 
     loadout_skins: "Skin"
-    "loadout_crates": "Crates"
+    "loadout_crates": "Shop"
     loadout_emotes: "Emote"
     loadout_crosshairs: "Mirini"
     loadout_badges: "Medaglie"
