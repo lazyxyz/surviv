@@ -9,7 +9,7 @@ export const assetsMapping = {
         "address": "0x8C546ABaeF038b70ae8836FF38954648C73bbe18"
     },
     "SurvivShopV2": {
-        "address": "0xbA09A324b5276d4F47CE703602F2f946B522329C"
+        "address": "0x340D2a8Bf561E6C018d0f2AbC70455fc3bCA07B4"
     },
     "NativeToken": {
         "address": "0x0000000000000000000000000000000000000000"
