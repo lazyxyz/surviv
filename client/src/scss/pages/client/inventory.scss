@@ -120,7 +120,7 @@
           }
         }
 
-        @media screen and (max-width: variables.$screen_large) {
+        @media screen and (min-width: variables.$screen_medium) {
           &:hover .item-tooltip {
             opacity: 1;
           }
