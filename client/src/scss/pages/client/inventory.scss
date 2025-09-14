@@ -108,16 +108,29 @@
 
           pointer-events: none;
 
-          @media screen and (max-width: variables.$screen_large) {
+          @media screen and (max-width: variables.$screen_medium) {
+            transform: translateY(100%);
+            bottom: -14px;
             font-size: 12px;
+          }
+          
+          @media screen and (max-width: variables.$screen_xsmall) {
+            transform: translateX(-100%);
+            left: -14px;
           }
         }
 
-        &:hover .item-tooltip {
-          opacity: 1;
+        @media screen and (max-width: variables.$screen_large) {
+          &:hover .item-tooltip {
+            opacity: 1;
+          }
         }
 
         @media screen and (max-width: variables.$screen_medium) {
+          &:active .item-tooltip {
+            opacity: 1;
+          }
+
           gap: 4px;
         }
       }
