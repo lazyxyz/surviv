@@ -1,6 +1,6 @@
 import $, { error } from "jquery";
 
-import { ACCESS_TOKEN, PUBLIC_KEY, SELECTOR_WALLET, shorten } from "./utils/constants";
+import { ACCESS_TOKEN, PUBLIC_KEY, SELECTOR_WALLET, SESSION_WALLETCONNECT, shorten, WalletType } from "./utils/constants";
 import { EIP6963, type Provider6963Props } from "./eip6963";
 import { ethers, toBeHex } from "ethers";
 
@@ -23,6 +23,8 @@ import { abi as seasonRewardsABI } from "@common/abis/INFTDistribution.json";
 import { errorAlert } from "./modal";
 import { resetPlayButtons } from "./ui/home";
 import { ChainConfig } from "../config";
+import {getWalletConnectInfo, getWalletConnectInit} from "./wallet/walletConnect";
+import type {EthereumProviderOptions} from "@walletconnect/ethereum-provider";
 
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
 const SURVIV_BASE_ADDRESS = SurvivMapping.SurvivBase.address;
@@ -148,6 +150,25 @@ export class Account extends EIP6963 {
         }
 
         if (getSelectorFromStorage?.length) {
+            if (getSelectorFromStorage === WalletType.WalletConnect) {
+                getWalletConnectInit({
+                    session: JSON.parse(localStorage.getItem(SESSION_WALLETCONNECT) as string) as EthereumProviderOptions['session'],
+                }).then(provider => {
+                    const parseProvider = {
+                        info: getWalletConnectInfo,
+                        accounts: provider.accounts,
+                        provider: provider as unknown as Provider6963Props['provider'],
+                    };
+
+                    // update providers
+                    {
+                        this.provider = parseProvider;
+                        this.providers.push(parseProvider);
+                    }
+                });
+                return
+            };
+
             this.provider = this.providers?.find(argument => argument.info.name === getSelectorFromStorage);
 
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -162,6 +183,7 @@ export class Account extends EIP6963 {
     disconnect(): void {
         // clear localStorage
         {
+            localStorage.removeItem(SESSION_WALLETCONNECT);
             localStorage.removeItem(ACCESS_TOKEN);
             localStorage.removeItem(PUBLIC_KEY);
             localStorage.removeItem(SELECTOR_WALLET);
@@ -257,9 +279,6 @@ export class Account extends EIP6963 {
             throw new Error(data.error || 'Signature verification failed');
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.eventListener();
-
         // Update field
         {
             this.address = accounts[0];
@@ -282,6 +301,9 @@ export class Account extends EIP6963 {
             $("#wallet-inactive").css("display", "none");
             resetPlayButtons();
         }
+
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        this.eventListener();
     }
 
     async eventListener(): Promise<void> {
@@ -302,18 +324,6 @@ export class Account extends EIP6963 {
 
         setTimeout(() => this.disconnect(), 1000);
     }
-
-    requestProvider(): void {
-        window.addEventListener("eip6963:announceProvider", event => {
-            const values = event["detail" as keyof Event] as unknown as Provider6963Props;
-
-            this.providers.push(values);
-        });
-
-        window.dispatchEvent(new Event("eip6963:requestProvider"));
-    }
-
-
 
     /**
      * Retrieves balances for all SurvivAssets, mapping token IDs to asset names and tiers.
