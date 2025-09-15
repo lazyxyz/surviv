@@ -1,8 +1,6 @@
-import { Badges } from "@common/definitions/badges";
 import { Loots } from "@common/definitions/loots";
 import { Numeric } from "@common/utils/math";
 import type { TranslationManifest, TranslationsManifest } from "../../translations/src/processTranslations";
-import { type Game } from "./scripts/game";
 import { defaultClientCVars } from "./scripts/utils/console/defaultClientCVars";
 import TRANSLATIONS_MANIFEST from "./translationsManifest.json";
 import { type TranslationKeys } from "./typings/translations";
@@ -26,12 +24,6 @@ export const TRANSLATIONS: {
         return defaultLanguage;
     },
     translations: {
-        hp18: {
-            name: "HP-18",
-            flag: "<img height=\"20\" src=\"./img/game/shared/weapons/hp18.svg\" />",
-            percentage: "HP-18%",
-            no_resize: true
-        }
     }
 };
 
@@ -49,6 +41,7 @@ export async function initTranslation(): Promise<void> {
         : defaultClientCVars.cv_language;
 
     selectedLanguage = GAME_CONSOLE.getBuiltInCVar("cv_language");
+    // console.log("selectedLanguage: ", selectedLanguage);
 
     const loadRightNow = (language: string, content: TranslationManifest): boolean => content.mandatory || language === selectedLanguage || language === defaultLanguage;
 

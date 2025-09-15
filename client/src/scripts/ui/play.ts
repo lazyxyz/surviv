@@ -311,23 +311,12 @@ async function connectToGame(data: GetGameResponse, gameAddress: string, game: G
     const { ui } = game.uiManager;
 
     if (!data.success) {
-        if (data.message) {
-            const reportID = data.reportID || "No report ID provided.";
-            const message = getTranslatedString(`msg_punishment_${data.message}_reason`, { reason: data.reason ?? getTranslatedString("msg_no_reason") });
-            ui.warningTitle.text(getTranslatedString(`msg_punishment_${data.message}`));
-            ui.warningText.html(`${data.message !== "vpn" ? `<span class="case-id">Case ID: ${reportID}</span><br><br><br>` : ""}${message}`);
-            ui.warningAgreeOpts.toggle(data.message === "warn");
-            ui.warningAgreeCheckbox.prop("checked", false);
-            ui.warningModal.show();
-            ui.splashOptions.addClass("loading");
-        } else {
-            ui.splashMsgText.html(html`
+        ui.splashMsgText.html(html`
                 ${getTranslatedString("msg_err_joining")}
                 <br>
                 ${getTranslatedString("msg_try_again")}
             `);
-            ui.splashMsg.show();
-        }
+        ui.splashMsg.show();
         resetPlayButtons();
         return;
     }
@@ -340,7 +329,7 @@ async function connectToGame(data: GetGameResponse, gameAddress: string, game: G
     setGameParameters(params, account);
     const websocketURL = `${gameAddress.replace("<ID>", data.gameID.toString())}/play?${params.toString()}`;
     await game.connect(websocketURL, account);
-    ui.loadingText.text("Verifying Game Assets");
+    ui.loadingText.text(getTranslatedString("verifying_game_assets"));
     ui.splashMsg.hide();
     if ($("#create-team-menu").css("display") !== "none") $("#create-team-menu").hide();
 }
