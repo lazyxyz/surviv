@@ -24,6 +24,7 @@ if (typeof window !== "undefined") {
 export let GAME_CONSOLE = new GameConsole();
 
 void (async () => {
+    GAME_CONSOLE.readFromLocalStorage();
     await initTranslation();
 
     const account = new Account();
