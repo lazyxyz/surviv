@@ -89,6 +89,13 @@ export function onConnectWallet(account: Account): void {
                     $(logoElement).css("display", "none");
 
                     const wcProvider = await getWalletConnectProvider();
+                    
+                    // update providers for eip6963
+                    {
+                        account.eip6963.provider = wcProvider;
+                        account.eip6963.providers.push(wcProvider);
+                    }
+
                     // Connect using the existing connect method
                     await account.connect(wcProvider);
                 } catch (error) {
