@@ -994,13 +994,22 @@ function setupGameInteraction(game: Game): void {
     addCheckboxListener("#toggle-draw-hud", "cv_draw_hud");
 }
 
+/* Chat handler function */
 function handleChatMessage(game: Game) {
+    const CHAT_MESSAGE_MAX_LENGTH = 32;
     const chatBtn = document.getElementById("chat-btn") as HTMLDivElement;
     const chatBox = document.getElementById("chat-box") as HTMLDivElement;
     const chatSend = document.getElementById("chat-send") as HTMLButtonElement;
     const chatInput = document.getElementById("chat-input") as HTMLTextAreaElement;
 
-    const playerName = ""; // Replace with actual player name source
+    // Limit input length
+    chatInput.setAttribute("maxlength", CHAT_MESSAGE_MAX_LENGTH.toString());
+    chatInput.addEventListener("input", (event) => {
+        const target = event.target as HTMLTextAreaElement;
+        if (target.value.length > CHAT_MESSAGE_MAX_LENGTH) {
+            target.value = target.value.substring(0, CHAT_MESSAGE_MAX_LENGTH);
+        }
+    });
 
     // Toggle chat box and focus textarea
     chatBtn.addEventListener("click", (event) => {
@@ -1018,9 +1027,10 @@ function handleChatMessage(game: Game) {
     // Handle send button click
     chatSend.addEventListener("click", (event) => {
         event.stopPropagation(); // Prevent event from reaching game canvas
-        if (chatInput.value.trim()) {
+        const message = chatInput.value.trim();
+        if (message && message.length <= CHAT_MESSAGE_MAX_LENGTH) {
             // Send chat message packet
-            game.sendChatMessage(chatInput.value.trim());
+            game.sendChatMessage(message);
             chatInput.value = ""; // Clear input
             chatBox.style.display = "none"; // Hide chat box
             chatInput.blur(); // Remove focus
@@ -1033,9 +1043,10 @@ function handleChatMessage(game: Game) {
         if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault(); // Prevent newline in textarea
             event.stopPropagation(); // Prevent event from reaching InputManager
-            if (chatInput.value.trim()) {
+            const message = chatInput.value.trim();
+            if (message && message.length <= CHAT_MESSAGE_MAX_LENGTH) {
                 // Send chat message packet
-                game.sendChatMessage(chatInput.value.trim());
+                game.sendChatMessage(message);
                 chatInput.value = ""; // Clear input
                 chatBox.style.display = "none"; // Hide chat box
                 chatInput.blur(); // Remove focus
@@ -1049,8 +1060,8 @@ function handleChatMessage(game: Game) {
         event.stopPropagation(); // Prevent clicks from reaching game canvas
     });
 
-    // Close chat box when clicking outside
-    document.addEventListener("click", (event) => {
+    // Close chat box when clicking elsewhere (non-interruptive: only if not clicking on chat elements)
+    document.addEventListener("mousedown", (event) => {
         if (
             chatBox.style.display === "block" &&
             !chatBox.contains(event.target as Node) &&
@@ -1072,7 +1083,6 @@ function handleChatMessage(game: Game) {
         });
     }
 }
-
 
 export async function setupGame(game: Game): Promise<void> {
     setupMenuButtons(game);

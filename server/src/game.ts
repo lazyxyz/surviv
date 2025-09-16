@@ -1124,7 +1124,6 @@ export class Game implements GameData {
         }
     }
 
-
     addSyncedParticles(particles: SyncedParticleSpawnerDefinition, position: Vector, layer: Layer | number): void {
         const particleDef = SyncedParticles.fromString(particles.type);
         const { spawnRadius, count, deployAnimation } = particles;

@@ -2071,103 +2071,63 @@
 
 /* Floating button */
 #chat-btn {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  width: 40px;
-  /* smaller */
-  height: 40px;
-  /* smaller */
-  background: #007bff;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  font-size: 18px;
-  /* smaller icon */
-  z-index: 99999;
-  /* super high priority */
-  pointer-events: auto;
-  /* ensure clickable */
-}
-
-
-/* Floating button */
-#chat-btn {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  width: 40px;
-  height: 40px;
-  background: #007bff;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  font-size: 18px;
-  z-index: 2147483647;  /* absolute max priority */
-  pointer-events: auto; /* clickable */
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    background: white;
+    color: #333; /* Dark gray for contrast */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    font-size: 18px;
+    z-index: 2147483647;
+    pointer-events: auto;
+    opacity: 0.9; /* Slight transparency */
 }
 
 #chat-box {
-  position: fixed;
-  bottom: 70px;
-  left: 20px;
-  width: 230px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 8px;
-  display: none;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-  z-index: 2147483647; /* max possible */
-  pointer-events: auto; /* allow typing */
+    position: fixed;
+    bottom: 70px;
+    left: 20px;
+    width: 230px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px;
+    display: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    z-index: 2147483647;
+    pointer-events: auto;
+    opacity: 0.9; /* Slight transparency */
 }
 
 #chat-box textarea {
-  width: 100%;
-  height: 55px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  resize: none;
-  padding: 4px;
-  font-size: 14px;
-  position: relative;
-  z-index: 2147483647; /* force above canvas */
+    width: 100%;
+    height: 55px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: none;
+    padding: 4px;
+    font-size: 14px;
+    position: relative;
+    z-index: 2147483647;
 }
 
 #chat-send {
-  margin-top: 5px;
-  width: 100%;
-  padding: 5px;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  position: relative;
-  z-index: 2147483647;
-}
-
-#chat-btn {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  width: 40px;
-  height: 40px;
-  background: #007bff;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 2147483647;
+    margin-top: 5px;
+    width: 100%;
+    padding: 5px;
+    background: #333; /* Dark gray instead of blue */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    position: relative;
+    z-index: 2147483647;
 }
