@@ -62,6 +62,7 @@ import { GAME_CONSOLE } from "..";
 import { resetPlayButtons, updateDisconnectTime } from "./ui/home";
 import { autoPickup, updateUsersBadge } from "./ui/game";
 import { teamSocket } from "./ui/play";
+import { ChatPacket } from "@common/packets/chatPacket";
 
 /* eslint-disable @stylistic/indent */
 
@@ -348,6 +349,12 @@ export class Game {
         updateUsersBadge(packet.badge?.idString)
     }
 
+    sendChatMessage(message: string) {
+        this.sendPacket(ChatPacket.create({
+            message: message
+        }));
+    }
+
     async connectWebSocket(
         url: string,
         totalRetryTime: number = 10000,
@@ -537,6 +544,9 @@ export class Game {
                 break;
             case packet instanceof KillFeedPacket:
                 this.uiManager.processKillFeedPacket(packet.output);
+                break;
+            case packet instanceof ChatPacket:
+                this.uiManager.processChatMessage(packet.output);
                 break;
             case packet instanceof PingPacket: {
                 this.uiManager.debugReadouts.ping.text(`${Date.now() - this.lastPingDate} ms`);

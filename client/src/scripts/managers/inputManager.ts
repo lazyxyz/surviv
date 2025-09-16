@@ -22,6 +22,7 @@ export class InputManager {
     readonly binds = new InputMapper();
 
     readonly isMobile!: boolean;
+    private _inputPaused = false;
 
     readonly movement = {
         up: false,
@@ -382,6 +383,9 @@ export class InputManager {
     private handleInputEvent(down: boolean, event: KeyboardEvent | MouseEvent | WheelEvent): void {
         if (!event.isTrusted) return;
 
+        // Skip processing if inputs are paused (e.g., chat is open)
+        if (this._inputPaused) return;
+        
         // Disable pointer events on mobile if mobile controls are enabled
         if (event instanceof PointerEvent && this.isMobile) return;
 
@@ -757,6 +761,22 @@ export class InputManager {
         }
 
         return name === undefined ? name : `./img/misc/${name}_icon.svg`;
+    }
+
+     pauseInput(): void {
+        this._inputPaused = true;
+        // Clear movement and actions to prevent stuck inputs
+        this.movement.up = false;
+        this.movement.down = false;
+        this.movement.left = false;
+        this.movement.right = false;
+        this.movement.moving = false;
+        this.attacking = false;
+        this.actions.length = 0;
+    }
+
+    resumeInput(): void {
+        this._inputPaused = false;
     }
 }
 

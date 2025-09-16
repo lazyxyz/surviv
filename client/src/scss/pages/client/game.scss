@@ -52,6 +52,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+
   .minimap-container {
     display: flex;
   }
@@ -130,6 +131,7 @@
 
   &:not(:first-child) {
     margin-top: 6px;
+
     @media screen and (max-width: variables.$screen_medium) {
       margin-top: 4px;
     }
@@ -138,6 +140,7 @@
   img {
     width: 14px;
     height: 14px;
+
     @media screen and (max-width: variables.$screen_medium) {
       width: 10px;
       height: 10px;
@@ -185,6 +188,7 @@
     top: 160px;
     transform: scale(55%);
     transform-origin: 0% 0%;
+
     @media screen and (min-width: variables.$screen_large) {
       flex-direction: column;
       left: 240px;
@@ -268,6 +272,7 @@
     }
 
     @media screen and (max-height: 465px) and (max-width: variables.$screen-large) {
+
       .teammate-name,
       .teammate-badge {
         display: none;
@@ -317,6 +322,7 @@
       }
     }
   }
+
   #ui-kill-leader {
     display: flex;
     width: max-content;
@@ -324,6 +330,7 @@
     border-radius: 8px;
     padding: 8px 12px 8px 12px;
     gap: 10px;
+
     @media screen and (max-width: variables.$screen_large) {
       top: 7px;
       right: 140px;
@@ -351,6 +358,7 @@
           width: 12px;
         }
       }
+
       @media screen and (max-width: variables.$screen_medium) {
         font-size: 12px;
 
@@ -398,6 +406,7 @@
         padding: 4px 5px 4px 5px;
         margin: 3px 0 3px 0;
       }
+
       @media screen and (max-width: variables.$screen_medium) {
         font-size: 8px;
         padding: 4px 5px 4px 5px;
@@ -576,7 +585,7 @@
   }
 }
 
-#interact-key.active + #interact-text {
+#interact-key.active+#interact-text {
   position: relative;
   top: 3px;
 }
@@ -603,6 +612,7 @@
   @media screen and (max-width: variables.$screen_large) {
     bottom: 60px;
   }
+
   @media screen and (max-width: variables.$screen_medium) {
     bottom: 40px;
   }
@@ -626,6 +636,7 @@
       height: 37px;
       font-size: 22px;
     }
+
     @media screen and (max-width: variables.$screen_medium) {
       width: 68px;
       height: 32px;
@@ -670,6 +681,7 @@
 
     border-width: 5px;
   }
+
   @media screen and (max-width: variables.$screen_medium) {
     width: 120px;
     height: 20px;
@@ -721,6 +733,7 @@
     @media screen and (max-width: variables.$screen_large) {
       font-size: 16px;
     }
+
     @media screen and (max-width: variables.$screen_medium) {
       font-size: 10px;
       font-weight: 600;
@@ -800,6 +813,7 @@
     @media screen and (max-width: variables.$screen_large) {
       background: linear-gradient(90deg, palette.$orange 0px, #ffc800 230px);
     }
+
     @media screen and (max-width: variables.$screen_medium) {
       background: linear-gradient(90deg, palette.$orange 0px, #ffc800 120px);
     }
@@ -818,6 +832,7 @@
       font-size: 12px;
       font-weight: 600;
     }
+
     @media screen and (max-width: variables.$screen_medium) {
       font-size: 10px;
       margin-left: 8px;
@@ -954,7 +969,7 @@
 }
 
 .mobile-mode {
-  & > button {
+  &>button {
     font-size: 14px;
     display: flex;
     align-items: center;
@@ -1022,6 +1037,7 @@
     @media screen and (max-width: variables.$screen_large) {
       font-size: 22px;
     }
+
     @media screen and (max-width: variables.$screen_medium) {
       font-size: 14px;
     }
@@ -1327,7 +1343,8 @@
   left: 75%;
   transform: translateX(-75%);
   flex-direction: row;
-  z-index: 1002; /* idk what z-index to put here but it needs it because of joysticks-container */
+  z-index: 1002;
+  /* idk what z-index to put here but it needs it because of joysticks-container */
   pointer-events: none;
 
   @media screen and (max-width: variables.$screen_large) {
@@ -1377,11 +1394,9 @@
     }
 
     &.has-item {
-      background: radial-gradient(
-        circle,
-        palette.$light_transparent_bg 0%,
-        palette.$transparent_bg 100%
-      );
+      background: radial-gradient(circle,
+          palette.$light_transparent_bg 0%,
+          palette.$transparent_bg 100%);
     }
 
     .item-tooltip {
@@ -1414,7 +1429,8 @@
   left: 25%;
   transform: translateX(-75%);
   flex-direction: row;
-  z-index: 1002; /* idk what z-index to put here but it needs it because of joysticks-container */
+  z-index: 1002;
+  /* idk what z-index to put here but it needs it because of joysticks-container */
 
   @media screen and (max-width: variables.$screen_large) {
     bottom: 5px;
@@ -1441,11 +1457,9 @@
     cursor: crosshair;
 
     &.has-item {
-      background: radial-gradient(
-        circle,
-        palette.$light_transparent_bg 0%,
-        palette.$transparent_bg 100%
-      );
+      background: radial-gradient(circle,
+          palette.$light_transparent_bg 0%,
+          palette.$transparent_bg 100%);
     }
 
     .item-name {
@@ -1481,6 +1495,7 @@
         font-size: 8px;
         bottom: 2px;
       }
+
       .item-tooltip {
         bottom: 40px;
         left: -15px;
@@ -1616,9 +1631,11 @@
     0% {
       transform: scale(1);
     }
+
     50% {
       transform: scale(1.5);
     }
+
     100% {
       transform: scale(1);
     }
@@ -1637,7 +1654,7 @@
   background-size: 100%;
   background-repeat: no-repeat;
 
-  & > div {
+  &>div {
     width: 84px;
     height: 84px;
     background-size: 100%;
@@ -1689,7 +1706,7 @@
     width: 228px;
     height: 228px;
 
-    > div {
+    >div {
       width: 58px;
       height: 58px;
     }
@@ -1899,9 +1916,11 @@
   0% {
     scale: 100%;
   }
+
   50% {
     scale: 110%;
   }
+
   100% {
     scale: 100%;
   }
@@ -1912,10 +1931,12 @@
     box-shadow: none;
     background-color: none;
   }
+
   50% {
     box-shadow: 0px 0px 25px #8c8c8c;
     background-color: #8c8c8c;
   }
+
   100% {
     box-shadow: none;
     background-color: none;
@@ -1927,10 +1948,12 @@
     box-shadow: none;
     background-color: none;
   }
+
   50% {
     box-shadow: 0px 0px 25px #008aff;
     background-color: #008aff;
   }
+
   100% {
     box-shadow: none;
     background-color: none;
@@ -1942,10 +1965,12 @@
     box-shadow: none;
     background-color: none;
   }
+
   50% {
     box-shadow: 0px 0px 25px #8a4c70;
     background-color: #8a4c70;
   }
+
   100% {
     box-shadow: none;
     background-color: none;
@@ -1957,10 +1982,12 @@
     box-shadow: none;
     background-color: none;
   }
+
   50% {
     box-shadow: 0px 0px 25px #5d0000;
     background-color: #5d0000;
   }
+
   100% {
     box-shadow: none;
     background-color: none;
@@ -2004,4 +2031,103 @@
   @media screen and (max-width: variables.$screen_medium) {
     display: block;
   }
+}
+
+
+
+#chat-feed {
+  .chat-feed-item {
+    left: 0px;
+    align-self: left;
+    max-width: fit-content;
+    padding: 8px;
+    margin: 5px 0 5px 0;
+    background: palette.$transparent_bg;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    @include variables.text-shadow;
+
+    @media screen and (max-width: variables.$screen_large) {
+      font-size: 12px;
+      padding: 4px 5px 4px 5px;
+      margin: 3px 0 3px 0;
+    }
+
+    @media screen and (max-width: variables.$screen_medium) {
+      font-size: 8px;
+      padding: 4px 5px 4px 5px;
+      margin: 3px 0 3px 0;
+      gap: 2px;
+      font-weight: 600;
+    }
+  }
+}
+
+
+/* Floating button */
+#chat-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    background: white;
+    color: #333; /* Dark gray for contrast */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    font-size: 18px;
+    z-index: 2147483647;
+    pointer-events: auto;
+    opacity: 0.9; /* Slight transparency */
+}
+
+#chat-box {
+    position: fixed;
+    bottom: 70px;
+    left: 20px;
+    width: 230px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px;
+    display: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    z-index: 2147483647;
+    pointer-events: auto;
+    opacity: 0.9; /* Slight transparency */
+}
+
+#chat-box textarea {
+    width: 100%;
+    height: 55px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: none;
+    padding: 4px;
+    font-size: 14px;
+    position: relative;
+    z-index: 2147483647;
+}
+
+#chat-send {
+    margin-top: 5px;
+    width: 100%;
+    padding: 5px;
+    background: #333; /* Dark gray instead of blue */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    position: relative;
+    z-index: 2147483647;
 }

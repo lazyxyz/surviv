@@ -15,6 +15,7 @@ import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
 import { savePlayerGame, savePlayerRank } from "../api/api";
 import { GameOverData, GameOverPacket } from "@common/packets/gameOverPacket";
 import { DamageParams } from "./gameObject";
+import { ChatPacket, ChatPacketData } from "@common/packets/chatPacket";
 
 export interface PlayerContainer {
     readonly name: string
