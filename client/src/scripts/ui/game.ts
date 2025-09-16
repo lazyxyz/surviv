@@ -15,7 +15,6 @@ import { GAME_CONSOLE } from "../../";
 import $ from "jquery";
 import type { Game } from "../game";
 import { getTranslatedString } from "../../translations";
-import { Vec, type Vector } from "@common/utils/vector";
 import { ItemType } from "@common/utils/objectDefinitions";
 import { CustomTeamMessages } from "@common/typings";
 import type { CVarTypeMapping } from "../utils/console/defaultClientCVars";
@@ -614,16 +613,16 @@ function setupMobileControls(game: Game): void {
         ui.emoteButton.on("click", (event) => {
             event.stopPropagation();
             ui.emoteWheel.toggle(150);
-        
+
             $(document).one("click", (event) => {
                 // 1. click outside wheel
                 if (!$(event.target).closest(ui.emoteWheel).length) {
-                    ui.emoteWheel.hide();                            
+                    ui.emoteWheel.hide();
                 }
 
                 // 2. click button X
                 if ($(event.target).closest(".button-center").length) {
-                    ui.emoteWheel.hide();                            
+                    ui.emoteWheel.hide();
                 }
             })
         });
@@ -642,7 +641,7 @@ function setupEmoteWheel(game: Game): void {
 
             if (inputManager.pingWheelActive) {
                 const ping = game.uiManager.mapPings[emoteSlot];
-                
+
                 if (game.map.expanded && ping && inputManager.pingWheelActive) {
                     inputManager.addAction({
                         type: InputActions.MapPing,
@@ -740,9 +739,9 @@ function setupInventorySlots(game: Game): void {
                         ${scope.name.split(" ")[0]}
                     </div>`
                 );
-                
+
                 $<HTMLDivElement>("#scopes-container-mobile").append(ele);
-                
+
                 listenerEvent(ele, scope);
             } else {
                 const ele = $<HTMLDivElement>(
@@ -770,15 +769,15 @@ function setupInventorySlots(game: Game): void {
                         <span class="item-count" id="${item.idString}-count">0</span>
                          <div class="item-tooltip">
                             ${getTranslatedString(
-                            'tt_restores',
-                            {
-                                item: `<b>${getTranslatedString(item.idString as TranslationKeys)}</b><br>`,
-                                amount: item.restoreAmount.toString(),
-                                type: item.healType === HealType.Adrenaline
-                                    ? getTranslatedString("adrenaline")
-                                    : getTranslatedString("health"),
-                                desc: getTranslatedString(`${item.idString}_desc` as TranslationKeys)
-                            })}
+                        'tt_restores',
+                        {
+                            item: `<b>${getTranslatedString(item.idString as TranslationKeys)}</b><br>`,
+                            amount: item.restoreAmount.toString(),
+                            type: item.healType === HealType.Adrenaline
+                                ? getTranslatedString("adrenaline")
+                                : getTranslatedString("health"),
+                            desc: getTranslatedString(`${item.idString}_desc` as TranslationKeys)
+                        })}
                         </div>
                     </div>`
                 );
@@ -817,35 +816,35 @@ function setupInventorySlots(game: Game): void {
                 return ele;
             })
         );
-        
+
         // ammos
         for (const ammo of Ammos) {
             if (ammo.ephemeral) continue;
-    
+
             const ele = $<HTMLDivElement>(
                 `<div class="inventory-items-card inventory-items-ammos-card" id="${ammo.idString}-slot">
                     <img class="item-image" src="./img/game/shared/loot/${ammo.idString}.svg" draggable="false">
                     <span class="item-count" id="${ammo.idString}-count">0</span>
                 </div>`
             );
-    
-            if(ammo.hideUnlessPresent){
+
+            if (ammo.hideUnlessPresent) {
                 $<HTMLDivElement>("#special-ammo-container").append(ele);
             }
 
-            if(!ammo.hideUnlessPresent){
+            if (!ammo.hideUnlessPresent) {
                 $<HTMLDivElement>("#ammo-container").append(ele);
             }
-    
+
             ele[0].addEventListener("pointerup", () => {
                 clearTimeout(dropTimer);
             });
-    
+
             slotListener(ele, button => {
                 const isPrimary = button === 0;
                 const isSecondary = button === 2;
                 const isTeamMode = game.teamMode;
-    
+
                 if (isPrimary) {
                     if (inputManager.pingWheelActive) {
                         inputManager.addAction({
@@ -853,10 +852,10 @@ function setupInventorySlots(game: Game): void {
                             emote: Ammos.fromString(ammo.idString)
                         });
                     }
-    
+
                     mobileDropItem(button, isTeamMode, ammo);
                 }
-    
+
                 if (isSecondary && isTeamMode) {
                     inputManager.addAction({
                         type: InputActions.DropItem,
@@ -995,6 +994,85 @@ function setupGameInteraction(game: Game): void {
     addCheckboxListener("#toggle-draw-hud", "cv_draw_hud");
 }
 
+function handleChatMessage(game: Game) {
+    const chatBtn = document.getElementById("chat-btn") as HTMLDivElement;
+    const chatBox = document.getElementById("chat-box") as HTMLDivElement;
+    const chatSend = document.getElementById("chat-send") as HTMLButtonElement;
+    const chatInput = document.getElementById("chat-input") as HTMLTextAreaElement;
+
+    const playerName = ""; // Replace with actual player name source
+
+    // Toggle chat box and focus textarea
+    chatBtn.addEventListener("click", (event) => {
+        event.stopPropagation(); // Prevent event from reaching game canvas
+        chatBox.style.display = chatBox.style.display === "block" ? "none" : "block";
+        if (chatBox.style.display === "block") {
+            chatInput.focus(); // Set focus to textarea
+            game.inputManager.pauseInput(); // Pause game input
+        } else {
+            chatInput.blur(); // Remove focus when closing
+            game.inputManager.resumeInput(); // Resume game input
+        }
+    });
+
+    // Handle send button click
+    chatSend.addEventListener("click", (event) => {
+        event.stopPropagation(); // Prevent event from reaching game canvas
+        if (chatInput.value.trim()) {
+            // Send chat message packet
+            game.sendChatMessage(chatInput.value.trim());
+            chatInput.value = ""; // Clear input
+            chatBox.style.display = "none"; // Hide chat box
+            chatInput.blur(); // Remove focus
+            game.inputManager.resumeInput(); // Resume game input
+        }
+    });
+
+    // Allow sending message with Enter key
+    chatInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault(); // Prevent newline in textarea
+            event.stopPropagation(); // Prevent event from reaching InputManager
+            if (chatInput.value.trim()) {
+                // Send chat message packet
+                game.sendChatMessage(chatInput.value.trim());
+                chatInput.value = ""; // Clear input
+                chatBox.style.display = "none"; // Hide chat box
+                chatInput.blur(); // Remove focus
+                game.inputManager.resumeInput(); // Resume game input
+            }
+        }
+    });
+
+    // Prevent game canvas from capturing clicks on chat box
+    chatBox.addEventListener("click", (event) => {
+        event.stopPropagation(); // Prevent clicks from reaching game canvas
+    });
+
+    // Close chat box when clicking outside
+    document.addEventListener("click", (event) => {
+        if (
+            chatBox.style.display === "block" &&
+            !chatBox.contains(event.target as Node) &&
+            event.target !== chatBtn
+        ) {
+            chatBox.style.display = "none";
+            chatInput.blur();
+            game.inputManager.resumeInput();
+        }
+    });
+
+    // Ensure mobile keyboard works (if applicable)
+    if (game.inputManager.isMobile) {
+        chatInput.addEventListener("focus", () => {
+            game.inputManager.pauseInput(); // Pause game input on mobile
+        });
+        chatInput.addEventListener("blur", () => {
+            game.inputManager.resumeInput(); // Resume game input on mobile
+        });
+    }
+}
+
 
 export async function setupGame(game: Game): Promise<void> {
     setupMenuButtons(game);
@@ -1017,4 +1095,5 @@ export async function setupGame(game: Game): Promise<void> {
 
     // Setup outside
     setUpCommands(game);
+    handleChatMessage(game);
 }

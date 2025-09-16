@@ -1383,9 +1383,8 @@ export class UIManager {
         }
     });
 
-    processChatMessage(message: ChatPacketData): void {
-        const messageText = `${message.name}: ${message.message}`;
-        this._addChatMessage(messageText);
+    processChatMessage(data: ChatPacketData): void {
+        this._addChatMessage(data.message);
     }
 
     processKillFeedPacket(message: KillFeedPacketData): void {

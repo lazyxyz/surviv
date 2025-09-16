@@ -323,6 +323,10 @@ export class Game implements GameData {
                 player.sendData(stream.getBuffer());
                 break;
             }
+            case packet instanceof ChatPacket: {
+                this.sendChatMessage(player, packet.output.message);
+                break;
+            }
         }
     }
 
@@ -1108,13 +1112,16 @@ export class Game implements GameData {
         syncedParticle.dead = true;
     }
 
-    addChatMessage(name: string, message: string): void {
-        this.packets.push(
-            ChatPacket.create({
-                name,
-                message
-            } as ChatPacketData)
-        );
+    sendChatMessage(player: Player, message: string): void {
+        if (this.teamMode) {
+            player.team?.sendTeamMessage(player.name, message);
+        } else {
+            this.packets.push(
+                ChatPacket.create({
+                    message
+                } as ChatPacketData)
+            );
+        }
     }
 
 

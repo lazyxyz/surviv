@@ -44,7 +44,8 @@ export const ClientToServerPackets = new PacketRegister(
     PlayerInputPacket,
     PingPacket,
     JoinPacket,
-    SpectatePacket
+    SpectatePacket,
+    ChatPacket,
 );
 
 export const ServerToClientPackets = new PacketRegister(

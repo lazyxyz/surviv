@@ -349,6 +349,12 @@ export class Game {
         updateUsersBadge(packet.badge?.idString)
     }
 
+    sendChatMessage(message: string) {
+        this.sendPacket(ChatPacket.create({
+            message: message
+        }));
+    }
+
     async connectWebSocket(
         url: string,
         totalRetryTime: number = 10000,
