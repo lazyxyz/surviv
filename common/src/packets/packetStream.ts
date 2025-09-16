@@ -1,4 +1,5 @@
 import { SuroiByteStream } from "../utils/suroiByteStream";
+import { ChatPacket } from "./chatPacket";
 import { DisconnectPacket } from "./disconnectPacket";
 import { GameOverPacket } from "./gameOverPacket";
 import { PlayerInputPacket } from "./inputPacket";
@@ -57,6 +58,7 @@ export const ServerToClientPackets = new PacketRegister(
     RewardsPacket,
     DisconnectPacket,
     ReadyPacket,
+    ChatPacket,
 );
 
 export class PacketStream {

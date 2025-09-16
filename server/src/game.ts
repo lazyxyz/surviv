@@ -57,6 +57,7 @@ import { getIP, createServer } from "./utils/serverHelpers";
 import { verifyAllAssets, verifyBadges } from "./api/balances";
 import { Armors } from "@common/definitions/armors";
 import { Badges } from "@common/definitions/badges";
+import { ChatPacket, ChatPacketData } from "@common/packets/chatPacket";
 
 
 /*
@@ -272,7 +273,7 @@ export class Game implements GameData {
 
         if (Config.addBot) {
             const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
-         
+
             const zombieCount = randomInRange(10, 20);
             const ninjaCount = randomInRange(5, 10);
             const assassinCount = randomInRange(3, 5);
@@ -1106,6 +1107,16 @@ export class Game implements GameData {
         this.removeObject(syncedParticle);
         syncedParticle.dead = true;
     }
+
+    addChatMessage(name: string, message: string): void {
+        this.packets.push(
+            ChatPacket.create({
+                name,
+                message
+            } as ChatPacketData)
+        );
+    }
+
 
     addSyncedParticles(particles: SyncedParticleSpawnerDefinition, position: Vector, layer: Layer | number): void {
         const particleDef = SyncedParticles.fromString(particles.type);

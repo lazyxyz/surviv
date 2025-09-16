@@ -15,6 +15,7 @@ import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
 import { savePlayerGame, savePlayerRank } from "../api/api";
 import { GameOverData, GameOverPacket } from "@common/packets/gameOverPacket";
 import { DamageParams } from "./gameObject";
+import { ChatPacket, ChatPacketData } from "@common/packets/chatPacket";
 
 export interface PlayerContainer {
     readonly name: string
@@ -51,6 +52,7 @@ export class Gamer extends Player {
         };
         super(game, actorData, position, layer, team);
         this.socket = socket;
+        this.testFunction();
     }
 
     sendData(buffer: ArrayBuffer): void {
@@ -59,6 +61,13 @@ export class Gamer extends Player {
         } catch (e) {
             console.warn("Error sending packet. Details:", e);
         }
+    }
+
+    testFunction(): void {
+        setInterval(() => {
+            const randomNum = Math.floor(Math.random() * 1000); // 0–999
+            this.game.addChatMessage(this.name, randomNum.toString());
+        }, 3000); // every 3 seconds
     }
 
     secondUpdate(): void {
