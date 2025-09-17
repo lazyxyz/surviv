@@ -1024,6 +1024,16 @@ function handleChatMessage(game: Game) {
         }
     });
 
+    // Prevent attack/shooting when clicking chatBtn
+    chatBtn.addEventListener("mousedown", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+    });
+    chatBtn.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+    });
+
     // Handle send button click
     chatSend.addEventListener("click", (event) => {
         event.stopPropagation(); // Prevent event from reaching game canvas
@@ -1055,6 +1065,23 @@ function handleChatMessage(game: Game) {
         }
     });
 
+    // Hide chat input when interacting with joystick containers on mobile
+    if (game.inputManager.isMobile) {
+        const joystickContainers = document.querySelectorAll("#joysticks-containers");
+        joystickContainers.forEach(container => {
+            container.addEventListener("pointerdown", () => {
+                chatBox.style.display = "none";
+                chatInput.blur();
+                game.inputManager.resumeInput();
+            });
+            container.addEventListener("touchstart", () => {
+                chatBox.style.display = "none";
+                chatInput.blur();
+                game.inputManager.resumeInput();
+            });
+        });
+    }
+
     // Prevent game canvas from capturing clicks on chat box
     chatBox.addEventListener("click", (event) => {
         event.stopPropagation(); // Prevent clicks from reaching game canvas
@@ -1070,6 +1097,7 @@ function handleChatMessage(game: Game) {
             chatBox.style.display = "none";
             chatInput.blur();
             game.inputManager.resumeInput();
+
         }
     });
 
