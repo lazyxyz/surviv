@@ -69,6 +69,7 @@ export const BULLET_WHIZ_SCALE = 5;
 export const SELECTOR_WALLET = "SELECTOR_WALLET";
 export const PUBLIC_KEY = "PUBLIC_KEY";
 export const ACCESS_TOKEN = "ACCESS_TOKEN";
+export const SESSION_WALLETCONNECT = 'SESSION_WALLETCONNECT';
 
 export enum WalletType {
     MetaMask = "MetaMask",

@@ -113,7 +113,7 @@
             bottom: -14px;
             font-size: 12px;
           }
-          
+
           @media screen and (max-width: variables.$screen_xsmall) {
             transform: translateX(-100%);
             left: -14px;
@@ -193,7 +193,7 @@
 
     &-weapons {
       display: flex;
-      flex: 1;
+      // flex: 1;
       gap: 6px;
       width: fit-content;
       align-self: end;

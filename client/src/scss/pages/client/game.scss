@@ -52,6 +52,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+
   .minimap-container {
     display: flex;
   }
@@ -130,6 +131,7 @@
 
   &:not(:first-child) {
     margin-top: 6px;
+
     @media screen and (max-width: variables.$screen_medium) {
       margin-top: 4px;
     }
@@ -138,6 +140,7 @@
   img {
     width: 14px;
     height: 14px;
+
     @media screen and (max-width: variables.$screen_medium) {
       width: 10px;
       height: 10px;
@@ -185,6 +188,7 @@
     top: 160px;
     transform: scale(55%);
     transform-origin: 0% 0%;
+
     @media screen and (min-width: variables.$screen_large) {
       flex-direction: column;
       left: 240px;
@@ -317,6 +321,7 @@
       }
     }
   }
+
   #ui-kill-leader {
     display: flex;
     width: max-content;
@@ -324,6 +329,7 @@
     border-radius: 8px;
     padding: 8px 12px 8px 12px;
     gap: 10px;
+
     @media screen and (max-width: variables.$screen_large) {
       top: 7px;
       right: 140px;
@@ -351,6 +357,7 @@
           width: 12px;
         }
       }
+
       @media screen and (max-width: variables.$screen_medium) {
         font-size: 12px;
 
@@ -398,6 +405,7 @@
         padding: 4px 5px 4px 5px;
         margin: 3px 0 3px 0;
       }
+
       @media screen and (max-width: variables.$screen_medium) {
         font-size: 8px;
         padding: 4px 5px 4px 5px;
@@ -452,6 +460,29 @@
         img {
           vertical-align: middle;
         }
+      }
+    }
+    .chat-feed-item {
+      left: 0px;
+      align-self: left;
+      max-width: fit-content;
+      font-family: "inter";
+      margin: 5px 0 5px 0;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 16px;
+      align-items: center;
+
+      @include variables.text-shadow;
+
+      @media screen and (max-width: variables.$screen_large) {
+        font-size: 12px;
+        margin: 3px 0 3px 0;
+      }
+
+      @media screen and (max-width: variables.$screen_medium) {
+        font-size: 10px;
+        margin: 3px 0 3px 0;
       }
     }
   }
@@ -603,6 +634,7 @@
   @media screen and (max-width: variables.$screen_large) {
     bottom: 60px;
   }
+
   @media screen and (max-width: variables.$screen_medium) {
     bottom: 40px;
   }
@@ -626,6 +658,7 @@
       height: 37px;
       font-size: 22px;
     }
+
     @media screen and (max-width: variables.$screen_medium) {
       width: 68px;
       height: 32px;
@@ -670,6 +703,7 @@
 
     border-width: 5px;
   }
+
   @media screen and (max-width: variables.$screen_medium) {
     width: 120px;
     height: 20px;
@@ -721,6 +755,7 @@
     @media screen and (max-width: variables.$screen_large) {
       font-size: 16px;
     }
+
     @media screen and (max-width: variables.$screen_medium) {
       font-size: 10px;
       font-weight: 600;
@@ -800,6 +835,7 @@
     @media screen and (max-width: variables.$screen_large) {
       background: linear-gradient(90deg, palette.$orange 0px, #ffc800 230px);
     }
+
     @media screen and (max-width: variables.$screen_medium) {
       background: linear-gradient(90deg, palette.$orange 0px, #ffc800 120px);
     }
@@ -818,6 +854,7 @@
       font-size: 12px;
       font-weight: 600;
     }
+
     @media screen and (max-width: variables.$screen_medium) {
       font-size: 10px;
       margin-left: 8px;
@@ -1022,6 +1059,7 @@
     @media screen and (max-width: variables.$screen_large) {
       font-size: 22px;
     }
+
     @media screen and (max-width: variables.$screen_medium) {
       font-size: 14px;
     }
@@ -1327,7 +1365,8 @@
   left: 75%;
   transform: translateX(-75%);
   flex-direction: row;
-  z-index: 1002; /* idk what z-index to put here but it needs it because of joysticks-container */
+  z-index: 1002;
+  /* idk what z-index to put here but it needs it because of joysticks-container */
   pointer-events: none;
 
   @media screen and (max-width: variables.$screen_large) {
@@ -1414,7 +1453,8 @@
   left: 25%;
   transform: translateX(-75%);
   flex-direction: row;
-  z-index: 1002; /* idk what z-index to put here but it needs it because of joysticks-container */
+  z-index: 1002;
+  /* idk what z-index to put here but it needs it because of joysticks-container */
 
   @media screen and (max-width: variables.$screen_large) {
     bottom: 5px;
@@ -1481,6 +1521,7 @@
         font-size: 8px;
         bottom: 2px;
       }
+
       .item-tooltip {
         bottom: 40px;
         left: -15px;
@@ -1616,9 +1657,11 @@
     0% {
       transform: scale(1);
     }
+
     50% {
       transform: scale(1.5);
     }
+
     100% {
       transform: scale(1);
     }
@@ -1899,9 +1942,11 @@
   0% {
     scale: 100%;
   }
+
   50% {
     scale: 110%;
   }
+
   100% {
     scale: 100%;
   }
@@ -1912,10 +1957,12 @@
     box-shadow: none;
     background-color: none;
   }
+
   50% {
     box-shadow: 0px 0px 25px #8c8c8c;
     background-color: #8c8c8c;
   }
+
   100% {
     box-shadow: none;
     background-color: none;
@@ -1927,10 +1974,12 @@
     box-shadow: none;
     background-color: none;
   }
+
   50% {
     box-shadow: 0px 0px 25px #008aff;
     background-color: #008aff;
   }
+
   100% {
     box-shadow: none;
     background-color: none;
@@ -1942,10 +1991,12 @@
     box-shadow: none;
     background-color: none;
   }
+
   50% {
     box-shadow: 0px 0px 25px #8a4c70;
     background-color: #8a4c70;
   }
+
   100% {
     box-shadow: none;
     background-color: none;
@@ -1957,10 +2008,12 @@
     box-shadow: none;
     background-color: none;
   }
+
   50% {
     box-shadow: 0px 0px 25px #5d0000;
     background-color: #5d0000;
   }
+
   100% {
     box-shadow: none;
     background-color: none;
@@ -2003,5 +2056,94 @@
 
   @media screen and (max-width: variables.$screen_medium) {
     display: block;
+  }
+}
+
+/* Floating button */
+#chat-btn {
+  position: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+  bottom: 10px;
+  left: 10px;
+  width: 40px;
+  height: 40px;
+  background: palette.$transparent_bg;
+  color: white; /* Dark gray for contrast */
+  border-radius: 8px;
+  font-size: 20px;
+  z-index: 1002;
+  pointer-events: auto;
+
+  @media screen and (max-width: variables.$screen_medium) {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    right: 40px;
+    left: auto;
+    bottom: 5px;
+  }
+}
+
+#chat-box {
+  position: fixed;
+  bottom: 55px;
+  left: 10px;
+  width: 230px;
+  height: 72px;
+  display: none;
+  z-index: 1002;
+  pointer-events: auto;
+
+  @media screen and (max-width: variables.$screen_medium) {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 42px;
+  }
+}
+
+#chat-box textarea {
+  position: relative;
+  width: 100%;
+  height: 72px;
+  color: white;
+  border: none;
+  background: palette.$transparent_bg;
+  border-radius: 8px;
+  resize: none;
+  padding: 8px;
+  font-size: 13px;
+  font-family: "inter";
+
+  &:focus {
+    outline: rgba(255, 255, 255, 0.3) solid 1.5px;
+    outline-offset: -1.5px;
+  }
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+#chat-send {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: fit-content;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  background-color: #ffffff5e;
+  color: palette.$light;
+  transition: 300ms;
+
+  &:hover {
+    opacity: 0.65;
   }
 }

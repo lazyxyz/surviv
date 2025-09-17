@@ -12,7 +12,8 @@ export const enum Constants {
     MIN_OBJECT_SCALE = 0.15,
     MAX_OBJECT_SCALE = 3,
     PLAYER_NAME_MAX_LENGTH = 16,
-    PLAYER_ADDRESS_MAX_LENGTH = 42
+    PLAYER_ADDRESS_MAX_LENGTH = 42,
+    CHAT_MESSAGE_MAX_LENGTH = 32,
 }
 
 /* eslint-disable @typescript-eslint/prefer-literal-enum-member */
