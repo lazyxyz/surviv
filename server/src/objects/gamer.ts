@@ -287,7 +287,6 @@ export class Gamer extends Player {
                 3000
             );
 
-            console.log("data: ", data);
             if (data.success && data.rewards.success) {
                 const rewards = data.rewards.rewards;
                 console.log("rewards: ", rewards);

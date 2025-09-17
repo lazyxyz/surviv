@@ -1116,11 +1116,14 @@ export class Game implements GameData {
         if (this.teamMode) {
             player.team?.sendTeamMessage(player.name, message);
         } else {
-            this.packets.push(
-                ChatPacket.create({
-                    message
-                } as ChatPacketData)
-            );
+            // Only allow player chat with badge
+            if (player.loadout.badge) {
+                this.packets.push(
+                    ChatPacket.create({
+                        message
+                    } as ChatPacketData)
+                );
+            }
         }
     }
 
