@@ -1,7 +1,7 @@
 {
-  "name": "Suroi - 2D Battle Royale",
-  "short_name": "Suroi",
-  "description": "Open-source 2D battle royale game inspired by surviv.io.",
+  "name": "SurvivFun",
+  "short_name": "SurvivFun",
+  "description": "The new 2D survival battle royale, inspired by a legendary game loved by millions! Win big with our play-and-earn model and tons of cool items for nonstop fun!",
   "background_color": "#5b8939",
   "start_url": ".",
   "display": "fullscreen",
