@@ -482,13 +482,19 @@
     justify-content: center;
     gap: 4px;
     color: white;
+    background-color: #0086ff;
+    border-bottom: 2px solid #0062b8;
+
+    img {
+      filter: drop-shadow(3px 3px 8px #00000064);
+    }
   }
 
-  .btn-quests:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
+  // .btn-quests:disabled {
+  //   opacity: 0.5;
+  //   cursor: not-allowed;
+  //   pointer-events: none;
+  // }
 
   .btn-leaderboard {
     color: white;
