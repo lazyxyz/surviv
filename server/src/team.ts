@@ -77,11 +77,12 @@ export class Team {
         return this.players.filter(player => !player.dead && !player.disconnected);
     }
 
-    sendTeamMessage(name: string, message: string): void {
+    sendTeamMessage(name: string, message: string, isSendAll: boolean = false): void {
         const textMessage = `${name}: ${message}`;
         for (const player of this.players) {
             player.sendPacket(
                 ChatPacket.create({
+                    isSendAll,
                     message: textMessage
                 } as ChatPacketData)
             );

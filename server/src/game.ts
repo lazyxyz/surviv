@@ -324,7 +324,7 @@ export class Game implements GameData {
                 break;
             }
             case packet instanceof ChatPacket: {
-                this.sendChatMessage(player, packet.output.message);
+                this.sendChatMessage(player, packet.output.isSendAll, packet.output.message);
                 break;
             }
         }
@@ -1112,18 +1112,16 @@ export class Game implements GameData {
         syncedParticle.dead = true;
     }
 
-    sendChatMessage(player: Player, message: string): void {
-        if (this.teamMode) {
-            player.team?.sendTeamMessage(player.name, message);
-        } else {
-            // Only allow player chat with badge
-            if (player.loadout.badge) {
-                this.packets.push(
-                    ChatPacket.create({
-                        message
-                    } as ChatPacketData)
-                );
-            }
+    sendChatMessage(player: Player, isSendAll: boolean, message: string): void {
+        if (isSendAll && player.loadout.badge && player.loadout.badge) {
+            this.packets.push(
+                ChatPacket.create({
+                    isSendAll,
+                    message
+                } as ChatPacketData)
+            );
+        } else if (this.teamMode && !isSendAll && player.team) {
+            player.team.sendTeamMessage(player.name, message);
         }
     }
 
