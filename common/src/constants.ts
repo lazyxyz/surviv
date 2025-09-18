@@ -276,3 +276,9 @@ export const TentTints = {
 
 export const EMOTE_SLOTS = ["top", "right", "bottom", "left", "win", "death"] as const;
 
+export const TEAMMATE_COLORS = [
+    0x00ffff, // cyan
+    0xff00ff, // magenta
+    0xffff00, // yellow
+    0xff8000  // orange
+];

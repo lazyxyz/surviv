@@ -2129,21 +2129,64 @@
   }
 }
 
-#chat-send {
+// #chat-send {
+//   position: absolute;
+//   bottom: 8px;
+//   right: 8px;
+//   width: fit-content;
+//   padding: 4px 8px;
+//   border: none;
+//   border-radius: 4px;
+//   cursor: pointer;
+//   font-size: 12px;
+//   background-color: #ffffff5e;
+//   color: palette.$light;
+//   transition: 300ms;
+
+//   &:hover {
+//     opacity: 0.65;
+//   }
+// }
+
+#chat-send, #chat-send-all {
   position: absolute;
   bottom: 8px;
-  right: 8px;
-  width: fit-content;
+  font-size: 12px;
   padding: 4px 8px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 12px;
   background-color: #ffffff5e;
   color: palette.$light;
-  transition: 300ms;
+  transition: opacity 300ms;
+  width: fit-content;
+}
 
-  &:hover {
-    opacity: 0.65;
+#chat-send:hover, #chat-send-all:hover {
+  opacity: 0.65;
+}
+
+#chat-send {
+  right: 8px;
+}
+
+#chat-send-all {
+  right: 56px; /* Positions to the left of chat-send */
+}
+
+@media screen and (max-width: variables.$screen_medium) {
+  #chat-box {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 42px;
+  }
+
+  #chat-send {
+    right: 8px;
+  }
+
+  #chat-send-all {
+    right: 56px; /* Maintains position to the left of chat-send */
   }
 }

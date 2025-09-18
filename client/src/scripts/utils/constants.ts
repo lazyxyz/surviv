@@ -1,4 +1,4 @@
-import { GameConstants, Layer } from "@common/constants";
+import { GameConstants, Layer, TEAMMATE_COLORS } from "@common/constants";
 import { Modes, type ColorKeys, type Mode } from "@common/definitions/modes";
 import { Color } from "pixi.js";
 
@@ -43,12 +43,11 @@ export function getGhillieTint(mode: Mode): Color {
     return colors.grass.multiply(new Color("hsl(0, 0%, 99%)"));
 }
 
-
-export const TEAMMATE_COLORS = [
-    new Color("#00ffff"),
-    new Color("#ff00ff"),
-    new Color("#ffff00"),
-    new Color("#ff8000")
+export const PIXI_TEAMMATE_COLORS = [
+    new Color(TEAMMATE_COLORS[0]),
+    new Color(TEAMMATE_COLORS[1]),
+    new Color(TEAMMATE_COLORS[2]),
+    new Color(TEAMMATE_COLORS[3])
 ];
 
 export const PIXI_SCALE = 20;

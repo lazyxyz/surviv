@@ -22,7 +22,7 @@ import { type TranslationKeys } from "../../typings/translations";
 import { type Game } from "../game";
 import { type GameObject } from "../objects/gameObject";
 import { Player } from "../objects/player";
-import { getGhillieTint, TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/constants";
+import { getGhillieTint, PIXI_TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/constants";
 import { formatDate, html } from "../utils/misc";
 import { SuroiSprite } from "../utils/pixi";
 import { ClientPerkManager } from "./perkManager";
@@ -30,7 +30,7 @@ import type { RewardsData } from "@common/packets/rewardsPacket";
 import { getBadgeImage } from "../inventory/badges";
 import { Modes } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "../..";
-import type { ChatPacketData } from "@common/packets/chatPacket";
+import type { ServerChatPacket, ServerChatPacketData } from "@common/packets/chatPacket";
 
 function safeRound(value: number): number {
     if (0 < value && value <= 1) return 1;
@@ -1161,10 +1161,12 @@ export class UIManager {
         });
     }
 
-    private _addChatMessage(text: string): void {
+    private _addChatMessage(text: string, color: number): void {
+
         const killFeedItem = $<HTMLDivElement>('<div class="chat-feed-item">');
 
         killFeedItem.html(text);
+        killFeedItem.css("color", `#${color.toString(16).padStart(6, "0")}`);
 
         const others = this._getKillFeedElements();
 
@@ -1229,7 +1231,7 @@ export class UIManager {
             removeAnimation.onfinish = () => {
                 killFeedItem.remove();
             };
-        }, 3000);
+        }, 4000);
     }
 
     private _addKillFeedMessage(text: string, classes: string[]): void {
@@ -1301,7 +1303,7 @@ export class UIManager {
             removeAnimation.onfinish = () => {
                 killFeedItem.remove();
             };
-        }, 3000);
+        }, 4000);
     }
 
     private _getKillFeedElements(): Array<{
@@ -1383,8 +1385,8 @@ export class UIManager {
         }
     });
 
-    processChatMessage(data: ChatPacketData): void {
-        this._addChatMessage(data.message);
+    processChatMessage(data: ServerChatPacketData): void {
+        this._addChatMessage(data.message, data.messageColor);
     }
 
     processKillFeedPacket(message: KillFeedPacketData): void {
@@ -1998,7 +2000,7 @@ class PlayerHealthUI {
 
             if (this._position.dirty && this._position.value) {
                 if ((indicator = teammateIndicators.get(id)) === undefined) {
-                    const color = TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(id) ?? this._colorIndex.value];
+                    const color = PIXI_TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(id) ?? this._colorIndex.value];
 
                     teammateIndicators.set(
                         id,
@@ -2026,7 +2028,7 @@ class PlayerHealthUI {
         }
 
         if (this._colorIndex.dirty) {
-            const color = TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(id) ?? this._colorIndex.value];
+            const color = PIXI_TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(id) ?? this._colorIndex.value];
 
             this.indicatorContainer.css(
                 "background-color",

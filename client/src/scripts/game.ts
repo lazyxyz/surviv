@@ -60,9 +60,9 @@ import { errorAlert } from "./modal";
 import { Modes, NumberToMode, type Mode } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "..";
 import { resetPlayButtons, updateDisconnectTime } from "./ui/home";
-import { autoPickup, updateUsersBadge } from "./ui/game";
+import { autoPickup, updateChatSendAllVisibility, updateUsersBadge } from "./ui/game";
 import { teamSocket } from "./ui/play";
-import { ChatPacket } from "@common/packets/chatPacket";
+import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 
 /* eslint-disable @stylistic/indent */
 
@@ -349,10 +349,18 @@ export class Game {
         updateUsersBadge(packet.badge?.idString)
     }
 
-    sendChatMessage(message: string) {
-        this.sendPacket(ChatPacket.create({
-            message: message
-        }));
+    sendChatMessage(message: string, isTeamChat: boolean = true) {
+        if (this.teamMode) {
+            this.sendPacket(ClientChatPacket.create({
+                isSendAll: !isTeamChat,
+                message: message
+            }));
+        } else {
+            this.sendPacket(ClientChatPacket.create({
+                isSendAll: true,
+                message: message
+            }));
+        }
     }
 
     async connectWebSocket(
@@ -545,7 +553,7 @@ export class Game {
             case packet instanceof KillFeedPacket:
                 this.uiManager.processKillFeedPacket(packet.output);
                 break;
-            case packet instanceof ChatPacket:
+            case packet instanceof ServerChatPacket:
                 this.uiManager.processChatMessage(packet.output);
                 break;
             case packet instanceof PingPacket: {
@@ -635,8 +643,11 @@ export class Game {
 
         const ui = this.uiManager.ui;
 
-        if (this.teamMode = packet.maxTeamSize !== TeamSize.Solo) {
+        if (packet.maxTeamSize !== TeamSize.Solo) {
+            this.teamMode = true;
             this.teamID = packet.teamID;
+        } else {
+            this.teamMode = false;
         }
 
         ui.canvas.addClass("active");
@@ -647,6 +658,7 @@ export class Game {
         ui.spectateKillLeader.addClass("btn-disabled");
 
         ui.teamContainer.toggle(this.teamMode);
+        updateChatSendAllVisibility(this.teamMode);
     }
 
     async endGame(): Promise<void> {
