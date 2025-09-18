@@ -30,8 +30,6 @@ async function fetchPrice(
         let price = "";
         if (SURVIV_SHOP_VERSION == 2) {
             let actualPrice = await account.queryPriceV2(itemType);
-            // Add 3% offset
-            actualPrice = (actualPrice * 103n) / 100n;
             price = actualPrice.toString();
         } else {
             price = await account.queryPrice(itemType, paymentToken);
