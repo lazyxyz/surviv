@@ -1,98 +1,104 @@
 # Translation File Reports
 
-This file is a report of all errors and missing keys in the translation files of this game. Last generated Mon, 15 Sep 2025 04:51:03 GMT
+This file is a report of all errors and missing keys in the translation files of this game. Last generated Thu, 18 Sep 2025 13:25:55 GMT
 
-## 🇸🇦 Arabic (100% Complete) - ar.hjson
-
-### (No Invalid Keys)
-
-### (No Undefined Keys)
-
-## 🇩🇪 German (100% Complete) - de.hjson
+## 🇸🇦 العربية (100% Complete) - ar.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇪🇸 Spanish (100% Complete) - es.hjson
+## 🇩🇪 Deutsch (100% Complete) - de.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇫🇷 French (100% Complete) - fr.hjson
+## 🇪🇸 Español (100% Complete) - es.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇮🇳 Hindi (100% Complete) - hi.hjson
+## 🇫🇷 Français (100% Complete) - fr.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇮🇩 Indonesian (100% Complete) - id.hjson
+## 🇮🇳 हिन्दी (100% Complete) - hi.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇮🇹 Italian (100% Complete) - it.hjson
+## 🇮🇩 Bahasa Indonesia (100% Complete) - id.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇯🇵 Japanese (100% Complete) - ja.hjson
+## 🇮🇹 Italiano (100% Complete) - it.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇰🇷 Korean (100% Complete) - ko.hjson
+## 🇯🇵 日本語 (100% Complete) - ja.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇲🇾 Malay (100% Complete) - ms.hjson
+## 🇰🇷 한국어 (100% Complete) - ko.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇳🇱 Dutch (100% Complete) - nl.hjson
+## 🇲🇾 Bahasa Melayu (100% Complete) - ms.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇵🇱 Polish (100% Complete) - pl.hjson
+## 🇳🇱 Nederlands (100% Complete) - nl.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇵🇹 Portuguese (100% Complete) - pt.hjson
+## 🇵🇱 Polski (100% Complete) - pl.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇧🇷 Brazilian (100% Complete) - pt_BR.hjson
+## 🇵🇹 Português (100% Complete) - pt.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇷🇺 Russian (100% Complete) - ru.hjson
+## 🇧🇷 Português Brasil (100% Complete) - pt_BR.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇹🇭 Thai (100% Complete) - th.hjson
+## 🇷🇺 Русский (100% Complete) - ru.hjson
+
+### (No Invalid Keys)
+
+### (No Undefined Keys)
+
+## 🇸🇰 Slovenčina (100% Complete) - sk.hjson
+
+### (No Invalid Keys)
+
+### (No Undefined Keys)
+
+## 🇹🇭 ไทย (100% Complete) - th.hjson
 
 ### (No Invalid Keys)
 
@@ -104,37 +110,37 @@ This file is a report of all errors and missing keys in the translation files of
 
 ### (No Undefined Keys)
 
-## 🇹🇷 Turkish (100% Complete) - tr.hjson
+## 🇹🇷 Türkçe (100% Complete) - tr.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇺🇦 Ukrainian (100% Complete) - uk.hjson
+## 🇺🇦 Українська (100% Complete) - uk.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇻🇳 Vietnamese (100% Complete) - vi.hjson
+## 🇻🇳 Tiếng Việt (100% Complete) - vi.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇳🇬 Yoruba (100% Complete) - yo.hjson
+## 🇳🇬 Yorùbá (100% Complete) - yo.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇨🇳 Simplified Chinese (100% Complete) - zh_CN.hjson
+## 🇨🇳 简体中文 (100% Complete) - zh_CN.hjson
 
 ### (No Invalid Keys)
 
 ### (No Undefined Keys)
 
-## 🇭🇰 Chinese (Hong Kong) (100% Complete) - zh_HK.hjson
+## 🇭🇰 繁體中文 (100% Complete) - zh_HK.hjson
 
 ### (No Invalid Keys)
 
