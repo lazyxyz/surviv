@@ -9,6 +9,7 @@ import { SurvivBadges, type Account } from "../account";
 import { GAME_CONSOLE } from "../..";
 import $ from "jquery";
 import { SURVIV_SHOP_VERSION } from "@common/mappings";
+import { ethers } from "ethers";
 
 export interface RegionInfo {
     readonly name: string;
@@ -40,6 +41,37 @@ export function resetPlayButtons(): void {
 }
 
 async function handleBuyCard(account: Account): Promise<void> {
+    // Function to fetch and format price
+    async function updateButtonPrice() {
+        try {
+            let price: number;
+            if (SURVIV_SHOP_VERSION == 2) {
+                price = await account.queryPriceV2(SurvivBadges.Cards);
+            } else {
+                price = await account.queryPrice(SurvivBadges.Cards, "NativeToken");
+            }
+
+            // Convert price from Wei to Ether
+            const priceInEther = ethers.formatEther(price);
+            // Round up to the nearest integer
+            const formattedPrice = Math.ceil(parseFloat(priceInEther));
+
+            // Update button text
+            $(".home-buy-card-button").text(`Claim for ${formattedPrice} $SOMI →`);
+        } catch (err) {
+            console.error("Error fetching price:", err);
+            $(".home-buy-card-button").text("Claim →"); // Fallback text on error
+        }
+    }
+
+    // Initial price update when the function is called
+    if (account.address) {
+        updateButtonPrice();
+    } else {
+        $(".home-buy-card-button").text("Claim →"); // Default text if wallet not connected
+    }
+
+    // Handle button click
     $(".home-buy-card-button").on("click", async () => {
         try {
             if (!account.address) {
@@ -57,6 +89,8 @@ async function handleBuyCard(account: Account): Promise<void> {
 
             GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", "surviv_card");
             successAlert("Purchase successful!");
+            // Optionally update price again after purchase
+            await updateButtonPrice();
         } catch (err) {
             console.error("Purchase error:", err);
             errorAlert("Something went wrong, please try again.");
