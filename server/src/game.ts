@@ -57,7 +57,7 @@ import { getIP, createServer } from "./utils/serverHelpers";
 import { verifyAllAssets, verifyBadges } from "./api/balances";
 import { Armors } from "@common/definitions/armors";
 import { Badges } from "@common/definitions/badges";
-import { ChatPacket, ChatPacketData } from "@common/packets/chatPacket";
+import { ClientChatPacket, ServerChatPacket, ServerChatPacketData } from "@common/packets/chatPacket";
 
 
 /*
@@ -323,7 +323,7 @@ export class Game implements GameData {
                 player.sendData(stream.getBuffer());
                 break;
             }
-            case packet instanceof ChatPacket: {
+            case packet instanceof ClientChatPacket: {
                 this.sendChatMessage(player, packet.output.isSendAll, packet.output.message);
                 break;
             }
@@ -1115,13 +1115,13 @@ export class Game implements GameData {
     sendChatMessage(player: Player, isSendAll: boolean, message: string): void {
         if (isSendAll && player.loadout.badge && player.loadout.badge) {
             this.packets.push(
-                ChatPacket.create({
-                    isSendAll,
+                ServerChatPacket.create({
+                    messageColor: 0xffffff,
                     message
-                } as ChatPacketData)
+                } as ServerChatPacketData)
             );
         } else if (this.teamMode && !isSendAll && player.team) {
-            player.team.sendTeamMessage(player.name, message);
+            player.team.sendTeamMessage(player.colorIndex, message);
         }
     }
 

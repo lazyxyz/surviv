@@ -62,7 +62,7 @@ import { GAME_CONSOLE } from "..";
 import { resetPlayButtons, updateDisconnectTime } from "./ui/home";
 import { autoPickup, updateChatSendAllVisibility, updateUsersBadge } from "./ui/game";
 import { teamSocket } from "./ui/play";
-import { ChatPacket } from "@common/packets/chatPacket";
+import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 
 /* eslint-disable @stylistic/indent */
 
@@ -351,12 +351,12 @@ export class Game {
 
     sendChatMessage(message: string, isTeamChat: boolean = true) {
         if (this.teamMode) {
-            this.sendPacket(ChatPacket.create({
+            this.sendPacket(ClientChatPacket.create({
                 isSendAll: !isTeamChat,
                 message: message
             }));
         } else {
-            this.sendPacket(ChatPacket.create({
+            this.sendPacket(ClientChatPacket.create({
                 isSendAll: true,
                 message: message
             }));
@@ -553,7 +553,7 @@ export class Game {
             case packet instanceof KillFeedPacket:
                 this.uiManager.processKillFeedPacket(packet.output);
                 break;
-            case packet instanceof ChatPacket:
+            case packet instanceof ServerChatPacket:
                 this.uiManager.processChatMessage(packet.output);
                 break;
             case packet instanceof PingPacket: {
