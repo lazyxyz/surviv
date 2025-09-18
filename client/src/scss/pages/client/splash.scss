@@ -228,7 +228,7 @@
   background: palette.$transparent_bg;
   width: 370px;
 
-  padding: 20px;
+  padding: 18px;
   border-radius: 20px;
 
   margin-left: 0.5rem;
@@ -585,8 +585,14 @@
     }
   }
 
+  .splash-text {
+    font-size: 14px;
+  }
+
   .btn {
-    font-size: 18px;
+    font-size: 15px;
+    font-weight: 600;
+    // font-size: 18px;
     width: 100%;
   }
 
