@@ -64,12 +64,7 @@ async function handleBuyCard(account: Account): Promise<void> {
         }
     }
 
-    // Initial price update when the function is called
-    if (account.address) {
-        updateButtonPrice();
-    } else {
-        $(".home-buy-card-button").text("Claim →"); // Default text if wallet not connected
-    }
+    updateButtonPrice();
 
     // Handle button click
     $(".home-buy-card-button").on("click", async () => {

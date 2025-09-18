@@ -20,11 +20,11 @@ import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
 import { abi as survivShopV2ABI } from "@common/abis/ISurvivShopV2.json";
 import { abi as seasonRewardsABI } from "@common/abis/INFTDistribution.json";
-import { errorAlert } from "./modal";
+import { errorAlert, warningAlert } from "./modal";
 import { resetPlayButtons } from "./ui/home";
 import { ChainConfig } from "../config";
-import {getWalletConnectInfo, getWalletConnectInit} from "./wallet/walletConnect";
-import type {EthereumProviderOptions} from "@walletconnect/ethereum-provider";
+import { getWalletConnectInfo, getWalletConnectInit } from "./wallet/walletConnect";
+import type { EthereumProviderOptions } from "@walletconnect/ethereum-provider";
 
 const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
 const SURVIV_BASE_ADDRESS = SurvivMapping.SurvivBase.address;
@@ -334,8 +334,8 @@ export class Account extends EIP6963 {
     async getAssetBalances(
         returnAll: boolean = false
     ): Promise<Record<SurvivAssets, Record<AssetTier, Record<string, number>>>> {
-        if (!this.provider?.provider) {
-            throw new Error('Provider not available');
+        if (!ChainConfig.rpcUrls[0]) {
+            throw new Error('RPC URL not configured');
         }
 
         if (!SurvivAssetsMapping || !SurvivAssetsMapping.address || !Array.isArray(SurvivAssetsMapping.assets)) {
@@ -348,9 +348,8 @@ export class Account extends EIP6963 {
         }
 
         // Initialize the ethers contract
-        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-        const signer = await ethersProvider.getSigner();
-        const contract = new ethers.Contract(assetsAddress, erc1155ABI, signer);
+        const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+        const contract = new ethers.Contract(assetsAddress, erc1155ABI, ethersProvider);
 
         // Initialize result with nested structure: SurvivAssets -> Tier -> assetName -> balance
         const result: Record<SurvivAssets, Record<AssetTier, Record<string, number>>> = {
@@ -449,9 +448,12 @@ export class Account extends EIP6963 {
         assetType: SurvivItems,
         returnAll: boolean = false
     ): Promise<Record<string, number>> {
-        if (!this.provider?.provider) {
-            throw new Error('Provider not available');
+        // Ensure RPC URL is available
+        if (!ChainConfig.rpcUrls[0]) {
+            throw new Error('RPC URL not configured');
         }
+
+
         const selectedMapping = itemMappings[assetType];
         if (!selectedMapping || !selectedMapping.address || !Array.isArray(selectedMapping.assets)) {
             throw new Error(`Invalid mapping configuration for asset type ${assetType}`);
@@ -470,9 +472,8 @@ export class Account extends EIP6963 {
         }
 
         // Initialize the ethers contract
-        const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-        const signer = await ethersProvider.getSigner();
-        const contract = new ethers.Contract(assetsAddress, erc1155ABI, signer);
+        const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+        const contract = new ethers.Contract(assetsAddress, erc1155ABI, ethersProvider);
 
         // Batch query balances
         const accounts = Array(tokenIds.length).fill(this.address);
@@ -492,6 +493,7 @@ export class Account extends EIP6963 {
 
         return result;
     }
+
     /**
      * Claims all available rewards (crates) for the authenticated user.
      * @returns A promise resolving to the transaction receipt.
@@ -541,12 +543,14 @@ export class Account extends EIP6963 {
   * @throws Error if the API request fails or no valid rewards are found.
   */
     async getValidRewards(): Promise<ValidRewards> {
+        // Ensure authentication token is present
         if (!this.token) {
             throw new Error('Authentication token is missing');
         }
 
-        if (!this.provider?.provider) {
-            throw new Error('Web3 provider not initialized');
+        // Ensure RPC URL is available
+        if (!ChainConfig.rpcUrls[0]) {
+            throw new Error('RPC URL not configured');
         }
 
         // Set fetch timeout
@@ -576,8 +580,14 @@ export class Account extends EIP6963 {
             const signatures: string[] = [];
 
             for (const claim of data.claims) {
-                if (!claim.reward?.to || !ethers.isAddress(claim.reward.to) || !Number.isInteger(claim.reward.amount) ||
-                    !claim.reward.salt || !Number.isInteger(claim.reward.expiry) || !claim.signature) {
+                if (
+                    !claim.reward?.to ||
+                    !ethers.isAddress(claim.reward.to) ||
+                    !Number.isInteger(claim.reward.amount) ||
+                    !claim.reward.salt ||
+                    !Number.isInteger(claim.reward.expiry) ||
+                    !claim.signature
+                ) {
                     console.warn('Invalid claim data, skipping:', claim);
                     continue;
                 }
@@ -591,10 +601,9 @@ export class Account extends EIP6963 {
                 signatures.push(claim.signature);
             }
 
-            // Initialize contract
-            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-            const signer = await ethersProvider.getSigner();
-            const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
+            // Initialize contract with read-only provider
+            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+            const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, ethersProvider);
 
             // Batch check used signatures
             const validIndices: number[] = [];
@@ -622,10 +631,10 @@ export class Account extends EIP6963 {
                 }
             }
 
-            const validCrates = validIndices.map(i => crates[i]);
-            const validSignatures = validIndices.map(i => signatures[i]);
+            const validCrates = validIndices.map((i) => crates[i]);
+            const validSignatures = validIndices.map((i) => signatures[i]);
 
-            // Remove invalid rewards
+            // Remove invalid rewards (assuming removeRewards is an API call or handled separately)
             if (validIndices.length < signatures.length) {
                 const invalidSignatures = signatures.filter((_, i) => !validIndices.includes(i));
                 await this.removeRewards(invalidSignatures);
@@ -869,8 +878,9 @@ export class Account extends EIP6963 {
         item: SaleItems, // Use SaleItems key type ("Crates" | "Cards" | "Keys")
         paymentToken: PaymentTokenType // Use PaymentTokens key type ("NativeToken")
     ): Promise<any> {
-        if (!this.provider?.provider) {
-            throw new Error('Web3 provider not initialized');
+        // Ensure RPC URL is available
+        if (!ChainConfig.rpcUrls[0]) {
+            throw new Error('RPC URL not configured');
         }
 
         let itemValue = saleMappings[item];
@@ -886,25 +896,30 @@ export class Account extends EIP6963 {
         const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         try {
-            // Initialize contract
-            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-            const signer = await ethersProvider.getSigner();
-            const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
+            // Initialize JSON-RPC provider
+            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
 
+            // Initialize contract with read-only provider (no signer needed)
+            const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, ethersProvider);
+
+            // Call the getPrice function
             const price = await survivShopContract.getPrice(PaymentTokens[paymentToken], itemAddress, itemIndex);
+
             clearTimeout(timeoutId);
             return price;
         } catch (error: any) {
+            console.log("error: ", error);
             clearTimeout(timeoutId);
             throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
         }
     }
 
     async queryPriceV2(
-        item: SaleItems, // Use SaleItems key type ("Crates" | "Cards" | "Keys")
+        item: SaleItems // Use SaleItems key type ("Crates" | "Cards" | "Keys")
     ): Promise<any> {
-        if (!this.provider?.provider) {
-            throw new Error('Web3 provider not initialized');
+        // Ensure RPC URL is available
+        if (!ChainConfig.rpcUrls[0]) {
+            throw new Error('RPC URL not configured');
         }
 
         let itemValue = saleMappings[item];
@@ -920,10 +935,13 @@ export class Account extends EIP6963 {
         const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         try {
-            // Initialize contract
-            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-            const signer = await ethersProvider.getSigner();
-            const survivShopContract = new ethers.Contract(SURVIV_SHOPV2_ADDRESS, survivShopV2ABI, signer);
+            // Initialize JSON-RPC provider
+            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+
+            // Initialize contract with read-only provider (no signer needed)
+            const survivShopContract = new ethers.Contract(SURVIV_SHOPV2_ADDRESS, survivShopV2ABI, ethersProvider);
+
+            // Call the getPrice function
             const price = await survivShopContract.getPrice(itemAddress, itemIndex);
 
             clearTimeout(timeoutId);
@@ -936,8 +954,15 @@ export class Account extends EIP6963 {
     }
 
     async getCommits(): Promise<any> {
-        if (!this.provider?.provider) {
-            throw new Error('Web3 provider not initialized');
+        // Ensure RPC URL is available
+        if (!ChainConfig.rpcUrls[0]) {
+            throw new Error('RPC URL not configured');
+        }
+
+        // Validate userAddress
+        if (!this.address) {
+            warningAlert("Please connect your wallet to continue!", 3000);
+            return;
         }
 
         // Set fetch timeout
@@ -945,26 +970,34 @@ export class Account extends EIP6963 {
         const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         try {
-            // Initialize contract
-            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-            const signer = await ethersProvider.getSigner();
+            // Initialize JSON-RPC provider
+            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
 
-            const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
-            const remainingCommits = await crateBaseContract.getCommits(signer.address);
+            // Initialize contract with read-only provider (no signer needed)
+            const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, ethersProvider);
+
+            // Call the getCommits function with the provided user address
+            const remainingCommits = await crateBaseContract.getCommits(this.address);
+
+            clearTimeout(timeoutId);
             return remainingCommits;
         } catch (error: any) {
+            console.log("error: ", error);
             clearTimeout(timeoutId);
             throw new Error(`Failed to request get commits: ${error.message || 'Unknown error'}`);
         }
     }
 
     async getTokenMints(txnHash: string): Promise<MintResult[]> {
-        if (!this.provider?.provider) {
-            throw new Error('Web3 provider not initialized');
+        // Ensure RPC URL is available
+        if (!ChainConfig.rpcUrls[0]) {
+            throw new Error('RPC URL not configured');
         }
 
         try {
-            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+            // Initialize JSON-RPC provider
+            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+
             // Fetch the transaction receipt using the provider
             const receipt = await ethersProvider.getTransactionReceipt(txnHash);
 
@@ -1036,15 +1069,19 @@ export class Account extends EIP6963 {
             });
 
             return result;
-        } catch (error) {
+        } catch (error: any) {
             console.log("error: ", error);
             return [];
         }
     }
 
     async getSeasonRewards(season: string = "1"): Promise<SeasonRewardsData> {
-        if (!this.provider?.provider) {
-            throw new Error('Web3 provider not initialized');
+        if (!ChainConfig.rpcUrls[0]) {
+            throw new Error('RPC URL not configured');
+        }
+        // Validate userAddress
+        if (!this.address) {
+            throw new Error('Please connect your wallet to continue!');
         }
 
         // Set fetch timeout
@@ -1065,13 +1102,12 @@ export class Account extends EIP6963 {
             const rewardsData: SeasonRewardsData = await response.json();
 
             if (rewardsData.success) {
-                const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-                const signer = await ethersProvider.getSigner();
+                const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
 
                 const distributionContract = new ethers.Contract(
                     rewardsData.distributionContract,
                     seasonRewardsABI,
-                    signer
+                    ethersProvider
                 );
 
                 // Store valid rewards
@@ -1088,7 +1124,7 @@ export class Account extends EIP6963 {
                 // Filter rewards
                 for (let i = 0; i < rewardsData.collections.length; i++) {
                     const isValid = await distributionContract.verifyRewards(
-                        signer.address,
+                        this.address,
                         rewardsData.collections[i],
                         rewardsData.merkleProofs[i],
                         rewardsData.tokenIds[i],
