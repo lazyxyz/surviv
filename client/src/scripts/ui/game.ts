@@ -994,13 +994,33 @@ function setupGameInteraction(game: Game): void {
     addCheckboxListener("#toggle-draw-hud", "cv_draw_hud");
 }
 
+export function updateChatSendAllVisibility(teamMode: boolean) {
+    const chatSendAll = document.getElementById("chat-send-all") as HTMLButtonElement;
+
+    chatSendAll.style.display = teamMode ? "block" : "none";
+}
+
 /* Chat handler function */
 function handleChatMessage(game: Game) {
     const CHAT_MESSAGE_MAX_LENGTH = 32;
     const chatBtn = document.getElementById("chat-btn") as HTMLDivElement;
     const chatBox = document.getElementById("chat-box") as HTMLDivElement;
     const chatSend = document.getElementById("chat-send") as HTMLButtonElement;
+    const chatSendAll = document.getElementById("chat-send-all") as HTMLButtonElement;
     const chatInput = document.getElementById("chat-input") as HTMLTextAreaElement;
+
+    chatSendAll.addEventListener("click", (event) => {
+        event.stopPropagation(); // Prevent event from reaching game canvas
+        const message = chatInput.value.trim();
+        if (message && message.length <= CHAT_MESSAGE_MAX_LENGTH) {
+            // Send chat message packet
+            game.sendChatMessage(message, false);
+            chatInput.value = ""; // Clear input
+            chatBox.style.display = "none"; // Hide chat box
+            chatInput.blur(); // Remove focus
+            game.inputManager.resumeInput(); // Resume game input
+        }
+    });
 
     // Limit input length
     chatInput.setAttribute("maxlength", CHAT_MESSAGE_MAX_LENGTH.toString());

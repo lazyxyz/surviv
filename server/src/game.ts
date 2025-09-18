@@ -57,7 +57,7 @@ import { getIP, createServer } from "./utils/serverHelpers";
 import { verifyAllAssets, verifyBadges } from "./api/balances";
 import { Armors } from "@common/definitions/armors";
 import { Badges } from "@common/definitions/badges";
-import { ChatPacket, ChatPacketData } from "@common/packets/chatPacket";
+import { ClientChatPacket, ServerChatPacket, ServerChatPacketData } from "@common/packets/chatPacket";
 
 
 /*
@@ -323,8 +323,8 @@ export class Game implements GameData {
                 player.sendData(stream.getBuffer());
                 break;
             }
-            case packet instanceof ChatPacket: {
-                this.sendChatMessage(player, packet.output.message);
+            case packet instanceof ClientChatPacket: {
+                this.sendChatMessage(player, packet.output.isSendAll, packet.output.message);
                 break;
             }
         }
@@ -1112,18 +1112,16 @@ export class Game implements GameData {
         syncedParticle.dead = true;
     }
 
-    sendChatMessage(player: Player, message: string): void {
-        if (this.teamMode) {
-            player.team?.sendTeamMessage(player.name, message);
-        } else {
-            // Only allow player chat with badge
-            if (player.loadout.badge) {
-                this.packets.push(
-                    ChatPacket.create({
-                        message
-                    } as ChatPacketData)
-                );
-            }
+    sendChatMessage(player: Player, isSendAll: boolean, message: string): void {
+        if (isSendAll && player.loadout.badge && player.loadout.badge) {
+            this.packets.push(
+                ServerChatPacket.create({
+                    messageColor: 0xffffff,
+                    message
+                } as ServerChatPacketData)
+            );
+        } else if (this.teamMode && !isSendAll && player.team) {
+            player.team.sendTeamMessage(player.colorIndex, message);
         }
     }
 

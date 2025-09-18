@@ -10,7 +10,7 @@ import $ from "jquery";
 import { Container, Graphics, RenderTexture, Sprite, Text, isMobile, type ColorSource, type Texture } from "pixi.js";
 import { getTranslatedString } from "../../translations";
 import { type Game } from "../game";
-import { getColors, DIFF_LAYER_HITBOX_OPACITY, FOOTSTEP_HITBOX_LAYER, HITBOX_DEBUG_MODE, PIXI_SCALE, TEAMMATE_COLORS } from "../utils/constants";
+import { getColors, DIFF_LAYER_HITBOX_OPACITY, FOOTSTEP_HITBOX_LAYER, HITBOX_DEBUG_MODE, PIXI_SCALE, PIXI_TEAMMATE_COLORS } from "../utils/constants";
 import { SuroiSprite, drawGroundGraphics, drawHitbox, toPixiCoords } from "../utils/pixi";
 import { GasRender } from "./gas";
 import { GAME_CONSOLE } from "../..";
@@ -55,7 +55,7 @@ export class Minimap {
     private _texture?: Texture;
 
     readonly indicator = new SuroiSprite("player_indicator")
-        .setTint(TEAMMATE_COLORS[0])
+        .setTint(PIXI_TEAMMATE_COLORS[0])
         .setZIndex(1000);
 
     readonly teammateIndicators = new Map<number, SuroiSprite>();
@@ -829,7 +829,7 @@ export class MapPing {
         this.color = definition.color;
 
         if (definition.isPlayerPing && playerId) {
-            this.color = TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(playerId) ?? game.uiManager.teammates.findIndex(({ id }) => id === playerId)];
+            this.color = PIXI_TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(playerId) ?? game.uiManager.teammates.findIndex(({ id }) => id === playerId)];
         }
 
         this.mapImage = new SuroiSprite(definition.idString)

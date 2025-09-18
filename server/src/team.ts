@@ -5,8 +5,8 @@ import { findGame } from "./gameManager";
 import { type Player } from "./objects/player";
 import { CUSTOM_TEAMS } from "./server";
 import { removeFrom } from "./utils/misc";
-import { TeamSize } from "@common/constants";
-import { ChatPacket, ChatPacketData } from "@common/packets/chatPacket";
+import { TEAMMATE_COLORS, TeamSize } from "@common/constants";
+import { ServerChatPacket, ServerChatPacketData } from "@common/packets/chatPacket";
 
 export class Team {
     readonly id: number; // team index in a game
@@ -77,13 +77,14 @@ export class Team {
         return this.players.filter(player => !player.dead && !player.disconnected);
     }
 
-    sendTeamMessage(name: string, message: string): void {
-        const textMessage = `${name}: ${message}`;
+    sendTeamMessage(colorIndex: number, message: string): void {
+        const playerColor = TEAMMATE_COLORS[colorIndex];
         for (const player of this.players) {
             player.sendPacket(
-                ChatPacket.create({
-                    message: textMessage
-                } as ChatPacketData)
+                ServerChatPacket.create({
+                    messageColor: playerColor,
+                    message: message
+                } as ServerChatPacketData)
             );
         }
     }
