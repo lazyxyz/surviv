@@ -64,7 +64,6 @@ function setTeamParameters(params: URLSearchParams): void {
 
 
 async function initializePlayButtons(game: Game, account: Account): Promise<void> {
-    const { ui } = game.uiManager;
     const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
 
     playButtons.forEach((button, index) => {
@@ -162,22 +161,26 @@ function setupTeamMenu(game: Game, account: Account): void {
 
 $<HTMLButtonElement>("#btn-leave-game").on("click", function () {
     if (confirm("Are you sure you want to leave the team?")) {
-        teamSocket?.close();
-        teamSocket = undefined;
-        teamID = undefined;
-        joinedTeam = false;
-        window.location.hash = "";
-        resetPlayButtons();
-        $("#create-team-menu").fadeOut(250);
-        $(".splash-earn-learn-more").show();
-        $("#splash-inventory").prepend($(".splash-earn-get-now").detach());
-        $("#splash-earn").append($(".splash-earn-learn-more").detach().show());
-        $("#splash-earn").prepend($(".splash-earn-get-now").detach().show());
-        $("#splash-earn").append($("#create-team-menu").detach().hide());
-        $(".splash-earn-get-now").show();
-        $("#option-btns-group").show();
+        leaveTeam();
     }
 });
+
+function leaveTeam() {
+    teamSocket?.close();
+    teamSocket = undefined;
+    teamID = undefined;
+    joinedTeam = false;
+    window.location.hash = "";
+    resetPlayButtons();
+    $("#create-team-menu").fadeOut(250);
+    $(".splash-earn-learn-more").show();
+    $("#splash-inventory").prepend($(".splash-earn-get-now").detach());
+    $("#splash-earn").append($(".splash-earn-learn-more").detach().show());
+    $("#splash-earn").prepend($(".splash-earn-get-now").detach().show());
+    $("#splash-earn").append($("#create-team-menu").detach().hide());
+    $(".splash-earn-get-now").show();
+    $("#option-btns-group").show();
+}
 
 function setupTeamMenuControls(game: Game, account: Account): void {
     const { ui } = game.uiManager;
@@ -263,6 +266,9 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
             case CustomTeamMessages.Started:
                 joinGame(TeamSize.Squad, game, account);
                 break;
+            case CustomTeamMessages.Kick:
+                leaveTeam();
+                break;
         }
     };
 
@@ -283,19 +289,7 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
         setTimeout(() => {
             ui.splashMsg.hide();
         }, 3000);
-        resetPlayButtons();
-        teamSocket = undefined;
-        teamID = undefined;
-        joinedTeam = false;
-        window.location.hash = "";
-        $("#create-team-menu").fadeOut(250);
-        $(".splash-earn-learn-more").show();
-        $("#splash-inventory").prepend($(".splash-earn-get-now").detach());
-        $("#splash-earn").append($(".splash-earn-learn-more").detach().show());
-        $("#splash-earn").prepend($(".splash-earn-get-now").detach().show());
-        $("#splash-earn").append($("#create-team-menu").detach().hide());
-        $(".splash-earn-get-now").show();
-        $("#option-btns-group").show();
+        leaveTeam();
         ui.splashUi.css({ filter: "", pointerEvents: "" });
     };
 }
@@ -314,7 +308,7 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
     if (data.type != CustomTeamMessages.Update) throw Error("handleTeamUpdate Failed");
 
     const { players, isLeader, ready } = data;
-    ui.createTeamPlayers.html(players.map((player: CustomTeamPlayerInfo) => {
+    ui.createTeamPlayers.html(players.map((player: CustomTeamPlayerInfo, index: number) => {
         let skin = player.skin;
         const localName = GAME_CONSOLE.getBuiltInCVar("cv_player_name");
         if (player.name === localName) {
@@ -324,10 +318,10 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         <div class="create-team-player-container">
             <i class="fa-solid fa-crown"${player.isLeader ? "" : ' style="display: none"'}></i>
             <i class="fa-regular fa-circle-check"${player.ready && !player.isLeader ? "" : ' style="display: none"'}></i>
-        ${
-            // show only for leader
+            ${
+            // Show kick icon only for leader and not for the leader's own player
             isLeader && !player.isLeader
-                ? `<i class="fa-regular fa-circle-xmark"${player.ready ? "" : ' style="display: none"'}></i>`
+                ? `<i class="fa-regular fa-circle-xmark kick-player" data-player-id="${index}"></i>`
                 : ""
             }
             <div id="team-skin" class="skin">
@@ -345,6 +339,26 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
     ui.createTeamToggles.toggleClass("disabled", !isLeader);
     ui.btnStartGame.toggleClass("btn-disabled", !isLeader && ready)
         .text(getTranslatedString(isLeader ? "create_team_play" : ready ? "create_team_waiting" : "create_team_ready"));
+
+    attachKickListeners(ui);
+}
+
+function attachKickListeners(ui: Game['uiManager']['ui']): void {
+    const kickIcons = ui.createTeamPlayers.find(".kick-player");
+    kickIcons.off("click");
+    kickIcons.on("click", (event: JQuery.ClickEvent) => {
+        const playerId = $(event.currentTarget).data("player-id");
+        if (typeof playerId !== "undefined") {
+            teamSocket?.send(
+                JSON.stringify({
+                    type: CustomTeamMessages.Kick,
+                    playerId: playerId,
+                })
+            );
+        } else {
+            console.error("Player ID not found for kick action");
+        }
+    });
 }
 
 export async function joinGame(teamSize: number, game: Game, account: Account): Promise<void> {
