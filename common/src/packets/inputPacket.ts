@@ -74,11 +74,8 @@ type TurningMixin = {
     readonly turning: true
     readonly rotation: number
 } & ({
-    readonly isMobile: false
+    readonly isMobile: boolean
     readonly distanceToMouse: number
-} | {
-    readonly isMobile: true
-    readonly distanceToMouse?: undefined
 }));
 
 export type PlayerInputData = {
@@ -116,9 +113,7 @@ export const PlayerInputPacket = createPacket("PlayerInputPacket")<PlayerInputDa
 
         if (turning) {
             stream.writeRotation2(data.rotation);
-            if (!isMobile) {
-                stream.writeFloat(data.distanceToMouse, 0, GameConstants.player.maxMouseDist, 2);
-            }
+            stream.writeFloat(data.distanceToMouse, 0, GameConstants.player.maxMouseDist, 2);
         }
 
         stream.writeArray(data.actions, action => {
@@ -189,11 +184,9 @@ export const PlayerInputPacket = createPacket("PlayerInputPacket")<PlayerInputDa
 
         if (turning) {
             data.rotation = stream.readRotation2();
-            if (!isMobile) {
-                (
-                    data as DeepMutable<NoMobile & { turning: true }>
-                ).distanceToMouse = stream.readFloat(0, GameConstants.player.maxMouseDist, 2);
-            }
+            (
+                data as DeepMutable<NoMobile & { turning: true }>
+            ).distanceToMouse = stream.readFloat(0, GameConstants.player.maxMouseDist, 2);
         }
 
         // Actions

@@ -13,7 +13,7 @@ import { Obstacles, type ObstacleDefinition } from "@common/definitions/obstacle
 import { PerkIds, Perks, type PerkDefinition, type PerkNames } from "@common/definitions/perks";
 import { DEFAULT_SCOPE, Scopes, type ScopeDefinition } from "@common/definitions/scopes";
 import { type SkinDefinition } from "@common/definitions/skins";
-import {  type SyncedParticleDefinition } from "@common/definitions/syncedParticles";
+import { type SyncedParticleDefinition } from "@common/definitions/syncedParticles";
 import { Throwables, type ThrowableDefinition } from "@common/definitions/throwables";
 import { type AllowedEmoteSources, type NoMobile, type PlayerInputData } from "@common/packets/inputPacket";
 import { createKillfeedMessage, KillFeedPacket, type ForEventType } from "@common/packets/killFeedPacket";
@@ -2014,15 +2014,13 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         if (this.turning = packet.turning) {
             this.rotation = packet.rotation;
-            if (!this.isMobile) {
-                this.distanceToMouse = (packet as typeof packet & NoMobile).distanceToMouse ?? 0;
-                /*
-                    we put ?? cause even though the packet's isMobile should match the server's, it might
-                    be possible—whether accidentally or maliciously—that it doesn't; however, the server is
-                    not to honor any change to isMobile. however, the packet will still be announcing itself
-                    as a mobile packet, and will thus lack the distanceToMouse field
-                */
-            }
+            this.distanceToMouse = (packet as typeof packet).distanceToMouse ?? 0;
+            /*
+                we put ?? cause even though the packet's isMobile should match the server's, it might
+                be possible—whether accidentally or maliciously—that it doesn't; however, the server is
+                not to honor any change to isMobile. however, the packet will still be announcing itself
+                as a mobile packet, and will thus lack the distanceToMouse field
+            */
         }
 
         const inventory = this.inventory;
@@ -2075,7 +2073,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                     const slot = action.slot;
 
                     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                    inventory.isLocked(slot)? inventory.unlock(slot): inventory.lock(slot);
+                    inventory.isLocked(slot) ? inventory.unlock(slot) : inventory.lock(slot);
                     break;
                 }
                 case InputActions.Loot:
