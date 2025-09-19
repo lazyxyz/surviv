@@ -98,6 +98,37 @@ async function initializePlayButtons(game: Game, account: Account): Promise<void
     });
 }
 
+// function setupTeamMenu(game: Game, account: Account): void {
+//     const { ui } = game.uiManager;
+//     $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", async function () {
+//         if (!isClickAllowed() || teamSocket || !selectedRegion || !account.token?.length) return;
+//         if (new Date().getTime() >= (parseJWT(account.token).exp * 1000)) {
+//             return account.sessionExpired();
+//         }
+
+//         ui.splashOptions.addClass("loading");
+//         ui.loadingText.text(getTranslatedString("loading_connecting"));
+
+//         const params = new URLSearchParams();
+//         if (this.id === "btn-join-team") {
+//             teamID = await promptTeamID();
+//             if (!teamID) {
+//                 resetPlayButtons();
+//                 return;
+//             }
+//             params.set("teamID", teamID);
+//         }
+
+//         setTeamParameters(params);
+//         const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
+//         teamSocket = new WebSocket(teamURL);
+//         setupTeamSocketHandlers(teamSocket, game, account);
+
+//         $("#create-team-menu").fadeIn(250);
+//         ui.splashUi.css({ filter: "brightness(0.6)", pointerEvents: "none" });
+//     });
+// }
+
 function setupTeamMenu(game: Game, account: Account): void {
     const { ui } = game.uiManager;
     $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", async function () {
@@ -106,8 +137,11 @@ function setupTeamMenu(game: Game, account: Account): void {
             return account.sessionExpired();
         }
 
-        ui.splashOptions.addClass("loading");
-        ui.loadingText.text(getTranslatedString("loading_connecting"));
+        // Custom UI changes for both leader and member when clicking #btn-create-team
+        $(".splash-earn-learn-more").hide();
+        $("#splash-inventory").prepend($(".splash-earn-get-now").detach());
+        $("#splash-earn").append($("#create-team-menu").detach().show());
+        $("#option-btns-group").hide();
 
         const params = new URLSearchParams();
         if (this.id === "btn-join-team") {
@@ -123,11 +157,27 @@ function setupTeamMenu(game: Game, account: Account): void {
         const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
         teamSocket = new WebSocket(teamURL);
         setupTeamSocketHandlers(teamSocket, game, account);
-
-        $("#create-team-menu").fadeIn(250);
-        ui.splashUi.css({ filter: "brightness(0.6)", pointerEvents: "none" });
     });
 }
+
+$<HTMLButtonElement>("#btn-leave-game").on("click", function () {
+    if (confirm("Are you sure you want to leave the team?")) {
+        teamSocket?.close();
+        teamSocket = undefined;
+        teamID = undefined;
+        joinedTeam = false;
+        window.location.hash = "";
+        resetPlayButtons();
+        $("#create-team-menu").fadeOut(250);
+        $(".splash-earn-learn-more").show();
+        $("#splash-inventory").prepend($(".splash-earn-get-now").detach());
+        $("#splash-earn").append($(".splash-earn-learn-more").detach().show());
+        $("#splash-earn").prepend($(".splash-earn-get-now").detach().show());
+        $("#splash-earn").append($("#create-team-menu").detach().hide());
+        $(".splash-earn-get-now").show();
+        $("#option-btns-group").show();
+    }
+});
 
 function setupTeamMenuControls(game: Game, account: Account): void {
     const { ui } = game.uiManager;
@@ -148,12 +198,10 @@ function setupTeamMenuControls(game: Game, account: Account): void {
             await navigator.clipboard.writeText(url);
             copyUrl.addClass("btn-success").css("pointer-events", "none").html(`
                 <i class="fa-solid fa-check" id="copy-team-btn-icon"></i>
-                ${getTranslatedString("copied")}
             `);
             setTimeout(() => {
                 copyUrl.removeClass("btn-success").css("pointer-events", "").html(`
                     <i class="fa-solid fa-clipboard" id="copy-team-btn-icon"></i>
-                    ${getTranslatedString("copy")}
                 `);
             }, 2000);
         } catch {
@@ -213,7 +261,6 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
                 ui.createTeamLock.prop("checked", data.locked);
                 break;
             case CustomTeamMessages.Started:
-                $("#create-team-menu").hide();
                 joinGame(TeamSize.Squad, game, account);
                 break;
         }
@@ -222,6 +269,9 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
     socket.onerror = (): void => {
         ui.splashMsgText.html(getTranslatedString("msg_error_joining_team"));
         ui.splashMsg.show();
+        setTimeout(() => {
+            ui.splashMsg.hide();
+        }, 3000);
         resetPlayButtons();
         $("#create-team-menu").fadeOut(250);
         ui.splashUi.css({ filter: "", pointerEvents: "" });
@@ -230,12 +280,22 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
     socket.onclose = (): void => {
         ui.splashMsgText.html(joinedTeam ? getTranslatedString("msg_lost_team_connection") : getTranslatedString("msg_error_joining_team"));
         ui.splashMsg.show();
+        setTimeout(() => {
+            ui.splashMsg.hide();
+        }, 3000);
         resetPlayButtons();
         teamSocket = undefined;
         teamID = undefined;
         joinedTeam = false;
         window.location.hash = "";
         $("#create-team-menu").fadeOut(250);
+        $(".splash-earn-learn-more").show();
+        $("#splash-inventory").prepend($(".splash-earn-get-now").detach());
+        $("#splash-earn").append($(".splash-earn-learn-more").detach().show());
+        $("#splash-earn").prepend($(".splash-earn-get-now").detach().show());
+        $("#splash-earn").append($("#create-team-menu").detach().hide());
+        $(".splash-earn-get-now").show();
+        $("#option-btns-group").show();
         ui.splashUi.css({ filter: "", pointerEvents: "" });
     };
 }
@@ -263,8 +323,14 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         return `
         <div class="create-team-player-container">
             <i class="fa-solid fa-crown"${player.isLeader ? "" : ' style="display: none"'}></i>
-            <i class="fa-regular fa-circle-check"${player.ready ? "" : ' style="display: none"'}></i>
-            <div class="skin">
+            <i class="fa-regular fa-circle-check"${player.ready && !player.isLeader ? "" : ' style="display: none"'}></i>
+        ${
+            // show only for leader
+            isLeader && !player.isLeader
+                ? `<i class="fa-regular fa-circle-xmark"${player.ready ? "" : ' style="display: none"'}></i>`
+                : ""
+            }
+            <div id="team-skin" class="skin">
                 <div class="skin-base" style="background-image: url('./img/game/shared/skins/${skin}_base.svg')"></div>
                 <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${skin}_fist.svg')"></div>
                 <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${skin}_fist.svg')"></div>
@@ -331,7 +397,6 @@ async function connectToGame(data: GetGameResponse, gameAddress: string, game: G
     await game.connect(websocketURL, account);
     ui.loadingText.text(getTranslatedString("verifying_game_assets"));
     ui.splashMsg.hide();
-    if ($("#create-team-menu").css("display") !== "none") $("#create-team-menu").hide();
 }
 
 function setGameParameters(params: URLSearchParams, account: Account): void {

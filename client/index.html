@@ -128,7 +128,6 @@
             </div>
           </div>
         </div>
-
         <div class="splash-earn-learn-more">
           <img src="./img/earn/thumbnail.webp" width="100%" />
           <a href="./earn/">
@@ -188,19 +187,23 @@
               <ul class="dropdown-content" id="server-list"></ul>
             </div>
 
-            <div id="team-option-btns" class="team-btns-container">
-              <button class="btn btn-lg btn-darken btn-primary" id="btn-play-solo">
-                <span translation="play_solo"></span>
-              </button>
-              <button class="btn btn-lg btn-darken btn-primary" id="btn-play-squad">
-                <span translation="play_squad"></span>
-              </button>
+            <div id="option-btns-group">
+              <div id="option-btns-group" class="team-btns-container">
+                <button class="btn btn-lg btn-darken btn-primary" id="btn-play-solo">
+                  <span translation="play_solo"></span>
+                </button>
+                <button class="btn btn-lg btn-darken btn-primary" id="btn-play-squad">
+                  <span translation="play_squad"></span>
+                </button>
+              </div>
+
+              <div id="option-btns-group" class="team-btns-container">
+                <button class="btn btn-lg btn-darken btn-purple" id="btn-join-team" translation="join_team"></button>
+                <button class="btn btn-lg btn-darken btn-purple" id="btn-create-team"
+                  translation="create_team"></button>
+              </div>
             </div>
 
-            <div id="team-option-btns" class="team-btns-container">
-              <button class="btn btn-lg btn-darken btn-purple" id="btn-join-team" translation="join_team"></button>
-              <button class="btn btn-lg btn-darken btn-purple" id="btn-create-team" translation="create_team"></button>
-            </div>
 
             <button class="rules-close-btn btn-darken" id="rules-close-btn" style="display: none">
               <i class="fa-solid fa-xmark"></i>
@@ -240,26 +243,27 @@
 
         </div>
       </div>
-
-
-      <div id="splash-customize">
-        <div id="skin-container">
-          <div id="skin-base"></div>
-          <div id="skin-left-fist"></div>
-          <div id="skin-right-fist"></div>
-        </div>
-        <div style="display: flex; flex-direction: row; gap: 15px">
-          <button class="btn btn-lg btn-darken btn-primary" id="btn-customize">
-            <i class="fa-solid fa-shirt"></i>
-            <span class="splash-text" translation="inventory"></span>
-            <div class="pulse-glow">New</div>
-          </button>
-          <button class="btn btn-lg btn-darken btn-secondary" id="btn-settings">
-            <i class="fa-solid fa-gear"></i>
-            <span translation="settings"></span>
-          </button>
+      <div id="splash-inventory">
+        <div id="splash-customize">
+          <div id="skin-container">
+            <div id="skin-base"></div>
+            <div id="skin-left-fist"></div>
+            <div id="skin-right-fist"></div>
+          </div>
+          <div style="display: flex; flex-direction: row; gap: 15px">
+            <button class="btn btn-lg btn-darken btn-primary" id="btn-customize">
+              <i class="fa-solid fa-shirt"></i>
+              <span class="splash-text" translation="inventory"></span>
+              <div class="pulse-glow">New</div>
+            </button>
+            <button class="btn btn-lg btn-darken btn-secondary" id="btn-settings">
+              <i class="fa-solid fa-gear"></i>
+              <span translation="settings"></span>
+            </button>
+          </div>
         </div>
       </div>
+
 
     </div>
     <div>
@@ -1094,7 +1098,53 @@
       </div>
     </div>
   </div>
-  <div class="modal dialog persistent-scrollbar" id="create-team-menu" style="display: none">
+
+  <!-- create team -->
+  <div class="persistent-scrollbar" id="create-team-menu" style="display: none">
+    <div class="dialog-header">
+      <p translation="create_team"></p>
+      <!-- <span class="dialog-close-btn fa-solid fa-xmark" id="close-create-team"></span> -->
+    </div>
+
+    <div id="create-team-container">
+      <div id="create-team-players"></div>
+      <div id="create-team-url">
+        <button class="btn btn-lg btn-danger btn-darken" id="btn-hide-team-url">
+          <i class="fa-solid fa-eye-slash"></i>
+        </button>
+        <input type="text" readonly id="create-team-url-field" />
+        <button class="btn btn-lg btn-darken btn-secondary" id="btn-copy-team-url">
+          <i class="fa-solid fa-copy"></i>
+          <!-- <span translation="copy"></span> -->
+        </button>
+      </div>
+      <div id="create-team-options">
+        <div id="create-team-toggles">
+          <label>
+            <span class="setting-title" translation="create_team_autofill"></span>
+            <input type="checkbox" id="create-team-toggle-auto-fill" />
+          </label>
+          <label>
+            <span class="setting-title" translation="create_team_lock"></span>
+            <input type="checkbox" id="create-team-toggle-lock" />
+          </label>
+        </div>
+        <!-- btn section -->
+        <div id="btn-action-section">
+          <button class="btn btn-lg btn-darken btn-secondary" id="btn-leave-game">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span translation="leave-game"></span>
+          </button>
+          <button class="btn btn-lg btn-darken btn-success" id="btn-start-game">
+            <i class="fa-solid fa-play"></i>
+            <span translation="create_team_play"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div class="modal dialog persistent-scrollbar" id="create-team-menu" style="display: none">
     <div class="dialog-header">
       <h3 translation="create_team"></h3>
       <span style="color: #ffcc00; font-size: 17px; margin-left: 20px;">Keep tab active or game won't load!</span>
@@ -1124,7 +1174,6 @@
             <input type="checkbox" id="create-team-toggle-lock" />
           </label>
         </div>
-        <!-- btn section -->
         <div id="btn-action-section">
           <button class="btn btn-lg btn-darken btn-primary" id="btn-inventory">
             <i class="fa-solid fa-shirt"></i>
@@ -1137,7 +1186,9 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
+
+
   <div class="modal dialog" id="select-language-menu" style="display: none">
     <div class="dialog-header">
       <h3 translation="languages"></h3>
