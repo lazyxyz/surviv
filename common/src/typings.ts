@@ -18,7 +18,8 @@ export const enum CustomTeamMessages {
     Update,
     Settings,
     Start,
-    Started
+    Started,
+    Kick
 }
 
 export interface CustomTeamPlayerInfo {
@@ -52,6 +53,10 @@ export type CustomTeamMessage =
     }
     | {
         type: CustomTeamMessages.Start | CustomTeamMessages.Started
+    }
+    | {
+        type: CustomTeamMessages.Kick
+        playerId: number
     };
 
 export type weaponPresentType = {

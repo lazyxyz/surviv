@@ -169,6 +169,16 @@ export class CustomTeam {
                 }
                 break;
             }
+            case CustomTeamMessages.Kick: {
+                if (player.isLeader) {
+                    const playerId = message.playerId;
+                    let player = this.players[playerId];
+                    player.sendMessage({ type: CustomTeamMessages.Kick, playerId });
+                    this.removePlayer(player);
+                    this._publishPlayerUpdate();
+                }
+                break;
+            }
         }
     }
 
