@@ -158,7 +158,7 @@ export class Zombie extends Player {
                 moving: false,
             },
             rotation: this.rotation,
-            distanceToMouse: undefined,
+            distanceToMouse: 0,
         };
 
         // Process idle input
@@ -195,7 +195,7 @@ export class Zombie extends Player {
                 angle: this.rotation,
             },
             rotation: this.rotation,
-            distanceToMouse: undefined,
+            distanceToMouse: 0,
         };
 
         // Process movement input

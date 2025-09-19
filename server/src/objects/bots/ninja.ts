@@ -154,7 +154,7 @@ export class Ninja extends Player {
                     turning: true,
                     mobile: { moving: false, angle: this.rotation },
                     rotation: this.rotation,
-                    distanceToMouse: undefined,
+                    distanceToMouse: 0,
                 };
                 this.processInputs(packet);
             }
@@ -297,7 +297,7 @@ export class Ninja extends Player {
                 angle: adjustedRotation,
             },
             rotation: adjustedRotation,
-            distanceToMouse: undefined,
+            distanceToMouse: 0,
         };
 
         this.processInputs(packet);
