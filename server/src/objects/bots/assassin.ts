@@ -201,7 +201,7 @@ export class Assassin extends Player {
                 angle: rotation,
             },
             rotation: rotation,
-            distanceToMouse: undefined,
+            distanceToMouse: 0,
         };
 
         // Process shooting input
@@ -245,7 +245,7 @@ export class Assassin extends Player {
                     turning: true,
                     mobile: { moving: false, angle: this.rotation },
                     rotation: this.rotation,
-                    distanceToMouse: undefined,
+                    distanceToMouse: 0,
                 };
 
                 this.processInputs(packet);
@@ -435,7 +435,7 @@ export class Assassin extends Player {
                 angle: adjustedRotation,
             },
             rotation: adjustedRotation,
-            distanceToMouse: undefined,
+            distanceToMouse: 0,
         };
 
         // Process movement input

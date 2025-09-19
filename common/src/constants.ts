@@ -63,6 +63,7 @@ export const GameConstants = freezeDeep({
         defaultSkin: DEFAULT_SKIN,
         killLeaderMinKills: 3,
         maxMouseDist: 256,
+        maxMobileAimDist: 128, // desktop / 2
         reviveTime: 8,
         maxReviveDist: 5,
         bleedOutDPMs: 0.002, // === 2 dps

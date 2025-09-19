@@ -335,6 +335,9 @@ export class InputManager {
                 } else {
                     this.attacking = attacking;
                 }
+
+                const joystickSize = GAME_CONSOLE.getBuiltInCVar("mb_joystick_size");
+                this.distanceToMouse = (data.distance / (joystickSize / 2)) * GameConstants.player.maxMobileAimDist;
             });
 
             rightJoyStick.on("end", () => {
@@ -385,7 +388,7 @@ export class InputManager {
 
         // Skip processing if inputs are paused (e.g., chat is open)
         if (this._inputPaused) return;
-        
+
         // Disable pointer events on mobile if mobile controls are enabled
         if (event instanceof PointerEvent && this.isMobile) return;
 
@@ -763,7 +766,7 @@ export class InputManager {
         return name === undefined ? name : `./img/misc/${name}_icon.svg`;
     }
 
-     pauseInput(): void {
+    pauseInput(): void {
         this._inputPaused = true;
         // Clear movement and actions to prevent stuck inputs
         this.movement.up = false;
