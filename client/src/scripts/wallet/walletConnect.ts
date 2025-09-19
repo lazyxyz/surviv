@@ -11,7 +11,7 @@ export const getWalletConnectInfo = {
 
 export async function getWalletConnectInit(options?: Partial<EthereumProviderOptions>) {
     const init = await EthereumProvider.init({
-        projectId: "790fa151a94cc5d3dfc5d87be9c3df2c", // from cloud.walletconnect.com
+        projectId: "58607dae64afd446b559c1b3ffd9ac90", // from cloud.walletconnect.com
         chains: [parseInt(ChainConfig.chainId, 16)], // must be a number
         showQrModal: true,
         ...(options as any),
