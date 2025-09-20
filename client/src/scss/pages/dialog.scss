@@ -207,26 +207,39 @@ input::-webkit-inner-spin-button {
 
   .dialog-header {
     display: flex;
-    justify-content: space-between;
-    p {
-      width: fit-content;
-      font-size: 18px;
-      font-weight: 600;
-      margin: unset;
-      @include variables.text-shadow;
+    flex-direction: column;
+    gap: 2px;
+
+    &-group {
+      p {
+        width: fit-content;
+        font-size: 18px;
+        font-weight: 600;
+        margin: unset;
+        @include variables.text-shadow;
+      }
+
+      img {
+        position: absolute;
+        width: 24px;
+        right: 16px;
+        top: 14px;
+        cursor: pointer;
+        transition: 300ms;
+
+        &:hover {
+          opacity: 0.65;
+        }
+      }
     }
 
-    img {
-      position: absolute;
-      width: 24px;
-      right: 16px;
-      top: 14px;
-      cursor: pointer;
-      transition: 300ms;
-
-      &:hover {
-        opacity: 0.65;
-      }
+    .note-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: palette.$lime;
+      margin: unset;
+      @include variables.text-shadow;
+      text-align: left;
     }
   }
 

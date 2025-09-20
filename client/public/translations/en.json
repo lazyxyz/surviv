@@ -213,6 +213,7 @@
     "create_team_ready": "Ready",
     "create_team_waiting": "I'm Ready",
     "create_team_play": "Start Game",
+    "create_team_title": "Keep tab active or game won't load!",
     "report_reporting": "Reporting",
     "report_id": "Report ID:",
     "languages": "Languages",
