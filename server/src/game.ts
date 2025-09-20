@@ -869,7 +869,9 @@ export class Game implements GameData {
         player.name = cleanUsername(packet.name);
 
         if (packet.badge?.idString) {
-            player.loadout.badge = await verifyBadges(packet.address, packet.badge?.idString);
+            const badgeResults = await verifyBadges(packet.address, packet.badge?.idString);
+            player.loadout.badge = badgeResults.badgeDefinition;
+            player.rewardsBoost = badgeResults.totalBoost;
         }
 
         const assets = await verifyAllAssets(packet.address, {
