@@ -239,10 +239,6 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
             case CustomTeamMessages.Kick:
                 leaveTeam();
                 break;
-            case CustomTeamMessages.PlayerUpdate:
-                // PlayerUpdate messages are handled by the Update message that follows
-                // This case is here for completeness but doesn't need specific handling
-                break;
         }
     };
 
@@ -346,7 +342,8 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         const text = ready ? "create_team_ready" : "create_team_ready";
 
         ui.btnStartGame
-            .toggleClass("btn-ready", ready)
+            .toggleClass("btn-success", ready)
+            .toggleClass("btn-alert", !ready)
             .html(`<span translation="${text}">${getTranslatedString(text)}</span> ${icon}`);
     }
 
