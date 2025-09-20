@@ -1377,7 +1377,6 @@ export class Game implements GameData {
 
                 // Extract token from Authorization header
                 const searchParams = new URLSearchParams(req.getQuery());
-                console.log("searchParams: ", searchParams.toString());
                 const token = searchParams.get('token');
 
                 let nameColor = 0xffffff;

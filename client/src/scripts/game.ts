@@ -340,14 +340,6 @@ export class Game {
         this.camera.resize(this.pixi.screen.width, this.pixi.screen.height, true);
     }
 
-    // ready(packet: PlayerData) {
-    //     this.sendPacket(JoinPacket.create({
-    //         ...packet,
-    //         isMobile: this.inputManager.isMobile
-    //     }));
-    //     updateUsersBadge(packet.badge?.idString)
-    // }
-
     sendChatMessage(message: string, isTeamChat: boolean = true) {
         if (this.teamMode) {
             this.sendPacket(ClientChatPacket.create({
@@ -532,7 +524,7 @@ export class Game {
                 this.initPixi(this.gameMode).then(_ => {
                     this.uiManager.ui.loadingText.text(getTranslatedString("verifying_game_assets"));
                     this.uiManager.ui.splashMsg.hide();
-                    
+
                     this.sendPacket(JoinPacket.create({
                         ...packet.output,
                         isMobile: this.inputManager.isMobile
