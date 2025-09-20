@@ -54,7 +54,6 @@ import { getColors, LAYER_TRANSITION_DELAY, parseJWT, PIXI_SCALE, UI_DEBUG_MODE 
 import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 import { Account } from "./account";
-import { ReadyPacket, type PlayerData } from "@common/packets/readyPacket";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { errorAlert } from "./modal";
 import { Modes, NumberToMode, type Mode } from "@common/definitions/modes";
@@ -341,13 +340,13 @@ export class Game {
         this.camera.resize(this.pixi.screen.width, this.pixi.screen.height, true);
     }
 
-    ready(packet: PlayerData) {
-        this.sendPacket(JoinPacket.create({
-            ...packet,
-            isMobile: this.inputManager.isMobile
-        }));
-        updateUsersBadge(packet.badge?.idString)
-    }
+    // ready(packet: PlayerData) {
+    //     this.sendPacket(JoinPacket.create({
+    //         ...packet,
+    //         isMobile: this.inputManager.isMobile
+    //     }));
+    //     updateUsersBadge(packet.badge?.idString)
+    // }
 
     sendChatMessage(message: string, isTeamChat: boolean = true) {
         if (this.teamMode) {
@@ -528,16 +527,25 @@ export class Game {
 
     onPacket(packet: OutputPacket): void {
         switch (true) {
-            case packet instanceof ReadyPacket:
+            case packet instanceof JoinPacket: {
                 this.gameMode = NumberToMode[packet.output.gameMode];
                 this.initPixi(this.gameMode).then(_ => {
-                    this.ready(packet.output);
+                    this.uiManager.ui.loadingText.text(getTranslatedString("verifying_game_assets"));
+                    this.uiManager.ui.splashMsg.hide();
+                    
+                    this.sendPacket(JoinPacket.create({
+                        ...packet.output,
+                        isMobile: this.inputManager.isMobile
+                    }));
                     this.setupGame();
+                    updateUsersBadge(packet.output.badge?.idString)
                 });
                 break;
-            case packet instanceof JoinedPacket:
+            }
+            case packet instanceof JoinedPacket: {
                 this.startGame(packet.output);
                 break;
+            }
             case packet instanceof MapPacket:
                 this.map.updateFromPacket(packet.output);
                 break;

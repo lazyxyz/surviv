@@ -34,7 +34,7 @@ export async function validateJWT(token: string, timeout: number = 5000): Promis
 }
 
 export async function savePlayerRank(player: string, rank: number, teamMode: boolean,
-    gameId: string, timeout: number = 10000): Promise<any> {
+    gameId: string, boost: number = 0, timeout: number = 10000): Promise<any> {
     const url = `${Config.earnConfig?.api}/admin/savePlayerRank`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -45,7 +45,7 @@ export async function savePlayerRank(player: string, rank: number, teamMode: boo
                 'Content-Type': 'application/json',
                 'x-api-key': process.env.X_API_KEY || '',
             },
-            body: JSON.stringify({ player, rank, teamMode, gameId }),
+            body: JSON.stringify({ player, rank, teamMode, gameId, boost }),
             signal: controller.signal,
         });
 

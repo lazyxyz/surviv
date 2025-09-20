@@ -283,6 +283,7 @@ export class Gamer extends Player {
                 rank,
                 this.game.teamMode,
                 this.game.gameId,
+                0,
                 3000
             );
 

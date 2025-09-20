@@ -237,10 +237,10 @@ async function getBalance(
 export async function verifyAllAssets(
     player: string,
     assets: {
-        skin: string;
-        melee: string;
-        gun: string;
-        emotes: string;
+        skin?: string;
+        melee?: string;
+        gun?: string;
+        emotes?: string;
     },
     timeout: number = 2000
 ): Promise<VerifiedAssets> {

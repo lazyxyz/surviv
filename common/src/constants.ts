@@ -14,6 +14,7 @@ export const enum Constants {
     PLAYER_NAME_MAX_LENGTH = 16,
     PLAYER_ADDRESS_MAX_LENGTH = 42,
     CHAT_MESSAGE_MAX_LENGTH = 32,
+    URL_MAX_LENGTH = 500,
 }
 
 /* eslint-disable @typescript-eslint/prefer-literal-enum-member */
