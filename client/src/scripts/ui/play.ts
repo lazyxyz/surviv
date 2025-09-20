@@ -343,7 +343,7 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         const icon = ready
             ? '<i class="fa-solid fa-circle-check"></i>'
             : '<i class="fa-solid fa-circle-question"></i>';
-        const text = ready ? "create_team_waiting" : "create_team_ready";
+        const text = ready ? "create_team_ready" : "create_team_ready";
 
         ui.btnStartGame
             .toggleClass("btn-ready", ready)
