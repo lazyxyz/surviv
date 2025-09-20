@@ -344,7 +344,7 @@
   align-items: center;
   gap: 16px;
 
-  background: #0000008c;
+  background: palette.$transparent_bg;
   backdrop-filter: blur(40px);
 
   padding: 16px;
@@ -380,11 +380,11 @@
     color: black;
 
     text-align: center;
-    background-color: #ffd23a;
+    background-color: palette.$lime;
     height: 38px;
 
     clip-path: polygon(2% 0, 100% 0, 98% 100%, 0% 100%);
-    padding: 12px 24px;
+    padding: 12px 8px;
     margin-top: 16px;
     transition: 300ms;
 
@@ -599,7 +599,6 @@
   .btn {
     font-size: 15px;
     font-weight: 600;
-    // font-size: 18px;
     width: 100%;
   }
 

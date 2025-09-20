@@ -97,37 +97,6 @@ async function initializePlayButtons(game: Game, account: Account): Promise<void
     });
 }
 
-// function setupTeamMenu(game: Game, account: Account): void {
-//     const { ui } = game.uiManager;
-//     $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", async function () {
-//         if (!isClickAllowed() || teamSocket || !selectedRegion || !account.token?.length) return;
-//         if (new Date().getTime() >= (parseJWT(account.token).exp * 1000)) {
-//             return account.sessionExpired();
-//         }
-
-//         ui.splashOptions.addClass("loading");
-//         ui.loadingText.text(getTranslatedString("loading_connecting"));
-
-//         const params = new URLSearchParams();
-//         if (this.id === "btn-join-team") {
-//             teamID = await promptTeamID();
-//             if (!teamID) {
-//                 resetPlayButtons();
-//                 return;
-//             }
-//             params.set("teamID", teamID);
-//         }
-
-//         setTeamParameters(params);
-//         const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
-//         teamSocket = new WebSocket(teamURL);
-//         setupTeamSocketHandlers(teamSocket, game, account);
-
-//         $("#create-team-menu").fadeIn(250);
-//         ui.splashUi.css({ filter: "brightness(0.6)", pointerEvents: "none" });
-//     });
-// }
-
 function setupTeamMenu(game: Game, account: Account): void {
     const { ui } = game.uiManager;
     $<HTMLButtonElement>("#btn-create-team, #btn-join-team").on("click", async function () {
@@ -246,6 +215,7 @@ function setupTeamMenuControls(game: Game, account: Account): void {
             console.error("Failed to start game");
         }
     });
+
 }
 
 function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account): void {
@@ -268,6 +238,10 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
                 break;
             case CustomTeamMessages.Kick:
                 leaveTeam();
+                break;
+            case CustomTeamMessages.PlayerUpdate:
+                // PlayerUpdate messages are handled by the Update message that follows
+                // This case is here for completeness but doesn't need specific handling
                 break;
         }
     };
@@ -292,6 +266,7 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
         leaveTeam();
         ui.splashUi.css({ filter: "", pointerEvents: "" });
     };
+
 }
 
 function handleTeamJoin(data: CustomTeamMessage, ui: Game['uiManager']['ui']): void {
@@ -302,6 +277,25 @@ function handleTeamJoin(data: CustomTeamMessage, ui: Game['uiManager']['ui']): v
     ui.createTeamUrl.val(`${window.location.origin}/?region=${GAME_CONSOLE.getBuiltInCVar("cv_region") || Config.defaultRegion}#${teamID}`);
     ui.createTeamAutoFill.prop("checked", data.autoFill);
     ui.createTeamLock.prop("checked", data.locked);
+}
+
+/**
+ * Updates the start game button state based on team readiness
+ * When all team members are ready, the button is enabled, otherwise disabled
+ */
+function updateStartGameButtonState(players: CustomTeamPlayerInfo[], isLeader: boolean, ui: Game['uiManager']['ui']): void {
+    const allPlayersReady = players.every(player => player.ready || player.isLeader);
+
+    if (isLeader) {
+        // For team leader, enable button only when all members are ready
+        ui.btnStartGame.prop("disabled", !allPlayersReady);
+
+        if (allPlayersReady) {
+            ui.btnStartGame.removeClass("btn-disabled");
+        } else {
+            ui.btnStartGame.addClass("btn-disabled");
+        }
+    }
 }
 
 function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']): void {
@@ -318,6 +312,7 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         <div class="create-team-player-container">
             <i class="fa-solid fa-crown"${player.isLeader ? "" : ' style="display: none"'}></i>
             <i class="fa-regular fa-circle-check"${player.ready && !player.isLeader ? "" : ' style="display: none"'}></i>
+
             ${
             // Show kick icon only for leader and not for the leader's own player
             isLeader && !player.isLeader
@@ -337,8 +332,26 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         `;
     }).join(""));
     ui.createTeamToggles.toggleClass("disabled", !isLeader);
-    ui.btnStartGame.toggleClass("btn-disabled", !isLeader && ready)
-        .text(getTranslatedString(isLeader ? "create_team_play" : ready ? "create_team_waiting" : "create_team_ready"));
+
+    // Update button text and icon based on role and ready status
+    if (isLeader) {
+        ui.btnStartGame
+            .removeClass("btn-ready")
+            .html(`<span translation="create_team_play">${getTranslatedString("create_team_play")}</span>`);
+    } else {
+        // For team members, add appropriate icons
+        const icon = ready
+            ? '<i class="fa-solid fa-circle-check"></i>'
+            : '<i class="fa-solid fa-circle-question"></i>';
+        const text = ready ? "create_team_waiting" : "create_team_ready";
+
+        ui.btnStartGame
+            .toggleClass("btn-ready", ready)
+            .html(`<span translation="${text}">${getTranslatedString(text)}</span> ${icon}`);
+    }
+
+    // Update start game button state based on team readiness
+    updateStartGameButtonState(players, isLeader, ui);
 
     attachKickListeners(ui);
 }

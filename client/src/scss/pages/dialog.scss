@@ -215,6 +215,19 @@ input::-webkit-inner-spin-button {
       margin: unset;
       @include variables.text-shadow;
     }
+
+    img {
+      position: absolute;
+      width: 24px;
+      right: 16px;
+      top: 14px;
+      cursor: pointer;
+      transition: 300ms;
+
+      &:hover {
+        opacity: 0.65;
+      }
+    }
   }
 
   #create-team-container {
@@ -255,17 +268,23 @@ input::-webkit-inner-spin-button {
         // ready indicator
         .fa-circle-check {
           position: absolute;
-          font-size: 24px;
+          font-size: 20px;
           color: limegreen;
-          top: 8px;
-          left: 8px;
+          top: 6px;
+          left: 6px;
         }
         .fa-circle-xmark {
           position: absolute;
-          font-size: 24px;
+          font-size: 20px;
           color: rgba(250, 250, 250, 0.5);
-          top: 8px;
-          right: 8px;
+          top: 6px;
+          right: 6px;
+          transition: 300ms;
+          cursor: pointer;
+
+          &:hover {
+            opacity: 0.65;
+          }
         }
 
         .skin {
