@@ -38,6 +38,7 @@ export class Gamer extends Player {
     private readonly _packetStream = new PacketStream(new SuroiByteStream(new ArrayBuffer(1 << 16)));
     readonly socket: WebSocket<PlayerContainer>;
     gameOver: boolean = false;
+    rewardsBoost: number = 0;
 
     constructor(game: Game, socket: WebSocket<PlayerContainer>, position: Vector, layer?: Layer, team?: Team) {
         const userData = socket.getUserData();
@@ -208,7 +209,7 @@ export class Gamer extends Player {
         this.notifySpectators(gameOverData);
 
         // Handle rewards if rank qualifies
-        if (rank < Config.earnConfig.rank) {
+        if (rank < Config.earnConfig.rank && !this.disconnected) {
             this.handleRewards(rank);
         }
     }
@@ -283,6 +284,7 @@ export class Gamer extends Player {
                 rank,
                 this.game.teamMode,
                 this.game.gameId,
+                this.rewardsBoost,
                 3000
             );
 

@@ -419,7 +419,6 @@ async function connectToGame(data: GetGameResponse, gameAddress: string, game: G
     setGameParameters(params, account);
     const websocketURL = `${gameAddress.replace("<ID>", data.gameID.toString())}/play?${params.toString()}`;
     await game.connect(websocketURL, account);
-    ui.loadingText.text(getTranslatedString("verifying_game_assets"));
     ui.splashMsg.hide();
 }
 

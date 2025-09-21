@@ -237,10 +237,10 @@ async function getBalance(
 export async function verifyAllAssets(
     player: string,
     assets: {
-        skin: string;
-        melee: string;
-        gun: string;
-        emotes: string;
+        skin?: string;
+        melee?: string;
+        gun?: string;
+        emotes?: string;
     },
     timeout: number = 2000
 ): Promise<VerifiedAssets> {
@@ -299,30 +299,79 @@ export async function verifyAllAssets(
     return result;
 }
 
+// /**
+//  * Verify badge for a player using SurvivBadgesMapping.
+//  * @param player - The player's address
+//  * @param badge - The badge item to verify
+//  * @param timeout - Timeout in milliseconds
+//  */
+// export async function verifyBadges(
+//     player: string,
+//     badge: string,
+//     timeout: number = 2000
+// ): Promise<BadgeDefinition | undefined> {
+//     if (!badge) {
+//         return undefined;
+//     }
+
+//     try {
+//         const checkResult = await getBalance(player, [badge], SurvivBadgesMapping, timeout);
+
+//         if (checkResult.isValid && checkResult.validItems[0]) {
+//             return Badges.fromStringSafe(checkResult.validItems[0]);
+//         }
+//     } catch (err) {
+//         console.error('Badge verification failed:', err);
+//     }
+
+//     return undefined;
+// }
+
 /**
- * Verify badge for a player using SurvivBadgesMapping.
+ * Verify badge for a player using SurvivBadgesMapping and calculate total boost.
  * @param player - The player's address
  * @param badge - The badge item to verify
  * @param timeout - Timeout in milliseconds
+ * @returns An object containing the BadgeDefinition (if valid) and the total boost percentage
  */
 export async function verifyBadges(
     player: string,
     badge: string,
     timeout: number = 2000
-): Promise<BadgeDefinition | undefined> {
+): Promise<{ badgeDefinition: BadgeDefinition | undefined; totalBoost: number }> {
     if (!badge) {
-        return undefined;
+        return { badgeDefinition: undefined, totalBoost: 0 };
     }
 
     try {
-        const checkResult = await getBalance(player, [badge], SurvivBadgesMapping, timeout);
+        // Pass all badges from SurvivBadgesMapping.assets to getBalance
+        const checkResult = await getBalance(player, SurvivBadgesMapping.assets, SurvivBadgesMapping, timeout);
 
-        if (checkResult.isValid && checkResult.validItems[0]) {
-            return Badges.fromStringSafe(checkResult.validItems[0]);
+        let totalBoost = 0;
+        if (checkResult.isValid && checkResult.validItems.length > 0) {
+            // Calculate total boost from all owned badges
+            checkResult.validItems.forEach((badgeId: string, index: number) => {
+                const mappingIndex = SurvivBadgesMapping.assets.indexOf(badgeId);
+                if (mappingIndex !== -1) {
+                    const amount = Number(checkResult.balances[index]); // Convert bigint to number
+                    totalBoost += SurvivBadgesMapping.boosts[mappingIndex] * amount;
+                }
+            });
         }
+
+        // Cap total boost at 300%
+        if (totalBoost >= 300) {
+            totalBoost = 300;
+        }
+
+        // Verify the requested badge
+        const badgeDefinition = checkResult.isValid && checkResult.validItems.includes(badge)
+            ? Badges.fromStringSafe(badge)
+            : undefined;
+
+        return { badgeDefinition, totalBoost };
     } catch (err) {
         console.error('Badge verification failed:', err);
+        return { badgeDefinition: undefined, totalBoost: 0 };
     }
-
-    return undefined;
 }

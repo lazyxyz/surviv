@@ -5,5 +5,13 @@ export const assetsMapping = {
     "surviv_s1_gold",
     "surviv_s1_silver",
     "somnia_s1",
-  ]
+    "surviv_pass",
+  ],
+  "boosts": [
+    45,
+    45,
+    45,
+    45,
+    15
+  ],
 };

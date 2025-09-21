@@ -4,18 +4,19 @@ import { html } from "../utils/misc";
 import { Account, SurvivItems } from "../account";
 import { Badges } from "@common/definitions/badges";
 import { GAME_CONSOLE } from "../..";
+import { SurvivBadgesMapping } from "@common/mappings";
 
 export function getBadgeImage(badgeId: string): string {
     if (!badgeId) return "";
     return `./img/game/shared/badges/${badgeId}.svg`;
 }
 
-// handler select and save badge
+// Handler to select and save badge
 function selectBadge(idString: string): void {
-    // remove previous selected
+    // Remove previous selected
     $(".badges-list-item-container").removeClass("selected");
 
-    // wait for dom
+    // Wait for DOM update
     setTimeout(() => $(`#badge-${idString}`).addClass("selected"), 0);
 
     GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", idString);
@@ -23,30 +24,62 @@ function selectBadge(idString: string): void {
 
 export async function showBadges(account: Account) {
     const badgeList = $<HTMLDivElement>("#badges-list");
+    badgeList.css("position", "relative"); // Ensure badgeList is a positioned ancestor
     badgeList.empty(); // Clear previous items
     const currentBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
 
-    // Clear the badge list before rendering new items
-    badgeList.empty();
-
+    // Get user badge balances
     const userBadgeBalance = [
         ...Object.entries((await account.getItemBalances(SurvivItems.SurvivBadges))),
     ];
 
-    const userBadges = userBadgeBalance.map(s => s[0]);
+    // Calculate total boost
+    let totalBoost = 0;
+    userBadgeBalance.forEach(([badgeId, amount]) => {
+        const index = SurvivBadgesMapping.assets.indexOf(badgeId);
+        if (index !== -1) {
+            totalBoost += SurvivBadgesMapping.boosts[index] * Number(amount);
+        }
+    });
+    if (totalBoost >= 300) {
+        totalBoost = 300; // Cap at 300%
+    }
+
+    // Display total boost
+    const boostDisplay = $<HTMLDivElement>(
+        html`<div 
+        class="badges-boost-display" 
+        style="
+            position: fixed;
+            top: 20px;
+            left: 55%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #fff;
+            z-index: 9999;
+        "
+    >
+        Total Reward Boost: ${totalBoost === 300 ? "Max (300%)" : `${totalBoost}%`}
+    </div>`
+    );
+
+    badgeList.append(boostDisplay);
 
     // Badges list
     const allBadges = Badges.definitions;
 
-    // inactive badges
+    // Inactive badges
     const inactiveBadges = allBadges
         .map(b => b.idString)
-        .filter(id => ![, ...userBadges].includes(id));
+        .filter(id => !userBadgeBalance.map(([id]) => id).includes(id));
 
-    // sort badges
-    const sortedBadgeIds = [...userBadges, ...inactiveBadges];
+    // Sort badges
+    const sortedBadgeIds = [...userBadgeBalance.map(([id]) => id), ...inactiveBadges];
 
-    // render badges
+    // Render badges
     for (const idString of sortedBadgeIds) {
         const badgeDef = allBadges.find(b => b.idString === idString);
         if (!badgeDef) {
@@ -54,7 +87,7 @@ export async function showBadges(account: Account) {
             continue;
         }
 
-        const isActive = userBadges.includes(idString);
+        const isActive = userBadgeBalance.map(([id]) => id).includes(idString);
         const inactiveStyle = isActive ? "" : " style=\"opacity: 0.5; filter: saturate(0.15); \"";
         const isSelected = idString === currentBadge;
 

@@ -19,6 +19,7 @@ export const Badges = ObjectDefinitions.create<BadgeDefinition>("Badges", [
     badge(["surviv_s1_gold", ["Survivor S1 Gold"]]),
     badge(["surviv_s1_silver", ["Survivor S1 Silver"]]),
     badge(["somnia_s1", ["Somnia S1"]]),
+    badge(["surviv_pass", ["Survivor Pass"]]),
 ]);
 
 

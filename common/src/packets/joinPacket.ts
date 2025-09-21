@@ -1,15 +1,30 @@
 import { GameConstants } from "../constants";
-import { Badges } from "../definitions/badges";
-import { Emotes } from "../definitions/emotes";
+import { BadgeDefinition, Badges } from "../definitions/badges";
+import { EmoteDefinition, Emotes } from "../definitions/emotes";
 import { Loots } from "../definitions/loots";
-import { Melees } from "../definitions/melees";
-import { Guns } from "../definitions/guns";
-import { Skins } from "../definitions/skins";
+import { MeleeDefinition, Melees } from "../definitions/melees";
+import { GunDefinition, Guns } from "../definitions/guns";
+import { SkinDefinition, Skins } from "../definitions/skins";
 import { createPacket } from "./packet";
-import { PlayerData } from "./readyPacket";
+
+export type PlayerData = {
+    readonly protocolVersion: number
+    readonly name: string
+    readonly address: string
+    readonly isMobile: boolean
+    readonly emotes: ReadonlyArray<EmoteDefinition | undefined>
+
+    readonly skin?: SkinDefinition
+    readonly badge?: BadgeDefinition
+
+    readonly melee?: MeleeDefinition
+    readonly gun?: GunDefinition
+} & {
+    readonly gameMode: number
+};
 
 // protocol version is automatically set; use this type when
-// creating an object for use by a JoinPacket
+// creating an object for use by a ReadyPacket
 export type JoinPacketCreation = Omit<PlayerData, "protocolVersion">;
 
 export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, PlayerData>({

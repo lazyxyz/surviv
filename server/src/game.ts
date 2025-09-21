@@ -1,4 +1,4 @@
-import { GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { EMOTE_SLOTS, GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
 import { type ExplosionDefinition } from "@common/definitions/explosions";
 import { Loots, type LootDefinition } from "@common/definitions/loots";
 import { MapPings, type MapPing } from "@common/definitions/mapPings";
@@ -6,7 +6,7 @@ import { Obstacles, type ObstacleDefinition } from "@common/definitions/obstacle
 import { SyncedParticles, type SyncedParticleDefinition, type SyncedParticleSpawnerDefinition } from "@common/definitions/syncedParticles";
 import { type ThrowableDefinition } from "@common/definitions/throwables";
 import { PlayerInputPacket } from "@common/packets/inputPacket";
-import { JoinPacket } from "@common/packets/joinPacket";
+import { JoinPacket, PlayerData } from "@common/packets/joinPacket";
 import { JoinedPacket } from "@common/packets/joinedPacket";
 import { KillFeedPacket, type KillFeedPacketData } from "@common/packets/killFeedPacket";
 import { type InputPacket, type OutputPacket } from "@common/packets/packet";
@@ -50,14 +50,16 @@ import { cleanUsername, Logger, removeFrom } from "./utils/misc";
 import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
 import { Mode, ModeToNumber } from "@common/definitions/modes";
-import { PlayerData, ReadyPacket } from "@common/packets/readyPacket";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { validateJWT } from "./api/api";
 import { getIP, createServer } from "./utils/serverHelpers";
 import { verifyAllAssets, verifyBadges } from "./api/balances";
-import { Armors } from "@common/definitions/armors";
-import { Badges } from "@common/definitions/badges";
 import { ClientChatPacket, ServerChatPacket, ServerChatPacketData } from "@common/packets/chatPacket";
+import { Badges } from "@common/definitions/badges";
+import { Skins } from "@common/definitions/skins";
+import { Melees } from "@common/definitions/melees";
+import { Guns } from "@common/definitions/guns";
+import { Emotes } from "@common/definitions/emotes";
 
 
 /*
@@ -851,13 +853,7 @@ export class Game implements GameData {
     }
 
     // Called when a JoinPacket is sent by the client
-    activatePlayer(player: Gamer, packet: PlayerData): void {
-        // // DEV MODE
-        // {
-        //     player.inventory.vest = Armors.fromString("developr_vest");
-        //     player.inventory.helmet = Armors.fromString("tactical_helmet");
-        // }
-
+    async activatePlayer(player: Gamer, packet: PlayerData) {
         const rejectedBy = this.pluginManager.emit("player_will_join", { player, joinPacket: packet });
         if (rejectedBy) {
             player.disconnect(`Connection rejected by server plugin '${rejectedBy.constructor.name}'`);
@@ -868,21 +864,27 @@ export class Game implements GameData {
             player.disconnect(`Invalid game version (expected ${GameConstants.protocolVersion}, was ${packet.protocolVersion})`);
             return;
         }
-
-        player.name = cleanUsername(packet.name);
-
         player.address = packet.address;
         player.isMobile = packet.isMobile;
-        if (packet.skin) player.loadout.skin = packet.skin;
-        player.loadout.badge = packet.badge;
-        player.loadout.emotes = packet.emotes;
-        if (packet.melee) {
-            player.inventory.weapons[2] = new MeleeItem(packet.melee, player);
+        player.name = cleanUsername(packet.name);
+
+        if (packet.badge?.idString) {
+            const badgeResults = await verifyBadges(packet.address, packet.badge?.idString);
+            player.loadout.badge = badgeResults.badgeDefinition;
+            player.rewardsBoost = badgeResults.totalBoost;
         }
 
-        if (packet.gun) {
-            player.inventory.weapons[0] = new GunItem(packet.gun, player);
-        }
+        const assets = await verifyAllAssets(packet.address, {
+            skin: packet.skin?.idString,
+            melee: packet.melee?.idString,
+            gun: packet.gun?.idString,
+            emotes: packet.emotes.toString(),
+        })
+
+        player.loadout.emotes = assets.emotes;
+        if (assets.skin) player.loadout.skin = assets.skin;
+        if (assets.melee) player.inventory.weapons[2] = new MeleeItem(assets.melee, player);
+        if (assets.gun) player.inventory.weapons[0] = new GunItem(assets.gun, player);
 
         this.livingPlayers.add(player);
         this.spectatablePlayers.push(player);
@@ -907,6 +909,9 @@ export class Game implements GameData {
                 }
             )
         );
+
+        this.addTimeout(() => { player.disableInvulnerability(); }, 5000);
+
 
         player.sendData(this.map.buffer);
 
@@ -1429,28 +1434,20 @@ export class Game implements GameData {
                         disconnect(socket, `Authentication failed. Please reconnect your wallet.`);
                         return;
                     }
-                    const badge = await verifyBadges(data.address, data.badge);
-
-                    const assets = await verifyAllAssets(data.address, {
-                        skin: data.skin,
-                        melee: data.melee,
-                        gun: data.gun,
-                        emotes: data.emotes,
-                    })
-
+                    const emotes = EMOTE_SLOTS.map((_, i) => Emotes.fromStringSafe(data.emotes[i] || ''))
 
                     const stream = new PacketStream(new ArrayBuffer(128));
                     stream.serializeServerPacket(
-                        ReadyPacket.create({
+                        JoinPacket.create({
                             isMobile: false,
                             address: data.address ? data.address : "",
                             gameMode: ModeToNumber[game.gameMode],
-                            emotes: assets.emotes,
+                            emotes: emotes,
                             name: data.name,
-                            badge: badge,
-                            skin: assets.skin,
-                            melee: assets.melee,
-                            gun: assets.gun,
+                            badge: Badges.fromStringSafe(data.badge),
+                            skin: Skins.fromStringSafe(data.skin),
+                            melee: Melees.fromStringSafe(data.melee),
+                            gun: Guns.fromStringSafe(data.gun),
                         })
                     );
                     socket.send(stream.getBuffer(), true, false);
