@@ -35,14 +35,15 @@ void (async () => {
         onConnectWallet(account),
     ]).then(() => {
         setupHome(account);
-        showInventory(account);
         setupGame(game);
         setupPlay(game, account);
+        showInventory(account);
     });
 
     setupConsoleListener();
     setupRangeInputs();
     setupTabNavigation();
     setupSettingsImportExport();
+
 
 })();

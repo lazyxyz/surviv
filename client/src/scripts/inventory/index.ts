@@ -58,11 +58,11 @@ export let SurvivAssetBalances: Record<SurvivAssets, Record<AssetTier, Record<st
 
 export async function showInventory(account: Account) {
     $("#btn-customize").on('click', async () => {
-        if (!account.address) {
+        try {
+            SurvivAssetBalances = await account.getAssetBalances();
+        } catch (errr) {
             warningAlert("Please connect your wallet to continue!", 3000);
-            return;
         }
-        SurvivAssetBalances = await account.getAssetBalances();
         await showShop(account);
     })
 
@@ -84,4 +84,8 @@ export async function showInventory(account: Account) {
 
     const idString = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
     updateSplashCustomize(idString);
+
+    if (window.location.pathname === "/inventory") {
+        $("#btn-customize").trigger('click');
+    }
 }

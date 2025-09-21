@@ -209,21 +209,25 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
 }
 
 export async function loadStore(account: Account): Promise<void> {
-    if (!account.address) {
-        warningAlert("Please connect your wallet to continue!");
-        return;
-    }
-
     if (!ShopCache.storeLoaded) {
-        const kitsBalance = await account.getItemBalances(SurvivItems.SurvivKits);
-        const badgesBalance = await account.getItemBalances(SurvivItems.SurvivBadges);
+        let kitsBalance: Record<string, number> = {};
+        let badgesBalance: Record<string, number> = {};
+        try {
+            kitsBalance = await account.getItemBalances(SurvivItems.SurvivKits) || {};
+            badgesBalance = await account.getItemBalances(SurvivItems.SurvivBadges) || {};
+        } catch (err) {
+            // fall back to empty objects on error
+            kitsBalance = {};
+            badgesBalance = {};
+        }
 
         ShopCache.storeLoaded = true;
         ShopCache.assetsBalance["key"] = kitsBalance["key"] || 0;
         ShopCache.assetsBalance["crate"] = kitsBalance["crate"] || 0;
         ShopCache.assetsBalance["surviv_card"] = badgesBalance["surviv_card"] || 0;
         ShopCache.assetsBalance["surviv_pass"] = badgesBalance["surviv_pass"] || 0;
-    };
+    }
+
 
     const storeItems: StoreItem[] = [
         {
