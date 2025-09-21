@@ -324,8 +324,10 @@ export class Account extends EIP6963 {
 
     sessionExpired(): void {
         $("#loading-text").text("Your session has expired. Please log in again.");
-
-        setTimeout(() => this.disconnect(), 1000);
+        this.disconnect();
+        setTimeout(() => {
+            $("#connect-wallet-btn").trigger("click");
+        }, 1000);
     }
 
     /**
