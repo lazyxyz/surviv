@@ -40,59 +40,6 @@ export function resetPlayButtons(): void {
     $("#btn-cancel-finding-game").css("display", "none");
 }
 
-async function handleBuyCard(account: Account): Promise<void> {
-    // Function to fetch and format price
-    async function updateButtonPrice() {
-        try {
-            let price: number;
-            if (SURVIV_SHOP_VERSION == 2) {
-                price = await account.queryPriceV2(SurvivBadges.Cards);
-            } else {
-                price = await account.queryPrice(SurvivBadges.Cards, "NativeToken");
-            }
-
-            // Convert price from Wei to Ether
-            const priceInEther = ethers.formatEther(price);
-            // Round up to the nearest integer
-            const formattedPrice = Math.ceil(parseFloat(priceInEther));
-
-            // Update button text
-            $(".home-buy-card-button").text(`Claim for ${formattedPrice} $SOMI →`);
-        } catch (err) {
-            console.error("Error fetching price:", err);
-            $(".home-buy-card-button").text("Claim →"); // Fallback text on error
-        }
-    }
-
-    updateButtonPrice();
-
-    // Handle button click
-    $(".home-buy-card-button").on("click", async () => {
-        try {
-            if (!account.address) {
-                warningAlert("Please connect your wallet to continue.");
-                return;
-            }
-
-            if (SURVIV_SHOP_VERSION == 2) {
-                const price = await account.queryPriceV2(SurvivBadges.Cards);
-                await account.buyItemsV2(SurvivBadges.Cards, 1, price);
-            } else {
-                const price = await account.queryPrice(SurvivBadges.Cards, "NativeToken");
-                await account.buyItems(SurvivBadges.Cards, 1, "NativeToken", price);
-            }
-
-            GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", "surviv_card");
-            successAlert("Purchase successful!");
-            // Optionally update price again after purchase
-            await updateButtonPrice();
-        } catch (err) {
-            console.error("Purchase error:", err);
-            errorAlert("Something went wrong, please try again.");
-        }
-    });
-}
-
 function setupLanguageSelector(): void {
     const languageFieldset = $("#languages-selector");
     for (const [language, languageInfo] of Object.entries(TRANSLATIONS.translations)) {
@@ -238,7 +185,6 @@ function setupUIInteractions(): void {
 export async function setupHome(account: Account): Promise<void> {
     createDropdown("#language-dropdown");
     createDropdown("#server-select");
-    await handleBuyCard(account);
     setupLanguageSelector();
     await loadServerList();
     setupServerSelector(account);
