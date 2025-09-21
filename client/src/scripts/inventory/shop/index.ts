@@ -48,13 +48,15 @@ export async function showShop(account: Account) {
         baseLoaded: false,
         assetsBalance: {
             crate: 0,
+            key: 0,
             surviv_card: 0,
-            key: 0
+            surviv_pass: 0,
         },
         assetsPrice: {
             crate: "",
+            key: "",
             surviv_card: "",
-            key: ""
+            surviv_pass: "",
         },
         PlayerValidRewards: undefined
     }

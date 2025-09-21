@@ -38,6 +38,7 @@ export enum SurvivKits {
 
 export enum SurvivBadges {
     Cards = "surviv_card",
+    Pass = "surviv_pass",
 }
 export type SaleItems = SurvivKits | SurvivBadges;
 
@@ -55,13 +56,15 @@ const itemMappings: Record<SurvivItems, { address: string; assets: string[] }> =
 const saleMappings: Record<SaleItems, { address: string; assets: string[] }> = {
     [SurvivKits.Crates]: SurvivKitsMapping,
     [SurvivKits.Keys]: SurvivKitsMapping,
-    [SurvivBadges.Cards]: SurvivBadgesMapping
+    [SurvivBadges.Cards]: SurvivBadgesMapping,
+    [SurvivBadges.Pass]: SurvivBadgesMapping,
 };
 
 const saleUSDPrices: Record<SaleItems, string> = {
     [SurvivKits.Crates]: "2000000000000000000",
     [SurvivKits.Keys]: "2000000000000000000",
-    [SurvivBadges.Cards]: "149000000000000000000"
+    [SurvivBadges.Cards]: "149000000000000000000",
+    [SurvivBadges.Pass]: "49000000000000000000",
 };
 
 export const PaymentTokens = {

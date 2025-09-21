@@ -222,6 +222,7 @@ export async function loadStore(account: Account): Promise<void> {
         ShopCache.assetsBalance["key"] = kitsBalance["key"] || 0;
         ShopCache.assetsBalance["crate"] = kitsBalance["crate"] || 0;
         ShopCache.assetsBalance["surviv_card"] = badgesBalance["surviv_card"] || 0;
+        ShopCache.assetsBalance["surviv_pass"] = badgesBalance["surviv_pass"] || 0;
     };
 
     const storeItems: StoreItem[] = [
@@ -236,6 +237,12 @@ export async function loadStore(account: Account): Promise<void> {
             image: "./img/assets/surviv_kit_crate.webp",
             price: "Loading...",
             itemType: SurvivKits.Crates,
+        },
+        {
+            name: "Surviv Pass",
+            image: "./img/game/shared/badges/surviv_pass.svg",
+            price: "Loading...",
+            itemType: SurvivBadges.Pass,
         },
         {
             name: "Surviv Cards",
