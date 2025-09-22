@@ -47,22 +47,8 @@ export async function showBadges(account: Account) {
 
     // Display total boost
     const boostDisplay = $<HTMLDivElement>(
-        html`<div 
-        class="badges-boost-display" 
-        style="
-            position: fixed;
-            top: 20px;
-            left: 55%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #fff;
-            z-index: 9999;
-        "
-    >
-        Total Reward Boost: ${totalBoost === 300 ? "Max (300%)" : `${totalBoost}%`}
+        html`<div class="badges-boost-display">
+        Total Reward Boost: <span>${totalBoost === 300 ? "Max (300%)" : `${totalBoost}%`}</span>
     </div>`
     );
 
