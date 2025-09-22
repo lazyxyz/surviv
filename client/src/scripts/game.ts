@@ -520,6 +520,7 @@ export class Game {
     onPacket(packet: OutputPacket): void {
         switch (true) {
             case packet instanceof JoinPacket: {
+                console.log("joinPacket: ", packet.output);
                 this.gameMode = NumberToMode[packet.output.gameMode];
                 this.initPixi(this.gameMode).then(_ => {
                     this.uiManager.ui.loadingText.text(getTranslatedString("verifying_game_assets"));

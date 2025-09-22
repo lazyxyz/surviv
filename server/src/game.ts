@@ -1398,7 +1398,7 @@ export class Game implements GameData {
                         lobbyClearing: searchParams.get("lobbyClearing") === "true",
                         weaponPreset: searchParams.get("weaponPreset") ?? "",
                         skin: searchParams.get("skin") ?? "",
-                        emotes: searchParams.get("emotes") ?? "",
+                        emotes: "",
                         badge: searchParams.get("badge") ?? "",
                         melee: searchParams.get("melee") ?? "",
                         gun: searchParams.get("gun") ?? "",
