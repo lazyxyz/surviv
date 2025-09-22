@@ -460,8 +460,6 @@ export class Minimap {
     }
 
     updateFromPacket(mapPacket: MapPacketData): void {
-        this.game.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
-
         const width = this._width = mapPacket.width;
         const height = this._height = mapPacket.height;
         this._objects = mapPacket.objects;

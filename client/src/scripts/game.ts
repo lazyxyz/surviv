@@ -521,10 +521,11 @@ export class Game {
         switch (true) {
             case packet instanceof JoinPacket: {
                 this.gameMode = NumberToMode[packet.output.gameMode];
-                this.initPixi(this.gameMode).then(_ => {
+                this.initPixi(this.gameMode).then(async _ => {
                     this.uiManager.ui.loadingText.text(getTranslatedString("verifying_game_assets"));
                     this.uiManager.ui.splashMsg.hide();
 
+                    // await new Promise(resolve => setTimeout(resolve, 3000));
                     this.sendPacket(JoinPacket.create({
                         ...packet.output,
                         isMobile: this.inputManager.isMobile
@@ -535,6 +536,7 @@ export class Game {
                 break;
             }
             case packet instanceof JoinedPacket: {
+                this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
                 this.startGame(packet.output);
                 break;
             }
@@ -661,6 +663,27 @@ export class Game {
         updateChatSendAllVisibility(this.teamMode);
     }
 
+    async disconnect() {
+        if (!this._socket || this._socket.readyState === WebSocket.CLOSED) {
+            return;  // Already closed or no socket
+        }
+
+        return new Promise<void>((resolve) => {
+            // Temporarily override onclose to resolve the promise
+            if (!this._socket) return;
+
+            const originalOnClose = this._socket.onclose;
+            this._socket.onclose = (ev) => {
+                if (originalOnClose && this._socket) originalOnClose.call(this._socket, ev);  // Call original handler
+                this._socket = undefined;  // Clear reference
+                resolve();
+            };
+
+            // Initiate close
+            this._socket.close();
+        });
+    }
+
     async endGame(): Promise<void> {
         const ui = this.uiManager.ui;
 
@@ -669,7 +692,7 @@ export class Game {
 
             this.soundManager.stopAll();
 
-            ui.splashUi.fadeIn(400, () => {
+            ui.splashUi.fadeIn(400, async () => {
                 if (this.music) {
                     void this.music.play();
                 }
@@ -684,8 +707,9 @@ export class Game {
                 this.gameStarted = false;
 
                 if (this._socket) {
-                    this._socket.close();
-                    this._socket = undefined; // Clear reference
+                    await this.disconnect();
+                    // this._socket.close();
+                    // this._socket = undefined; // Clear reference
                 }
 
                 // reset stuff

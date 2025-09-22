@@ -522,7 +522,7 @@ export class Game implements GameData {
         }
         this.pluginManager.emit("game_end", this);
 
-        // End the game in 5 seconds
+        // End the game in 2 seconds
         this.addTimeout(() => {
             // Clear all collections
             this.livingPlayers.clear();
@@ -549,7 +549,7 @@ export class Game implements GameData {
             this.app.close();
             Logger.log(`Game ${this.port} | Ended`);
             parentPort?.postMessage({ type: WorkerMessages.GameEnded });
-        }, 5000);
+        }, 2000);
     }
 
     setGameData(data: Partial<Omit<GameData, "aliveCount">>): void {
@@ -1436,7 +1436,7 @@ export class Game implements GameData {
                     }
                     const emotes = EMOTE_SLOTS.map((_, i) => Emotes.fromStringSafe(data.emotes[i] || ''))
 
-                    const stream = new PacketStream(new ArrayBuffer(128));
+                    const stream = new PacketStream(new ArrayBuffer(1024));
                     stream.serializeServerPacket(
                         JoinPacket.create({
                             isMobile: false,
