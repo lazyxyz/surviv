@@ -13,7 +13,6 @@ const config: UserConfig = {
                 earn: resolve(__dirname, "../earn/index.html"),
                 leaderboard: resolve(__dirname, "../leaderboard/index.html"),
                 wiki: resolve(__dirname, "../wiki/index.html"),
-                badges: resolve(__dirname, "../badges/index.html"),
             }
         }
     },

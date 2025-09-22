@@ -7,7 +7,6 @@ import { GAME_CONSOLE } from "../../..";
 import { ChainConfig } from "../../../config";
 import { SURVIV_SHOP_VERSION } from "@common/mappings";
 
-
 interface StoreItem {
     // balance: number;
     name: string;
@@ -42,6 +41,34 @@ async function fetchPrice(
     }
 }
 
+async function fetchBalances(account: Account): Promise<number[]> {
+    if (!ShopCache.storeLoaded) {
+        let kitsBalance: Record<string, number> = {};
+        let badgesBalance: Record<string, number> = {};
+        try {
+            kitsBalance = await account.getItemBalances(SurvivItems.SurvivKits) || {};
+            badgesBalance = await account.getItemBalances(SurvivItems.SurvivBadges) || {};
+        } catch (err) {
+            // fall back to empty objects on error
+            kitsBalance = {};
+            badgesBalance = {};
+        }
+
+        ShopCache.storeLoaded = true;
+        ShopCache.assetsBalance["key"] = kitsBalance["key"] || 0;
+        ShopCache.assetsBalance["crate"] = kitsBalance["crate"] || 0;
+        ShopCache.assetsBalance["surviv_pass"] = badgesBalance["surviv_pass"] || 0;
+        ShopCache.assetsBalance["surviv_card"] = badgesBalance["surviv_card"] || 0;
+        return [
+            ShopCache.assetsBalance["key"],
+            ShopCache.assetsBalance["crate"],
+            ShopCache.assetsBalance["surviv_pass"],
+            ShopCache.assetsBalance["surviv_card"]
+        ]
+    }
+    return [];
+}
+
 function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
     const $storeContainer = $("#buy-customize-items");
     $storeContainer.empty();
@@ -49,7 +76,7 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
         // Use placeholder price initially
         const $card = $(`
       <div class="crates-card" data-item-type="${item.itemType}">
-        <p>You have ${ShopCache.assetsBalance[item.itemType]}</p>
+        <p class="balance-placeholder">Loading...</p>
         <img src="${item.image}" class="crates-image" alt="${item.name}">
         <div class="crates-information">
           <p>${item.name}</p>
@@ -73,6 +100,19 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
                 maximumFractionDigits: 2
             });
             $card.find(".price-placeholder").text(`${formatted} ${ChainConfig.nativeCurrency.symbol}`);
+        });
+
+        // Fetch balances asynchronously and update the UI
+        fetchBalances(account).then(balances => {
+            // Map itemType to the correct index in the balances array
+            const balanceIndexMap: Record<SaleItems, number> = {
+                [SurvivKits.Keys]: 0, // "key"
+                [SurvivKits.Crates]: 1, // "crate"
+                [SurvivBadges.Pass]: 2, // "surviv_pass"
+                [SurvivBadges.Cards]: 3, // "surviv_card"
+            };
+            const balance = balances.length > 0 ? balances[balanceIndexMap[item.itemType]] : ShopCache.assetsBalance[item.itemType] ?? 0;
+            $card.find(".balance-placeholder").text(`You have ${balance}`);
         });
     });
 }
@@ -209,26 +249,6 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
 }
 
 export async function loadStore(account: Account): Promise<void> {
-    if (!ShopCache.storeLoaded) {
-        let kitsBalance: Record<string, number> = {};
-        let badgesBalance: Record<string, number> = {};
-        try {
-            kitsBalance = await account.getItemBalances(SurvivItems.SurvivKits) || {};
-            badgesBalance = await account.getItemBalances(SurvivItems.SurvivBadges) || {};
-        } catch (err) {
-            // fall back to empty objects on error
-            kitsBalance = {};
-            badgesBalance = {};
-        }
-
-        ShopCache.storeLoaded = true;
-        ShopCache.assetsBalance["key"] = kitsBalance["key"] || 0;
-        ShopCache.assetsBalance["crate"] = kitsBalance["crate"] || 0;
-        ShopCache.assetsBalance["surviv_card"] = badgesBalance["surviv_card"] || 0;
-        ShopCache.assetsBalance["surviv_pass"] = badgesBalance["surviv_pass"] || 0;
-    }
-
-
     const storeItems: StoreItem[] = [
         {
             name: "Surviv Keys",

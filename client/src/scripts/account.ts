@@ -339,6 +339,8 @@ export class Account extends EIP6963 {
     async getAssetBalances(
         returnAll: boolean = false
     ): Promise<Record<SurvivAssets, Record<AssetTier, Record<string, number>>>> {
+
+        
         if (!ChainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
@@ -438,7 +440,6 @@ export class Account extends EIP6963 {
                 }
             }
         }
-
         return result;
     }
 

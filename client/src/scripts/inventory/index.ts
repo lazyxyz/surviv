@@ -59,7 +59,9 @@ export let SurvivAssetBalances: Record<SurvivAssets, Record<AssetTier, Record<st
 export async function showInventory(account: Account) {
     $("#btn-customize").on('click', async () => {
         try {
-            SurvivAssetBalances = await account.getAssetBalances();
+            account.getAssetBalances().then(balances => {
+                SurvivAssetBalances =balances;
+            });
         } catch (errr) {
             warningAlert("Please connect your wallet to continue!", 3000);
         }

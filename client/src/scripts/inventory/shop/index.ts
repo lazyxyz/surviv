@@ -83,8 +83,8 @@ export async function showShop(account: Account) {
 
     // Trigger store tab click by default
     $("#store-tab").trigger('click');
-    try {
-        ShopCache.PlayerValidRewards = await account.getValidRewards();
-        await updateRewardsTab(ShopCache.PlayerValidRewards.validCrates.length);
-    } catch (err) { };
+    account.getValidRewards().then(validRewards => {
+        ShopCache.PlayerValidRewards = validRewards;
+        updateRewardsTab(validRewards.validCrates.length)
+    }).catch(err => { })
 }
