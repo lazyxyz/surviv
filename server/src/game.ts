@@ -878,7 +878,7 @@ export class Game implements GameData {
             skin: packet.skin?.idString,
             melee: packet.melee?.idString,
             gun: packet.gun?.idString,
-            emotes: packet.emotes.toString(),
+            emotes: packet.emotes.map(e => e?.idString),
         })
 
         player.loadout.emotes = assets.emotes;

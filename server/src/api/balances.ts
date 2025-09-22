@@ -240,7 +240,7 @@ export async function verifyAllAssets(
         skin?: string;
         melee?: string;
         gun?: string;
-        emotes?: string;
+        emotes?: (string | undefined)[];
     },
     timeout: number = 2000
 ): Promise<VerifiedAssets> {
@@ -258,7 +258,7 @@ export async function verifyAllAssets(
             ...(assets.skin ? [{ type: 'skin', value: assets.skin }] : []),
             ...(assets.melee ? [{ type: 'melee', value: assets.melee }] : []),
             ...(assets.gun ? [{ type: 'gun', value: assets.gun }] : []),
-            ...(assets.emotes ? assets.emotes.split(',').filter(e => e).map(value => ({ type: 'emotes', value })) : [])
+            ...(assets.emotes ? assets.emotes.map(value => ({ type: 'emotes', value: value || '' })) : [])
         ];
 
         // Prepare items for SurvivAssetsMapping
@@ -299,33 +299,7 @@ export async function verifyAllAssets(
     return result;
 }
 
-// /**
-//  * Verify badge for a player using SurvivBadgesMapping.
-//  * @param player - The player's address
-//  * @param badge - The badge item to verify
-//  * @param timeout - Timeout in milliseconds
-//  */
-// export async function verifyBadges(
-//     player: string,
-//     badge: string,
-//     timeout: number = 2000
-// ): Promise<BadgeDefinition | undefined> {
-//     if (!badge) {
-//         return undefined;
-//     }
 
-//     try {
-//         const checkResult = await getBalance(player, [badge], SurvivBadgesMapping, timeout);
-
-//         if (checkResult.isValid && checkResult.validItems[0]) {
-//             return Badges.fromStringSafe(checkResult.validItems[0]);
-//         }
-//     } catch (err) {
-//         console.error('Badge verification failed:', err);
-//     }
-
-//     return undefined;
-// }
 
 /**
  * Verify badge for a player using SurvivBadgesMapping and calculate total boost.
