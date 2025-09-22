@@ -30,6 +30,7 @@ export let ShopCache: {
     assetsBalance: Record<SaleItems, number>;
     assetsPrice: Record<SaleItems, string>;
     PlayerValidRewards: ValidRewards | undefined;
+    discountEligible: boolean;
 }
 
 export async function updateRewardsTab(rewards: number) {
@@ -58,7 +59,8 @@ export async function showShop(account: Account) {
             surviv_card: "",
             surviv_pass: "",
         },
-        PlayerValidRewards: undefined
+        PlayerValidRewards: undefined,
+        discountEligible: false,
     }
 
 

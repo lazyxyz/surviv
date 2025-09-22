@@ -60,13 +60,6 @@ const saleMappings: Record<SaleItems, { address: string; assets: string[] }> = {
     [SurvivBadges.Pass]: SurvivBadgesMapping,
 };
 
-const saleUSDPrices: Record<SaleItems, string> = {
-    [SurvivKits.Crates]: "2000000000000000000",
-    [SurvivKits.Keys]: "2000000000000000000",
-    [SurvivBadges.Cards]: "149000000000000000000",
-    [SurvivBadges.Pass]: "49000000000000000000",
-};
-
 export const PaymentTokens = {
     NativeToken: SurvivMapping.NativeToken.address,
 } as const;
@@ -340,7 +333,7 @@ export class Account extends EIP6963 {
         returnAll: boolean = false
     ): Promise<Record<SurvivAssets, Record<AssetTier, Record<string, number>>>> {
 
-        
+
         if (!ChainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
@@ -1189,6 +1182,37 @@ export class Account extends EIP6963 {
         } catch (error: any) {
             clearTimeout(timeoutId);
             throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
+        }
+    }
+
+
+    async isDiscountEligible(): Promise<boolean> {
+        // Ensure RPC URL is available
+        if (!ChainConfig.rpcUrls[0]) {
+            throw new Error('RPC URL not configured');
+        }
+
+        if (!this.address) { return false }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Initialize JSON-RPC provider
+            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+
+            // Initialize contract with read-only provider (no signer needed)
+            const survivShopContract = new ethers.Contract(SURVIV_SHOPV2_ADDRESS, survivShopV2ABI, ethersProvider);
+
+            // Call the getPrice function
+            const isEligible = await survivShopContract.isEligible(this.address);
+            clearTimeout(timeoutId);
+            return isEligible;
+        } catch (error: any) {
+            console.log("error: ", error);
+            clearTimeout(timeoutId);
+            throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
         }
     }
 }

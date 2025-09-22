@@ -7,6 +7,8 @@ import { GAME_CONSOLE } from "../../..";
 import { ChainConfig } from "../../../config";
 import { SURVIV_SHOP_VERSION } from "@common/mappings";
 
+const DISCOUNT = 20; // DISCOUNT 20%
+
 interface StoreItem {
     // balance: number;
     name: string;
@@ -93,15 +95,31 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
     `);
         $storeContainer.append($card);
 
-        // Fetch price asynchronously and update the UI
         fetchPrice(account, item.itemType).then(price => {
-            const formatted = Number(formatEther(price)).toLocaleString(undefined, {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            });
-            $card.find(".price-placeholder").text(`${formatted} ${ChainConfig.nativeCurrency.symbol}`);
+            const rawPrice = Number(formatEther(price));
+            let effectivePrice = rawPrice;
+            if (ShopCache.discountEligible) {
+                effectivePrice = rawPrice - (rawPrice * DISCOUNT / 100);
+                const formatted = rawPrice.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                });
+                const formattedDiscount = effectivePrice.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                });
+                $card.find(".price-placeholder").html(
+                    `<span style="font-size:70%; text-decoration:line-through; opacity:0.7; margin-right:4px;">${formatted}</span> ${formattedDiscount} ${ChainConfig.nativeCurrency.symbol}`
+                );
+            } else {
+                const formatted = rawPrice.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                });
+                $card.find(".price-placeholder").text(`${formatted} ${ChainConfig.nativeCurrency.symbol}`);
+            }
+            $card.data("effective-price", effectivePrice);
         });
-
         // Fetch balances asynchronously and update the UI
         fetchBalances(account).then(balances => {
             // Map itemType to the correct index in the balances array
@@ -119,15 +137,14 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
 
 // Update total purchase amount based on user input
 function updateTotalPurchase($card: JQuery<HTMLElement>, amount: number) {
-    const priceText = $card.find(".price-placeholder").text();
-    const priceValue = parseFloat(priceText);
+    const effectivePrice = $card.data("effective-price");
     const $buyButton = $card.find(".buy-now-btn");
-    if (!isNaN(priceValue) && amount > 0) {
-        $buyButton.text(`Buy ${(priceValue * amount).toFixed(1)} ${ChainConfig.nativeCurrency.symbol}`);
+    if (effectivePrice !== undefined && amount > 0) {
+        const total = (effectivePrice * amount).toFixed(1);
+        $buyButton.text(`Buy ${total} ${ChainConfig.nativeCurrency.symbol}`);
     } else {
         $buyButton.text("Buy now");
         $buyButton.prop("disabled", true).removeClass("active");
-
     }
 }
 
@@ -208,7 +225,12 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
             isProcessing = true;
             $buyButton.prop("disabled", true);
             try {
-                const value = BigInt(ShopCache.assetsPrice[itemType]) * BigInt(amount);
+                const originalPriceWei = BigInt(ShopCache.assetsPrice[itemType]);
+                let pricePerItemWei = originalPriceWei;
+                if (ShopCache.discountEligible) {
+                    pricePerItemWei = (originalPriceWei * BigInt(100 - DISCOUNT)) / BigInt(100);
+                }
+                const value = pricePerItemWei * BigInt(amount);
 
                 if (SURVIV_SHOP_VERSION == 2) {
                     await account.buyItemsV2(itemType, amount, value);
@@ -275,6 +297,10 @@ export async function loadStore(account: Account): Promise<void> {
             itemType: SurvivBadges.Cards,
         },
     ];
+
+    await account.isDiscountEligible().then(isEligible => {
+        ShopCache.discountEligible = isEligible;
+    }).catch(err => { })
 
     renderStoreItems(account, storeItems);
     setupPurchaseInteractions(account, storeItems);
