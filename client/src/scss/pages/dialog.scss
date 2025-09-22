@@ -194,7 +194,8 @@ input::-webkit-inner-spin-button {
 
 #customize-menu {
   background-color: #4c722f;
-  max-width: 850px;
+  max-width: 920px;
+  // max-width: 850px;
 }
 
 #create-team-menu {
@@ -708,7 +709,7 @@ input::-webkit-inner-spin-button {
     height: 100%;
 
     .skins-list-item-container {
-      padding: 8px;
+      padding: 4px;
       border: 5px solid transparent;
       border-radius: 10px;
       display: flex;
@@ -821,10 +822,34 @@ input::-webkit-inner-spin-button {
       justify-content: center;
       align-items: center;
 
+      position: relative;
       gap: 8px;
-      padding: 16px;
+      padding: 40px 12px 12px 12px;
       border-radius: 10px;
       background: #73a246;
+
+      .total-supply {
+        position: absolute;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        top: 10px;
+        width: 90%;
+        text-shadow: 1px 1px 2px palette.$transparent_bg;
+
+        &-title {
+          font-size: 11px;
+          color: white;
+          margin: unset;
+        }
+        &-amount {
+          font-size: 12px;
+          font-weight: 600;
+          color: palette.$lime;
+          margin: unset;
+        }
+      }
+
       .crates-image {
         border-radius: 12px;
         width: 90px;
@@ -840,8 +865,16 @@ input::-webkit-inner-spin-button {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 4px;
-        margin-top: 8px;
+        gap: 2px;
+
+        .balance-placeholder {
+          font-size: 12px;
+          padding: 4px 8px;
+          background-color: rgba(0, 0, 0, 0.2);
+          border-radius: 10px;
+          margin-bottom: 8px;
+        }
+
         p {
           margin: unset;
           color: white;
@@ -852,12 +885,21 @@ input::-webkit-inner-spin-button {
         h3 {
           margin: unset;
           color: white;
-          font-size: 18px;
+          font-size: 16px;
           font-weight: 700;
+          text-shadow: 1px 1px 4px palette.$transparent_bg;
 
           @include variables.mobile-device {
             font-size: 16px;
           }
+        }
+
+        span {
+          font-size: 14px;
+          font-weight: 500;
+          text-decoration: line-through;
+          opacity: 0.65;
+          text-shadow: none;
         }
       }
 
@@ -1402,9 +1444,25 @@ input::-webkit-inner-spin-button {
     flex-wrap: wrap;
     height: 100%;
 
+    .badges-boost-display {
+      position: fixed;
+      top: 6px;
+      left: 55%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #fff;
+      span {
+        font-weight: 600;
+        color: palette.$lime;
+      }
+    }
+
     .badges-list-item-container {
       width: 140px;
-      margin: 8px;
+      margin: 4px;
       box-shadow: inset 0px 0px 0px 5px transparent;
       display: flex;
       flex-direction: column;

@@ -78,9 +78,9 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
         // Use placeholder price initially
         const $card = $(`
       <div class="crates-card" data-item-type="${item.itemType}">
-        <p class="balance-placeholder">Loading...</p>
         <img src="${item.image}" class="crates-image" alt="${item.name}">
         <div class="crates-information">
+        <div class="balance-placeholder"></div>
           <p>${item.name}</p>
           <h3 class="price-placeholder">Loading...</h3>
           <h3 class="total-purchase"></h3>
@@ -93,6 +93,17 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
         <button class="btn btn-alert btn-darken buy-now-btn" disabled>Buy now</button>
       </div>
     `);
+
+        // if the item is a badge or pass, add total supply element
+        if (item.itemType === SurvivBadges.Pass || item.itemType === SurvivBadges.Cards) {
+            const $totalSupply = $(`
+                <div class="total-supply">
+                    <div class="total-supply-title">Available Supply</div>
+                    <div class="total-supply-amount">100/1000</div>
+                </div>`)
+            $card.prepend($totalSupply);
+        }
+
         $storeContainer.append($card);
 
         fetchPrice(account, item.itemType).then(price => {
@@ -109,7 +120,7 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
                     maximumFractionDigits: 2
                 });
                 $card.find(".price-placeholder").html(
-                    `<span style="font-size:70%; text-decoration:line-through; opacity:0.7; margin-right:4px;">${formatted}</span> ${formattedDiscount} ${ChainConfig.nativeCurrency.symbol}`
+                    `<span>${formatted}</span> ${formattedDiscount} ${ChainConfig.nativeCurrency.symbol}`
                 );
             } else {
                 const formatted = rawPrice.toLocaleString(undefined, {
@@ -130,7 +141,7 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
                 [SurvivBadges.Cards]: 3, // "surviv_card"
             };
             const balance = balances.length > 0 ? balances[balanceIndexMap[item.itemType]] : ShopCache.assetsBalance[item.itemType] ?? 0;
-            $card.find(".balance-placeholder").text(`You have ${balance}`);
+            $card.find(".balance-placeholder").html(`You have: <b>${balance}</b>`);
         });
     });
 }
