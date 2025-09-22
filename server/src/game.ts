@@ -1437,7 +1437,7 @@ export class Game implements GameData {
                     }
                     const emotes = EMOTE_SLOTS.map((_, i) => Emotes.fromStringSafe(data.emotes[i] || ''))
 
-                    const stream = new PacketStream(new ArrayBuffer(128));
+                    const stream = new PacketStream(new ArrayBuffer(1024));
                     stream.serializeServerPacket(
                         JoinPacket.create({
                             isMobile: false,
