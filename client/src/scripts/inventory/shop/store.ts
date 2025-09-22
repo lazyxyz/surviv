@@ -8,6 +8,7 @@ import { ChainConfig } from "../../../config";
 import { SURVIV_SHOP_VERSION } from "@common/mappings";
 
 const DISCOUNT = 20; // DISCOUNT 20%
+const MAX_BADGES_CAP = 1000;
 
 interface StoreItem {
     // balance: number;
@@ -74,7 +75,7 @@ async function fetchBalances(account: Account): Promise<number[]> {
 function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
     const $storeContainer = $("#buy-customize-items");
     $storeContainer.empty();
-    storeItems.forEach((item, index) => {
+    storeItems.forEach(async (item, index) => {
         // Use placeholder price initially
         const $card = $(`
       <div class="crates-card" data-item-type="${item.itemType}">
@@ -94,13 +95,17 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
       </div>
     `);
 
-        // if the item is a badge or pass, add total supply element
+      // if the item is a badge or pass, add total supply element with visual horizontal pile/progress
         if (item.itemType === SurvivBadges.Pass || item.itemType === SurvivBadges.Cards) {
+            const currentSupply = await account.getBadgeSupply(item.itemType);
+            const percentage = (currentSupply / MAX_BADGES_CAP) * 100;
             const $totalSupply = $(`
                 <div class="total-supply">
-                    <div class="total-supply-title">Available Supply</div>
-                    <div class="total-supply-amount">100/1000</div>
-                </div>`)
+                    <div class="pile-container">
+                        <div class="pile-bar" style="width: ${percentage}%"></div>
+                        <div class="pile-text">Items minted: ${currentSupply}/${MAX_BADGES_CAP}</div>
+                    </div>
+                </div>`);
             $card.prepend($totalSupply);
         }
 

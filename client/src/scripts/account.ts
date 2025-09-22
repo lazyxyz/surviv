@@ -1215,4 +1215,42 @@ export class Account extends EIP6963 {
             throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
         }
     }
+
+
+    async getBadgeSupply(badgeName: string) {
+        try {
+            // Find index of badgeName in assets array
+            const tokenId = SurvivBadgesMapping.assets.indexOf(badgeName);
+            if (tokenId === -1) {
+                throw new Error(`Badge "${badgeName}" not found in assets mapping`);
+            }
+
+            const contractAddress = SurvivBadgesMapping.address;
+            const apiUrl = `${ChainConfig.blockExplorerAPI}/api/v2/tokens/${contractAddress}/instances/${tokenId}/holders`;
+
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Sum up the values for the specified tokenId
+            const totalSupply = data.items
+                .filter((item: { token_id: string; }) => item.token_id === tokenId.toString())
+                .reduce((sum: number, item: { value: string; }) => sum + parseInt(item.value), 0);
+
+            return totalSupply;
+        } catch (error) {
+            console.error('Error fetching badge supply:', error);
+            throw error;
+        }
+    }
+
 }

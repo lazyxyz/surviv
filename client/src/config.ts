@@ -31,7 +31,8 @@ export const ChainConfig = {
         symbol: "STT",
         decimals: 18
     },
-    blockExplorerUrls: ["https://shannon-explorer.somnia.network/"]
+    blockExplorerUrls: ["https://shannon-explorer.somnia.network/"],
+    blockExplorerAPI: "https://somnia.w3us.site",
 } satisfies ChainInfo as ChainInfo;
 
 export interface ConfigType {
@@ -79,5 +80,6 @@ export interface ChainInfo {
         symbol: string,
         decimals: number,
     }
-    readonly blockExplorerUrls: string[]
+    readonly blockExplorerUrls: string[],
+    readonly blockExplorerAPI: string
 }
