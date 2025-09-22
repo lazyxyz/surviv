@@ -95,15 +95,16 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
       </div>
     `);
 
-      // if the item is a badge or pass, add total supply element with visual horizontal pile/progress
+        // if the item is a badge or pass, add total supply element with visual horizontal pile/progress
         if (item.itemType === SurvivBadges.Pass || item.itemType === SurvivBadges.Cards) {
             const currentSupply = await account.getBadgeSupply(item.itemType);
             const percentage = (currentSupply / MAX_BADGES_CAP) * 100;
+            const textColor = percentage >= 30 ? "black" : "white";
             const $totalSupply = $(`
                 <div class="total-supply">
                     <div class="pile-container">
                         <div class="pile-bar" style="width: ${percentage}%"></div>
-                        <div class="pile-text">Items minted: ${currentSupply}/${MAX_BADGES_CAP}</div>
+                        <div class="pile-text" style="color: ${textColor};">Items minted:&nbsp;<span>${currentSupply}/${MAX_BADGES_CAP}</span></div>
                     </div>
                 </div>`);
             $card.prepend($totalSupply);
