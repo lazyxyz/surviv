@@ -1434,7 +1434,9 @@ export class Game implements GameData {
                         disconnect(socket, `Authentication failed. Please reconnect your wallet.`);
                         return;
                     }
-                    const emotes = EMOTE_SLOTS.map((_, i) => Emotes.fromStringSafe(data.emotes[i] || ''))
+
+                    const ownedEmotes = data.emotes.split(',');
+                    const emotes = EMOTE_SLOTS.map((_, i) => Emotes.fromStringSafe(ownedEmotes[i] || ''))
 
                     const stream = new PacketStream(new ArrayBuffer(1024));
                     stream.serializeServerPacket(

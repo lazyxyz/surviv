@@ -516,6 +516,7 @@ export class Game {
     }
 
     inventoryMsgTimeout: number | undefined;
+    joinRetryInterval?: NodeJS.Timeout;
 
     onPacket(packet: OutputPacket): void {
         switch (true) {
@@ -525,19 +526,34 @@ export class Game {
                     this.uiManager.ui.loadingText.text(getTranslatedString("verifying_game_assets"));
                     this.uiManager.ui.splashMsg.hide();
 
-                    // await new Promise(resolve => setTimeout(resolve, 3000));
-                    this.sendPacket(JoinPacket.create({
+                    // Prepare the client JoinPacket data (do this once)
+                    const clientJoinPacket = JoinPacket.create({
                         ...packet.output,
                         isMobile: this.inputManager.isMobile
-                    }));
+                    });
+
+                    // Start retry interval: Send every 1 second until JoinedPacket arrives
+                    this.joinRetryInterval = setInterval(() => {
+                        this.sendPacket(clientJoinPacket);
+                        console.log("Retrying client JoinPacket send");  // Optional debug log
+                    }, 1000);
+
+                    // Send immediately once (first attempt)
+                    this.sendPacket(clientJoinPacket);
+                    this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
+
                     this.setupGame();
                     updateUsersBadge(packet.output.badge?.idString)
                 });
                 break;
             }
             case packet instanceof JoinedPacket: {
-                this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
+                
                 this.startGame(packet.output);
+                if (this.joinRetryInterval) {
+                    clearInterval(this.joinRetryInterval);
+                    this.joinRetryInterval = undefined;
+                }
                 break;
             }
             case packet instanceof MapPacket:
