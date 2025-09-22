@@ -854,6 +854,7 @@ export class Game implements GameData {
 
     // Called when a JoinPacket is sent by the client
     async activatePlayer(player: Gamer, packet: PlayerData) {
+         console.log("activatePlayer 1");
         const rejectedBy = this.pluginManager.emit("player_will_join", { player, joinPacket: packet });
         if (rejectedBy) {
             player.disconnect(`Connection rejected by server plugin '${rejectedBy.constructor.name}'`);
@@ -898,6 +899,7 @@ export class Game implements GameData {
         this.updateGameData({ aliveCount: this.aliveCount });
 
         player.joined = true;
+         console.log("activatePlayer 2");
 
         player.sendPacket(
             JoinedPacket.create(
@@ -910,11 +912,7 @@ export class Game implements GameData {
             )
         );
 
-        this.addTimeout(() => { player.disableInvulnerability(); }, 5000);
-
-
         player.sendData(this.map.buffer);
-
         this.addTimeout(() => { player.disableInvulnerability(); }, 5000);
 
         // Start the game
@@ -930,6 +928,8 @@ export class Game implements GameData {
 
         Logger.log(`Game ${this.port} | "${player.name}" joined`);
         this.pluginManager.emit("player_did_join", { player, joinPacket: packet });
+         console.log("activatePlayer 3");
+
     }
 
     removePlayer(player: Player): void {
@@ -1416,6 +1416,7 @@ export class Game implements GameData {
              */
             async open(socket: WebSocket<PlayerContainer>) {
                 try {
+                    console.log("Connect WS 1");
                     const data = socket.getUserData();
 
                     if (!data.token) {
@@ -1451,6 +1452,7 @@ export class Game implements GameData {
                         })
                     );
                     socket.send(stream.getBuffer(), true, false);
+                    console.log("Connect WS 2");
                 } catch (err: any) {
                     console.log("Open websocket failed: ", err);
                     disconnect(socket, "Unknown error. Please contact Surviv team.");
