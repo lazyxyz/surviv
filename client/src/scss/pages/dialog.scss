@@ -1484,6 +1484,7 @@ input::-webkit-inner-spin-button {
     }
 
     .badges-list-item-container {
+      position: relative;
       width: 140px;
       margin: 4px;
       box-shadow: inset 0px 0px 0px 5px transparent;
@@ -1497,6 +1498,19 @@ input::-webkit-inner-spin-button {
 
       &.selected {
         box-shadow: 0px 0px 0px 4px palette.$orange;
+      }
+      .badge-balance {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        background: palette.$transparent_bg;
+        backdrop-filter: blur(30px);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #ffffff;
+        z-index: 9999;
       }
     }
 
