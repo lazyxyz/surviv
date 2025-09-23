@@ -273,7 +273,7 @@ export class Gamer extends Player {
             } as unknown as RewardsData));
         };
 
-        if (!this.loadout.badge) {
+        if (this.rewardsBoost == 0) {
             processRewardsPacket(false, rank, 0, 0);
             return;
         }

@@ -543,12 +543,12 @@ export class Game {
                     this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
 
                     this.setupGame();
-                    updateUsersBadge(packet.output.badge?.idString)
+                    
+                    // updateUsersBadge(packet.output.badge?.idString) // Temperary close since no way to check
                 });
                 break;
             }
             case packet instanceof JoinedPacket: {
-                
                 this.startGame(packet.output);
                 if (this.joinRetryInterval) {
                     clearInterval(this.joinRetryInterval);

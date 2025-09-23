@@ -304,6 +304,7 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         if (player.name === localName) {
             skin = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
         }
+
         return `
         <div class="create-team-player-container">
             <i class="fa-solid fa-crown"${player.isLeader ? "" : ' style="display: none"'}></i>
@@ -320,9 +321,9 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
                 <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${skin}_fist.svg')"></div>
                 <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${skin}_fist.svg')"></div>
             </div>
-            <div class="create-team-player-name-container">
+             <div class="create-team-player-name-container">
                 <span class="create-team-player-name"${player.nameColor ? ` style="color: ${new Color(player.nameColor).toHex()}"` : ""}>${player.name}</span>
-                ${player.badge?.length ? `<img class="create-team-player-badge" draggable="false" src="${""}" />` : ""}
+                ${player.badge?.length ? `<img class="create-team-player-badge" draggable="false" src="./img/game/shared/badges/${player.badge}.svg" />` : ""}
             </div>
         </div>
         `;
