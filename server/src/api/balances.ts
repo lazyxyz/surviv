@@ -324,10 +324,10 @@ export async function verifyBadges(
         let totalBoost = 0;
         if (checkResult.isValid && checkResult.validItems.length > 0) {
             // Calculate total boost from all owned badges
-            checkResult.validItems.forEach((badgeId: string, index: number) => {
+            checkResult.validItems.forEach((badgeId: string) => {
                 const mappingIndex = SurvivBadgesMapping.assets.indexOf(badgeId);
                 if (mappingIndex !== -1) {
-                    const amount = Number(checkResult.balances[index]); // Convert bigint to number
+                    const amount = Number(checkResult.balances[mappingIndex]); // Convert bigint to number
                     totalBoost += SurvivBadgesMapping.boosts[mappingIndex] * amount;
                 }
             });
