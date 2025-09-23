@@ -5,7 +5,7 @@ import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
 import type { Account } from "../account";
 import type { Game } from "../game";
-import { warningAlert } from "../modal";
+import { errorAlert, warningAlert } from "../modal";
 import { parseJWT } from "../utils/constants";
 import { resetPlayButtons, selectedRegion } from "./home";
 import { Color } from "pixi.js";
@@ -243,24 +243,14 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
     };
 
     socket.onerror = (): void => {
-        ui.splashMsgText.html(getTranslatedString("msg_error_joining_team"));
-        ui.splashMsg.show();
-        setTimeout(() => {
-            ui.splashMsg.hide();
-        }, 3000);
+        errorAlert(getTranslatedString("msg_error_joining_team"), 3000);
         resetPlayButtons();
         $("#create-team-menu").fadeOut(250);
-        ui.splashUi.css({ filter: "", pointerEvents: "" });
     };
 
     socket.onclose = (): void => {
-        ui.splashMsgText.html(joinedTeam ? getTranslatedString("msg_lost_team_connection") : getTranslatedString("msg_error_joining_team"));
-        ui.splashMsg.show();
-        setTimeout(() => {
-            ui.splashMsg.hide();
-        }, 3000);
+        joinedTeam ? errorAlert(getTranslatedString("msg_lost_team_connection"), 3000) : errorAlert(getTranslatedString("msg_error_joining_team"), 3000);
         leaveTeam();
-        ui.splashUi.css({ filter: "", pointerEvents: "" });
     };
 
 }
