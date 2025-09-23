@@ -37,7 +37,8 @@ export const ChainConfig = {
         symbol: "SOMI",
         decimals: 18
     },
-    blockExplorerUrls: ["https://mainnet.somnia.w3us.site/"]
+    blockExplorerUrls: ["https://mainnet.somnia.w3us.site/"],
+    blockExplorerAPI: "https://mainnet.somnia.w3us.site"
 } satisfies ChainInfo as ChainInfo;
 
 export interface ConfigType {
@@ -85,5 +86,6 @@ export interface ChainInfo {
         symbol: string,
         decimals: number,
     }
-    readonly blockExplorerUrls: string[]
+    readonly blockExplorerUrls: string[],
+    readonly blockExplorerAPI: string
 }

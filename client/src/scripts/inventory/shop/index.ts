@@ -30,6 +30,7 @@ export let ShopCache: {
     assetsBalance: Record<SaleItems, number>;
     assetsPrice: Record<SaleItems, string>;
     PlayerValidRewards: ValidRewards | undefined;
+    discountEligible: boolean;
 }
 
 export async function updateRewardsTab(rewards: number) {
@@ -48,15 +49,18 @@ export async function showShop(account: Account) {
         baseLoaded: false,
         assetsBalance: {
             crate: 0,
+            key: 0,
             surviv_card: 0,
-            key: 0
+            surviv_pass: 0,
         },
         assetsPrice: {
             crate: "",
+            key: "",
             surviv_card: "",
-            key: ""
+            surviv_pass: "",
         },
-        PlayerValidRewards: undefined
+        PlayerValidRewards: undefined,
+        discountEligible: false,
     }
 
 
@@ -81,8 +85,8 @@ export async function showShop(account: Account) {
 
     // Trigger store tab click by default
     $("#store-tab").trigger('click');
-    try {
-        ShopCache.PlayerValidRewards = await account.getValidRewards();
-        await updateRewardsTab(ShopCache.PlayerValidRewards.validCrates.length);
-    } catch (err) { };
+    account.getValidRewards().then(validRewards => {
+        ShopCache.PlayerValidRewards = validRewards;
+        updateRewardsTab(validRewards.validCrates.length)
+    }).catch(err => { })
 }

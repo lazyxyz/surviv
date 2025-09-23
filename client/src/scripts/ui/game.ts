@@ -55,16 +55,19 @@ function setupMenuButtons(game: Game): void {
 
     $("#btn-play-again, #btn-spectate-replay").on("click", async () => {
         await game.endGame();
+
         if (teamSocket) {
-            teamSocket.send(JSON.stringify({ type: CustomTeamMessages.Start }))
+            teamSocket.send(JSON.stringify({ type: CustomTeamMessages.Start }));
         } else {
             if (game.account) {
-                joinGame(game.teamSize, game, game.account)
+                // async sleep
+                joinGame(game.teamSize, game, game.account);
             } else {
-                errorAlert("Please connect your wallet to continue!")
+                errorAlert("Please connect your wallet to continue!");
             }
         }
     });
+
 
     $<HTMLButtonElement>("#btn-resume-game").on("click", () => gameMenu.hide());
     $<HTMLButtonElement>("#btn-fullscreen").on("click", () => {

@@ -54,7 +54,6 @@ import { getColors, LAYER_TRANSITION_DELAY, parseJWT, PIXI_SCALE, UI_DEBUG_MODE 
 import { loadTextures, SuroiSprite } from "./utils/pixi";
 import { Tween } from "./utils/tween";
 import { Account } from "./account";
-import { ReadyPacket, type PlayerData } from "@common/packets/readyPacket";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { errorAlert } from "./modal";
 import { Modes, NumberToMode, type Mode } from "@common/definitions/modes";
@@ -341,14 +340,6 @@ export class Game {
         this.camera.resize(this.pixi.screen.width, this.pixi.screen.height, true);
     }
 
-    ready(packet: PlayerData) {
-        this.sendPacket(JoinPacket.create({
-            ...packet,
-            isMobile: this.inputManager.isMobile
-        }));
-        updateUsersBadge(packet.badge?.idString)
-    }
-
     sendChatMessage(message: string, isTeamChat: boolean = true) {
         if (this.teamMode) {
             this.sendPacket(ClientChatPacket.create({
@@ -525,19 +516,46 @@ export class Game {
     }
 
     inventoryMsgTimeout: number | undefined;
+    joinRetryInterval?: NodeJS.Timeout;
 
     onPacket(packet: OutputPacket): void {
         switch (true) {
-            case packet instanceof ReadyPacket:
+            case packet instanceof JoinPacket: {
                 this.gameMode = NumberToMode[packet.output.gameMode];
-                this.initPixi(this.gameMode).then(_ => {
-                    this.ready(packet.output);
+                this.initPixi(this.gameMode).then(async _ => {
+                    this.uiManager.ui.loadingText.text(getTranslatedString("verifying_game_assets"));
+                    this.uiManager.ui.splashMsg.hide();
+
+                    // Prepare the client JoinPacket data (do this once)
+                    const clientJoinPacket = JoinPacket.create({
+                        ...packet.output,
+                        isMobile: this.inputManager.isMobile
+                    });
+
+                    // Start retry interval: Send every 1 second until JoinedPacket arrives
+                    this.joinRetryInterval = setInterval(() => {
+                        this.sendPacket(clientJoinPacket);
+                        console.log("Retrying client JoinPacket send");  // Optional debug log
+                    }, 1000);
+
+                    // Send immediately once (first attempt)
+                    this.sendPacket(clientJoinPacket);
+                    this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
+
                     this.setupGame();
+                    updateUsersBadge(packet.output.badge?.idString)
                 });
                 break;
-            case packet instanceof JoinedPacket:
+            }
+            case packet instanceof JoinedPacket: {
+                
                 this.startGame(packet.output);
+                if (this.joinRetryInterval) {
+                    clearInterval(this.joinRetryInterval);
+                    this.joinRetryInterval = undefined;
+                }
                 break;
+            }
             case packet instanceof MapPacket:
                 this.map.updateFromPacket(packet.output);
                 break;
@@ -661,6 +679,27 @@ export class Game {
         updateChatSendAllVisibility(this.teamMode);
     }
 
+    async disconnect() {
+        if (!this._socket || this._socket.readyState === WebSocket.CLOSED) {
+            return;  // Already closed or no socket
+        }
+
+        return new Promise<void>((resolve) => {
+            // Temporarily override onclose to resolve the promise
+            if (!this._socket) return;
+
+            const originalOnClose = this._socket.onclose;
+            this._socket.onclose = (ev) => {
+                if (originalOnClose && this._socket) originalOnClose.call(this._socket, ev);  // Call original handler
+                this._socket = undefined;  // Clear reference
+                resolve();
+            };
+
+            // Initiate close
+            this._socket.close();
+        });
+    }
+
     async endGame(): Promise<void> {
         const ui = this.uiManager.ui;
 
@@ -669,7 +708,7 @@ export class Game {
 
             this.soundManager.stopAll();
 
-            ui.splashUi.fadeIn(400, () => {
+            ui.splashUi.fadeIn(400, async () => {
                 if (this.music) {
                     void this.music.play();
                 }
@@ -684,8 +723,9 @@ export class Game {
                 this.gameStarted = false;
 
                 if (this._socket) {
-                    this._socket.close();
-                    this._socket = undefined; // Clear reference
+                    await this.disconnect();
+                    // this._socket.close();
+                    // this._socket = undefined; // Clear reference
                 }
 
                 // reset stuff

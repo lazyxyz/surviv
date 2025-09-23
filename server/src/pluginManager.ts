@@ -17,7 +17,7 @@ import { Loot, type ItemData } from "./objects/loot";
 import { Obstacle } from "./objects/obstacle";
 import { Player } from "./objects/player";
 import { Logger } from "./utils/misc";
-import { PlayerData } from "@common/packets/readyPacket";
+import { PlayerData } from "@common/packets/joinPacket";
 
 interface PlayerDamageEvent extends DamageParams {
     readonly player: Player

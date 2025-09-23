@@ -64,7 +64,6 @@ function setTeamParameters(params: URLSearchParams): void {
 
 
 async function initializePlayButtons(game: Game, account: Account): Promise<void> {
-    const { ui } = game.uiManager;
     const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
 
     playButtons.forEach((button, index) => {
@@ -106,8 +105,11 @@ function setupTeamMenu(game: Game, account: Account): void {
             return account.sessionExpired();
         }
 
-        ui.splashOptions.addClass("loading");
-        ui.loadingText.text(getTranslatedString("loading_connecting"));
+        // Custom UI changes for both leader and member when clicking #btn-create-team
+        $(".splash-earn-learn-more").hide();
+        $("#splash-inventory").prepend($(".splash-earn-get-now").detach());
+        $("#splash-earn").append($("#create-team-menu").detach().show());
+        $("#option-btns-group").hide();
 
         const params = new URLSearchParams();
         if (this.id === "btn-join-team") {
@@ -123,10 +125,30 @@ function setupTeamMenu(game: Game, account: Account): void {
         const teamURL = `${selectedRegion.teamAddress}/team?${params.toString()}`;
         teamSocket = new WebSocket(teamURL);
         setupTeamSocketHandlers(teamSocket, game, account);
-
-        $("#create-team-menu").fadeIn(250);
-        ui.splashUi.css({ filter: "brightness(0.6)", pointerEvents: "none" });
     });
+}
+
+$<HTMLButtonElement>("#btn-leave-game").on("click", function () {
+    if (confirm("Are you sure you want to leave the team?")) {
+        leaveTeam();
+    }
+});
+
+function leaveTeam() {
+    teamSocket?.close();
+    teamSocket = undefined;
+    teamID = undefined;
+    joinedTeam = false;
+    window.location.hash = "";
+    resetPlayButtons();
+    $("#create-team-menu").fadeOut(250);
+    $(".splash-earn-learn-more").show();
+    $("#splash-inventory").prepend($(".splash-earn-get-now").detach());
+    $("#splash-earn").append($(".splash-earn-learn-more").detach().show());
+    $("#splash-earn").prepend($(".splash-earn-get-now").detach().show());
+    $("#splash-earn").append($("#create-team-menu").detach().hide());
+    $(".splash-earn-get-now").show();
+    $("#option-btns-group").show();
 }
 
 function setupTeamMenuControls(game: Game, account: Account): void {
@@ -148,12 +170,10 @@ function setupTeamMenuControls(game: Game, account: Account): void {
             await navigator.clipboard.writeText(url);
             copyUrl.addClass("btn-success").css("pointer-events", "none").html(`
                 <i class="fa-solid fa-check" id="copy-team-btn-icon"></i>
-                ${getTranslatedString("copied")}
             `);
             setTimeout(() => {
                 copyUrl.removeClass("btn-success").css("pointer-events", "").html(`
                     <i class="fa-solid fa-clipboard" id="copy-team-btn-icon"></i>
-                    ${getTranslatedString("copy")}
                 `);
             }, 2000);
         } catch {
@@ -195,6 +215,7 @@ function setupTeamMenuControls(game: Game, account: Account): void {
             console.error("Failed to start game");
         }
     });
+
 }
 
 function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account): void {
@@ -213,8 +234,10 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
                 ui.createTeamLock.prop("checked", data.locked);
                 break;
             case CustomTeamMessages.Started:
-                $("#create-team-menu").hide();
                 joinGame(TeamSize.Squad, game, account);
+                break;
+            case CustomTeamMessages.Kick:
+                leaveTeam();
                 break;
         }
     };
@@ -222,6 +245,9 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
     socket.onerror = (): void => {
         ui.splashMsgText.html(getTranslatedString("msg_error_joining_team"));
         ui.splashMsg.show();
+        setTimeout(() => {
+            ui.splashMsg.hide();
+        }, 3000);
         resetPlayButtons();
         $("#create-team-menu").fadeOut(250);
         ui.splashUi.css({ filter: "", pointerEvents: "" });
@@ -230,14 +256,13 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
     socket.onclose = (): void => {
         ui.splashMsgText.html(joinedTeam ? getTranslatedString("msg_lost_team_connection") : getTranslatedString("msg_error_joining_team"));
         ui.splashMsg.show();
-        resetPlayButtons();
-        teamSocket = undefined;
-        teamID = undefined;
-        joinedTeam = false;
-        window.location.hash = "";
-        $("#create-team-menu").fadeOut(250);
+        setTimeout(() => {
+            ui.splashMsg.hide();
+        }, 3000);
+        leaveTeam();
         ui.splashUi.css({ filter: "", pointerEvents: "" });
     };
+
 }
 
 function handleTeamJoin(data: CustomTeamMessage, ui: Game['uiManager']['ui']): void {
@@ -250,11 +275,30 @@ function handleTeamJoin(data: CustomTeamMessage, ui: Game['uiManager']['ui']): v
     ui.createTeamLock.prop("checked", data.locked);
 }
 
+/**
+ * Updates the start game button state based on team readiness
+ * When all team members are ready, the button is enabled, otherwise disabled
+ */
+function updateStartGameButtonState(players: CustomTeamPlayerInfo[], isLeader: boolean, ui: Game['uiManager']['ui']): void {
+    const allPlayersReady = players.every(player => player.ready || player.isLeader);
+
+    if (isLeader) {
+        // For team leader, enable button only when all members are ready
+        ui.btnStartGame.prop("disabled", !allPlayersReady);
+
+        if (allPlayersReady) {
+            ui.btnStartGame.removeClass("btn-disabled");
+        } else {
+            ui.btnStartGame.addClass("btn-disabled");
+        }
+    }
+}
+
 function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']): void {
     if (data.type != CustomTeamMessages.Update) throw Error("handleTeamUpdate Failed");
 
     const { players, isLeader, ready } = data;
-    ui.createTeamPlayers.html(players.map((player: CustomTeamPlayerInfo) => {
+    ui.createTeamPlayers.html(players.map((player: CustomTeamPlayerInfo, index: number) => {
         let skin = player.skin;
         const localName = GAME_CONSOLE.getBuiltInCVar("cv_player_name");
         if (player.name === localName) {
@@ -263,8 +307,15 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         return `
         <div class="create-team-player-container">
             <i class="fa-solid fa-crown"${player.isLeader ? "" : ' style="display: none"'}></i>
-            <i class="fa-regular fa-circle-check"${player.ready ? "" : ' style="display: none"'}></i>
-            <div class="skin">
+            <i class="fa-regular fa-circle-check"${player.ready && !player.isLeader ? "" : ' style="display: none"'}></i>
+
+            ${
+            // Show kick icon only for leader and not for the leader's own player
+            isLeader && !player.isLeader
+                ? `<i class="fa-regular fa-circle-xmark kick-player" data-player-id="${index}"></i>`
+                : ""
+            }
+            <div id="team-skin" class="skin">
                 <div class="skin-base" style="background-image: url('./img/game/shared/skins/${skin}_base.svg')"></div>
                 <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${skin}_fist.svg')"></div>
                 <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${skin}_fist.svg')"></div>
@@ -277,8 +328,47 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         `;
     }).join(""));
     ui.createTeamToggles.toggleClass("disabled", !isLeader);
-    ui.btnStartGame.toggleClass("btn-disabled", !isLeader && ready)
-        .text(getTranslatedString(isLeader ? "create_team_play" : ready ? "create_team_waiting" : "create_team_ready"));
+
+    // Update button text and icon based on role and ready status
+    if (isLeader) {
+        ui.btnStartGame
+            .removeClass("btn-ready")
+            .html(`<span translation="create_team_play">${getTranslatedString("create_team_play")}</span>`);
+    } else {
+        // For team members, add appropriate icons
+        const icon = ready
+            ? '<i class="fa-solid fa-circle-check"></i>'
+            : '<i class="fa-solid fa-circle-question"></i>';
+        const text = ready ? "create_team_ready" : "create_team_ready";
+
+        ui.btnStartGame
+            .toggleClass("btn-success", ready)
+            .toggleClass("btn-alert", !ready)
+            .html(`<span translation="${text}">${getTranslatedString(text)}</span> ${icon}`);
+    }
+
+    // Update start game button state based on team readiness
+    updateStartGameButtonState(players, isLeader, ui);
+
+    attachKickListeners(ui);
+}
+
+function attachKickListeners(ui: Game['uiManager']['ui']): void {
+    const kickIcons = ui.createTeamPlayers.find(".kick-player");
+    kickIcons.off("click");
+    kickIcons.on("click", (event: JQuery.ClickEvent) => {
+        const playerId = $(event.currentTarget).data("player-id");
+        if (typeof playerId !== "undefined") {
+            teamSocket?.send(
+                JSON.stringify({
+                    type: CustomTeamMessages.Kick,
+                    playerId: playerId,
+                })
+            );
+        } else {
+            console.error("Player ID not found for kick action");
+        }
+    });
 }
 
 export async function joinGame(teamSize: number, game: Game, account: Account): Promise<void> {
@@ -329,9 +419,7 @@ async function connectToGame(data: GetGameResponse, gameAddress: string, game: G
     setGameParameters(params, account);
     const websocketURL = `${gameAddress.replace("<ID>", data.gameID.toString())}/play?${params.toString()}`;
     await game.connect(websocketURL, account);
-    ui.loadingText.text(getTranslatedString("verifying_game_assets"));
     ui.splashMsg.hide();
-    if ($("#create-team-menu").css("display") !== "none") $("#create-team-menu").hide();
 }
 
 function setGameParameters(params: URLSearchParams, account: Account): void {

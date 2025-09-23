@@ -38,6 +38,7 @@ export enum SurvivKits {
 
 export enum SurvivBadges {
     Cards = "surviv_card",
+    Pass = "surviv_pass",
 }
 export type SaleItems = SurvivKits | SurvivBadges;
 
@@ -55,13 +56,8 @@ const itemMappings: Record<SurvivItems, { address: string; assets: string[] }> =
 const saleMappings: Record<SaleItems, { address: string; assets: string[] }> = {
     [SurvivKits.Crates]: SurvivKitsMapping,
     [SurvivKits.Keys]: SurvivKitsMapping,
-    [SurvivBadges.Cards]: SurvivBadgesMapping
-};
-
-const saleUSDPrices: Record<SaleItems, string> = {
-    [SurvivKits.Crates]: "2000000000000000000",
-    [SurvivKits.Keys]: "2000000000000000000",
-    [SurvivBadges.Cards]: "149000000000000000000"
+    [SurvivBadges.Cards]: SurvivBadgesMapping,
+    [SurvivBadges.Pass]: SurvivBadgesMapping,
 };
 
 export const PaymentTokens = {
@@ -321,8 +317,10 @@ export class Account extends EIP6963 {
 
     sessionExpired(): void {
         $("#loading-text").text("Your session has expired. Please log in again.");
-
-        setTimeout(() => this.disconnect(), 1000);
+        this.disconnect();
+        setTimeout(() => {
+            $("#connect-wallet-btn").trigger("click");
+        }, 1000);
     }
 
     /**
@@ -334,6 +332,8 @@ export class Account extends EIP6963 {
     async getAssetBalances(
         returnAll: boolean = false
     ): Promise<Record<SurvivAssets, Record<AssetTier, Record<string, number>>>> {
+
+
         if (!ChainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
@@ -433,7 +433,6 @@ export class Account extends EIP6963 {
                 }
             }
         }
-
         return result;
     }
 
@@ -1188,4 +1187,73 @@ export class Account extends EIP6963 {
             throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
         }
     }
+
+
+    async isDiscountEligible(): Promise<boolean> {
+        // Ensure RPC URL is available
+        if (!ChainConfig.rpcUrls[0]) {
+            throw new Error('RPC URL not configured');
+        }
+
+        if (!this.address) { return false }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            // Initialize JSON-RPC provider
+            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+
+            // Initialize contract with read-only provider (no signer needed)
+            const survivShopContract = new ethers.Contract(SURVIV_SHOPV2_ADDRESS, survivShopV2ABI, ethersProvider);
+
+            // Call the getPrice function
+            const isEligible = await survivShopContract.isEligible(this.address);
+            clearTimeout(timeoutId);
+            return isEligible;
+        } catch (error: any) {
+            console.log("error: ", error);
+            clearTimeout(timeoutId);
+            throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
+        }
+    }
+
+
+    async getBadgeSupply(badgeName: string) {
+        try {
+            // Find index of badgeName in assets array
+            const tokenId = SurvivBadgesMapping.assets.indexOf(badgeName);
+            if (tokenId === -1) {
+                throw new Error(`Badge "${badgeName}" not found in assets mapping`);
+            }
+
+            const contractAddress = SurvivBadgesMapping.address;
+            const apiUrl = `${ChainConfig.blockExplorerAPI}/api/v2/tokens/${contractAddress}/instances/${tokenId}/holders`;
+
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            // Sum up the values for the specified tokenId
+            const totalSupply = data.items
+                .filter((item: { token_id: string; }) => item.token_id === tokenId.toString())
+                .reduce((sum: number, item: { value: string; }) => sum + parseInt(item.value), 0);
+
+            return totalSupply;
+        } catch (error) {
+            console.error('Error fetching badge supply:', error);
+            throw error;
+        }
+    }
+
 }

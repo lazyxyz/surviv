@@ -7,6 +7,8 @@ import { GAME_CONSOLE } from "../../..";
 import { ChainConfig } from "../../../config";
 import { SURVIV_SHOP_VERSION } from "@common/mappings";
 
+const DISCOUNT = 20; // DISCOUNT 20%
+const MAX_BADGES_CAP = 1000;
 
 interface StoreItem {
     // balance: number;
@@ -42,16 +44,44 @@ async function fetchPrice(
     }
 }
 
+async function fetchBalances(account: Account): Promise<number[]> {
+    if (!ShopCache.storeLoaded) {
+        let kitsBalance: Record<string, number> = {};
+        let badgesBalance: Record<string, number> = {};
+        try {
+            kitsBalance = await account.getItemBalances(SurvivItems.SurvivKits) || {};
+            badgesBalance = await account.getItemBalances(SurvivItems.SurvivBadges) || {};
+        } catch (err) {
+            // fall back to empty objects on error
+            kitsBalance = {};
+            badgesBalance = {};
+        }
+
+        ShopCache.storeLoaded = true;
+        ShopCache.assetsBalance["key"] = kitsBalance["key"] || 0;
+        ShopCache.assetsBalance["crate"] = kitsBalance["crate"] || 0;
+        ShopCache.assetsBalance["surviv_pass"] = badgesBalance["surviv_pass"] || 0;
+        ShopCache.assetsBalance["surviv_card"] = badgesBalance["surviv_card"] || 0;
+        return [
+            ShopCache.assetsBalance["key"],
+            ShopCache.assetsBalance["crate"],
+            ShopCache.assetsBalance["surviv_pass"],
+            ShopCache.assetsBalance["surviv_card"]
+        ]
+    }
+    return [];
+}
+
 function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
     const $storeContainer = $("#buy-customize-items");
     $storeContainer.empty();
-    storeItems.forEach((item, index) => {
+    storeItems.forEach(async (item, index) => {
         // Use placeholder price initially
         const $card = $(`
       <div class="crates-card" data-item-type="${item.itemType}">
-        <p>You have ${ShopCache.assetsBalance[item.itemType]}</p>
         <img src="${item.image}" class="crates-image" alt="${item.name}">
         <div class="crates-information">
+        <div class="balance-placeholder"></div>
           <p>${item.name}</p>
           <h3 class="price-placeholder">Loading...</h3>
           <h3 class="total-purchase"></h3>
@@ -64,30 +94,73 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
         <button class="btn btn-alert btn-darken buy-now-btn" disabled>Buy now</button>
       </div>
     `);
+
+      // if the item is a badge or pass, add total supply element with visual horizontal pile/progress
+        if (item.itemType === SurvivBadges.Pass || item.itemType === SurvivBadges.Cards) {
+            const currentSupply = await account.getBadgeSupply(item.itemType);
+            const percentage = (currentSupply / MAX_BADGES_CAP) * 100;
+            const $totalSupply = $(`
+                <div class="total-supply">
+                    <div class="pile-container">
+                        <div class="pile-bar" style="width: ${percentage}%"></div>
+                        <div class="pile-text">Items minted: ${currentSupply}/${MAX_BADGES_CAP}</div>
+                    </div>
+                </div>`);
+            $card.prepend($totalSupply);
+        }
+
         $storeContainer.append($card);
 
-        // Fetch price asynchronously and update the UI
         fetchPrice(account, item.itemType).then(price => {
-            const formatted = Number(formatEther(price)).toLocaleString(undefined, {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            });
-            $card.find(".price-placeholder").text(`${formatted} ${ChainConfig.nativeCurrency.symbol}`);
+            const rawPrice = Number(formatEther(price));
+            let effectivePrice = rawPrice;
+            if (ShopCache.discountEligible) {
+                effectivePrice = rawPrice - (rawPrice * DISCOUNT / 100);
+                const formatted = rawPrice.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                });
+                const formattedDiscount = effectivePrice.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                });
+                $card.find(".price-placeholder").html(
+                    `<span>${formatted}</span> ${formattedDiscount} ${ChainConfig.nativeCurrency.symbol}`
+                );
+            } else {
+                const formatted = rawPrice.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                });
+                $card.find(".price-placeholder").text(`${formatted} ${ChainConfig.nativeCurrency.symbol}`);
+            }
+            $card.data("effective-price", effectivePrice);
+        });
+        // Fetch balances asynchronously and update the UI
+        fetchBalances(account).then(balances => {
+            // Map itemType to the correct index in the balances array
+            const balanceIndexMap: Record<SaleItems, number> = {
+                [SurvivKits.Keys]: 0, // "key"
+                [SurvivKits.Crates]: 1, // "crate"
+                [SurvivBadges.Pass]: 2, // "surviv_pass"
+                [SurvivBadges.Cards]: 3, // "surviv_card"
+            };
+            const balance = balances.length > 0 ? balances[balanceIndexMap[item.itemType]] : ShopCache.assetsBalance[item.itemType] ?? 0;
+            $card.find(".balance-placeholder").html(`You have: <b>${balance}</b>`);
         });
     });
 }
 
 // Update total purchase amount based on user input
 function updateTotalPurchase($card: JQuery<HTMLElement>, amount: number) {
-    const priceText = $card.find(".price-placeholder").text();
-    const priceValue = parseFloat(priceText);
+    const effectivePrice = $card.data("effective-price");
     const $buyButton = $card.find(".buy-now-btn");
-    if (!isNaN(priceValue) && amount > 0) {
-        $buyButton.text(`Buy ${(priceValue * amount).toFixed(1)} ${ChainConfig.nativeCurrency.symbol}`);
+    if (effectivePrice !== undefined && amount > 0) {
+        const total = (effectivePrice * amount).toFixed(1);
+        $buyButton.text(`Buy ${total} ${ChainConfig.nativeCurrency.symbol}`);
     } else {
         $buyButton.text("Buy now");
         $buyButton.prop("disabled", true).removeClass("active");
-
     }
 }
 
@@ -168,7 +241,12 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
             isProcessing = true;
             $buyButton.prop("disabled", true);
             try {
-                const value = BigInt(ShopCache.assetsPrice[itemType]) * BigInt(amount);
+                const originalPriceWei = BigInt(ShopCache.assetsPrice[itemType]);
+                let pricePerItemWei = originalPriceWei;
+                if (ShopCache.discountEligible) {
+                    pricePerItemWei = (originalPriceWei * BigInt(100 - DISCOUNT)) / BigInt(100);
+                }
+                const value = pricePerItemWei * BigInt(amount);
 
                 if (SURVIV_SHOP_VERSION == 2) {
                     await account.buyItemsV2(itemType, amount, value);
@@ -209,21 +287,6 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
 }
 
 export async function loadStore(account: Account): Promise<void> {
-    if (!account.address) {
-        warningAlert("Please connect your wallet to continue!");
-        return;
-    }
-
-    if (!ShopCache.storeLoaded) {
-        const kitsBalance = await account.getItemBalances(SurvivItems.SurvivKits);
-        const badgesBalance = await account.getItemBalances(SurvivItems.SurvivBadges);
-
-        ShopCache.storeLoaded = true;
-        ShopCache.assetsBalance["key"] = kitsBalance["key"] || 0;
-        ShopCache.assetsBalance["crate"] = kitsBalance["crate"] || 0;
-        ShopCache.assetsBalance["surviv_card"] = badgesBalance["surviv_card"] || 0;
-    };
-
     const storeItems: StoreItem[] = [
         {
             name: "Surviv Keys",
@@ -238,12 +301,22 @@ export async function loadStore(account: Account): Promise<void> {
             itemType: SurvivKits.Crates,
         },
         {
+            name: "Surviv Pass",
+            image: "./img/game/shared/badges/surviv_pass.svg",
+            price: "Loading...",
+            itemType: SurvivBadges.Pass,
+        },
+        {
             name: "Surviv Cards",
             image: "./img/game/shared/badges/surviv_card.svg",
             price: "Loading...",
             itemType: SurvivBadges.Cards,
         },
     ];
+
+    await account.isDiscountEligible().then(isEligible => {
+        ShopCache.discountEligible = isEligible;
+    }).catch(err => { })
 
     renderStoreItems(account, storeItems);
     setupPurchaseInteractions(account, storeItems);

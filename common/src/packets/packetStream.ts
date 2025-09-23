@@ -10,7 +10,7 @@ import { MapPacket } from "./mapPacket";
 import { type InputPacket, type OutputPacket, type PacketTemplate } from "./packet";
 import { PickupPacket } from "./pickupPacket";
 import { PingPacket } from "./pingPacket";
-import { ReadyPacket } from "./readyPacket";
+import { ConnectPacket } from "./connectPacket";
 import { RewardsPacket } from "./rewardsPacket";
 import { SpectatePacket } from "./spectatePacket";
 import { UpdatePacket } from "./updatePacket";
@@ -46,6 +46,7 @@ export const ClientToServerPackets = new PacketRegister(
     JoinPacket,
     SpectatePacket,
     ClientChatPacket,
+    ConnectPacket,
 );
 
 export const ServerToClientPackets = new PacketRegister(
@@ -53,12 +54,12 @@ export const ServerToClientPackets = new PacketRegister(
     KillFeedPacket,
     PickupPacket,
     PingPacket,
+    JoinPacket,
     JoinedPacket,
     MapPacket,
     GameOverPacket,
     RewardsPacket,
     DisconnectPacket,
-    ReadyPacket,
     ServerChatPacket,
 );
 
