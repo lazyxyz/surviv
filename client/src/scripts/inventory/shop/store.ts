@@ -94,22 +94,30 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
         <button class="btn btn-alert btn-darken buy-now-btn" disabled>Buy now</button>
       </div>
     `);
-
-      // if the item is a badge or pass, add total supply element with visual horizontal pile/progress
-        if (item.itemType === SurvivBadges.Pass || item.itemType === SurvivBadges.Cards) {
-            const currentSupply = await account.getBadgeSupply(item.itemType);
-            const percentage = (currentSupply / MAX_BADGES_CAP) * 100;
-            const $totalSupply = $(`
-                <div class="total-supply">
-                    <div class="pile-container">
-                        <div class="pile-bar" style="width: ${percentage}%"></div>
-                        <div class="pile-text">Items minted: ${currentSupply}/${MAX_BADGES_CAP}</div>
-                    </div>
-                </div>`);
-            $card.prepend($totalSupply);
-        }
-
         $storeContainer.append($card);
+
+        // if the item is a badge or pass, add total supply element with visual horizontal pile/progress
+        if (item.itemType === SurvivBadges.Pass || item.itemType === SurvivBadges.Cards) {
+            try {
+                const currentSupply = await account.getBadgeSupply(item.itemType);
+                const percentage = (currentSupply / MAX_BADGES_CAP) * 100;
+                const textColor = percentage >= 30 ? "black" : "white";
+
+                // Check if total-supply already exists to prevent duplicates
+                if ($card.find(".total-supply").length === 0) {
+                    const $totalSupply = $(`
+                        <div class="total-supply">
+                            <div class="pile-container">
+                                <div class="pile-bar" style="width: ${percentage}%"></div>
+                                <div class="pile-text" style="color: ${textColor};">Items minted:&nbsp;<span>${currentSupply}/${MAX_BADGES_CAP}</span></div>
+                            </div>
+                        </div>`);
+                    $card.prepend($totalSupply);
+                }
+            } catch (error) {
+                console.error(`Failed to fetch badge supply for ${item.itemType}:`, error);
+            }
+        }
 
         fetchPrice(account, item.itemType).then(price => {
             const rawPrice = Number(formatEther(price));

@@ -29,13 +29,12 @@ export async function showBadges(account: Account) {
     const currentBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
 
     // Get user badge balances
-    const userBadgeBalance = [
-        ...Object.entries((await account.getItemBalances(SurvivItems.SurvivBadges))),
-    ];
+    const userBadgeBalances = await account.getItemBalances(SurvivItems.SurvivBadges);
+    const userOwnedBadges = new Map(Object.entries(userBadgeBalances).map(([id, balance]) => [id, Number(balance)]));
 
     // Calculate total boost
     let totalBoost = 0;
-    userBadgeBalance.forEach(([badgeId, amount]) => {
+    Object.entries(userBadgeBalances).forEach(([badgeId, amount]) => {
         const index = SurvivBadgesMapping.assets.indexOf(badgeId);
         if (index !== -1) {
             totalBoost += SurvivBadgesMapping.boosts[index] * Number(amount);
@@ -60,10 +59,10 @@ export async function showBadges(account: Account) {
     // Inactive badges
     const inactiveBadges = allBadges
         .map(b => b.idString)
-        .filter(id => !userBadgeBalance.map(([id]) => id).includes(id));
+        .filter(id => !userOwnedBadges.has(id));
 
     // Sort badges
-    const sortedBadgeIds = [...userBadgeBalance.map(([id]) => id), ...inactiveBadges];
+    const sortedBadgeIds = [...userOwnedBadges.keys(), ...inactiveBadges];
 
     // Render badges
     for (const idString of sortedBadgeIds) {
@@ -73,12 +72,14 @@ export async function showBadges(account: Account) {
             continue;
         }
 
-        const isActive = userBadgeBalance.map(([id]) => id).includes(idString);
-        const inactiveStyle = isActive ? "" : " style=\"opacity: 0.5; filter: saturate(0.15); \"";
+        const balance = userOwnedBadges.get(idString) ?? 0;
+        const isActive = balance > 0;
+        const inactiveStyle = isActive ? "" : ' style="opacity: 0.5; filter: saturate(0.15);"';
         const isSelected = idString === currentBadge;
 
         const badgeItem = $<HTMLDivElement>(
             html`<div id="badge-${idString}" class="badges-list-item-container${isSelected ? " selected" : ""}">
+                ${isActive ? `<div class="badge-balance">x${balance}</div>` : ''}
                 <div class="badges-list-item badge${isActive ? " active" : " inactive"}" ${inactiveStyle}>
                     <div class="badge-image" style="background-image: url('${getBadgeImage(idString)}')"></div>
                 </div>
