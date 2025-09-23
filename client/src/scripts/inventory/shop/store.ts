@@ -309,13 +309,13 @@ export async function loadStore(account: Account): Promise<void> {
             itemType: SurvivKits.Crates,
         },
         {
-            name: "Surviv Pass",
+            name: "Survivor's Pass",
             image: "./img/game/shared/badges/surviv_pass.svg",
             price: "Loading...",
             itemType: SurvivBadges.Pass,
         },
         {
-            name: "Surviv Cards",
+            name: "Genesis Survivor's Card",
             image: "./img/game/shared/badges/surviv_card.svg",
             price: "Loading...",
             itemType: SurvivBadges.Cards,

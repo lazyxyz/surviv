@@ -1118,7 +1118,7 @@ export class Game implements GameData {
     }
 
     sendChatMessage(player: Player, isSendAll: boolean, message: string): void {
-        if (isSendAll && player.loadout.badge && player.loadout.badge) {
+        if (isSendAll && player.loadout.badge) {
             this.packets.push(
                 ServerChatPacket.create({
                     messageColor: 0xffffff,

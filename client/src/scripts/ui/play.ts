@@ -5,7 +5,7 @@ import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
 import type { Account } from "../account";
 import type { Game } from "../game";
-import { warningAlert } from "../modal";
+import { errorAlert, warningAlert } from "../modal";
 import { parseJWT } from "../utils/constants";
 import { resetPlayButtons, selectedRegion } from "./home";
 import { Color } from "pixi.js";
@@ -243,24 +243,14 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
     };
 
     socket.onerror = (): void => {
-        ui.splashMsgText.html(getTranslatedString("msg_error_joining_team"));
-        ui.splashMsg.show();
-        setTimeout(() => {
-            ui.splashMsg.hide();
-        }, 3000);
+        errorAlert(getTranslatedString("msg_error_joining_team"), 3000);
         resetPlayButtons();
         $("#create-team-menu").fadeOut(250);
-        ui.splashUi.css({ filter: "", pointerEvents: "" });
     };
 
     socket.onclose = (): void => {
-        ui.splashMsgText.html(joinedTeam ? getTranslatedString("msg_lost_team_connection") : getTranslatedString("msg_error_joining_team"));
-        ui.splashMsg.show();
-        setTimeout(() => {
-            ui.splashMsg.hide();
-        }, 3000);
+        joinedTeam ? errorAlert(getTranslatedString("msg_lost_team_connection"), 3000) : errorAlert(getTranslatedString("msg_error_joining_team"), 3000);
         leaveTeam();
-        ui.splashUi.css({ filter: "", pointerEvents: "" });
     };
 
 }
@@ -304,6 +294,7 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         if (player.name === localName) {
             skin = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
         }
+
         return `
         <div class="create-team-player-container">
             <i class="fa-solid fa-crown"${player.isLeader ? "" : ' style="display: none"'}></i>
@@ -320,9 +311,9 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
                 <div class="skin-left-fist" style="background-image: url('./img/game/shared/skins/${skin}_fist.svg')"></div>
                 <div class="skin-right-fist" style="background-image: url('./img/game/shared/skins/${skin}_fist.svg')"></div>
             </div>
-            <div class="create-team-player-name-container">
+             <div class="create-team-player-name-container">
                 <span class="create-team-player-name"${player.nameColor ? ` style="color: ${new Color(player.nameColor).toHex()}"` : ""}>${player.name}</span>
-                ${player.badge?.length ? `<img class="create-team-player-badge" draggable="false" src="${""}" />` : ""}
+                ${player.badge?.length ? `<img class="create-team-player-badge" draggable="false" src="./img/game/shared/badges/${player.badge}.svg" />` : ""}
             </div>
         </div>
         `;
