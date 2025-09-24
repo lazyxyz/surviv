@@ -295,4 +295,10 @@
   "region_sa": "América do Sul"
   "region_as": "Ásia"
   "region_us": "Estados Unidos"
+  "create_team_title": "Mantenha a aba ativa ou o jogo não vai carregar!"
+  "leaderboard": "Placar"
+  "marketplace": "Mercado de NFT"
+  "leave_team_confirm": "Quer sair?"
+  "my_loot": "Saques"
+  "my_rewards": "Recompensas"
 }

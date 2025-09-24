@@ -129,7 +129,7 @@ function setupTeamMenu(game: Game, account: Account): void {
 }
 
 $<HTMLButtonElement>("#btn-leave-game").on("click", function () {
-    if (confirm("Are you sure you want to leave the team?")) {
+    if (confirm(getTranslatedString("leave_team_confirm"))) {
         leaveTeam();
     }
 });

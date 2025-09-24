@@ -295,4 +295,10 @@
   "region_sa": "Sud America"
   "region_as": "Asia"
   "region_us": "Stati Uniti"
+  "create_team_title": "Tieni la scheda attiva o il gioco non si caricherà!"
+  "leaderboard": "Classifica"
+  "marketplace": "Mercato NFT"
+  "leave_team_confirm": "Vuoi uscire?"
+  "my_loot": "Bottini"
+  "my_rewards": "Ricompense"
 }

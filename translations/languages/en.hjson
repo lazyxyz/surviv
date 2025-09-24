@@ -296,4 +296,10 @@
   "region_sa": "South America"
   "region_as": "Asia"
   "region_us": "United States"
+  "create_team_title": "Keep tab active or game won't load!"
+  "leaderboard": "Leaderboard"
+  "marketplace": "NFT Marketplace"
+  "leave_team_confirm": "Do you want to leave?"
+  "my_loot": "Loots"
+  "my_rewards": "Rewards"
 }
