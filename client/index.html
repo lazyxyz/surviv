@@ -213,7 +213,7 @@
               <button class="btn btn-lg btn-darken btn-success btn-leaderboard" id="btn-rules" style="display: none">
                 <div class="pulsating-circle" style="display: none"></div>
                 <i class="fa-solid fa-crown"></i>
-                <span>Leaderboard</span>
+                <span translation="leaderboard"></span>
               </button>
             </a>
 
@@ -222,7 +222,7 @@
               <button class="btn btn-lg btn-darken btn-quests btn-primary" id="btn-rules" style="display: none">
                 <!-- <div class="pulsating-circle" style="display: block"></div> -->
                 <img src="public/img/misc/opensea.svg" alt="">
-                <span>Marketplace</span>
+                <span translation="marketplace"></span>
               </button>
             </a>
 
@@ -939,12 +939,16 @@
         <!-- Add tab crates -->
         <div class="tab-content" id="tab-crates-content" style="display: block;">
           <div id="crates-tab">
-            <button class="crates-tab-child active" id="store-tab" data-tab="buy-customize-items"
-              translate="">Store</button>
-            <button class="crates-tab-child" id="my-crates-tab" data-tab="my-crates-customize-items" translate="">My
-              Crates</button>
-            <button class="crates-tab-child" id="rewards-tab" data-tab="rewards-customize-items"
-              translate="">Rewards</button>
+            <button class="crates-tab-child active" id="store-tab" data-tab="buy-customize-items">
+              <span translation="loadout_crates"></span>
+            </button>
+
+            <button class="crates-tab-child" id="my-crates-tab" data-tab="my-crates-customize-items">
+              <span translation="my_loot"></span>
+            </button>
+            <button class="crates-tab-child" id="rewards-tab" data-tab="rewards-customize-items">
+               <span translation="my_rewards"></span>
+            </button>
           </div>
           <div class="crates-customize">
             <!-- Buy keys -->
