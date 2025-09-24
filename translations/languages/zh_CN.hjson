@@ -295,4 +295,10 @@
   "region_sa": "南美"
   "region_as": "亚洲"
   "region_us": "美国"
+  "create_team_title": "保持标签活跃，否则游戏无法加载！"
+  "leaderboard": "排行榜"
+  "marketplace": "NFT市场"
+  "leave_team_confirm": "你想离开吗？"
+  "my_loot": "战利品"
+  "my_rewards": "奖励"
 }
