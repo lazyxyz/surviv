@@ -245,7 +245,6 @@
     @media screen and (max-width: 480px) {
       flex-direction: column;
     }
-
     &-card {
       display: flex;
       gap: 20px;
@@ -256,7 +255,6 @@
       width: 100%;
       padding: 16px;
     }
-
     &-rank {
       display: flex;
       flex-direction: column;
@@ -279,7 +277,6 @@
     .img-squad {
       background-color: #3aff7140;
     }
-
     &-img {
       width: 48px;
       height: 48px;
@@ -289,6 +286,79 @@
       justify-content: center;
 
       border-radius: 8px;
+    }
+    // Compair card
+    &-table {
+      width: 100%;
+      padding-top: 24px;
+      &-row {
+        padding: 16px;
+
+        @media screen and (max-width: variables.$screen_xsmall) {
+          p {
+            height: 51px;
+          }
+
+          a {
+            font-size: 11px;
+          }
+        }
+        th {
+          padding: 12px;
+        }
+        img {
+          width: 88px;
+          height: 88px;
+          border-radius: 10px;
+          margin-bottom: 12px;
+        }
+        p {
+          font-size: 14px;
+          font-weight: 600;
+          margin: unset;
+        }
+        .benefits {
+          font-size: 16px;
+          text-align: left;
+          font-weight: 600px;
+
+          @media screen and (max-width: variables.$screen_xsmall) {
+            font-size: 14px;
+          }
+
+          span {
+            font-size: 12px;
+            color: palette.$lime;
+            font-weight: 600;
+          }
+        }
+        td {
+          text-align: center;
+          padding: 16px;
+          font-weight: 500;
+
+          @media screen and (max-width: variables.$screen_small) {
+            padding: 16px 0px;
+          }
+        }
+
+        s {
+          opacity: 0.65;
+        }
+
+        b {
+          color: palette.$lime;
+        }
+        .claim-btns {
+          text-align: center;
+          vertical-align: middle;
+          a {
+            color: black;
+            width: fit-content;
+            margin: 0 auto;
+          }
+        }
+      }
     }
   }
 
