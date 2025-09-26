@@ -159,7 +159,7 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
     });
 
     // Append learn more link after all store items
-    const $learnMoreLink = $('<a class="learn-more" href="https://surviv.fun/earn/" target="_blank">Learn more > </a>');
+    const $learnMoreLink = $('<a class="learn-more" href="/earn/" target="_blank">Learn more > </a>');
     $storeContainer.append($learnMoreLink);
 }
 
