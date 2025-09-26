@@ -142,11 +142,11 @@
       },
       {
         id: "s1",
-        name: "TBA",
-        title: "TBA",
-        api: "https://admin.surviv.fun/stats/playerRankingsByDate?startDate=2025-09-18T00:00:00Z&endDate=2025-09-23T00:00:00Z",
+        name: "Game Night",
+        title: "Vietnam Game Night — Sept 27th, 2–3 PM UTC",
+        api: "https://admin.surviv.fun/stats/playerRankingsByDate?startDate=2025-09-27T14:00:00Z&endDate=2025-09-27T15:00:00Z",
         icon: "../img/game/shared/badges/somnia_s1.svg",
-        playerPointsApi: "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}&startDate=2025-09-18T00:00:00Z&endDate=2025-09-23T00:00:00Z"
+        playerPointsApi: "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}?startDate=2025-09-27T14:00:00Z&endDate=2025-09-27T15:00:00Z"
       },
       {
         id: "1",
@@ -198,6 +198,7 @@
         squadPoints: asNumber(raw.squadPoints ?? raw.squad ?? 0),
         socialPoints: asNumber(raw.socialPoints ?? raw.social ?? 0),
         games: asNumber(raw.games ?? raw.totalGames ?? raw.matches ?? 0),
+        todayGames: asNumber(raw.todayGames ?? raw.todayGames ?? raw.matches ?? 0),
       };
     }
 
@@ -307,6 +308,7 @@
       const squad = asNumber(player.squadPoints, 0);
       const social = asNumber(player.socialPoints, 0);
       const games = asNumber(player.games, 0);
+      const todayGames = asNumber(player.todayGames, 0);
       const rate = games > 0 ? ((solo + squad) / games).toFixed(2) : '0.00';
 
       const addr = (player.player || '').toString();
@@ -320,7 +322,7 @@
             <div class="w-[160px] h-[48px]" id="row-child">${solo}</div>
             <div class="w-[160px] h-[48px]" id="row-child">${squad}</div>
             <div class="w-[160px] h-[48px]" id="row-child">${social}</div>
-            <div class="w-[110px] h-[48px]" id="row-child">${games}</div>
+            <div class="w-[110px] h-[48px]" id="row-child">${games} (${todayGames})</div>
             <div class="w-[100px] h-[48px]" id="row-child">${rate}</div>
           `;
 
@@ -451,6 +453,7 @@
         // Fetch and pin "my" row using PUBLIC_KEY only
         if (myPublicKey && myRankingContainer) {
           const myData = await fetchMyPlayerPoints(myPublicKey, seasonConfig);
+          console.log("myData: ", myData);
           if (myData) {
             // Determine rank based on current page if present; otherwise show "—"
             const rankNumber = players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) >= 0 ? (page - 1) * limit + players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) + 1 : '—';
