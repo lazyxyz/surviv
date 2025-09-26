@@ -806,6 +806,7 @@ input::-webkit-inner-spin-button {
   }
 
   .crates-customize-child {
+    position: relative;
     display: flex;
     gap: 8px;
     margin-top: 12px;
@@ -984,6 +985,20 @@ input::-webkit-inner-spin-button {
       }
       .active {
         opacity: 1;
+      }
+    }
+
+    .learn-more {
+      position: absolute;
+      font-weight: 600;
+      bottom: 10px;
+      color: palette.$lime;
+      font-size: 14px;
+      bottom: -30px;
+      transition: 300ms;
+
+      &:hover {
+        opacity: 0.65;
       }
     }
   }
@@ -1477,6 +1492,8 @@ input::-webkit-inner-spin-button {
       border-radius: 8px;
       font-size: 12px;
       color: #fff;
+      width: 180px;
+      text-align: center;
       span {
         font-weight: 600;
         color: palette.$lime;
