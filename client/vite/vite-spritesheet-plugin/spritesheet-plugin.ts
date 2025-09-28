@@ -22,7 +22,7 @@ export type CacheData = {
     }
 };
 
-const GAME_MODES = [ "fall", "winter", "shared"];
+const GAME_MODES = [ "fall", "winter", "normal", "shared"];
 
 const defaultGlob = "**/*.{png,gif,jpg,bmp,tiff,svg}";
 const imagesMatcher = new Minimatch(defaultGlob);
@@ -134,6 +134,7 @@ export function spritesheet(): Plugin[] {
 
     const atlasesByMode: Record<string, MultiResAtlasList> = {};
     const exportedAtlasesByMode: Record<string, { low: SpritesheetData[], high: SpritesheetData[] }> = {
+        normal: { low: [], high: [] },
         fall: { low: [], high: [] },
         winter: { low: [], high: [] },
         shared: { low: [], high: [] }

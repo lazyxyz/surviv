@@ -1346,6 +1346,362 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "baseball_bat", weight: 2 },
             { item: "gas_can", weight: 0 } // somewhat hack in order to make the gas can obtainable through mini plumpkins
         ]
+    },
+
+    desert:
+    {
+        ground_loot: [
+            { table: "healing_items", weight: 1 },
+            { table: "ammo", weight: 1 },
+            { table: "guns", weight: 1 },
+            { table: "equipment", weight: 0.6 },
+            { table: "scopes", weight: 0.3 },
+            // { item: "deer_season", weight: 0.2 }
+        ],
+        regular_crate: [
+            { table: "guns", weight: 1.25 },
+            { table: "healing_items", weight: 1 },
+            { table: "equipment", weight: 0.6 },
+            { table: "ammo", weight: 0.5 },
+            { table: "scopes", weight: 0.3 },
+            { table: "throwables", weight: 0.3 },
+            // { item: "deer_season", weight: 0.2 },
+            { table: "melee", weight: 0.04 }
+        ],
+        airdrop_crate: [
+            [{ table: "airdrop_equipment", weight: 1 }],
+            [{ table: "airdrop_scopes", weight: 1 }],
+            [{ table: "airdrop_healing_items", weight: 1 }],
+            [{ table: "airdrop_skins", weight: 1 }],
+            [{ table: "airdrop_melee", weight: 1 }],
+            [{ table: "ammo", weight: 1 }],
+            [{ table: "airdrop_guns", weight: 1 }],
+            [
+                { table: "fall_perks", weight: 0.5 },
+                { item: NullString, weight: 1 }
+            ],
+            [
+                { item: "frag_grenade", count: 3, weight: 1 },
+                { item: NullString, weight: 2 }
+            ]
+        ],
+        gold_airdrop_crate: [
+            [{ table: "airdrop_equipment", weight: 1 }],
+            [{ table: "airdrop_scopes", weight: 1 }],
+            [{ table: "airdrop_healing_items", weight: 1 }],
+            [{ table: "airdrop_skins", weight: 1 }],
+            [{ table: "airdrop_melee", weight: 1 }],
+            [{ table: "ammo", weight: 1 }],
+            [{ table: "gold_airdrop_guns", weight: 1 }],
+            [{ table: "fall_perks", weight: 1 }],
+            [{ item: "frag_grenade", count: 3, weight: 1 }]
+        ],
+        briefcase: [
+            { item: "l115a1", weight: 1 },
+            { item: "mk18", weight: 1 },
+            { item: "deagle", weight: 0.0001 }
+        ],
+        ammo_crate: [
+            [{ table: "ammo", weight: 1 }],
+            [{ table: "ammo", weight: 1 }],
+            [
+                { item: NullString, weight: 2 },
+                { item: "50cal", count: 8, weight: 0.5 },
+                { item: "338lap", count: 2, weight: 0.15 },
+                { item: "curadell", weight: 0.05 }
+            ]
+        ],
+        loot_tree: [
+            [
+                { item: "g19", weight: 1 },
+                { item: "m1895", weight: 1 },
+                { item: "cz600", weight: 0.5 },
+                { item: "mosin_nagant", weight: 0.3 },
+                { item: "deagle", weight: 0.1 },
+                { item: "l115a1", weight: 0.01 }
+            ],
+            [{ item: "hatchet", weight: 1 }],
+            [{ item: "woody", weight: 1 }],
+            [{ item: "regular_helmet", weight: 1 }],
+            [{ item: "regular_pack", weight: 1 }],
+            [{ item: "9mm", count: 24, weight: 1 }]
+        ],
+        lux_crate: [
+            [
+                { item: "vks", weight: 0.1 },
+                { item: "tango_51", weight: 0.3 },
+                { item: "rgs", weight: 0.4 },
+                { item: "l115a1", weight: 0.05 },
+                { item: "mk18", weight: 0.05 }
+            ],
+            [{ table: "special_scopes", weight: 1 }]
+        ],
+        gold_rock: [
+            [{ item: "tango_51", weight: 1 }],
+            [{ table: "scopes", weight: 1 }]
+        ],
+        loot_barrel: [
+            [{ item: "crowbar", weight: 1 }],
+            [{ item: "tango_51", weight: 1 }],
+            [
+                { table: "equipment", weight: 1 },
+                { table: "scopes", weight: 1 },
+                { table: "healing_items", weight: 1 }
+            ]
+        ],
+        gun_locker: {
+            min: 1,
+            max: 2,
+            loot: [
+                // 32% chance for one of these
+                { item: "g19", weight: 0.5 },
+                { item: "m1895", weight: 0.5 },
+                // 21% chance for one of these
+                { item: "cz600", weight: 0.222 },
+                { item: "rgs", weight: 0.222 },
+                { item: "blr", weight: 0.222 },
+                // 16% chance for one of these
+                { item: "mosin_nagant", weight: 0.256 },
+                { item: "tango_51", weight: 0.256 },
+                // 13% chance for one of these
+                { item: "vss", weight: 0.099 },
+                { item: "sr25", weight: 0.099 },
+                { item: "mini14", weight: 0.099 },
+                { item: "sks", weight: 0.099 },
+                // 10% chance for one of these
+                { item: "deagle", weight: 0.061 },
+                { item: "rsh12", weight: 0.061 },
+                { item: "vks", weight: 0.061 },
+                { item: "model_89", weight: 0.061 },
+                { item: "m1_garand", weight: 0.061 },
+                // 8% chance for one of these
+                { item: "l115a1", weight: 0.117 },
+                { item: "mk18", weight: 0.117 }
+            ]
+        },
+        guns: [
+            // 32% chance for one of these
+            { item: "g19", weight: 0.5 },
+            { item: "m1895", weight: 0.5 },
+            // 21% chance for one of these
+            { item: "cz600", weight: 0.222 },
+            { item: "rgs", weight: 0.222 },
+            { item: "blr", weight: 0.222 },
+            // 16% chance for one of these
+            { item: "mosin_nagant", weight: 0.256 },
+            { item: "tango_51", weight: 0.256 },
+            // 13% chance for one of these
+            { item: "vss", weight: 0.099 },
+            { item: "sr25", weight: 0.099 },
+            { item: "mini14", weight: 0.099 },
+            { item: "sks", weight: 0.099 },
+            // 10% chance for one of these
+            { item: "deagle", weight: 0.061 },
+            { item: "rsh12", weight: 0.061 },
+            { item: "vks", weight: 0.061 },
+            { item: "model_89", weight: 0.061 },
+            { item: "m1_garand", weight: 0.061 },
+            // 8% chance for one of these
+            { item: "l115a1", weight: 0.117 },
+            { item: "mk18", weight: 0.117 }
+        ],
+        special_guns: [
+            // 32% chance for one of these
+            { item: "g19", weight: 0.5 },
+            { item: "m1895", weight: 0.5 },
+            // 21% chance for one of these
+            { item: "cz600", weight: 0.222 },
+            { item: "rgs", weight: 0.222 },
+            { item: "blr", weight: 0.222 },
+            // 16% chance for one of these
+            { item: "mosin_nagant", weight: 0.256 },
+            { item: "tango_51", weight: 0.256 },
+            // 13% chance for one of these
+            { item: "vss", weight: 0.099 },
+            { item: "sr25", weight: 0.099 },
+            { item: "mini14", weight: 0.099 },
+            { item: "sks", weight: 0.099 },
+            // 10% chance for one of these
+            { item: "deagle", weight: 0.061 },
+            { item: "rsh12", weight: 0.061 },
+            { item: "vks", weight: 0.061 },
+            { item: "model_89", weight: 0.061 },
+            { item: "m1_garand", weight: 0.061 },
+            // 8% chance for one of these
+            { item: "l115a1", weight: 0.117 },
+            { item: "mk18", weight: 0.117 }
+        ],
+        airdrop_guns: [
+            // 8% chance for one of these
+            { item: "g19", weight: 0.135 },
+            { item: "m1895", weight: 0.135 },
+            // 11% chance for one of these
+            { item: "cz600", weight: 0.117 },
+            { item: "rgs", weight: 0.117 },
+            { item: "blr", weight: 0.117 },
+            // 15% chance for one of these
+            { item: "mosin_nagant", weight: 0.228 },
+            { item: "tango_51", weight: 0.228 },
+            // 19% chance for one of these
+            { item: "vss", weight: 0.148 },
+            { item: "sr25", weight: 0.148 },
+            { item: "mini14", weight: 0.148 },
+            { item: "sks", weight: 0.148 },
+            // 24% chance for one of these
+            { item: "deagle", weight: 0.154 },
+            { item: "rsh12", weight: 0.154 },
+            { item: "vks", weight: 0.154 },
+            { item: "model_89", weight: 0.154 },
+            { item: "m1_garand", weight: 0.154 },
+            // 32% chance for one of these
+            { item: "l115a1", weight: 0.5 },
+            { item: "mk18", weight: 0.5 }
+        ],
+        airdrop_skins: [
+            { item: NullString, weight: 3 },
+            { item: "smug", weight: 0.2 },
+            { item: "slime", weight: 0.7 },
+            { item: "skeleton", weight: 0.6 },
+            { item: "shishi", weight: 0.1 },
+            { item: "roll_safe", weight: 0.001 }
+        ],
+        airdrop_scopes: [
+            { item: "8x_scope", weight: 1 },
+            { item: "15x_scope", weight: 0.005 }
+        ],
+        airdrop_melee: [
+            { item: NullString, weight: 3 },
+            { item: "hatchet", weight: 0.2 },
+            { item: "kbar", weight: 0.2 },
+            { item: "maul", weight: 0.1 }
+        ],
+        gold_airdrop_guns: [
+            // 8% chance for one of these
+            { item: "g19", weight: 0.135 },
+            { item: "m1895", weight: 0.135 },
+            // 11% chance for one of these
+            { item: "cz600", weight: 0.117 },
+            { item: "rgs", weight: 0.117 },
+            { item: "blr", weight: 0.117 },
+            // 15% chance for one of these
+            { item: "mosin_nagant", weight: 0.228 },
+            { item: "tango_51", weight: 0.228 },
+            // 19% chance for one of these
+            { item: "vss", weight: 0.148 },
+            { item: "sr25", weight: 0.148 },
+            { item: "mini14", weight: 0.148 },
+            { item: "sks", weight: 0.148 },
+            // 24% chance for one of these
+            { item: "deagle", weight: 0.154 },
+            { item: "rsh12", weight: 0.154 },
+            { item: "vks", weight: 0.154 },
+            { item: "model_89", weight: 0.154 },
+            { item: "m1_garand", weight: 0.154 },
+            // 32% chance for one of these
+            { item: "l115a1", weight: 0.5 },
+            { item: "mk18", weight: 0.5 }
+        ],
+        viking_chest_guns: [
+            // 32% chance for one of these
+            { item: "g19", weight: 0.5 },
+            { item: "m1895", weight: 0.5 },
+            // 21% chance for one of these
+            { item: "cz600", weight: 0.222 },
+            { item: "rgs", weight: 0.222 },
+            { item: "blr", weight: 0.222 },
+            // 16% chance for one of these
+            { item: "mosin_nagant", weight: 0.256 },
+            { item: "tango_51", weight: 0.256 },
+            // 13% chance for one of these
+            { item: "vss", weight: 0.099 },
+            { item: "sr25", weight: 0.099 },
+            { item: "mini14", weight: 0.099 },
+            { item: "sks", weight: 0.099 },
+            // 10% chance for one of these
+            { item: "deagle", weight: 0.061 },
+            { item: "rsh12", weight: 0.061 },
+            { item: "vks", weight: 0.061 },
+            { item: "model_89", weight: 0.061 },
+            { item: "m1_garand", weight: 0.061 },
+            // 8% chance for one of these
+            { item: "l115a1", weight: 0.117 },
+            { item: "mk18", weight: 0.117 }
+        ],
+        river_chest_guns: [
+            // 32% chance for one of these
+            { item: "g19", weight: 0.5 },
+            { item: "m1895", weight: 0.5 },
+            // 21% chance for one of these
+            { item: "cz600", weight: 0.222 },
+            { item: "rgs", weight: 0.222 },
+            { item: "blr", weight: 0.222 },
+            // 16% chance for one of these
+            { item: "mosin_nagant", weight: 0.256 },
+            { item: "tango_51", weight: 0.256 },
+            // 13% chance for one of these
+            { item: "vss", weight: 0.099 },
+            { item: "sr25", weight: 0.099 },
+            { item: "mini14", weight: 0.099 },
+            { item: "sks", weight: 0.099 },
+            // 10% chance for one of these
+            { item: "deagle", weight: 0.061 },
+            { item: "rsh12", weight: 0.061 },
+            { item: "vks", weight: 0.061 },
+            { item: "model_89", weight: 0.061 },
+            { item: "m1_garand", weight: 0.061 },
+            // 8% chance for one of these
+            { item: "l115a1", weight: 0.117 },
+            { item: "mk18", weight: 0.117 }
+        ],
+        ammo: [
+            { item: "9mm", count: 24, weight: 1 },
+            { item: "556mm", count: 24, weight: 1 },
+            { item: "762mm", count: 24, weight: 1 },
+            { item: "50cal", count: 8, weight: 0.2 },
+            { item: "338lap", count: 2, weight: 0.05 }
+        ],
+        throwables: [
+            { item: "frag_grenade", count: 2, weight: 1 },
+            { item: "smoke_grenade", count: 2, weight: 1 }
+        ],
+        equipment: [
+            { item: "regular_helmet", weight: 1 },
+            { item: "tactical_helmet", weight: 0.2 },
+
+            { item: "regular_vest", weight: 1 },
+            { item: "tactical_vest", weight: 0.2 },
+
+            { item: "basic_pack", weight: 0.9 },
+            { item: "regular_pack", weight: 0.2 },
+            { item: "tactical_pack", weight: 0.07 }
+        ],
+        special_equipment: [
+            { item: "regular_helmet", weight: 1 },
+            { item: "tactical_helmet", weight: 0.35 },
+
+            { item: "regular_vest", weight: 1 },
+            { item: "tactical_vest", weight: 0.35 },
+
+            { item: "basic_pack", weight: 0.8 },
+            { item: "regular_pack", weight: 0.5 },
+            { item: "tactical_pack", weight: 0.09 }
+        ],
+        scopes: [
+            { item: "4x_scope", weight: 1 },
+            { item: "8x_scope", weight: 0.1 },
+            { item: "15x_scope", weight: 0.00025 }
+        ],
+        special_scopes: [
+            { item: "4x_scope", weight: 1 },
+            { item: "8x_scope", weight: 0.2 },
+            { item: "15x_scope", weight: 0.0005 }
+        ],
+        melee: [
+            { item: "hatchet", weight: 3 },
+            { item: "kbar", weight: 2 },
+            { item: "baseball_bat", weight: 2 },
+            { item: "gas_can", weight: 0 } // somewhat hack in order to make the gas can obtainable through mini plumpkins
+        ]
     }
 };
 

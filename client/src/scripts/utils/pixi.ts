@@ -9,8 +9,12 @@ import { PIXI_SCALE, WALL_STROKE_WIDTH } from "./constants";
 // Import all mode-specific spritesheet modules statically
 import { atlases as fallHighRes } from "virtual:spritesheets-jsons-high-res-fall";
 import { atlases as fallLowRes } from "virtual:spritesheets-jsons-low-res-fall";
+
 import { atlases as winterHighRes } from "virtual:spritesheets-jsons-high-res-winter";
 import { atlases as winterLowRes } from "virtual:spritesheets-jsons-low-res-winter";
+
+import { atlases as normalHighRes } from "virtual:spritesheets-jsons-high-res-normal";
+import { atlases as normalLowRes } from "virtual:spritesheets-jsons-low-res-normal";
 
 const textures: Record<string, Texture> = {};
 
@@ -28,7 +32,8 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean, 
     // Select the appropriate spritesheets based on modeName and resolution
     const modeAtlases: Record<string, SpritesheetData[]> = {
         fall: highResolution ? fallHighRes : fallLowRes,
-        winter: highResolution ? winterHighRes : winterLowRes
+        winter: highResolution ? winterHighRes : winterLowRes,
+        normal: highResolution ? normalHighRes : normalLowRes,
     };
 
     const spritesheets: SpritesheetData[] = modeAtlases[modeName];
