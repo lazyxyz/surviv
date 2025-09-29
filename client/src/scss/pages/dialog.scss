@@ -435,6 +435,16 @@ input::-webkit-inner-spin-button {
           }
         }
       }
+
+      // Enable horizontal scrolling if there are 13 or more players (more than 3 rows in 4-column layout)
+      &:has(> .create-team-player-container:nth-child(13)) {
+        grid-template-columns: unset;
+        grid-template-rows: repeat(3, auto);
+        grid-auto-flow: column;
+        grid-auto-columns: calc(25% - 6px);
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
     }
 
     #create-team-url {
