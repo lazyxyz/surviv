@@ -41,7 +41,7 @@ export function initTeamRoutes(app: TemplatedApp) {
             }
 
             if (noTeamIdGiven) {
-                if (team.locked || team.players.length >= (maxTeamSize as number)) {
+                if (team.locked || (!team.roomMode && team.players.length >= (maxTeamSize as number) )) {
                     forbidden(res); // TODO "Team is locked" and "Team is full" messages
                     return;
                 }

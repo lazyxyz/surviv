@@ -21,6 +21,7 @@ export let teamSocket: WebSocket | undefined;
 export let teamID: string | undefined | null;
 let joinedTeam = false;
 let autoFill = false;
+let roomMode = false;
 let lastPlayButtonClickTime = 0;
 
 function isClickAllowed(): boolean {
@@ -198,6 +199,16 @@ function setupTeamMenuControls(game: Game, account: Account): void {
         autoFill = this.checked;
         teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, autoFill }));
     });
+   
+    $<HTMLInputElement>("#create-team-toggle-auto-fill").on("click", function () {
+        autoFill = this.checked;
+        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, autoFill }));
+    });
+   
+    $<HTMLInputElement>("#create-team-toggle-room").on("click", function () {
+        roomMode = this.checked;
+        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, roomMode }));
+    });
 
     $<HTMLInputElement>("#create-team-toggle-lock").on("click", function () {
         teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, locked: this.checked }));
@@ -232,6 +243,7 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
             case CustomTeamMessages.Settings:
                 ui.createTeamAutoFill.prop("checked", data.autoFill);
                 ui.createTeamLock.prop("checked", data.locked);
+                ui.createTeamRoomMode.prop("checked", data.roomMode);
                 break;
             case CustomTeamMessages.Started:
                 joinGame(TeamSize.Squad, game, account);
@@ -263,6 +275,7 @@ function handleTeamJoin(data: CustomTeamMessage, ui: Game['uiManager']['ui']): v
     ui.createTeamUrl.val(`${window.location.origin}/?region=${GAME_CONSOLE.getBuiltInCVar("cv_region") || Config.defaultRegion}#${teamID}`);
     ui.createTeamAutoFill.prop("checked", data.autoFill);
     ui.createTeamLock.prop("checked", data.locked);
+    ui.createTeamRoomMode.prop("checked", data.roomMode);
 }
 
 /**
