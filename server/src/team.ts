@@ -98,7 +98,7 @@ export class CustomTeam {
 
     readonly players: CustomTeamPlayer[] = [];
 
-    autoFill = false;
+    autoFill: boolean;
     locked = false;
     roomMode = false; // allow more than 4 players join
 
@@ -107,6 +107,7 @@ export class CustomTeam {
 
     constructor() {
         this.id = Array.from({ length: 4 }, () => CustomTeam._idChars.charAt(random(0, CustomTeam._idCharMax))).join("");
+        this.autoFill = true;
     }
 
     addPlayer(player: CustomTeamPlayer): void {

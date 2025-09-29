@@ -20,8 +20,6 @@ import { DEFAULT_BADGE } from "@common/definitions/badges";
 export let teamSocket: WebSocket | undefined;
 export let teamID: string | undefined | null;
 let joinedTeam = false;
-// let autoFill = false;
-// let roomMode = false;
 let lastPlayButtonClickTime = 0;
 
 function isClickAllowed(): boolean {
