@@ -209,8 +209,6 @@
   "go_damage_taken": "Damage Taken:"
   "go_time_alive": "Time Alive:"
   "create_team": "Create Team"
-  "create_team_autofill": "Auto Fill"
-  "create_team_lock": "Lock"
   "create_team_ready": "Ready"
   "create_team_waiting": "Waiting..."
   "create_team_play": "Start Game"
@@ -302,5 +300,8 @@
   "leave_team_confirm": "Do you want to leave?"
   "my_loot": "Loots"
   "my_rewards": "Rewards"
+  
   "create_team_room": "Room"
+  "create_team_autofill": "Auto Fill"
+  "create_team_lock": "Lock"
 }

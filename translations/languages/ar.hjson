@@ -208,8 +208,6 @@
   "go_damage_taken": "الضرر المُتلقى:"
   "go_time_alive": "وقت البقاء:"
   "create_team": "إنشاء فريق"
-  "create_team_autofill": "تعبئة تلقائية"
-  "create_team_lock": "قفل الفريق"
   "create_team_ready": "جاهز"
   "create_team_waiting": "في الانتظار..."
   "create_team_play": "بدء اللعبة"
@@ -301,5 +299,8 @@
   "leave_team_confirm": "هل تريد المغادرة؟"
   "my_loot": "الغنائم"
   "my_rewards": "المكافآت"
-
+  
+  "create_team_room": "غرفة"
+  "create_team_autofill": "تعبئة تلقائية"
+  "create_team_lock": "قفل"
 }

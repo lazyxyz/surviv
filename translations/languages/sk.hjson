@@ -208,8 +208,6 @@
   "go_damage_taken": "Prijaté poškodenie:"
   "go_time_alive": "Čas prežitia:"
   "create_team": "Vytvoriť tím"
-  "create_team_autofill": "Automatické doplnenie"
-  "create_team_lock": "Zamknúť tím"
   "create_team_ready": "Pripravený"
   "create_team_waiting": "Čakanie..."
   "create_team_play": "Spustiť hru"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Chceš odísť?"
   "my_loot": "Koristi"
   "my_rewards": "Odmeny"
+  
+  "create_team_room": "Miestnosť"
+  "create_team_autofill": "Auto"
+  "create_team_lock": "Zámok"
 }

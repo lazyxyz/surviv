@@ -208,8 +208,6 @@
   "go_damage_taken": "Dégâts Reçus :"
   "go_time_alive": "Temps en Vie :"
   "create_team": "Créer Équipe"
-  "create_team_autofill": "Remplissage Auto"
-  "create_team_lock": "Verrouiller Équipe"
   "create_team_ready": "Prêt"
   "create_team_waiting": "En attente..."
   "create_team_play": "Lancer Jeu"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Voulez-vous quitter ?"
   "my_loot": "Butins"
   "my_rewards": "Récompenses"
+
+  "create_team_room": "Salle"
+  "create_team_autofill": "Remplir"
+  "create_team_lock": "Verrou"
 }

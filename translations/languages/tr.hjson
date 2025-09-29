@@ -208,8 +208,6 @@
   "go_damage_taken": "Alınan Hasar:"
   "go_time_alive": "Yaşama Süresi:"
   "create_team": "Takım Oluştur"
-  "create_team_autofill": "Otomatik Doldur"
-  "create_team_lock": "Takımı Kilitle"
   "create_team_ready": "Hazır"
   "create_team_waiting": "Bekleniyor..."
   "create_team_play": "Oyunu Başlat"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Ayrılmak istiyor musunuz?"
   "my_loot": "Ganimetler"
   "my_rewards": "Ödüller"
+
+  "create_team_room": "Oda"
+  "create_team_autofill": "Otomatik"
+  "create_team_lock": "Kilit"
 }
