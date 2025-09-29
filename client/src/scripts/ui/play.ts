@@ -20,8 +20,8 @@ import { DEFAULT_BADGE } from "@common/definitions/badges";
 export let teamSocket: WebSocket | undefined;
 export let teamID: string | undefined | null;
 let joinedTeam = false;
-let autoFill = false;
-let roomMode = false;
+// let autoFill = false;
+// let roomMode = false;
 let lastPlayButtonClickTime = 0;
 
 function isClickAllowed(): boolean {
@@ -196,23 +196,16 @@ function setupTeamMenuControls(game: Game, account: Account): void {
         }
     });
 
-    $<HTMLInputElement>("#create-team-toggle-auto-fill").on("click", function () {
-        autoFill = this.checked;
-        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, autoFill }));
+    ui.createTeamAutoFill.on("click", function () {
+        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, autoFill: this.checked }));
     });
 
-    $<HTMLInputElement>("#create-team-toggle-auto-fill").on("click", function () {
-        autoFill = this.checked;
-        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, autoFill }));
-    });
-
-    $<HTMLInputElement>("#create-team-toggle-room").on("click", function () {
-        roomMode = this.checked;
-        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, roomMode }));
-    });
-
-    $<HTMLInputElement>("#create-team-toggle-lock").on("click", function () {
+    ui.createTeamLock.on("click", function () {
         teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, locked: this.checked }));
+    });
+
+    ui.createTeamRoomMode.on("click", function () {
+        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, roomMode: this.checked }));
     });
 
     ui.btnStartGame.on("click", async () => {
@@ -419,8 +412,13 @@ async function connectToGame(data: GetGameResponse, gameAddress: string, game: G
     ui.splashOptions.addClass("loading");
     ui.loadingText.text(getTranslatedString("msg_loading"));
     const params = new URLSearchParams();
+
     if (teamID) params.set("teamID", teamID);
+    const autoFill = ui.createTeamAutoFill.prop("checked");
+    const roomMode = ui.createTeamRoomMode.prop("checked");
+
     if (autoFill) params.set("autoFill", String(autoFill));
+    if (roomMode) params.set("roomMode", String(roomMode));
     setGameParameters(params, account);
     const websocketURL = `${gameAddress.replace("<ID>", data.gameID.toString())}/play?${params.toString()}`;
     await game.connect(websocketURL, account);
