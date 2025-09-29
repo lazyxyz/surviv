@@ -183,8 +183,9 @@ function setupTeamMenuControls(game: Game, account: Account): void {
     });
 
     const hideUrl = $<HTMLButtonElement>("#btn-hide-team-url");
+    const urlField = ui.createTeamUrl;
+    urlField.addClass("hidden").css({ color: "transparent", textShadow: "0 0 8px rgba(0, 0, 0, 0.5)" });
     hideUrl.on("click", () => {
-        const urlField = ui.createTeamUrl;
         const icon = hideUrl.children("i");
         if (urlField.hasClass("hidden")) {
             icon.removeClass("fa-eye").addClass("fa-eye-slash");
@@ -199,12 +200,12 @@ function setupTeamMenuControls(game: Game, account: Account): void {
         autoFill = this.checked;
         teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, autoFill }));
     });
-   
+
     $<HTMLInputElement>("#create-team-toggle-auto-fill").on("click", function () {
         autoFill = this.checked;
         teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, autoFill }));
     });
-   
+
     $<HTMLInputElement>("#create-team-toggle-room").on("click", function () {
         roomMode = this.checked;
         teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, roomMode }));
@@ -286,7 +287,7 @@ function updateStartGameButtonState(players: CustomTeamPlayerInfo[], isLeader: b
     const allPlayersReady = players.every(player => player.ready || player.isLeader);
 
     if (isLeader) {
-        // For team leader, enable button only when all members are ready
+        // For team leader, enable button only when all members are ready, execept room mode
         ui.btnStartGame.prop("disabled", !allPlayersReady);
 
         if (allPlayersReady) {
