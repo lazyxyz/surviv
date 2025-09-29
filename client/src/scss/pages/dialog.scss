@@ -354,15 +354,24 @@ input::-webkit-inner-spin-button {
         .create-team-player-name-container {
           display: flex;
           justify-content: center;
+          align-items: center;
           margin: 10px 5px 0 5px;
+          width: 100%;
+          overflow: hidden;
 
           .create-team-player-name {
+            flex: 1;
+            min-width: 0;
             font-size: 16px;
             font-weight: 600;
             @include variables.text-shadow;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
 
           .create-team-player-badge {
+            flex-shrink: 0;
             display: inline-block;
             height: 20px;
             margin-left: 5px;
@@ -372,9 +381,14 @@ input::-webkit-inner-spin-button {
 
       // Adjustments when there are 5 or more players
       &:has(> .create-team-player-container:nth-child(5)) {
-        grid-template-columns: repeat(4, 1fr);
+
+        grid-template-columns: repeat(4, minmax(0, 1fr)); // ensure equal width
+
 
         .create-team-player-container {
+          flex: none; // prevent flex stretch
+          width: 100%; // force equal size
+          min-width: 0; // allow text truncation
           padding: 10px;
 
           // leader indicator
@@ -423,9 +437,15 @@ input::-webkit-inner-spin-button {
 
           .create-team-player-name-container {
             margin: 6px 3px 0 3px;
+            width: 100%;
+            min-width: 0; // important for ellipsis
 
             .create-team-player-name {
-              font-size: 13px;
+              font-size: 10px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 100%; // text won’t push container
             }
 
             .create-team-player-badge {
