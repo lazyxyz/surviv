@@ -208,8 +208,6 @@
   "go_damage_taken": "Danno Subito:"
   "go_time_alive": "Tempo Sopravvissuto:"
   "create_team": "Crea Squadra"
-  "create_team_autofill": "Riempimento Automatico"
-  "create_team_lock": "Blocca Squadra"
   "create_team_ready": "Pronto"
   "create_team_waiting": "In attesa..."
   "create_team_play": "Inizia Gioco"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Vuoi uscire?"
   "my_loot": "Bottini"
   "my_rewards": "Ricompense"
+
+  "create_team_room": "Stanza"
+  "create_team_autofill": "Riempimento"
+  "create_team_lock": "Blocco"
 }

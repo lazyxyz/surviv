@@ -532,22 +532,34 @@ export class Game {
                         isMobile: this.inputManager.isMobile
                     });
 
-                    // Start retry interval: Send every 1 second until JoinedPacket arrives
+                    let attempts = 0;
+                    const maxAttempts = 3;
+
+                    // Start retry interval: Send every 1 second until success or max reached
                     this.joinRetryInterval = setInterval(() => {
+                        if (attempts >= maxAttempts) {
+                            clearInterval(this.joinRetryInterval);
+                            console.warn("Max JoinPacket attempts reached");
+                            return;
+                        }
                         this.sendPacket(clientJoinPacket);
-                        console.log("Retrying client JoinPacket send");  // Optional debug log
-                    }, 1000);
+                        attempts++;
+                        console.log(`JoinPacket attempt ${attempts}`);
+                    }, 3000);
 
                     // Send immediately once (first attempt)
                     this.sendPacket(clientJoinPacket);
-                    this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
+                    attempts++;
+                    console.log(`JoinPacket attempt ${attempts} (initial)`);
 
+                    this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
                     this.setupGame();
-                    
-                    // updateUsersBadge(packet.output.badge?.idString) // Temperary close since no way to check
+
+                    // updateUsersBadge(packet.output.badge?.idString) // Temporarily closed since no way to check
                 });
                 break;
             }
+
             case packet instanceof JoinedPacket: {
                 this.startGame(packet.output);
                 if (this.joinRetryInterval) {

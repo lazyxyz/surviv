@@ -208,8 +208,6 @@
   "go_damage_taken": "받은 데미지:"
   "go_time_alive": "생존 시간:"
   "create_team": "팀 생성"
-  "create_team_autofill": "자동 채우기"
-  "create_team_lock": "팀 잠금"
   "create_team_ready": "준비 완료"
   "create_team_waiting": "대기 중..."
   "create_team_play": "게임 시작"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "나가시겠습니까?"
   "my_loot": "전리품"
   "my_rewards": "보상"
+
+  "create_team_room": "방"
+  "create_team_autofill": "자동 채우기"
+  "create_team_lock": "잠금"
 }

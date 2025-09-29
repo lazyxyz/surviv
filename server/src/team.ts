@@ -98,14 +98,16 @@ export class CustomTeam {
 
     readonly players: CustomTeamPlayer[] = [];
 
-    autoFill = false;
+    autoFill: boolean;
     locked = false;
+    roomMode = false; // allow more than 4 players join
 
     gameID?: number;
     resetTimeout?: NodeJS.Timeout;
 
     constructor() {
         this.id = Array.from({ length: 4 }, () => CustomTeam._idChars.charAt(random(0, CustomTeam._idCharMax))).join("");
+        this.autoFill = true;
     }
 
     addPlayer(player: CustomTeamPlayer): void {
@@ -115,7 +117,8 @@ export class CustomTeam {
             isLeader: player.isLeader,
             ready: player.ready,
             autoFill: this.autoFill,
-            locked: this.locked
+            locked: this.locked,
+            roomMode: this.roomMode,
         });
 
         this._publishPlayerUpdate();
@@ -140,11 +143,13 @@ export class CustomTeam {
 
                 if (message.autoFill !== undefined) this.autoFill = message.autoFill;
                 if (message.locked !== undefined) this.locked = message.locked;
+                if (message.roomMode !== undefined) this.roomMode = message.roomMode;
 
                 this._publishMessage({
                     type: CustomTeamMessages.Settings,
                     autoFill: this.autoFill,
-                    locked: this.locked
+                    locked: this.locked,
+                    roomMode: this.roomMode,
                 });
                 break;
             }

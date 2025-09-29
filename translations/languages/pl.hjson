@@ -208,8 +208,6 @@
   "go_damage_taken": "Otrzymane Obrażenia:"
   "go_time_alive": "Czas Przeżyty:"
   "create_team": "Stwórz Drużynę"
-  "create_team_autofill": "Automatyczne Wypełnienie"
-  "create_team_lock": "Zablokuj Drużynę"
   "create_team_ready": "Gotowy"
   "create_team_waiting": "Oczekiwanie..."
   "create_team_play": "Rozpocznij Grę"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Czy chcesz opuścić?"
   "my_loot": "Łupy"
   "my_rewards": "Nagrody"
+
+  "create_team_room": "Pokój"
+  "create_team_autofill": "Auto"
+  "create_team_lock": "Blokada"
 }

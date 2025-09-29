@@ -208,8 +208,6 @@
   "go_damage_taken": "Pinsalang Natanggap:"
   "go_time_alive": "Oras na Buhay:"
   "create_team": "Lumikha ng Team"
-  "create_team_autofill": "Awtomatikong Punan"
-  "create_team_lock": "I-lock ang Team"
   "create_team_ready": "Handa"
   "create_team_waiting": "Naghintay..."
   "create_team_play": "Simulan ang Laro"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Gusto mo bang umalis?"
   "my_loot": "Mga Nakuhang Item"
   "my_rewards": "Mga Gantimpala"
+
+  "create_team_room": "Kwarto"
+  "create_team_autofill": "Auto Fill"
+  "create_team_lock": "I-lock"
 }

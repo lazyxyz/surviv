@@ -208,8 +208,6 @@
   "go_damage_taken": "Kerusakan Diterima:"
   "go_time_alive": "Waktu Hidup:"
   "create_team": "Buat Tim"
-  "create_team_autofill": "Isi Otomatis"
-  "create_team_lock": "Kunci Tim"
   "create_team_ready": "Siap"
   "create_team_waiting": "Menunggu..."
   "create_team_play": "Mulai Game"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Apakah Anda ingin keluar?"
   "my_loot": "Jarahan"
   "my_rewards": "Hadiah"
+
+  "create_team_room": "Ruang"
+  "create_team_autofill": "Isi Otomatis"
+  "create_team_lock": "Kunci"
 }

@@ -208,8 +208,6 @@
   "go_damage_taken": "受到傷害："
   "go_time_alive": "存活時間："
   "create_team": "創建隊伍"
-  "create_team_autofill": "自動填充"
-  "create_team_lock": "鎖定隊伍"
   "create_team_ready": "準備"
   "create_team_waiting": "等待中..."
   "create_team_play": "開始遊戲"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "你想離開嗎？"
   "my_loot": "戰利品"
   "my_rewards": "獎勵"
+
+  "create_team_room": "房間"
+  "create_team_autofill": "自動填寫"
+  "create_team_lock": "鎖定"
 }

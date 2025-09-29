@@ -208,8 +208,6 @@
   "go_damage_taken": "Отримана Шкода:"
   "go_time_alive": "Час Виживання:"
   "create_team": "Створи Команду"
-  "create_team_autofill": "Автозаповнення"
-  "create_team_lock": "Заблокувати Команду"
   "create_team_ready": "Готовий"
   "create_team_waiting": "Очікування..."
   "create_team_play": "Почати Гру"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Хочете вийти?"
   "my_loot": "Здобич"
   "my_rewards": "Нагороди"
+
+  "create_team_room": "Кімната"
+  "create_team_autofill": "Авто"
+  "create_team_lock": "Блок"
 }
