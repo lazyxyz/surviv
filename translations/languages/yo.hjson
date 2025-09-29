@@ -209,8 +209,6 @@
   "go_damage_taken": "Ìpalára Tí Ó Gbà:"
   "go_time_alive": "Àkókò Láyé:"
   "create_team": "Dá Ẹgbẹ́"
-  "create_team_autofill": "Kún Lọ́nà"
-  "create_team_lock": "Tì Ẹgbẹ́"
   "create_team_ready": "Ṣetán"
   "create_team_waiting": "Ń dúró..."
   "create_team_play": "Bẹ̀rẹ̀ Eré"
@@ -303,4 +301,8 @@
   "leave_team_confirm": "Ṣe o fẹ lọ kuro?"
   "my_loot": "Awọn Ikogun"
   "my_rewards": "Awọn Ẹsan"
+
+  "create_team_room": "Yara"
+  "create_team_autofill": "Fọwọsi"
+  "create_team_lock": "Titi"
 }

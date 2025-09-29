@@ -208,8 +208,6 @@
   "go_damage_taken": "Daño Recibido:"
   "go_time_alive": "Tiempo Vivo:"
   "create_team": "Crear Equipo"
-  "create_team_autofill": "Rellenar Automático"
-  "create_team_lock": "Bloquear Equipo"
   "create_team_ready": "Listo"
   "create_team_waiting": "Esperando..."
   "create_team_play": "Iniciar Juego"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "¿Quieres salir?"
   "my_loot": "Botines"
   "my_rewards": "Recompensas"
+
+  "create_team_room": "Sala"
+  "create_team_autofill": "Rellenar"
+  "create_team_lock": "Bloquear"
 }

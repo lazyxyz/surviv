@@ -532,32 +532,34 @@ export class Game {
                         isMobile: this.inputManager.isMobile
                     });
 
-                    let retryAttempts = 0;
-                    const maxAttempts = 5;
+                    let attempts = 0;
+                    const maxAttempts = 3;
 
-                    // Start retry interval: Send every 1 second until JoinedPacket arrives or max attempts reached
+                    // Start retry interval: Send every 1 second until success or max reached
                     this.joinRetryInterval = setInterval(() => {
-                        if (retryAttempts >= maxAttempts) {
+                        if (attempts >= maxAttempts) {
                             clearInterval(this.joinRetryInterval);
-                            console.log("Max retry attempts reached for client JoinPacket");
+                            console.warn("Max JoinPacket attempts reached");
                             return;
                         }
                         this.sendPacket(clientJoinPacket);
-                        console.log(`Retrying client JoinPacket send (Attempt ${retryAttempts + 1}/${maxAttempts})`);
-                        retryAttempts++;
-                    }, 1000);
+                        attempts++;
+                        console.log(`JoinPacket attempt ${attempts}`);
+                    }, 3000);
 
                     // Send immediately once (first attempt)
                     this.sendPacket(clientJoinPacket);
-                    retryAttempts++; // Count the first attempt
-                    this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
+                    attempts++;
+                    console.log(`JoinPacket attempt ${attempts} (initial)`);
 
+                    this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
                     this.setupGame();
 
-                    // updateUsersBadge(packet.output.badge?.idString) // Temporary close since no way to check
+                    // updateUsersBadge(packet.output.badge?.idString) // Temporarily closed since no way to check
                 });
                 break;
             }
+
             case packet instanceof JoinedPacket: {
                 this.startGame(packet.output);
                 if (this.joinRetryInterval) {

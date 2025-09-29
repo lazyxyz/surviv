@@ -20,6 +20,7 @@ export interface PlayerContainer {
     readonly name: string
     readonly teamID?: string
     readonly autoFill: boolean
+    readonly roomMode: boolean
     player?: Gamer
     readonly address?: string
     readonly token?: string

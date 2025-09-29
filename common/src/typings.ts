@@ -39,6 +39,7 @@ export type CustomTeamMessage =
         ready: boolean
         autoFill: boolean
         locked: boolean
+        roomMode: boolean
     }
     | {
         type: CustomTeamMessages.Update
@@ -50,6 +51,7 @@ export type CustomTeamMessage =
         type: CustomTeamMessages.Settings
         autoFill?: boolean
         locked?: boolean
+        roomMode?: boolean
     }
     | {
         type: CustomTeamMessages.Start | CustomTeamMessages.Started

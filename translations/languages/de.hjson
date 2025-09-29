@@ -208,8 +208,6 @@
   "go_damage_taken": "Schaden erlitten:"
   "go_time_alive": "Überlebenszeit:"
   "create_team": "Team erstellen"
-  "create_team_autofill": "Auto-Auffüllen"
-  "create_team_lock": "Team sperren"
   "create_team_ready": "Bereit"
   "create_team_waiting": "Warten..."
   "create_team_play": "Spiel starten"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Möchtest du verlassen?"
   "my_loot": "Beute"
   "my_rewards": "Belohnungen"
+  
+  "create_team_room": "Raum"
+  "create_team_autofill": "Autoausfüllen"
+  "create_team_lock": "Sperren"
 }

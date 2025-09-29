@@ -208,8 +208,6 @@
   "go_damage_taken": "नुकसान लिया:"
   "go_time_alive": "जीवित समय:"
   "create_team": "टीम बनाएँ"
-  "create_team_autofill": "स्वचालित भराई"
-  "create_team_lock": "टीम लॉक करें"
   "create_team_ready": "तैयार"
   "create_team_waiting": "प्रतीक्षा में..."
   "create_team_play": "गेम शुरू करें"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "क्या आप छोड़ना चाहते हैं?"
   "my_loot": "लूट"
   "my_rewards": "पुरस्कार"
+
+  "create_team_room": "कक्ष"
+  "create_team_autofill": "स्वतः भरें"
+  "create_team_lock": "ताला"
 }

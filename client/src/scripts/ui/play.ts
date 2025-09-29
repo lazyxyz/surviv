@@ -20,7 +20,6 @@ import { DEFAULT_BADGE } from "@common/definitions/badges";
 export let teamSocket: WebSocket | undefined;
 export let teamID: string | undefined | null;
 let joinedTeam = false;
-let autoFill = false;
 let lastPlayButtonClickTime = 0;
 
 function isClickAllowed(): boolean {
@@ -182,8 +181,9 @@ function setupTeamMenuControls(game: Game, account: Account): void {
     });
 
     const hideUrl = $<HTMLButtonElement>("#btn-hide-team-url");
+    const urlField = ui.createTeamUrl;
+    urlField.addClass("hidden").css({ color: "transparent", textShadow: "0 0 8px rgba(0, 0, 0, 0.5)" });
     hideUrl.on("click", () => {
-        const urlField = ui.createTeamUrl;
         const icon = hideUrl.children("i");
         if (urlField.hasClass("hidden")) {
             icon.removeClass("fa-eye").addClass("fa-eye-slash");
@@ -194,13 +194,16 @@ function setupTeamMenuControls(game: Game, account: Account): void {
         }
     });
 
-    $<HTMLInputElement>("#create-team-toggle-auto-fill").on("click", function () {
-        autoFill = this.checked;
-        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, autoFill }));
+    ui.createTeamAutoFill.on("click", function () {
+        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, autoFill: this.checked }));
     });
 
-    $<HTMLInputElement>("#create-team-toggle-lock").on("click", function () {
+    ui.createTeamLock.on("click", function () {
         teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, locked: this.checked }));
+    });
+
+    ui.createTeamRoomMode.on("click", function () {
+        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, roomMode: this.checked }));
     });
 
     ui.btnStartGame.on("click", async () => {
@@ -232,6 +235,7 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
             case CustomTeamMessages.Settings:
                 ui.createTeamAutoFill.prop("checked", data.autoFill);
                 ui.createTeamLock.prop("checked", data.locked);
+                ui.createTeamRoomMode.prop("checked", data.roomMode);
                 break;
             case CustomTeamMessages.Started:
                 joinGame(TeamSize.Squad, game, account);
@@ -263,6 +267,7 @@ function handleTeamJoin(data: CustomTeamMessage, ui: Game['uiManager']['ui']): v
     ui.createTeamUrl.val(`${window.location.origin}/?region=${GAME_CONSOLE.getBuiltInCVar("cv_region") || Config.defaultRegion}#${teamID}`);
     ui.createTeamAutoFill.prop("checked", data.autoFill);
     ui.createTeamLock.prop("checked", data.locked);
+    ui.createTeamRoomMode.prop("checked", data.roomMode);
 }
 
 /**
@@ -273,7 +278,7 @@ function updateStartGameButtonState(players: CustomTeamPlayerInfo[], isLeader: b
     const allPlayersReady = players.every(player => player.ready || player.isLeader);
 
     if (isLeader) {
-        // For team leader, enable button only when all members are ready
+        // For team leader, enable button only when all members are ready, execept room mode
         ui.btnStartGame.prop("disabled", !allPlayersReady);
 
         if (allPlayersReady) {
@@ -405,8 +410,13 @@ async function connectToGame(data: GetGameResponse, gameAddress: string, game: G
     ui.splashOptions.addClass("loading");
     ui.loadingText.text(getTranslatedString("msg_loading"));
     const params = new URLSearchParams();
+
     if (teamID) params.set("teamID", teamID);
+    const autoFill = ui.createTeamAutoFill.prop("checked");
+    const roomMode = ui.createTeamRoomMode.prop("checked");
+
     if (autoFill) params.set("autoFill", String(autoFill));
+    if (roomMode) params.set("roomMode", String(roomMode));
     setGameParameters(params, account);
     const websocketURL = `${gameAddress.replace("<ID>", data.gameID.toString())}/play?${params.toString()}`;
     await game.connect(websocketURL, account);

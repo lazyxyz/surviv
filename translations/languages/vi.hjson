@@ -208,8 +208,6 @@
   "go_damage_taken": "Sát thương nhận:"
   "go_time_alive": "Thời gian sống:"
   "create_team": "Tạo đội"
-  "create_team_autofill": "Tự điền"
-  "create_team_lock": "Khóa đội"
   "create_team_ready": "Sẵn sàng"
   "create_team_waiting": "Đang đợi..."
   "create_team_play": "Bắt đầu"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Bạn có muốn rời đi không?"
   "my_loot": "Chiến lợi phẩm"
   "my_rewards": "Phần thưởng"
+
+  "create_team_room": "Phòng"
+  "create_team_autofill": "Tự Điền"
+  "create_team_lock": "Khóa"
 }

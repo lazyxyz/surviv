@@ -270,6 +270,8 @@ export class UIManager {
         createTeamUrl: $<HTMLInputElement>("#create-team-url-field"),
         createTeamAutoFill: $<HTMLInputElement>("#create-team-toggle-auto-fill"),
         createTeamLock: $<HTMLInputElement>("#create-team-toggle-lock"),
+        createTeamRoomMode: $<HTMLInputElement>("#create-team-toggle-room"),
+
         createTeamPlayers: $<HTMLDivElement>("#create-team-players"),
         closeCreateTeam: $<HTMLButtonElement>("#close-create-team"),
 
