@@ -718,7 +718,6 @@ export class Game {
 
         return await new Promise(resolve => {
             ui.splashOptions.addClass("loading");
-            console.log("END GAME!");
             this.soundManager.stopAll();
 
             ui.splashUi.fadeIn(400, async () => {

@@ -1,5 +1,5 @@
 import { type WebSocket } from "uWebSockets.js";
-import { Layer, SpectateActions } from "@common/constants";
+import { Layer, SpectateActions, TeamSize } from "@common/constants";
 import { Vector } from "@common/utils/vector";
 import { Game } from "../game";
 import { Team } from "../team";
@@ -276,6 +276,12 @@ export class Gamer extends Player {
 
         if (this.rewardsBoost == 0) {
             processRewardsPacket(false, rank, 0, 0);
+            return;
+        }
+
+        // Skip 50vs50 Mode
+        if (this.game.maxTeamSize == TeamSize.V50) {
+            processRewardsPacket(true, rank, 0, 0);
             return;
         }
 

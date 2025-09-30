@@ -34,9 +34,9 @@ if (isMainThread) {
         Logger.log(`Listening on ${Config.host}:${Config.port}`);
         Logger.log("Press Ctrl+C to exit.");
 
-        await newGame(TeamSize.Solo);
-        await newGame(TeamSize.Squad);
-        await newGame(TeamSize.V50);
+        // await newGame(TeamSize.Solo);
+        // await newGame(TeamSize.Squad);
+        // await newGame(TeamSize.V50);
 
         setInterval(() => {
             const memoryUsage = process.memoryUsage().rss;
