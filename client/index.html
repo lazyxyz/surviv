@@ -149,16 +149,6 @@
         </a>
       </div>
 
-      <!-- <div id="splash-news" class="persistent-scrollbar">
-        <h2>
-          <a href="./news/">
-            <i class="fa-solid fa-newspaper"></i>
-            <span translation="news"></span>
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          </a>
-        </h2>
-        <div id="news-posts"></div>
-      </div> -->
       <div id="splash-center">
         <div id="splash-server-message" style="display: none">
           <span id="splash-server-message-text"></span>
@@ -204,6 +194,7 @@
                   translation="create_team"></button>
               </div>
             </div>
+
 
             <a href="/leaderboard/" target="_blank">
               <button class="btn btn-lg btn-darken btn-success btn-leaderboard" id="btn-single-home">
@@ -1114,19 +1105,37 @@
       <div id="create-team-options">
         <div id="create-team-toggles">
           <label>
-            <span class="setting-title" translation="create_team_autofill"></span>
-            <input type="checkbox" id="create-team-toggle-auto-fill" />
+            <span class="setting-title" translation="create_team_room"></span>
+            <input type="checkbox" id="create-team-toggle-room" />
           </label>
 
           <label>
-            <span class="setting-title" translation="create_team_room"></span>
-            <input type="checkbox" id="create-team-toggle-room" />
+            <span class="setting-title" translation="create_team_autofill"></span>
+            <input type="checkbox" id="create-team-toggle-auto-fill" />
           </label>
 
           <label>
             <span class="setting-title" translation="create_team_lock"></span>
             <input type="checkbox" id="create-team-toggle-lock" />
           </label>
+        </div>
+        <div id="create-team-room-options" class="room-dependent">
+          <label>
+            <span class="setting-title" translation="mode"></span>
+            <select id="create-team-mode">
+              <option value="solo">Solo</option>
+              <option value="duo">Duo</option>
+              <option value="squad">Squad</option>
+              <option value="50v50">50v50</option>
+            </select>
+          </label>
+          <!-- <label>
+            <span class="setting-title" translation="map"></span>
+            <select id="create-team-map">
+              <option value="winter">Winter</option>
+              <option value="fall">Fall</option>
+            </select>
+          </label> -->
         </div>
         <!-- btn section -->
         <div id="btn-action-section">
@@ -1137,6 +1146,7 @@
       </div>
     </div>
   </div>
+
 
   <div class="modal dialog" id="select-language-menu" style="display: none">
     <div class="dialog-header">

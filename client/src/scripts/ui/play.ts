@@ -125,6 +125,7 @@ function setupTeamMenu(game: Game, account: Account): void {
         teamSocket = new WebSocket(teamURL);
         setupTeamSocketHandlers(teamSocket, game, account);
     });
+
 }
 
 $<HTMLButtonElement>("#btn-leave-game").on("click", function () {
@@ -217,6 +218,14 @@ function setupTeamMenuControls(game: Game, account: Account): void {
         } catch {
             console.error("Failed to start game");
         }
+    });
+
+    $('#create-team-toggle-room').on('change', function (this: HTMLInputElement) {
+        const dependents = $('.room-dependent');
+        const displayStyle = this.checked ? 'flex' : 'none';
+        dependents.each(function () {
+            $(this).css('display', displayStyle);
+        });
     });
 
 }
