@@ -826,8 +826,8 @@ export class MapPing {
 
         this.color = definition.color;
 
-        if (definition.isPlayerPing && playerId) {
-            this.color = PIXI_TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(playerId) ?? game.uiManager.teammates.findIndex(({ id }) => id === playerId)];
+        if (definition.isPlayerPing) {
+            this.color = PIXI_TEAMMATE_COLORS[0];
         }
 
         this.mapImage = new SuroiSprite(definition.idString)

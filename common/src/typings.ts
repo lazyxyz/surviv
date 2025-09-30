@@ -19,7 +19,8 @@ export const enum CustomTeamMessages {
     Settings,
     Start,
     Started,
-    Kick
+    Kick,
+    Ready
 }
 
 export interface CustomTeamPlayerInfo {
@@ -40,6 +41,7 @@ export type CustomTeamMessage =
         autoFill: boolean
         locked: boolean
         roomMode: boolean
+        teamSize: number
     }
     | {
         type: CustomTeamMessages.Update
@@ -52,13 +54,19 @@ export type CustomTeamMessage =
         autoFill?: boolean
         locked?: boolean
         roomMode?: boolean
+        teamSize?: number
     }
     | {
         type: CustomTeamMessages.Start | CustomTeamMessages.Started
+        teamSize?: number
     }
     | {
         type: CustomTeamMessages.Kick
         playerId: number
+    }
+    | {
+        type: CustomTeamMessages.Ready
+        ready?: boolean
     };
 
 export type weaponPresentType = {

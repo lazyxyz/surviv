@@ -29,21 +29,20 @@ export function initGameRoutes(app: TemplatedApp) {
 
             if (!teamSize) teamSize = TeamSize.Solo;
 
-            let teamID;
-            if (teamSize != TeamSize.Solo) {
-                teamSize = TeamSize.Squad;
-                teamID = new URLSearchParams(req.getQuery()).get("teamID"); // must be here or it causes uWS errors
-            }
-
+            let teamID = new URLSearchParams(req.getQuery()).get("teamID");
+           
             let response: GetGameResponse;
             if (teamID) {
                 const team = CUSTOM_TEAMS.get(teamID);
                 if (team?.gameID !== undefined) {
                     const game = GAMES[team.gameID];
+                    
+                    // Should allow member join even game started after specific duration
                     response = game && !game.stopped && game.startedTime == -1 ? { success: true, gameID: team.gameID }
                         : { success: false };
+
                 } else {
-                    response = { success: false };
+                    response = await findGame(teamSize);
                 }
             } else {
                 response = await findGame(teamSize);

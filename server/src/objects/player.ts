@@ -404,7 +404,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             this._team = team;
             this.teamID = team.id;
 
-            team.reassignColorIndexes();
             team.addPlayer(this);
             team.setDirty();
         }

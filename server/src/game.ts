@@ -654,6 +654,7 @@ export class Game implements GameData {
 
             const { teamID, autoFill, roomMode } = socket.getUserData();
 
+            console.log("roomMode: ", roomMode);
             if (teamID && !roomMode) {
                 team = this.teamsMapping.get(teamID);
                 if (
@@ -1134,7 +1135,7 @@ export class Game implements GameData {
                 } as ServerChatPacketData)
             );
         } else if (this.teamMode && !isSendAll && player.team) {
-            player.team.sendTeamMessage(player.colorIndex, message);
+            player.team.sendTeamMessage(message);
         }
     }
 
