@@ -21,6 +21,7 @@ export const Config = {
     port: 8000,
     soloPort: 8001,
     squadPort: 9001,
+    v50Port: 9500,
     addBot: true,
 
     spawn: { mode: SpawnMode.Normal },
@@ -68,6 +69,7 @@ export interface ConfigType {
 
     readonly soloPort: number;
     readonly squadPort: number;
+    readonly v50Port: number;
     readonly addBot: boolean;
     
     /**

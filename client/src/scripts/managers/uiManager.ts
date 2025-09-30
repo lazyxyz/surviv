@@ -2003,7 +2003,7 @@ class PlayerHealthUI {
 
             if (this._position.dirty && this._position.value) {
                 if ((indicator = teammateIndicators.get(id)) === undefined) {
-                    const color = PIXI_TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(id) ?? this._colorIndex.value];
+                    const color = PIXI_TEAMMATE_COLORS[0];
 
                     teammateIndicators.set(
                         id,
@@ -2031,7 +2031,7 @@ class PlayerHealthUI {
         }
 
         if (this._colorIndex.dirty) {
-            const color = PIXI_TEAMMATE_COLORS[this.game.uiManager.getTeammateColorIndex(id) ?? this._colorIndex.value];
+            const color = PIXI_TEAMMATE_COLORS[0];
 
             this.indicatorContainer.css(
                 "background-color",

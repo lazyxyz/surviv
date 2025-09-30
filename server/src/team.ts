@@ -26,7 +26,7 @@ export class Team {
     }
 
     addPlayer(player: Player): void {
-        player.colorIndex = this.getNextAvailableColorIndex();
+        // player.colorIndex = 0;
         this._indexMapping.set(player, this._players.push(player) - 1);
         this.setDirty();
     }
@@ -41,7 +41,6 @@ export class Team {
             for (const [player, mapped] of this._indexMapping.entries()) { // refresh mapping
                 if (mapped <= index) continue;
                 this._indexMapping.set(player, mapped - 1);
-                this.reassignColorIndexes();
             }
         }
         return exists;
@@ -53,22 +52,6 @@ export class Team {
         }
     }
 
-    // Team color indexes must be checked and updated in order not to have duplicates.
-    getNextAvailableColorIndex(): number {
-        const existingIndexes = this.players.map(player => player.colorIndex);
-        let newIndex = 0;
-        while (existingIndexes.includes(newIndex)) {
-            newIndex++;
-        }
-        return newIndex;
-    }
-
-    reassignColorIndexes(): void {
-        this.players.forEach((player, index) => {
-            player.colorIndex = index;
-        });
-    }
-
     hasLivingPlayers(): boolean {
         return this.players.some(player => !player.dead && !player.disconnected);
     }
@@ -77,12 +60,11 @@ export class Team {
         return this.players.filter(player => !player.dead && !player.disconnected);
     }
 
-    sendTeamMessage(colorIndex: number, message: string): void {
-        const playerColor = TEAMMATE_COLORS[colorIndex];
+    sendTeamMessage(message: string): void {
         for (const player of this.players) {
             player.sendPacket(
                 ServerChatPacket.create({
-                    messageColor: playerColor,
+                    messageColor: 0xffffff,
                     message: message
                 } as ServerChatPacketData)
             );

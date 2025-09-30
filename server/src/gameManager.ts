@@ -149,11 +149,21 @@ export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
 export async function newGame(maxTeamSize?: TeamSize): Promise<number> {
     return new Promise<number>(resolve => {
         const teamSize = maxTeamSize ? maxTeamSize : TeamSize.Solo;
-
         let startGameId = Config.soloPort;
-        if (maxTeamSize == TeamSize.Squad) {
-            startGameId = Config.squadPort;
+
+        switch (maxTeamSize) {
+            case TeamSize.Solo:
+                startGameId = Config.soloPort;
+                break;
+            case TeamSize.Squad:
+                startGameId = Config.squadPort;
+                break;
+
+            case TeamSize.V50:
+                startGameId = Config.v50Port;
+                break;
         }
+
         const maxGames = Config.maxGames + startGameId;
         for (let i = startGameId; i < maxGames; i++) {
             const game = GAMES[i];
@@ -173,11 +183,11 @@ if (!isMainThread) {
     const gameId = uuidv4();
     let maxTeamSize = (workerData as WorkerInitData).maxTeamSize;
 
-   new Game(port, maxTeamSize, gameId);
+    new Game(port, maxTeamSize, gameId);
 
     parentPort?.on("message", (message: WorkerMessage) => {
         switch (message.type) {
-         
+
             case WorkerMessages.UpdateMaxTeamSize: {
                 maxTeamSize = message.maxTeamSize;
                 break;
