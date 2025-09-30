@@ -1,6 +1,6 @@
 # Translation File Reports
 
-This file is a report of all errors and missing keys in the translation files of this game. Last generated Tue, 30 Sep 2025 08:03:41 GMT
+This file is a report of all errors and missing keys in the translation files of this game. Last generated Tue, 30 Sep 2025 10:53:12 GMT
 
 ## 🇸🇦 العربية (99% Complete) - ar.hjson
 
@@ -9,7 +9,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇩🇪 Deutsch (99% Complete) - de.hjson
@@ -19,7 +18,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇪🇸 Español (99% Complete) - es.hjson
@@ -29,7 +27,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇫🇷 Français (99% Complete) - fr.hjson
@@ -39,7 +36,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇮🇳 हिन्दी (99% Complete) - hi.hjson
@@ -49,7 +45,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇮🇩 Bahasa Indonesia (99% Complete) - id.hjson
@@ -59,7 +54,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇮🇹 Italiano (99% Complete) - it.hjson
@@ -69,7 +63,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇯🇵 日本語 (99% Complete) - ja.hjson
@@ -79,7 +72,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇰🇷 한국어 (99% Complete) - ko.hjson
@@ -89,7 +81,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇲🇾 Bahasa Melayu (99% Complete) - ms.hjson
@@ -99,7 +90,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇳🇱 Nederlands (99% Complete) - nl.hjson
@@ -109,7 +99,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇵🇱 Polski (99% Complete) - pl.hjson
@@ -119,7 +108,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇵🇹 Português (99% Complete) - pt.hjson
@@ -129,7 +117,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇧🇷 Português Brasil (99% Complete) - pt_BR.hjson
@@ -139,7 +126,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇷🇺 Русский (99% Complete) - ru.hjson
@@ -149,7 +135,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇸🇰 Slovenčina (99% Complete) - sk.hjson
@@ -159,7 +144,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇹🇭 ไทย (99% Complete) - th.hjson
@@ -169,7 +153,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇵🇭 Tagalog (99% Complete) - tl.hjson
@@ -179,7 +162,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇹🇷 Türkçe (99% Complete) - tr.hjson
@@ -189,7 +171,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇺🇦 Українська (99% Complete) - uk.hjson
@@ -199,7 +180,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇻🇳 Tiếng Việt (99% Complete) - vi.hjson
@@ -209,7 +189,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇳🇬 Yorùbá (99% Complete) - yo.hjson
@@ -219,7 +198,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇨🇳 简体中文 (99% Complete) - zh_CN.hjson
@@ -229,7 +207,6 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
 ## 🇭🇰 繁體中文 (99% Complete) - zh_HK.hjson
@@ -239,6 +216,5 @@ This file is a report of all errors and missing keys in the translation files of
 ### Undefined Keys
 
 - Key `leave_team` is not defined
-- Key `create_room` is not defined
 - Key `team_mode` is not defined
 
