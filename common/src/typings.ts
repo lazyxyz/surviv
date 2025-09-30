@@ -65,6 +65,7 @@ export type CustomTeamMessage =
     }
     | {
         type: CustomTeamMessages.Ready
+        ready?: boolean
     };
 
 export type weaponPresentType = {

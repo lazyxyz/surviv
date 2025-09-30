@@ -189,7 +189,11 @@ export class CustomTeam {
             }
 
             case CustomTeamMessages.Ready: {
-                player.ready = !player.ready;
+                if (message.ready) {
+                    player.ready = message.ready;
+                } else {
+                    player.ready = !player.ready;
+                }
                 this._publishPlayerUpdate();
                 break;
             }
@@ -244,7 +248,7 @@ export class CustomTeamPlayer {
         this.team = team;
         team.players.push(this);
         this.name = name;
-        this.ready = false;
+        this.ready = true;
         this.skin = skin;
         this.badge = badge;
         this.nameColor = nameColor;
