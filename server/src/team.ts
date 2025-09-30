@@ -98,16 +98,16 @@ export class CustomTeam {
 
     readonly players: CustomTeamPlayer[] = [];
 
-    autoFill: boolean;
+    autoFill = true;
     locked = false;
     roomMode = false; // allow more than 4 players join
+    teamSize = TeamSize.Squad;
 
     gameID?: number;
     resetTimeout?: NodeJS.Timeout;
 
     constructor() {
         this.id = Array.from({ length: 4 }, () => CustomTeam._idChars.charAt(random(0, CustomTeam._idCharMax))).join("");
-        this.autoFill = true;
     }
 
     addPlayer(player: CustomTeamPlayer): void {
@@ -119,6 +119,7 @@ export class CustomTeam {
             autoFill: this.autoFill,
             locked: this.locked,
             roomMode: this.roomMode,
+            teamSize: this.teamSize,
         });
 
         this._publishPlayerUpdate();
@@ -144,18 +145,20 @@ export class CustomTeam {
                 if (message.autoFill !== undefined) this.autoFill = message.autoFill;
                 if (message.locked !== undefined) this.locked = message.locked;
                 if (message.roomMode !== undefined) this.roomMode = message.roomMode;
+                if (message.teamSize !== undefined) this.teamSize = message.teamSize;
 
                 this._publishMessage({
                     type: CustomTeamMessages.Settings,
                     autoFill: this.autoFill,
                     locked: this.locked,
                     roomMode: this.roomMode,
+                    teamSize: this.teamSize,
                 });
                 break;
             }
             case CustomTeamMessages.Start: {
                 if (player.isLeader) {
-                    const result = await findGame(TeamSize.Squad);
+                    const result = await findGame(this.teamSize);
                     if (result.success) {
                         this.gameID = result.gameID;
                         clearTimeout(this.resetTimeout);
@@ -182,6 +185,12 @@ export class CustomTeam {
                     this.removePlayer(player);
                     this._publishPlayerUpdate();
                 }
+                break;
+            }
+
+            case CustomTeamMessages.Ready: {
+                player.ready = !player.ready;
+                this._publishPlayerUpdate();
                 break;
             }
         }
