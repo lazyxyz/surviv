@@ -654,7 +654,6 @@ export class Game implements GameData {
 
             const { teamID, autoFill, roomMode } = socket.getUserData();
 
-            console.log("roomMode: ", roomMode);
             if (teamID && !roomMode) {
                 team = this.teamsMapping.get(teamID);
                 if (

@@ -453,7 +453,6 @@
         // Fetch and pin "my" row using PUBLIC_KEY only
         if (myPublicKey && myRankingContainer) {
           const myData = await fetchMyPlayerPoints(myPublicKey, seasonConfig);
-          console.log("myData: ", myData);
           if (myData) {
             // Determine rank based on current page if present; otherwise show "—"
             const rankNumber = players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) >= 0 ? (page - 1) * limit + players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey) + 1 : '—';
