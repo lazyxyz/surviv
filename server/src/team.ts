@@ -150,7 +150,7 @@ export class CustomTeam {
                             player.ready = false;
                         }
 
-                        this._publishMessage({ type: CustomTeamMessages.Started });
+                        this._publishMessage({ type: CustomTeamMessages.Started, teamSize: this.teamSize });
                         this._publishPlayerUpdate();
                     }
                 } else {

@@ -58,6 +58,7 @@ export type CustomTeamMessage =
     }
     | {
         type: CustomTeamMessages.Start | CustomTeamMessages.Started
+        teamSize?: number
     }
     | {
         type: CustomTeamMessages.Kick

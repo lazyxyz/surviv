@@ -256,17 +256,14 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
                 handleTeamUpdate(data, ui);
                 break;
             case CustomTeamMessages.Settings:
+                // Update options for members to join game
                 ui.createTeamAutoFill.prop("checked", data.autoFill);
-                ui.createTeamLock.prop("checked", data.locked);
                 ui.createTeamRoomMode.prop("checked", data.roomMode);
-
-                const teamSizeKey = TeamSize[data.teamSize || 1];
-                ui.createTeamMode.val(teamSizeKey);
-
                 break;
             case CustomTeamMessages.Started:
-                const teamSize = ui.createTeamMode.val() as keyof typeof TeamSize;
-                joinGame(TeamSize[teamSize], game, account);
+                let teamSize = TeamSize.Solo;
+                if (data.teamSize) teamSize = data.teamSize;
+                joinGame(teamSize, game, account);
                 break;
             case CustomTeamMessages.Kick:
                 leaveTeam();
