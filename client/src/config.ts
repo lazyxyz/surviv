@@ -11,15 +11,15 @@ export const Config = {
             apiAddress: "https://test-api.grindy.io",
             // apiAddress: "http://localhost:3001",
         },
-        test: {
-            name: "Test",
-            mainAddress: "https://as.grindy.io",
-            gameAddress: "wss://<ID>.as.grindy.io",
-            teamAddress: "wss://team.as.grindy.io",
-            apiAddress: "https://test-api.grindy.io",
-        },
+        // test: {
+        //     name: "Test",
+        //     mainAddress: "https://as.grindy.io",
+        //     gameAddress: "wss://<ID>.as.grindy.io",
+        //     teamAddress: "wss://team.as.grindy.io",
+        //     apiAddress: "https://test-api.grindy.io",
+        // },
     },
-    defaultRegion: "test",
+    defaultRegion: "dev",
 } satisfies ConfigType as ConfigType;
 
 export const ChainConfig = {
