@@ -26,22 +26,24 @@ export interface ModeDefinition {
     readonly modeLogoImage?: string | { solo: string, squads: string }
 }
 
-export type Mode = "normal" | "fall" | "winter";
+export type Mode = "normal" | "fall" | "winter" | "desert";
 
 export const ModeToNumber: Record<Mode, number> = {
     normal: 0,
     fall: 1,
     winter: 2,
+    desert: 3,
 };
 
 export const NumberToMode: Record<number, Mode> = {
     0: "normal",
     1: "fall",
     2: "winter",
+    3: "desert",
 };
 
 export function getRandomMode(): Mode {
-    const modes: Mode[] = ["normal", "fall", "winter"];
+    const modes: Mode[] = ["normal", "fall", "winter", "desert"];
     return modes[Math.floor(Math.random() * modes.length)];
 }
 
@@ -113,7 +115,34 @@ export const Modes: Record<Mode, ModeDefinition> = {
         },
         specialPlayButtons: true,
         modeLogoImage: "./img/game/winter/obstacles/red_gift.svg"
-    }
+    },
+    desert: {
+        idString: "fall",
+        colors: {
+            grass: "hsla(50, 74%, 45%, 1.00)",
+            water: "hsl(211, 63%, 42%)",
+            border: "hsl(211, 63%, 30%)",
+            beach: "hsl(40, 39%, 55%)",
+            riverBank: "hsl(33, 50%, 30%)",
+            trail: "hsl(35, 50%, 40%)",
+            gas: "hsla(17, 100%, 50%, 0.55)",
+            void: "hsl(25, 80%, 6%)"
+        },
+        ambience: "wind_ambience",
+        inheritTexturesFrom: "fall",
+        defaultScope: "2x_scope",
+        reskin: "fall",
+        particleEffects: {
+            frames: ["leaf_particle_1", "leaf_particle_2", "leaf_particle_3"],
+            delay: 1000
+        },
+        specialPlayButtons: true,
+        // Icons
+        modeLogoImage: {
+            solo: "./img/misc/user.svg",
+            squads: "./img/misc/user-group.svg"
+        },
+    },
 };
 export const ObstacleModeVariations: Partial<Record<Mode, string>> = {
     winter: "_winter"

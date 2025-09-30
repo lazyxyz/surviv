@@ -16,6 +16,9 @@ import { atlases as winterLowRes } from "virtual:spritesheets-jsons-low-res-wint
 import { atlases as normalHighRes } from "virtual:spritesheets-jsons-high-res-normal";
 import { atlases as normalLowRes } from "virtual:spritesheets-jsons-low-res-normal";
 
+import { atlases as desertHighRes } from "virtual:spritesheets-jsons-high-res-desert";
+import { atlases as desertLowRes } from "virtual:spritesheets-jsons-low-res-desert";
+
 const textures: Record<string, Texture> = {};
 
 const loadingText = $("#loading-text");
@@ -34,6 +37,7 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean, 
         fall: highResolution ? fallHighRes : fallLowRes,
         winter: highResolution ? winterHighRes : winterLowRes,
         normal: highResolution ? normalHighRes : normalLowRes,
+        desert: highResolution ? desertHighRes : desertLowRes,
     };
 
     const spritesheets: SpritesheetData[] = modeAtlases[modeName];

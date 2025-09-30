@@ -22,7 +22,7 @@ export type CacheData = {
     }
 };
 
-const GAME_MODES = [ "fall", "winter", "normal", "shared"];
+const GAME_MODES = [ "fall", "winter", "normal", "desert", "shared"];
 
 const defaultGlob = "**/*.{png,gif,jpg,bmp,tiff,svg}";
 const imagesMatcher = new Minimatch(defaultGlob);
@@ -137,6 +137,7 @@ export function spritesheet(): Plugin[] {
         normal: { low: [], high: [] },
         fall: { low: [], high: [] },
         winter: { low: [], high: [] },
+        desert: { low: [], high: [] },
         shared: { low: [], high: [] }
     };
 
