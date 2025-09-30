@@ -206,7 +206,7 @@
   }
 }
 
-#btn-rules {
+#btn-single-home {
   margin-top: 10px;
   position: relative;
 
@@ -214,10 +214,6 @@
     background-color: palette.$orange;
     border-bottom: 2px solid palette.$orange_bg;
     box-shadow: inset 0 -2px palette.$orange_bg;
-
-    & > .pulsating-circle {
-      display: block !important;
-    }
   }
 }
 

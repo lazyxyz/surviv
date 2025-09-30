@@ -26,7 +26,7 @@ export class Team {
     }
 
     addPlayer(player: Player): void {
-        player.colorIndex = this.getNextAvailableColorIndex();
+        // player.colorIndex = 0;
         this._indexMapping.set(player, this._players.push(player) - 1);
         this.setDirty();
     }
@@ -41,7 +41,6 @@ export class Team {
             for (const [player, mapped] of this._indexMapping.entries()) { // refresh mapping
                 if (mapped <= index) continue;
                 this._indexMapping.set(player, mapped - 1);
-                this.reassignColorIndexes();
             }
         }
         return exists;
@@ -53,22 +52,6 @@ export class Team {
         }
     }
 
-    // Team color indexes must be checked and updated in order not to have duplicates.
-    getNextAvailableColorIndex(): number {
-        const existingIndexes = this.players.map(player => player.colorIndex);
-        let newIndex = 0;
-        while (existingIndexes.includes(newIndex)) {
-            newIndex++;
-        }
-        return newIndex;
-    }
-
-    reassignColorIndexes(): void {
-        this.players.forEach((player, index) => {
-            player.colorIndex = index;
-        });
-    }
-
     hasLivingPlayers(): boolean {
         return this.players.some(player => !player.dead && !player.disconnected);
     }
@@ -77,12 +60,11 @@ export class Team {
         return this.players.filter(player => !player.dead && !player.disconnected);
     }
 
-    sendTeamMessage(colorIndex: number, message: string): void {
-        const playerColor = TEAMMATE_COLORS[colorIndex];
+    sendTeamMessage(message: string): void {
         for (const player of this.players) {
             player.sendPacket(
                 ServerChatPacket.create({
-                    messageColor: playerColor,
+                    messageColor: 0xffffff,
                     message: message
                 } as ServerChatPacketData)
             );
@@ -98,16 +80,16 @@ export class CustomTeam {
 
     readonly players: CustomTeamPlayer[] = [];
 
-    autoFill: boolean;
+    autoFill = true;
     locked = false;
     roomMode = false; // allow more than 4 players join
+    teamSize = TeamSize.Squad;
 
     gameID?: number;
     resetTimeout?: NodeJS.Timeout;
 
     constructor() {
         this.id = Array.from({ length: 4 }, () => CustomTeam._idChars.charAt(random(0, CustomTeam._idCharMax))).join("");
-        this.autoFill = true;
     }
 
     addPlayer(player: CustomTeamPlayer): void {
@@ -119,6 +101,7 @@ export class CustomTeam {
             autoFill: this.autoFill,
             locked: this.locked,
             roomMode: this.roomMode,
+            teamSize: this.teamSize,
         });
 
         this._publishPlayerUpdate();
@@ -144,18 +127,20 @@ export class CustomTeam {
                 if (message.autoFill !== undefined) this.autoFill = message.autoFill;
                 if (message.locked !== undefined) this.locked = message.locked;
                 if (message.roomMode !== undefined) this.roomMode = message.roomMode;
+                if (message.teamSize !== undefined) this.teamSize = message.teamSize;
 
                 this._publishMessage({
                     type: CustomTeamMessages.Settings,
                     autoFill: this.autoFill,
                     locked: this.locked,
                     roomMode: this.roomMode,
+                    teamSize: this.teamSize,
                 });
                 break;
             }
             case CustomTeamMessages.Start: {
                 if (player.isLeader) {
-                    const result = await findGame(TeamSize.Squad);
+                    const result = await findGame(this.teamSize);
                     if (result.success) {
                         this.gameID = result.gameID;
                         clearTimeout(this.resetTimeout);
@@ -165,7 +150,7 @@ export class CustomTeam {
                             player.ready = false;
                         }
 
-                        this._publishMessage({ type: CustomTeamMessages.Started });
+                        this._publishMessage({ type: CustomTeamMessages.Started, teamSize: this.teamSize });
                         this._publishPlayerUpdate();
                     }
                 } else {
@@ -182,6 +167,16 @@ export class CustomTeam {
                     this.removePlayer(player);
                     this._publishPlayerUpdate();
                 }
+                break;
+            }
+
+            case CustomTeamMessages.Ready: {
+                if (message.ready) {
+                    player.ready = message.ready;
+                } else {
+                    player.ready = !player.ready;
+                }
+                this._publishPlayerUpdate();
                 break;
             }
         }
@@ -235,7 +230,7 @@ export class CustomTeamPlayer {
         this.team = team;
         team.players.push(this);
         this.name = name;
-        this.ready = false;
+        this.ready = true;
         this.skin = skin;
         this.badge = badge;
         this.nameColor = nameColor;
