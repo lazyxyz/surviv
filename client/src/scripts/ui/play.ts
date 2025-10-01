@@ -233,15 +233,17 @@ function setupTeamMenuControls(game: Game, account: Account): void {
             console.error("Failed to start game");
         }
     });
+}
 
-    $('#create-team-toggle-room').on('change', function (this: HTMLInputElement) {
-        const dependents = $('.room-dependent');
-        const displayStyle = this.checked ? 'flex' : 'none';
-        dependents.each(function () {
-            $(this).css('display', displayStyle);
-        });
+function updateRoomOptions(ui: Game['uiManager']['ui'], enable: boolean, teamSize: number) {
+    const dependents = $('.room-dependent');
+    const displayStyle = enable ? 'flex' : 'none';
+    dependents.each(function () {
+        $(this).css('display', displayStyle);
     });
 
+    const teamSizeKey = TeamSize[teamSize || 1];
+    ui.createTeamMode.val(teamSizeKey);
 }
 
 function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account): void {
@@ -256,9 +258,10 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
                 handleTeamUpdate(data, ui);
                 break;
             case CustomTeamMessages.Settings:
-                // Update options for members to join game
                 ui.createTeamAutoFill.prop("checked", data.autoFill);
                 ui.createTeamRoomMode.prop("checked", data.roomMode);
+                ui.createTeamLock.prop("checked", data.locked);
+                updateRoomOptions(ui, data.roomMode ? true : false, data.teamSize ? data.teamSize : TeamSize.Squad);
                 break;
             case CustomTeamMessages.Started:
                 let teamSize = TeamSize.Solo;
@@ -294,8 +297,7 @@ function handleTeamJoin(data: CustomTeamMessage, ui: Game['uiManager']['ui']): v
     ui.createTeamLock.prop("checked", data.locked);
     ui.createTeamRoomMode.prop("checked", data.roomMode);
 
-    const teamSizeKey = TeamSize[data.teamSize || 1];
-    ui.createTeamMode.val(teamSizeKey);
+    updateRoomOptions(ui, data.roomMode, data.teamSize);
 }
 
 /**
@@ -351,7 +353,6 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         </div>
         `;
     }).join(""));
-    ui.createTeamToggles.toggleClass("disabled", !isLeader);
 
     // Update button text and icon based on role and ready status
     if (isLeader) {
@@ -359,6 +360,9 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
             .attr("data-role", "leader")
             .removeClass("btn-ready")
             .html(`<span translation="create_team_play">${getTranslatedString("create_team_play")}</span>`);
+
+        $('#create-team-options').removeClass('disabled');
+        $('#create-team-options input, #create-team-options select').prop('disabled', false);
     } else {
         // For team members, add appropriate icons
         const icon = ready
@@ -371,6 +375,9 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
             .toggleClass("btn-success", ready)
             .toggleClass("btn-alert", !ready)
             .html(`<span translation="${text}">${getTranslatedString(text)}</span> ${icon}`);
+
+        $('#create-team-options').addClass('disabled');
+        $('#create-team-options input, #create-team-options select').prop('disabled', true);
     }
 
     // Update start game button state based on team readiness
