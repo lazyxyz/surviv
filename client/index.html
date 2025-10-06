@@ -149,16 +149,6 @@
         </a>
       </div>
 
-      <!-- <div id="splash-news" class="persistent-scrollbar">
-        <h2>
-          <a href="./news/">
-            <i class="fa-solid fa-newspaper"></i>
-            <span translation="news"></span>
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          </a>
-        </h2>
-        <div id="news-posts"></div>
-      </div> -->
       <div id="splash-center">
         <div id="splash-server-message" style="display: none">
           <span id="splash-server-message-text"></span>
@@ -206,11 +196,8 @@
             </div>
 
 
-            <button class="rules-close-btn btn-darken" id="rules-close-btn" style="display: none">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
             <a href="/leaderboard/" target="_blank">
-              <button class="btn btn-lg btn-darken btn-success btn-leaderboard" id="btn-rules" style="display: none">
+              <button class="btn btn-lg btn-darken btn-success btn-leaderboard" id="btn-single-home">
                 <div class="pulsating-circle" style="display: none"></div>
                 <i class="fa-solid fa-crown"></i>
                 <span translation="leaderboard"></span>
@@ -219,8 +206,8 @@
 
             <!-- Marketplace -->
             <a href=" https://opensea.io/collection/surviv-assets" target="_blank">
-              <button class="btn btn-lg btn-darken btn-quests btn-primary" id="btn-rules" style="display: none">
-                <!-- <div class="pulsating-circle" style="display: block"></div> -->
+              <button class="btn btn-lg btn-darken btn-quests btn-primary" id="btn-single-home">
+                <div class="pulsating-circle" style="display: none"></div>
                 <img src="public/img/misc/opensea.svg" alt="">
                 <span translation="marketplace"></span>
               </button>
@@ -237,10 +224,6 @@
 
           <a href="https://socials.surviv.fun/discord" rel="noopener noreferrer"
             class="btn btn-darken btn-social btn-discord" target="_blank"></a>
-
-          <!-- <a href="https://surviv-fun.notion.site/23e5955bf67e802f8b3bc92549693a85?v=23e5955bf67e80c0aa31000cd929f6ac"
-            rel="noopener noreferrer" class="btn btn-darken btn-assets" id="link-social" target="_blank"></a> -->
-
 
         </div>
       </div>
@@ -756,12 +739,6 @@
           </div>
           <div class="modal-item checkbox-setting">
             <label>
-              <span class="setting-title" translation="settings_hide_rules">Hide rules button</span>
-              <input type="checkbox" id="toggle-hide-rules" />
-            </label>
-          </div>
-          <div class="modal-item checkbox-setting">
-            <label>
               <span class="setting-title" translation="settings_warn_before_leaving">Warn before leaving</span>
               <input type="checkbox" id="toggle-leave-warning" />
             </label>
@@ -947,7 +924,7 @@
               <span translation="my_loot"></span>
             </button>
             <button class="crates-tab-child" id="rewards-tab" data-tab="rewards-customize-items">
-               <span translation="my_rewards"></span>
+              <span translation="my_rewards"></span>
             </button>
           </div>
           <div class="crates-customize">
@@ -1128,23 +1105,47 @@
       <div id="create-team-options">
         <div id="create-team-toggles">
           <label>
+            <span class="setting-title" translation="create_team_room"></span>
+            <input type="checkbox" id="create-team-toggle-room" />
+          </label>
+
+          <label>
             <span class="setting-title" translation="create_team_autofill"></span>
             <input type="checkbox" id="create-team-toggle-auto-fill" />
           </label>
+
           <label>
             <span class="setting-title" translation="create_team_lock"></span>
             <input type="checkbox" id="create-team-toggle-lock" />
           </label>
         </div>
-        <!-- btn section -->
-        <div id="btn-action-section">
-          <button class="btn btn-lg btn-darken btn-success" id="btn-start-game">
-            <span translation="create_team_play"></span>
-          </button>
+        <div id="create-team-room-options" class="room-dependent">
+          <label>
+            <span class="setting-title" translation="team_mode"></span>
+            <select id="create-team-mode">
+              <option value="Solo" translation="play_solo"></option>
+              <option value="Squad" translation="play_squad"></option>
+              <option value="V50">50v50</option>
+            </select>
+          </label>
+          <!-- <label>
+            <span class="setting-title" translation="map"></span>
+            <select id="create-team-map">
+              <option value="winter">Winter</option>
+              <option value="fall">Fall</option>
+            </select>
+          </label> -->
         </div>
+        <!-- btn section -->
+      </div>
+      <div id="btn-action-section">
+        <button class="btn btn-lg btn-darken btn-success" id="btn-start-game">
+          <span translation="create_team_play"></span>
+        </button>
       </div>
     </div>
   </div>
+
 
   <div class="modal dialog" id="select-language-menu" style="display: none">
     <div class="dialog-header">

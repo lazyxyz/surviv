@@ -208,8 +208,6 @@
   "go_damage_taken": "Kerosakan Diterima:"
   "go_time_alive": "Masa Hidup:"
   "create_team": "Cipta Pasukan"
-  "create_team_autofill": "Isi Automatik"
-  "create_team_lock": "Kunci Pasukan"
   "create_team_ready": "Sedia"
   "create_team_waiting": "Menunggu..."
   "create_team_play": "Mulakan Permainan"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Adakah anda mahu keluar?"
   "my_loot": "Rampasan"
   "my_rewards": "Ganjaran"
+
+  "create_team_room": "Bilik"
+  "create_team_autofill": "Isi Auto"
+  "create_team_lock": "Kunci"
 }

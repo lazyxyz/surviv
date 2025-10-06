@@ -208,8 +208,6 @@
   "go_damage_taken": "被ダメージ："
   "go_time_alive": "生存時間："
   "create_team": "チーム作成"
-  "create_team_autofill": "自動補充"
-  "create_team_lock": "チームロック"
   "create_team_ready": "準備完了"
   "create_team_waiting": "待機中..."
   "create_team_play": "ゲーム開始"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "退出しますか？"
   "my_loot": "戦利品"
   "my_rewards": "報酬"
+
+  "create_team_room": "部屋"
+  "create_team_autofill": "自動入力"
+  "create_team_lock": "ロック"
 }

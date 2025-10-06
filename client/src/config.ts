@@ -8,18 +8,11 @@ export const Config = {
             mainAddress: "http://127.0.0.1:8000",
             gameAddress: "ws://127.0.0.1:<ID>",
             teamAddress: "ws://127.0.0.1:8000",
-            apiAddress: "https://test-api.grindy.io",
+            apiAddress: "https://admin.surviv.fun",
             // apiAddress: "http://localhost:3001",
         },
-        test: {
-            name: "Test",
-            mainAddress: "https://as.grindy.io",
-            gameAddress: "wss://<ID>.as.grindy.io",
-            teamAddress: "wss://team.as.grindy.io",
-            apiAddress: "https://test-api.grindy.io",
-        },
     },
-    defaultRegion: "test",
+    defaultRegion: "dev",
 } satisfies ConfigType as ConfigType;
 
 export const ChainConfig = {

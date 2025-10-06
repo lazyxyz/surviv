@@ -208,8 +208,6 @@
   "go_damage_taken": "Полученный Урон:"
   "go_time_alive": "Время Выживания:"
   "create_team": "Создать Команду"
-  "create_team_autofill": "Автозаполнение"
-  "create_team_lock": "Заблокировать Команду"
   "create_team_ready": "Готов"
   "create_team_waiting": "Ожидание..."
   "create_team_play": "Начать Игру"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Хотите выйти?"
   "my_loot": "Добыча"
   "my_rewards": "Награды"
+
+  "create_team_room": "Комната"
+  "create_team_autofill": "Авто"
+  "create_team_lock": "Блок"
 }

@@ -652,9 +652,10 @@ export class Game implements GameData {
 
         let team: Team | undefined;
         if (this.teamMode) {
-            const { teamID, autoFill } = socket.getUserData();
 
-            if (teamID) {
+            const { teamID, autoFill, roomMode } = socket.getUserData();
+
+            if (teamID && !roomMode) {
                 team = this.teamsMapping.get(teamID);
                 if (
                     !team // team doesn't exist
@@ -671,8 +672,15 @@ export class Game implements GameData {
                         && team.players.length < (this.maxTeamSize as number)
                         && team.hasLivingPlayers()
                 );
-                if (vacantTeams.length) {
-                    team = pickRandomInArray(vacantTeams);
+                if (vacantTeams.length > 1) {
+                    let minSize = Infinity;
+                    for (const team of vacantTeams) {
+                        if (team.players.length < minSize) {
+                            minSize = team.players.length;
+                        }
+                    }
+                    const smallestTeams = vacantTeams.filter(team => team.players.length === minSize);
+                    team = pickRandomInArray(smallestTeams);
                 } else {
                     this.teams.add(team = new Team(this.nextTeamID));
                 }
@@ -1127,7 +1135,7 @@ export class Game implements GameData {
                 } as ServerChatPacketData)
             );
         } else if (this.teamMode && !isSendAll && player.team) {
-            player.team.sendTeamMessage(player.colorIndex, message);
+            player.team.sendTeamMessage(message);
         }
     }
 
@@ -1392,6 +1400,7 @@ export class Game implements GameData {
                         name: searchParams.get("name") ?? "No name",
                         teamID: searchParams.get("teamID") ?? undefined,
                         autoFill: Boolean(searchParams.get("autoFill")),
+                        roomMode: Boolean(searchParams.get("roomMode")),
                         address: searchParams.get("address") ?? "",
                         token: token,
                         ip,

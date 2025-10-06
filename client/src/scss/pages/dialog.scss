@@ -22,6 +22,7 @@ input::-webkit-inner-spin-button {
   margin-bottom: 8px;
   gap: 4px;
 }
+
 .weapon-tab-child {
   flex: 1;
   padding: 8px 0;
@@ -32,10 +33,12 @@ input::-webkit-inner-spin-button {
   font-weight: bold;
   border-bottom: 2px solid transparent;
 }
+
 .weapon-tab-child.active {
   background: #333;
   border-bottom: 2px solid #ffd700;
 }
+
 .weapon-list {
   display: flex;
   flex-wrap: wrap;
@@ -49,13 +52,16 @@ input::-webkit-inner-spin-button {
     max-height: 235px;
   }
 }
+
 .weapons-container-card.inactive {
   opacity: 0.4;
   // pointer-events: none;
 }
+
 .weapons-container-card.selected {
   border: 2px solid #ffd700;
 }
+
 .weapons-container {
   overflow-y: unset;
 }
@@ -76,19 +82,23 @@ input::-webkit-inner-spin-button {
   @include variables.modal-basic;
   background: #5b8939;
   transition: opacity 300ms ease-out;
+
   &-body {
     display: flex;
     align-items: baseline;
     gap: 8px;
   }
+
   h3,
   p {
     margin: 0;
   }
+
   i {
     font-size: 18px;
     cursor: pointer;
   }
+
   .close-popup {
     align-self: baseline;
   }
@@ -98,20 +108,24 @@ input::-webkit-inner-spin-button {
   @include variables.modal-basic;
   background: #f2770f;
   transition: opacity 300ms ease-out;
+
   &-body {
     display: flex;
     align-items: baseline;
     gap: 8px;
   }
+
   h3,
   p {
     margin: 0;
   }
+
   i {
     align-items: baseline;
     font-size: 18px;
     cursor: pointer;
   }
+
   .close-popup {
     align-self: baseline;
   }
@@ -121,20 +135,24 @@ input::-webkit-inner-spin-button {
   @include variables.modal-basic;
   background: #d03947;
   transition: opacity 300ms ease-out;
+
   &-body {
     display: flex;
     align-items: baseline;
     gap: 8px;
   }
+
   h3,
   p {
     margin: 0;
   }
+
   i {
     align-items: baseline;
     font-size: 18px;
     cursor: pointer;
   }
+
   .close-popup {
     align-self: baseline;
   }
@@ -198,405 +216,6 @@ input::-webkit-inner-spin-button {
   // max-width: 850px;
 }
 
-#create-team-menu {
-  width: fit-content;
-  max-width: 370px;
-  display: flex;
-  flex-direction: column;
-  padding: 18px;
-  gap: 12px;
-
-  .dialog-header {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-
-    &-group {
-      p {
-        width: fit-content;
-        font-size: 18px;
-        font-weight: 600;
-        margin: unset;
-        @include variables.text-shadow;
-      }
-
-      img {
-        position: absolute;
-        width: 24px;
-        right: 16px;
-        top: 14px;
-        cursor: pointer;
-        transition: 300ms;
-
-        &:hover {
-          opacity: 0.65;
-        }
-      }
-    }
-
-    .note-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: palette.$lime;
-      margin: unset;
-      @include variables.text-shadow;
-      text-align: left;
-    }
-  }
-
-  #create-team-container {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-
-    #create-team-players {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-
-      .create-team-player-container {
-        background-color: palette.$light_transparent_bg;
-        border-radius: 10px;
-        padding: 16px;
-        border: 1.5px solid palette.$light_transparent_bg;
-
-        position: relative;
-
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 4px;
-
-        // leader indicator
-        .fa-crown {
-          position: absolute;
-          font-size: 24px;
-          top: 8px;
-          left: 8px;
-          color: palette.$lime;
-          text-shadow: 0px 0px 5px rgba(255, 170, 0, 1);
-        }
-
-        // ready indicator
-        .fa-circle-check {
-          position: absolute;
-          font-size: 20px;
-          color: limegreen;
-          top: 6px;
-          left: 6px;
-        }
-        .fa-circle-xmark {
-          position: absolute;
-          font-size: 20px;
-          color: rgba(250, 250, 250, 0.5);
-          top: 6px;
-          right: 6px;
-          transition: 300ms;
-          cursor: pointer;
-
-          &:hover {
-            opacity: 0.65;
-          }
-        }
-
-        .skin {
-          position: relative;
-          width: 69px;
-          height: 60px;
-
-          .skin-base {
-            position: relative;
-            top: 0;
-            left: 6px;
-            width: 56px;
-            height: 56px;
-            transform: rotate(90deg);
-            background-size: 56px;
-          }
-
-          .skin-left-fist,
-          .skin-right-fist {
-            position: absolute;
-            top: 40px;
-            width: 20px;
-            height: 20px;
-            transform: rotate(90deg);
-            background-size: 20px;
-          }
-
-          .skin-right-fist {
-            left: 48px;
-          }
-        }
-
-        .create-team-player-name-container {
-          display: flex;
-          justify-content: center;
-          margin: 10px 5px 0 5px;
-
-          .create-team-player-name {
-            font-size: 16px;
-            font-weight: 600;
-            @include variables.text-shadow;
-          }
-
-          .create-team-player-badge {
-            display: inline-block;
-            height: 20px;
-            margin-left: 5px;
-          }
-        }
-      }
-    }
-
-    #create-team-url {
-      display: flex;
-      justify-content: center;
-
-      #create-team-url-field {
-        color: black;
-        user-select: all;
-        font-size: 16px;
-        width: 350px;
-        padding: 4px 8px;
-        outline: none;
-        border: none;
-        border-bottom: 2px solid rgb(209, 207, 207);
-        box-shadow: inset 0 -2px rgb(209, 207, 207);
-      }
-
-      #btn-copy-team-url {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-      }
-
-      #btn-hide-team-url {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-        width: 4rem;
-      }
-    }
-
-    #create-team-options {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-
-      #create-team-toggles {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-
-        &.disabled {
-          // pointer-events: none;
-          // filter: brightness(80%);
-          display: none;
-        }
-
-        label {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-
-          i {
-            font-size: 16px;
-          }
-
-          span {
-            margin-right: 8px;
-            font-size: 16px;
-            font-weight: 600;
-          }
-
-          input {
-            font-family: monospace;
-            margin: auto;
-            outline: none;
-          }
-        }
-      }
-      #btn-action-section {
-        width: 100%;
-        display: flex;
-        gap: 8px;
-        button {
-          width: 100%;
-        }
-      }
-    }
-  }
-}
-// #create-team-menu {
-//   background-color: palette.$bg;
-//   width: fit-content;
-//   max-width: unset;
-//   display: flex;
-
-//   #create-team-container {
-//     display: flex;
-//     flex-direction: column;
-
-//     width: inherit;
-//     min-width: 644px;
-//     padding: 10px;
-
-//     #create-team-players {
-//       display: flex;
-//       gap: 8px;
-//       margin-left: auto;
-//       margin-right: auto;
-
-//       .create-team-player-container {
-//         min-width: 150px;
-//         height: 150px;
-//         background-color: #545663;
-//         border-radius: 8px;
-
-//         position: relative;
-
-//         display: flex;
-//         flex-direction: column;
-//         justify-content: center;
-//         align-items: center;
-
-//         // leader indicator
-//         .fa-crown {
-//           position: absolute;
-//           font-size: 24px;
-//           top: 5px;
-//           left: 5px;
-//         }
-
-//         // ready indicator
-//         .fa-circle-check {
-//           position: absolute;
-//           font-size: 24px;
-//           color: limegreen;
-//           top: 5px;
-//           right: 5px;
-//         }
-
-//         .skin {
-//           position: relative;
-//           width: 102px;
-//           height: 98px;
-
-//           .skin-base {
-//             position: relative;
-//             top: 0;
-//             left: 6px;
-//             width: 90px;
-//             height: 90px;
-//             transform: rotate(90deg);
-//           }
-
-//           .skin-left-fist,
-//           .skin-right-fist {
-//             position: absolute;
-//             top: 64px;
-//             width: 34px;
-//             height: 34px;
-//             transform: rotate(90deg);
-//           }
-
-//           .skin-right-fist {
-//             left: 68px;
-//           }
-//         }
-
-//         .create-team-player-name-container {
-//           display: flex;
-//           justify-content: center;
-//           margin: 10px 5px 0 5px;
-
-//           .create-team-player-name {
-//             font-size: 20px;
-//             font-weight: bold;
-//             @include variables.text-shadow;
-//           }
-
-//           .create-team-player-badge {
-//             display: inline-block;
-//             height: 24px;
-//             margin-left: 5px;
-//           }
-//         }
-//       }
-//     }
-
-//     #create-team-url {
-//       display: flex;
-//       padding-top: 10px;
-//       justify-content: center;
-
-//       #create-team-url-field {
-//         color: black;
-//         user-select: all;
-//         font-size: 18px;
-//         width: 350px;
-//         padding: 4px 8px;
-//         outline: none;
-//         border: none;
-//         border-bottom: 2px solid rgb(209, 207, 207);
-//         box-shadow: inset 0 -2px rgb(209, 207, 207);
-//       }
-
-//       #btn-copy-team-url {
-//         border-top-left-radius: 0;
-//         border-bottom-left-radius: 0;
-//       }
-
-//       #btn-hide-team-url {
-//         border-top-right-radius: 0;
-//         border-bottom-right-radius: 0;
-//         width: 4rem;
-//       }
-//     }
-
-//     #create-team-options {
-//       display: flex;
-//       justify-content: space-between;
-//       align-items: center;
-//       padding-top: 12px;
-
-//       #create-team-toggles {
-//         display: flex;
-//         flex-direction: column;
-//         justify-content: center;
-//         gap: 12px;
-
-//         &.disabled {
-//           pointer-events: none;
-//           filter: brightness(80%);
-//         }
-
-//         label {
-//           display: flex;
-
-//           span {
-//             margin-right: 10px;
-//           }
-
-//           input {
-//             margin-left: auto;
-//             font-family: monospace;
-//           }
-//         }
-//       }
-//       #btn-action-section {
-//         display: flex;
-//         gap: 8px;
-//         #btn-start-game {
-//           margin-left: auto;
-//         }
-//       }
-//     }
-//   }
-// }
 
 #language-dropdown {
   position: absolute;
@@ -669,6 +288,7 @@ input::-webkit-inner-spin-button {
     filter: saturate(0.15) brightness(0.65);
     cursor: not-allowed;
   }
+
   .skin.active {
     filter: none;
     opacity: 1;
@@ -733,6 +353,7 @@ input::-webkit-inner-spin-button {
       background-repeat: no-repeat;
       background-position: center;
       background-size: 130px;
+
       .skin {
         position: relative;
         width: 102px;
@@ -816,6 +437,7 @@ input::-webkit-inner-spin-button {
     }
 
     width: 100%;
+
     .crates-card {
       width: 100%;
       display: flex;
@@ -884,6 +506,7 @@ input::-webkit-inner-spin-button {
           height: 64px;
         }
       }
+
       .crates-information {
         display: flex;
         flex-direction: column;
@@ -944,6 +567,7 @@ input::-webkit-inner-spin-button {
           border: none;
           opacity: 1;
           font-size: 18px;
+
           &:hover {
             opacity: 0.8;
           }
@@ -967,6 +591,7 @@ input::-webkit-inner-spin-button {
             outline-offset: -1.5px;
           }
         }
+
         .crates-remove {
           opacity: 0.35;
         }
@@ -975,6 +600,7 @@ input::-webkit-inner-spin-button {
           opacity: 1;
         }
       }
+
       .buy-now-btn {
         opacity: 0.35;
 
@@ -983,6 +609,7 @@ input::-webkit-inner-spin-button {
           font-weight: 600;
         }
       }
+
       .active {
         opacity: 1;
       }
@@ -1011,20 +638,24 @@ input::-webkit-inner-spin-button {
     flex-direction: column;
     align-items: center;
     gap: 12px;
+
     p {
       font-size: 14px;
       font-weight: 500;
     }
+
     .crates-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       width: 100%;
+
       .crates-select {
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 4px;
+
         input {
           width: 18px;
           height: 18px;
@@ -1047,6 +678,7 @@ input::-webkit-inner-spin-button {
         }
       }
     }
+
     .my-crates-select {
       position: fixed;
       bottom: 8px;
@@ -1075,6 +707,7 @@ input::-webkit-inner-spin-button {
           font-weight: 600;
         }
       }
+
       button {
         margin-top: 0px;
         height: 36px;
@@ -1086,6 +719,7 @@ input::-webkit-inner-spin-button {
           font-weight: 600;
         }
       }
+
       .open-now,
       #claim-btn,
       .claim-items {
@@ -1098,10 +732,12 @@ input::-webkit-inner-spin-button {
         top: -10px;
         left: -10px;
       }
+
       .active {
         @include variables.active;
       }
     }
+
     .my-crates-customize {
       display: flex;
       flex-wrap: wrap;
@@ -1132,6 +768,7 @@ input::-webkit-inner-spin-button {
           cursor: not-allowed;
         }
       }
+
       img {
         width: 100px;
         height: 100px;
@@ -1150,6 +787,7 @@ input::-webkit-inner-spin-button {
     flex-direction: column;
     gap: 12px;
     align-items: center;
+
     p {
       align-self: flex-start;
       font-size: 14px;
@@ -1200,6 +838,7 @@ input::-webkit-inner-spin-button {
           height: 56px;
         }
       }
+
       h3 {
         margin: 0px;
         font-size: 14px;
@@ -1212,6 +851,7 @@ input::-webkit-inner-spin-button {
           border-radius: 8px;
         }
       }
+
       h5 {
         margin: 0px;
         font-size: 14px;
@@ -1226,6 +866,7 @@ input::-webkit-inner-spin-button {
       }
     }
   }
+
   .claim-all-btn {
     position: fixed;
     justify-content: center;
@@ -1494,6 +1135,7 @@ input::-webkit-inner-spin-button {
       color: #fff;
       width: 180px;
       text-align: center;
+
       span {
         font-weight: 600;
         color: palette.$lime;
@@ -1516,6 +1158,7 @@ input::-webkit-inner-spin-button {
       &.selected {
         box-shadow: 0px 0px 0px 4px palette.$orange;
       }
+
       .badge-balance {
         position: absolute;
         top: 6px;
@@ -1557,11 +1200,13 @@ input::-webkit-inner-spin-button {
       background-color: #22222267;
       width: 100%;
       padding: 12px;
+
       p {
         margin: 0;
       }
     }
   }
+
   #weapons-list-no-gun {
     img {
       width: 94px;
@@ -1569,6 +1214,7 @@ input::-webkit-inner-spin-button {
       padding: 12px;
       background: #0000002b;
       border-radius: 10px;
+
       @media screen and (max-width: variables.$screen_xsmall) {
         width: 60px;
         height: 60px;
@@ -1594,7 +1240,8 @@ input::-webkit-inner-spin-button {
 
       img {
         width: 48px;
-        height: auto; /* giữ tỉ lệ ảnh */
+        height: auto;
+        /* giữ tỉ lệ ảnh */
       }
     }
   }
@@ -1714,7 +1361,7 @@ input::-webkit-inner-spin-button {
       height: 191px;
       background-size: contain;
 
-      & > div {
+      &>div {
         width: 56px;
         height: 56px;
         background-size: contain;
@@ -1747,10 +1394,11 @@ input::-webkit-inner-spin-button {
       width: 165px;
       height: 165px;
 
-      & > div {
+      &>div {
         width: 42px;
         height: 42px;
       }
+
       // top: 7px; left: 51px;
       .emote-top {
         top: 0px;
@@ -1810,10 +1458,8 @@ input::-webkit-inner-spin-button {
         border: 2px solid gray;
         border-radius: 10px;
         padding: 7px;
-        background-color: color.adjust(
-          palette.$transparent_bg,
-          $lightness: 30%
-        );
+        background-color: color.adjust(palette.$transparent_bg,
+            $lightness: 30%);
       }
 
       .modal-item:not(:last-child) {
@@ -1900,4 +1546,392 @@ input::-webkit-inner-spin-button {
   outline: none;
   border: none;
   border-radius: 8px;
+}
+
+
+#create-team-menu {
+  width: fit-content;
+  max-width: 370px;
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  gap: 12px;
+
+  .dialog-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    &-group {
+      p {
+        width: fit-content;
+        font-size: 18px;
+        font-weight: 600;
+        margin: unset;
+        @include variables.text-shadow;
+      }
+
+      img {
+        position: absolute;
+        width: 24px;
+        right: 16px;
+        top: 14px;
+        cursor: pointer;
+        transition: 300ms;
+
+        &:hover {
+          opacity: 0.65;
+        }
+      }
+    }
+
+    .note-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: palette.$lime;
+      margin: unset;
+      @include variables.text-shadow;
+      text-align: left;
+    }
+  }
+
+  #create-team-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    #create-team-players {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+
+      .create-team-player-container {
+        box-sizing: border-box;
+        background-color: palette.$light_transparent_bg;
+        border-radius: 10px;
+        padding: 16px;
+        border: 1.5px solid palette.$light_transparent_bg;
+
+        position: relative;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+
+        // leader indicator
+        .fa-crown {
+          position: absolute;
+          font-size: 24px;
+          top: 8px;
+          left: 8px;
+          color: palette.$lime;
+          text-shadow: 0px 0px 5px rgba(255, 170, 0, 1);
+        }
+
+        // ready indicator
+        .fa-circle-check {
+          position: absolute;
+          font-size: 20px;
+          color: limegreen;
+          top: 6px;
+          left: 6px;
+        }
+
+        .fa-circle-xmark {
+          position: absolute;
+          font-size: 20px;
+          color: rgba(250, 250, 250, 0.5);
+          top: 6px;
+          right: 6px;
+          transition: 300ms;
+          cursor: pointer;
+
+          &:hover {
+            opacity: 0.65;
+          }
+        }
+
+        .skin {
+          position: relative;
+          width: 69px;
+          height: 60px;
+
+          .skin-base {
+            position: relative;
+            top: 0;
+            left: 6px;
+            width: 56px;
+            height: 56px;
+            transform: rotate(90deg);
+            background-size: 56px;
+          }
+
+          .skin-left-fist,
+          .skin-right-fist {
+            position: absolute;
+            top: 40px;
+            width: 20px;
+            height: 20px;
+            transform: rotate(90deg);
+            background-size: 20px;
+          }
+
+          .skin-right-fist {
+            left: 48px;
+          }
+        }
+
+        .create-team-player-name-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin: 10px 5px 0 5px;
+          width: 100%;
+          overflow: hidden;
+
+          .create-team-player-name {
+            flex: 1;
+            min-width: 0;
+            font-size: 16px;
+            font-weight: 600;
+            @include variables.text-shadow;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .create-team-player-badge {
+            flex-shrink: 0;
+            display: inline-block;
+            height: 20px;
+            margin-left: 5px;
+          }
+        }
+      }
+
+      // Adjustments when there are 5 or more players
+      &:has(> .create-team-player-container:nth-child(5)) {
+
+        grid-template-columns: repeat(4, minmax(0, 1fr)); // ensure equal width
+
+
+        .create-team-player-container {
+          flex: none; // prevent flex stretch
+          width: 100%; // force equal size
+          min-width: 0; // allow text truncation
+          padding: 10px;
+
+          // leader indicator
+          .fa-crown {
+            font-size: 18px;
+            top: 6px;
+            left: 6px;
+          }
+
+          // ready indicator
+          .fa-circle-check {
+            font-size: 16px;
+            top: 4px;
+            left: 4px;
+          }
+
+          .fa-circle-xmark {
+            font-size: 16px;
+            top: 4px;
+            right: 4px;
+          }
+
+          .skin {
+            width: 50px;
+            height: 43px;
+
+            .skin-base {
+              left: 4px;
+              width: 40px;
+              height: 40px;
+              background-size: 40px;
+            }
+
+            .skin-left-fist,
+            .skin-right-fist {
+              top: 29px;
+              width: 14px;
+              height: 14px;
+              background-size: 14px;
+            }
+
+            .skin-right-fist {
+              left: 34px;
+            }
+          }
+
+          .create-team-player-name-container {
+            margin: 6px 3px 0 3px;
+            width: 100%;
+            min-width: 0; // important for ellipsis
+
+            .create-team-player-name {
+              font-size: 10px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 100%; // text won’t push container
+            }
+
+            .create-team-player-badge {
+              height: 16px;
+              margin-left: 3px;
+            }
+          }
+        }
+      }
+
+      // Enable horizontal scrolling if there are 13 or more players (more than 3 rows in 4-column layout)
+      &:has(> .create-team-player-container:nth-child(13)) {
+        grid-template-columns: unset;
+        grid-template-rows: repeat(3, auto);
+        grid-auto-flow: column;
+        grid-auto-columns: calc(25% - 6px);
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+    }
+
+    #create-team-url {
+      display: flex;
+      justify-content: center;
+
+      #create-team-url-field {
+        color: black;
+        user-select: all;
+        font-size: 16px;
+        width: 350px;
+        padding: 4px 8px;
+        outline: none;
+        border: none;
+        border-bottom: 2px solid rgb(209, 207, 207);
+        box-shadow: inset 0 -2px rgb(209, 207, 207);
+      }
+
+      #btn-copy-team-url {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      #btn-hide-team-url {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        width: 4rem;
+      }
+    }
+
+    #create-team-options {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+
+      #create-team-toggles,
+      #create-team-room-options {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+
+        &.disabled {
+          // pointer-events: none;
+          // filter: brightness(80%);
+          display: none;
+        }
+
+        label {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          i {
+            font-size: 16px;
+          }
+
+          span {
+            margin-right: 8px;
+            font-size: 12px;
+            font-weight: 600;
+          }
+
+          input,
+          select {
+            font-family: monospace;
+            margin: auto;
+            outline: none;
+          }
+
+          select {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            background-color: palette.$light_transparent_bg;
+            border: 1.5px solid palette.$light_transparent_bg;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 300ms;
+            color: inherit;
+            @include variables.text-shadow;
+
+            &:hover {
+              opacity: 0.65;
+            }
+          }
+        }
+      }
+
+      #create-team-room-options {
+        display: none; // Hidden by default; use JS to show when #create-team-toggle-room is checked (e.g., add/remove a class or toggle display)
+      }
+
+      #btn-action-section {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+
+        button {
+          width: 100%;
+        }
+      }
+
+      &.disabled {
+        pointer-events: none; // Prevents clicks/taps
+        opacity: 0.9;
+        background-color: rgba(0, 0, 0, 0.1); // Light overlay for visual cue
+
+        label,
+        span,
+        input,
+        select {
+          cursor: not-allowed; // Cursor hint
+          color: rgba(255, 255, 255, 0.5); // Dim text
+        }
+
+        // Override hover effects to prevent visual feedback
+        select:hover {
+          opacity: 1; // No change on hover
+        }
+      }
+    }
+  }
+
+  #btn-action-section {
+    width: 100%;
+    display: flex;
+    justify-content: center; // Center the button
+    gap: 8px;
+
+    #btn-start-game {
+      width: 100%; // Wider button (adjust percentage or use fixed px like 300px if preferred)
+      text-align: center; // Ensure text/icon inside button is centered
+    }
+  }
 }

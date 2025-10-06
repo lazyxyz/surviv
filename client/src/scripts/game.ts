@@ -62,6 +62,7 @@ import { resetPlayButtons, updateDisconnectTime } from "./ui/home";
 import { autoPickup, updateChatSendAllVisibility, updateUsersBadge } from "./ui/game";
 import { teamSocket } from "./ui/play";
 import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
+import { CustomTeamMessages } from "@common/typings";
 
 /* eslint-disable @stylistic/indent */
 
@@ -532,22 +533,34 @@ export class Game {
                         isMobile: this.inputManager.isMobile
                     });
 
-                    // Start retry interval: Send every 1 second until JoinedPacket arrives
+                    let attempts = 0;
+                    const maxAttempts = 3;
+
+                    // Start retry interval: Send every 1 second until success or max reached
                     this.joinRetryInterval = setInterval(() => {
+                        if (attempts >= maxAttempts) {
+                            clearInterval(this.joinRetryInterval);
+                            console.warn("Max JoinPacket attempts reached");
+                            return;
+                        }
                         this.sendPacket(clientJoinPacket);
-                        console.log("Retrying client JoinPacket send");  // Optional debug log
-                    }, 1000);
+                        attempts++;
+                        console.log(`JoinPacket attempt ${attempts}`);
+                    }, 3000);
 
                     // Send immediately once (first attempt)
                     this.sendPacket(clientJoinPacket);
-                    this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
+                    attempts++;
+                    console.log(`JoinPacket attempt ${attempts} (initial)`);
 
+                    this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
                     this.setupGame();
-                    
-                    // updateUsersBadge(packet.output.badge?.idString) // Temperary close since no way to check
+
+                    // updateUsersBadge(packet.output.badge?.idString) // Temporarily closed since no way to check
                 });
                 break;
             }
+
             case packet instanceof JoinedPacket: {
                 this.startGame(packet.output);
                 if (this.joinRetryInterval) {
@@ -705,7 +718,6 @@ export class Game {
 
         return await new Promise(resolve => {
             ui.splashOptions.addClass("loading");
-
             this.soundManager.stopAll();
 
             ui.splashUi.fadeIn(400, async () => {
@@ -724,8 +736,6 @@ export class Game {
 
                 if (this._socket) {
                     await this.disconnect();
-                    // this._socket.close();
-                    // this._socket = undefined; // Clear reference
                 }
 
                 // reset stuff
@@ -749,8 +759,16 @@ export class Game {
 
                 updateDisconnectTime();
                 resetPlayButtons();
-                if (teamSocket) ui.createTeamMenu.fadeIn(250, resolve);
-                else resolve();
+                if (teamSocket) {
+                    ui.createTeamMenu.fadeIn(250, () => {
+                        setTimeout(() => {
+                            if (teamSocket) teamSocket.send(JSON.stringify({ type: CustomTeamMessages.Ready, ready: true }));
+                            resolve();
+                        }, 300);
+                    });
+                } else {
+                    resolve();
+                }
             });
         });
     }

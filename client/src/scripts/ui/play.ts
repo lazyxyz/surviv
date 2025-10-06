@@ -20,7 +20,6 @@ import { DEFAULT_BADGE } from "@common/definitions/badges";
 export let teamSocket: WebSocket | undefined;
 export let teamID: string | undefined | null;
 let joinedTeam = false;
-let autoFill = false;
 let lastPlayButtonClickTime = 0;
 
 function isClickAllowed(): boolean {
@@ -126,6 +125,7 @@ function setupTeamMenu(game: Game, account: Account): void {
         teamSocket = new WebSocket(teamURL);
         setupTeamSocketHandlers(teamSocket, game, account);
     });
+
 }
 
 $<HTMLButtonElement>("#btn-leave-game").on("click", function () {
@@ -182,8 +182,8 @@ function setupTeamMenuControls(game: Game, account: Account): void {
     });
 
     const hideUrl = $<HTMLButtonElement>("#btn-hide-team-url");
+    const urlField = ui.createTeamUrl;
     hideUrl.on("click", () => {
-        const urlField = ui.createTeamUrl;
         const icon = hideUrl.children("i");
         if (urlField.hasClass("hidden")) {
             icon.removeClass("fa-eye").addClass("fa-eye-slash");
@@ -194,28 +194,56 @@ function setupTeamMenuControls(game: Game, account: Account): void {
         }
     });
 
-    $<HTMLInputElement>("#create-team-toggle-auto-fill").on("click", function () {
-        autoFill = this.checked;
-        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, autoFill }));
+    ui.createTeamAutoFill.on("click", function () {
+        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, autoFill: this.checked }));
     });
 
-    $<HTMLInputElement>("#create-team-toggle-lock").on("click", function () {
+    ui.createTeamLock.on("click", function () {
         teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, locked: this.checked }));
     });
 
-    ui.btnStartGame.on("click", async () => {
+    ui.createTeamRoomMode.on("click", function () {
+        teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Settings, roomMode: this.checked }));
+    });
+
+    ui.createTeamMode.on("change", function (e) {
+        const selectedValue = $(this).val() as keyof typeof TeamSize;
+        const teamSize = TeamSize[selectedValue];
+
+        // Ensure the value is valid
+        if (teamSize !== undefined) {
+            teamSocket?.send(JSON.stringify({
+                type: CustomTeamMessages.Settings,
+                teamSize: teamSize,
+            }));
+        } else {
+            console.warn('Invalid team size selected:', selectedValue);
+        }
+    });
+
+    ui.btnStartGame.on("click", async (e) => {
         try {
-            const data: GetGameResponse = await $.get(`${selectedRegion?.mainAddress}/api/getGame?teamSize=${TeamSize.Squad}&teamID=${teamID}&token=${account.token}`);
-            if (data.success) {
-                await connectToGame(data, String(selectedRegion?.gameAddress), game, account);
-            } else {
+            const role = $(e.currentTarget).attr("data-role");
+            if (role === "leader") {
                 teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Start }));
+            } else {
+                teamSocket?.send(JSON.stringify({ type: CustomTeamMessages.Ready }));
             }
         } catch {
             console.error("Failed to start game");
         }
     });
+}
 
+function updateRoomOptions(ui: Game['uiManager']['ui'], enable: boolean, teamSize: number) {
+    const dependents = $('.room-dependent');
+    const displayStyle = enable ? 'flex' : 'none';
+    dependents.each(function () {
+        $(this).css('display', displayStyle);
+    });
+
+    const teamSizeKey = TeamSize[teamSize || 1];
+    ui.createTeamMode.val(teamSizeKey);
 }
 
 function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account): void {
@@ -231,10 +259,14 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
                 break;
             case CustomTeamMessages.Settings:
                 ui.createTeamAutoFill.prop("checked", data.autoFill);
+                ui.createTeamRoomMode.prop("checked", data.roomMode);
                 ui.createTeamLock.prop("checked", data.locked);
+                updateRoomOptions(ui, data.roomMode ? true : false, data.teamSize ? data.teamSize : TeamSize.Squad);
                 break;
             case CustomTeamMessages.Started:
-                joinGame(TeamSize.Squad, game, account);
+                let teamSize = TeamSize.Solo;
+                if (data.teamSize) teamSize = data.teamSize;
+                joinGame(teamSize, game, account);
                 break;
             case CustomTeamMessages.Kick:
                 leaveTeam();
@@ -263,6 +295,9 @@ function handleTeamJoin(data: CustomTeamMessage, ui: Game['uiManager']['ui']): v
     ui.createTeamUrl.val(`${window.location.origin}/?region=${GAME_CONSOLE.getBuiltInCVar("cv_region") || Config.defaultRegion}#${teamID}`);
     ui.createTeamAutoFill.prop("checked", data.autoFill);
     ui.createTeamLock.prop("checked", data.locked);
+    ui.createTeamRoomMode.prop("checked", data.roomMode);
+
+    updateRoomOptions(ui, data.roomMode, data.teamSize);
 }
 
 /**
@@ -273,7 +308,7 @@ function updateStartGameButtonState(players: CustomTeamPlayerInfo[], isLeader: b
     const allPlayersReady = players.every(player => player.ready || player.isLeader);
 
     if (isLeader) {
-        // For team leader, enable button only when all members are ready
+        // For team leader, enable button only when all members are ready, execept room mode
         ui.btnStartGame.prop("disabled", !allPlayersReady);
 
         if (allPlayersReady) {
@@ -318,13 +353,16 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         </div>
         `;
     }).join(""));
-    ui.createTeamToggles.toggleClass("disabled", !isLeader);
 
     // Update button text and icon based on role and ready status
     if (isLeader) {
         ui.btnStartGame
+            .attr("data-role", "leader")
             .removeClass("btn-ready")
             .html(`<span translation="create_team_play">${getTranslatedString("create_team_play")}</span>`);
+
+        $('#create-team-options').removeClass('disabled');
+        $('#create-team-options input, #create-team-options select').prop('disabled', false);
     } else {
         // For team members, add appropriate icons
         const icon = ready
@@ -333,9 +371,13 @@ function handleTeamUpdate(data: CustomTeamMessage, ui: Game['uiManager']['ui']):
         const text = ready ? "create_team_ready" : "create_team_ready";
 
         ui.btnStartGame
+            .attr("data-role", "member")
             .toggleClass("btn-success", ready)
             .toggleClass("btn-alert", !ready)
             .html(`<span translation="${text}">${getTranslatedString(text)}</span> ${icon}`);
+
+        $('#create-team-options').addClass('disabled');
+        $('#create-team-options input, #create-team-options select').prop('disabled', true);
     }
 
     // Update start game button state based on team readiness
@@ -405,8 +447,13 @@ async function connectToGame(data: GetGameResponse, gameAddress: string, game: G
     ui.splashOptions.addClass("loading");
     ui.loadingText.text(getTranslatedString("msg_loading"));
     const params = new URLSearchParams();
+
     if (teamID) params.set("teamID", teamID);
+    const autoFill = ui.createTeamAutoFill.prop("checked");
+    const roomMode = ui.createTeamRoomMode.prop("checked");
+
     if (autoFill) params.set("autoFill", String(autoFill));
+    if (roomMode) params.set("roomMode", String(roomMode));
     setGameParameters(params, account);
     const websocketURL = `${gameAddress.replace("<ID>", data.gameID.toString())}/play?${params.toString()}`;
     await game.connect(websocketURL, account);

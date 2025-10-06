@@ -208,8 +208,6 @@
   "go_damage_taken": "Schade Ontvangen:"
   "go_time_alive": "Tijd in Leven:"
   "create_team": "Team Maken"
-  "create_team_autofill": "Automatisch Vullen"
-  "create_team_lock": "Team Vergrendelen"
   "create_team_ready": "Klaar"
   "create_team_waiting": "Wachten..."
   "create_team_play": "Spel Starten"
@@ -301,4 +299,8 @@
   "leave_team_confirm": "Wil je vertrekken?"
   "my_loot": "Buit"
   "my_rewards": "Beloningen"
+
+  "create_team_room": "Kamer"
+  "create_team_autofill": "Autovullen"
+  "create_team_lock": "Slot"
 }

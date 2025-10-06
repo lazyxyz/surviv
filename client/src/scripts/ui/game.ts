@@ -559,24 +559,6 @@ function setupGeneralSettings(game: Game): void {
         }
     );
     splashUi.toggleClass("blur", GAME_CONSOLE.getBuiltInCVar("cv_blur_splash"));
-
-    const button = $<HTMLButtonElement>("#btn-rules, #rules-close-btn");
-    addCheckboxListener(
-        "#toggle-hide-rules",
-        "cv_hide_rules_button",
-        value => {
-            button.toggle(!value);
-        }
-    );
-    button.toggle(!GAME_CONSOLE.getBuiltInCVar("cv_hide_rules_button"));
-
-    $(".checkbox-setting").has("#toggle-hide-rules").toggle(GAME_CONSOLE.getBuiltInCVar("cv_rules_acknowledged"));
-
-    $("#rules-close-btn").on("click", () => {
-        button.hide();
-        GAME_CONSOLE.setBuiltInCVar("cv_hide_rules_button", true);
-        $<HTMLInputElement>("#toggle-hide-rules").prop("checked", true);
-    }).toggle(GAME_CONSOLE.getBuiltInCVar("cv_rules_acknowledged") && !GAME_CONSOLE.getBuiltInCVar("cv_hide_rules_button"));
 }
 
 function setupMobileControls(game: Game): void {
