@@ -49,7 +49,7 @@ export const Config = {
     
     earnConfig: {
         rank: 5,
-        api: "https://test-api.grindy.io",
+        api: "https://admin.surviv.fun",
         // api: "http://localhost:3001",
     },
 } satisfies ConfigType as ConfigType;
