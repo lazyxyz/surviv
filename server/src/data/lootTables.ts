@@ -1368,6 +1368,48 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             // { item: "deer_season", weight: 0.2 },
             { table: "melee", weight: 0.04 }
         ],
+        wood_barrel: [
+            { table: "guns", weight: 1.25 },
+            { table: "healing_items", weight: 1 },
+            { table: "equipment", weight: 0.6 },
+            { table: "ammo", weight: 0.5 },
+            { table: "scopes", weight: 0.3 },
+            { table: "throwables", weight: 0.3 },
+            // { item: "deer_season", weight: 0.2 },
+            { table: "melee", weight: 0.04 }
+        ],
+        ceramic_jar: [
+            { table: "guns", weight: 1.25 },
+            { table: "healing_items", weight: 1 },
+            { table: "equipment", weight: 0.6 },
+            { table: "ammo", weight: 0.5 },
+            { table: "scopes", weight: 0.3 },
+            { table: "throwables", weight: 0.3 },
+            // { item: "deer_season", weight: 0.2 },
+            { table: "melee", weight: 0.04 }
+        ],
+        barrel_cactus: {
+            min: 2,
+            max: 3,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1 },
+                { table: "guns", weight: 0.9 },
+                { table: "scopes", weight: 0.3 }
+            ]
+        },
+        century_plant: {
+            min: 2,
+            max: 3,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1 },
+                { table: "guns", weight: 0.9 },
+                { table: "scopes", weight: 0.3 }
+            ]
+        },
         airdrop_crate: [
             [{ table: "airdrop_equipment", weight: 1 }],
             [{ table: "airdrop_scopes", weight: 1 }],

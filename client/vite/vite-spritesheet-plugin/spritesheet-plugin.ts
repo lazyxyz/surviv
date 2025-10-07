@@ -22,7 +22,7 @@ export type CacheData = {
     }
 };
 
-const GAME_MODES = [ "fall", "winter", "normal", "desert", "shared"];
+const GAME_MODES = ["fall", "winter", "normal", "desert", "shared"];
 
 const defaultGlob = "**/*.{png,gif,jpg,bmp,tiff,svg}";
 const imagesMatcher = new Minimatch(defaultGlob);

@@ -204,7 +204,7 @@ const maps = {
             { name: "Deepwood", position: Vec.create(0.5, 0.65) }
         ]
     },
-    
+
     fall: {
         width: 1924,
         height: 1924,
@@ -539,22 +539,23 @@ const maps = {
             ]
         },
         buildings: {
+            // plumpkin_bunker: 1,
+            // lodge: 1,
+            // green_house: 2,
+            // red_house: 2,
+            // red_house_v2: 2,
+            // warehouse: 4,
+            // tugboat_red: 1,
+            // tugboat_white: 7,
+            // barn: 3,
             small_bridge: Infinity,
-            plumpkin_bunker: 1,
             sea_traffic_control: 1,
-            tugboat_red: 1,
-            tugboat_white: 7,
-            lodge: 1,
             bombed_armory: 1,
-            barn: 3,
-            green_house: 2,
-            warehouse: 4,
-            red_house: 2,
-            red_house_v2: 2,
-            tent_big_1: 2,
-            tent_big_2: 2,
-            tent_big_3: 2,
-            tent_big_4: 2,
+            warehouse: 8,
+            tent_big_1: 3,
+            tent_big_2: 3,
+            tent_big_3: 3,
+            tent_big_4: 3,
             hay_shed_1: 1,
             hay_shed_2: 3,
             hay_shed_3: 3,
@@ -562,42 +563,53 @@ const maps = {
             tent_2: 3,
             tent_3: 3,
             tent_4: 3,
-            tent_5: 1,
+            tent_5: 3,
             outhouse: 10
         },
-        majorBuildings: ["bombed_armory", "lodge", "plumpkin_bunker"],
-        quadBuildingLimit: {
-            barn: 1,
-            outhouse: 3,
-            red_house: 1,
-            green_house: 1,
-            red_house_v2: 1,
-            warehouse: 2,
-            bombed_armory: 1,
-            lodge: 1,
-            tent_1: 1,
-            tent_2: 1,
-            tent_3: 1,
-            tent_4: 1
-        },
+        // majorBuildings: ["bombed_armory", "lodge", "plumpkin_bunker"],
+        // quadBuildingLimit: {
+        //     barn: 1,
+        //     outhouse: 3,
+        //     red_house: 1,
+        //     green_house: 1,
+        //     red_house_v2: 1,
+        //     warehouse: 2,
+        //     bombed_armory: 1,
+        //     lodge: 1,
+        //     tent_1: 1,
+        //     tent_2: 1,
+        //     tent_3: 1,
+        //     tent_4: 1
+        // },
         obstacles: {
-            oak_tree: 230,
-            small_oak_tree: 50,
-            birch_tree: 25,
-            maple_tree: 70,
-            pine_tree: 95,
-            dormant_oak_tree: 25,
+            // oak_tree: 230,
+            // small_oak_tree: 50,
+            // birch_tree: 25,
+            // maple_tree: 70,
+            // pine_tree: 95,
+            // dormant_oak_tree: 25,
+            // vibrant_bush: 200,
+            // oak_leaf_pile: 200,
+            // pumpkin: 200,
+            // large_pumpkin: 5,
+            // regular_crate: 200,
+            palm_tree: 150,
+            small_palm_tree: 50,
+            doum_palm_tree: 100,
+            quiver_tree: 50,
+            wood_barrel: 100,
+            ceramic_jar: 60,
+            barrel_cactus: 100,
+            century_plant: 70,
             stump: 40,
             hatchet_stump: 3,
-            regular_crate: 200,
+            regular_crate: 100,
             flint_crate: 10,
             grenade_crate: 50,
             rock: 220,
             clearing_boulder: 15,
             river_chest: 1,
             river_rock: 60,
-            vibrant_bush: 200,
-            oak_leaf_pile: 200,
             lily_pad: 50,
             barrel: 90,
             viking_chest: 1,
@@ -607,52 +619,60 @@ const maps = {
             loot_tree: 4,
             loot_barrel: 1,
             flint_stone: 1,
-            pumpkin: 200,
-            large_pumpkin: 5,
             pebble: 110
         },
-        obstacleClumps: [
-            {
-                clumpAmount: 110,
-                clump: {
-                    minAmount: 2,
-                    maxAmount: 3,
-                    jitter: 5,
-                    obstacles: ["oak_tree"],
-                    radius: 12
-                }
-            },
-            {
-                clumpAmount: 15,
-                clump: {
-                    minAmount: 2,
-                    maxAmount: 3,
-                    jitter: 5,
-                    obstacles: ["small_oak_tree"],
-                    radius: 12
-                }
-            },
-            {
-                clumpAmount: 15,
-                clump: {
-                    minAmount: 2,
-                    maxAmount: 3,
-                    jitter: 5,
-                    obstacles: ["birch_tree"],
-                    radius: 12
-                }
-            },
-            {
-                clumpAmount: 15,
-                clump: {
-                    minAmount: 2,
-                    maxAmount: 3,
-                    jitter: 5,
-                    obstacles: ["pine_tree"],
-                    radius: 12
-                }
-            }
-        ],
+        // obstacleClumps: [
+        //     {
+        //         clumpAmount: 2,
+        //         clump: {
+        //             minAmount: 1,
+        //             maxAmount: 2,
+        //             jitter: 0,
+        //             obstacles: ["palm_tree"],
+        //             radius: 0
+        //         }
+        //     },
+        //     {
+        //         clumpAmount: 0,
+        //         clump: {
+        //             minAmount: 1,
+        //             maxAmount: 2,
+        //             jitter: 0,
+        //             obstacles: ["small_palm_tree"],
+        //             radius: 0
+        //         }
+        //     },
+        //     {
+        //         clumpAmount: 5,
+        //         clump: {
+        //             minAmount: 1,
+        //             maxAmount: 2,
+        //             jitter: 0,
+        //             obstacles: ["doum_palm_tree"],
+        //             radius: 0
+        //         }
+        //     },
+        //     // {
+        //     //     clumpAmount: 15,
+        //     //     clump: {
+        //     //         minAmount: 2,
+        //     //         maxAmount: 3,
+        //     //         jitter: 5,
+        //     //         obstacles: ["birch_tree"],
+        //     //         radius: 12
+        //     //     }
+        //     // },
+        //     // {
+        //     //     clumpAmount: 15,
+        //     //     clump: {
+        //     //         minAmount: 2,
+        //     //         maxAmount: 3,
+        //     //         jitter: 5,
+        //     //         obstacles: ["pine_tree"],
+        //     //         radius: 12
+        //     //     }
+        //     // }
+        // ],
         loots: {
             ground_loot: 60
         },
@@ -665,7 +685,6 @@ const maps = {
             { name: "Darkwood", position: Vec.create(0.5, 0.65) }
         ]
     },
-
 
     debug: {
         width: 1620,

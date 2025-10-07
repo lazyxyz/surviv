@@ -6,7 +6,7 @@ export type ColorKeys = "grass" | "water" | "border" | "beach" | "riverBank" | "
 export interface ModeDefinition {
     readonly idString: string
     readonly colors: Record<ColorKeys, string>
-    readonly inheritTexturesFrom?: Mode
+    readonly inheritTexturesFrom?: Mode | Mode[]
     readonly specialMenuMusic?: boolean
     readonly ambience?: string
     readonly specialSounds?: string[]
@@ -119,7 +119,7 @@ export const Modes: Record<Mode, ModeDefinition> = {
     desert: {
         idString: "fall",
         colors: {
-            grass: "hsla(50, 74%, 45%, 1.00)",
+            grass: "hsl(42.94, 87.93%, 77.25%)",
             water: "hsl(211, 63%, 42%)",
             border: "hsl(211, 63%, 30%)",
             beach: "hsl(40, 39%, 55%)",
@@ -133,7 +133,7 @@ export const Modes: Record<Mode, ModeDefinition> = {
         defaultScope: "2x_scope",
         reskin: "fall",
         particleEffects: {
-            frames: ["leaf_particle_1", "leaf_particle_2", "leaf_particle_3"],
+            frames: ["weed_1", "weed_2", "weed_3"],
             delay: 1000
         },
         specialPlayButtons: true,
