@@ -239,6 +239,14 @@ export class Minimap {
                 ctx.roundShape(getRiverPoly(river.waterHitbox.points), 0, true);
             }
         }
+
+        for (const oasis of this._terrain.oases) {
+            const waterPoints = oasis.waterHitbox.points.map(point => ({
+                ...Vec.scale(point, scale),
+                radius
+            }));
+            ctx.roundShape(waterPoints, 0, true);
+        }
         ctx.fill(getColors(this.game.gameMode).water);
 
         ctx.beginPath();
@@ -486,7 +494,7 @@ export class Minimap {
         rivers.push(...mapPacket.rivers.map(({ width, points, isTrail }) => new River(width, points, rivers, mapBounds, isTrail)));
 
         const oases: Oasis[] = [];
-        
+
         if (mapPacket.oases) {
             oases.push(...mapPacket.oases.map(({ center, radius, bankWidth, seed }) => new Oasis(radius, center, bankWidth, seed)));
         }
