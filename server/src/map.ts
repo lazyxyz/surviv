@@ -11,11 +11,11 @@ import { Angle, Collision, Geometry, Numeric, τ } from "@common/utils/math";
 import { type Mutable, type SMutable } from "@common/utils/misc";
 import { MapObjectSpawnMode, NullString, type ReferenceTo, type ReifiableDef } from "@common/utils/objectDefinitions";
 import { SeededRandom, pickRandomInArray, random, randomFloat, randomPointInsideCircle, randomRotation, randomVector } from "@common/utils/random";
-import { River, Terrain } from "@common/utils/terrain";
+import { Oasis, River, Terrain } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
 import { Config } from "./config";
 import { getLootFromTable } from "./data/lootTables";
-import { MapDefinition, MapName, Maps, ObstacleClump, RiverDefinition } from "./data/maps";
+import { MapDefinition, MapName, Maps, OasisDefinition, ObstacleClump, RiverDefinition } from "./data/maps";
 import { type Game } from "./game";
 import { Building } from "./objects/building";
 import { Obstacle } from "./objects/obstacle";
@@ -137,6 +137,15 @@ export class GameMap {
             if (mapDef.rivers) rivers.push(...this._generateRivers(mapDef.rivers, seededRandom));
         }
 
+        const oases: Oasis[] = [];
+        if (mapDef.oases) {
+            const seededRandom = new SeededRandom(this.seed + 1); // Use a different seed offset for oases
+            oases.push(...this._generateOases(mapDef.oases, seededRandom, rivers));
+        }
+
+        console.log("oases: ", oases);
+
+        packet.oases = oases;
         packet.rivers = rivers;
 
         this.terrain = new Terrain(
@@ -145,7 +154,8 @@ export class GameMap {
             mapDef.oceanSize,
             mapDef.beachSize,
             this.seed,
-            rivers
+            rivers,
+            oases,
         );
 
         this._generateClearings(mapDef.clearings);
@@ -326,6 +336,51 @@ export class GameMap {
 
         return true;
     }
+
+    private _generateOases(definition: OasisDefinition, randomGenerator: SeededRandom, rivers: readonly River[]): Oasis[] {
+        const {
+            minAmount,
+            maxAmount,
+            minRadius,
+            maxRadius,
+            bankWidth
+        } = definition;
+        const oases: Oasis[] = [];
+        const amount = randomGenerator.getInt(minAmount, maxAmount);
+        let i = 0;
+        let attempts = 0;
+        while (i < amount && attempts < 100) {
+            attempts++;
+            const radius = randomGenerator.get(minRadius, maxRadius);
+            const spawnHitbox = new CircleHitbox(radius + bankWidth + 8, Vec.create(0, 0)); // padding for jagged
+            const position = this.getRandomPosition(spawnHitbox, {
+                spawnMode: MapObjectSpawnMode.Grass
+            });
+            if (!position) continue;
+            let collided = false;
+            const testBankHitbox = new CircleHitbox(radius + bankWidth + 16, position); // approximate
+            for (const oasis of oases) {
+                if (oasis.bankHitbox.collidesWith(testBankHitbox)) {
+                    collided = true;
+                    break;
+                }
+            }
+            if (collided) continue;
+            for (const river of rivers) {
+                if (testBankHitbox.collidesWith(river.bankHitbox) || (river.waterHitbox && testBankHitbox.collidesWith(river.waterHitbox))) {
+                    collided = true;
+                    break;
+                }
+            }
+            if (collided) continue;
+            const subSeed = randomGenerator.getInt(0, 2 ** 31 - 1);
+            const oasis = new Oasis(radius, position, bankWidth, subSeed);
+            oases.push(oasis);
+            i++;
+        }
+        return oases;
+    }
+
 
     // TODO Move this to a utility class and use it in gas.ts as well
     getQuadrant(x: number, y: number, width: number, height: number): 1 | 2 | 3 | 4 {
@@ -920,27 +975,50 @@ export class GameMap {
                 case MapObjectSpawnMode.Grass:
                 case MapObjectSpawnMode.GrassAndSand:
                 case MapObjectSpawnMode.Beach: {
-                    for (const river of this.terrain.getRiversInHitbox(hitbox)) {
-                        if (
-                            (spawnMode !== MapObjectSpawnMode.GrassAndSand || river.isTrail)
-                            && (
-                                river.bankHitbox.isPointInside(position)
-                                || hitbox.collidesWith(river.bankHitbox)
-                            )
-                        ) {
-                            collided = true;
-                            break;
-                        }
 
-                        if (
-                            spawnMode === MapObjectSpawnMode.GrassAndSand
-                            && (
-                                river.waterHitbox?.isPointInside(position)
-                                || river.waterHitbox?.collidesWith(hitbox)
-                            )
-                        ) {
-                            collided = true;
-                            break;
+                    if (this.terrain) {
+                        for (const river of this.terrain.getRiversInHitbox(hitbox)) {
+                            if (
+                                (spawnMode !== MapObjectSpawnMode.GrassAndSand || river.isTrail)
+                                && (
+                                    river.bankHitbox.isPointInside(position)
+                                    || hitbox.collidesWith(river.bankHitbox)
+                                )
+                            ) {
+                                collided = true;
+                                break;
+                            }
+
+                            if (
+                                spawnMode === MapObjectSpawnMode.GrassAndSand
+                                && (
+                                    river.waterHitbox?.isPointInside(position)
+                                    || river.waterHitbox?.collidesWith(hitbox)
+                                )
+                            ) {
+                                collided = true;
+                                break;
+                            }
+                        }
+                        for (const oasis of this.terrain.getOasesInHitbox(hitbox)) {
+                            if (
+                                oasis.bankHitbox.isPointInside(position)
+                                || hitbox.collidesWith(oasis.bankHitbox)
+                            ) {
+                                collided = true;
+                                break;
+                            }
+
+                            if (
+                                spawnMode === MapObjectSpawnMode.GrassAndSand
+                                && (
+                                    oasis.waterHitbox.isPointInside(position)
+                                    || oasis.waterHitbox.collidesWith(hitbox)
+                                )
+                            ) {
+                                collided = true;
+                                break;
+                            }
                         }
                     }
                     if (!params?.ignoreClearings) {

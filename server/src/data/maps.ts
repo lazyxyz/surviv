@@ -27,12 +27,21 @@ export interface RiverDefinition {
     readonly maxWideWidth: number
 }
 
+export interface OasisDefinition {
+    readonly minAmount: number
+    readonly maxAmount: number
+    readonly minRadius: number
+    readonly maxRadius: number
+    readonly bankWidth: number
+}
+
 export interface MapDefinition {
     readonly width: number
     readonly height: number
     readonly oceanSize: number
     readonly beachSize: number
     readonly rivers?: RiverDefinition
+    readonly oases?: OasisDefinition
     readonly trails?: RiverDefinition
     readonly clearings?: {
         readonly minWidth: number
@@ -512,6 +521,13 @@ const maps = {
             minWideWidth: 25,
             maxWideWidth: 28,
             maxWideAmount: 1
+        },
+        oases: {
+            minAmount: 1,
+            maxAmount: 3,
+            minRadius: 40,
+            maxRadius: 80,
+            bankWidth: 16
         },
         trails: {
             minAmount: 2,
