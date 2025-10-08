@@ -510,8 +510,8 @@ const maps = {
     desert: {
         width: 1924,
         height: 1924,
-        oceanSize: 128,
-        beachSize: 32,
+        oceanSize: 64,
+        beachSize: 16,
         // rivers: {
         //     minAmount: 2,
         //     maxAmount: 2,
@@ -523,11 +523,11 @@ const maps = {
         //     maxWideAmount: 1
         // },
         oases: {
-            minAmount: 10,
+            minAmount: 5,
             maxAmount: 10,
             minRadius: 40,
             maxRadius: 80,
-            bankWidth: 16
+            bankWidth: 12
         },
         trails: {
             minAmount: 2,
@@ -624,9 +624,9 @@ const maps = {
             grenade_crate: 50,
             rock: 220,
             clearing_boulder: 15,
-            river_chest: 1,
-            river_rock: 60,
-            lily_pad: 50,
+            river_chest: 3,
+            river_rock: 30,
+            lily_pad: 25,
             barrel: 90,
             viking_chest: 1,
             super_barrel: 35,

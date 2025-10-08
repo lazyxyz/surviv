@@ -576,11 +576,25 @@ export class Oasis {
         this.radius = radius;
         this.bankWidth = bankWidth;
         this.seed = seed;
+
         const random = new SeededRandom(seed);
-        const random2 = new SeededRandom(seed + 1);
+
         const spacing = 16;
         const deviation = Numeric.min(8, radius / 4);
+
         this.waterHitbox = new PolygonHitbox(jaggedCircle(center, radius, spacing, deviation, random));
-        this.bankHitbox = new PolygonHitbox(jaggedCircle(center, radius + bankWidth, spacing, deviation, random2));
+
+        const waterPoints = this.waterHitbox.points;
+        const bankPoints: Vector[] = [];
+        for (const p of waterPoints) {
+            const dir = Vec.normalizeSafe(Vec.sub(p, this.center), Vec.create(1, 0));
+
+            const variation = this.bankWidth * 0.2; // 20% variation; adjust multiplier as needed
+            const offsetAmount = this.bankWidth + random.get(-variation, variation);
+            const offset = Vec.scale(dir, offsetAmount);
+
+            bankPoints.push(Vec.add(p, offset));
+        }
+        this.bankHitbox = new PolygonHitbox(bankPoints);
     }
 }
