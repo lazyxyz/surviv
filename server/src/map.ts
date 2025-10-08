@@ -143,8 +143,6 @@ export class GameMap {
             oases.push(...this._generateOases(mapDef.oases, seededRandom, rivers));
         }
 
-        console.log("oases: ", oases);
-
         packet.oases = oases;
         packet.rivers = rivers;
 
@@ -532,7 +530,7 @@ export class GameMap {
                 if (
                     this.occupiedBridgePositions.some(pos => Vec.equals(pos, position))
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    || (this.isInRiver(buildingDef.bridgeHitbox!.transform(position, 1, bestOrientation)))
+                    || (this.isInRiverOrOasis(buildingDef.bridgeHitbox!.transform(position, 1, bestOrientation)))
                     || (spawnHitbox.collidesWith(this.beachHitbox))
                 ) return;
 
@@ -901,7 +899,11 @@ export class GameMap {
                     };
                 }
                 case MapObjectSpawnMode.RiverBank: {
-                    return () => pickRandomInArray(this.terrain.rivers.filter(({ isTrail }) => !isTrail)).bankHitbox.randomPoint();
+                    return () => {
+                        const nonTrailRivers = this.terrain.rivers.filter(({ isTrail }) => !isTrail);
+                        const waterBodies = [...nonTrailRivers, ...this.terrain.oases];
+                        return pickRandomInArray(waterBodies).bankHitbox.randomPoint();
+                    };
                 }
                 case MapObjectSpawnMode.Beach: {
                     return () => {
@@ -930,6 +932,9 @@ export class GameMap {
                 }
                 case MapObjectSpawnMode.Trail: {
                     return () => pickRandomInArray(this.terrain.rivers.filter(({ isTrail }) => isTrail)).bankHitbox.randomPoint();
+                }
+                case MapObjectSpawnMode.AroundOasis: {
+                    return () => pickRandomInArray(this.terrain.oases).bankHitbox.randomPoint();
                 }
             }
         })();
@@ -1072,8 +1077,9 @@ export class GameMap {
                     break;
                 }
                 case MapObjectSpawnMode.RiverBank:
+                case MapObjectSpawnMode.AroundOasis:
                 case MapObjectSpawnMode.Trail: {
-                    if (this.isInRiver(hitbox)) {
+                    if (this.isInRiverOrOasis(hitbox)) {
                         collided = true;
                         break;
                     }
@@ -1085,9 +1091,14 @@ export class GameMap {
         return attempts < maxAttempts ? position : undefined;
     }
 
-    private isInRiver(hitbox: Hitbox): boolean {
+    private isInRiverOrOasis(hitbox: Hitbox): boolean {
         for (const river of this.terrain.getRiversInHitbox(hitbox)) {
             if (river.waterHitbox?.collidesWith(hitbox)) {
+                return true;
+            }
+        }
+        for (const oasis of this.terrain.getOasesInHitbox(hitbox)) {
+            if (oasis.waterHitbox?.collidesWith(hitbox)) {
                 return true;
             }
         }

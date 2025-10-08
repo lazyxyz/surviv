@@ -441,6 +441,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     readonly variations?: Exclude<Variation, 0>
                     readonly hitbox: Hitbox
                     readonly spawnHitbox: Hitbox
+                    readonly spawnMode?: MapObjectSpawnMode
                     readonly rotationMode: RotationMode
                     readonly scaleProps: {
                         readonly destroy: number
@@ -467,7 +468,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     destroy: props.scaleProps.destroy
                 },
                 spawnHitbox: props.spawnHitbox,
-                spawnMode: MapObjectSpawnMode.Grass,
+                spawnMode: props.spawnMode ?? MapObjectSpawnMode.Grass,
                 rotationMode: props.rotationMode,
                 variations: props.variations ?? undefined,
                 hitbox: props.hitbox,
@@ -940,6 +941,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     destroy: 0.65
                 },
                 spawnHitbox: new CircleHitbox(8.5),
+                spawnMode: MapObjectSpawnMode.AroundOasis,
                 rotationMode: RotationMode.Full,
                 hitbox: new CircleHitbox(3.5),
                 variations: 1
