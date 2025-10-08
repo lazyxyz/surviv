@@ -894,7 +894,11 @@ export class GameMap {
                 case MapObjectSpawnMode.River: {
                     // rivers that aren't trails must have a waterHitbox
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    return () => pickRandomInArray(this.terrain.rivers.filter(({ isTrail }) => !isTrail))?.waterHitbox!.randomPoint();
+                    return () => {
+                        const nonTrailRivers = this.terrain.rivers.filter(({ isTrail }) => !isTrail);
+                        const waterBodies = [...nonTrailRivers, ...this.terrain.oases];
+                        return pickRandomInArray(waterBodies)?.waterHitbox!.randomPoint();
+                    };
                 }
                 case MapObjectSpawnMode.RiverBank: {
                     return () => pickRandomInArray(this.terrain.rivers.filter(({ isTrail }) => !isTrail)).bankHitbox.randomPoint();
@@ -1042,14 +1046,27 @@ export class GameMap {
                                 Vec.addComponent(position, radius, 0)
                             ]
                         ) {
+                            let fullySubmerged = false;
                             for (const river of this.terrain.getRiversInHitbox(hitbox)) {
-                                if (!river.waterHitbox?.isPointInside(point)) {
-                                    collided = true;
+                                if (river.waterHitbox?.isPointInside(point)) {
+                                    fullySubmerged = true;
                                     break;
                                 }
                             }
-                            if (collided) break;
+                            if (!fullySubmerged) {
+                                for (const oasis of this.terrain.getOasesInHitbox(hitbox)) {
+                                    if (oasis.waterHitbox.isPointInside(point)) {
+                                        fullySubmerged = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (!fullySubmerged) {
+                                collided = true;
+                                break;
+                            }
                         }
+                        if (collided) break;
                     }
                     // TODO add code for other hitbox types
                     break;

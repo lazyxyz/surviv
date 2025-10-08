@@ -512,19 +512,19 @@ const maps = {
         height: 1924,
         oceanSize: 128,
         beachSize: 32,
-        rivers: {
-            minAmount: 2,
-            maxAmount: 2,
-            wideChance: 0.35,
-            minWidth: 12,
-            maxWidth: 18,
-            minWideWidth: 25,
-            maxWideWidth: 28,
-            maxWideAmount: 1
-        },
+        // rivers: {
+        //     minAmount: 2,
+        //     maxAmount: 2,
+        //     wideChance: 0.35,
+        //     minWidth: 12,
+        //     maxWidth: 18,
+        //     minWideWidth: 25,
+        //     maxWideWidth: 28,
+        //     maxWideAmount: 1
+        // },
         oases: {
-            minAmount: 1,
-            maxAmount: 3,
+            minAmount: 10,
+            maxAmount: 10,
             minRadius: 40,
             maxRadius: 80,
             bankWidth: 16
