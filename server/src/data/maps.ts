@@ -524,14 +524,14 @@ const maps = {
         // },
         oases: {
             minAmount: 5,
-            maxAmount: 10,
+            maxAmount: 7,
             minRadius: 40,
             maxRadius: 80,
             bankWidth: 12
         },
         trails: {
-            minAmount: 2,
-            maxAmount: 3,
+            minAmount: 7,
+            maxAmount: 7,
             wideChance: 0.2,
             minWidth: 2,
             maxWidth: 4,

@@ -128,6 +128,12 @@ export class GameMap {
             )
         );
 
+        const oases: Oasis[] = [];
+        if (mapDef.oases) {
+            const seededRandom = new SeededRandom(this.seed + 1);
+            oases.push(...this._generateOases(mapDef.oases, seededRandom));  // Remove 'rivers' param
+        }
+
         const rivers: River[] = [];
 
         if (mapDef.rivers || mapDef.trails) {
@@ -135,12 +141,6 @@ export class GameMap {
 
             if (mapDef.trails) rivers.push(...this._generateRivers(mapDef.trails, seededRandom, true));
             if (mapDef.rivers) rivers.push(...this._generateRivers(mapDef.rivers, seededRandom));
-        }
-
-        const oases: Oasis[] = [];
-        if (mapDef.oases) {
-            const seededRandom = new SeededRandom(this.seed + 1); // Use a different seed offset for oases
-            oases.push(...this._generateOases(mapDef.oases, seededRandom, rivers));
         }
 
         packet.oases = oases;
@@ -335,7 +335,7 @@ export class GameMap {
         return true;
     }
 
-    private _generateOases(definition: OasisDefinition, randomGenerator: SeededRandom, rivers: readonly River[]): Oasis[] {
+    private _generateOases(definition: OasisDefinition, randomGenerator: SeededRandom): Oasis[] {
         const {
             minAmount,
             maxAmount,
@@ -364,13 +364,7 @@ export class GameMap {
                 }
             }
             if (collided) continue;
-            for (const river of rivers) {
-                if (testBankHitbox.collidesWith(river.bankHitbox) || (river.waterHitbox && testBankHitbox.collidesWith(river.waterHitbox))) {
-                    collided = true;
-                    break;
-                }
-            }
-            if (collided) continue;
+           
             const subSeed = randomGenerator.getInt(0, 2 ** 31 - 1);
             const oasis = new Oasis(radius, position, bankWidth, subSeed);
             oases.push(oasis);
