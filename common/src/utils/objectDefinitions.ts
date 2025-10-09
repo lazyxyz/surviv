@@ -580,7 +580,7 @@ export enum MapObjectSpawnMode {
     River,
     Beach,
     Trail,
-    AroundOasis
+    GrassAndAroundOasis,
 }
 
 export const LootRadius: Record<ItemType, number> = {

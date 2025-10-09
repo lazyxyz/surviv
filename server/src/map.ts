@@ -364,7 +364,7 @@ export class GameMap {
                 }
             }
             if (collided) continue;
-           
+
             const subSeed = randomGenerator.getInt(0, 2 ** 31 - 1);
             const oasis = new Oasis(radius, position, bankWidth, subSeed);
             oases.push(oasis);
@@ -927,8 +927,21 @@ export class GameMap {
                 case MapObjectSpawnMode.Trail: {
                     return () => pickRandomInArray(this.terrain.rivers.filter(({ isTrail }) => isTrail)).bankHitbox.randomPoint();
                 }
-                case MapObjectSpawnMode.AroundOasis: {
-                    return () => pickRandomInArray(this.terrain.oases).bankHitbox.randomPoint();
+                case MapObjectSpawnMode.GrassAndAroundOasis: {
+                    return () => {
+                        if (Math.random() < 0.05) { // oasis bank area much smaller then grass.
+                            // Grass logic
+                            return randomVector(
+                                this._beachPadding + width,
+                                this.width - this._beachPadding - width,
+                                this._beachPadding + height,
+                                this.height - this._beachPadding - height
+                            );
+                        } else {
+                            // AroundOasis logic
+                            return pickRandomInArray(this.terrain.oases).bankHitbox.randomPoint();
+                        }
+                    };
                 }
             }
         })();
@@ -1034,6 +1047,64 @@ export class GameMap {
                     }
                     break;
                 }
+                case MapObjectSpawnMode.GrassAndAroundOasis: {
+                    let isAroundOasis = false;
+                    for (const oasis of this.terrain.getOasesInHitbox(hitbox)) {
+                        if (oasis.bankHitbox.isPointInside(position)) {
+                            isAroundOasis = true;
+                            break;
+                        }
+                    }
+
+                    if (this.terrain) {
+                        for (const river of this.terrain.getRiversInHitbox(hitbox)) {
+                            if (
+                                river.bankHitbox.isPointInside(position)
+                                || hitbox.collidesWith(river.bankHitbox)
+                            ) {
+                                collided = true;
+                                break;
+                            }
+
+                            if (
+                                river.waterHitbox?.isPointInside(position)
+                                || river.waterHitbox?.collidesWith(hitbox)
+                            ) {
+                                collided = true;
+                                break;
+                            }
+                        }
+                        for (const oasis of this.terrain.getOasesInHitbox(hitbox)) {
+                            if (!isAroundOasis) {
+                                // For grass parts, avoid oasis banks and water
+                                if (
+                                    oasis.bankHitbox.isPointInside(position)
+                                    || hitbox.collidesWith(oasis.bankHitbox)
+                                ) {
+                                    collided = true;
+                                    break;
+                                }
+                            }
+
+                            if (
+                                oasis.waterHitbox.isPointInside(position)
+                                || oasis.waterHitbox.collidesWith(hitbox)
+                            ) {
+                                collided = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!params?.ignoreClearings) {
+                        for (const clearing of this.clearings) {
+                            if (clearing.collidesWith(hitbox)) {
+                                collided = true;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
                 case MapObjectSpawnMode.River: {
                     if (hitbox instanceof CircleHitbox) {
                         const radius = hitbox.radius;
@@ -1071,7 +1142,6 @@ export class GameMap {
                     break;
                 }
                 case MapObjectSpawnMode.RiverBank:
-                case MapObjectSpawnMode.AroundOasis:
                 case MapObjectSpawnMode.Trail: {
                     if (this.isInRiverOrOasis(hitbox)) {
                         collided = true;

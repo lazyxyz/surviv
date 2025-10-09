@@ -498,7 +498,6 @@ export class Minimap {
         if (mapPacket.oases) {
             oases.push(...mapPacket.oases.map(({ center, radius, bankWidth, seed }) => new Oasis(radius, center, bankWidth, seed)));
         }
-        console.log("oases: ", oases);
 
         this._terrain = new Terrain(
             width,

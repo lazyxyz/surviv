@@ -941,7 +941,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     destroy: 0.65
                 },
                 spawnHitbox: new CircleHitbox(8.5),
-                spawnMode: MapObjectSpawnMode.AroundOasis,
+                spawnMode: MapObjectSpawnMode.GrassAndAroundOasis,
                 rotationMode: RotationMode.Full,
                 hitbox: new CircleHitbox(3.5),
                 variations: 1
