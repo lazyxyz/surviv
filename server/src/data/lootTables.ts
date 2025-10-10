@@ -1410,6 +1410,39 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "scopes", weight: 0.3 }
             ]
         },
+        pencil_cactus: {
+            min: 2,
+            max: 3,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1 },
+                { table: "guns", weight: 0.9 },
+                { table: "scopes", weight: 0.3 }
+            ]
+        },
+        ghost_plan: {
+            min: 2,
+            max: 3,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1 },
+                { table: "guns", weight: 0.9 },
+                { table: "scopes", weight: 0.3 }
+            ]
+        },
+        bull_skeleton: {
+            min: 2,
+            max: 3,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1 },
+                { table: "guns", weight: 0.9 },
+                { table: "scopes", weight: 0.3 }
+            ]
+        },
         airdrop_crate: [
             [{ table: "airdrop_equipment", weight: 1 }],
             [{ table: "airdrop_scopes", weight: 1 }],

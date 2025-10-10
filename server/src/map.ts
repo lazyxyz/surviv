@@ -662,13 +662,52 @@ export class GameMap {
         return building;
     }
 
+    // private _generateObstacles(definition: ReifiableDef<ObstacleDefinition>, count: number, getPosition?: () => Vector): void {
+    //     // i don't know why "definition = Obstacles.reify(definition)" doesn't work anymore, but it doesn't
+    //     const def = Obstacles.reify(definition);
+
+    //     const { scale = { spawnMin: 1, spawnMax: 1 }, variations, rotationMode } = def;
+    //     const { spawnMin, spawnMax } = scale;
+    //     const effSpawnHitbox = def.spawnHitbox ?? def.hitbox;
+
+    //     for (let i = 0; i < count; i++) {
+    //         const scale = randomFloat(spawnMin, spawnMax);
+    //         const variation = (variations !== undefined ? random(0, variations - 1) : 0) as Variation;
+    //         const rotation = GameMap.getRandomRotation(rotationMode);
+
+    //         let orientation: Orientation = 0;
+
+    //         if (rotationMode === RotationMode.Limited) {
+    //             orientation = rotation as Orientation;
+    //         }
+
+    //         const position = this.getRandomPosition(effSpawnHitbox, {
+    //             getPosition,
+    //             scale,
+    //             orientation,
+    //             spawnMode: def.spawnMode,
+    //             ignoreClearings: this.mapDef.clearings?.allowedObstacles?.includes(def.idString)
+    //         });
+
+    //         if (!position) {
+    //             Logger.warn(`Failed to find valid position for obstacle ${def.idString}`);
+    //             continue;
+    //         }
+
+    //         this.generateObstacle(def, position, { layer: Layer.Ground, scale, variation });
+    //     }
+    // }
+
+
     private _generateObstacles(definition: ReifiableDef<ObstacleDefinition>, count: number, getPosition?: () => Vector): void {
-        // i don't know why "definition = Obstacles.reify(definition)" doesn't work anymore, but it doesn't
         const def = Obstacles.reify(definition);
 
         const { scale = { spawnMin: 1, spawnMax: 1 }, variations, rotationMode } = def;
         const { spawnMin, spawnMax } = scale;
         const effSpawnHitbox = def.spawnHitbox ?? def.hitbox;
+
+        // Track placed positions for AroundOasis mode
+        const placedPositions: Vector[] = [];
 
         for (let i = 0; i < count; i++) {
             const scale = randomFloat(spawnMin, spawnMax);
@@ -681,17 +720,36 @@ export class GameMap {
                 orientation = rotation as Orientation;
             }
 
-            const position = this.getRandomPosition(effSpawnHitbox, {
-                getPosition,
-                scale,
-                orientation,
-                spawnMode: def.spawnMode,
-                ignoreClearings: this.mapDef.clearings?.allowedObstacles?.includes(def.idString)
-            });
+            let position: Vector | undefined;
+            let attempts = 0;
+            const maxAttempts = 200;
+            do {
+                position = this.getRandomPosition(effSpawnHitbox, {
+                    getPosition,
+                    scale,
+                    orientation,
+                    spawnMode: def.spawnMode,
+                    ignoreClearings: this.mapDef.clearings?.allowedObstacles?.includes(def.idString)
+                });
+
+                attempts++;
+                // Enforce minimum distance for AroundOasis mode
+                if (
+                    def.spawnMode === MapObjectSpawnMode.GrassAndAroundOasis &&
+                    position &&
+                    placedPositions.some(p => Geometry.distanceSquared(p, position!) < 36 * 36)
+                ) {
+                    position = undefined;
+                }
+            } while (!position && attempts < maxAttempts);
 
             if (!position) {
                 Logger.warn(`Failed to find valid position for obstacle ${def.idString}`);
                 continue;
+            }
+
+            if (def.spawnMode === MapObjectSpawnMode.GrassAndAroundOasis) {
+                placedPositions.push(position);
             }
 
             this.generateObstacle(def, position, { layer: Layer.Ground, scale, variation });
@@ -929,7 +987,7 @@ export class GameMap {
                 }
                 case MapObjectSpawnMode.GrassAndAroundOasis: {
                     return () => {
-                        if (Math.random() < 0.05) { // oasis bank area much smaller then grass.
+                        if (Math.random() < 0.1) { // oasis bank area much smaller then grass.
                             // Grass logic
                             return randomVector(
                                 this._beachPadding + width,
@@ -963,6 +1021,7 @@ export class GameMap {
                 collided = true;
                 continue;
             }
+
 
             const hitbox = initialHitbox.transform(position, scale, orientation);
 

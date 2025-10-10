@@ -133,8 +133,8 @@ export const Modes: Record<Mode, ModeDefinition> = {
         defaultScope: "2x_scope",
         reskin: "fall",
         particleEffects: {
-            frames: ["weed_1", "weed_2", "weed_3"],
-            delay: 1000
+            frames: ["weed_1", "weed_2"],
+            delay: 1000,
         },
         specialPlayButtons: true,
         // Icons
