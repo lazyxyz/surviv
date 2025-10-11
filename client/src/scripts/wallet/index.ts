@@ -84,12 +84,12 @@ export function onConnectWallet(account: Account): void {
 
             elements.onclick = async () => {
                 try {
-                     $(".connect-wallet-portal").css("display", "none");
+                    $(".connect-wallet-portal").css("display", "none");
                     // Hide logo to show loading icon
                     $(logoElement).css("display", "none");
 
                     const wcProvider = await getWalletConnectProvider();
-                    
+
                     // update providers for eip6963
                     {
                         account.eip6963.provider = wcProvider;

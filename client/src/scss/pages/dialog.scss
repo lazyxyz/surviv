@@ -1901,6 +1901,37 @@ input::-webkit-inner-spin-button {
           width: 100%;
         }
       }
+
+      &.disabled {
+        pointer-events: none; // Prevents clicks/taps
+        opacity: 0.9;
+        background-color: rgba(0, 0, 0, 0.1); // Light overlay for visual cue
+
+        label,
+        span,
+        input,
+        select {
+          cursor: not-allowed; // Cursor hint
+          color: rgba(255, 255, 255, 0.5); // Dim text
+        }
+
+        // Override hover effects to prevent visual feedback
+        select:hover {
+          opacity: 1; // No change on hover
+        }
+      }
+    }
+  }
+
+  #btn-action-section {
+    width: 100%;
+    display: flex;
+    justify-content: center; // Center the button
+    gap: 8px;
+
+    #btn-start-game {
+      width: 100%; // Wider button (adjust percentage or use fixed px like 300px if preferred)
+      text-align: center; // Ensure text/icon inside button is centered
     }
   }
 }

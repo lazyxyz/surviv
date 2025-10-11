@@ -441,6 +441,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     readonly variations?: Exclude<Variation, 0>
                     readonly hitbox: Hitbox
                     readonly spawnHitbox: Hitbox
+                    readonly spawnMode?: MapObjectSpawnMode
                     readonly rotationMode: RotationMode
                     readonly scaleProps: {
                         readonly destroy: number
@@ -467,7 +468,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     destroy: props.scaleProps.destroy
                 },
                 spawnHitbox: props.spawnHitbox,
-                spawnMode: MapObjectSpawnMode.Grass,
+                spawnMode: props.spawnMode ?? MapObjectSpawnMode.Grass,
                 rotationMode: props.rotationMode,
                 variations: props.variations ?? undefined,
                 hitbox: props.hitbox,
@@ -874,6 +875,270 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
         );
 
         return ([
+            {
+                idString: "bull_skeleton",
+                name: "Bull Skeleton",
+                material: "stone",
+                health: 100,
+                scale: {
+                    spawnMin: 1,
+                    spawnMax: 1,
+                    destroy: 0.5
+                },
+                hitbox: new CircleHitbox(4),
+                spawnHitbox: new CircleHitbox(4.5),
+                rotationMode: RotationMode.Full,
+                frames: { particle: "bull_skeleton_particle", residue: "bull_skeleton_residue" }
+            },
+            {
+                idString: "dinosaur_skeleton",
+                name: "Dinosaur Skeleton",
+                material: "stone",
+                health: 100,
+                scale: {
+                    spawnMin: 1,
+                    spawnMax: 1,
+                    destroy: 0.5
+                },
+                hitbox: new CircleHitbox(6),
+                spawnHitbox: new CircleHitbox(6.5),
+                rotationMode: RotationMode.Full,
+                frames: { particle: "bull_skeleton_particle", residue: "dinosaur_skeleton_residue" }
+            },
+            {
+                idString: "mammoth_skeleton",
+                name: "Mammoth Skeleton",
+                material: "stone",
+                health: 500,
+                scale: {
+                    spawnMin: 1,
+                    spawnMax: 1,
+                    destroy: 0.5
+                },
+                hitbox: new CircleHitbox(8),
+                spawnHitbox: new CircleHitbox(8.5),
+                rotationMode: RotationMode.Full,
+                frames: { particle: "bull_skeleton_particle", residue: "mammoth_skeleton_residue" }
+            },
+            {
+                idString: "pencil_cactus",
+                name: "Pencil Cactus",
+                material: "bush",
+                health: 80,
+                scale: {
+                    spawnMin: 0.5,
+                    spawnMax: 0.7,
+                    destroy: 0.45
+                },
+                hitbox: new CircleHitbox(4.2),
+                noCollisions: true,
+                rotationMode: RotationMode.Full,
+                zIndex: ZIndexes.ObstaclesLayer3,
+                frames: { particle: "pencil_cactus_particle", residue: "pencil_cactus_residue" }
+            },
+            {
+                idString: "ghost_plant",
+                name: "Ghost Plant",
+                material: "bush",
+                health: 80,
+                scale: {
+                    spawnMin: 0.8,
+                    spawnMax: 0.9,
+                    destroy: 0.55
+                },
+                hitbox: new CircleHitbox(4.2),
+                noCollisions: true,
+                rotationMode: RotationMode.Full,
+                zIndex: ZIndexes.ObstaclesLayer3,
+                frames: { particle: "ghost_plant_particle", residue: "ghost_plant_residue" }
+            },
+            {
+                idString: "century_plant",
+                name: "Century Plant",
+                material: "bush",
+                health: 80,
+                scale: {
+                    spawnMin: 0.5,
+                    spawnMax: 0.7,
+                    destroy: 0.45
+                },
+                hitbox: new CircleHitbox(4.2),
+                noCollisions: true,
+                rotationMode: RotationMode.Full,
+                zIndex: ZIndexes.ObstaclesLayer3,
+                frames: { particle: "century_plant_particle", residue: "century_plant_residue" }
+            },
+            {
+                idString: "wood_barrel",
+                name: "Wood Barrel",
+                material: "wood",
+                health: 120,
+                scale: { spawnMin: 1, spawnMax: 1, destroy: 0.7 },
+                hitbox: new CircleHitbox(3.75),
+                rotationMode: RotationMode.Full,
+                hasLoot: true,
+                frames: { particle: "wood_barrel_particle", residue: "wood_barrel_residue" }
+            },
+            {
+                idString: "ceramic_jar",
+                name: "Ceramic Jar",
+                material: "porcelain",
+                health: 80,
+                scale: { spawnMin: 0.9, spawnMax: 0.9, destroy: 0.6 },
+                hitbox: new CircleHitbox(3.75),
+                rotationMode: RotationMode.Full,
+                spawnMode: MapObjectSpawnMode.GrassAndAroundOasis,
+                hasLoot: true,
+                frames: { particle: "ceramic_jar_particle", residue: "ceramic_jar_residue" }
+            },
+            {
+                idString: "barrel_cactus",
+                name: "Barrel Cactus",
+                material: "pumpkin",
+                health: 160,
+                scale: {
+                    spawnMin: 0.7,
+                    spawnMax: 0.9,
+                    destroy: 0.7
+                },
+                hitbox: new CircleHitbox(4.69),
+                rotationMode: RotationMode.Full,
+                allowFlyover: FlyoverPref.Always,
+                hasLoot: true,
+                frames: {
+                    particle: "barrel_cactus_particle",
+                    residue: "barrel_cactus_residue"
+                }
+            },
+            tree([{
+                name: "Date Palm Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.8,
+                    spawnMax: 1,
+                    destroy: 0.65
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                spawnMode: MapObjectSpawnMode.GrassAndAroundOasis,
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                frames: {
+                    particle: "date_palm_tree_particle",
+                    residue: "date_palm_tree_residue"
+                }
+            }]),
+            tree([{
+                name: "Palm Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.7,
+                    spawnMax: 1,
+                    destroy: 0.65
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                spawnMode: MapObjectSpawnMode.GrassAndAroundOasis,
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                variations: 1,
+                frames: {
+                    particle: "palm_tree_particle",
+                    residue: "palm_tree_residue"
+                }
+            }]),
+
+            tree([{
+                name: "Small Palm Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.7,
+                    spawnMax: 0.9,
+                    destroy: 0.5
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                variations: 1,
+                zIndex: ZIndexes.ObstaclesLayer4,
+                frames: {
+                    particle: "palm_tree_particle",
+                    residue: "palm_tree_residue"
+                }
+            }]),
+
+            tree([{
+                name: "Child Palm Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.7,
+                    spawnMax: 0.9,
+                    destroy: 0.5
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                rotationMode: RotationMode.Full,
+                spawnMode: MapObjectSpawnMode.GrassAndAroundOasis,
+                hitbox: new CircleHitbox(3.5),
+                variations: 1,
+                zIndex: ZIndexes.ObstaclesLayer4,
+                frames: {
+                    particle: "palm_tree_particle",
+                    residue: "palm_tree_residue"
+                }
+            }]),
+
+            tree([{
+                name: "Doum Palm Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.6,
+                    spawnMax: 0.9,
+                    destroy: 0.55
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                zIndex: ZIndexes.ObstaclesLayer4,
+                frames: {
+                    particle: "doum_palm_tree_particle",
+                    residue: "doum_palm_tree_residue"
+                }
+            }]),
+
+            tree([{
+                name: "Dry Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.6,
+                    spawnMax: 0.9,
+                    destroy: 0.55
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                zIndex: ZIndexes.ObstaclesLayer3,
+                frames: {
+                    particle: "dormant_oak_tree_particle",
+                    residue: "dormant_oak_tree_residue"
+                }
+            }]),
+
+            tree([{
+                name: "Quiver Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.5,
+                    spawnMax: 0.8,
+                    destroy: 0.45
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                zIndex: ZIndexes.ObstaclesLayer4,
+                frames: {
+                    particle: "quiver_tree_particle",
+                    residue: "quiver_tree_residue"
+                }
+            }]),
+
             tree([{
                 name: "Oak Tree",
                 health: 180,

@@ -1080,7 +1080,15 @@ export class UIManager {
 
             if (this.game.activePlayer) {
                 const backpack = this.game.activePlayer.equipment.backpack;
-                itemSlot.toggleClass("full", count >= backpack.maxCapacity[item]);
+                const isFull = count >= backpack.maxCapacity[item];
+                itemSlot.toggleClass("full", isFull);
+
+                // Change color of .item-count to red if ammo is full
+                if (itemDef.itemType === ItemType.Ammo && isFull) {
+                    countElem.css("opacity", "35%");
+                } else {
+                    countElem.css("opacity", "100%");
+                }
             }
             const isPresent = count > 0;
 
