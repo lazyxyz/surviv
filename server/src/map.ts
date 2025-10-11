@@ -987,7 +987,7 @@ export class GameMap {
                 }
                 case MapObjectSpawnMode.GrassAndAroundOasis: {
                     return () => {
-                        if (Math.random() < 0.1) { // oasis bank area much smaller then grass.
+                        if (Math.random() < 0.05) { // oasis bank area much smaller then grass.
                             // Grass logic
                             return randomVector(
                                 this._beachPadding + width,

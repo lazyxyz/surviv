@@ -512,16 +512,6 @@ const maps = {
         height: 1924,
         oceanSize: 64,
         beachSize: 16,
-        // rivers: {
-        //     minAmount: 2,
-        //     maxAmount: 2,
-        //     wideChance: 0.35,
-        //     minWidth: 12,
-        //     maxWidth: 18,
-        //     minWideWidth: 25,
-        //     maxWideWidth: 28,
-        //     maxWideAmount: 1
-        // },
         oases: {
             minAmount: 7,
             maxAmount: 7,
@@ -555,15 +545,6 @@ const maps = {
             ]
         },
         buildings: {
-            // plumpkin_bunker: 1,
-            // lodge: 1,
-            // green_house: 2,
-            // red_house: 2,
-            // red_house_v2: 2,
-            // warehouse: 4,
-            // tugboat_red: 1,
-            // tugboat_white: 7,
-            // barn: 3,
             small_bridge: Infinity,
             sea_traffic_control: 1,
             bombed_armory: 1,
@@ -582,33 +563,7 @@ const maps = {
             tent_5: 3,
             outhouse: 10
         },
-        // majorBuildings: ["bombed_armory", "lodge", "plumpkin_bunker"],
-        // quadBuildingLimit: {
-        //     barn: 1,
-        //     outhouse: 3,
-        //     red_house: 1,
-        //     green_house: 1,
-        //     red_house_v2: 1,
-        //     warehouse: 2,
-        //     bombed_armory: 1,
-        //     lodge: 1,
-        //     tent_1: 1,
-        //     tent_2: 1,
-        //     tent_3: 1,
-        //     tent_4: 1
-        // },
         obstacles: {
-            // oak_tree: 230,
-            // small_oak_tree: 50,
-            // birch_tree: 25,
-            // maple_tree: 70,
-            // pine_tree: 95,
-            // dormant_oak_tree: 25,
-            // vibrant_bush: 200,
-            // oak_leaf_pile: 200,
-            // pumpkin: 200,
-            // large_pumpkin: 5,
-            // regular_crate: 200,
             palm_tree: 100,
             date_palm_tree: 150,
             small_palm_tree: 50,
@@ -645,68 +600,16 @@ const maps = {
             flint_stone: 1,
             pebble: 110
         },
-        // obstacleClumps: [
-        //     {
-        //         clumpAmount: 2,
-        //         clump: {
-        //             minAmount: 1,
-        //             maxAmount: 2,
-        //             jitter: 0,
-        //             obstacles: ["palm_tree"],
-        //             radius: 0
-        //         }
-        //     },
-        //     {
-        //         clumpAmount: 0,
-        //         clump: {
-        //             minAmount: 1,
-        //             maxAmount: 2,
-        //             jitter: 0,
-        //             obstacles: ["small_palm_tree"],
-        //             radius: 0
-        //         }
-        //     },
-        //     {
-        //         clumpAmount: 5,
-        //         clump: {
-        //             minAmount: 1,
-        //             maxAmount: 2,
-        //             jitter: 0,
-        //             obstacles: ["doum_palm_tree"],
-        //             radius: 0
-        //         }
-        //     },
-        //     // {
-        //     //     clumpAmount: 15,
-        //     //     clump: {
-        //     //         minAmount: 2,
-        //     //         maxAmount: 3,
-        //     //         jitter: 5,
-        //     //         obstacles: ["birch_tree"],
-        //     //         radius: 12
-        //     //     }
-        //     // },
-        //     // {
-        //     //     clumpAmount: 15,
-        //     //     clump: {
-        //     //         minAmount: 2,
-        //     //         maxAmount: 3,
-        //     //         jitter: 5,
-        //     //         obstacles: ["pine_tree"],
-        //     //         radius: 12
-        //     //     }
-        //     // }
-        // ],
         loots: {
-            ground_loot: 60
+            ground_loot: 40
         },
         places: [
-            { name: "Antler", position: Vec.create(0.23, 0.2) },
-            { name: "Deadfall", position: Vec.create(0.23, 0.8) },
-            { name: "Beaverdam", position: Vec.create(0.75, 0.2) },
-            { name: "Crimson Hills", position: Vec.create(0.72, 0.8) },
-            { name: "Emerald Farms", position: Vec.create(0.5, 0.35) },
-            { name: "Darkwood", position: Vec.create(0.5, 0.65) }
+            { name: "Sand Antler", position: Vec.create(0.23, 0.2) },
+            { name: "Dune Fall", position: Vec.create(0.23, 0.8) },
+            { name: "Oasis Dam", position: Vec.create(0.75, 0.2) },
+            { name: "Crimson Dunes", position: Vec.create(0.72, 0.8) },
+            { name: "Mirage Farms", position: Vec.create(0.5, 0.35) },
+            { name: "Shadow Sands", position: Vec.create(0.5, 0.65) }
         ]
     },
 

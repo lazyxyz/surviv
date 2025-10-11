@@ -987,6 +987,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 scale: { spawnMin: 0.9, spawnMax: 0.9, destroy: 0.6 },
                 hitbox: new CircleHitbox(3.75),
                 rotationMode: RotationMode.Full,
+                spawnMode: MapObjectSpawnMode.GrassAndAroundOasis,
                 hasLoot: true,
                 frames: { particle: "ceramic_jar_particle", residue: "ceramic_jar_residue" }
             },
