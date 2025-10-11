@@ -316,7 +316,8 @@ export class Game {
                             return randomVector(x - width, x + width, y - height, y + height);
                         },
                         speed: randomVector(-10, 10, gravityOn ? 10 : -10, 10),
-                        lifetime: randomFloat(12000, 50000),
+                        lifetime: randomFloat(5000, 15000),
+                        // lifetime: randomFloat(12000, 50000),
                         zIndex: Number.MAX_SAFE_INTEGER - 5,
                         alpha: {
                             start: this.layer === Layer.Ground ? 0.7 : 0,
