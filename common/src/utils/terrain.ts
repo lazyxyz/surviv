@@ -101,6 +101,7 @@ export class Terrain {
     readonly floors = new Map<Hitbox, { readonly floorType: FloorNames, readonly layer: Layer | number }>();
 
     readonly rivers: readonly River[];
+    readonly oases: readonly Oasis[];
 
     readonly beachHitbox: PolygonHitbox;
     readonly grassHitbox: PolygonHitbox;
@@ -110,6 +111,7 @@ export class Terrain {
     private readonly _grid: Array<
         Array<{
             readonly rivers: River[]
+            readonly oases: Oasis[]
             readonly floors: Array<{ readonly type: FloorNames, readonly hitbox: Hitbox, readonly layer: number }>
         }>
     > = [];
@@ -120,7 +122,8 @@ export class Terrain {
         oceanSize: number,
         beachSize: number,
         seed: number,
-        rivers: readonly River[]
+        rivers: readonly River[],
+        oases: readonly Oasis[],
     ) {
         this.width = Math.floor(width / this.cellSize);
         this.height = Math.floor(height / this.cellSize);
@@ -130,7 +133,8 @@ export class Terrain {
             for (let y = 0; y <= this.height; y++) {
                 this._grid[x][y] = {
                     rivers: [],
-                    floors: []
+                    floors: [],
+                    oases: []
                 };
             }
         }
@@ -174,6 +178,26 @@ export class Terrain {
                     // only add it to cells it collides with
                     if (river.bankHitbox.collidesWith(rect)) {
                         this._grid[x][y].rivers.push(river);
+                    }
+                }
+            }
+        }
+
+        this.oases = oases;
+        for (const oasis of oases) {
+            const rect = oasis.bankHitbox.toRectangle();
+            const min = this._roundToCells(rect.min);
+            const max = this._roundToCells(rect.max);
+            for (let x = min.x; x <= max.x; x++) {
+                for (let y = min.y; y <= max.y; y++) {
+                    const min = Vec.create(x * this.cellSize, y * this.cellSize);
+                    const rect = new RectangleHitbox(
+                        min,
+                        Vec.add(min, Vec.create(this.cellSize, this.cellSize))
+                    );
+                    // only add it to cells it collides with
+                    if (oasis.bankHitbox.collidesWith(rect)) {
+                        this._grid[x][y].oases.push(oasis);
                     }
                 }
             }
@@ -232,6 +256,16 @@ export class Terrain {
                     break;
                 }
             }
+
+            for (const oasis of cell.oases) {
+                if (oasis.bankHitbox.isPointInside(position)) {
+                    floor = FloorNames.Sand;
+                }
+                if (oasis.waterHitbox.isPointInside(position)) {
+                    floor = FloorNames.Water;
+                    break;
+                }
+            }
         }
 
         for (const floor of cell.floors) {
@@ -273,6 +307,26 @@ export class Terrain {
             }
         }
         return [...rivers];
+    }
+
+    getOasesInPosition(position: Vector): Oasis[] {
+        const pos = this._roundToCells(position);
+        return this._grid[pos.x][pos.y].oases;
+    }
+
+    getOasesInHitbox(hitbox: Hitbox): Oasis[] {
+        const oases = new Set<Oasis>();
+        const rect = hitbox.toRectangle();
+        const min = this._roundToCells(rect.min);
+        const max = this._roundToCells(rect.max);
+        for (let x = min.x; x <= max.x; x++) {
+            for (let y = min.y; y <= max.y; y++) {
+                for (const oasis of this._grid[x][y].oases) {
+                    oases.add(oasis);
+                }
+            }
+        }
+        return [...oases];
     }
 
     private _roundToCells(vector: Vector): Vector {
@@ -483,5 +537,64 @@ export class River {
         }
 
         return nearestT;
+    }
+}
+
+function jaggedCircle(center: Vector, radius: number, spacing: number, deviation: number, random: SeededRandom): Vector[] {
+    const points: Vector[] = [];
+    const circumference = Math.PI * 2 * radius;
+    const numSegments = Math.ceil(circumference / spacing);
+    for (let i = 0; i < numSegments; i++) {
+        const fraction = i / numSegments;
+        const baseAngle = fraction * Math.PI * 2;
+        const angleDeviation = random.get(-Math.PI / numSegments / 2, Math.PI / numSegments / 2);
+        const angle = baseAngle + angleDeviation;
+        const rDeviation = random.get(-deviation, deviation);
+        const r = radius + rDeviation;
+        points.push(Vec.add(center, Vec.fromPolar(angle, r)));
+    }
+    return points;
+}
+
+
+export class Oasis {
+    readonly center: Vector;
+    readonly radius: number;
+    readonly bankWidth: number;
+    readonly seed: number;
+    readonly waterHitbox: PolygonHitbox;
+    readonly bankHitbox: PolygonHitbox;
+
+
+    constructor(
+        radius: number,
+        center: Vector,
+        bankWidth: number,
+        seed: number
+    ) {
+        this.center = center;
+        this.radius = radius;
+        this.bankWidth = bankWidth;
+        this.seed = seed;
+
+        const random = new SeededRandom(seed);
+
+        const spacing = 16;
+        const deviation = Numeric.min(8, radius / 4);
+
+        this.waterHitbox = new PolygonHitbox(jaggedCircle(center, radius, spacing, deviation, random));
+
+        const waterPoints = this.waterHitbox.points;
+        const bankPoints: Vector[] = [];
+        for (const p of waterPoints) {
+            const dir = Vec.normalizeSafe(Vec.sub(p, this.center), Vec.create(1, 0));
+
+            const variation = this.bankWidth * 0.2; // 20% variation; adjust multiplier as needed
+            const offsetAmount = this.bankWidth + random.get(-variation, variation);
+            const offset = Vec.scale(dir, offsetAmount);
+
+            bankPoints.push(Vec.add(p, offset));
+        }
+        this.bankHitbox = new PolygonHitbox(bankPoints);
     }
 }

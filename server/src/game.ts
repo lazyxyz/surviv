@@ -242,7 +242,8 @@ export class Game implements GameData {
 
     getRandomMode(): Mode {
         const random = Math.random() * 100;
-        if (random < 50) return "fall";
+        if (random < 40) return "desert"; // 40% desert
+        if (random < 70) return "fall";
         return "winter";
     }
 
@@ -251,7 +252,8 @@ export class Game implements GameData {
         this.port = port;
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
-        this.gameMode = this.getRandomMode();
+        // this.gameMode = this.getRandomMode();
+        this.gameMode = "desert";
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
         this.updateGameData({
             aliveCount: 0,

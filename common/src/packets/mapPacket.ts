@@ -20,6 +20,8 @@ export type MapPacketData = {
     readonly beachSize: number
 
     readonly rivers: ReadonlyArray<{ readonly width: number, readonly points: readonly Vector[], readonly isTrail: boolean }>
+    readonly oases?: ReadonlyArray<{ readonly center: Vector, readonly radius: number, readonly bankWidth: number, readonly seed: number }>
+    
     readonly objects: readonly MapObject[]
     readonly places: ReadonlyArray<{ readonly position: Vector, readonly name: string }>
 };
@@ -39,6 +41,12 @@ export const MapPacket = createPacket("MapPacket")<MapPacketData>({
                         1
                     )
                     .writeUint8(river.isTrail ? -1 : 0);
+            }, 1)
+            .writeArray(data.oases ?? [], oasis => {
+                strm.writePosition(oasis.center);
+                strm.writeFloat(oasis.radius, 0, 2048, 2);
+                strm.writeFloat(oasis.bankWidth, 0, 1, 1);
+                strm.writeUint32(oasis.seed);
             }, 1)
             .writeArray(data.objects, object => {
                 strm.writeObjectType(object.type)
@@ -103,6 +111,12 @@ export const MapPacket = createPacket("MapPacket")<MapPacketData>({
                 width: stream.readUint8(),
                 points: stream.readArray(() => stream.readPosition(), 1),
                 isTrail: stream.readUint8() !== 0
+            }), 1),
+            oases: stream.readArray(() => ({
+                center: stream.readPosition(),
+                radius: stream.readFloat(0, 2048, 2),
+                bankWidth: stream.readFloat(0, 1, 1),
+                seed: stream.readUint32()
             }), 1),
             objects: stream.readArray(() => {
                 const type = stream.readObjectType() as ObjectCategory.Obstacle | ObjectCategory.Building;

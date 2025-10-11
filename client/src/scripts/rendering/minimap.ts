@@ -4,7 +4,7 @@ import { type MapPacketData } from "@common/packets/mapPacket";
 import { type PingSerialization, type PlayerPingSerialization } from "@common/packets/updatePacket";
 import { RectangleHitbox } from "@common/utils/hitbox";
 import { Numeric } from "@common/utils/math";
-import { FloorTypes, River, Terrain } from "@common/utils/terrain";
+import { FloorTypes, Oasis, River, Terrain } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
 import $ from "jquery";
 import { Container, Graphics, RenderTexture, Sprite, Text, isMobile, type ColorSource, type Texture } from "pixi.js";
@@ -78,7 +78,7 @@ export class Minimap {
     readonly gasRender: GasRender;
     readonly placesContainer = new Container();
 
-    private _terrain = new Terrain(0, 0, 0, 0, 0, []);
+    private _terrain = new Terrain(0, 0, 0, 0, 0, [], []);
     get terrain(): Terrain { return this._terrain; }
 
     readonly pings = new Set<MapPing>();
@@ -221,11 +221,31 @@ export class Minimap {
                 .fill(river.isTrail ? getColors(this.game.gameMode).trail : getColors(this.game.gameMode).riverBank);
         }
 
+        // oasis bank needs to be drawn first
+        for (const oasis of this._terrain.oases) {
+            const bankPoints = oasis.bankHitbox.points.map(point => ({
+                ...Vec.scale(point, scale),
+                radius
+            }));
+            ctx
+                .beginPath()
+                .roundShape(bankPoints, 0, true)
+                .fill(getColors(this.game.gameMode).riverBank);
+        }
+
         ctx.beginPath();
         for (const river of this._terrain.rivers) {
             if (river.waterHitbox) {
                 ctx.roundShape(getRiverPoly(river.waterHitbox.points), 0, true);
             }
+        }
+
+        for (const oasis of this._terrain.oases) {
+            const waterPoints = oasis.waterHitbox.points.map(point => ({
+                ...Vec.scale(point, scale),
+                radius
+            }));
+            ctx.roundShape(waterPoints, 0, true);
         }
         ctx.fill(getColors(this.game.gameMode).water);
 
@@ -473,13 +493,20 @@ export class Minimap {
         const rivers: River[] = [];
         rivers.push(...mapPacket.rivers.map(({ width, points, isTrail }) => new River(width, points, rivers, mapBounds, isTrail)));
 
+        const oases: Oasis[] = [];
+
+        if (mapPacket.oases) {
+            oases.push(...mapPacket.oases.map(({ center, radius, bankWidth, seed }) => new Oasis(radius, center, bankWidth, seed)));
+        }
+
         this._terrain = new Terrain(
             width,
             height,
             mapPacket.oceanSize,
             mapPacket.beachSize,
             mapPacket.seed,
-            rivers
+            rivers,
+            oases
         );
 
         for (const object of this._objects) {
