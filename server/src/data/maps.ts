@@ -819,30 +819,23 @@ const maps = {
         }
     },
     gunsTest: (() => {
-        const Guns = Loots.byType(ItemType.Gun);
-
+        const guns = Guns.definitions;
         return {
             width: 64,
-            height: 48 + (16 * Guns.length),
+            height: 48 + (16 * guns.length),
             beachSize: 8,
             oceanSize: 8,
             onGenerate(map) {
-                for (let i = 0, l = Guns.length; i < l; i++) {
-                    const player = new Gamer(
-                        map.game,
-                        { getUserData: () => { return {}; } } as unknown as WebSocket<PlayerContainer>,
-                        Vec.create(32, 32 + (16 * i))
-                    );
-                    const gun = Guns[i];
+                const itemPos = Vec.create(map.width / 2, map.height / 2);
+                for (const item of Guns.definitions) {
+                    map.game.addLoot(item, itemPos, 0, { count: 1, pushVel: 0, jitterSpawn: false });
+                    map.game.addLoot(item.ammoType, Vec.create(this.width / 2, this.height / 2 - 10), 0, { count: Infinity });
 
-                    player.inventory.addOrReplaceWeapon(0, gun.idString);
-                    (player.inventory.getWeapon(0) as GunItem).ammo = gun.capacity;
-                    player.inventory.items.setItem(gun.ammoType, Infinity);
-                    player.disableInvulnerability();
-                    // setInterval(() => player.activeItem.useItem(), 30);
-                    map.game.addLoot(gun.idString, Vec.create(16, 32 + (16 * i)), 0);
-                    map.game.addLoot(gun.ammoType, Vec.create(16, 32 + (16 * i)), 0, { count: Infinity });
-                    map.game.grid.addObject(player);
+                    itemPos.x += 10;
+                    if (itemPos.x > map.width / 2 + 100) {
+                        itemPos.x = map.width / 2;
+                        itemPos.y += 10;
+                    }
                 }
             }
         };
