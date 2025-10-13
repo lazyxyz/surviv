@@ -14,7 +14,8 @@ import { type GunItem } from "../inventory/gunItem";
 import { GameMap } from "../map";
 import { Gamer, type PlayerContainer } from "../objects/gamer";
 import { getLootFromTable, LootTables } from "./lootTables";
-import { PerkCategories } from "@common/definitions/perks";
+import { PerkCategories, Perks } from "@common/definitions/perks";
+import { Melees } from "@common/definitions/melees";
 
 export interface RiverDefinition {
     readonly minAmount: number
@@ -818,28 +819,51 @@ const maps = {
             map.game.addLoot(Guns.fromString(gun).ammoType, Vec.create(this.width / 2, this.height / 2 - 10), 0, { count: Infinity });
         }
     },
+    
     gunsTest: (() => {
-        const guns = Guns.definitions;
         return {
-            width: 100,
-            height: 100,
+            width: 200,
+            height: 200,
             beachSize: 8,
             oceanSize: 8,
             onGenerate(map) {
-                const itemPos = Vec.create(map.width / 2, map.height / 2);
-                for (const item of Guns.definitions) {
-                    map.game.addLoot(item, itemPos, 0, { count: 1, pushVel: 0, jitterSpawn: false });
-                    map.game.addLoot(item.ammoType, Vec.create(this.width / 2, this.height / 2 - 10), 0, { count: Infinity });
+                let itemPos = Vec.create(0, 20); // Start slightly inset from top-left for better spacing
+                const colSpacing = 15;
+                const rowSpacing = 20;
+                const maxX = map.width - 20; // Leave margin on right
 
-                    itemPos.x += 10;
-                    if (itemPos.x > map.width / 2 + 100) {
-                        itemPos.x = map.width / 2;
-                        itemPos.y += 10;
+                const placeItem = (item: any, isGun = false) => {
+                    map.game.addLoot(item, itemPos, 0, { count: 1, pushVel: 0, jitterSpawn: false });
+                    if (isGun) {
+                        map.game.addLoot(item.ammoType, itemPos, 0, { count: Infinity });
                     }
+
+                    itemPos.x += colSpacing;
+                    if (itemPos.x > maxX) {
+                        itemPos.x = 0;
+                        itemPos.y += rowSpacing;
+                    }
+                };
+
+                // Place guns
+                for (const item of Guns.definitions) {
+                    placeItem(item, true);
+                }
+
+                // Place perks
+                for (const item of Perks.definitions) {
+                    placeItem(item);
+                }
+
+                // Place melees
+                for (const item of Melees.definitions) {
+                    placeItem(item);
                 }
             }
         };
     })(),
+
+
     obstaclesTest: {
         width: 128,
         height: 128,

@@ -2518,18 +2518,18 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 idString: "m134_minigun",
                 name: "M134 Minigun",
                 ammoType: "762mm",
-                ammoSpawnAmount: 600,
-                capacity: 200,
-                extendedCapacity: 300,
-                reloadTime: 6,
-                fireDelay: 20,
+                ammoSpawnAmount: 750,
+                capacity: 250,
+                extendedCapacity: 350,
+                reloadTime: 6.5,
+                fireDelay: 30,
                 switchDelay: 500,
                 speedMultiplier: 0.7,
-                recoilMultiplier: 0.6,
-                recoilDuration: 250,
+                recoilMultiplier: 0.5,
+                recoilDuration: 300,
                 fireMode: FireMode.Auto,
-                shotSpread: 5,
-                moveSpread: 10,
+                shotSpread: 4.5,
+                moveSpread: 9,
                 length: 9.5,
                 fists: {
                     left: { x: 120, y: -8 },
@@ -2539,15 +2539,15 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 },
                 image: { position: { x: 100, y: 0 } },
                 casingParticles: [
-                    { position: { x: 4.5, y: 0.6 } }
+                    { frame: "casing_762x39mm", position: { x: 4.5, y: 0.6 } }
                 ],
                 gasParticles: gasParticlePresets.automatic,
                 ballistics: {
-                    damage: 15,
+                    damage: 14,
                     obstacleMultiplier: 2,
-                    speed: 0.3,
+                    speed: 0.28,
                     range: 200,
-                    tracer: { width: 1.2, length: 1.5 }
+                    tracer: { width: 1.1, length: 1.4 }
                 },
             },
             {
