@@ -253,7 +253,7 @@ export class Game implements GameData {
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
         // this.gameMode = this.getRandomMode();
-        this.gameMode = "desert";
+        this.gameMode = "winter";
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
         this.updateGameData({
             aliveCount: 0,

@@ -2371,6 +2371,366 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                     }
                 }
             },
+
+            // New gun 
+
+            {
+                idString: "mp5",
+                name: "MP5",
+                ammoType: "9mm",
+                ammoSpawnAmount: 90,
+                capacity: 30,
+                extendedCapacity: 40,
+                reloadTime: 2,
+                fireDelay: 75,
+                switchDelay: 300,
+                recoilMultiplier: 0.75,
+                recoilDuration: 100,
+                fireMode: FireMode.Auto,
+                shotSpread: 3,
+                moveSpread: 5,
+                length: 6.5,
+                fists: {
+                    left: { x: 95, y: -3 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 75, y: 0 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 10,
+                    obstacleMultiplier: 1,
+                    speed: 0.25,
+                    range: 130
+                },
+            },
+            {
+                idString: "m4a1",
+                name: "M4A1",
+                ammoType: "556mm",
+                ammoSpawnAmount: 90,
+                capacity: 30,
+                extendedCapacity: 45,
+                reloadTime: 2.3,
+                fireDelay: 75,
+                switchDelay: 400,
+                recoilMultiplier: 0.7,
+                recoilDuration: 130,
+                fireMode: FireMode.Auto,
+                shotSpread: 2,
+                moveSpread: 4,
+                length: 7.5,
+                fists: {
+                    left: { x: 110, y: -3 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 85, y: 1 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 13,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.3,
+                    range: 160
+                },
+            },
+            {
+                idString: "scar_l",
+                name: "SCAR-L",
+                ammoType: "556mm",
+                ammoSpawnAmount: 90,
+                capacity: 30,
+                extendedCapacity: 45,
+                reloadTime: 2.4,
+                fireDelay: 96,
+                switchDelay: 400,
+                recoilMultiplier: 0.75,
+                recoilDuration: 140,
+                fireMode: FireMode.Auto,
+                shotSpread: 2.5,
+                moveSpread: 5,
+                length: 7.8,
+                fists: {
+                    left: { x: 115, y: -3 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 85, y: 0 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 12.5,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.28,
+                    range: 160
+                },
+            },
+            {
+                idString: "famas",
+                name: "FAMAS",
+                ammoType: "556mm",
+                ammoSpawnAmount: 90,
+                capacity: 25,
+                extendedCapacity: 40,
+                reloadTime: 2.7,
+                fireDelay: 54,
+                switchDelay: 400,
+                recoilMultiplier: 0.8,
+                recoilDuration: 150,
+                fireMode: FireMode.Burst,
+                burstProperties: {
+                    shotsPerBurst: 3,
+                    burstCooldown: 325
+                },
+                shotSpread: 3,
+                moveSpread: 6,
+                length: 7.2,
+                fists: {
+                    left: { x: 100, y: -2 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 80, y: 0 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 11.5,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.28,
+                    range: 160
+                },
+            },
+            {
+                idString: "m134_minigun",
+                name: "M134 Minigun",
+                ammoType: "762mm",
+                ammoSpawnAmount: 600,
+                capacity: 200,
+                extendedCapacity: 300,
+                reloadTime: 6,
+                fireDelay: 20,
+                switchDelay: 500,
+                speedMultiplier: 0.7,
+                recoilMultiplier: 0.6,
+                recoilDuration: 250,
+                fireMode: FireMode.Auto,
+                shotSpread: 5,
+                moveSpread: 10,
+                length: 9.5,
+                fists: {
+                    left: { x: 120, y: -8 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 100, y: 0 } },
+                casingParticles: [
+                    { position: { x: 4.5, y: 0.6 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 15,
+                    obstacleMultiplier: 2,
+                    speed: 0.3,
+                    range: 200,
+                    tracer: { width: 1.2, length: 1.5 }
+                },
+            },
+            {
+                idString: "rpk",
+                name: "RPK",
+                ammoType: "762mm",
+                ammoSpawnAmount: 120,
+                capacity: 40,
+                extendedCapacity: 75,
+                reloadTime: 3.2,
+                fireDelay: 100,
+                switchDelay: 400,
+                speedMultiplier: 0.85,
+                recoilMultiplier: 0.75,
+                recoilDuration: 180,
+                fireMode: FireMode.Auto,
+                shotSpread: 2.5,
+                moveSpread: 5,
+                length: 8.2,
+                fists: {
+                    left: { x: 115, y: -4 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 90, y: 0 } },
+                casingParticles: [
+                    { frame: "casing_762x39mm", position: { x: 4.2, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 14.5,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.26,
+                    range: 180,
+                    tracer: { width: 1.1, length: 1.4 }
+                },
+            },
+            {
+                idString: "spas12",
+                name: "SPAS-12",
+                ammoType: "12g",
+                ammoSpawnAmount: 24,
+                capacity: 7,
+                extendedCapacity: 12,
+                reloadTime: 2.5,
+                shotsPerReload: 1,
+                fireDelay: 150,
+                switchDelay: 700,
+                recoilMultiplier: 0.55,
+                recoilDuration: 500,
+                fireMode: FireMode.Single,
+                bulletCount: 8,
+                shotSpread: 8,
+                moveSpread: 10,
+                jitterRadius: 0.8,
+                length: 7.8,
+                fists: {
+                    left: { x: 110, y: -3 },
+                    right: { x: 45, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 85, y: 2 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.6 } }
+                ],
+                gasParticles: gasParticlePresets.shotgun,
+                ballistics: {
+                    damage: 10,
+                    obstacleMultiplier: 1,
+                    speed: 0.18,
+                    range: 60,
+                    tracer: { length: 0.7 }
+                },
+            },
+            {
+                idString: "awm",
+                name: "AWM",
+                ammoType: "338lap",
+                ammoSpawnAmount: 15,
+                capacity: 5,
+                extendedCapacity: 10,
+                reloadTime: 3.5,
+                fireDelay: 1200,
+                switchDelay: 900,
+                recoilMultiplier: 0.35,
+                recoilDuration: 1500,
+                fireMode: FireMode.Single,
+                shotSpread: 0.1,
+                moveSpread: 0.3,
+                shootOnRelease: true,
+                length: 9.8,
+                fists: {
+                    left: { x: 110, y: 0 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 100, y: 3 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.6 }, ejectionDelay: 500 }
+                ],
+                gasParticles: gasParticlePresets.rifle,
+                ballistics: {
+                    damage: 150,
+                    obstacleMultiplier: 1,
+                    speed: 0.45,
+                    range: 350,
+                    tracer: { width: 2, length: 3.5 }
+                },
+            },
+            {
+                idString: "barrett_m82",
+                name: "Barrett M82",
+                ammoType: "50cal",
+                ammoSpawnAmount: 30,
+                capacity: 10,
+                extendedCapacity: 15,
+                reloadTime: 4,
+                fireDelay: 1000,
+                switchDelay: 900,
+                recoilMultiplier: 0.4,
+                recoilDuration: 1200,
+                fireMode: FireMode.Single,
+                shotSpread: 0.5,
+                moveSpread: 1,
+                length: 10.5,
+                fists: {
+                    left: { x: 120, y: 0 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 110, y: 2 } },
+                casingParticles: [
+                    { position: { x: 4.5, y: 0.6 } }
+                ],
+                gasParticles: gasParticlePresets.rifle,
+                ballistics: {
+                    damage: 200,
+                    obstacleMultiplier: 2,
+                    speed: 0.5,
+                    range: 300,
+                    tracer: { width: 2.5, length: 4 }
+                },
+            },
+            {
+                idString: "mk12",
+                name: "Mk12 SPR",
+                ammoType: "556mm",
+                ammoSpawnAmount: 80,
+                capacity: 20,
+                extendedCapacity: 30,
+                reloadTime: 2.4,
+                fireDelay: 200,
+                switchDelay: 400,
+                recoilMultiplier: 0.7,
+                recoilDuration: 200,
+                fireMode: FireMode.Single,
+                shotSpread: 1,
+                moveSpread: 2,
+                length: 8,
+                fists: {
+                    left: { x: 110, y: -2 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 85, y: 2 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.rifle,
+                ballistics: {
+                    damage: 30,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.3,
+                    range: 230,
+                    tracer: { length: 1.5 }
+                },
+            }
+
         ] satisfies ReadonlyArray<RawDefinition<RawGunDefinition>>).map(e => {
             if (e.dual === undefined) {
                 return [e];
