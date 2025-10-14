@@ -80,6 +80,11 @@ type BaseGunDefinition = InventoryItemDefinition & {
 
     readonly noMuzzleFlash: boolean
     readonly ballistics: BaseBulletDefinition
+    readonly gatling?: {
+        barrelCount: number,
+        barrelRadius: number,
+        rotationSpeed: number
+    }
 } & ReloadOnEmptyMixin & BurstFireMixin & DualDefMixin;
 
 type BurstFireMixin = ({
@@ -220,6 +225,9 @@ const defaultCustomize: Array<ObjectDefinition & Partial<{
     readonly gasParticles: any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     readonly ballistics: any
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly gatling: any
 }>> = [
         {
             idString: "mg5",
@@ -2549,6 +2557,12 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                     range: 200,
                     tracer: { width: 1.1, length: 1.4 }
                 },
+
+                gatling: {
+                    barrelCount: 6,
+                    barrelRadius: 0.3,  // Small offset for 2D visuals/spread (adjust for feel)
+                    rotationSpeed: 667  // RPM of barrels (4000 rounds/min / 6 = ~667 RPM; scales with spin-up)
+                }
             },
             {
                 idString: "rpk",
