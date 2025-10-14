@@ -80,6 +80,13 @@ type BaseGunDefinition = InventoryItemDefinition & {
 
     readonly noMuzzleFlash: boolean
     readonly ballistics: BaseBulletDefinition
+    readonly gatling?: {
+        barrelCount: number,
+        barrelRadius: number,
+        rotationSpeed: number
+    }
+
+    readonly spinUpTime?: number,
 } & ReloadOnEmptyMixin & BurstFireMixin & DualDefMixin;
 
 type BurstFireMixin = ({
@@ -220,6 +227,9 @@ const defaultCustomize: Array<ObjectDefinition & Partial<{
     readonly gasParticles: any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     readonly ballistics: any
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly gatling: any
 }>> = [
         {
             idString: "mg5",
@@ -2491,7 +2501,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireMode: FireMode.Burst,
                 burstProperties: {
                     shotsPerBurst: 3,
-                    burstCooldown: 325
+                    burstCooldown: 250
                 },
                 shotSpread: 3,
                 moveSpread: 6,
@@ -2518,18 +2528,18 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 idString: "m134_minigun",
                 name: "M134 Minigun",
                 ammoType: "762mm",
-                ammoSpawnAmount: 600,
-                capacity: 200,
-                extendedCapacity: 300,
-                reloadTime: 6,
-                fireDelay: 20,
+                ammoSpawnAmount: 750,
+                capacity: 250,
+                extendedCapacity: 250,
+                reloadTime: 6.5,
+                fireDelay: 30,
                 switchDelay: 500,
-                speedMultiplier: 0.7,
-                recoilMultiplier: 0.6,
-                recoilDuration: 250,
+                speedMultiplier: 0.5,
+                recoilMultiplier: 0.4,
+                recoilDuration: 300,
                 fireMode: FireMode.Auto,
-                shotSpread: 5,
-                moveSpread: 10,
+                shotSpread: 4,
+                moveSpread: 6,
                 length: 9.5,
                 fists: {
                     left: { x: 120, y: -8 },
@@ -2539,16 +2549,23 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 },
                 image: { position: { x: 100, y: 0 } },
                 casingParticles: [
-                    { position: { x: 4.5, y: 0.6 } }
+                    { frame: "casing_762x39mm", position: { x: 4.5, y: 0.6 } }
                 ],
                 gasParticles: gasParticlePresets.automatic,
                 ballistics: {
-                    damage: 15,
+                    damage: 14,
                     obstacleMultiplier: 2,
-                    speed: 0.3,
+                    speed: 0.28,
                     range: 200,
-                    tracer: { width: 1.2, length: 1.5 }
+                    tracer: { width: 1.1, length: 1.4 }
                 },
+
+                gatling: {
+                    barrelCount: 6,
+                    barrelRadius: 0.8,  // Small offset for 2D visuals/spread (adjust for feel)
+                    rotationSpeed: 333  // RPM of barrels (4000 rounds/min / 6 = ~667 RPM; scales with spin-up)
+                },
+                spinUpTime: 1000
             },
             {
                 idString: "rpk",
@@ -2561,7 +2578,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireDelay: 100,
                 switchDelay: 400,
                 speedMultiplier: 0.85,
-                recoilMultiplier: 0.75,
+                recoilMultiplier: 0.8,
                 recoilDuration: 180,
                 fireMode: FireMode.Auto,
                 shotSpread: 2.5,
@@ -2595,9 +2612,9 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 extendedCapacity: 12,
                 reloadTime: 2.5,
                 shotsPerReload: 1,
-                fireDelay: 150,
+                fireDelay: 250,
                 switchDelay: 700,
-                recoilMultiplier: 0.55,
+                recoilMultiplier: 0.6,
                 recoilDuration: 500,
                 fireMode: FireMode.Single,
                 bulletCount: 8,
