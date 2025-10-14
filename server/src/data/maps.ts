@@ -16,6 +16,7 @@ import { Gamer, type PlayerContainer } from "../objects/gamer";
 import { getLootFromTable, LootTables } from "./lootTables";
 import { PerkCategories, Perks } from "@common/definitions/perks";
 import { Melees } from "@common/definitions/melees";
+import { Scopes } from "@common/definitions/scopes";
 
 export interface RiverDefinition {
     readonly minAmount: number
@@ -857,6 +858,11 @@ const maps = {
 
                 // Place melees
                 for (const item of Melees.definitions) {
+                    placeItem(item);
+                }
+               
+                // Place scopes
+                for (const item of Scopes.definitions) {
                     placeItem(item);
                 }
             }

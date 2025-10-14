@@ -85,6 +85,8 @@ type BaseGunDefinition = InventoryItemDefinition & {
         barrelRadius: number,
         rotationSpeed: number
     }
+
+    readonly spinUpTime?: number,
 } & ReloadOnEmptyMixin & BurstFireMixin & DualDefMixin;
 
 type BurstFireMixin = ({
@@ -2537,7 +2539,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilDuration: 300,
                 fireMode: FireMode.Auto,
                 shotSpread: 4.5,
-                moveSpread: 9,
+                moveSpread: 1,
                 length: 9.5,
                 fists: {
                     left: { x: 120, y: -8 },
@@ -2560,9 +2562,10 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
 
                 gatling: {
                     barrelCount: 6,
-                    barrelRadius: 0.3,  // Small offset for 2D visuals/spread (adjust for feel)
-                    rotationSpeed: 667  // RPM of barrels (4000 rounds/min / 6 = ~667 RPM; scales with spin-up)
-                }
+                    barrelRadius: 0.8,  // Small offset for 2D visuals/spread (adjust for feel)
+                    rotationSpeed: 333  // RPM of barrels (4000 rounds/min / 6 = ~667 RPM; scales with spin-up)
+                },
+                spinUpTime: 1500
             },
             {
                 idString: "rpk",
