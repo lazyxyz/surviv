@@ -6,7 +6,7 @@ import { Orientation } from "@common/typings";
 import { type BulletOptions } from "@common/utils/baseBullet";
 import { CircleHitbox, RectangleHitbox } from "@common/utils/hitbox";
 import { adjacentOrEqualLayer, isStairLayer } from "@common/utils/layer";
-import { Angle, Geometry, HALF_PI, resolveStairInteraction, TAU } from "@common/utils/math";
+import { Angle, Geometry, HALF_PI, TAU, resolveStairInteraction } from "@common/utils/math";
 import { type DeepMutable, type DeepRequired, type Timeout } from "@common/utils/misc";
 import { ItemType, type ReifiableDef } from "@common/utils/objectDefinitions";
 import { randomFloat, randomPointInsideCircle } from "@common/utils/random";
@@ -36,6 +36,7 @@ export class GunItem extends InventoryItem<GunDefinition> {
     private _burstTimeout?: NodeJS.Timeout;
     private _autoFireTimeout?: NodeJS.Timeout;
     private _spinUpTimeout?: NodeJS.Timeout;
+    private _spinDownTimeout?: NodeJS.Timeout;
 
     private _altFire = false;
 
@@ -47,6 +48,7 @@ export class GunItem extends InventoryItem<GunDefinition> {
         clearTimeout(this._burstTimeout);
         clearTimeout(this._autoFireTimeout);
         clearTimeout(this._spinUpTimeout);
+        clearTimeout(this._spinDownTimeout);
         this._isSpinning = false;
         this._currentBarrelIndex = 0;
     }
@@ -90,14 +92,18 @@ export class GunItem extends InventoryItem<GunDefinition> {
             || this !== owner.activeItem
         ) {
             this._consecutiveShots = 0;
-            this._isSpinning = false;
+            clearTimeout(this._spinDownTimeout);
+            if (this._isSpinning) {
+                this._spinDownTimeout = setTimeout(() => {
+                    this._isSpinning = false;
+                }, definition.spinUpTime);
+            }
             return;
         }
 
         if (definition.summonAirdrop && owner.isInsideBuilding) {
             owner.sendPacket(PickupPacket.create({ message: InventoryMessages.CannotUseRadio }));
             this._consecutiveShots = 0;
-            this._isSpinning = false;
             return;
         }
 
@@ -106,10 +112,14 @@ export class GunItem extends InventoryItem<GunDefinition> {
                 owner.animation = AnimationType.GunClick;
                 owner.setPartialDirty();
             }
+
             this._consecutiveShots = 0;
             this._isSpinning = false;
+            clearTimeout(this._spinDownTimeout);
             return;
         }
+
+        clearTimeout(this._spinDownTimeout);
 
         if (definition.spinUpTime !== undefined && !this._isSpinning) {
             // Start spin-up for gatling guns
@@ -118,7 +128,6 @@ export class GunItem extends InventoryItem<GunDefinition> {
                 this._isSpinning = true;
                 this._useItemNoDelayCheck(skipAttackCheck);
             }, definition.spinUpTime);
-            return;
             return;
         }
 
@@ -440,6 +449,7 @@ export class GunItem extends InventoryItem<GunDefinition> {
         this._burstTimeout = void clearTimeout(this._burstTimeout);
         this._autoFireTimeout = void clearTimeout(this._autoFireTimeout);
         this._spinUpTimeout = void clearTimeout(this._spinUpTimeout);
+        this._spinDownTimeout = void clearTimeout(this._spinDownTimeout);
         this._isSpinning = false;
     }
 }

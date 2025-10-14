@@ -2565,7 +2565,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                     barrelRadius: 0.8,  // Small offset for 2D visuals/spread (adjust for feel)
                     rotationSpeed: 333  // RPM of barrels (4000 rounds/min / 6 = ~667 RPM; scales with spin-up)
                 },
-                spinUpTime: 1500
+                spinUpTime: 1000
             },
             {
                 idString: "rpk",
