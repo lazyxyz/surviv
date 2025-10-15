@@ -142,11 +142,11 @@
       },
       {
         id: "s1",
-        name: "Game Night",
-        title: "Vietnam Game Night — Sept 27th, 2–3 PM UTC",
-        api: "https://admin.surviv.fun/stats/playerRankingsByDate?startDate=2025-09-27T14:00:00Z&endDate=2025-09-27T15:00:00Z",
+        name: "Mainnet Gaming Party",
+        title: "Mainnet Gaming Party — Oct 16 to Oct 21, 00 AM UTC",
+        api: "https://admin.surviv.fun/stats/playerRankingsByDate?startDate=2025-10-16T00:00:00Z&endDate=2025-10-21T00:00:00Z",
         icon: "../img/game/shared/badges/somnia_s1.svg",
-        playerPointsApi: "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}?startDate=2025-09-27T14:00:00Z&endDate=2025-09-27T15:00:00Z"
+        playerPointsApi: "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}?startDate=2025-10-16T00:00:00Z&endDate=2025-10-21T00:00:00Z"
       },
       {
         id: "1",
@@ -251,7 +251,7 @@
       button.id = `season-${s.id.toLowerCase()}-button`;
       button.innerHTML = `
         <img src="${s.icon}" alt="${s.name} Badge" class="w-[36px] h-[36px] filter drop-shadow-[0_0_2px_#facc15a6]">
-        ${s.name}
+         <span style="color: black;">${s.name}</span>
       `;
       button.addEventListener('click', () => {
         window.location.href = `/leaderboard/?season=${s.id.toLowerCase()}`;
