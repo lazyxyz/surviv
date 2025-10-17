@@ -2610,7 +2610,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 ammoSpawnAmount: 24,
                 capacity: 7,
                 extendedCapacity: 12,
-                reloadTime: 2.5,
+                reloadTime: 0.7,
                 shotsPerReload: 1,
                 fireDelay: 250,
                 switchDelay: 700,
@@ -2642,42 +2642,6 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 },
             },
             {
-                idString: "awm",
-                name: "AWM",
-                ammoType: "338lap",
-                ammoSpawnAmount: 15,
-                capacity: 5,
-                extendedCapacity: 10,
-                reloadTime: 3.5,
-                fireDelay: 1200,
-                switchDelay: 900,
-                recoilMultiplier: 0.35,
-                recoilDuration: 1500,
-                fireMode: FireMode.Single,
-                shotSpread: 0.1,
-                moveSpread: 0.3,
-                shootOnRelease: true,
-                length: 9.8,
-                fists: {
-                    left: { x: 110, y: 0 },
-                    right: { x: 40, y: 0 },
-                    rightZIndex: 4,
-                    animationDuration: 100
-                },
-                image: { position: { x: 100, y: 3 } },
-                casingParticles: [
-                    { position: { x: 4, y: 0.6 }, ejectionDelay: 500 }
-                ],
-                gasParticles: gasParticlePresets.rifle,
-                ballistics: {
-                    damage: 150,
-                    obstacleMultiplier: 1,
-                    speed: 0.45,
-                    range: 350,
-                    tracer: { width: 2, length: 3.5 }
-                },
-            },
-            {
                 idString: "barrett_m82",
                 name: "Barrett M82",
                 ammoType: "50cal",
@@ -2694,7 +2658,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 moveSpread: 1,
                 length: 10.5,
                 fists: {
-                    left: { x: 120, y: 0 },
+                    left: { x: 100, y: 0 },
                     right: { x: 40, y: 0 },
                     rightZIndex: 4,
                     animationDuration: 100
