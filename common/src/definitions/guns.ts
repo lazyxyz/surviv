@@ -18,6 +18,8 @@ type BaseGunDefinition = InventoryItemDefinition & {
     readonly fireDelay: number
     readonly switchDelay: number
 
+    readonly stopSound?: string
+
     readonly recoilMultiplier: number
     readonly recoilDuration: number
     readonly shotSpread: number
@@ -87,6 +89,7 @@ type BaseGunDefinition = InventoryItemDefinition & {
     }
 
     readonly spinUpTime?: number,
+
 } & ReloadOnEmptyMixin & BurstFireMixin & DualDefMixin;
 
 type BurstFireMixin = ({
@@ -2487,6 +2490,40 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 },
             },
             {
+                idString: "groza",
+                name: "GROZA",
+                ammoType: "762mm",
+                ammoSpawnAmount: 90,
+                capacity: 30,
+                extendedCapacity: 45,
+                reloadTime: 2.4,
+                fireDelay: 96,
+                switchDelay: 400,
+                recoilMultiplier: 0.75,
+                recoilDuration: 140,
+                fireMode: FireMode.Auto,
+                shotSpread: 2.5,
+                moveSpread: 5,
+                length: 7.8,
+                fists: {
+                    left: { x: 115, y: -3 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 85, y: 0 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 12.5,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.28,
+                    range: 160
+                },
+            },
+            {
                 idString: "famas",
                 name: "FAMAS",
                 ammoType: "556mm",
@@ -2531,41 +2568,60 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 ammoSpawnAmount: 750,
                 capacity: 250,
                 extendedCapacity: 250,
-                reloadTime: 6.5,
+                reloadTime: 0.1,
+                // reloadTime: 6.5,
                 fireDelay: 30,
                 switchDelay: 500,
                 speedMultiplier: 0.5,
+                stopSound: "m134_minigun_stop",
                 recoilMultiplier: 0.4,
                 recoilDuration: 300,
                 fireMode: FireMode.Auto,
-                shotSpread: 4,
+                shotSpread: 1,
                 moveSpread: 6,
                 length: 9.5,
+                bulletOffset: 1.8,
                 fists: {
-                    left: { x: 120, y: -8 },
-                    right: { x: 40, y: 0 },
+                    left: { x: 110, y: 26 },
+                    right: { x: 40, y: 36 },
                     rightZIndex: 4,
+                    leftZIndex: 4,
                     animationDuration: 100
                 },
-                image: { position: { x: 100, y: 0 } },
+                // fists: {
+                //     left: { x: 120, y: -8 },
+                //     right: { x: 40, y: 0 },
+                //     rightZIndex: 4,
+                //     animationDuration: 100
+                // },
+                image: { position: { x: 125, y: 40 } },
+                // image: { position: { x: 100, y: 0 } },
                 casingParticles: [
-                    { frame: "casing_762x39mm", position: { x: 4.5, y: 0.6 } }
+                    { frame: "casing_762x39mm", position: { x: 3.5, y: 2.8 } }
+                    // { frame: "casing_762x39mm", position: { x: 4.5, y: 0.6 } }
                 ],
                 gasParticles: gasParticlePresets.automatic,
                 ballistics: {
                     damage: 14,
                     obstacleMultiplier: 2,
-                    speed: 0.28,
+                    speed: 0.3,
                     range: 200,
-                    tracer: { width: 1.1, length: 1.4 }
+                    tracer: { width: 1.1, length: 1.4 },
                 },
+                // ballistics: {
+                //     damage: 14,
+                //     obstacleMultiplier: 2,
+                //     speed: 0.28,
+                //     range: 200,
+                //     tracer: { width: 1.1, length: 1.4 }
+                // },
 
                 gatling: {
                     barrelCount: 6,
                     barrelRadius: 0.8,  // Small offset for 2D visuals/spread (adjust for feel)
                     rotationSpeed: 333  // RPM of barrels (4000 rounds/min / 6 = ~667 RPM; scales with spin-up)
                 },
-                spinUpTime: 1000
+                spinUpTime: 1000,
             },
             {
                 idString: "rpk",

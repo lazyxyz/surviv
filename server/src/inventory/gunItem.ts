@@ -123,6 +123,9 @@ export class GunItem extends InventoryItem<GunDefinition> {
 
         if (definition.spinUpTime !== undefined && !this._isSpinning) {
             // Start spin-up for gatling guns
+            owner.animation = AnimationType.GunSpinUp;
+            owner.setPartialDirty();
+
             clearTimeout(this._spinUpTimeout);
             this._spinUpTimeout = setTimeout(() => {
                 this._isSpinning = true;

@@ -43,7 +43,29 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     activeItem: WeaponDefinition = Loots.fromString("fists");
 
     meleeStopSound?: GameSound;
+    gunStopSound?: GameSound;
     meleeAttackCounter = 0;
+    gunAttackCounter = 0;
+
+    // Function to handle gun attack image/frame changes
+    gunAttackCount(): void {
+        const weaponDef = this.activeItem;
+        if (weaponDef.itemType !== ItemType.Gun) return;
+
+        // Toggle the counter
+        if (this.gunAttackCounter >= 1) {
+            this.gunAttackCounter--;
+        } else {
+            this.gunAttackCounter++;
+        }
+
+        // Toggle between _world and _used frames for only m134_minigun
+        if (weaponDef.idString === "m134_minigun") {
+            const frame = `m134_minigun${this.gunAttackCounter <= 0 ? "_world" : "_used"}`;
+            this.images.weapon.setFrame(frame);
+            this.images.altWeapon.setFrame(frame);
+        }
+    }
 
     blockEmoting = false;
 
@@ -1613,6 +1635,19 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     }
                 } = this._getItemReference() as SingleGunNarrowing;
 
+                // Add gunStopSound for m134_minigun
+                if (weaponDef.stopSound && this.gunStopSound === undefined) {
+                    this.gunStopSound = this.playSound(
+                        weaponDef.stopSound,
+                        {
+                            falloff: 0.4,
+                            maxRange: 96
+                        }
+                    );
+                } else {
+                    this.gunStopSound = undefined;
+                }
+
                 if (anim === AnimationType.LastShot) {
                     this.playSound(
                         `${idString}_fire_last`,
@@ -1731,6 +1766,9 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                         }
                     });
                 }
+
+                // Call gunAttackCount to update gun image/frame
+                this.gunAttackCount();
 
                 this.spawnCasingParticles("fire", isAltFire);
                 break;
@@ -1945,6 +1983,21 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                         this.anims.rightFist = undefined;
                     }
                 });
+                break;
+            }
+
+            case AnimationType.GunSpinUp: {
+                if (this.activeItem.itemType !== ItemType.Gun) {
+                    console.warn(`Attempted to play gun spin-up animation with non-gun item '${this.activeItem.idString}'`);
+                    return;
+                }
+                const weaponDef = this.activeItem;
+                if (weaponDef.spinUpTime) {
+                    this.playSound(`${weaponDef.idString}_spin`, {
+                        falloff: 0.4,
+                        maxRange: 96
+                    });
+                }
                 break;
             }
         }
