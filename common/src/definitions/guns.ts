@@ -2388,7 +2388,6 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
             },
 
             // New gun 
-
             {
                 idString: "mp5",
                 name: "MP5",
@@ -2404,7 +2403,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireMode: FireMode.Auto,
                 shotSpread: 3,
                 moveSpread: 5,
-                length: 6.5,
+                length: 7.2,
                 fists: {
                     left: { x: 95, y: -3 },
                     right: { x: 40, y: 0 },
@@ -2438,7 +2437,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireMode: FireMode.Auto,
                 shotSpread: 2,
                 moveSpread: 4,
-                length: 7.5,
+                length: 7.9,
                 fists: {
                     left: { x: 110, y: -3 },
                     right: { x: 40, y: 0 },
@@ -2472,7 +2471,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireMode: FireMode.Auto,
                 shotSpread: 2.5,
                 moveSpread: 5,
-                length: 7.8,
+                length: 7.9,
                 fists: {
                     left: { x: 115, y: -3 },
                     right: { x: 40, y: 0 },
@@ -2544,7 +2543,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 },
                 shotSpread: 3,
                 moveSpread: 6,
-                length: 7.2,
+                length: 7.5,
                 fists: {
                     left: { x: 100, y: -2 },
                     right: { x: 40, y: 0 },
@@ -2626,7 +2625,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireMode: FireMode.Auto,
                 shotSpread: 2.5,
                 moveSpread: 5,
-                length: 8.2,
+                length: 9.5,
                 fists: {
                     left: { x: 115, y: -4 },
                     right: { x: 40, y: 0 },
@@ -2664,7 +2663,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 shotSpread: 8,
                 moveSpread: 10,
                 jitterRadius: 0.8,
-                length: 7.8,
+                length: 8,
                 fists: {
                     left: { x: 110, y: -3 },
                     right: { x: 45, y: 0 },
@@ -2734,7 +2733,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireMode: FireMode.Single,
                 shotSpread: 1,
                 moveSpread: 2,
-                length: 8,
+                length: 9.3,
                 fists: {
                     left: { x: 110, y: -2 },
                     right: { x: 40, y: 0 },
