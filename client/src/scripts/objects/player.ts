@@ -1054,12 +1054,17 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             : weaponDef as SingleGunNarrowing | Exclude<WeaponDefinition, GunDefinition>;
     }
 
-    private _getOffset(): number {
+    private _getOffset(isMuzzle: boolean = false): number {
         const weaponDef = this.activeItem;
+        if (weaponDef.itemType !== ItemType.Gun) return 0;
 
-        return weaponDef.itemType === ItemType.Gun && weaponDef.isDual
-            ? weaponDef.leftRightOffset * PIXI_SCALE
-            : 0;
+        let yOffset = weaponDef.isDual ? weaponDef.leftRightOffset * PIXI_SCALE : 0;
+
+        if (isMuzzle && weaponDef.muzzleOffsetPixels !== undefined) {
+            yOffset += weaponDef.muzzleOffsetPixels;
+        }
+
+        return yOffset;
     }
 
     updateFistsPosition(anim: boolean): void {
@@ -1710,9 +1715,8 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
                 if (!weaponDef.noMuzzleFlash) {
                     const muzzleFlash = this.images.muzzleFlash;
-
                     muzzleFlash.x = weaponDef.length * PIXI_SCALE;
-                    muzzleFlash.y = (isAltFire ? -1 : 1) * this._getOffset();
+                    muzzleFlash.y = (isAltFire ? -1 : 1) * this._getOffset(true);
                     muzzleFlash.setVisible(true);
                     muzzleFlash.alpha = 0.95;
                     muzzleFlash.scale = Vec.create(

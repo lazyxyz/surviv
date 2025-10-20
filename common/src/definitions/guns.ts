@@ -74,6 +74,8 @@ type BaseGunDefinition = InventoryItemDefinition & {
         readonly maxSpeed: number
     }
 
+    muzzleOffsetPixels?: number;
+
     readonly image: {
         readonly angle: number
         // no relation to the ZIndexes enum
@@ -2577,9 +2579,9 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.4,
                 recoilDuration: 300,
                 fireMode: FireMode.Auto,
-                shotSpread: 1,
+                shotSpread: 4,
                 moveSpread: 6,
-                length: 9.5,
+                length: 11.3,
                 bulletOffset: 1.8,
                 fists: {
                     left: { x: 110, y: 26 },
@@ -2588,17 +2590,9 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                     leftZIndex: 4,
                     animationDuration: 100
                 },
-                // fists: {
-                //     left: { x: 120, y: -8 },
-                //     right: { x: 40, y: 0 },
-                //     rightZIndex: 4,
-                //     animationDuration: 100
-                // },
                 image: { position: { x: 125, y: 40 } },
-                // image: { position: { x: 100, y: 0 } },
                 casingParticles: [
                     { frame: "casing_762x39mm", position: { x: 3.5, y: 2.8 } }
-                    // { frame: "casing_762x39mm", position: { x: 4.5, y: 0.6 } }
                 ],
                 gasParticles: gasParticlePresets.automatic,
                 ballistics: {
@@ -2608,19 +2602,12 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                     range: 200,
                     tracer: { width: 1.1, length: 1.4 },
                 },
-                // ballistics: {
-                //     damage: 14,
-                //     obstacleMultiplier: 2,
-                //     speed: 0.28,
-                //     range: 200,
-                //     tracer: { width: 1.1, length: 1.4 }
-                // },
-
                 gatling: {
                     barrelCount: 6,
-                    barrelRadius: 0.8,  // Small offset for 2D visuals/spread (adjust for feel)
+                    barrelRadius: 0.6,
                     rotationSpeed: 333  // RPM of barrels (4000 rounds/min / 6 = ~667 RPM; scales with spin-up)
                 },
+                muzzleOffsetPixels: 35,
                 spinUpTime: 1000,
             },
             {
