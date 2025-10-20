@@ -74,6 +74,8 @@ type BaseGunDefinition = InventoryItemDefinition & {
         readonly maxSpeed: number
     }
 
+    muzzleOffsetPixels?: number;
+
     readonly image: {
         readonly angle: number
         // no relation to the ZIndexes enum
@@ -2386,7 +2388,6 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
             },
 
             // New gun 
-
             {
                 idString: "mp5",
                 name: "MP5",
@@ -2402,7 +2403,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireMode: FireMode.Auto,
                 shotSpread: 3,
                 moveSpread: 5,
-                length: 6.5,
+                length: 7.2,
                 fists: {
                     left: { x: 95, y: -3 },
                     right: { x: 40, y: 0 },
@@ -2436,7 +2437,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireMode: FireMode.Auto,
                 shotSpread: 2,
                 moveSpread: 4,
-                length: 7.5,
+                length: 7.9,
                 fists: {
                     left: { x: 110, y: -3 },
                     right: { x: 40, y: 0 },
@@ -2470,7 +2471,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireMode: FireMode.Auto,
                 shotSpread: 2.5,
                 moveSpread: 5,
-                length: 7.8,
+                length: 7.9,
                 fists: {
                     left: { x: 115, y: -3 },
                     right: { x: 40, y: 0 },
@@ -2542,7 +2543,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 },
                 shotSpread: 3,
                 moveSpread: 6,
-                length: 7.2,
+                length: 7.5,
                 fists: {
                     left: { x: 100, y: -2 },
                     right: { x: 40, y: 0 },
@@ -2577,9 +2578,9 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.4,
                 recoilDuration: 300,
                 fireMode: FireMode.Auto,
-                shotSpread: 1,
+                shotSpread: 4,
                 moveSpread: 6,
-                length: 9.5,
+                length: 11.3,
                 bulletOffset: 1.8,
                 fists: {
                     left: { x: 110, y: 26 },
@@ -2588,17 +2589,9 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                     leftZIndex: 4,
                     animationDuration: 100
                 },
-                // fists: {
-                //     left: { x: 120, y: -8 },
-                //     right: { x: 40, y: 0 },
-                //     rightZIndex: 4,
-                //     animationDuration: 100
-                // },
                 image: { position: { x: 125, y: 40 } },
-                // image: { position: { x: 100, y: 0 } },
                 casingParticles: [
                     { frame: "casing_762x39mm", position: { x: 3.5, y: 2.8 } }
-                    // { frame: "casing_762x39mm", position: { x: 4.5, y: 0.6 } }
                 ],
                 gasParticles: gasParticlePresets.automatic,
                 ballistics: {
@@ -2608,19 +2601,12 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                     range: 200,
                     tracer: { width: 1.1, length: 1.4 },
                 },
-                // ballistics: {
-                //     damage: 14,
-                //     obstacleMultiplier: 2,
-                //     speed: 0.28,
-                //     range: 200,
-                //     tracer: { width: 1.1, length: 1.4 }
-                // },
-
                 gatling: {
                     barrelCount: 6,
-                    barrelRadius: 0.8,  // Small offset for 2D visuals/spread (adjust for feel)
+                    barrelRadius: 0.6,
                     rotationSpeed: 333  // RPM of barrels (4000 rounds/min / 6 = ~667 RPM; scales with spin-up)
                 },
+                muzzleOffsetPixels: 35,
                 spinUpTime: 1000,
             },
             {
@@ -2639,7 +2625,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireMode: FireMode.Auto,
                 shotSpread: 2.5,
                 moveSpread: 5,
-                length: 8.2,
+                length: 9.5,
                 fists: {
                     left: { x: 115, y: -4 },
                     right: { x: 40, y: 0 },
@@ -2677,7 +2663,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 shotSpread: 8,
                 moveSpread: 10,
                 jitterRadius: 0.8,
-                length: 7.8,
+                length: 8,
                 fists: {
                     left: { x: 110, y: -3 },
                     right: { x: 45, y: 0 },
@@ -2747,7 +2733,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 fireMode: FireMode.Single,
                 shotSpread: 1,
                 moveSpread: 2,
-                length: 8,
+                length: 9.3,
                 fists: {
                     left: { x: 110, y: -2 },
                     right: { x: 40, y: 0 },
