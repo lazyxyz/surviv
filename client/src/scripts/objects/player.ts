@@ -44,8 +44,11 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
     meleeStopSound?: GameSound;
     gunStopSound?: GameSound;
+    gunSound?: GameSound;
+
     meleeAttackCounter = 0;
     gunAttackCounter = 0;
+    private _stopTimeout?: NodeJS.Timeout;
 
     // Function to handle gun attack image/frame changes
     gunAttackCount(): void {
@@ -1640,19 +1643,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     }
                 } = this._getItemReference() as SingleGunNarrowing;
 
-                // Add gunStopSound for m134_minigun
-                if (weaponDef.stopSound && this.gunStopSound === undefined) {
-                    this.gunStopSound = this.playSound(
-                        weaponDef.stopSound,
-                        {
-                            falloff: 0.4,
-                            maxRange: 96
-                        }
-                    );
-                } else {
-                    this.gunStopSound = undefined;
-                }
-
                 if (anim === AnimationType.LastShot) {
                     this.playSound(
                         `${idString}_fire_last`,
@@ -1661,12 +1651,47 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                         }
                     );
                 } else {
+                    if (this._stopTimeout) {
+                        clearTimeout(this._stopTimeout);
+                        this._stopTimeout = undefined;
+                    }
+
+
+
                     this.playSound(
                         `${idString}_fire`,
                         {
-                            falloff: 0.5
+                            falloff: 0.5,
+                            onEnd: () => {
+                                this._stopTimeout = setTimeout(() => {
+                                    if (weaponDef.stopSound) {
+                                        this.playSound(
+                                            weaponDef.stopSound,
+                                            {
+                                                falloff: 0.4,
+                                                maxRange: 96
+                                            }
+                                        );
+                                    }
+                                    this._stopTimeout = undefined;
+                                }, 100);
+                            }
                         }
                     );
+
+                    if (weaponDef.bulletFlyingSound) {
+                        if (Math.random() < 0.05) {
+                            console.log("BULLET FLYING!");
+                            const variant = Math.floor(Math.random() * 3) + 1;
+                            this.playSound(
+                                `bullet_fly_${variant}`,
+                                {
+                                    falloff: 0.5,
+                                    dynamic: true,
+                                }
+                            );
+                        }
+                    }
                 }
 
                 const isAltFire = weaponDef.isDual
