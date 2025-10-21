@@ -43,6 +43,8 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     activeItem: WeaponDefinition = Loots.fromString("fists");
 
     meleeStopSound?: GameSound;
+    
+    spinSound?: GameSound;
     gunStopSound?: GameSound;
     gunSound?: GameSound;
 
@@ -1621,6 +1623,55 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 }, 200);
                 break;
             }
+            case AnimationType.GunSpinUp: {
+                if (this.activeItem.itemType !== ItemType.Gun) {
+                    console.warn(`Attempted to play gun spin-up animation with non-gun item '${this.activeItem.idString}'`);
+                    return;
+                }
+                const weaponDef = this.activeItem;
+                if (weaponDef.spinUpTime) {
+                    this.spinSound = this.playSound(`${weaponDef.idString}_spin`, {
+                        falloff: 0.4,
+                        maxRange: 96,
+                        onEnd: () => {
+                            this.spinSound = undefined;  // Auto-cleanup on natural end
+                        }
+                    });
+                }
+                break;
+            }
+            case AnimationType.GunSpinDown: {
+                if (this.activeItem.itemType !== ItemType.Gun) {
+                    console.warn(`Attempted to play gun spin-down animation with non-gun item '${this.activeItem.idString}'`);
+                    return;
+                }
+                const weaponDef = this.activeItem;
+
+                // NEW: Stop all ongoing sounds before playing stop
+                if (this.gunSound) {
+                    this.gunSound.stop();
+                    this.gunSound = undefined;
+                    console.log('Stopped firing sound on spin-down');
+                }
+                if (this.spinSound) {
+                    this.spinSound.stop();
+                    this.spinSound = undefined;
+                    console.log('Stopped spin-up sound on spin-down');
+                }
+                // Clear any stop timeouts (from fire loop)
+                if (this._stopTimeout) {
+                    clearTimeout(this._stopTimeout);
+                    this._stopTimeout = undefined;
+                }
+
+                if (weaponDef.spinUpTime) {
+                    this.playSound(`${weaponDef.idString}_stop`, {
+                        falloff: 0.4,
+                        maxRange: 96
+                    });
+                }
+                break;
+            }
             case AnimationType.GunFire:
             case AnimationType.GunFireAlt:
             case AnimationType.LastShot: {
@@ -1656,42 +1707,32 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                         this._stopTimeout = undefined;
                     }
 
+                    if (!weaponDef.gatling || !this.gunSound) {
+                        this.gunSound = this.playSound(
+                            `${idString}_fire`,
+                            {
+                                falloff: 0.5,
+                                onEnd: () => {
+                                    this.gunSound = undefined;
+                                }
+                            }
+                        );
 
-
-                    this.playSound(
-                        `${idString}_fire`,
-                        {
-                            falloff: 0.5,
-                            onEnd: () => {
-                                this._stopTimeout = setTimeout(() => {
-                                    if (weaponDef.stopSound) {
-                                        this.playSound(
-                                            weaponDef.stopSound,
-                                            {
-                                                falloff: 0.4,
-                                                maxRange: 96
-                                            }
-                                        );
+                        if (weaponDef.bulletFlyingSound) {
+                            // 5% chance bullet flying sounds
+                            if (Math.random() < 0.05) {
+                                const variant = Math.floor(Math.random() * 3) + 1;
+                                this.playSound(
+                                    `bullet_fly_${variant}`,
+                                    {
+                                        falloff: 0.5,
+                                        dynamic: true,
                                     }
-                                    this._stopTimeout = undefined;
-                                }, 100);
+                                );
                             }
                         }
-                    );
-
-                    if (weaponDef.bulletFlyingSound) {
-                        if (Math.random() < 0.05) {
-                            console.log("BULLET FLYING!");
-                            const variant = Math.floor(Math.random() * 3) + 1;
-                            this.playSound(
-                                `bullet_fly_${variant}`,
-                                {
-                                    falloff: 0.5,
-                                    dynamic: true,
-                                }
-                            );
-                        }
                     }
+
                 }
 
                 const isAltFire = weaponDef.isDual
@@ -2023,6 +2064,21 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 const weaponDef = this.activeItem;
                 if (weaponDef.spinUpTime) {
                     this.playSound(`${weaponDef.idString}_spin`, {
+                        falloff: 0.4,
+                        maxRange: 96
+                    });
+                }
+                break;
+            }
+            case AnimationType.GunSpinDown: {
+                console.log('SPIN DOWN');
+                if (this.activeItem.itemType !== ItemType.Gun) {
+                    console.warn(`Attempted to play gun spin-down animation with non-gun item '${this.activeItem.idString}'`);
+                    return;
+                }
+                const weaponDef = this.activeItem;
+                if (weaponDef.spinUpTime) {
+                    this.playSound(`${weaponDef.idString}_stop`, {
                         falloff: 0.4,
                         maxRange: 96
                     });

@@ -173,7 +173,8 @@ export const enum AnimationType {
     GunClick,
     LastShot,
     Revive,
-    GunSpinUp
+    GunSpinUp,
+    GunSpinDown
 }
 
 export const enum KillfeedMessageType {
