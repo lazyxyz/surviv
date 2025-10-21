@@ -92,15 +92,15 @@ export class GunItem extends InventoryItem<GunDefinition> {
             || this !== owner.activeItem
         ) {
             this._consecutiveShots = 0;
-    clearTimeout(this._spinDownTimeout);
-    if (this._isSpinning) {
-        owner.animation = AnimationType.GunSpinDown;
-        owner.setPartialDirty();
-        this._spinDownTimeout = setTimeout(() => {
-            this._isSpinning = false;
-        }, definition.spinUpTime);
-    }
-    return;
+            clearTimeout(this._spinDownTimeout);
+            if (this._isSpinning) {
+                owner.animation = AnimationType.GunSpinDown;
+                owner.setPartialDirty();
+                this._spinDownTimeout = setTimeout(() => {
+                    this._isSpinning = false;
+                }, definition.spinUpTime);
+            }
+            return;
         }
 
         if (definition.summonAirdrop && owner.isInsideBuilding) {

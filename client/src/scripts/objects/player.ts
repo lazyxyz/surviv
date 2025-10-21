@@ -43,7 +43,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     activeItem: WeaponDefinition = Loots.fromString("fists");
 
     meleeStopSound?: GameSound;
-    
+
     spinSound?: GameSound;
     gunStopSound?: GameSound;
     gunSound?: GameSound;
@@ -1651,12 +1651,10 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 if (this.gunSound) {
                     this.gunSound.stop();
                     this.gunSound = undefined;
-                    console.log('Stopped firing sound on spin-down');
                 }
                 if (this.spinSound) {
                     this.spinSound.stop();
                     this.spinSound = undefined;
-                    console.log('Stopped spin-up sound on spin-down');
                 }
                 // Clear any stop timeouts (from fire loop)
                 if (this._stopTimeout) {
@@ -2071,7 +2069,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 break;
             }
             case AnimationType.GunSpinDown: {
-                console.log('SPIN DOWN');
                 if (this.activeItem.itemType !== ItemType.Gun) {
                     console.warn(`Attempted to play gun spin-down animation with non-gun item '${this.activeItem.idString}'`);
                     return;
