@@ -139,7 +139,7 @@ export class GunItem extends InventoryItem<GunDefinition> {
         owner.action?.cancel();
         clearTimeout(this._burstTimeout);
 
-        owner.animation = definition.ballistics.lastShotFX && this.ammo === 1
+        owner.animation = (definition.ballistics.lastShotFX || definition.gatling) && this.ammo === 1
             ? AnimationType.LastShot
             : this._altFire
                 ? AnimationType.GunFireAlt
