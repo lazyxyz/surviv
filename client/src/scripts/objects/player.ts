@@ -1709,7 +1709,14 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                         this._stopTimeout = undefined;
                     }
 
-                    if (!weaponDef.gatling || !this.gunSound) {
+                    if (!weaponDef.gatling) {
+                        this.playSound(
+                            `${idString}_fire`,
+                            {
+                                falloff: 0.5,
+                            }
+                        );
+                    } else if (!this.gunSound) {
                         this.gunSound = this.playSound(
                             `${idString}_fire`,
                             {
@@ -1719,8 +1726,9 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                                 }
                             }
                         );
+                    }
 
-                        if (weaponDef.bulletFlyingSound) {
+                     if (weaponDef.bulletFlyingSound) {
                             // 5% chance bullet flying sounds
                             if (Math.random() < 0.05) {
                                 const variant = Math.floor(Math.random() * 3) + 1;
@@ -1733,8 +1741,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                                 );
                             }
                         }
-                    }
-
                 }
 
                 const isAltFire = weaponDef.isDual
