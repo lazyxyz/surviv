@@ -22,7 +22,11 @@ export const Config = {
     soloPort: 8001,
     squadPort: 9001,
     v50Port: 9500,
+    
     addBot: true,
+
+    // addBot: false,
+    // testMode: "gunsTest", // For Testing
 
     spawn: { mode: SpawnMode.Normal },
 
@@ -66,6 +70,8 @@ export interface ConfigType {
     readonly squadPort: number;
     readonly v50Port: number;
     readonly addBot: boolean;
+
+    readonly testMode?: string;
     
     /**
      * HTTPS/SSL options. Not used if running locally or with nginx.

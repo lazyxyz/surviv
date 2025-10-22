@@ -43,7 +43,34 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     activeItem: WeaponDefinition = Loots.fromString("fists");
 
     meleeStopSound?: GameSound;
+
+    spinSound?: GameSound;
+    gunStopSound?: GameSound;
+    gunSound?: GameSound;
+
     meleeAttackCounter = 0;
+    gunAttackCounter = 0;
+    private _stopTimeout?: NodeJS.Timeout;
+
+    // Function to handle gun attack image/frame changes
+    gunAttackCount(): void {
+        const weaponDef = this.activeItem;
+        if (weaponDef.itemType !== ItemType.Gun) return;
+
+        // Toggle the counter
+        if (this.gunAttackCounter >= 1) {
+            this.gunAttackCounter--;
+        } else {
+            this.gunAttackCounter++;
+        }
+
+        // Toggle between _world and _used frames for only m134_minigun
+        if (weaponDef.idString === "m134_minigun") {
+            const frame = `m134_minigun${this.gunAttackCounter <= 0 ? "_world" : "_used"}`;
+            this.images.weapon.setFrame(frame);
+            this.images.altWeapon.setFrame(frame);
+        }
+    }
 
     blockEmoting = false;
 
@@ -1032,12 +1059,17 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             : weaponDef as SingleGunNarrowing | Exclude<WeaponDefinition, GunDefinition>;
     }
 
-    private _getOffset(): number {
+    private _getOffset(isMuzzle: boolean = false): number {
         const weaponDef = this.activeItem;
+        if (weaponDef.itemType !== ItemType.Gun) return 0;
 
-        return weaponDef.itemType === ItemType.Gun && weaponDef.isDual
-            ? weaponDef.leftRightOffset * PIXI_SCALE
-            : 0;
+        let yOffset = weaponDef.isDual ? weaponDef.leftRightOffset * PIXI_SCALE : 0;
+
+        if (isMuzzle && weaponDef.muzzleOffsetPixels !== undefined) {
+            yOffset += weaponDef.muzzleOffsetPixels;
+        }
+
+        return yOffset;
     }
 
     updateFistsPosition(anim: boolean): void {
@@ -1591,6 +1623,53 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 }, 200);
                 break;
             }
+            case AnimationType.GunSpinUp: {
+                if (this.activeItem.itemType !== ItemType.Gun) {
+                    console.warn(`Attempted to play gun spin-up animation with non-gun item '${this.activeItem.idString}'`);
+                    return;
+                }
+                const weaponDef = this.activeItem;
+                if (weaponDef.spinUpTime) {
+                    this.spinSound = this.playSound(`${weaponDef.idString}_spin`, {
+                        falloff: 0.4,
+                        maxRange: 96,
+                        onEnd: () => {
+                            this.spinSound = undefined;  // Auto-cleanup on natural end
+                        }
+                    });
+                }
+                break;
+            }
+            case AnimationType.GunSpinDown: {
+                if (this.activeItem.itemType !== ItemType.Gun) {
+                    console.warn(`Attempted to play gun spin-down animation with non-gun item '${this.activeItem.idString}'`);
+                    return;
+                }
+                const weaponDef = this.activeItem;
+
+                // NEW: Stop all ongoing sounds before playing stop
+                if (this.gunSound) {
+                    this.gunSound.stop();
+                    this.gunSound = undefined;
+                }
+                if (this.spinSound) {
+                    this.spinSound.stop();
+                    this.spinSound = undefined;
+                }
+                // Clear any stop timeouts (from fire loop)
+                if (this._stopTimeout) {
+                    clearTimeout(this._stopTimeout);
+                    this._stopTimeout = undefined;
+                }
+
+                if (weaponDef.spinUpTime) {
+                    this.playSound(`${weaponDef.idString}_stop`, {
+                        falloff: 0.4,
+                        maxRange: 96
+                    });
+                }
+                break;
+            }
             case AnimationType.GunFire:
             case AnimationType.GunFireAlt:
             case AnimationType.LastShot: {
@@ -1614,19 +1693,54 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                 } = this._getItemReference() as SingleGunNarrowing;
 
                 if (anim === AnimationType.LastShot) {
-                    this.playSound(
-                        `${idString}_fire_last`,
-                        {
-                            falloff: 0.5
-                        }
-                    );
+                    if (weaponDef.gatling) {
+                        this.playAnimation(AnimationType.GunSpinDown);
+                    } else {
+                        this.playSound(
+                            `${idString}_fire_last`,
+                            {
+                                falloff: 0.5
+                            }
+                        );
+                    }
                 } else {
-                    this.playSound(
-                        `${idString}_fire`,
-                        {
-                            falloff: 0.5
+                    if (this._stopTimeout) {
+                        clearTimeout(this._stopTimeout);
+                        this._stopTimeout = undefined;
+                    }
+
+                    if (!weaponDef.gatling) {
+                        this.playSound(
+                            `${idString}_fire`,
+                            {
+                                falloff: 0.5,
+                            }
+                        );
+                    } else if (!this.gunSound) {
+                        this.gunSound = this.playSound(
+                            `${idString}_fire`,
+                            {
+                                falloff: 0.5,
+                                onEnd: () => {
+                                    this.gunSound = undefined;
+                                }
+                            }
+                        );
+                    }
+
+                     if (weaponDef.bulletFlyingSound) {
+                            // 5% chance bullet flying sounds
+                            if (Math.random() < 0.05) {
+                                const variant = Math.floor(Math.random() * 3) + 1;
+                                this.playSound(
+                                    `bullet_fly_${variant}`,
+                                    {
+                                        falloff: 0.5,
+                                        dynamic: true,
+                                    }
+                                );
+                            }
                         }
-                    );
                 }
 
                 const isAltFire = weaponDef.isDual
@@ -1675,9 +1789,8 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
                 if (!weaponDef.noMuzzleFlash) {
                     const muzzleFlash = this.images.muzzleFlash;
-
                     muzzleFlash.x = weaponDef.length * PIXI_SCALE;
-                    muzzleFlash.y = (isAltFire ? -1 : 1) * this._getOffset();
+                    muzzleFlash.y = (isAltFire ? -1 : 1) * this._getOffset(true);
                     muzzleFlash.setVisible(true);
                     muzzleFlash.alpha = 0.95;
                     muzzleFlash.scale = Vec.create(
@@ -1731,6 +1844,9 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                         }
                     });
                 }
+
+                // Call gunAttackCount to update gun image/frame
+                this.gunAttackCount();
 
                 this.spawnCasingParticles("fire", isAltFire);
                 break;
@@ -1945,6 +2061,35 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                         this.anims.rightFist = undefined;
                     }
                 });
+                break;
+            }
+
+            case AnimationType.GunSpinUp: {
+                if (this.activeItem.itemType !== ItemType.Gun) {
+                    console.warn(`Attempted to play gun spin-up animation with non-gun item '${this.activeItem.idString}'`);
+                    return;
+                }
+                const weaponDef = this.activeItem;
+                if (weaponDef.spinUpTime) {
+                    this.playSound(`${weaponDef.idString}_spin`, {
+                        falloff: 0.4,
+                        maxRange: 96
+                    });
+                }
+                break;
+            }
+            case AnimationType.GunSpinDown: {
+                if (this.activeItem.itemType !== ItemType.Gun) {
+                    console.warn(`Attempted to play gun spin-down animation with non-gun item '${this.activeItem.idString}'`);
+                    return;
+                }
+                const weaponDef = this.activeItem;
+                if (weaponDef.spinUpTime) {
+                    this.playSound(`${weaponDef.idString}_stop`, {
+                        falloff: 0.4,
+                        maxRange: 96
+                    });
+                }
                 break;
             }
         }
