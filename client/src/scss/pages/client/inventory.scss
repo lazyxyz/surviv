@@ -256,17 +256,32 @@
           position: absolute;
           left: 6px;
 
-          width: 48px;
-          height: 48px;
-
-          @media screen and (max-width: variables.$screen_medium) {
-            width: 36px;
-            height: 36px;
-          }
+          width: 56px;
+          height: 56px;
+          top: 0px;
 
           @media screen and (max-width: variables.$screen_medium) {
             width: 24px;
             height: 24px;
+            left: 4px;
+            top: 6px;
+          }
+        }
+
+        #item-slot-3,
+        #item-slot-4 {
+          position: absolute;
+          left: 6px;
+
+          width: 48px;
+          height: 48px;
+          top: 6px;
+
+          @media screen and (max-width: variables.$screen_medium) {
+            width: 24px;
+            height: 24px;
+            left: 4px;
+            top: 6px;
           }
         }
 

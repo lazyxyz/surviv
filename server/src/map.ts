@@ -83,8 +83,7 @@ export class GameMap {
     constructor(game: Game) {
         this.game = game;
 
-        // const [name, ...params] = mapData.split(":") as [MapName, ...string[]];
-        const mapDef: MapDefinition = Maps[game.gameMode];
+        const mapDef: MapDefinition = Config.testMode ? Maps[Config.testMode as MapName] : Maps[game.gameMode];
 
         // @ts-expect-error I don't know why this rule exists
         type PacketType = this["_packet"];
@@ -168,7 +167,7 @@ export class GameMap {
 
         Object.entries(mapDef.loots ?? {}).forEach(([loot, count]) => this._generateLoots(loot, count));
 
-        // mapDef.onGenerate?.(this, params);
+        mapDef.onGenerate?.(this, [game.gameMode]);
 
         if (mapDef.places) {
             packet.places = mapDef.places.map(({ name, position }) => {
@@ -661,43 +660,6 @@ export class GameMap {
 
         return building;
     }
-
-    // private _generateObstacles(definition: ReifiableDef<ObstacleDefinition>, count: number, getPosition?: () => Vector): void {
-    //     // i don't know why "definition = Obstacles.reify(definition)" doesn't work anymore, but it doesn't
-    //     const def = Obstacles.reify(definition);
-
-    //     const { scale = { spawnMin: 1, spawnMax: 1 }, variations, rotationMode } = def;
-    //     const { spawnMin, spawnMax } = scale;
-    //     const effSpawnHitbox = def.spawnHitbox ?? def.hitbox;
-
-    //     for (let i = 0; i < count; i++) {
-    //         const scale = randomFloat(spawnMin, spawnMax);
-    //         const variation = (variations !== undefined ? random(0, variations - 1) : 0) as Variation;
-    //         const rotation = GameMap.getRandomRotation(rotationMode);
-
-    //         let orientation: Orientation = 0;
-
-    //         if (rotationMode === RotationMode.Limited) {
-    //             orientation = rotation as Orientation;
-    //         }
-
-    //         const position = this.getRandomPosition(effSpawnHitbox, {
-    //             getPosition,
-    //             scale,
-    //             orientation,
-    //             spawnMode: def.spawnMode,
-    //             ignoreClearings: this.mapDef.clearings?.allowedObstacles?.includes(def.idString)
-    //         });
-
-    //         if (!position) {
-    //             Logger.warn(`Failed to find valid position for obstacle ${def.idString}`);
-    //             continue;
-    //         }
-
-    //         this.generateObstacle(def, position, { layer: Layer.Ground, scale, variation });
-    //     }
-    // }
-
 
     private _generateObstacles(definition: ReifiableDef<ObstacleDefinition>, count: number, getPosition?: () => Vector): void {
         const def = Obstacles.reify(definition);

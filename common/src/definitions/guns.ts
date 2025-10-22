@@ -18,6 +18,9 @@ type BaseGunDefinition = InventoryItemDefinition & {
     readonly fireDelay: number
     readonly switchDelay: number
 
+    readonly stopSound?: string
+    readonly bulletFlyingSound?: boolean,
+
     readonly recoilMultiplier: number
     readonly recoilDuration: number
     readonly shotSpread: number
@@ -72,6 +75,8 @@ type BaseGunDefinition = InventoryItemDefinition & {
         readonly maxSpeed: number
     }
 
+    muzzleOffsetPixels?: number;
+
     readonly image: {
         readonly angle: number
         // no relation to the ZIndexes enum
@@ -80,6 +85,14 @@ type BaseGunDefinition = InventoryItemDefinition & {
 
     readonly noMuzzleFlash: boolean
     readonly ballistics: BaseBulletDefinition
+    readonly gatling?: {
+        barrelCount: number,
+        barrelRadius: number,
+        rotationSpeed: number
+    }
+
+    readonly spinUpTime?: number,
+
 } & ReloadOnEmptyMixin & BurstFireMixin & DualDefMixin;
 
 type BurstFireMixin = ({
@@ -220,6 +233,9 @@ const defaultCustomize: Array<ObjectDefinition & Partial<{
     readonly gasParticles: any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     readonly ballistics: any
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    readonly gatling: any
 }>> = [
         {
             idString: "mg5",
@@ -801,6 +817,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.75,
                 recoilDuration: 60,
                 fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
                 shotSpread: 2,
                 moveSpread: 7,
                 length: 6.1,
@@ -835,6 +852,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.75,
                 recoilDuration: 150,
                 fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
                 shotSpread: 3,
                 moveSpread: 6.75,
                 length: 7.3,
@@ -873,6 +891,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.75,
                 recoilDuration: 150,
                 fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
                 shotSpread: 2,
                 moveSpread: 6,
                 length: 7.75,
@@ -908,6 +927,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.75,
                 recoilDuration: 130,
                 fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
                 shotSpread: 2,
                 moveSpread: 4,
                 length: 7.9,
@@ -1017,6 +1037,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.75,
                 recoilDuration: 145,
                 fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
                 shotSpread: 5,
                 moveSpread: 10,
                 length: 7.3,
@@ -1091,6 +1112,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.7, // also test out 6.75
                 recoilDuration: 200,
                 fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
                 shotSpread: 3.5,
                 moveSpread: 7.5, // also test out 6.5, 7, 8
                 length: 9.47,
@@ -1131,6 +1153,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.7,
                 recoilDuration: 175,
                 fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
                 shotSpread: 3,
                 moveSpread: 4.5,
                 length: 8,
@@ -1192,6 +1215,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.65,
                 recoilDuration: 200,
                 fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
                 shotSpread: 2,
                 moveSpread: 4.5,
                 length: 8.6,
@@ -1247,6 +1271,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.65,
                 recoilDuration: 200,
                 fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
                 shotSpread: 3,
                 moveSpread: 8,
                 length: 7.15,
@@ -1301,6 +1326,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.75,
                 recoilDuration: 140,
                 fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
                 shotSpread: 3.5,
                 moveSpread: 8,
                 length: 7.8,
@@ -1963,6 +1989,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.7,
                 recoilDuration: 200,
                 fireMode: FireMode.Single,
+                bulletFlyingSound: true,
                 shotSpread: 1,
                 moveSpread: 3.5,
                 length: 7.85,
@@ -2000,6 +2027,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.8,
                 recoilDuration: 155,
                 fireMode: FireMode.Single,
+                bulletFlyingSound: true,
                 shotSpread: 2,
                 moveSpread: 5,
                 length: 7.2,
@@ -2042,6 +2070,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.75,
                 recoilDuration: 200,
                 fireMode: FireMode.Single,
+                bulletFlyingSound: true,
                 shotSpread: 1,
                 moveSpread: 3.5,
                 length: 8.1,
@@ -2108,6 +2137,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.7,
                 recoilDuration: 300,
                 fireMode: FireMode.Single,
+                bulletFlyingSound: true,
                 shotSpread: 1,
                 moveSpread: 4,
                 length: 6.75,
@@ -2151,6 +2181,7 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                 recoilMultiplier: 0.8,
                 recoilDuration: 150,
                 fireMode: FireMode.Single,
+                bulletFlyingSound: true,
                 shotSpread: 3,
                 moveSpread: 5,
                 length: 7.9,
@@ -2371,6 +2402,385 @@ export const Guns = ObjectDefinitions.withDefault<GunDefinition>()(
                     }
                 }
             },
+
+            // New gun 
+            {
+                idString: "mp5",
+                name: "MP5",
+                ammoType: "9mm",
+                ammoSpawnAmount: 90,
+                capacity: 30,
+                extendedCapacity: 40,
+                reloadTime: 1.8,
+                fireDelay: 75,
+                switchDelay: 300,
+                recoilMultiplier: 0.7,
+                speedMultiplier: 0.92,
+                recoilDuration: 100,
+                fireMode: FireMode.Auto,
+                shotSpread: 3,
+                moveSpread: 5,
+                length: 7.2, // 6.5
+                fists: {
+                    left: { x: 95, y: -3 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 75, y: 0 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 10,
+                    obstacleMultiplier: 1,
+                    speed: 0.25,
+                    range: 130
+                },
+            },
+            {
+                idString: "m4a1",
+                name: "M4A1",
+                ammoType: "556mm",
+                ammoSpawnAmount: 90,
+                capacity: 30,
+                extendedCapacity: 45,
+                reloadTime: 2.3,
+                fireDelay: 70,
+                switchDelay: 400,
+                recoilMultiplier: 0.7,
+                speedMultiplier: 0.9,
+                recoilDuration: 130,
+                fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
+                shotSpread: 2,
+                moveSpread: 4,
+                length: 7.9, // 7.4
+                fists: {
+                    left: { x: 110, y: -3 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 85, y: 1 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 13,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.3,
+                    range: 160
+                },
+            },
+            {
+                idString: "scar_l",
+                name: "SCAR-L",
+                ammoType: "556mm",
+                ammoSpawnAmount: 90,
+                capacity: 30,
+                extendedCapacity: 45,
+                reloadTime: 2.4,
+                fireDelay: 96,
+                switchDelay: 400,
+                recoilMultiplier: 0.75,
+                speedMultiplier: 0.88,
+                recoilDuration: 140,
+                fireMode: FireMode.Auto,
+                bulletFlyingSound: true,
+                shotSpread: 2.5,
+                moveSpread: 5,
+                length: 7.9,
+                fists: {
+                    left: { x: 115, y: -3 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 85, y: 0 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 12.5,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.28,
+                    range: 160
+                },
+            },
+            {
+                idString: "groza",
+                name: "GROZA",
+                ammoType: "762mm",
+                ammoSpawnAmount: 90,
+                capacity: 30,
+                extendedCapacity: 45,
+                reloadTime: 2.4,
+                fireDelay: 80,
+                switchDelay: 400,
+                recoilMultiplier: 0.8,
+                speedMultiplier: 0.9,
+                recoilDuration: 140,
+                fireMode: FireMode.Auto,
+                shotSpread: 2.5,
+                moveSpread: 5,
+                length: 7.8, // 7.2
+                fists: {
+                    left: { x: 115, y: -3 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 85, y: 0 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 12.5,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.28,
+                    range: 160
+                },
+            },
+            {
+                idString: "famas",
+                name: "FAMAS",
+                ammoType: "556mm",
+                ammoSpawnAmount: 90,
+                capacity: 30,
+                extendedCapacity: 45,
+                reloadTime: 2.7,
+                fireDelay: 55,
+                switchDelay: 400,
+                recoilMultiplier: 0.85,
+                speedMultiplier: 0.88,
+                recoilDuration: 150,
+                fireMode: FireMode.Burst,
+                burstProperties: {
+                    shotsPerBurst: 3,
+                    burstCooldown: 250
+                },
+                shotSpread: 3,
+                moveSpread: 6,
+                length: 7.5,
+                fists: {
+                    left: { x: 100, y: -2 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 80, y: 0 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 11.5,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.28,
+                    range: 160
+                },
+            },
+            {
+                idString: "m134_minigun",
+                name: "M134 Minigun",
+                ammoType: "762mm",
+                ammoSpawnAmount: 750,
+                capacity: 250,
+                extendedCapacity: 250,
+                reloadTime: 5.0,
+                fireDelay: 30,
+                switchDelay: 500,
+                stopSound: "m134_minigun_stop",
+                bulletFlyingSound: true,
+                recoilMultiplier: 0.4,
+                speedMultiplier: 0.5,
+                recoilDuration: 300,
+                fireMode: FireMode.Auto,
+                shotSpread: 4,
+                moveSpread: 6,
+                length: 11.3,
+                bulletOffset: 1.8,
+                fists: {
+                    left: { x: 110, y: 26 },
+                    right: { x: 40, y: 36 },
+                    rightZIndex: 4,
+                    leftZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 125, y: 40 } },
+                casingParticles: [
+                    { frame: "casing_762x39mm", position: { x: 3.5, y: 2.8 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 14,
+                    obstacleMultiplier: 2,
+                    speed: 0.3,
+                    range: 200,
+                    tracer: { width: 1.1, length: 1.4 },
+                },
+                gatling: {
+                    barrelCount: 6,
+                    barrelRadius: 0.6,
+                    rotationSpeed: 333  // RPM of barrels (4000 rounds/min / 6 = ~667 RPM; scales with spin-up)
+                },
+                muzzleOffsetPixels: 35,
+                spinUpTime: 1000,
+            },
+            {
+                idString: "rpk",
+                name: "RPK",
+                ammoType: "762mm",
+                ammoSpawnAmount: 120,
+                capacity: 75,
+                extendedCapacity: 100,
+                reloadTime: 3.2,
+                fireDelay: 100,
+                switchDelay: 400,
+                bulletFlyingSound: true,
+                recoilMultiplier: 0.8,
+                speedMultiplier: 0.82,
+                recoilDuration: 180,
+                fireMode: FireMode.Auto,
+                shotSpread: 2.5,
+                moveSpread: 5,
+                length: 9.5,
+                fists: {
+                    left: { x: 115, y: -4 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 90, y: 0 } },
+                casingParticles: [
+                    { frame: "casing_762x39mm", position: { x: 4.2, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.automatic,
+                ballistics: {
+                    damage: 14.5,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.26,
+                    range: 180,
+                    tracer: { width: 1.1, length: 1.4 }
+                },
+            },
+            {
+                idString: "spas12",
+                name: "SPAS-12",
+                ammoType: "12g",
+                ammoSpawnAmount: 24,
+                capacity: 8,
+                extendedCapacity: 12,
+                reloadTime: 0.7,
+                shotsPerReload: 1,
+                fireDelay: 250,
+                switchDelay: 700,
+                recoilMultiplier: 0.65,
+                speedMultiplier: 0.85,
+                recoilDuration: 500,
+                fireMode: FireMode.Single,
+                bulletCount: 8,
+                shotSpread: 8,
+                moveSpread: 10,
+                jitterRadius: 0.8,
+                length: 8,
+                fists: {
+                    left: { x: 110, y: -3 },
+                    right: { x: 45, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 85, y: 2 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.6 } }
+                ],
+                gasParticles: gasParticlePresets.shotgun,
+                ballistics: {
+                    damage: 10,
+                    obstacleMultiplier: 1,
+                    speed: 0.18,
+                    range: 60,
+                    tracer: { length: 0.7 }
+                },
+            },
+            {
+                idString: "barrett_m82",
+                name: "Barrett M82",
+                ammoType: "338lap",
+                ammoSpawnAmount: 30,
+                capacity: 10,
+                extendedCapacity: 15,
+                reloadTime: 4,
+                fireDelay: 1200,
+                switchDelay: 900,
+                recoilMultiplier: 0.45,
+                speedMultiplier: 0.75,
+                recoilDuration: 1200,
+                fireMode: FireMode.Single,
+                shotSpread: 0.5,
+                moveSpread: 1,
+                length: 10.5,
+                fists: {
+                    left: { x: 100, y: 0 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 110, y: 2 } },
+                casingParticles: [
+                    { position: { x: 4.5, y: 0.6 } }
+                ],
+                gasParticles: gasParticlePresets.rifle,
+                ballistics: {
+                    damage: 150,
+                    obstacleMultiplier: 2,
+                    speed: 0.5,
+                    range: 300,
+                    tracer: { width: 2.5, length: 4 }
+                },
+            },
+            {
+                idString: "mk12",
+                name: "Mk12 SPR",
+                ammoType: "556mm",
+                ammoSpawnAmount: 80,
+                capacity: 20,
+                extendedCapacity: 30,
+                reloadTime: 2.4,
+                fireDelay: 200,
+                switchDelay: 400,
+                recoilMultiplier: 0.7,
+                speedMultiplier: 0.85,
+                recoilDuration: 200,
+                fireMode: FireMode.Single,
+                shotSpread: 1,
+                moveSpread: 2,
+                length: 9.3,
+                fists: {
+                    left: { x: 110, y: -2 },
+                    right: { x: 40, y: 0 },
+                    rightZIndex: 4,
+                    animationDuration: 100
+                },
+                image: { position: { x: 85, y: 2 } },
+                casingParticles: [
+                    { position: { x: 4, y: 0.4 } }
+                ],
+                gasParticles: gasParticlePresets.rifle,
+                ballistics: {
+                    damage: 30,
+                    obstacleMultiplier: 1.5,
+                    speed: 0.3,
+                    range: 230,
+                    tracer: { length: 1.5 }
+                },
+            }
+
         ] satisfies ReadonlyArray<RawDefinition<RawGunDefinition>>).map(e => {
             if (e.dual === undefined) {
                 return [e];

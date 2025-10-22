@@ -6,7 +6,7 @@ import { Orientation } from "@common/typings";
 import { type BulletOptions } from "@common/utils/baseBullet";
 import { CircleHitbox, RectangleHitbox } from "@common/utils/hitbox";
 import { adjacentOrEqualLayer, isStairLayer } from "@common/utils/layer";
-import { Angle, Geometry, HALF_PI, resolveStairInteraction } from "@common/utils/math";
+import { Angle, Geometry, HALF_PI, TAU, resolveStairInteraction } from "@common/utils/math";
 import { type DeepMutable, type DeepRequired, type Timeout } from "@common/utils/misc";
 import { ItemType, type ReifiableDef } from "@common/utils/objectDefinitions";
 import { randomFloat, randomPointInsideCircle } from "@common/utils/random";
@@ -35,13 +35,22 @@ export class GunItem extends InventoryItem<GunDefinition> {
     // those need to be nodejs timeouts because some guns fire rate are too close to the tick rate
     private _burstTimeout?: NodeJS.Timeout;
     private _autoFireTimeout?: NodeJS.Timeout;
+    private _spinUpTimeout?: NodeJS.Timeout;
+    private _spinDownTimeout?: NodeJS.Timeout;
 
     private _altFire = false;
+
+    private _isSpinning = false;
+    private _currentBarrelIndex = 0;
 
     cancelAllTimers(): void {
         this._reloadTimeout?.kill();
         clearTimeout(this._burstTimeout);
         clearTimeout(this._autoFireTimeout);
+        clearTimeout(this._spinUpTimeout);
+        clearTimeout(this._spinDownTimeout);
+        this._isSpinning = false;
+        this._currentBarrelIndex = 0;
     }
 
     cancelReload(): void { this._reloadTimeout?.kill(); }
@@ -83,6 +92,14 @@ export class GunItem extends InventoryItem<GunDefinition> {
             || this !== owner.activeItem
         ) {
             this._consecutiveShots = 0;
+            clearTimeout(this._spinDownTimeout);
+            if (this._isSpinning) {
+                owner.animation = AnimationType.GunSpinDown;
+                owner.setPartialDirty();
+                this._spinDownTimeout = setTimeout(() => {
+                    this._isSpinning = false;
+                }, definition.spinUpTime);
+            }
             return;
         }
 
@@ -99,13 +116,30 @@ export class GunItem extends InventoryItem<GunDefinition> {
             }
 
             this._consecutiveShots = 0;
+            this._isSpinning = false;
+            clearTimeout(this._spinDownTimeout);
+            return;
+        }
+
+        clearTimeout(this._spinDownTimeout);
+
+        if (definition.spinUpTime !== undefined && !this._isSpinning) {
+            // Start spin-up for gatling guns
+            owner.animation = AnimationType.GunSpinUp;
+            owner.setPartialDirty();
+
+            clearTimeout(this._spinUpTimeout);
+            this._spinUpTimeout = setTimeout(() => {
+                this._isSpinning = true;
+                this._useItemNoDelayCheck(skipAttackCheck);
+            }, definition.spinUpTime);
             return;
         }
 
         owner.action?.cancel();
         clearTimeout(this._burstTimeout);
 
-        owner.animation = definition.ballistics.lastShotFX && this.ammo === 1
+        owner.animation = (definition.ballistics.lastShotFX || definition.gatling) && this.ammo === 1
             ? AnimationType.LastShot
             : this._altFire
                 ? AnimationType.GunFireAlt
@@ -295,6 +329,17 @@ export class GunItem extends InventoryItem<GunDefinition> {
                 rotation = randomFloat(-1, 1);
             }
 
+            // Handle Gatling barrel offset if applicable
+            if (definition.gatling) {
+                const barrelAngle = (this._currentBarrelIndex / definition.gatling.barrelCount) * TAU;
+                const barrelOffset = Vec.create(
+                    definition.gatling.barrelRadius * Math.cos(barrelAngle),
+                    definition.gatling.barrelRadius * Math.sin(barrelAngle)
+                );
+                finalSpawnPosition = Vec.add(finalSpawnPosition, Vec.rotate(barrelOffset, owner.rotation));
+                this._currentBarrelIndex = (this._currentBarrelIndex + 1) % definition.gatling.barrelCount;
+            }
+
             rotation *= spread;
 
             if (!doSplinterGrouping) {
@@ -338,6 +383,7 @@ export class GunItem extends InventoryItem<GunDefinition> {
 
         if (this.ammo <= 0) {
             this._consecutiveShots = 0;
+            this._isSpinning = false;
             this._reloadTimeout = owner.game.addTimeout(
                 this.reload.bind(this, true),
                 definition.fireDelay
@@ -407,5 +453,8 @@ export class GunItem extends InventoryItem<GunDefinition> {
         this._reloadTimeout = void this._reloadTimeout?.kill();
         this._burstTimeout = void clearTimeout(this._burstTimeout);
         this._autoFireTimeout = void clearTimeout(this._autoFireTimeout);
+        this._spinUpTimeout = void clearTimeout(this._spinUpTimeout);
+        this._spinDownTimeout = void clearTimeout(this._spinDownTimeout);
+        this._isSpinning = false;
     }
 }

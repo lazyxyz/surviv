@@ -14,7 +14,9 @@ import { type GunItem } from "../inventory/gunItem";
 import { GameMap } from "../map";
 import { Gamer, type PlayerContainer } from "../objects/gamer";
 import { getLootFromTable, LootTables } from "./lootTables";
-import { PerkCategories } from "@common/definitions/perks";
+import { PerkCategories, Perks } from "@common/definitions/perks";
+import { Melees } from "@common/definitions/melees";
+import { Scopes } from "@common/definitions/scopes";
 
 export interface RiverDefinition {
     readonly minAmount: number
@@ -818,35 +820,56 @@ const maps = {
             map.game.addLoot(Guns.fromString(gun).ammoType, Vec.create(this.width / 2, this.height / 2 - 10), 0, { count: Infinity });
         }
     },
+    
     gunsTest: (() => {
-        const Guns = Loots.byType(ItemType.Gun);
-
         return {
-            width: 64,
-            height: 48 + (16 * Guns.length),
+            width: 200,
+            height: 200,
             beachSize: 8,
             oceanSize: 8,
             onGenerate(map) {
-                for (let i = 0, l = Guns.length; i < l; i++) {
-                    const player = new Gamer(
-                        map.game,
-                        { getUserData: () => { return {}; } } as unknown as WebSocket<PlayerContainer>,
-                        Vec.create(32, 32 + (16 * i))
-                    );
-                    const gun = Guns[i];
+                let itemPos = Vec.create(0, 20); // Start slightly inset from top-left for better spacing
+                const colSpacing = 15;
+                const rowSpacing = 20;
+                const maxX = map.width - 20; // Leave margin on right
 
-                    player.inventory.addOrReplaceWeapon(0, gun.idString);
-                    (player.inventory.getWeapon(0) as GunItem).ammo = gun.capacity;
-                    player.inventory.items.setItem(gun.ammoType, Infinity);
-                    player.disableInvulnerability();
-                    // setInterval(() => player.activeItem.useItem(), 30);
-                    map.game.addLoot(gun.idString, Vec.create(16, 32 + (16 * i)), 0);
-                    map.game.addLoot(gun.ammoType, Vec.create(16, 32 + (16 * i)), 0, { count: Infinity });
-                    map.game.grid.addObject(player);
+                const placeItem = (item: any, isGun = false) => {
+                    map.game.addLoot(item, itemPos, 0, { count: 1, pushVel: 0, jitterSpawn: false });
+                    if (isGun) {
+                        map.game.addLoot(item.ammoType, itemPos, 0, { count: Infinity });
+                    }
+
+                    itemPos.x += colSpacing;
+                    if (itemPos.x > maxX) {
+                        itemPos.x = 0;
+                        itemPos.y += rowSpacing;
+                    }
+                };
+
+                // Place guns
+                for (const item of Guns.definitions) {
+                    placeItem(item, true);
+                }
+
+                // Place perks
+                for (const item of Perks.definitions) {
+                    placeItem(item);
+                }
+
+                // Place melees
+                for (const item of Melees.definitions) {
+                    placeItem(item);
+                }
+               
+                // Place scopes
+                for (const item of Scopes.definitions) {
+                    placeItem(item);
                 }
             }
         };
     })(),
+
+
     obstaclesTest: {
         width: 128,
         height: 128,
