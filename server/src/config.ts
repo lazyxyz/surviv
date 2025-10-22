@@ -23,6 +23,8 @@ export const Config = {
     squadPort: 9001,
     v50Port: 9500,
     
+    // addBot: true,
+
     addBot: false,
     testMode: "gunsTest", // For Testing
 
