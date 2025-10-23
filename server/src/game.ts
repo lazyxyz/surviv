@@ -114,6 +114,16 @@ export class Game implements GameData {
 
     readonly gameMode: Mode;
 
+    destroyedObstacles: Array<{
+        definition: ObstacleDefinition
+        position: Vector
+        rotation: number
+        orientation: number
+        scale: number
+        layer: Layer
+        variation?: number
+    }> = [];
+
     readonly teams = new (class SetArray<T> extends Set<T> {
         private _valueCache?: T[];
         get valueArray(): T[] {
@@ -502,18 +512,18 @@ export class Game implements GameData {
             );
 
 
-            // const obstacles = [...this.grid.pool.getCategory(ObjectCategory.Obstacle)];
-            // for (const obstacle of obstacles) {
-            //     if (!obstacle.dead) {
-            //         this.removeObject(obstacle);
-            //     }
+            // for (const data of this.destroyedObstacles) {
+            //     this.map.generateObstacle(data.definition, data.position, {
+            //         rotation: data.rotation,
+            //         scale: data.scale,
+            //         layer: data.layer,
+            //     });
             // }
 
-            this.gas.reset();
-            // this.gas.dirty = true;
-            // this.gas.completionRatioDirty = true;
+            // this.destroyedObstacles = [];
 
-            setTimeout(() => this.gas.advanceGasStage(), 10000);
+            this.gas.reset();
+            setTimeout(() => this.gas.advanceGasStage(), 50);
         }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {

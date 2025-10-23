@@ -181,6 +181,10 @@ export class Game {
         this.map = new Minimap(this);
         this.camera = new Camera(this);
         this.particleManager = new ParticleManager(this);
+        this.gasRender = new GasRender(PIXI_SCALE);
+        this.camera.addObject(this.gasRender.graphics);
+        this.map.indicator.setFrame("player_indicator");
+
 
         this.soundManager = new SoundManager(this);
         this.inputManager.generateBindsConfigScreen();
@@ -293,11 +297,6 @@ export class Game {
 
 
     setupGame() {
-        this.gasRender = new GasRender(PIXI_SCALE, this.gameMode);
-
-        this.camera.addObject(this.gasRender.graphics);
-        this.map.indicator.setFrame("player_indicator");
-
         const particleEffects = Modes[this.gameMode].particleEffects;
         if (particleEffects !== undefined) {
             const This = this;
@@ -599,10 +598,7 @@ export class Game {
             }
             case packet instanceof ResetPacket: {
                 this.gas.reset();
-                // this.gasRender?.graphics.clear();
-                // this.gasRender = new GasRender(PIXI_SCALE, this.gameMode);
-
-                // this.camera.addObject(this.gasRender)
+                this.map.clear();
 
                 this._timeouts.clear();
                 break

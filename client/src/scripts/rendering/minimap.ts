@@ -98,7 +98,7 @@ export class Minimap {
             throw new Error("Class 'Minimap' has already been instantiated");
         }
         Minimap._instantiated = true;
-        this.gasRender = new GasRender(1, this.game.gameMode)
+        this.gasRender = new GasRender(1)
 
         this._objectsContainer.mask = this.mask;
 
