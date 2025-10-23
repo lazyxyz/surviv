@@ -63,11 +63,11 @@ function setTeamParameters(params: URLSearchParams): void {
 
 
 async function initializePlayButtons(game: Game, account: Account): Promise<void> {
-    const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
+    const playButtons = [$("#btn-play-solo"), $("#btn-play-squad"), $('#btn-play-cursed-island')];
 
     playButtons.forEach((button, index) => {
         button.addClass("play-button");
-        const translationString = `play_${["solo", "squad"][index]}` as TranslationKeys;
+        const translationString = `play_${["solo", "squad", "cursed_island"][index]}` as TranslationKeys;
         const logoSrc = index === 0 ? "./img/misc/user.svg" : "./img/misc/user-group.svg";
         button.html(`
             <img class="btn-icon" width="26" height="26" src="${logoSrc}">
@@ -93,6 +93,16 @@ async function initializePlayButtons(game: Game, account: Account): Promise<void
         }
         if (!isClickAllowed()) return;
         await joinGame(TeamSize.Squad, game, account);
+    });
+    
+    playButtons[2].on("click", async () => {
+        console.log("HELLO")
+        if (!account.address) {
+            warningAlert("Please connect your wallet to continue!");
+            return;
+        }
+        if (!isClickAllowed()) return;
+        await joinGame(TeamSize.CursedIsland, game, account);
     });
 }
 

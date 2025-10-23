@@ -19,6 +19,9 @@ import { atlases as normalLowRes } from "virtual:spritesheets-jsons-low-res-norm
 import { atlases as desertHighRes } from "virtual:spritesheets-jsons-high-res-desert";
 import { atlases as desertLowRes } from "virtual:spritesheets-jsons-low-res-desert";
 
+import { atlases as cursedIslandHighRes } from "virtual:spritesheets-jsons-high-res-cursedIsland";
+import { atlases as cursedIslandLowRes } from "virtual:spritesheets-jsons-low-res-cursedIsland";
+
 const textures: Record<string, Texture> = {};
 
 const loadingText = $("#loading-text");
@@ -38,6 +41,7 @@ export async function loadTextures(renderer: Renderer, highResolution: boolean, 
         winter: highResolution ? winterHighRes : winterLowRes,
         normal: highResolution ? normalHighRes : normalLowRes,
         desert: highResolution ? desertHighRes : desertLowRes,
+        cursedIsland: highResolution ? cursedIslandHighRes : cursedIslandLowRes,
     };
 
     const spritesheets: SpritesheetData[] = modeAtlases[modeName];

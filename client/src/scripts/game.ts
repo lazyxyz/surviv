@@ -63,6 +63,7 @@ import { autoPickup, updateChatSendAllVisibility, updateUsersBadge } from "./ui/
 import { teamSocket } from "./ui/play";
 import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 import { CustomTeamMessages } from "@common/typings";
+import { ResetPacket } from "@common/packets/resetPackage";
 
 /* eslint-disable @stylistic/indent */
 
@@ -596,6 +597,17 @@ export class Game {
                 }, 5000);
                 break;
             }
+            case packet instanceof ResetPacket: {
+                this.gas.reset();
+                // this.gasRender?.graphics.clear();
+                // this.gasRender = new GasRender(PIXI_SCALE, this.gameMode);
+
+                // this.camera.addObject(this.gasRender)
+
+                this._timeouts.clear();
+                break
+            }
+
             case packet instanceof PickupPacket: {
                 const { output: { message, item } } = packet;
 

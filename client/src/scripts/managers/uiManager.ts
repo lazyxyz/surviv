@@ -30,7 +30,7 @@ import type { RewardsData } from "@common/packets/rewardsPacket";
 import { getBadgeImage } from "../inventory/badges";
 import { Modes } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "../..";
-import type { ServerChatPacket, ServerChatPacketData } from "@common/packets/chatPacket";
+import type {  ServerChatPacketData } from "@common/packets/chatPacket";
 
 function safeRound(value: number): number {
     if (0 < value && value <= 1) return 1;

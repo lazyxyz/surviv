@@ -615,6 +615,110 @@ const maps = {
         ]
     },
 
+    cursedIsland: {
+        width: 1924,
+        height: 1924,
+        oceanSize: 64,
+        beachSize: 16,
+        oases: {
+            minAmount: 7,
+            maxAmount: 7,
+            minRadius: 40,
+            maxRadius: 80,
+            bankWidth: 12
+        },
+        trails: {
+            minAmount: 7,
+            maxAmount: 7,
+            wideChance: 0.2,
+            minWidth: 2,
+            maxWidth: 4,
+            minWideWidth: 3,
+            maxWideWidth: 5,
+            maxWideAmount: 1
+        },
+        clearings: {
+            minWidth: 200,
+            minHeight: 150,
+            maxWidth: 250,
+            maxHeight: 200,
+            count: 2,
+            allowedObstacles: ["clearing_boulder", "flint_crate", "rock", "vibrant_bush", "river_chest", "lily_pad", "grenade_crate", "oak_leaf_pile", "river_rock", "melee_crate", "flint_stone"],
+            obstacles: [
+                { idString: "clearing_boulder", min: 3, max: 6 },
+                { idString: "flint_crate", min: 0, max: 2 },
+                { idString: "grenade_crate", min: 0, max: 2 },
+                { idString: "melee_crate", min: 0, max: 1 },
+                { idString: "flint_stone", min: 0, max: 1 }
+            ]
+        },
+        buildings: {
+            small_bridge: Infinity,
+            sea_traffic_control: 1,
+            tent_big_1: 3,
+            tent_big_2: 3,
+            tent_big_3: 3,
+            tent_big_4: 3,
+            hay_shed_1: 1,
+            hay_shed_2: 3,
+            hay_shed_3: 3,
+            tent_1: 3,
+            tent_2: 3,
+            tent_3: 3,
+            tent_4: 3,
+            tent_5: 3,
+            outhouse: 10
+        },
+        obstacles: {
+            palm_tree: 100,
+            date_palm_tree: 150,
+            small_palm_tree: 50,
+            child_palm_tree: 60,
+            doum_palm_tree: 100,
+            quiver_tree: 60,
+            wood_barrel: 100,
+            ceramic_jar: 60,
+            barrel_cactus: 100,
+            century_plant: 100,
+            ghost_plant: 80,
+            pencil_cactus: 80,
+            bull_skeleton: 60,
+            dinosaur_skeleton: 15,
+            mammoth_skeleton: 5,
+            dry_tree: 100,
+            stump: 40,
+            hatchet_stump: 3,
+            regular_crate: 100,
+            flint_crate: 10,
+            grenade_crate: 50,
+            rock: 220,
+            clearing_boulder: 15,
+            river_chest: 7,
+            river_rock: 20,
+            lily_pad: 15,
+            barrel: 90,
+            viking_chest: 1,
+            super_barrel: 35,
+            melee_crate: 1,
+            gold_rock: 1,
+            loot_tree: 4,
+            loot_barrel: 1,
+            flint_stone: 1,
+            pebble: 110
+        },
+        loots: {
+            ground_loot: 40
+        },
+        places: [
+            { name: "Sand Antler", position: Vec.create(0.23, 0.2) },
+            { name: "Dune Fall", position: Vec.create(0.23, 0.8) },
+            { name: "Oasis Dam", position: Vec.create(0.75, 0.2) },
+            { name: "Crimson Dunes", position: Vec.create(0.72, 0.8) },
+            { name: "Mirage Farms", position: Vec.create(0.5, 0.35) },
+            { name: "Shadow Sands", position: Vec.create(0.5, 0.65) }
+        ]
+    },
+
     debug: {
         width: 1620,
         height: 1620,
@@ -820,7 +924,7 @@ const maps = {
             map.game.addLoot(Guns.fromString(gun).ammoType, Vec.create(this.width / 2, this.height / 2 - 10), 0, { count: Infinity });
         }
     },
-    
+
     gunsTest: (() => {
         return {
             width: 200,
@@ -860,7 +964,7 @@ const maps = {
                 for (const item of Melees.definitions) {
                     placeItem(item);
                 }
-               
+
                 // Place scopes
                 for (const item of Scopes.definitions) {
                     placeItem(item);

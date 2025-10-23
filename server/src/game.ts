@@ -60,6 +60,7 @@ import { Skins } from "@common/definitions/skins";
 import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
 import { Emotes } from "@common/definitions/emotes";
+import { ResetPacket } from "@common/packets/resetPackage";
 
 
 /*
@@ -75,8 +76,9 @@ export class Game implements GameData {
     public readonly port: number;
     public readonly gameId: string;
 
+    private gas: Gas;
+
     readonly map: GameMap;
-    readonly gas: Gas;
     readonly grid: Grid;
     readonly pluginManager = new PluginManager(this);
 
@@ -231,6 +233,8 @@ export class Game implements GameData {
 
     readonly app: any;
 
+    gameWave: number = 1;
+
     /**
      * **Warning**: This is a getter _with side effects_! Make
      * sure to either use the id returned by this getter or
@@ -252,7 +256,13 @@ export class Game implements GameData {
         this.port = port;
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
-        this.gameMode = this.getRandomMode();
+
+        if (maxTeamSize == TeamSize.CursedIsland) {
+            this.gameMode = "cursedIsland";
+        } else {
+            this.gameMode = this.getRandomMode();
+        }
+
         this.teamMode = this.maxTeamSize > TeamSize.Solo;
         this.updateGameData({
             aliveCount: 0,
@@ -482,6 +492,28 @@ export class Game implements GameData {
             )
         ) {
             this.endGame();
+        }
+
+        // game wave end
+        if (this.gas.isFinal()) {
+
+            this.packets.push(
+                ResetPacket.create()
+            );
+
+
+            // const obstacles = [...this.grid.pool.getCategory(ObjectCategory.Obstacle)];
+            // for (const obstacle of obstacles) {
+            //     if (!obstacle.dead) {
+            //         this.removeObject(obstacle);
+            //     }
+            // }
+
+            this.gas.reset();
+            // this.gas.dirty = true;
+            // this.gas.completionRatioDirty = true;
+
+            setTimeout(() => this.gas.advanceGasStage(), 10000);
         }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {

@@ -148,6 +148,7 @@ export enum TeamSize {
     Solo = 1,
     Squad = 4,
     V50 = 50,
+    CursedIsland = 10,
 }
 
 export enum ObjectCategory {
@@ -187,7 +188,8 @@ export const enum KillfeedMessageType {
 export const enum GasState {
     Inactive,
     Waiting,
-    Advancing
+    Advancing,
+    End
 }
 
 export const enum FireMode {

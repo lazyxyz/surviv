@@ -155,12 +155,17 @@ export async function newGame(maxTeamSize?: TeamSize): Promise<number> {
             case TeamSize.Solo:
                 startGameId = Config.soloPort;
                 break;
+                
             case TeamSize.Squad:
                 startGameId = Config.squadPort;
                 break;
 
             case TeamSize.V50:
                 startGameId = Config.v50Port;
+                break;
+
+            case TeamSize.CursedIsland:
+                startGameId = Config.cursedIslandPort;
                 break;
         }
 

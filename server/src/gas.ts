@@ -26,6 +26,8 @@ export class Gas {
     dps = 0;
     private _lastDamageTimestamp;
 
+    private _isFinal = false;
+
     dirty = false;
     completionRatioDirty = false;
 
@@ -158,6 +160,10 @@ export class Gas {
         this.dirty = true;
         this.completionRatioDirty = true;
 
+        if (currentStage.state === GasState.End) {
+            this._isFinal = true;
+        }
+
         if (currentStage.summonAirdrop) {
             this.game.summonAirdrop(
                 this.game.map.getRandomPosition(
@@ -179,5 +185,36 @@ export class Gas {
 
     isInGas(position: Vector): boolean {
         return Geometry.distanceSquared(position, this.currentPosition) >= this.currentRadius ** 2;
+    }
+
+    isFinal(): boolean {
+        return this._isFinal;
+    }
+
+    reset(): void {
+        this.stage = 0;
+        this.state = GasState.Inactive;
+        this.currentDuration = 0;
+        this.countdownStart = 0;
+        this.completionRatio = 0;
+
+        const firstStage = GasStages[0];
+        this.oldRadius = firstStage.oldRadius * this.mapSize;
+        this.newRadius = firstStage.newRadius * this.mapSize;
+        this.currentRadius = firstStage.oldRadius * this.mapSize;
+
+        this.oldPosition = Vec.create(this.game.map.width / 2, this.game.map.height / 2);
+        this.newPosition = Vec.clone(this.oldPosition);
+        this.currentPosition = Vec.clone(this.oldPosition);
+
+        this.dps = 0;
+        this._lastDamageTimestamp = this.game.now;
+
+        this._isFinal = false;
+
+        this.dirty = true;
+        this.completionRatioDirty = false;
+
+        this._doDamage = false;
     }
 }

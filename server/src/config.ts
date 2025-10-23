@@ -22,6 +22,7 @@ export const Config = {
     soloPort: 8001,
     squadPort: 9001,
     v50Port: 9500,
+    cursedIslandPort: 9600,
     
     addBot: true,
 
@@ -38,7 +39,8 @@ export const Config = {
     maxPlayersPerGame: 100,
 
     maxGames: 20,
-    gameJoinTime: 90,
+    // gameJoinTime: 90,
+    gameJoinTime: 10,
 
     gas: { mode: GasMode.Normal },
 
@@ -74,6 +76,7 @@ export interface ConfigType {
     readonly soloPort: number;
     readonly squadPort: number;
     readonly v50Port: number;
+    readonly cursedIslandPort: number;
     readonly addBot: boolean;
 
     readonly testMode?: string;

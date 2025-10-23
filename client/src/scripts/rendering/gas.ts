@@ -127,6 +127,25 @@ export class Gas {
             }
         }
     }
+
+    reset(): void {
+        this.state = GasState.Inactive;
+        this.currentDuration = 0;
+        this.oldPosition = Vec.create(0, 0);
+        this.lastPosition = Vec.create(0, 0);
+        this.position = Vec.create(0, 0);
+        this.newPosition = Vec.create(0, 0);
+        this.oldRadius = 2048;
+        this.lastRadius = 2048;
+        this.radius = 2048;
+        this.newRadius = 2048;
+        this.lastUpdateTime = Date.now();
+
+        this._ui.msgContainer.fadeOut();
+        this._ui.timer.removeClass("advancing");
+        this._ui.timerImg.attr("src", "./img/misc/gas-waiting-icon.svg");
+        this._ui.timerText.text("0:00");
+    }
 }
 
 export class GasRender {
