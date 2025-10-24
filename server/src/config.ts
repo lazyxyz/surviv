@@ -1,4 +1,4 @@
-import { Layer, TeamSize } from "@common/constants";
+import { Layer, MODE } from "@common/constants";
 import { type Vector } from "@common/utils/vector";
 import { type Game } from "./game";
 import { type GamePlugin } from "./pluginManager";
@@ -30,11 +30,6 @@ export const Config = {
     // testMode: "gunsTest", // For Testing
 
     spawn: { mode: SpawnMode.Normal },
-
-    maxTeamSize: {
-        rotation: [TeamSize.Solo, TeamSize.Squad],
-        switchSchedule: 'all' // open all
-    },
 
     maxPlayersPerGame: 100,
 
@@ -110,24 +105,6 @@ export interface ConfigType {
         }
         | { readonly mode: SpawnMode.Center }
 
-    /**
-     * The maximum number of players allowed to join a team.
-     *
-     * Specifying a {@link TeamSize} causes the team size to
-     * simply remain at that value indefinitely; alternatively,
-     * specifying a cron pattern and an array of team sizes
-     * allows for team sizes to change periodically
-     */
-    readonly maxTeamSize: TeamSize | {
-        /**
-         * The duration between switches. Must be a cron pattern.
-         */
-        readonly switchSchedule: string
-        /**
-         * The team sizes to switch between.
-         */
-        readonly rotation: TeamSize[]
-    }
 
     /**
      * Whether to start the game as soon as joining (debug feature, also disables winning when 1 player is remaining for obvious reasons).

@@ -1,4 +1,4 @@
-import { EMOTE_SLOTS, GameConstants, KillfeedMessageType, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { EMOTE_SLOTS, GameConstants, KillfeedMessageType, Layer, MODE, ObjectCategory } from "@common/constants";
 import { type ExplosionDefinition } from "@common/definitions/explosions";
 import { Loots, type LootDefinition } from "@common/definitions/loots";
 import { MapPings, type MapPing } from "@common/definitions/mapPings";
@@ -49,7 +49,7 @@ import { IDAllocator } from "./utils/idAllocator";
 import { cleanUsername, Logger, removeFrom } from "./utils/misc";
 import { Assassin, BotType, Zombie } from "./objects/bots";
 import { Ninja } from "./objects/bots/ninja";
-import { Mode, ModeToNumber } from "@common/definitions/modes";
+import {  MAP, ModeToNumber } from "@common/definitions/modes";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { validateJWT } from "./api/api";
 import { getIP, createServer } from "./utils/serverHelpers";
@@ -76,7 +76,7 @@ export class Game implements GameData {
     public readonly port: number;
     public readonly gameId: string;
 
-    private gas: Gas;
+    gas: Gas;
 
     readonly map: GameMap;
     readonly grid: Grid;
@@ -108,11 +108,11 @@ export class Game implements GameData {
      */
     readonly packets: InputPacket[] = [];
 
-    readonly maxTeamSize: TeamSize;
+    readonly maxTeamSize: MODE;
 
     readonly teamMode: boolean;
 
-    readonly gameMode: Mode;
+    readonly gameMap: MAP;
 
     destroyedObstacles: Array<{
         definition: ObstacleDefinition
@@ -254,7 +254,7 @@ export class Game implements GameData {
         return this._idAllocator.takeNext();
     }
 
-    getRandomMode(): Mode {
+    getRandomMode(): MAP {
         const random = Math.random() * 100;
         if (random < 40) return "desert"; // 40% desert
         if (random < 70) return "fall";
@@ -262,18 +262,18 @@ export class Game implements GameData {
     }
 
 
-    constructor(port: number, maxTeamSize: TeamSize, gameId: string) {
+    constructor(port: number, maxTeamSize: MODE, gameId: string) {
         this.port = port;
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
 
-        if (maxTeamSize == TeamSize.CursedIsland) {
-            this.gameMode = "cursedIsland";
+        if (maxTeamSize == MODE.CursedIsland) {
+            this.gameMap = "cursedIsland";
         } else {
-            this.gameMode = this.getRandomMode();
+            this.gameMap = this.getRandomMode();
         }
 
-        this.teamMode = this.maxTeamSize > TeamSize.Solo;
+        this.teamMode = this.maxTeamSize > MODE.Solo;
         this.updateGameData({
             aliveCount: 0,
             allowJoin: false,
@@ -284,7 +284,7 @@ export class Game implements GameData {
 
         this.pluginManager.loadPlugins();
 
-        const { width, height } = Maps[this.gameMode];
+        const { width, height } = Maps[this.gameMap];
         this.grid = new Grid(this, width, height);
         this.map = new GameMap(this);
         this.gas = new Gas(this);
@@ -506,21 +506,11 @@ export class Game implements GameData {
 
         // game wave end
         if (this.gas.isFinal()) {
-
             this.packets.push(
                 ResetPacket.create()
             );
 
-
-            // for (const data of this.destroyedObstacles) {
-            //     this.map.generateObstacle(data.definition, data.position, {
-            //         rotation: data.rotation,
-            //         scale: data.scale,
-            //         layer: data.layer,
-            //     });
-            // }
-
-            // this.destroyedObstacles = [];
+            this.map.regenerateObstacles();
 
             this.gas.reset();
             setTimeout(() => this.gas.advanceGasStage(), 50);
@@ -1495,7 +1485,7 @@ export class Game implements GameData {
                         JoinPacket.create({
                             isMobile: false,
                             address: data.address ? data.address : "",
-                            gameMode: ModeToNumber[game.gameMode],
+                            gameMode: ModeToNumber[game.gameMap],
                             emotes: emotes,
                             name: data.name,
                             badge: Badges.fromStringSafe(data.badge),

@@ -1,4 +1,4 @@
-import { type TeamSize } from "@common/constants";
+import { type MODE } from "@common/constants";
 import { toBeHex } from "ethers";
 
 export const Config = {
@@ -60,7 +60,7 @@ export interface Region {
 export interface ServerInfo {
     readonly protocolVersion: number
     readonly playerCount: number
-    readonly maxTeamSize: TeamSize
+    readonly maxTeamSize: MODE
     readonly nextSwitchTime: number
 };
 

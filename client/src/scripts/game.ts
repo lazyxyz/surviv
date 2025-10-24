@@ -1,4 +1,4 @@
-import { InputActions, InventoryMessages, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { InputActions, InventoryMessages, Layer, ObjectCategory, MODE } from "@common/constants";
 import { ArmorType } from "@common/definitions/armors";
 import { type BadgeDefinition } from "@common/definitions/badges";
 import { type DualGunNarrowing } from "@common/definitions/guns";
@@ -23,7 +23,6 @@ import { type ObjectsNetData } from "@common/utils/objectsSerializations";
 import { randomFloat, randomVector } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound, type Sound } from "@pixi/sound";
-import $ from "jquery";
 import { Application, Color } from "pixi.js";
 import "pixi.js/prepare";
 import { getTranslatedString } from "../translations";
@@ -56,7 +55,7 @@ import { Tween } from "./utils/tween";
 import { Account } from "./account";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { errorAlert } from "./modal";
-import { Modes, NumberToMode, type Mode } from "@common/definitions/modes";
+import {  Maps, NumberToMode, type MAP } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "..";
 import { resetPlayButtons, updateDisconnectTime } from "./ui/home";
 import { autoPickup, updateChatSendAllVisibility, updateUsersBadge } from "./ui/game";
@@ -123,9 +122,9 @@ export class Game {
     teamID = -1;
 
     teamMode = false;
-    teamSize = TeamSize.Solo;
+    teamSize = MODE.Solo;
     gameId = "";
-    gameMode: Mode = "winter";
+    gameMap: MAP = "winter";
     account: Account | undefined;
 
     /**
@@ -223,7 +222,7 @@ export class Game {
         return game;
     }
 
-    initPixi = async (gameMode: Mode): Promise<void> => {
+    initPixi = async (mapName: MAP): Promise<void> => {
         const renderMode = GAME_CONSOLE.getBuiltInCVar("cv_renderer");
         const renderRes = GAME_CONSOLE.getBuiltInCVar("cv_renderer_res");
         const pixi = this.pixi;
@@ -232,7 +231,7 @@ export class Game {
         if (this.pixi.stage.children.length == 0) {
             await this.pixi.init({
                 resizeTo: window,
-                background: getColors(this.gameMode).grass,
+                background: getColors(this.gameMap).grass,
                 antialias: GAME_CONSOLE.getBuiltInCVar("cv_antialias"),
                 autoDensity: true,
                 preferWebGLVersion: renderMode === "webgl1" ? 1 : 2,
@@ -280,7 +279,7 @@ export class Game {
             this.inputManager.isMobile
                 ? GAME_CONSOLE.getBuiltInCVar("mb_high_res_textures")
                 : GAME_CONSOLE.getBuiltInCVar("cv_high_res_textures")
-            , gameMode.toString()
+            , mapName.toString()
         );
 
         pixi.ticker.add(this._renderCallback);
@@ -297,7 +296,7 @@ export class Game {
 
 
     setupGame() {
-        const particleEffects = Modes[this.gameMode].particleEffects;
+        const particleEffects = Maps[this.gameMap].particleEffects;
         if (particleEffects !== undefined) {
             const This = this;
             const gravityOn = particleEffects.gravity;
@@ -523,8 +522,8 @@ export class Game {
     onPacket(packet: OutputPacket): void {
         switch (true) {
             case packet instanceof JoinPacket: {
-                this.gameMode = NumberToMode[packet.output.gameMode];
-                this.initPixi(this.gameMode).then(async _ => {
+                this.gameMap = NumberToMode[packet.output.gameMode];
+                this.initPixi(this.gameMap).then(async _ => {
                     this.uiManager.ui.loadingText.text(getTranslatedString("verifying_game_assets"));
                     this.uiManager.ui.splashMsg.hide();
 
@@ -597,10 +596,22 @@ export class Game {
                 break;
             }
             case packet instanceof ResetPacket: {
+                // for (const obj of this.objects.getCategory(ObjectCategory.Obstacle)) {
+                //     if (obj.dead && !obj.definition.noResidue) {
+                //         obj.destroy();
+                //         this.objects.delete(obj);
+                //     }
+                // }
+
+                for (const obj of this.objects.getCategory(ObjectCategory.DeathMarker)) {
+                    obj.destroy();
+                    this.objects.delete(obj);
+                }
+
                 this.gas.reset();
                 this.map.clear();
-
                 this._timeouts.clear();
+
                 break
             }
 
@@ -672,7 +683,7 @@ export class Game {
         // game started if page is out of focus.
         if (!document.hasFocus()) this.soundManager.play("join_notification");
 
-        const ambience = Modes[this.gameMode].ambience;
+        const ambience = Maps[this.gameMap].ambience;
         if (ambience) {
             this.ambience = this.soundManager.play(ambience, { loop: true, ambient: true });
         }
@@ -683,7 +694,7 @@ export class Game {
 
         const ui = this.uiManager.ui;
 
-        if (packet.maxTeamSize !== TeamSize.Solo) {
+        if (packet.maxTeamSize !== MODE.Solo) {
             this.teamMode = true;
             this.teamID = packet.teamID;
         } else {
@@ -1049,7 +1060,7 @@ export class Game {
         this.map.terrainGraphics.visible = !basement;
         const { red, green, blue } = this.pixi.renderer.background.color;
         const color = { r: red * 255, g: green * 255, b: blue * 255 };
-        const targetColor = basement ? getColors(this.gameMode).void : getColors(this.gameMode).grass;
+        const targetColor = basement ? getColors(this.gameMap).void : getColors(this.gameMap).grass;
 
         this.backgroundTween?.kill();
         this.backgroundTween = this.addTween({

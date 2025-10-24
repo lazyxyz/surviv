@@ -16,7 +16,7 @@ import { isArray } from "@common/utils/misc";
 import { ItemType, NullString, type ObjectDefinition, type ObjectDefinitions, type ReferenceOrRandom, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { random, weightedRandom } from "@common/utils/random";
 import { Maps } from "./maps";
-import { Mode } from "@common/definitions/modes";
+import { MAP } from "@common/definitions/modes";
 
 export type WeightedItem =
     (
@@ -50,8 +50,8 @@ export class LootItem {
     ) { }
 }
 
-export function getLootFromTable(gameMode: Mode, tableID: string): LootItem[] {
-    const lootTable = resolveTable(gameMode, tableID);
+export function getLootFromTable(gameMap: MAP, tableID: string): LootItem[] {
+    const lootTable = resolveTable(gameMap, tableID);
     if (lootTable === undefined) {
         throw new ReferenceError(`Unknown loot table: ${tableID}`);
     }
@@ -70,27 +70,27 @@ export function getLootFromTable(gameMode: Mode, tableID: string): LootItem[] {
 
     return (
         isSimple && isArray(loot[0])
-            ? (loot as readonly WeightedItem[][]).map(innerTable => getLoot(gameMode, innerTable))
+            ? (loot as readonly WeightedItem[][]).map(innerTable => getLoot(gameMap, innerTable))
             : min === 1 && max === 1
-                ? getLoot(gameMode, loot as WeightedItem[], noDuplicates)
+                ? getLoot(gameMap, loot as WeightedItem[], noDuplicates)
                 : Array.from(
                     { length: random(min, max) },
-                    () => getLoot(gameMode, loot as WeightedItem[], noDuplicates)
+                    () => getLoot(gameMap, loot as WeightedItem[], noDuplicates)
                 )
     ).flat();
 }
 
-export function resolveTable(gameMode: Mode, tableID: string): LootTable {
-    return LootTables[gameMode]?.[tableID] ?? LootTables.normal[tableID];
+export function resolveTable(gameMap: MAP, tableID: string): LootTable {
+    return LootTables[gameMap]?.[tableID] ?? LootTables.normal[tableID];
 }
 
-function getLoot(gameMode: Mode, items: WeightedItem[], noDuplicates?: boolean): LootItem[] {
+function getLoot(gameMap: MAP, items: WeightedItem[], noDuplicates?: boolean): LootItem[] {
     const selection = items.length === 1
         ? items[0]
         : weightedRandom(items, items.map(({ weight }) => weight));
 
     if ("table" in selection) {
-        return getLootFromTable(gameMode, selection.table);
+        return getLootFromTable(gameMap, selection.table);
     }
 
     const item = selection.item;
@@ -2362,14 +2362,14 @@ const spawnableItemTypeCache = [] as Cache;
 
 // has to lazy-loaded to avoid circular dependency issues
 let spawnableLoots: SpawnableItemRegistry | undefined = undefined;
-export const SpawnableLoots = (gameMode: Mode): SpawnableItemRegistry => spawnableLoots ??= (() => {
+export const SpawnableLoots = (gameMap: MAP): SpawnableItemRegistry => spawnableLoots ??= (() => {
     /*
         we have a collection of loot tables, but not all of them are necessarily reachable
         for example, if loot table A belongs to obstacle A, but said obstacle is never spawned,
         then we mustn't take loot table A into account
     */
 
-    const mainMap = Maps[gameMode];
+    const mainMap = Maps[gameMap];
 
     // first, get all the reachable buildings
     // to do this, we get all the buildings in the map def, then for each one, include itself and any subbuildings
@@ -2407,13 +2407,13 @@ export const SpawnableLoots = (gameMode: Mode): SpawnableItemRegistry => spawnab
     // both the obstacles and the buildings
     const reachableLootTables = [
         ...new Set(
-            Object.keys(mainMap.loots ?? {}).map(t => resolveTable(gameMode, t)).concat(
+            Object.keys(mainMap.loots ?? {}).map(t => resolveTable(gameMap, t)).concat(
                 reachableObstacles.filter(({ hasLoot }) => hasLoot).map(
-                    ({ lootTable, idString }) => resolveTable(gameMode, lootTable ?? idString)
+                    ({ lootTable, idString }) => resolveTable(gameMap, lootTable ?? idString)
                 )
             ).concat(
                 reachableBuildings.map(
-                    ({ lootSpawners }) => lootSpawners.map(({ table }) => resolveTable(gameMode, table))
+                    ({ lootSpawners }) => lootSpawners.map(({ table }) => resolveTable(gameMap, table))
                 ).flat()
             )
         )
@@ -2426,7 +2426,7 @@ export const SpawnableLoots = (gameMode: Mode): SpawnableItemRegistry => spawnab
                 : (table as FullLootTable).loot
         )
             .flat()
-            .map(entry => "item" in entry ? entry.item : getAllItemsFromTable(resolveTable(gameMode, entry.table)))
+            .map(entry => "item" in entry ? entry.item : getAllItemsFromTable(resolveTable(gameMap, entry.table)))
             .filter(item => item !== NullString)
             .flat();
 

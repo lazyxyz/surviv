@@ -6,7 +6,7 @@ export type ColorKeys = "grass" | "water" | "border" | "beach" | "riverBank" | "
 export interface ModeDefinition {
     readonly idString: string
     readonly colors: Record<ColorKeys, string>
-    readonly inheritTexturesFrom?: Mode | Mode[]
+    readonly inheritTexturesFrom?: MAP | MAP[]
     readonly specialMenuMusic?: boolean
     readonly ambience?: string
     readonly specialSounds?: string[]
@@ -26,9 +26,9 @@ export interface ModeDefinition {
     readonly modeLogoImage?: string | { solo: string, squads: string }
 }
 
-export type Mode = "normal" | "fall" | "winter" | "desert" | "cursedIsland";
+export type MAP = "normal" | "fall" | "winter" | "desert" | "cursedIsland";
 
-export const ModeToNumber: Record<Mode, number> = {
+export const ModeToNumber: Record<MAP, number> = {
     normal: 0,
     fall: 1,
     winter: 2,
@@ -36,7 +36,7 @@ export const ModeToNumber: Record<Mode, number> = {
     cursedIsland: 4,
 };
 
-export const NumberToMode: Record<number, Mode> = {
+export const NumberToMode: Record<number, MAP> = {
     0: "normal",
     1: "fall",
     2: "winter",
@@ -44,12 +44,12 @@ export const NumberToMode: Record<number, Mode> = {
     4: "cursedIsland"
 };
 
-export function getRandomMode(): Mode {
-    const modes: Mode[] = ["normal", "fall", "winter", "desert", "cursedIsland"];
+export function getRandomMode(): MAP {
+    const modes: MAP[] = ["normal", "fall", "winter", "desert", "cursedIsland"];
     return modes[Math.floor(Math.random() * modes.length)];
 }
 
-export const Modes: Record<Mode, ModeDefinition> = {
+export const Maps: Record<MAP, ModeDefinition> = {
     normal: {
         idString: "normal",
         colors: {
@@ -173,6 +173,6 @@ export const Modes: Record<Mode, ModeDefinition> = {
         },
     },
 };
-export const ObstacleModeVariations: Partial<Record<Mode, string>> = {
+export const ObstacleModeVariations: Partial<Record<MAP, string>> = {
     winter: "_winter"
 };

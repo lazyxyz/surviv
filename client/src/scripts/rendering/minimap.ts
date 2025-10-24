@@ -193,7 +193,7 @@ export class Minimap {
         ctx.cut();
 
         ctx.roundShape?.(beach, radius);
-        ctx.fill(getColors(this.game.gameMode).beach);
+        ctx.fill(getColors(this.game.gameMap).beach);
 
         const grass = scale === 1 ? grassPoints : grassPoints.map(point => Vec.scale(point, scale));
         ctx.roundShape(grass, radius);
@@ -217,7 +217,7 @@ export class Minimap {
             ctx
                 .beginPath()
                 .roundShape(getRiverPoly(river.bankHitbox.points), 0, true)
-                .fill(river.isTrail ? getColors(this.game.gameMode).trail : getColors(this.game.gameMode).riverBank);
+                .fill(river.isTrail ? getColors(this.game.gameMap).trail : getColors(this.game.gameMap).riverBank);
         }
 
         // oasis bank needs to be drawn first
@@ -229,7 +229,7 @@ export class Minimap {
             ctx
                 .beginPath()
                 .roundShape(bankPoints, 0, true)
-                .fill(getColors(this.game.gameMode).riverBank);
+                .fill(getColors(this.game.gameMap).riverBank);
         }
 
         ctx.beginPath();
@@ -246,11 +246,11 @@ export class Minimap {
             }));
             ctx.roundShape(waterPoints, 0, true);
         }
-        ctx.fill(getColors(this.game.gameMode).water);
+        ctx.fill(getColors(this.game.gameMap).water);
 
         ctx.beginPath();
         ctx.rect(0, 0, this._width * scale, this._height * scale);
-        ctx.fill(getColors(this.game.gameMode).water);
+        ctx.fill(getColors(this.game.gameMap).water);
         ctx.roundShape(beach, radius);
         ctx.cut();
 
@@ -310,7 +310,7 @@ export class Minimap {
         terrainGraphics.rect(-margin, realHeight, realWidth + doubleMargin, margin);
         terrainGraphics.rect(-margin, -margin, margin, realHeight + doubleMargin);
         terrainGraphics.rect(realWidth, -margin, margin, realHeight + doubleMargin);
-        terrainGraphics.fill(getColors(this.game.gameMode).border);
+        terrainGraphics.fill(getColors(this.game.gameMap).border);
 
         this.game.camera.addObject(terrainGraphics);
 
@@ -393,7 +393,7 @@ export class Minimap {
             resolution: isMobile.any ? 1 : 2
         });
 
-        this.game.pixi.renderer.render({ container: mapRender, target: this._texture, clearColor: getColors(this.game.gameMode).grass });
+        this.game.pixi.renderer.render({ container: mapRender, target: this._texture, clearColor: getColors(this.game.gameMap).grass });
         this.sprite.texture.destroy(true);
         this.sprite.texture = this._texture;
         mapRender.destroy({

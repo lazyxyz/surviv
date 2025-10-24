@@ -1,5 +1,5 @@
 import $ from "jquery";
-import { EMOTE_SLOTS, TeamSize } from "@common/constants";
+import { EMOTE_SLOTS, MODE } from "@common/constants";
 import { CustomTeamMessages, type CustomTeamMessage, type CustomTeamPlayerInfo, type GetGameResponse } from "@common/typings";
 import { getTranslatedString } from "../../translations";
 import type { TranslationKeys } from "../../typings/translations";
@@ -83,7 +83,7 @@ async function initializePlayButtons(game: Game, account: Account): Promise<void
             return;
         }
         if (!isClickAllowed()) return;
-        await joinGame(TeamSize.Solo, game, account);
+        await joinGame(MODE.Solo, game, account);
     });
 
     playButtons[1].on("click", async () => {
@@ -92,7 +92,7 @@ async function initializePlayButtons(game: Game, account: Account): Promise<void
             return;
         }
         if (!isClickAllowed()) return;
-        await joinGame(TeamSize.Squad, game, account);
+        await joinGame(MODE.Squad, game, account);
     });
     
     playButtons[2].on("click", async () => {
@@ -102,7 +102,7 @@ async function initializePlayButtons(game: Game, account: Account): Promise<void
             return;
         }
         if (!isClickAllowed()) return;
-        await joinGame(TeamSize.CursedIsland, game, account);
+        await joinGame(MODE.CursedIsland, game, account);
     });
 }
 
@@ -217,8 +217,8 @@ function setupTeamMenuControls(game: Game, account: Account): void {
     });
 
     ui.createTeamMode.on("change", function (e) {
-        const selectedValue = $(this).val() as keyof typeof TeamSize;
-        const teamSize = TeamSize[selectedValue];
+        const selectedValue = $(this).val() as keyof typeof MODE;
+        const teamSize = MODE[selectedValue];
 
         // Ensure the value is valid
         if (teamSize !== undefined) {
@@ -252,7 +252,7 @@ function updateRoomOptions(ui: Game['uiManager']['ui'], enable: boolean, teamSiz
         $(this).css('display', displayStyle);
     });
 
-    const teamSizeKey = TeamSize[teamSize || 1];
+    const teamSizeKey = MODE[teamSize || 1];
     ui.createTeamMode.val(teamSizeKey);
 }
 
@@ -271,10 +271,10 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
                 ui.createTeamAutoFill.prop("checked", data.autoFill);
                 ui.createTeamRoomMode.prop("checked", data.roomMode);
                 ui.createTeamLock.prop("checked", data.locked);
-                updateRoomOptions(ui, data.roomMode ? true : false, data.teamSize ? data.teamSize : TeamSize.Squad);
+                updateRoomOptions(ui, data.roomMode ? true : false, data.teamSize ? data.teamSize : MODE.Squad);
                 break;
             case CustomTeamMessages.Started:
-                let teamSize = TeamSize.Solo;
+                let teamSize = MODE.Solo;
                 if (data.teamSize) teamSize = data.teamSize;
                 joinGame(teamSize, game, account);
                 break;

@@ -1,4 +1,4 @@
-import { GameConstants, TeamSize } from "@common/constants";
+import { GameConstants, MODE } from "@common/constants";
 import { type GetGameResponse } from "@common/typings";
 import { URLSearchParams } from "node:url";
 import { Config } from "../config";
@@ -15,7 +15,6 @@ export function initGameRoutes(app: TemplatedApp) {
                 .writeHeader("Content-Type", "application/json")
                 .end(JSON.stringify({
                     playerCount: GAMES.reduce((a, b) => a + (b?.aliveCount ?? 0), 0),
-                    maxTeamSize: Config.maxTeamSize,
                     protocolVersion: GameConstants.protocolVersion
                 }));
         }).get("/api/getGame", async (res, req) => {
@@ -27,7 +26,7 @@ export function initGameRoutes(app: TemplatedApp) {
 
             let teamSize = Number(searchParams.get("teamSize"));
 
-            if (!teamSize) teamSize = TeamSize.Solo;
+            if (!teamSize) teamSize = MODE.Solo;
 
             let teamID = new URLSearchParams(req.getQuery()).get("teamID");
            

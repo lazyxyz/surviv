@@ -15,7 +15,7 @@ import { HealingItems } from "../../common/src/definitions/healingItems";
 import { Loots } from "../../common/src/definitions/loots";
 import { MapPings } from "../../common/src/definitions/mapPings";
 import { Melees } from "../../common/src/definitions/melees";
-import { Modes } from "../../common/src/definitions/modes";
+import { Mode } from "../../common/src/definitions/modes";
 import { Obstacles, RotationMode } from "../../common/src/definitions/obstacles";
 import { DEFAULT_SCOPE, Scopes } from "../../common/src/definitions/scopes";
 import { Skins } from "../../common/src/definitions/skins";
@@ -2284,7 +2284,7 @@ logger.indent("Validating melees", () => {
 });
 
 logger.indent("Validating modes", () => {
-    for (const [name, mode] of Object.entries(Modes)) {
+    for (const [name, mode] of Object.entries(Mode)) {
         logger.indent(`Validating mode '${name}'`, () => {
             const errorPath = tester.createPath("modes", `mode '${name}'`);
 

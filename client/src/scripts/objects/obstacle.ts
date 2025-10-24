@@ -190,7 +190,7 @@ export class Obstacle extends GameObject.derive(ObjectCategory.Obstacle) {
 
                         texture = "airdrop_crate_unlocking";
 
-                        if (this.game.gameMode === "winter") {
+                        if (this.game.gameMap === "winter") {
                             this.game.particleManager.spawnParticles(1, () => ({
                                 frames: "airdrop_particle_4",
                                 position: this.hitbox.randomPoint(),

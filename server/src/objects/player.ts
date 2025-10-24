@@ -8,7 +8,6 @@ import { Guns, type GunDefinition } from "@common/definitions/guns";
 import { Loots, type WeaponDefinition } from "@common/definitions/loots";
 import { type PlayerPing } from "@common/definitions/mapPings";
 import { Melees, type MeleeDefinition } from "@common/definitions/melees";
-import { Modes } from "@common/definitions/modes";
 import { Obstacles, type ObstacleDefinition } from "@common/definitions/obstacles";
 import { PerkIds, Perks, type PerkDefinition, type PerkNames } from "@common/definitions/perks";
 import { DEFAULT_SCOPE, Scopes, type ScopeDefinition } from "@common/definitions/scopes";
@@ -48,6 +47,7 @@ import { type Loot } from "./loot";
 import { type Obstacle } from "./obstacle";
 import { type SyncedParticle } from "./syncedParticle";
 import { weaponPresentType } from "@common/typings";
+import { Maps } from "@common/definitions/modes";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -431,7 +431,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         this.inventory.addOrReplaceWeapon(2, "fists");
 
-        const defaultScope = Modes[this.game.gameMode].defaultScope;
+        const defaultScope = Maps[this.game.gameMap].defaultScope;
         if (defaultScope) {
             this.inventory.scope = defaultScope;
             this.inventory.items.setItem(defaultScope, 1);
@@ -525,7 +525,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             // and if we somehow don't have any matching slots, then someone's probably messing with us… fallback to slot 0 lol
         }
 
-        const spawnable = SpawnableLoots(this.game.gameMode);
+        const spawnable = SpawnableLoots(this.game.gameMap);
 
         const { inventory } = this;
         const { items, backpack: { maxCapacity }, throwableItemMap } = inventory;
@@ -922,7 +922,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             this.setPartialDirty();
 
             if (this.isMoving) {
-                this.floor = this.game.map.terrain.getFloor(this.position, this.layer, this.game.gameMode);
+                this.floor = this.game.map.terrain.getFloor(this.position, this.layer, this.game.gameMap);
             }
         }
 
