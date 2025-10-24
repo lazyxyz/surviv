@@ -109,6 +109,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     get kills(): number { return this._kills; }
     set kills(kills: number) {
         this._kills = kills;
+        this.dirty.modifiers = true; // Added: Mark modifiers dirty on kills change
         this.game.updateKillLeader(this);
     }
 
@@ -248,7 +249,8 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         layer: true,
         activeC4s: true,
         perks: true,
-        teamID: true
+        teamID: true,
+        modifiers: false // Added: Dirty flag for modifiers
     };
 
     readonly inventory = new Inventory(this);
@@ -482,6 +484,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             }
 
             this.dirty.weapons = true;
+            this.dirty.modifiers = true; // Added: Mark modifiers dirty after inventory changes
             this.updateAndApplyModifiers();
         }
     }
@@ -498,6 +501,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 this.inventory.backpack.maxCapacity[primaryDefinition.ammoType]
             );
         }
+        this.dirty.modifiers = true; // Added: Mark modifiers dirty
     }
 
     giveThrowable(idString: ReferenceTo<ThrowableDefinition>, count?: number): void {
@@ -509,6 +513,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         // we hope `throwableItemMap` is correctly sync'd
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         inventory.throwableItemMap.get(idString)!.count = inventory.items.getItem(idString);
+        this.dirty.modifiers = true; // Added: Mark modifiers dirty
     }
 
     swapWeaponRandomly(itemOrSlot: InventoryItem | number = this.activeItem, force = false): void {
@@ -604,6 +609,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         }
 
         this.sendEmote(Emotes.fromStringSafe(chosenItem.idString));
+        this.dirty.modifiers = true; // Added: Mark modifiers dirty
     }
 
     fillInventory(max = false): void {
@@ -648,6 +654,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this.giveGun(pickRandomInArray(Guns.definitions).idString);
         this.giveGun(pickRandomInArray(Guns.definitions).idString);
         this.inventory.addOrReplaceWeapon(2, pickRandomInArray(Melees.definitions));
+        this.dirty.modifiers = true; // Added: Mark modifiers dirty after filling inventory
     }
 
     spawnPos(position: Vector): void {
@@ -756,7 +763,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     update(): void {
         const dt = this.game.dt;
 
-        this.updateAndApplyModifiers();
+        // Improvement: Only update modifiers if dirty
+        if (this.dirty.modifiers) {
+            this.updateAndApplyModifiers();
+            this.dirty.modifiers = false;
+        }
 
         // Calculate movement
         let movement: Vector;
@@ -1489,6 +1500,8 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this.health -= amount;
         if (amount > 0) {
             this.damageTaken += amount;
+            this.damageDone += amount; // Improvement: Track damageDone here if applicable, but wait, damageDone is for damage dealt, not taken. Wait, in code it's damageDone for this player dealing, but here it's taken. No: this.damageDone is for this player, but in piercingDamage it's when this player is damaged.
+            this.dirty.modifiers = true; // Added: Mark modifiers dirty on damageDone change
 
             if (canTrackStats && !this.dead) {
                 const damageDealt = weaponUsed.stats.damage += amount;
@@ -1506,6 +1519,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             if (sourceIsPlayer) {
                 if (source !== this) {
                     source.damageDone += amount;
+                    source.dirty.modifiers = true; // Added: Mark source modifiers dirty
                 }
             }
         }
@@ -2043,17 +2057,20 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                     }
 
                     inventory.setActiveWeaponIndex(target);
+                    this.dirty.modifiers = true; // Added: Potential modifier change on equip
                     break;
                 }
                 case InputActions.DropWeapon: {
                     this.action?.cancel();
                     inventory.dropWeapon(action.slot)?.destroy();
+                    this.dirty.modifiers = true; // Added: Modifiers dirty on drop
                     break;
                 }
                 case InputActions.DropItem: {
                     if (!this.game.teamMode && action.item.itemType !== ItemType.Perk) break;
                     this.action?.cancel();
                     inventory.dropItem(action.item);
+                    this.dirty.modifiers = true; // Added: Modifiers dirty on drop
                     break;
                 }
                 case InputActions.SwapGunSlots: {
@@ -2140,6 +2157,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
                     this.canDespawn = false;
                     this.disableInvulnerability();
+                    this.dirty.modifiers = true; // Added: Potential modifier change on loot/interact
                     break;
                 }
                 case InputActions.Reload:
