@@ -295,8 +295,8 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "ammo", weight: 1 },
             { table: "guns", weight: 0.9 },
             { table: "scopes", weight: 0.3 },
-            { item: "m134_minigun", weight: 0.3 },
-            { item: PerkIds.InfiniteAmmo, weight: 0.3 }
+            { item: "m134_minigun", weight: 0.1 },
+            { item: PerkIds.InfiniteAmmo, weight: 0.1 }
         ],
         large_pumpkin: {
             min: 2,
@@ -307,8 +307,8 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "ammo", weight: 1 },
                 { table: "guns", weight: 0.9 },
                 { table: "scopes", weight: 0.3 },
-                { item: "m134_minigun", weight: 0.7 },
-                { item: PerkIds.InfiniteAmmo, weight: 0.7 }
+                { item: "m134_minigun", weight: 0.3 },
+                { item: PerkIds.InfiniteAmmo, weight: 0.3 }
             ]
         },
         birthday_cake: [
