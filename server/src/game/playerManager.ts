@@ -107,10 +107,10 @@ export class PlayerManager {
 
         // Start the game
         if (
-            (this.game.teamMode ? this.game.teams.size : this.game.aliveCount) > (Config.startImmediately ? 0 : 1)
-            && !this.game._started
+            !this.game._started
             && this.game.startTimeout === undefined
         ) {
+            console.log("START THE GAME!");
             this.game.startTimeout = this.game.addTimeout(() => {
                 this.game.addTimeout(this.game.postGameStarted.bind(this.game), Config.gameJoinTime * 1000);
             }, 3000);

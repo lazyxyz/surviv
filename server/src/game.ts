@@ -150,7 +150,7 @@ export class Game implements GameData {
 
     readonly mapPings: PingSerialization[] = [];
 
-    readonly _timeouts = new Set<Timeout>();
+    _timeouts = new Set<Timeout>();
 
     addTimeout(callback: () => void, delay = 0): Timeout {
         const timeout = new Timeout(callback, this.now + delay);
@@ -186,8 +186,6 @@ export class Game implements GameData {
 
     private readonly _start = this._now;
     get start(): number { return this._start; }
-
-    private totalBots: number = 0;
 
     readonly app: any;
 

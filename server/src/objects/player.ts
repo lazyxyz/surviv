@@ -1522,7 +1522,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
                 // teamMode hopefully guarantees team's existence
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                && this._team!.players.some(p => !p.dead && !p.downed && !p.disconnected && p !== this)
+                && this._team?.players.some(p => !p.dead && !p.downed && !p.disconnected && p !== this)
                 && !this.downed
             ) {
                 this.down(source, weaponUsed);
