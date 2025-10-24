@@ -1,30 +1,21 @@
-import { EMOTE_SLOTS, GameConstants, KillfeedMessageType, Layer, MODE, ObjectCategory } from "@common/constants";
+
+import { Layer, MODE, ObjectCategory } from "@common/constants";
 import { type ExplosionDefinition } from "@common/definitions/explosions";
-import { Loots, type LootDefinition } from "@common/definitions/loots";
-import { MapPings, type MapPing } from "@common/definitions/mapPings";
-import { Obstacles, type ObstacleDefinition } from "@common/definitions/obstacles";
-import { SyncedParticles, type SyncedParticleDefinition, type SyncedParticleSpawnerDefinition } from "@common/definitions/syncedParticles";
+import { type LootDefinition } from "@common/definitions/loots";
+import { type ObstacleDefinition } from "@common/definitions/obstacles";
+import { type SyncedParticleDefinition, type SyncedParticleSpawnerDefinition } from "@common/definitions/syncedParticles";
 import { type ThrowableDefinition } from "@common/definitions/throwables";
-import { PlayerInputPacket } from "@common/packets/inputPacket";
-import { JoinPacket, PlayerData } from "@common/packets/joinPacket";
-import { JoinedPacket } from "@common/packets/joinedPacket";
-import { KillFeedPacket, type KillFeedPacketData } from "@common/packets/killFeedPacket";
-import { type InputPacket, type OutputPacket } from "@common/packets/packet";
-import { PacketStream } from "@common/packets/packetStream";
-import { PingPacket } from "@common/packets/pingPacket";
-import { SpectatePacket } from "@common/packets/spectatePacket";
+import { PlayerData } from "@common/packets/joinPacket";
+import { type InputPacket } from "@common/packets/packet";
 import { type PingSerialization } from "@common/packets/updatePacket";
-import { CircleHitbox, type Hitbox } from "@common/utils/hitbox";
-import { EaseFunctions, Geometry, Numeric, Statistics } from "@common/utils/math";
+import { Statistics } from "@common/utils/math";
 import { Timeout } from "@common/utils/misc";
-import { ItemType, MapObjectSpawnMode, type ReifiableDef } from "@common/utils/objectDefinitions";
-import { pickRandomInArray, randomFloat, randomPointInsideCircle, randomRotation } from "@common/utils/random";
-import { SuroiByteStream } from "@common/utils/suroiByteStream";
-import { Vec, type Vector } from "@common/utils/vector";
-import { TemplatedApp, type WebSocket } from "uWebSockets.js";
+import { type ReifiableDef } from "@common/utils/objectDefinitions";
+import { type Vector } from "@common/utils/vector";
+import { type WebSocket } from "uWebSockets.js";
 import { parentPort } from "worker_threads";
-import { Config, SpawnMode } from "./config";
-import { MapName, Maps } from "./data/maps";
+import { Config } from "./config";
+import { Maps } from "./data/maps";
 import { WorkerMessages, type GameData, type WorkerMessage } from "./gameManager";
 import { Gas } from "./gas";
 import { GunItem } from "./inventory/gunItem";
@@ -37,8 +28,7 @@ import { Explosion } from "./objects/explosion";
 import { type BaseGameObject, type GameObject } from "./objects/gameObject";
 import { Loot, type ItemData } from "./objects/loot";
 import { Obstacle } from "./objects/obstacle";
-import { Parachute } from "./objects/parachute";
-import { Player, type ActorContainer } from "./objects/player";
+import { Player } from "./objects/player";
 import { Gamer, type PlayerContainer } from "./objects/gamer";
 import { SyncedParticle } from "./objects/syncedParticle";
 import { ThrowableProjectile } from "./objects/throwableProj";
@@ -46,22 +36,17 @@ import { PluginManager } from "./pluginManager";
 import { Team } from "./team";
 import { Grid } from "./utils/grid";
 import { IDAllocator } from "./utils/idAllocator";
-import { cleanUsername, Logger, removeFrom } from "./utils/misc";
-import { Assassin, BotType, Zombie } from "./objects/bots";
-import { Ninja } from "./objects/bots/ninja";
-import {  MAP, ModeToNumber } from "@common/definitions/modes";
-import { DisconnectPacket } from "@common/packets/disconnectPacket";
-import { validateJWT } from "./api/api";
-import { getIP, createServer } from "./utils/serverHelpers";
-import { verifyAllAssets, verifyBadges } from "./api/balances";
-import { ClientChatPacket, ServerChatPacket, ServerChatPacketData } from "@common/packets/chatPacket";
-import { Badges } from "@common/definitions/badges";
-import { Skins } from "@common/definitions/skins";
-import { Melees } from "@common/definitions/melees";
-import { Guns } from "@common/definitions/guns";
-import { Emotes } from "@common/definitions/emotes";
+import { Logger } from "./utils/misc";
+import { MAP } from "@common/definitions/modes";
+import { createServer } from "./utils/serverHelpers";
 import { ResetPacket } from "@common/packets/resetPackage";
-
+import { Airdrop, AirdropManager } from "./game/airdropManager";
+import { GameLifecycle } from "./game/gameLifecycle";
+import { ObjectSpawner } from "./game/objectSpawner";
+import { PlayerManager } from "./game/playerManager";
+import { BotManager } from "./game/botManager";
+import { ConnectionManager } from "./game/connectionManager";
+import { SpawnManager } from "./game/spawnManager";
 
 /*
     eslint-disable
@@ -88,24 +73,12 @@ export class Game implements GameData {
     updateObjects = false;
 
     readonly livingPlayers = new Set<Player>();
-    /**
-     * Players that have connected but haven't sent a JoinPacket yet
-     */
     readonly connectingPlayers = new Set<Player>();
     readonly connectedPlayers = new Set<Player>();
     readonly spectatablePlayers: Player[] = [];
-    /**
-     * New players created this tick
-     */
     readonly newPlayers: Player[] = [];
-    /**
-    * Players deleted this tick
-    */
     readonly deletedPlayers: number[] = [];
 
-    /**
-     * Packets created this tick that will be sent to all players
-     */
     readonly packets: InputPacket[] = [];
 
     readonly maxTeamSize: MODE;
@@ -163,23 +136,11 @@ export class Game implements GameData {
     readonly explosions: Explosion[] = [];
     readonly emotes: Emote[] = [];
 
-    /**
-     * All bullets that currently exist
-     */
     readonly bullets = new Set<Bullet>();
-    /**
-     * All bullets created this tick
-     */
     readonly newBullets: Bullet[] = [];
 
-    /**
-     * All airdrops
-     */
     readonly airdrops: Airdrop[] = [];
 
-    /**
-     * All planes this tick
-     */
     readonly planes: Array<{
         readonly position: Vector
         readonly direction: number
@@ -187,12 +148,9 @@ export class Game implements GameData {
 
     readonly detectors: Obstacle[] = [];
 
-    /**
-     * All map pings this tick
-     */
     readonly mapPings: PingSerialization[] = [];
 
-    private readonly _timeouts = new Set<Timeout>();
+    readonly _timeouts = new Set<Timeout>();
 
     addTimeout(callback: () => void, delay = 0): Timeout {
         const timeout = new Timeout(callback, this.now + delay);
@@ -200,11 +158,9 @@ export class Game implements GameData {
         return timeout;
     }
 
-    private _started = false;
+    _started = false;
 
-    // #region GameData interface members
-
-    startedTime = Number.MAX_VALUE; // Default of Number.MAX_VALUE makes it so games that haven't started yet are joined first
+    startedTime = Number.MAX_VALUE;
     allowJoin = false;
     over = false;
     stopped = false;
@@ -212,29 +168,21 @@ export class Game implements GameData {
         return this.livingPlayers.size;
     }
 
-    // #endregion
-
     startTimeout?: Timeout;
 
     aliveCountDirty = false;
 
-    /**
-     * The value of `Date.now()`, as of the start of the tick.
-     */
     private _now = Date.now();
     get now(): number { return this._now; }
 
     private readonly idealDt = 1000 / Config.tps;
 
-    /**
-     * Game Tick delta time
-     */
     private _dt = this.idealDt;
     get dt(): number { return this._dt; }
 
     private readonly _tickTimes: number[] = [];
 
-    private readonly _idAllocator = new IDAllocator(16);
+    _idAllocator = new IDAllocator(16);
 
     private readonly _start = this._now;
     get start(): number { return this._start; }
@@ -245,22 +193,25 @@ export class Game implements GameData {
 
     gameWave: number = 1;
 
-    /**
-     * **Warning**: This is a getter _with side effects_! Make
-     * sure to either use the id returned by this getter or
-     * to return it.
-     */
     get nextObjectID(): number {
         return this._idAllocator.takeNext();
     }
 
-    getRandomMode(): MAP {
+    // New managers
+    spawnManager: SpawnManager;
+    objectSpawner: ObjectSpawner;
+    private botManager: BotManager;
+    private connectionManager: ConnectionManager;
+    private playerManager: PlayerManager;
+    private airdropManager: AirdropManager;
+    private gameLifecycle: GameLifecycle;
+
+    getRandomMap(): MAP {
         const random = Math.random() * 100;
-        if (random < 40) return "desert"; // 40% desert
+        if (random < 40) return "desert";
         if (random < 70) return "fall";
         return "winter";
     }
-
 
     constructor(port: number, maxTeamSize: MODE, gameId: string) {
         this.port = port;
@@ -270,7 +221,7 @@ export class Game implements GameData {
         if (maxTeamSize == MODE.CursedIsland) {
             this.gameMap = "cursedIsland";
         } else {
-            this.gameMap = this.getRandomMode();
+            this.gameMap = this.getRandomMap();
         }
 
         this.teamMode = this.maxTeamSize > MODE.Solo;
@@ -283,6 +234,14 @@ export class Game implements GameData {
         });
 
         this.pluginManager.loadPlugins();
+          // Initialize new managers
+        this.botManager = new BotManager(this);
+        this.connectionManager = new ConnectionManager(this);
+        this.spawnManager = new SpawnManager(this);
+        this.playerManager = new PlayerManager(this);
+        this.objectSpawner = new ObjectSpawner(this);
+        this.airdropManager = new AirdropManager(this);
+        this.gameLifecycle = new GameLifecycle(this);
 
         const { width, height } = Maps[this.gameMap];
         this.grid = new Grid(this, width, height);
@@ -294,63 +253,16 @@ export class Game implements GameData {
         this.pluginManager.emit("game_created", this);
         Logger.log(`Game ${this.port} | Created in ${Date.now() - this._start} ms`);
 
+        this.app = createServer();
+
         if (Config.addBot) {
-            const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-            const zombieCount = randomInRange(10, 20);
-            const ninjaCount = randomInRange(5, 10);
-            const assassinCount = randomInRange(3, 5);
-
-            this.activeZombie(zombieCount);
-            this.activeNinja(ninjaCount);
-            this.activeAssassin(assassinCount);
-
-            this.totalBots = zombieCount + ninjaCount + assassinCount;
-            Logger.log(`Bots added to game: Total Bots = ${this.totalBots} (Zombies: ${zombieCount}, Ninjas: ${ninjaCount}, Assassins: ${assassinCount})`);
+            this.botManager.activateBots();
         }
 
-        this.app = createServer();
-        this.initPlayRoutes(this.app, this);
+        this.connectionManager.initPlayRoutes(this.app);
 
         // Start the tick loop
         this.tick();
-    }
-
-    onMessage(stream: SuroiByteStream, player: Gamer): void {
-        const packetStream = new PacketStream(stream);
-        while (true) {
-            const packet = packetStream.deserializeClientPacket();
-            if (packet === undefined) break;
-            this.onPacket(packet, player);
-        }
-    }
-
-    onPacket(packet: OutputPacket, player: Gamer): void {
-        switch (true) {
-            case packet instanceof JoinPacket:
-                this.activatePlayer(player, packet.output);
-                break;
-            case packet instanceof PlayerInputPacket:
-                // Ignore input packets from players that haven't finished joining, dead players, and if the game is over
-                if (!player.joined || player.dead || player.game.over) return;
-                player.processInputs(packet.output);
-                break;
-            case packet instanceof SpectatePacket:
-                player.spectate(packet.output);
-                break;
-            case packet instanceof PingPacket: {
-                if (Date.now() - player.lastPingTime < 4000) return;
-                player.lastPingTime = Date.now();
-                const stream = new PacketStream(new ArrayBuffer(8));
-                stream.serializeServerPacket(PingPacket.create());
-                player.sendData(stream.getBuffer());
-                break;
-            }
-            case packet instanceof ClientChatPacket: {
-                this.sendChatMessage(player, packet.output.isSendAll, packet.output.message);
-                break;
-            }
-        }
     }
 
     readonly tick = (): void => {
@@ -395,7 +307,7 @@ export class Game implements GameData {
             if (bullet.dead) {
                 const onHitExplosion = bullet.definition.onHitExplosion;
                 if (onHitExplosion && !bullet.reflected) {
-                    this.addExplosion(
+                    this.objectSpawner.addExplosion(
                         onHitExplosion,
                         bullet.position,
                         bullet.shooter,
@@ -407,16 +319,6 @@ export class Game implements GameData {
             }
         }
 
-        /*
-            Do the damage after updating all bullets
-            This is to make sure bullets hitting the same object on the same tick will all die so
-            they don't de-sync with the client
-    
-            Example: a shotgun insta-killing a crate—on the client all bullets will hit the crate,
-            while on the server, the usual approach of dealing damage on-update would cause some
-            bullets to pass through unhindered since the crate would have been destroyed by the
-            first pellets.
-        */
         for (const { object, damage, source, weapon, position } of records) {
             object.damage({
                 amount: damage,
@@ -501,7 +403,7 @@ export class Game implements GameData {
                     : this.aliveCount <= 1
             )
         ) {
-            this.endGame();
+            this.gameLifecycle.endGame();
         }
 
         // game wave end
@@ -517,19 +419,16 @@ export class Game implements GameData {
         }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {
-            this.createNewGame();
+            this.gameLifecycle.createNewGame();
         }
 
         // Record performance and start the next tick
-        // THIS TICK COUNTER IS WORKING CORRECTLY!
-        // It measures the time it takes to calculate a tick, not the time between ticks.
         const tickTime = Date.now() - this.now;
         this._tickTimes.push(tickTime);
 
         if (this._tickTimes.length >= 200) {
             const mspt = Statistics.average(this._tickTimes);
             const stddev = Statistics.stddev(this._tickTimes);
-            // Logger.log(`Game ${this.port} | ms/tick: ${mspt.toFixed(2)} ± ${stddev.toFixed(2)} | Load: ${((mspt / this.idealDt) * 100).toFixed(1)}%`);
             this._tickTimes.length = 0;
         }
 
@@ -540,54 +439,8 @@ export class Game implements GameData {
         }
     };
 
-    endGame(): void {
-        this.setGameData({ allowJoin: false, over: true });
-
-        for (const player of this.livingPlayers) {
-            const { movement } = player;
-            movement.up = movement.down = movement.left = movement.right = false;
-            player.attacking = false;
-            player.sendEmote(player.loadout.emotes[4]);
-            if (player instanceof Gamer) {
-                player.handleGameOver(true);
-            }
-            this.pluginManager.emit("player_did_win", player);
-        }
-        this.pluginManager.emit("game_end", this);
-
-        // End the game in 2 seconds
-        this.addTimeout(() => {
-            // Clear all collections
-            this.livingPlayers.clear();
-            this.connectedPlayers.clear();
-            this.connectingPlayers.clear();
-            this.spectatablePlayers.length = 0;
-            this.teams.clear();
-            this.airdrops.length = 0;
-            this.detectors.length = 0;
-            this.bullets.clear();
-            this.newBullets.length = 0;
-            this.explosions.length = 0;
-            this.emotes.length = 0;
-            this.newPlayers.length = 0;
-            this.deletedPlayers.length = 0;
-            this.packets.length = 0;
-            this.planes.length = 0;
-            this.mapPings.length = 0;
-            this._timeouts.forEach(timeout => timeout.kill());
-            this._timeouts.clear();
-            this.grid.pool.clear();
-
-            this.setGameData({ stopped: true });
-            this.app.close();
-            Logger.log(`Game ${this.port} | Ended`);
-            parentPort?.postMessage({ type: WorkerMessages.GameEnded });
-        }, 2000);
-    }
-
     setGameData(data: Partial<Omit<GameData, "aliveCount">>): void {
         for (const [key, value] of Object.entries(data)) {
-            // HACK this is kinda really fkin dumb, i dunno why this isn't working
             this[key as keyof typeof data] = value as never;
         }
         this.updateGameData(data);
@@ -599,528 +452,46 @@ export class Game implements GameData {
         } satisfies WorkerMessage);
     }
 
-    createNewGame(): void {
-        if (!this.allowJoin) return; // means a new game has already been created by this game
+    // Delegated to playerManager
+    get killLeader(): Player | undefined { return this.playerManager.killLeader; }
+    updateKillLeader(player: Player): void { this.playerManager.updateKillLeader(player); }
+    killLeaderDead(killer?: Player): void { this.playerManager.killLeaderDead(killer); }
+    killLeaderDisconnected(leader: Player): void { this.playerManager.killLeaderDisconnected(leader); }
 
-        parentPort?.postMessage({
-            type: WorkerMessages.CreateNewGame, maxTeamSize: this.maxTeamSize
-        });
-        Logger.log(`Game ${this.port} | Attempting to create new game`);
-        this.setGameData({ allowJoin: false });
-    }
-
-    private _killLeader: Player | undefined;
-    get killLeader(): Player | undefined { return this._killLeader; }
-
-    updateKillLeader(player: Player): void {
-        const oldKillLeader = this._killLeader;
-
-        if (player.kills > (this._killLeader?.kills ?? (GameConstants.player.killLeaderMinKills - 1)) && !player.dead) {
-            this._killLeader = player;
-
-            if (oldKillLeader !== this._killLeader) {
-                this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderAssigned);
-            }
-        } else if (player === oldKillLeader) {
-            this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderUpdated);
-        }
-    }
-
-    killLeaderDead(killer?: Player): void {
-        this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderDeadOrDisconnected, { attackerId: killer?.id });
-        let newKillLeader: Player | undefined;
-        for (const player of this.livingPlayers) {
-            if (player.kills > (newKillLeader?.kills ?? (GameConstants.player.killLeaderMinKills - 1)) && !player.dead) {
-                newKillLeader = player;
-            }
-        }
-        this._killLeader = newKillLeader;
-        this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderAssigned);
-    }
-
-    killLeaderDisconnected(leader: Player): void {
-        this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderDeadOrDisconnected, { disconnected: true });
-        let newKillLeader: Player | undefined;
-        for (const player of this.livingPlayers) {
-            if (player === leader) continue;
-            if (player.kills > (newKillLeader?.kills ?? (GameConstants.player.killLeaderMinKills - 1)) && !player.dead) {
-                newKillLeader = player;
-            }
-        }
-
-        if ((this._killLeader = newKillLeader) !== undefined) {
-            this._sendKillLeaderKFPacket(KillfeedMessageType.KillLeaderAssigned);
-        }
-    }
-
-    private _sendKillLeaderKFPacket<
-        Message extends
-        | KillfeedMessageType.KillLeaderAssigned
-        | KillfeedMessageType.KillLeaderDeadOrDisconnected
-        | KillfeedMessageType.KillLeaderUpdated
-    >(
-        messageType: Message,
-        options?: Partial<Omit<KillFeedPacketData & { readonly messageType: NoInfer<Message> }, "messageType" | "playerID" | "attackerKills">>
-    ): void {
-        if (this._killLeader === undefined) return;
-
-        this.packets.push(
-            KillFeedPacket.create({
-                messageType,
-                victimId: this._killLeader.id,
-                attackerKills: this._killLeader.kills,
-                ...options
-            } as KillFeedPacketData & { readonly messageType: Message })
-        );
-    }
-
+    // Delegated to playerManager
     addPlayer(socket: WebSocket<PlayerContainer>): Gamer | undefined {
-        if (this.pluginManager.emit("player_will_connect")) {
-            return undefined;
-        }
-
-        let spawnPosition = Vec.create(this.map.width / 2, this.map.height / 2);
-        let spawnLayer;
-
-        let team: Team | undefined;
-        if (this.teamMode) {
-
-            const { teamID, autoFill, roomMode } = socket.getUserData();
-
-            if (teamID && !roomMode) {
-                team = this.teamsMapping.get(teamID);
-                if (
-                    !team // team doesn't exist
-                    || (team.players.length && !team.hasLivingPlayers()) // team isn't empty but has no living players
-                    || team.players.length >= (this.maxTeamSize as number) // team is full
-                ) {
-                    this.teams.add(team = new Team(this.nextTeamID, autoFill));
-                    this.teamsMapping.set(teamID, team);
-                }
-            } else {
-                const vacantTeams = this.teams.valueArray.filter(
-                    team =>
-                        team.autoFill
-                        && team.players.length < (this.maxTeamSize as number)
-                        && team.hasLivingPlayers()
-                );
-                if (vacantTeams.length > 1) {
-                    let minSize = Infinity;
-                    for (const team of vacantTeams) {
-                        if (team.players.length < minSize) {
-                            minSize = team.players.length;
-                        }
-                    }
-                    const smallestTeams = vacantTeams.filter(team => team.players.length === minSize);
-                    team = pickRandomInArray(smallestTeams);
-                } else {
-                    this.teams.add(team = new Team(this.nextTeamID));
-                }
-            }
-        }
-
-        switch (Config.spawn.mode) {
-            case SpawnMode.Normal: {
-                const hitbox = new CircleHitbox(5);
-                const gasPosition = this.gas.currentPosition;
-                const gasRadius = this.gas.newRadius ** 2;
-                const teamPosition = this.teamMode
-                    // teamMode should guarantee the `team` object's existence
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    ? pickRandomInArray(team!.getLivingPlayers())?.position
-                    : undefined;
-
-                let foundPosition = false;
-                for (let tries = 0; !foundPosition && tries < 200; tries++) {
-                    const position = this.map.getRandomPosition(
-                        hitbox,
-                        {
-                            maxAttempts: 500,
-                            spawnMode: MapObjectSpawnMode.GrassAndSand,
-                            getPosition: this.teamMode && teamPosition
-                                ? () => randomPointInsideCircle(teamPosition, 20, 10)
-                                : undefined,
-                            collides: position => Geometry.distanceSquared(position, gasPosition) >= gasRadius
-                        }
-                    );
-
-                    // Break if the above code couldn't find a valid position, as it's unlikely that subsequent loops will
-                    if (!position) break;
-                    else spawnPosition = position;
-
-                    // Ensure the position is at least 60 units from other players
-                    foundPosition = true;
-                    const radiusHitbox = new CircleHitbox(60, spawnPosition);
-                    for (const object of this.grid.intersectsHitbox(radiusHitbox)) {
-                        if (
-                            object.isPlayer
-                            // teamMode should guarantee the `team` object's existence
-                            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                            && (!this.teamMode || !team!.players.includes(object))
-                        ) {
-                            foundPosition = false;
-                        }
-                    }
-                }
-
-                // Spawn on top of a random teammate if a valid position couldn't be found
-                if (!foundPosition && teamPosition) spawnPosition = teamPosition;
-                break;
-            }
-            case SpawnMode.Radius: {
-                const { x, y } = Config.spawn.position;
-                spawnPosition = randomPointInsideCircle(
-                    Vec.create(x, y),
-                    Config.spawn.radius
-                );
-                break;
-            }
-            case SpawnMode.Fixed: {
-                const { x, y } = Config.spawn.position;
-                spawnPosition = Vec.create(x, y);
-                spawnLayer = Config.spawn.layer ?? Layer.Ground;
-                break;
-            }
-            case SpawnMode.Center: {
-                // no-op; this is the default
-                break;
-            }
-        }
-
-        // Player is added to the players array when a JoinPacket is received from the client
-        const player = new Gamer(this, socket, spawnPosition, spawnLayer, team);
-        this.connectingPlayers.add(player);
-        this.pluginManager.emit("player_did_connect", player);
-        return player;
+        return this.playerManager.addPlayer(socket);
     }
 
-    createBot(botType: BotType, botData: ActorContainer): Player {
-        let spawnPosition = Vec.create(this.map.width / 2, this.map.height / 2);
-        let spawnLayer;
-
-        let team: Team | undefined;
-        if (this.teamMode) {
-            this.teams.add(team = new Team(this.nextTeamID, false));
-        }
-
-        const hitbox = new CircleHitbox(5);
-        const gasPosition = this.gas.newPosition;
-        const gasRadius = this.gas.newRadius ** 2;
-
-        let foundPosition = false;
-        for (let tries = 0; !foundPosition && tries < 200; tries++) {
-            const position = this.map.getRandomPosition(
-                hitbox,
-                {
-                    maxAttempts: 500,
-                    spawnMode: MapObjectSpawnMode.GrassAndSand,
-                    getPosition: undefined,
-                    collides: position => Geometry.distanceSquared(position, gasPosition) >= gasRadius
-                }
-            );
-
-            if (!position) break;
-            else spawnPosition = position;
-        }
-
-        let bot: Player;
-        if (botType == BotType.Zombie) {
-            bot = new Zombie(this, botData, spawnPosition, spawnLayer, team);
-        } else if (botType == BotType.Ninja) {
-            bot = new Ninja(this, botData, spawnPosition, spawnLayer, team);
-        } else {
-            bot = new Assassin(this, botData, spawnPosition, spawnLayer, team);
-        }
-
-        this.livingPlayers.add(bot);
-        this.spectatablePlayers.push(bot);
-        this.connectedPlayers.add(bot);
-        this.newPlayers.push(bot);
-        this.grid.addObject(bot);
-        bot.setDirty();
-        this.aliveCountDirty = true;
-        this.updateObjects = true;
-        this.updateGameData({ aliveCount: this.aliveCount });
-        bot.joined = true;
-
-        this.addTimeout(() => { bot.disableInvulnerability(); }, 5000);
-        return bot;
-    }
-
-    activeNinja(botCount: number): void {
-        const botData: ActorContainer = {
-            autoFill: false,
-            lobbyClearing: true,
-            weaponPreset: "falchion",
-            ip: undefined
-        };
-
-        for (let i = 0; i < botCount; i++) {
-            this.createBot(BotType.Ninja, botData);
-        }
-    }
-
-    activeZombie(botCount: number): void {
-        const botData: ActorContainer = {
-            autoFill: false,
-            lobbyClearing: true,
-            weaponPreset: "falchion",
-            ip: undefined
-        };
-
-        for (let i = 0; i < botCount; i++) {
-            this.createBot(BotType.Zombie, botData);
-        }
-    }
-
-    activeAssassin(botCount: number): void {
-        const botData: ActorContainer = {
-            autoFill: false,
-            lobbyClearing: true,
-            weaponPreset: "falchion",
-            ip: undefined
-        };
-
-        for (let i = 0; i < botCount; i++) {
-            this.createBot(BotType.Assassin, botData);
-        }
-    }
-
-    postGameStarted(): void {
-        this._started = true;
-        this.setGameData({ startedTime: this.now });
-        this.gas.advanceGasStage();
-        this.setGameData({ allowJoin: false })
-    }
-
-    // Called when a JoinPacket is sent by the client
     async activatePlayer(player: Gamer, packet: PlayerData) {
-        const rejectedBy = this.pluginManager.emit("player_will_join", { player, joinPacket: packet });
-        if (rejectedBy) {
-            player.disconnect(`Connection rejected by server plugin '${rejectedBy.constructor.name}'`);
-            return;
-        }
-
-        if (packet.protocolVersion !== GameConstants.protocolVersion) {
-            player.disconnect(`Invalid game version (expected ${GameConstants.protocolVersion}, was ${packet.protocolVersion})`);
-            return;
-        }
-        player.address = packet.address;
-        player.isMobile = packet.isMobile;
-        player.name = cleanUsername(packet.name);
-
-        if (packet.badge?.idString) {
-            const badgeResults = await verifyBadges(packet.address, packet.badge?.idString);
-            player.loadout.badge = badgeResults.badgeDefinition;
-            player.rewardsBoost = badgeResults.totalBoost;
-        }
-
-        const assets = await verifyAllAssets(packet.address, {
-            skin: packet.skin?.idString,
-            melee: packet.melee?.idString,
-            gun: packet.gun?.idString,
-            emotes: packet.emotes.map(e => e?.idString),
-        })
-
-        player.loadout.emotes = assets.emotes;
-        if (assets.skin) player.loadout.skin = assets.skin;
-        if (assets.melee) player.inventory.weapons[2] = new MeleeItem(assets.melee, player);
-        if (assets.gun) player.inventory.weapons[0] = new GunItem(assets.gun, player);
-
-        this.livingPlayers.add(player);
-        this.spectatablePlayers.push(player);
-        this.connectingPlayers.delete(player);
-        this.connectedPlayers.add(player);
-        this.newPlayers.push(player);
-        this.grid.addObject(player);
-        player.setDirty();
-        this.aliveCountDirty = true;
-        this.updateObjects = true;
-        this.updateGameData({ aliveCount: this.aliveCount });
-
-        player.joined = true;
-
-        player.sendPacket(
-            JoinedPacket.create(
-                {
-                    maxTeamSize: this.maxTeamSize,
-                    teamID: player.teamID ?? 0,
-                    emotes: player.loadout.emotes,
-                    gameId: this.gameId,
-                }
-            )
-        );
-
-        this.addTimeout(() => { player.disableInvulnerability(); }, 5000);
-
-
-        player.sendData(this.map.buffer);
-
-        this.addTimeout(() => { player.disableInvulnerability(); }, 5000);
-
-        // Start the game
-        if (
-            (this.teamMode ? this.teams.size : this.aliveCount) > (Config.startImmediately ? 0 : 1)
-            && !this._started
-            && this.startTimeout === undefined
-        ) {
-            this.startTimeout = this.addTimeout(() => {
-                this.addTimeout(this.postGameStarted.bind(this), Config.gameJoinTime * 1000);
-            }, 3000);
-        }
-
-        Logger.log(`Game ${this.port} | "${player.name}" joined`);
-        this.pluginManager.emit("player_did_join", { player, joinPacket: packet });
+        await this.playerManager.activatePlayer(player, packet);
     }
 
     removePlayer(player: Player): void {
-        if (player === this.killLeader) {
-            this.killLeaderDisconnected(player);
-        }
-
-        player.disconnected = true;
-        this.aliveCountDirty = true;
-        this.connectingPlayers.delete(player);
-        this.connectedPlayers.delete(player);
-
-        if (player.canDespawn) {
-            this.livingPlayers.delete(player);
-            this.removeObject(player);
-            this.deletedPlayers.push(player.id);
-            removeFrom(this.spectatablePlayers, player);
-            this.updateGameData({ aliveCount: this.aliveCount });
-
-            if (this.teamMode) {
-                const team = player.team;
-                if (team) {
-                    team.removePlayer(player);
-
-                    if (!team.players.length) {
-                        this.teams.delete(team);
-                    };
-                }
-                player.teamWipe();
-                player.beingRevivedBy?.action?.cancel();
-            }
-        } else {
-            player.rotation = 0;
-            player.movement.up = player.movement.down = player.movement.left = player.movement.right = false;
-            player.attacking = false;
-            player.setPartialDirty();
-
-            if (this.teamMode && this.now - player.joinTime < 10000) {
-                player.team?.removePlayer(player);
-            }
-        }
-
-        if (player.spectating !== undefined) {
-            player.spectating.spectators.delete(player);
-        }
-
-        if (this.aliveCount < 2) {
-            this.startTimeout?.kill();
-            this.startTimeout = undefined;
-        }
-
-        if (player instanceof Gamer) {
-            try {
-                player.socket.close();
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            } catch (_) {
-                /* not a really big deal if we can't close the socket */
-                // when does this ever fail?
-            }
-        }
-
-        this.pluginManager.emit("player_disconnect", player);
+        this.playerManager.removePlayer(player);
     }
 
-    /**
-     * Adds a `Loot` item to the game world
-     * @param definition The type of loot to add. Prefer passing `LootDefinition` if possible
-     * @param position The position to spawn this loot at
-     * @param count Optionally define an amount of this loot (note that this does not equate spawning
-     * that many `Loot` objects, but rather how many the singular `Loot` object will contain)
-     * @returns The created loot object
-     */
+    // Delegated to gameLifecycle
+    postGameStarted(): void {
+        this.gameLifecycle.postGameStarted();
+    }
+
+    // Delegated to objectSpawner
     addLoot<Def extends LootDefinition = LootDefinition>(
         definition: ReifiableDef<Def>,
         position: Vector,
         layer: Layer,
-        { count, pushVel, jitterSpawn = true, data }: {
-            readonly count?: number
-            readonly pushVel?: number
-            /**
-             * Whether to add a random offset to the given position
-             */
-            readonly jitterSpawn?: boolean
-            readonly data?: ItemData<Def>
-        } = {}
+        options: { count?: number, pushVel?: number, jitterSpawn?: boolean, data?: ItemData<Def> } = {}
     ): Loot<Def> | undefined {
-        const args = {
-            position,
-            layer,
-            count,
-            pushVel,
-            jitterSpawn,
-            data
-        };
-
-        definition = Loots.reify<Def>(definition);
-
-        if (
-            this.pluginManager.emit(
-                "loot_will_generate",
-                {
-                    definition,
-                    ...args
-                }
-            )
-        ) return;
-
-        const loot = new Loot<Def>(
-            this,
-            definition,
-            jitterSpawn
-                ? Vec.add(
-                    position,
-                    randomPointInsideCircle(Vec.create(0, 0), GameConstants.lootSpawnDistance)
-                )
-                : position,
-            layer,
-            {
-                count,
-                pushVel,
-                data
-            }
-        );
-        this.grid.addObject(loot);
-
-        this.pluginManager.emit(
-            "loot_did_generate",
-            { loot, ...args }
-        );
-
-        return loot;
+        return this.objectSpawner.addLoot(definition, position, layer, options);
     }
 
     removeLoot(loot: Loot): void {
-        loot.dead = true;
-        this.removeObject(loot);
+        this.objectSpawner.removeLoot(loot);
     }
 
     addBullet(source: GunItem | Explosion, shooter: GameObject, options: ServerBulletOptions): Bullet {
-        const bullet = new Bullet(
-            this,
-            source,
-            shooter,
-            options
-        );
-
-        this.bullets.add(bullet);
-        this.newBullets.push(bullet);
-
-        return bullet;
+        return this.objectSpawner.addBullet(source, shooter, options);
     }
 
     addExplosion(
@@ -1131,436 +502,39 @@ export class Game implements GameData {
         weapon?: GunItem | MeleeItem | ThrowableItem,
         damageMod = 1
     ): Explosion {
-        const explosion = new Explosion(this, type, position, source, layer, weapon, damageMod);
-        this.explosions.push(explosion);
-        return explosion;
+        return this.objectSpawner.addExplosion(type, position, source, layer, weapon, damageMod);
     }
 
     addProjectile(definition: ThrowableDefinition, position: Vector, layer: Layer, source: ThrowableItem): ThrowableProjectile {
-        const projectile = new ThrowableProjectile(this, position, layer, definition, source);
-        this.grid.addObject(projectile);
-        return projectile;
+        return this.objectSpawner.addProjectile(definition, position, layer, source);
     }
 
     removeProjectile(projectile: ThrowableProjectile): void {
-        this.removeObject(projectile);
-        projectile.dead = true;
+        this.objectSpawner.removeProjectile(projectile);
     }
 
     addSyncedParticle(definition: SyncedParticleDefinition, position: Vector, layer: Layer | number, creatorID?: number): SyncedParticle {
-        const syncedParticle = new SyncedParticle(this, definition, position, layer, creatorID);
-        this.grid.addObject(syncedParticle);
-        return syncedParticle;
+        return this.objectSpawner.addSyncedParticle(definition, position, layer, creatorID);
     }
 
     removeSyncedParticle(syncedParticle: SyncedParticle): void {
-        this.removeObject(syncedParticle);
-        syncedParticle.dead = true;
-    }
-
-    sendChatMessage(player: Player, isSendAll: boolean, message: string): void {
-        if (isSendAll && player.loadout.badge) {
-            this.packets.push(
-                ServerChatPacket.create({
-                    messageColor: 0xffffff,
-                    message
-                } as ServerChatPacketData)
-            );
-        } else if (this.teamMode && !isSendAll && player.team) {
-            player.team.sendTeamMessage(message);
-        }
+        this.objectSpawner.removeSyncedParticle(syncedParticle);
     }
 
     addSyncedParticles(particles: SyncedParticleSpawnerDefinition, position: Vector, layer: Layer | number): void {
-        const particleDef = SyncedParticles.fromString(particles.type);
-        const { spawnRadius, count, deployAnimation } = particles;
-
-        const duration = deployAnimation?.duration;
-        const circOut = EaseFunctions.cubicOut;
-
-        const setParticleTarget = duration
-            ? (particle: SyncedParticle, target: Vector) => {
-                particle.setTarget(target, duration, circOut);
-            }
-            : (particle: SyncedParticle, target: Vector) => {
-                particle._position = target;
-            };
-
-        const spawnParticles = (amount = 1): void => {
-            for (let i = 0; i++ < amount; i++) {
-                setParticleTarget(
-                    this.addSyncedParticle(
-                        particleDef,
-                        position,
-                        layer
-                    ),
-                    Vec.add(
-                        Vec.fromPolar(
-                            randomRotation(),
-                            randomFloat(0, spawnRadius)
-                        ),
-                        position
-                    )
-                );
-            }
-        };
-
-        if (deployAnimation?.staggering) {
-            const staggering = deployAnimation.staggering;
-            const initialAmount = staggering.initialAmount ?? 0;
-
-            spawnParticles(initialAmount);
-
-            const addTimeout = this.addTimeout.bind(this);
-            const addParticles = spawnParticles.bind(null, staggering.spawnPerGroup);
-            const delay = staggering.delay;
-
-            for (let i = initialAmount, j = 1; i < count; i++, j++) {
-                addTimeout(addParticles, j * delay);
-            }
-        } else {
-            spawnParticles(particles.count);
-        }
+        this.objectSpawner.addSyncedParticles(particles, position, layer);
     }
 
-    /**
-     * Delete an object and give the id back to the allocator
-     * @param object The object to delete
-     */
     removeObject(object: GameObject): void {
-        this.grid.removeObject(object);
-        this._idAllocator.give(object.id);
-        this.updateObjects = true;
+        this.objectSpawner.removeObject(object);
     }
 
+    // Delegated to airdropManager
     summonAirdrop(position: Vector): void {
-        if (this.pluginManager.emit("airdrop_will_summon", { position })) return;
-
-        const paddingFactor = 1.25;
-
-        const crateDef = Obstacles.fromString("airdrop_crate_locked");
-        const crateHitbox = (crateDef.spawnHitbox ?? crateDef.hitbox).clone();
-        let thisHitbox = crateHitbox.clone();
-
-        let collided = true;
-        let attempts = 0;
-        let randomInt: number | undefined;
-
-        while (collided) {
-            if (attempts === 500) {
-                switch (true) {
-                    case position.x < this.map.height / 2 && position.y < this.map.height / 2:
-                        randomInt = [1, 2, 3][Math.floor(Math.random() * 3)];
-                        break;
-                    case position.x > this.map.height / 2 && position.y < this.map.height / 2:
-                        randomInt = [1, 4, 5][Math.floor(Math.random() * 3)];
-                        break;
-                    case position.x < this.map.height / 2 && position.y > this.map.height / 2:
-                        randomInt = [3, 6, 7][Math.floor(Math.random() * 3)];
-                        break;
-                    case position.x > this.map.height / 2 && position.y > this.map.height / 2:
-                        randomInt = [4, 6, 8][Math.floor(Math.random() * 3)];
-                        break;
-                }
-            }
-
-            if (randomInt !== undefined) {
-                const distance = crateHitbox.toRectangle().max.x * 2 * paddingFactor;
-
-                switch (randomInt) {
-                    case 1:
-                        position.y = position.y + distance;
-                        break;
-                    case 2:
-                        position.x = position.x + distance;
-                        position.y = position.y + distance;
-                        break;
-                    case 3:
-                        position.x = position.x + distance;
-                        break;
-                    case 4:
-                        position.x = position.x - distance;
-                        break;
-                    case 5:
-                        position.x = position.x - distance;
-                        position.y = position.y + distance;
-                        break;
-                    case 6:
-                        position.y = position.y - distance;
-                        break;
-                    case 7:
-                        position.y = position.y - distance;
-                        position.x = position.x + distance;
-                        break;
-                    case 8:
-                        position.y = position.y - distance;
-                        position.x = position.x - distance;
-                        break;
-                }
-            }
-
-            attempts++;
-            collided = false;
-
-            for (const airdrop of this.airdrops) {
-                thisHitbox = crateHitbox.transform(position);
-                const thatHitbox = (airdrop.type.spawnHitbox ?? airdrop.type.hitbox).transform(airdrop.position);
-                thatHitbox.scale(paddingFactor);
-
-                if (Vec.equals(thisHitbox.getCenter(), thatHitbox.getCenter())) {
-                    /*
-                        when dealing with airdrops exactly superimposed, the normal collision
-                        method makes them line up all in one direction; ideally, we'd want them
-                        to scatter around the original point. to influence the collider, we'll
-                        nudge one of the hitboxes
-                    */
-                    thisHitbox = thisHitbox.transform(Vec.fromPolar(randomRotation(), 0.01));
-                }
-
-                if (thisHitbox.collidesWith(thatHitbox)) {
-                    collided = true;
-                    if (attempts >= 500) continue;
-                    thisHitbox.resolveCollision(thatHitbox);
-                }
-                position = thisHitbox.getCenter();
-            }
-
-            thisHitbox = crateHitbox.transform(position);
-
-            {
-                const padded = thisHitbox.clone();
-                padded.scale(paddingFactor);
-                for (const object of this.grid.intersectsHitbox(padded, Layer.Ground)) {
-                    let hitbox: Hitbox;
-                    if (
-                        object.isObstacle
-                        && !object.dead
-                        && object.definition.indestructible
-                        && ((hitbox = object.spawnHitbox.clone()).scale(paddingFactor), hitbox.collidesWith(thisHitbox))
-                    ) {
-                        collided = true;
-                        if (attempts >= 500) continue;
-                        thisHitbox.resolveCollision(object.spawnHitbox);
-                    }
-                    position = thisHitbox.getCenter();
-                }
-            }
-
-            thisHitbox = crateHitbox.transform(position);
-
-            {
-                const padded = thisHitbox.clone();
-                padded.scale(paddingFactor);
-                // second loop, buildings
-                for (const object of this.grid.intersectsHitbox(thisHitbox, Layer.Ground)) {
-                    if (
-                        object.isBuilding
-                        && object.scopeHitbox
-                        && object.definition.wallsToDestroy === Infinity
-                    ) {
-                        const hitbox = object.scopeHitbox.clone();
-                        hitbox.scale(paddingFactor);
-                        if (!thisHitbox.collidesWith(hitbox)) continue;
-                        collided = true;
-                        if (attempts >= 500) continue;
-                        thisHitbox.resolveCollision(object.scopeHitbox);
-                    }
-                    position = thisHitbox.getCenter();
-                }
-            }
-
-            thisHitbox = crateHitbox.transform(position);
-
-            const { min, max } = thisHitbox.toRectangle();
-            const width = max.x - min.x;
-            const height = max.y - min.y;
-            position.x = Numeric.clamp(position.x, width, this.map.width - width);
-            position.y = Numeric.clamp(position.y, height, this.map.height - height);
-        }
-
-        const direction = randomRotation();
-
-        const planePos = Vec.add(
-            position,
-            Vec.fromPolar(direction, -GameConstants.maxPosition)
-        );
-
-        const airdrop = { position, type: crateDef };
-
-        this.airdrops.push(airdrop);
-
-        this.planes.push({ position: planePos, direction });
-
-        this.addTimeout(() => {
-            const parachute = new Parachute(this, position, airdrop);
-            this.grid.addObject(parachute);
-            this.mapPings.push({
-                definition: MapPings.fromString<MapPing>("airdrop_ping"),
-                position
-            });
-        }, GameConstants.airdrop.flyTime);
-
-        this.pluginManager.emit("airdrop_did_summon", { airdrop, position });
+        this.airdropManager.summonAirdrop(position);
     }
 
     isStarted() {
-        return this._started;
+        return this.gameLifecycle.isStarted();
     }
-
-    initPlayRoutes(app: TemplatedApp, game: Game) {
-        app.ws("/play", {
-            idleTimeout: 30,
-            /**
-             * Upgrade the connection to WebSocket.
-             */
-            upgrade(res, req, context) {
-                res.onAborted((): void => { /* Handle errors in WS connection */ });
-
-                const ip = getIP(res, req);
-
-                // Extract token from Authorization header
-                const searchParams = new URLSearchParams(req.getQuery());
-                const token = searchParams.get('token');
-
-                let nameColor = 0xffffff;
-
-                //
-                // Upgrade the connection
-                //
-                res.upgrade(
-                    {
-                        name: searchParams.get("name") ?? "No name",
-                        teamID: searchParams.get("teamID") ?? undefined,
-                        autoFill: Boolean(searchParams.get("autoFill")),
-                        roomMode: Boolean(searchParams.get("roomMode")),
-                        address: searchParams.get("address") ?? "",
-                        token: token,
-                        ip,
-                        nameColor,
-                        lobbyClearing: searchParams.get("lobbyClearing") === "true",
-                        weaponPreset: searchParams.get("weaponPreset") ?? "",
-                        skin: searchParams.get("skin") ?? "",
-                        emotes: searchParams.get("emotes") ?? "",
-                        badge: searchParams.get("badge") ?? "",
-                        melee: searchParams.get("melee") ?? "",
-                        gun: searchParams.get("gun") ?? "",
-                    },
-                    req.getHeader("sec-websocket-key"),
-                    req.getHeader("sec-websocket-protocol"),
-                    req.getHeader("sec-websocket-extensions"),
-                    context
-                );
-            },
-
-            /**
-             * Handle opening of the socket.
-             * @param socket The socket being opened.
-             */
-            async open(socket: WebSocket<PlayerContainer>) {
-                try {
-                    const data = socket.getUserData();
-
-                    if (!data.token) {
-                        disconnect(socket, `Authentication token not found. Please reconnect your wallet.`);
-                        return;
-                    }
-                    const token = data.token;
-                    const payload = await validateJWT(token);
-
-                    if (payload.walletAddress != data.address?.toLowerCase()) {
-                        disconnect(socket, `Invalid address. Please reconnect your wallet.`);
-                        return;
-                    }
-
-                    if ((data.player = game.addPlayer(socket)) === undefined) {
-                        disconnect(socket, `Authentication failed. Please reconnect your wallet.`);
-                        return;
-                    }
-
-                    const ownedEmotes = data.emotes.split(',');
-                    const emotes = EMOTE_SLOTS.map((_, i) => Emotes.fromStringSafe(ownedEmotes[i] || ''))
-
-                    const stream = new PacketStream(new ArrayBuffer(1024));
-                    stream.serializeServerPacket(
-                        JoinPacket.create({
-                            isMobile: false,
-                            address: data.address ? data.address : "",
-                            gameMode: ModeToNumber[game.gameMap],
-                            emotes: emotes,
-                            name: data.name,
-                            badge: Badges.fromStringSafe(data.badge),
-                            skin: Skins.fromStringSafe(data.skin),
-                            melee: Melees.fromStringSafe(data.melee),
-                            gun: Guns.fromStringSafe(data.gun),
-                        })
-                    );
-                    socket.send(stream.getBuffer(), true, false);
-                } catch (err: any) {
-                    console.log("Open websocket failed: ", err);
-                    disconnect(socket, "Unknown error. Please contact Surviv team.");
-                }
-            },
-
-            /**
-             * Handle messages coming from the socket.
-             * @param socket The socket in question.
-             * @param message The message to handle.
-             */
-            message(socket: WebSocket<PlayerContainer>, message: ArrayBuffer) {
-                const stream = new SuroiByteStream(message);
-                try {
-                    const player = socket.getUserData().player;
-                    if (player === undefined) return;
-                    game.onMessage(stream, player);
-                } catch (e) {
-                    console.warn("Error parsing message:", e);
-                }
-            },
-
-            /**
-             * Handle closing of the socket.
-             * @param socket The socket being closed.
-             */
-            close(socket: WebSocket<PlayerContainer>) {
-                const { player, ip } = socket.getUserData();
-
-                // this should never be null-ish, but will leave it here for any potential race conditions (i.e. TFO? (verification required))
-                if (Config.protection && ip !== undefined) simultaneousConnections[ip]--;
-
-                if (!player) return;
-
-                Logger.log(`Game ${game.port} | "${player.name}" left`);
-                game.removePlayer(player);
-            }
-        }).listen(Config.host, game.port, (): void => {
-            Logger.log(`Game ${game.port} | Listening on ${Config.host}:${game.port}`);
-        });
-    }
-}
-
-function disconnect(socket: WebSocket<PlayerContainer>, reason: string): void {
-    try {
-        const stream = new PacketStream(new ArrayBuffer(128));
-        stream.serializeServerPacket(
-            DisconnectPacket.create({
-                reason
-            })
-        );
-
-        const buffer = stream.getBuffer();
-        const sendResult = socket.send(buffer, true, false);
-        if (sendResult !== 1) {
-            console.warn(`Failed to send disconnect packet. Reason: ${reason}, Send result: ${sendResult}`);
-        }
-        socket.end(1000, reason); // Graceful close with code 1000
-    } catch (e) {
-        console.warn(`Error during disconnect. Reason: ${reason}, Details:`, e);
-    }
-}
-
-const simultaneousConnections: Record<string, number> = {};
-
-export interface Airdrop {
-    readonly position: Vector
-    readonly type: ObstacleDefinition
 }
