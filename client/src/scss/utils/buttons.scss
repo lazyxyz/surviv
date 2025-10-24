@@ -40,6 +40,16 @@
   filter: drop-shadow(3px 3px 8px #00000064);
 }
 
+.btn-special-icon {
+  position: absolute;
+  top: calc((45px - 24px) / 2);
+  left: 2px;
+  height: 24px;
+  margin-left: 20px;
+  scale: 2;
+  filter: drop-shadow(3px 3px 8px #00000064);
+}
+
 .link-darken:hover,
 .link-darken:active,
 .btn-darken:hover,

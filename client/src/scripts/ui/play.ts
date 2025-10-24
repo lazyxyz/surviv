@@ -65,13 +65,14 @@ function setTeamParameters(params: URLSearchParams): void {
 async function initializePlayButtons(game: Game, account: Account): Promise<void> {
     const playButtons = [$("#btn-play-solo"), $("#btn-play-squad")];
 
-    playButtons.forEach((button, index) => {
+   playButtons.forEach((button, index) => {
         button.addClass("play-button");
         const translationString = `play_${["solo", "squad"][index]}` as TranslationKeys;
-        const logoSrc = index === 0 ? "./img/misc/user.svg" : "./img/misc/user-group.svg";
+        const logoSrc = index === 0 ? "./img/game/shared/weapons/m134_minigun.svg" : "./img/misc/user-group.svg";
+        const iconClass = index === 0 ? "btn-special-icon" : "btn-icon"; // Apply special icon class to solo (minigun) for 2x scale
         button.html(`
-            <img class="btn-icon" width="26" height="26" src="${logoSrc}">
-            <span style="margin-left: ${index > 0 ? "20px;" : "0"}" translation="${translationString}">
+            <img class="${iconClass}" width="26" height="26" src="${logoSrc}">
+            <span style="margin-left: ${index === 0 ? "40px;" : "20px;"}" translation="${translationString}">
                 ${getTranslatedString(translationString)}
             </span>
         `);
