@@ -63,6 +63,7 @@ import { autoPickup, updateChatSendAllVisibility, updateUsersBadge } from "./ui/
 import { teamSocket } from "./ui/play";
 import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 import { CustomTeamMessages } from "@common/typings";
+import { FogOfWar } from "./fogOfWar";
 
 /* eslint-disable @stylistic/indent */
 
@@ -155,6 +156,7 @@ export class Game {
     readonly soundManager: SoundManager;
     gasRender: GasRender | undefined;
     readonly particleManager: ParticleManager;
+    readonly fogOfWar: FogOfWar;
 
     readonly pixi: Application;
     readonly inputManager: InputManager;
@@ -180,6 +182,7 @@ export class Game {
         this.map = new Minimap(this);
         this.camera = new Camera(this);
         this.particleManager = new ParticleManager(this);
+        this.fogOfWar = new FogOfWar(this.pixi, this.camera);
 
         this.soundManager = new SoundManager(this);
         this.inputManager.generateBindsConfigScreen();
@@ -269,6 +272,7 @@ export class Game {
             this.map.expanded = GAME_CONSOLE.getBuiltInCVar("cv_map_expanded");
             this.uiManager.ui.gameUi.toggle(GAME_CONSOLE.getBuiltInCVar("cv_draw_hud"));
         }
+        this.fogOfWar.init();
 
         await loadTextures(
             pixi.renderer,
@@ -340,6 +344,7 @@ export class Game {
     resize(): void {
         this.map.resize();
         this.camera.resize(this.pixi.screen.width, this.pixi.screen.height, true);
+        this.fogOfWar.resize();
     }
 
     sendChatMessage(message: string, isTeamChat: boolean = true) {
