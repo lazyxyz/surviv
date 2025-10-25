@@ -26,13 +26,14 @@ export interface ModeDefinition {
     readonly modeLogoImage?: string | { solo: string, squads: string }
 }
 
-export type Mode = "normal" | "fall" | "winter" | "desert";
+export type Mode = "normal" | "fall" | "winter" | "desert" | "cursedIsland";
 
 export const ModeToNumber: Record<Mode, number> = {
     normal: 0,
     fall: 1,
     winter: 2,
     desert: 3,
+    cursedIsland: 4,
 };
 
 export const NumberToMode: Record<number, Mode> = {
@@ -40,6 +41,7 @@ export const NumberToMode: Record<number, Mode> = {
     1: "fall",
     2: "winter",
     3: "desert",
+    4: "cursedIsland",
 };
 
 export function getRandomMode(): Mode {
@@ -130,6 +132,33 @@ export const Modes: Record<Mode, ModeDefinition> = {
         },
         ambience: "wind_ambience",
         inheritTexturesFrom: "fall",
+        defaultScope: "2x_scope",
+        reskin: "fall",
+        particleEffects: {
+            frames: ["weed_1", "weed_2"],
+            delay: 1000,
+        },
+        specialPlayButtons: true,
+        // Icons
+        modeLogoImage: {
+            solo: "./img/misc/user.svg",
+            squads: "./img/misc/user-group.svg"
+        },
+    },
+    cursedIsland: {
+        idString: "cursedIsland",
+        colors: {
+            grass: "hsl(42.94, 87.93%, 77.25%)",
+            water: "hsl(211, 63%, 42%)",
+            border: "hsl(211, 63%, 30%)",
+            beach: "hsl(40, 39%, 55%)",
+            riverBank: "hsl(33, 50%, 30%)",
+            trail: "hsl(35, 50%, 40%)",
+            gas: "hsla(17, 100%, 50%, 0.55)",
+            void: "hsl(25, 80%, 6%)"
+        },
+        ambience: "wind_ambience",
+        inheritTexturesFrom: "desert",
         defaultScope: "2x_scope",
         reskin: "fall",
         particleEffects: {
