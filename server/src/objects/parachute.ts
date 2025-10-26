@@ -56,7 +56,7 @@ export class Parachute extends BaseGameObject.derive(ObjectCategory.Parachute) {
                 if (object.hitbox?.collidesWith(crate.hitbox)) {
                     switch (true) {
                         case object.isPlayer: {
-                            object.piercingDamage({
+                            object.damageHandler.piercingDamage({
                                 amount: GameConstants.airdrop.damage,
                                 source: KillfeedEventType.Airdrop
                             });

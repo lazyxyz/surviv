@@ -746,7 +746,7 @@ export class Inventory {
         this._lastWeaponIndex = target;
 
         item?.refreshModifiers();
-        this.owner.updateAndApplyModifiers();
+        this.owner.modifierCalculator.updateAndApplyModifiers();
 
         return old;
     }

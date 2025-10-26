@@ -25,7 +25,7 @@ export class GameLifecycle {
             const { movement } = player;
             movement.up = movement.down = movement.left = movement.right = false;
             player.attacking = false;
-            player.sendEmote(player.loadout.emotes[4]);
+            player.communicationHandler.sendEmote(player.loadout.emotes[4]);
             if (player instanceof Gamer) {
                 player.handleGameOver(true);
             }

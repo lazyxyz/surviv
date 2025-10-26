@@ -146,7 +146,7 @@ export class PlayerManager {
                         this.game.teams.delete(team);
                     }
                 }
-                player.teamWipe();
+                player.damageHandler.teamWipe();
                 player.beingRevivedBy?.action?.cancel();
             }
         } else {

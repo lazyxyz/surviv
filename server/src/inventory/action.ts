@@ -49,7 +49,7 @@ export class ReviveAction extends Action {
     override execute(): void {
         super.execute();
 
-        this.target.revive();
+        this.target.damageHandler.revive();
         this.player.animation = AnimationType.None;
         this.player.setDirty();
     }
