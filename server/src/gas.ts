@@ -177,8 +177,6 @@ export class Gas {
 
         if (currentStage.state == GasState.Final) {
             this._isFinal = true;
-
-            console.log("GAS FINAL: ", this.stage);
         }
 
         // Start the next stage

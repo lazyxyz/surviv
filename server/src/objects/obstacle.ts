@@ -292,14 +292,6 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
         this.hitbox = this.definition.hitbox.transform(this.position, this.scale, hitboxRotation);
         this.spawnHitbox = (this.definition.spawnHitbox ?? this.definition.hitbox).transform(this.position, this.scale, hitboxRotation);
 
-        // Reset door state if applicable
-        if (this.isDoor && this.door) {
-            this.door.isOpen = false;
-            this.door.offset = 0;
-            this.hitbox = this.door.closedHitbox.clone();
-            this.spawnHitbox = this.hitbox;
-        }
-
         // Regenerate loot for variety on next destruction
         if (this.definition.hasLoot) {
             this.loot = getLootFromTable(this.game.gameMap, this.definition.lootTable ?? this.definition.idString);

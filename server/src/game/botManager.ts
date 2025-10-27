@@ -6,11 +6,13 @@ import { BotType, Zombie, Ninja, Assassin } from "../objects/bots";
 import { ActorContainer, Player } from "../objects/player";
 import { Game } from "../game";
 import { Logger } from "../utils/misc";
-import { Layer } from "@common/constants";
+import { Layer, MODE } from "@common/constants";
+import { Ghost } from "../objects/bots/ghost";
 
 export class BotManager {
     private game: Game;
     private totalBots: number = 0;
+    private bots: Set<Player> = new Set();
 
     constructor(game: Game) {
         this.game = game;
@@ -48,12 +50,14 @@ export class BotManager {
             bot = new Zombie(this.game, botData, spawnPosition, spawnLayer);
         } else if (botType === BotType.Ninja) {
             bot = new Ninja(this.game, botData, spawnPosition, spawnLayer);
-        } else {
+        } else if(botType == BotType.Assassin) {
             bot = new Assassin(this.game, botData, spawnPosition, spawnLayer);
+        } else {
+            bot = new Ghost(this.game, botData, spawnPosition, spawnLayer);
         }
 
-        this.game.livingPlayers.add(bot);
-        this.game.spectatablePlayers.push(bot);
+        // this.game.livingPlayers.add(bot);
+        // this.game.spectatablePlayers.push(bot);
         this.game.connectedPlayers.add(bot);
         this.game.newPlayers.push(bot);
         this.game.grid.addObject(bot);
@@ -62,6 +66,9 @@ export class BotManager {
         this.game.updateObjects = true;
         this.game.updateGameData({ aliveCount: this.game.aliveCount });
         bot.joined = true;
+
+        this.bots.add(bot);
+        this.totalBots++;
 
         this.game.addTimeout(() => { bot.disableInvulnerability(); }, 5000);
         return bot;
@@ -81,17 +88,39 @@ export class BotManager {
             ip: undefined
         };
 
-        for (let i = 0; i < zombieCount; i++) {
-            this.createBot(BotType.Zombie, botData);
+        for (let i = 0; i < 50; i++) {
+            this.createBot(BotType.Ghost, botData);
         }
-        for (let i = 0; i < ninjaCount; i++) {
-            this.createBot(BotType.Ninja, botData);
-        }
-        for (let i = 0; i < assassinCount; i++) {
-            this.createBot(BotType.Assassin, botData);
-        }
+
+        // for (let i = 0; i < zombieCount; i++) {
+        //     this.createBot(BotType.Zombie, botData);
+        // }
+        // for (let i = 0; i < ninjaCount; i++) {
+        //     this.createBot(BotType.Ninja, botData);
+        // }
+        // for (let i = 0; i < assassinCount; i++) {
+        //     this.createBot(BotType.Assassin, botData);
+        // }
 
         this.totalBots = zombieCount + ninjaCount + assassinCount;
         Logger.log(`Bots added to game: Total Bots = ${this.totalBots} (Zombies: ${zombieCount}, Ninjas: ${ninjaCount}, Assassins: ${assassinCount})`);
+    }
+
+    removeBots(): void {
+        for (const bot of Array.from(this.bots)) {
+            bot.dead = true;
+            this.game.livingPlayers.delete(bot);
+            this.game.spectatablePlayers = this.game.spectatablePlayers.filter(p => p !== bot);
+            this.game.connectedPlayers.delete(bot);
+            this.game.newPlayers = this.game.newPlayers.filter(p => p !== bot);
+            this.game.grid.removeObject(bot);
+            bot.destroy();
+        }
+        this.bots.clear();
+        this.totalBots = 0;
+        this.game.aliveCountDirty = true;
+        this.game.updateObjects = true;
+        this.game.updateGameData({ aliveCount: this.game.aliveCount });
+        Logger.log(`All bots removed. Total bots cleaned: ${this.totalBots}`);
     }
 }

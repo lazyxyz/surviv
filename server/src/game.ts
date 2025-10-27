@@ -74,8 +74,8 @@ export class Game implements GameData {
     readonly livingPlayers = new Set<Player>();
     readonly connectingPlayers = new Set<Player>();
     readonly connectedPlayers = new Set<Player>();
-    readonly spectatablePlayers: Player[] = [];
-    readonly newPlayers: Player[] = [];
+    spectatablePlayers: Player[] = [];
+    newPlayers: Player[] = [];
     readonly deletedPlayers: number[] = [];
 
     readonly packets: InputPacket[] = [];
@@ -231,7 +231,7 @@ export class Game implements GameData {
         });
 
         this.pluginManager.loadPlugins();
-          // Initialize new managers
+        // Initialize new managers
         this.botManager = new BotManager(this);
         this.connectionManager = new ConnectionManager(this);
         this.spawnManager = new SpawnManager(this);
@@ -394,6 +394,7 @@ export class Game implements GameData {
             this._started
             && !this.over
             && !Config.startImmediately
+            && this.maxTeamSize != MODE.CursedIsland
             && (
                 this.teamMode
                     ? this.aliveCount <= (this.maxTeamSize as number) && new Set([...this.livingPlayers].map(p => p.teamID)).size <= 1
@@ -404,12 +405,13 @@ export class Game implements GameData {
         }
 
         // game wave end
-        if (this.gas.isFinal()) {
+        if (this.maxTeamSize == MODE.CursedIsland && this.gas.isFinal()) {
             this.gas.reset();
             setTimeout(() => this.gas.advanceGasStage(), 50);
 
             this.gameWave++;
-            console.log("WAVE: ", this.gameWave);
+            this.botManager.removeBots();
+            setTimeout(() => this.botManager.activateBots(), 5000);
         }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {

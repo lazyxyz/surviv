@@ -597,6 +597,37 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this.action = action;
     }
 
+    /**
+     * Destroys the player instance and cleans up resources to prevent memory leaks.
+     * This should be called when removing bots or disconnected players.
+     * Assumes the player has already been removed from game collections (e.g., via game.removePlayer).
+     */
+    destroy(): void {
+        // Clear collections and sets
+        this.visibleObjects.clear();
+        this.nearObjects.clear();
+        this.spectators.clear();
+        this._mapPings = [];
+
+        this.bufferedAttack = undefined;
+        this.action?.cancel();
+
+        // Clear packets buffer
+        this._packets.length = 0;
+
+        // Null out references
+        this.spectating = undefined;
+        this.killedBy = undefined;
+        this.downedBy = undefined;
+        this.beingRevivedBy = undefined;
+        this.activeStair = undefined;
+        this._team = undefined;
+
+        // Mark as destroyed to prevent further updates
+        this.dead = true;
+        this.disconnected = true;
+    }
+
     override get data(): FullData<ObjectCategory.Player> {
         const data: SDeepMutable<FullData<ObjectCategory.Player>> = {
             position: this.position,
