@@ -123,9 +123,7 @@ export class Gas {
         this.completionRatio = 1;
         this.countdownStart = this.game.now;
 
-        if(currentStage.state == GasState.Final) {
-            this._isFinal = true;
-        }
+
 
         if (currentStage.state === GasState.Waiting) {
             this.oldPosition = Vec.clone(this.newPosition);
@@ -175,6 +173,12 @@ export class Gas {
                     }
                 ) ?? this.newPosition
             );
+        }
+
+        if (currentStage.state == GasState.Final) {
+            this._isFinal = true;
+
+            console.log("GAS FINAL: ", this.stage);
         }
 
         // Start the next stage

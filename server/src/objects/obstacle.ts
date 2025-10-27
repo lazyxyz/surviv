@@ -1,5 +1,5 @@
 import { ObjectCategory } from "@common/constants";
-import { Obstacles, RotationMode, type ObstacleDefinition } from "@common/definitions/obstacles";
+import { Obstacles, RevivableMaterialSet, RotationMode, type ObstacleDefinition } from "@common/definitions/obstacles";
 import { PerkIds } from "@common/definitions/perks";
 import { type Orientation, type Variation } from "@common/typings";
 import { CircleHitbox, RectangleHitbox, type Hitbox } from "@common/utils/hitbox";
@@ -271,7 +271,7 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
                 amount
             });
 
-            if (Config.obstacleRevivalDelay) {
+            if (Config.obstacleRevivalDelay && RevivableMaterialSet.has(this.definition.material)) {
                 this._revivalTimeout = this.game.addTimeout(() => {
                     this.revive();
                 }, Config.obstacleRevivalDelay);
@@ -280,7 +280,7 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
     }
 
     private revive(): void {
-       if (!this.dead) return; // Already revived or not dead
+        if (!this.dead) return; // Already revived or not dead
 
         this.dead = false;
         this.health = this.maxHealth;

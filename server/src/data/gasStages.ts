@@ -30,49 +30,79 @@ export const GasStages: GasStage[] = [
     },
     {
         state: GasState.Advancing,
-        duration: 10,
+        duration: 3,
         oldRadius: 0.762,
         newRadius: 0.68,
-        dps: 1
+        dps: 0
     },
     // Round 2
     {
         state: GasState.Waiting,
-        duration: 15,
+        duration: 3,
         oldRadius: 0.68,
         newRadius: 0.55,
-        dps: 1
+        dps: 0
     },
     {
         state: GasState.Advancing,
         duration: 10,
         oldRadius: 0.68,
         newRadius: 0.55,
-        dps: 1.5
+        dps: 0
     },
     // Round 3
     {
         state: GasState.Waiting,
-        duration: 10,
+        duration: 3,
         oldRadius: 0.55,
         newRadius: 0.42,
-        dps: 2,
+        dps: 0,
         summonAirdrop: true
     },
     {
-        state: GasState.Final,
-        duration: 10,
+        state: GasState.Advancing,
+        duration: 5,
         oldRadius: 0.55,
-        newRadius: 0,
-        dps: 2.5
+        newRadius: 0.42,
+        dps: 0
+    },
+    // Round 4
+    {
+        state: GasState.Waiting,
+        duration: 5,
+        oldRadius: 0.42,
+        newRadius: 0.2,
+        dps: 0
+    },
+    {
+        state: GasState.Advancing,
+        duration: 5,
+        oldRadius: 0.42,
+        newRadius: 0.2,
+        dps: 0
+    },
+    // Round 5
+    {
+        state: GasState.Waiting,
+        duration: 5,
+        oldRadius: 0.2,
+        newRadius: 0.07,
+        dps: 0
+    },
+    {
+        state: GasState.Advancing,
+        duration: 5,
+        oldRadius: 0.2,
+        newRadius: 0.07,
+        dps: 0
     },
     // End
     {
-        state: GasState.Waiting,
+        state: GasState.Final,
         duration: 0,
         oldRadius: 0,
         newRadius: 0,
-        dps: 3
+        dps: 0
     },
 ];
 

@@ -63,7 +63,7 @@ export class Gas {
 
             const [isInactive, isAdvancing] = [
                 gas.state === GasState.Inactive,
-                gas.state === GasState.Advancing || gas.state === GasState.Final
+                gas.state === GasState.Advancing
             ];
 
             const time = this.currentDuration - Math.round(this.currentDuration * (gasProgress ?? 1));
@@ -74,7 +74,6 @@ export class Gas {
                     gasMessage = getTranslatedString("gas_waiting", { time: formatDate(time) });
                     break;
                 }
-                case GasState.Final:
                 case GasState.Advancing: {
                     gasMessage = getTranslatedString("gas_advancing");
                     break;
@@ -113,12 +112,12 @@ export class Gas {
             const time = this.currentDuration - Math.round(this.currentDuration * gasProgress);
             this._ui.timerText.text(`${Math.floor(time / 60)}:${(time % 60) < 10 ? "0" : ""}${time % 60}`);
 
-            if (this.state !== GasState.Advancing && this.state !== GasState.Final) {
+            if (this.state !== GasState.Advancing) {
                 this.position = this.oldPosition;
                 this.radius = this.oldRadius;
             }
 
-            if (this.state === GasState.Advancing || this.state === GasState.Final) {
+            if (this.state === GasState.Advancing) {
                 this.lastPosition = Vec.clone(this.position);
                 this.lastRadius = this.radius;
                 this.position = Vec.lerp(this.oldPosition, this.newPosition, gasProgress);
@@ -193,7 +192,7 @@ export class GasRender {
         let position: Vector;
         let radius: number;
 
-        if (gas.state === GasState.Advancing || gas.state === GasState.Final) {
+        if (gas.state === GasState.Advancing) {
             const interpFactor = Numeric.clamp((Date.now() - gas.lastUpdateTime) / gas.game.serverDt, 0, 1);
             position = Vec.lerp(gas.lastPosition, gas.position, interpFactor);
             radius = Numeric.lerp(gas.lastRadius, gas.radius, interpFactor);

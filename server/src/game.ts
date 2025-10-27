@@ -39,7 +39,6 @@ import { IDAllocator } from "./utils/idAllocator";
 import { Logger } from "./utils/misc";
 import { MAP } from "@common/definitions/modes";
 import { createServer } from "./utils/serverHelpers";
-import { ResetPacket } from "@common/packets/resetPackage";
 import { Airdrop, AirdropManager } from "./game/airdropManager";
 import { GameLifecycle } from "./game/gameLifecycle";
 import { ObjectSpawner } from "./game/objectSpawner";
@@ -404,17 +403,14 @@ export class Game implements GameData {
             this.gameLifecycle.endGame();
         }
 
-        // // game wave end
-        // if (this.gas.isFinal()) {
-        //     this.packets.push(
-        //         ResetPacket.create()
-        //     );
+        // game wave end
+        if (this.gas.isFinal()) {
+            this.gas.reset();
+            setTimeout(() => this.gas.advanceGasStage(), 50);
 
-        //     this.map.regenerateObstacles();
-
-        //     this.gas.reset();
-        //     setTimeout(() => this.gas.advanceGasStage(), 50);
-        // }
+            this.gameWave++;
+            console.log("WAVE: ", this.gameWave);
+        }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {
             this.gameLifecycle.createNewGame();
