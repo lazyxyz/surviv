@@ -37,6 +37,8 @@ export const Config = {
     // gameJoinTime: 90,
     gameJoinTime: 10,
 
+    lootLifetime: 3000, // Remove loot after 3s
+
     gas: { mode: GasMode.Normal },
 
     tps: 40,
@@ -75,6 +77,7 @@ export interface ConfigType {
     readonly addBot: boolean;
 
     readonly testMode?: string;
+
     
     /**
      * HTTPS/SSL options. Not used if running locally or with nginx.
@@ -125,6 +128,8 @@ export interface ConfigType {
      * The number of seconds after which players are prevented from joining a game.
      */
     readonly gameJoinTime: number
+
+    readonly lootLifetime?: number; // Auto-removal lifetime in ms
 
     /**
      * There are 3 gas modes: GasMode.Normal, GasMode.Debug, and GasMode.Disabled.

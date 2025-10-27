@@ -17,6 +17,7 @@ import { GameObject } from "../objects/gameObject";
 import { ItemData, Loot } from "../objects/loot";
 import { SyncedParticle } from "../objects/syncedParticle";
 import { ThrowableProjectile } from "../objects/throwableProj";
+import { Config } from "../config";
 
 export class ObjectSpawner {
     private game: Game;
@@ -79,6 +80,14 @@ export class ObjectSpawner {
             "loot_did_generate",
             { loot, ...args }
         );
+
+        if(Config.lootLifetime) {
+            this.game.addTimeout(() => {
+                if (!loot.dead) {
+                    this.removeLoot(loot);
+                }
+            }, Config.lootLifetime);
+        }
 
         return loot;
     }
