@@ -79,6 +79,80 @@ export class Obstacle extends GameObject.derive(ObjectCategory.Obstacle) {
         this.updateFromData(data, true);
     }
 
+    private initSpecialEffects(): void {
+        const definition = this.definition;
+        // Recreate smoke emitter if applicable (checks !this.smokeEmitter after potential reset)
+        if ((definition.explosion ?? ("emitParticles" in definition)) && !this.smokeEmitter) {
+            this.smokeEmitter = this.game.particleManager.addEmitter({
+                delay: 400,
+                active: false,
+                spawnOptions: () => ({
+                    frames: "smoke_particle",
+                    position: this.position,
+                    layer: this.layer,
+                    zIndex: Numeric.max((definition.zIndex ?? ZIndexes.ObstaclesLayer1) + 1, ZIndexes.Players),
+                    lifetime: 3500,
+                    scale: { start: 0, end: randomFloat(4, 5) },
+                    alpha: { start: 0.9, end: 0 },
+                    speed: Vec.fromPolar(randomFloat(-1.9, -2.1), randomFloat(5, 6))
+                })
+            });
+        }
+        // Recreate glow and flicker if applicable (checks this._glow ??= for recreation)
+        if (definition.glow !== undefined) {
+            const glow = definition.glow;
+            const particle = this._glow ??= this.game.particleManager.spawnParticle({
+                frames: "_glow_",
+                position: glow.position !== undefined
+                    ? Vec.add(this.position, glow.position)
+                    : this.position,
+                layer: this.layer,
+                lifetime: Infinity,
+                speed: Vec.create(0, 0),
+                zIndex: this.container.zIndex - 0.5,
+                tint: glow.tint,
+                scale: glow.scale
+            });
+            if (glow.scaleAnim !== undefined) {
+                const { to, duration } = glow.scaleAnim;
+                // offset so that they aren't all synchronized lol
+                window.setTimeout(() => {
+                    if (this.dead) return;
+                    this._glowTween ??= this.game.addTween({
+                        target: particle,
+                        to: {
+                            scale: to
+                        },
+                        duration,
+                        ease: EaseFunctions.cubicOut,
+                        yoyo: true,
+                        infinite: true
+                    });
+                }, Math.random() * 2000);
+            }
+            const { chance, strength, interval } = glow.flicker ?? { chance: 0, strength: 1, interval: 1 };
+            if ((chance ?? 0) > 0) {
+                const This = this;
+                // "i will write bad code but make it look pretty so that it doesn't look like bad code"
+                // -eiπ
+                this._flickerTimeout ??= this.game.addTimeout(function flicker(): void {
+                    if (particle.dead) return;
+                    if (Math.random() < chance) {
+                        const old = particle.alpha;
+                        particle.alpha *= strength;
+                        This._flickerTimeout = This.game.addTimeout(() => {
+                            if (particle.dead) return;
+                            particle.alpha = old;
+                            This._flickerTimeout = This.game.addTimeout(flicker, interval);
+                        }, 50);
+                    } else {
+                        This._flickerTimeout = This.game.addTimeout(flicker, interval);
+                    }
+                }, interval);
+            }
+        }
+    }
+
     private revive(): void {
         this.dead = false;
 
@@ -87,7 +161,7 @@ export class Obstacle extends GameObject.derive(ObjectCategory.Obstacle) {
         }
 
         // Recreate special effects on revival
-        // this.initSpecialEffects();
+        this.initSpecialEffects();
 
         // Optional: Spawn revival particles (symmetric to destroy, but reversed)
         if (!("replaceWith" in this.definition && this.definition.replaceWith) && !this.definition.noDestroyEffect) {
@@ -195,7 +269,7 @@ export class Obstacle extends GameObject.derive(ObjectCategory.Obstacle) {
                 });
             }
 
-            if (definition.sound && !definition.role && !this.destroyed) {
+            if (definition.sound && !definition.role && !this.dead) {
                 if ("names" in definition.sound) definition.sound.names.forEach(name => this.playSound(name, definition.sound));
                 else this.playSound(definition.sound.name, definition.sound);
             }
@@ -203,7 +277,7 @@ export class Obstacle extends GameObject.derive(ObjectCategory.Obstacle) {
             if (this.activated !== full.activated) {
                 this.activated = full.activated;
 
-                if (!isNew && !this.destroyed) {
+                if (!isNew && !this.dead) {
                     if (definition.isActivatable && definition.sound) {
                         if ("names" in definition.sound) definition.sound.names.forEach(name => this.playSound(name, definition.sound));
                         else this.playSound(definition.sound.name, definition.sound);
@@ -294,64 +368,7 @@ export class Obstacle extends GameObject.derive(ObjectCategory.Obstacle) {
         this.container.scale.set(this.dead ? 1 : this.scale);
 
         if (isNew) {
-            if (definition.glow !== undefined) {
-                const glow = definition.glow;
-
-                const particle = this._glow ??= this.game.particleManager.spawnParticle({
-                    frames: "_glow_",
-                    position: glow.position !== undefined
-                        ? Vec.add(this.position, glow.position)
-                        : this.position,
-                    layer: this.layer,
-                    lifetime: Infinity,
-                    speed: Vec.create(0, 0),
-                    zIndex: this.container.zIndex - 0.5,
-                    tint: glow.tint,
-                    scale: glow.scale
-                });
-
-                if (glow.scaleAnim !== undefined) {
-                    const { to, duration } = glow.scaleAnim;
-
-                    // offset so that they aren't all synchronized lol
-                    window.setTimeout(() => {
-                        if (this.dead) return;
-
-                        this._glowTween ??= this.game.addTween({
-                            target: particle,
-                            to: {
-                                scale: to
-                            },
-                            duration,
-                            ease: EaseFunctions.cubicOut,
-                            yoyo: true,
-                            infinite: true
-                        });
-                    }, Math.random() * 2000);
-                }
-
-                const { chance, strength, interval } = glow.flicker ?? { chance: 0, strength: 1, interval: 1 };
-                if ((chance ?? 0) > 0) {
-                    const This = this;
-                    // "i will write bad code but make it look pretty so that it doesn't look like bad code"
-                    // -eiπ
-
-                    this._flickerTimeout ??= this.game.addTimeout(function flicker(): void {
-                        if (particle.dead) return;
-                        if (Math.random() < chance) {
-                            const old = particle.alpha;
-                            particle.alpha *= strength;
-                            This._flickerTimeout = This.game.addTimeout(() => {
-                                if (particle.dead) return;
-                                particle.alpha = old;
-                                This._flickerTimeout = This.game.addTimeout(flicker, interval);
-                            }, 50);
-                        } else {
-                            This._flickerTimeout = This.game.addTimeout(flicker, interval);
-                        }
-                    }, interval);
-                }
-            }
+            this.initSpecialEffects();
         }
 
         // Change the texture of the obstacle and play a sound when it's destroyed
@@ -417,6 +434,9 @@ export class Obstacle extends GameObject.derive(ObjectCategory.Obstacle) {
             this._glowTween?.kill();
             this._flickerTimeout?.kill();
             this._glow?.kill();
+            this._glow = undefined;  // Added: Reset for recreation
+            this._glowTween = undefined;
+            this._flickerTimeout = undefined;
         }
 
         this.updateZIndex();
