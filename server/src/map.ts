@@ -1190,31 +1190,6 @@ export class GameMap {
         }
         return false;
     }
-
-    regenerateObstacles(): void {
-        // Revive dead regrowable standalone obstacles at original positions
-        for (const obj of this.game.grid.pool.getCategory(ObjectCategory.Obstacle)) {
-            if (!obj.dead || obj.parentBuilding) continue;
-
-            // Revive: reset state to alive
-            obj.dead = false;
-            // Restore full health (assuming Obstacle has health property)
-            obj.health = obj.definition.health; // Adjust if maxHealth is stored differently
-            // Restore scale to original spawn range (randomize or use stored; here randomize for "same-ish")
-            obj.scale = randomFloat(obj.definition.scale?.spawnMin ?? 1, obj.definition.scale?.spawnMax ?? 1);
-            // Mark for full update to sync revival to clients
-            this.game.fullDirtyObjects.add(obj);
-        }
-
-        // Remove residues (decals from destroyed objects)
-        for (const obj of this.game.grid.pool.getCategory(ObjectCategory.DeathMarker)) {
-            obj.dead = true;
-            this.game.removeObject(obj);
-        }
-
-        // No need to regenerate new obstacles; revived existing ones
-    }
-
 }
 
 interface RotationMapping {

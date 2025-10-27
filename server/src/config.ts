@@ -23,7 +23,7 @@ export const Config = {
     squadPort: 9001,
     v50Port: 9500,
     cursedIslandPort: 9600,
-    
+
     addBot: true,
 
     // addBot: false,
@@ -37,7 +37,8 @@ export const Config = {
     // gameJoinTime: 90,
     gameJoinTime: 10,
 
-    lootLifetime: 3000, // Remove loot after 3s
+    objectLifetime: 3000, // Remove loot after 30s
+    obstacleRevivalDelay: 5000, // Remove loot after 3 mins
 
     gas: { mode: GasMode.Normal },
 
@@ -49,7 +50,7 @@ export const Config = {
     authServer: {
         address: "http://localhost:8080"
     },
-    
+
     earnConfig: {
         rank: 5,
         api: "https://admin.surviv.fun",
@@ -78,7 +79,7 @@ export interface ConfigType {
 
     readonly testMode?: string;
 
-    
+
     /**
      * HTTPS/SSL options. Not used if running locally or with nginx.
      */
@@ -95,18 +96,18 @@ export interface ConfigType {
      * - `SpawnMode.Center` always spawns the player in the center of the map.
      */
     readonly spawn:
-        | { readonly mode: SpawnMode.Normal }
-        | {
-            readonly mode: SpawnMode.Radius
-            readonly position: Vector
-            readonly radius: number
-        }
-        | {
-            readonly mode: SpawnMode.Fixed
-            readonly position: Vector
-            readonly layer?: Layer
-        }
-        | { readonly mode: SpawnMode.Center }
+    | { readonly mode: SpawnMode.Normal }
+    | {
+        readonly mode: SpawnMode.Radius
+        readonly position: Vector
+        readonly radius: number
+    }
+    | {
+        readonly mode: SpawnMode.Fixed
+        readonly position: Vector
+        readonly layer?: Layer
+    }
+    | { readonly mode: SpawnMode.Center }
 
 
     /**
@@ -129,7 +130,8 @@ export interface ConfigType {
      */
     readonly gameJoinTime: number
 
-    readonly lootLifetime?: number; // Auto-removal lifetime in ms
+    readonly objectLifetime?: number; // Auto-removal lifetime in ms of loot/deathMarker
+    readonly obstacleRevivalDelay?: number; // Auto-revival obstacle delay in ms
 
     /**
      * There are 3 gas modes: GasMode.Normal, GasMode.Debug, and GasMode.Disabled.
@@ -138,13 +140,13 @@ export interface ConfigType {
      * GasMode.Disabled: Gas is disabled.
      */
     readonly gas:
-        | { readonly mode: GasMode.Disabled }
-        | { readonly mode: GasMode.Normal }
-        | {
-            readonly mode: GasMode.Debug
-            readonly overridePosition?: boolean
-            readonly overrideDuration?: number
-        }
+    | { readonly mode: GasMode.Disabled }
+    | { readonly mode: GasMode.Normal }
+    | {
+        readonly mode: GasMode.Debug
+        readonly overridePosition?: boolean
+        readonly overrideDuration?: number
+    }
 
     /**
      * The number of game ticks that occur per second.
@@ -231,9 +233,9 @@ export interface ConfigType {
         readonly address: string
     }
 
-    
+
     readonly earnConfig: {
         readonly rank: number, // Rank receive rewards
         readonly api: string,
-    }; 
+    };
 }

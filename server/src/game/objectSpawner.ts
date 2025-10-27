@@ -1,4 +1,4 @@
-import { Layer, GameConstants } from "@common/constants";
+import { Layer, GameConstants, ObjectCategory } from "@common/constants";
 import { ExplosionDefinition } from "@common/definitions/explosions";
 import { LootDefinition, Loots } from "@common/definitions/loots";
 import { SyncedParticleDefinition, SyncedParticleSpawnerDefinition, SyncedParticles } from "@common/definitions/syncedParticles";
@@ -18,6 +18,7 @@ import { ItemData, Loot } from "../objects/loot";
 import { SyncedParticle } from "../objects/syncedParticle";
 import { ThrowableProjectile } from "../objects/throwableProj";
 import { Config } from "../config";
+import { Obstacle } from "../objects/obstacle";
 
 export class ObjectSpawner {
     private game: Game;
@@ -81,12 +82,12 @@ export class ObjectSpawner {
             { loot, ...args }
         );
 
-        if(Config.lootLifetime) {
+        if (Config.objectLifetime) {
             this.game.addTimeout(() => {
                 if (!loot.dead) {
                     this.removeLoot(loot);
                 }
-            }, Config.lootLifetime);
+            }, Config.objectLifetime);
         }
 
         return loot;

@@ -16,6 +16,8 @@ import { type Building } from "./building";
 import { type Bullet } from "./bullet";
 import { BaseGameObject, DamageParams, type GameObject } from "./gameObject";
 import { type Player } from "./player";
+import { Timeout } from "@common/utils/misc";
+import { Config } from "../config";
 
 export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
     override readonly fullAllocBytes = 10;
@@ -61,6 +63,8 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
     puzzlePiece?: string | boolean;
 
     detectedMetal?: boolean;
+
+    private _revivalTimeout?: Timeout;
 
     constructor(
         game: Game,
@@ -156,7 +160,7 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
                     )
                     || source instanceof Obstacle
                 )
-                || (weaponDef?.itemType === ItemType.Melee && definition.material === "stone" && !weaponDef?.stonePiercing))
+                    || (weaponDef?.itemType === ItemType.Melee && definition.material === "stone" && !weaponDef?.stonePiercing))
             )
             || this.game.pluginManager.emit("obstacle_will_damage", {
                 obstacle: this,
@@ -266,7 +270,42 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
                 weaponUsed,
                 amount
             });
+
+            if (Config.obstacleRevivalDelay) {
+                this._revivalTimeout = this.game.addTimeout(() => {
+                    this.revive();
+                }, Config.obstacleRevivalDelay);
+            }
         }
+    }
+
+    private revive(): void {
+        if (!this.dead) return; // Already revived or not dead
+        this.dead = false;
+        this.health = this.maxHealth;
+        this.scale = this.maxScale;
+        this.collidable = !this.definition.noCollisions;
+        // Recalculate hitbox
+        const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
+        this.hitbox = this.definition.hitbox.transform(this.position, this.scale, hitboxRotation);
+        this.spawnHitbox = (this.definition.spawnHitbox ?? this.definition.hitbox).transform(this.position, this.scale, hitboxRotation);
+        // Reset door state if applicable
+        if (this.isDoor && this.door) {
+            this.door.isOpen = false;
+            this.door.offset = 0;
+            this.hitbox = this.door.closedHitbox.clone();
+            this.spawnHitbox = this.hitbox;
+        }
+        // Update grid
+        this.game.grid.updateObject(this);
+        this.setDirty();
+
+        // // Optional: Emit revival event for plugins
+        // this.game.pluginManager.emit("obstacle_did_revive", {
+        //     obstacle: this
+        // });
+
+        this._revivalTimeout = undefined;
     }
 
     canInteract(player?: Player): boolean {

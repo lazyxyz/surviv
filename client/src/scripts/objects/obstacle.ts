@@ -79,6 +79,54 @@ export class Obstacle extends GameObject.derive(ObjectCategory.Obstacle) {
         this.updateFromData(data, true);
     }
 
+    private revive(): void {
+        this.dead = false;
+
+        if (this.mountSprite !== undefined) {
+            this.mountSprite.setVisible(true);
+        }
+
+        // Recreate special effects on revival
+        // this.initSpecialEffects();
+
+        // Optional: Spawn revival particles (symmetric to destroy, but reversed)
+        if (!("replaceWith" in this.definition && this.definition.replaceWith) && !this.definition.noDestroyEffect) {
+            this.game.particleManager.spawnParticles(10, () => ({
+                frames: this.particleFrames,
+                position: this.hitbox.randomPoint(),
+                layer: this.layer,
+                zIndex: (this.definition.zIndex ?? ZIndexes.ObstaclesLayer1) + 1,
+                lifetime: 1500,
+                rotation: {
+                    start: randomRotation(),
+                    end: randomRotation()
+                },
+                scale: {
+                    start: 0,
+                    end: randomFloat(0.85, 0.95),
+                    ease: EaseFunctions.quarticOut
+                },
+                alpha: {
+                    start: 0.65,
+                    end: 1,
+                    ease: EaseFunctions.sexticOut
+                },
+                speed: Vec.fromPolar(randomRotation() + Math.PI, randomFloat(2, 5)) // Inward direction
+            }));
+
+            // Optional: Play a revival sound
+            const playSound = (name: string): void => {
+                this.playSound(name, {
+                    falloff: 0.2,
+                    maxRange: 96
+                });
+            };
+
+            // You can add a specific revival sound here if defined in definitions, e.g.:
+            // playSound(`${MaterialSounds[this.definition.material]?.revived ?? this.definition.material}_revived`);
+        }
+    }
+
     override updateFromData(data: ObjectsNetData[ObjectCategory.Obstacle], isNew = false): void {
         let texture: string | undefined;
 
@@ -223,6 +271,11 @@ export class Obstacle extends GameObject.derive(ObjectCategory.Obstacle) {
         }
 
         const definition = this.definition;
+
+        // Handle revival
+        if (this.dead && !data.dead) {
+            this.revive();
+        }
 
         this.scale = data.scale;
 
