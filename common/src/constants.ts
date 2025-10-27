@@ -189,7 +189,7 @@ export const enum GasState {
     Inactive,
     Waiting,
     Advancing,
-    End
+    Final
 }
 
 export const enum FireMode {

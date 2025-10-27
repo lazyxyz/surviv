@@ -23,6 +23,7 @@ import { type ObjectsNetData } from "@common/utils/objectsSerializations";
 import { randomFloat, randomVector } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound, type Sound } from "@pixi/sound";
+import $ from "jquery";
 import { Application, Color } from "pixi.js";
 import "pixi.js/prepare";
 import { getTranslatedString } from "../translations";
@@ -55,14 +56,13 @@ import { Tween } from "./utils/tween";
 import { Account } from "./account";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { errorAlert } from "./modal";
-import {  Maps, NumberToMode, type MAP } from "@common/definitions/modes";
+import { Maps, NumberToMode, type MAP } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "..";
 import { resetPlayButtons, updateDisconnectTime } from "./ui/home";
 import { autoPickup, updateChatSendAllVisibility, updateUsersBadge } from "./ui/game";
 import { teamSocket } from "./ui/play";
 import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 import { CustomTeamMessages } from "@common/typings";
-import { ResetPacket } from "@common/packets/resetPackage";
 
 /* eslint-disable @stylistic/indent */
 
@@ -180,10 +180,6 @@ export class Game {
         this.map = new Minimap(this);
         this.camera = new Camera(this);
         this.particleManager = new ParticleManager(this);
-        this.gasRender = new GasRender(PIXI_SCALE);
-        this.camera.addObject(this.gasRender.graphics);
-        this.map.indicator.setFrame("player_indicator");
-
 
         this.soundManager = new SoundManager(this);
         this.inputManager.generateBindsConfigScreen();
@@ -222,7 +218,7 @@ export class Game {
         return game;
     }
 
-    initPixi = async (mapName: MAP): Promise<void> => {
+    initPixi = async (gameMode: MAP): Promise<void> => {
         const renderMode = GAME_CONSOLE.getBuiltInCVar("cv_renderer");
         const renderRes = GAME_CONSOLE.getBuiltInCVar("cv_renderer_res");
         const pixi = this.pixi;
@@ -279,7 +275,7 @@ export class Game {
             this.inputManager.isMobile
                 ? GAME_CONSOLE.getBuiltInCVar("mb_high_res_textures")
                 : GAME_CONSOLE.getBuiltInCVar("cv_high_res_textures")
-            , mapName.toString()
+            , gameMode.toString()
         );
 
         pixi.ticker.add(this._renderCallback);
@@ -296,6 +292,11 @@ export class Game {
 
 
     setupGame() {
+        this.gasRender = new GasRender(PIXI_SCALE);
+
+        this.camera.addObject(this.gasRender.graphics);
+        this.map.indicator.setFrame("player_indicator");
+
         const particleEffects = Maps[this.gameMap].particleEffects;
         if (particleEffects !== undefined) {
             const This = this;
@@ -595,26 +596,6 @@ export class Game {
                 }, 5000);
                 break;
             }
-            case packet instanceof ResetPacket: {
-                // for (const obj of this.objects.getCategory(ObjectCategory.Obstacle)) {
-                //     if (obj.dead && !obj.definition.noResidue) {
-                //         obj.destroy();
-                //         this.objects.delete(obj);
-                //     }
-                // }
-
-                for (const obj of this.objects.getCategory(ObjectCategory.DeathMarker)) {
-                    obj.destroy();
-                    this.objects.delete(obj);
-                }
-
-                this.gas.reset();
-                this.map.clear();
-                this._timeouts.clear();
-
-                break
-            }
-
             case packet instanceof PickupPacket: {
                 const { output: { message, item } } = packet;
 

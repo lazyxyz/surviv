@@ -404,17 +404,17 @@ export class Game implements GameData {
             this.gameLifecycle.endGame();
         }
 
-        // game wave end
-        if (this.gas.isFinal()) {
-            this.packets.push(
-                ResetPacket.create()
-            );
+        // // game wave end
+        // if (this.gas.isFinal()) {
+        //     this.packets.push(
+        //         ResetPacket.create()
+        //     );
 
-            this.map.regenerateObstacles();
+        //     this.map.regenerateObstacles();
 
-            this.gas.reset();
-            setTimeout(() => this.gas.advanceGasStage(), 50);
-        }
+        //     this.gas.reset();
+        //     setTimeout(() => this.gas.advanceGasStage(), 50);
+        // }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {
             this.gameLifecycle.createNewGame();

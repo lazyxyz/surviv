@@ -87,7 +87,7 @@ export class Gamer extends Player {
         super.disconnect();
     }
 
-    die(params: Omit<DamageParams, "amount">): void {
+    override die(params: Omit<DamageParams, "amount">): void {
         super.die(params);
         if (!this.disconnected && !this.gameOver) {
             this.handleGameOver();
@@ -188,6 +188,8 @@ export class Gamer extends Player {
     handleGameOver(won = false): void {
         if (!this.address || this.gameOver) return;
         this.gameOver = true;
+
+        console.log("handleGameOver!");
 
         const rank = this.calculateRank(won);
         if (!rank) {

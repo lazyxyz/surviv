@@ -20,6 +20,7 @@ export class GameLifecycle {
 
     endGame(): void {
         this.game.setGameData({ allowJoin: false, over: true });
+        console.log("endGame!");
 
         for (const player of this.game.livingPlayers) {
             const { movement } = player;

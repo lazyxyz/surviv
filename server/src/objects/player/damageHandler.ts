@@ -158,7 +158,7 @@ export class DamageHandler {
                     }
                 }
 
-                this.die(params);
+                this.player.die(params);
             }
         }
 
