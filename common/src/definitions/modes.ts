@@ -148,23 +148,21 @@ export const Modes: Record<Mode, ModeDefinition> = {
     cursedIsland: {
         idString: "cursedIsland",
         colors: {
-            grass: "hsl(42.94, 87.93%, 77.25%)",
-            water: "hsl(211, 63%, 42%)",
+            grass: "hsl(224, 43%, 21%)",
+            water: "hsl(331, 49%, 39%)",
             border: "hsl(211, 63%, 30%)",
-            beach: "hsl(40, 39%, 55%)",
-            riverBank: "hsl(33, 50%, 30%)",
-            trail: "hsl(35, 50%, 40%)",
-            gas: "hsla(17, 100%, 50%, 0.55)",
+            beach: "hsl(229, 18%, 36%)",
+            riverBank: "hsl(229, 18%, 36%)",
+            trail: "hsl(229, 18%, 36%)",
+            gas: "hsla(17, 100%, 50%, 0.35)",
             void: "hsl(25, 80%, 6%)"
         },
-        ambience: "wind_ambience",
+        ambience: "horror_ambience",
         inheritTexturesFrom: "desert",
-        defaultScope: "2x_scope",
+        defaultScope: "8x_scope",
         reskin: "fall",
-        particleEffects: {
-            frames: ["weed_1", "weed_2"],
-            delay: 1000,
-        },
+        darkShaders: true,
+        bulletTrailAdjust: "hsl(280, 50%, 70%)",
         specialPlayButtons: true,
         // Icons
         modeLogoImage: {
@@ -174,5 +172,5 @@ export const Modes: Record<Mode, ModeDefinition> = {
     },
 };
 export const ObstacleModeVariations: Partial<Record<Mode, string>> = {
-    winter: "_winter"
+    winter: "_winter",
 };
