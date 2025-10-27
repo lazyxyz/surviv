@@ -36,7 +36,7 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
 
     spawnHitbox: Hitbox;
 
-    readonly loot: LootItem[] = [];
+    loot: LootItem[] = [];
     readonly lootSpawnOffset?: Vector;
 
     readonly definition: ObstacleDefinition;
@@ -280,15 +280,18 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
     }
 
     private revive(): void {
-        if (!this.dead) return; // Already revived or not dead
+       if (!this.dead) return; // Already revived or not dead
+
         this.dead = false;
         this.health = this.maxHealth;
         this.scale = this.maxScale;
         this.collidable = !this.definition.noCollisions;
+
         // Recalculate hitbox
         const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
         this.hitbox = this.definition.hitbox.transform(this.position, this.scale, hitboxRotation);
         this.spawnHitbox = (this.definition.spawnHitbox ?? this.definition.hitbox).transform(this.position, this.scale, hitboxRotation);
+
         // Reset door state if applicable
         if (this.isDoor && this.door) {
             this.door.isOpen = false;
@@ -296,8 +299,15 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
             this.hitbox = this.door.closedHitbox.clone();
             this.spawnHitbox = this.hitbox;
         }
+
+        // Regenerate loot for variety on next destruction
+        if (this.definition.hasLoot) {
+            this.loot = getLootFromTable(this.game.gameMap, this.definition.lootTable ?? this.definition.idString);
+        }
+
         // Update grid
         this.game.grid.updateObject(this);
+
         this.setDirty();
 
         // // Optional: Emit revival event for plugins
