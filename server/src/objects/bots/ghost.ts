@@ -47,11 +47,11 @@ export class Ghost extends Player {
         this.name = this.getRandomName(); // Assign random name
         this.loadout.skin = Skins.fromString("ghost");
         this.inventory.scope = Scopes.definitions[0];
+        this.health = this.health * 0.3; // Reduce health
 
         // Apply level-based multipliers
         const healthMultiplier = 1 + Ghost.HEALTH_MULTIPLIER_PER_LEVEL * (level - 1);
-        this.maxHealth *= healthMultiplier;
-        this.health = this.maxHealth; // Set health to new max
+        this.health *= healthMultiplier;
 
         this.leveledSpeed = Ghost.BASE_SPEED * (1 + Ghost.SPEED_MULTIPLIER_PER_LEVEL * (level - 1));
 

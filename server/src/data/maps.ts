@@ -621,11 +621,21 @@ const maps = {
         oceanSize: 64,
         beachSize: 16,
         oases: {
-            minAmount: 7,
-            maxAmount: 7,
+            minAmount: 1,
+            maxAmount: 3,
             minRadius: 40,
             maxRadius: 80,
             bankWidth: 12
+        },
+        rivers: {
+            minAmount: 1,
+            maxAmount: 1,
+            wideChance: 0.35,
+            minWidth: 12,
+            maxWidth: 18,
+            minWideWidth: 25,
+            maxWideWidth: 28,
+            maxWideAmount: 1
         },
         trails: {
             minAmount: 7,
@@ -643,10 +653,9 @@ const maps = {
             maxWidth: 250,
             maxHeight: 200,
             count: 2,
-            allowedObstacles: ["clearing_boulder", "flint_crate", "rock", "vibrant_bush", "river_chest", "lily_pad", "grenade_crate", "oak_leaf_pile", "river_rock", "melee_crate", "flint_stone"],
+            allowedObstacles: ["clearing_boulder", "rock", "vibrant_bush", "river_chest", "lily_pad", "grenade_crate", "oak_leaf_pile", "river_rock", "melee_crate", "flint_stone"],
             obstacles: [
                 { idString: "clearing_boulder", min: 3, max: 6 },
-                { idString: "flint_crate", min: 0, max: 2 },
                 { idString: "grenade_crate", min: 0, max: 2 },
                 { idString: "melee_crate", min: 0, max: 1 },
                 { idString: "flint_stone", min: 0, max: 1 }
@@ -689,7 +698,6 @@ const maps = {
             stump: 40,
             hatchet_stump: 3,
             regular_crate: 100,
-            flint_crate: 10,
             grenade_crate: 50,
             rock: 220,
             clearing_boulder: 15,
