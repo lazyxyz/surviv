@@ -666,4 +666,8 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
         return data;
     }
+
+    isBot(): boolean {
+        return false;
+    }
 }

@@ -47,7 +47,8 @@ export class Ghost extends Player {
         this.name = this.getRandomName(); // Assign random name
         this.loadout.skin = Skins.fromString("ghost");
         this.inventory.scope = Scopes.definitions[0];
-        this.health = this.health * 0.3; // Reduce health
+        // this.health = this.health * 0.3; // Reduce health
+        this.health = this.health * 1; // Reduce health
 
         // Apply level-based multipliers
         const healthMultiplier = 1 + Ghost.HEALTH_MULTIPLIER_PER_LEVEL * (level - 1);
@@ -228,5 +229,9 @@ export class Ghost extends Player {
 
         // Process movement input
         this.processInputs(packet);
+    }
+
+    override isBot(): boolean {
+        return true;
     }
 }

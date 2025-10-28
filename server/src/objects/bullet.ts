@@ -12,8 +12,8 @@ import { Building } from "./building";
 import { type Explosion } from "./explosion";
 import { type GameObject } from "./gameObject";
 import { Obstacle } from "./obstacle";
-import { type Player } from "./player";
-import { Ghost } from "./bots/ghost";
+import { Player } from "./player";
+import { KNOCK_BACK_AMOUNT } from "../constants";
 
 type Weapon = GunItem | Explosion;
 
@@ -150,10 +150,9 @@ export class Bullet extends BaseBullet {
                 }
             }
 
-            // Apply pushback if the object is a Ghost
-            if (object instanceof Ghost) {
-                const knockbackAmount = 0.5; // Configurable knockback distance
-                object.position = Vec.add(object.position, Vec.scale(this.direction, knockbackAmount));
+            // Apply pushback if the object is a Bot
+            if (object instanceof Player && object.isBot()) {
+                object.position = Vec.add(object.position, Vec.scale(this.direction, KNOCK_BACK_AMOUNT));
                 this.game.grid.updateObject(object);
                 object.setDirty();
             }
