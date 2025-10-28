@@ -1,4 +1,4 @@
-import { GameConstants, Layer } from "@common/constants";
+import { GameConstants, KillfeedEventType, Layer } from "@common/constants";
 import { type Vector, Vec } from "@common/utils/vector";
 import { Game } from "../../game";
 import { Team } from "../../team";
@@ -10,11 +10,11 @@ import { Scopes } from "@common/definitions/scopes";
 import { Config } from "../../config";
 import { DamageParams } from "../gameObject";
 import { randomFloat } from "@common/utils/random";
-
-enum GhostSkill {
-    Rage = "Rage",
-    None = "None"
-}
+import { Perks, PerkIds } from "@common/definitions/perks";
+import { CircleHitbox } from "@common/utils/hitbox";
+import { SyncedParticle } from "../syncedParticle";
+import { adjacentOrEqualLayer } from "@common/utils/layer";
+import { KillFeedPacket } from "@common/packets/killFeedPacket";
 
 /**
  * Ghost Class
@@ -26,7 +26,7 @@ export class Ghost extends Player {
     private static readonly ROTATION_RATE = 0.35; // Maximum rotation speed per update
     private static readonly IDLE_ROTATION_SPEED = 0.1; // Rotation speed when idling
     private static readonly SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance from target
-    private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.5; // Base chase speed (faster than Zombie)
+    private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.5;
     private static readonly BASE_APS = 2; // Base attacks per second (2 attack per second)
     private static readonly HEALTH_MULTIPLIER_PER_LEVEL = 0.05; // 5% health increase per level
     private static readonly SPEED_MULTIPLIER_PER_LEVEL = 0.02; // 2% speed increase per level
@@ -38,8 +38,6 @@ export class Ghost extends Player {
     private target: Gamer | null = null; // Current target Gamer to chase
     private attackCooldown: number = 0; // Cooldown timer for attacks (in ticks)
     private readonly attackInterval: number; // Interval between attacks (in ticks)
-    private leveledSpeed: number; // Leveled base speed (modifiable for skills)
-    private skill: GhostSkill = GhostSkill.None; // Assigned skill
 
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team, level: number = 1) {
         super(game, userData, position, layer, team);
@@ -47,23 +45,28 @@ export class Ghost extends Player {
         this.name = this.getRandomName(); // Assign random name
         this.loadout.skin = Skins.fromString("ghost");
         this.inventory.scope = Scopes.definitions[0];
-        // this.health = this.health * 0.3; // Reduce health
-        this.health = this.health * 1; // Reduce health
+        this.health = this.health * 0.3; // Reduce health
+
+        // this.perks.addItem(Perks.fromString(PerkIds.AdvancedAthletics));
+        // this.updateAndApplyModifiers();
 
         // Apply level-based multipliers
         const healthMultiplier = 1 + Ghost.HEALTH_MULTIPLIER_PER_LEVEL * (level - 1);
         this.health *= healthMultiplier;
 
-        this.leveledSpeed = Ghost.BASE_SPEED * (1 + Ghost.SPEED_MULTIPLIER_PER_LEVEL * (level - 1));
+        this.baseSpeed = Ghost.BASE_SPEED * (1 + Ghost.SPEED_MULTIPLIER_PER_LEVEL * (level - 1));
 
         const aps = Ghost.BASE_APS * (1 + Ghost.APS_MULTIPLIER_PER_LEVEL * (level - 1));
         this.attackInterval = Math.floor(Config.tps / aps); // TPS is 40, base interval = 40 / 1 = 40 ticks (1s)
 
-        // Assign skill with chance
-        this.skill = Math.random() < Ghost.RAGE_SKILL_CHANCE ? GhostSkill.Rage : GhostSkill.None;
-
         // Pick initial target
         this.target = this.pickNewTarget();
+
+        // Ghost ability
+        {
+            this._hitbox = new CircleHitbox(0, this.position);
+            // this.damageable = false;
+        }
     }
 
     /**
@@ -132,16 +135,25 @@ export class Ghost extends Player {
     update(): void {
         super.update();
 
+        // Special smoke/particle check for Ghosts (point-in-hitbox since radius=0)
+        const depleters = new Set<SyncedParticle>();
+
+        for (const object of this.nearObjects) {
+            if (
+                object.isSyncedParticle
+                && adjacentOrEqualLayer(object.layer, this.layer)
+                // For Ghosts with radius=0, check if position is inside the particle hitbox
+                && object.hitbox?.isPointInside(this.position)
+            ) {
+                this.health = 0;
+                this.die({});
+                return;
+            }
+        }
+
         // Re-pick target if current is invalid
         if (!this.target || this.target.dead || this.target.downed) {
             this.target = this.pickNewTarget();
-        }
-
-        // Apply skills if applicable
-        if (this.skill === GhostSkill.Rage && this.health < this.maxHealth * 0.3) {
-            this.baseSpeed = this.leveledSpeed * 1.5; // 50% speed increase
-        } else {
-            this.baseSpeed = this.leveledSpeed; // Reset to normal
         }
 
         // Chase and attack logic

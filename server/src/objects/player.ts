@@ -631,6 +631,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     override get data(): FullData<ObjectCategory.Player> {
         const data: SDeepMutable<FullData<ObjectCategory.Player>> = {
             position: this.position,
+            radius: this.hitbox.radius,
             rotation: this.rotation,
             full: {
                 layer: this.layer,

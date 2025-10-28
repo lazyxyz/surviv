@@ -158,6 +158,7 @@ export class UpdateManager {
 
                 if (
                     (isObstacle || isBuilding)
+                    && this.player.hitbox.radius > 0
                     && this.player.mapPerkOrDefault(
                         PerkIds.AdvancedAthletics,
                         () => {

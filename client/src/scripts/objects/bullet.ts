@@ -9,11 +9,11 @@ import { colord } from "colord";
 import { BloomFilter } from "pixi-filters";
 import { Color } from "pixi.js";
 import { type Game } from "../game";
-import {  PIXI_SCALE } from "../utils/constants";
+import { PIXI_SCALE } from "../utils/constants";
 import { SuroiSprite, toPixiCoords } from "../utils/pixi";
 import type { Building } from "./building";
 import { type Obstacle } from "./obstacle";
-import { type Player } from "./player";
+import { Player } from "./player";
 import { GAME_CONSOLE } from "../..";
 import { Maps } from "@common/definitions/modes";
 
@@ -83,6 +83,11 @@ export class Bullet extends BaseBullet {
         if (!this.dead) {
             for (const collision of this.updateAndGetCollisions(delta, this.game.objects)) {
                 const object = collision.object;
+
+                if (object.isPlayer && object.hitbox.radius === 0) { // skip bots
+                    console.log("hitbox: ", object.hitbox);
+                    continue;
+                }
 
                 if (object.isObstacle && object.definition.isStair) {
                     this.setLayer(resolveStairInteraction(

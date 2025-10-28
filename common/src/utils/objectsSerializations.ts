@@ -31,6 +31,7 @@ export interface ObjectsNetData extends BaseObjectsNetData {
     //
     readonly [ObjectCategory.Player]: {
         readonly position: Vector
+        readonly radius?: number
         readonly rotation: number
         readonly animation?: AnimationType
         readonly action?: ({
