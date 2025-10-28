@@ -594,7 +594,7 @@ export class UpdateManager {
                packet.planes = game.planes;
                packet.mapPings = [...game.mapPings, ...this.player._mapPings];
                this.player._mapPings.length = 0;
-       
+
                // serialize and send update packet
                this.player.sendPacket(UpdatePacket.create(packet as UpdatePacketDataIn));
        

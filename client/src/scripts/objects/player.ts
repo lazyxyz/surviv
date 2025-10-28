@@ -407,7 +407,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
         // Position and rotation
         const oldPosition = Vec.clone(this.position);
         this.position = data.position;
-        if (data.radius) this._hitbox.radius = data.radius;
+        this.hitbox.radius = data.radius;
         this._hitbox.position = this.position;
         this._bulletWhizHitbox.position = this.position;
 

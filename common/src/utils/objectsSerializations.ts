@@ -31,7 +31,7 @@ export interface ObjectsNetData extends BaseObjectsNetData {
     //
     readonly [ObjectCategory.Player]: {
         readonly position: Vector
-        readonly radius?: number
+        readonly radius: number
         readonly rotation: number
         readonly animation?: AnimationType
         readonly action?: ({
@@ -184,8 +184,9 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
     // Player serialization
     //
     [ObjectCategory.Player]: {
-        serializePartial(stream, { position, rotation, animation, action }): void {
+        serializePartial(stream, { position, radius,  rotation, animation, action }): void {
             stream.writePosition(position);
+            stream.writeFloat(radius,  0, 5, 2);
             stream.writeRotation2(rotation);
 
             /*
@@ -275,6 +276,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
         deserializePartial(stream) {
             const data: Mutable<ObjectsNetData[ObjectCategory.Player]> = {
                 position: stream.readPosition(),
+                radius: stream.readFloat(0, 5, 2),
                 rotation: stream.readRotation2()
             };
 

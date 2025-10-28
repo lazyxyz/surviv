@@ -85,7 +85,6 @@ export class Bullet extends BaseBullet {
                 const object = collision.object;
 
                 if (object.isPlayer && object.hitbox.radius === 0) { // skip bots
-                    console.log("hitbox: ", object.hitbox);
                     continue;
                 }
 
