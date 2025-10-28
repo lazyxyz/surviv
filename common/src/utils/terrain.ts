@@ -1,5 +1,5 @@
 import { GameConstants, Layer } from "../constants";
-import { Mode } from "../definitions/modes";
+import { MAP } from "../definitions/modes";
 import { PolygonHitbox, RectangleHitbox, type Hitbox } from "./hitbox";
 import { Collision, Numeric } from "./math";
 import { SeededRandom } from "./random";
@@ -220,7 +220,7 @@ export class Terrain {
         }
     }
 
-    getFloor(position: Vector, layer: number, gameMode: Mode): FloorNames {
+    getFloor(position: Vector, layer: number, gameMode: MAP): FloorNames {
         const pos = this._roundToCells(position);
         let floor: FloorNames = FloorNames.Water;
 

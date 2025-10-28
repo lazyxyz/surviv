@@ -8,7 +8,6 @@ import { getTranslatedString } from "../../translations";
 import { type Game } from "../game";
 import { getColors, UI_DEBUG_MODE } from "../utils/constants";
 import { formatDate } from "../utils/misc";
-import type { Mode } from "@common/definitions/modes";
 
 export class Gas {
     state = GasState.Inactive;
@@ -157,7 +156,7 @@ export class GasRender {
     private static readonly _overdraw = 100 * 1000;
     private static readonly _segments = 512;
 
-    constructor(scale: number, gameMode: Mode) {
+    constructor(scale: number) {
         this._scale = scale;
 
         this._graphics = new Graphics();
@@ -173,7 +172,7 @@ export class GasRender {
             .lineTo(GasRender._overdraw, GasRender._overdraw)
             .lineTo(-GasRender._overdraw, GasRender._overdraw)
             .closePath()
-            .fill(getColors(gameMode).gas)
+            .fill(getColors("normal").gas)
             .moveTo(0, 1);
 
         const tau = 2 * Math.PI;

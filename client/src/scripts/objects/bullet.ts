@@ -14,8 +14,8 @@ import { SuroiSprite, toPixiCoords } from "../utils/pixi";
 import type { Building } from "./building";
 import { type Obstacle } from "./obstacle";
 import { type Player } from "./player";
-import { Modes } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "../..";
+import { Maps } from "@common/definitions/modes";
 
 const white = 0xFFFFFF;
 
@@ -63,7 +63,7 @@ export class Bullet extends BaseBullet {
                 ? random(0, white)
                 : tracerStats.color ?? white
         );
-        if (Modes[this.game.gameMode].bulletTrailAdjust) color.multiply(Modes[this.game.gameMode].bulletTrailAdjust);
+        if (Maps[this.game.gameMap].bulletTrailAdjust) color.multiply(Maps[this.game.gameMap].bulletTrailAdjust);
         if (this.saturate) {
             const hsl = colord(color.toRgbaString()).saturate(50);
             color.value = (hsl.brightness() < 0.6 ? hsl.lighten(0.1) : hsl.darken(0.2)).rgba;

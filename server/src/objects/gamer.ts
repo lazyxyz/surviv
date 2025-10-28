@@ -1,5 +1,5 @@
 import { type WebSocket } from "uWebSockets.js";
-import { Layer, SpectateActions, TeamSize } from "@common/constants";
+import { Layer, SpectateActions, MODE } from "@common/constants";
 import { Vector } from "@common/utils/vector";
 import { Game } from "../game";
 import { Team } from "../team";
@@ -87,7 +87,7 @@ export class Gamer extends Player {
         super.disconnect();
     }
 
-    die(params: Omit<DamageParams, "amount">): void {
+    override die(params: Omit<DamageParams, "amount">): void {
         super.die(params);
         if (!this.disconnected && !this.gameOver) {
             this.handleGameOver();
@@ -189,6 +189,8 @@ export class Gamer extends Player {
         if (!this.address || this.gameOver) return;
         this.gameOver = true;
 
+        console.log("handleGameOver!");
+
         const rank = this.calculateRank(won);
         if (!rank) {
             this.spectate({ spectateAction: SpectateActions.BeginSpectating });
@@ -280,7 +282,7 @@ export class Gamer extends Player {
         }
 
         // Skip 50vs50 Mode
-        if (this.game.maxTeamSize == TeamSize.V50) {
+        if (this.game.maxTeamSize == MODE.V50) {
             processRewardsPacket(true, rank, 0, 0);
             return;
         }

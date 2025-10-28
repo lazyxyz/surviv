@@ -26,12 +26,12 @@ export class Gas {
     dps = 0;
     private _lastDamageTimestamp;
 
-    private _isFinal = false;
-
     dirty = false;
     completionRatioDirty = false;
 
     private _doDamage = false;
+    private _isFinal = false;
+
     get doDamage(): boolean { return this._doDamage; }
 
     readonly game: Game;
@@ -64,7 +64,7 @@ export class Gas {
             this._lastDamageTimestamp = this.game.now;
             this._doDamage = true;
 
-            if (this.state === GasState.Advancing) {
+            if (this.state === GasState.Advancing || this.state === GasState.Final) {
                 this.currentPosition = Vec.lerp(this.oldPosition, this.newPosition, this.completionRatio);
                 this.currentRadius = Numeric.lerp(this.oldRadius, this.newRadius, this.completionRatio);
             }
@@ -123,6 +123,8 @@ export class Gas {
         this.completionRatio = 1;
         this.countdownStart = this.game.now;
 
+
+
         if (currentStage.state === GasState.Waiting) {
             this.oldPosition = Vec.clone(this.newPosition);
             if (currentStage.newRadius !== 0) {
@@ -160,10 +162,6 @@ export class Gas {
         this.dirty = true;
         this.completionRatioDirty = true;
 
-        if (currentStage.state === GasState.End) {
-            this._isFinal = true;
-        }
-
         if (currentStage.summonAirdrop) {
             this.game.summonAirdrop(
                 this.game.map.getRandomPosition(
@@ -177,6 +175,10 @@ export class Gas {
             );
         }
 
+        if (currentStage.state == GasState.Final) {
+            this._isFinal = true;
+        }
+
         // Start the next stage
         if (duration !== 0) {
             this.game.addTimeout(() => this.advanceGasStage(), duration * 1000);
@@ -186,6 +188,7 @@ export class Gas {
     isInGas(position: Vector): boolean {
         return Geometry.distanceSquared(position, this.currentPosition) >= this.currentRadius ** 2;
     }
+
 
     isFinal(): boolean {
         return this._isFinal;

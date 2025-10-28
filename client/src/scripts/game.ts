@@ -1,4 +1,4 @@
-import { InputActions, InventoryMessages, Layer, ObjectCategory, TeamSize } from "@common/constants";
+import { InputActions, InventoryMessages, Layer, ObjectCategory, MODE } from "@common/constants";
 import { ArmorType } from "@common/definitions/armors";
 import { type BadgeDefinition } from "@common/definitions/badges";
 import { type DualGunNarrowing } from "@common/definitions/guns";
@@ -56,14 +56,13 @@ import { Tween } from "./utils/tween";
 import { Account } from "./account";
 import { RewardsPacket } from "@common/packets/rewardsPacket";
 import { errorAlert } from "./modal";
-import { Modes, NumberToMode, type Mode } from "@common/definitions/modes";
+import { Maps, NumberToMode, type MAP } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "..";
 import { resetPlayButtons, updateDisconnectTime } from "./ui/home";
 import { autoPickup, updateChatSendAllVisibility, updateUsersBadge } from "./ui/game";
 import { teamSocket } from "./ui/play";
 import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 import { CustomTeamMessages } from "@common/typings";
-import { ResetPacket } from "@common/packets/resetPackage";
 
 /* eslint-disable @stylistic/indent */
 
@@ -123,9 +122,9 @@ export class Game {
     teamID = -1;
 
     teamMode = false;
-    teamSize = TeamSize.Solo;
+    teamSize = MODE.Solo;
     gameId = "";
-    gameMode: Mode = "winter";
+    gameMap: MAP = "winter";
     account: Account | undefined;
 
     /**
@@ -219,7 +218,7 @@ export class Game {
         return game;
     }
 
-    initPixi = async (gameMode: Mode): Promise<void> => {
+    initPixi = async (gameMode: MAP): Promise<void> => {
         const renderMode = GAME_CONSOLE.getBuiltInCVar("cv_renderer");
         const renderRes = GAME_CONSOLE.getBuiltInCVar("cv_renderer_res");
         const pixi = this.pixi;
@@ -228,7 +227,7 @@ export class Game {
         if (this.pixi.stage.children.length == 0) {
             await this.pixi.init({
                 resizeTo: window,
-                background: getColors(this.gameMode).grass,
+                background: getColors(this.gameMap).grass,
                 antialias: GAME_CONSOLE.getBuiltInCVar("cv_antialias"),
                 autoDensity: true,
                 preferWebGLVersion: renderMode === "webgl1" ? 1 : 2,
@@ -293,12 +292,12 @@ export class Game {
 
 
     setupGame() {
-        this.gasRender = new GasRender(PIXI_SCALE, this.gameMode);
+        this.gasRender = new GasRender(PIXI_SCALE);
 
         this.camera.addObject(this.gasRender.graphics);
         this.map.indicator.setFrame("player_indicator");
 
-        const particleEffects = Modes[this.gameMode].particleEffects;
+        const particleEffects = Maps[this.gameMap].particleEffects;
         if (particleEffects !== undefined) {
             const This = this;
             const gravityOn = particleEffects.gravity;
@@ -524,8 +523,8 @@ export class Game {
     onPacket(packet: OutputPacket): void {
         switch (true) {
             case packet instanceof JoinPacket: {
-                this.gameMode = NumberToMode[packet.output.gameMode];
-                this.initPixi(this.gameMode).then(async _ => {
+                this.gameMap = NumberToMode[packet.output.gameMode];
+                this.initPixi(this.gameMap).then(async _ => {
                     this.uiManager.ui.loadingText.text(getTranslatedString("verifying_game_assets"));
                     this.uiManager.ui.splashMsg.hide();
 
@@ -597,17 +596,6 @@ export class Game {
                 }, 5000);
                 break;
             }
-            case packet instanceof ResetPacket: {
-                this.gas.reset();
-                // this.gasRender?.graphics.clear();
-                // this.gasRender = new GasRender(PIXI_SCALE, this.gameMode);
-
-                // this.camera.addObject(this.gasRender)
-
-                this._timeouts.clear();
-                break
-            }
-
             case packet instanceof PickupPacket: {
                 const { output: { message, item } } = packet;
 
@@ -676,7 +664,7 @@ export class Game {
         // game started if page is out of focus.
         if (!document.hasFocus()) this.soundManager.play("join_notification");
 
-        const ambience = Modes[this.gameMode].ambience;
+        const ambience = Maps[this.gameMap].ambience;
         if (ambience) {
             this.ambience = this.soundManager.play(ambience, { loop: true, ambient: true });
         }
@@ -687,7 +675,7 @@ export class Game {
 
         const ui = this.uiManager.ui;
 
-        if (packet.maxTeamSize !== TeamSize.Solo) {
+        if (packet.maxTeamSize !== MODE.Solo) {
             this.teamMode = true;
             this.teamID = packet.teamID;
         } else {
@@ -1053,7 +1041,7 @@ export class Game {
         this.map.terrainGraphics.visible = !basement;
         const { red, green, blue } = this.pixi.renderer.background.color;
         const color = { r: red * 255, g: green * 255, b: blue * 255 };
-        const targetColor = basement ? getColors(this.gameMode).void : getColors(this.gameMode).grass;
+        const targetColor = basement ? getColors(this.gameMap).void : getColors(this.gameMap).grass;
 
         this.backgroundTween?.kill();
         this.backgroundTween = this.addTween({

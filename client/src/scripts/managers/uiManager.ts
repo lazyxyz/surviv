@@ -5,9 +5,8 @@ import { type EmoteDefinition } from "@common/definitions/emotes";
 import { type GunDefinition } from "@common/definitions/guns";
 import { Loots } from "@common/definitions/loots";
 import { MapPings, type PlayerPing } from "@common/definitions/mapPings";
-import { PerkCategories, PerkIds, type PerkDefinition } from "@common/definitions/perks";
+import {  PerkIds, type PerkDefinition } from "@common/definitions/perks";
 import { DEFAULT_SCOPE, type ScopeDefinition } from "@common/definitions/scopes";
-import { Skins } from "@common/definitions/skins";
 import { type GameOverData } from "@common/packets/gameOverPacket";
 import { type KillFeedPacketData } from "@common/packets/killFeedPacket";
 import { type PlayerData } from "@common/packets/updatePacket";
@@ -22,15 +21,15 @@ import { type TranslationKeys } from "../../typings/translations";
 import { type Game } from "../game";
 import { type GameObject } from "../objects/gameObject";
 import { Player } from "../objects/player";
-import { getGhillieTint, PIXI_TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/constants";
+import {  PIXI_TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/constants";
 import { formatDate, html } from "../utils/misc";
 import { SuroiSprite } from "../utils/pixi";
 import { ClientPerkManager } from "./perkManager";
 import type { RewardsData } from "@common/packets/rewardsPacket";
 import { getBadgeImage } from "../inventory/badges";
-import { Modes } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "../..";
 import type {  ServerChatPacketData } from "@common/packets/chatPacket";
+import { Maps } from "@common/definitions/modes";
 
 function safeRound(value: number): number {
     if (0 < value && value <= 1) return 1;
@@ -957,7 +956,7 @@ export class UIManager {
                 // handle display image
                 {
                     const isFists = definition.idString === "fists";
-                    const location = definition.itemType === ItemType.Melee && definition.reskins?.includes(Modes[this.game.gameMode].idString) ? Modes[this.game.gameMode].idString : "shared";
+                    const location = definition.itemType === ItemType.Melee && definition.reskins?.includes(Maps[this.game.gameMap].idString) ? Maps[this.game.gameMap].idString : "shared";
                     const newSrc = `./img/game/${location}/weapons/${isFists ? 'fists-hand' : definition.idString}.svg`;
                     const oldSrc = itemImage.attr("src");
 

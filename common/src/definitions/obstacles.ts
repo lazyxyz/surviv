@@ -147,6 +147,7 @@ type RawObstacleDefinition = ObjectDefinition & {
         readonly maxRange?: number
         readonly falloff?: number
     }
+
 } & ObstacleRoleMixin & VariationMixin;
 
 export type VariationMixin = {
@@ -272,6 +273,16 @@ export const Materials = [
     "trash_bag",
     "ice"
 ] as const;
+
+export const RevivableMaterials: Array<typeof Materials[number]> = [
+    "tree",
+    "stone",
+    "bush",
+    "pumpkin",
+    "porcelain",
+];
+
+export const RevivableMaterialSet = new Set<typeof RevivableMaterials[number]>(RevivableMaterials);
 
 export const MaterialSounds: Record<string, { hit?: string, destroyed?: string }> = {
     cardboard: { hit: "stone", destroyed: "crate" },

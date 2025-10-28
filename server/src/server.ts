@@ -1,4 +1,4 @@
-import { TeamSize } from "@common/constants";
+import { MODE } from "@common/constants";
 import os from "os";
 import { isMainThread } from "worker_threads";
 import { version } from "../../package.json";
@@ -13,7 +13,6 @@ import { initTeamRoutes } from "./api/team";
 export let teamsCreated: Record<string, number> = {};
 
 export const CUSTOM_TEAMS: Map<string, CustomTeam> = new Map<string, CustomTeam>();
-export let maxTeamSize = typeof Config.maxTeamSize === "number" ? Config.maxTeamSize : Config.maxTeamSize.rotation[0];
 
 if (isMainThread) {
     let app = createServer();
@@ -47,15 +46,6 @@ if (isMainThread) {
 
             Logger.log(perfString);
         }, 30000);
-
-        const teamSize = Config.maxTeamSize;
-        if (typeof teamSize === "object") {
-            for (const size of teamSize.rotation) {
-                maxTeamSize = size;
-                const humanReadableTeamSizes = [undefined, "solos", "squads"];
-                Logger.log(`Switching to ${humanReadableTeamSizes[maxTeamSize] ?? `team size ${maxTeamSize}`}`);
-            }
-        }
     });
 
 }

@@ -1,5 +1,5 @@
 import { GameConstants, Layer, TEAMMATE_COLORS } from "@common/constants";
-import { Modes, type ColorKeys, type Mode } from "@common/definitions/modes";
+import {  Maps, type ColorKeys, type MAP } from "@common/definitions/modes";
 import { Color } from "pixi.js";
 
 export const FORCE_MOBILE = false;
@@ -26,8 +26,8 @@ export const HITBOX_COLORS = {
     playerWeapon: new Color("lime")
 };
 
-export function getColors(mode: Mode): Record<ColorKeys, Color> {
-    const modeDef = Modes[mode];
+export function getColors(mapName: MAP): Record<ColorKeys, Color> {
+    const modeDef = Maps[mapName];
 
     return (Object.keys(modeDef.colors) as ColorKeys[]).reduce(
         (result, key) => {
@@ -38,8 +38,8 @@ export function getColors(mode: Mode): Record<ColorKeys, Color> {
     );
 }
 
-export function getGhillieTint(mode: Mode): Color {
-    const colors = getColors(mode);
+export function getGhillieTint(mapName: MAP): Color {
+    const colors = getColors(mapName);
     return colors.grass.multiply(new Color("hsl(0, 0%, 99%)"));
 }
 

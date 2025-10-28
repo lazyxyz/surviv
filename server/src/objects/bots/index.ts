@@ -1,7 +1,8 @@
 export enum BotType{
     Zombie,
     Ninja,
-    Assassin
+    Assassin,
+    Ghost
 }
 
 export * from './zombie';

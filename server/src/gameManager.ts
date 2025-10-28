@@ -1,4 +1,4 @@
-import { TeamSize } from "@common/constants";
+import { MODE } from "@common/constants";
 import { type GetGameResponse } from "@common/typings";
 import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
 import { Config } from "./config";
@@ -28,12 +28,12 @@ export type WorkerMessage =
     }
     | {
         readonly type: WorkerMessages.UpdateMaxTeamSize
-        readonly maxTeamSize: TeamSize
+        readonly maxTeamSize: MODE
     }
     | {
         readonly type:
         | WorkerMessages.CreateNewGame
-        readonly maxTeamSize: TeamSize
+        readonly maxTeamSize: MODE
     }
     | {
         readonly type:
@@ -52,7 +52,7 @@ export class GameContainer {
     readonly worker: Worker;
 
     resolve: (id: number) => void;
-    maxTeamSize: TeamSize;
+    maxTeamSize: MODE;
 
     private _data: GameData = {
         aliveCount: 0,
@@ -70,7 +70,7 @@ export class GameContainer {
 
     private readonly _ipPromiseMap = new Map<string, Array<() => void>>();
 
-    constructor(readonly id: number, maxTeamSize: TeamSize, resolve: (id: number) => void) {
+    constructor(readonly id: number, maxTeamSize: MODE, resolve: (id: number) => void) {
         this.resolve = resolve;
         this.maxTeamSize = maxTeamSize;
         (
@@ -112,7 +112,7 @@ export class GameContainer {
     }
 }
 
-export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
+export async function findGame(teamSize: MODE): Promise<GetGameResponse> {
     let gameID: number;
     let eligibleGames = GAMES.filter((g?: GameContainer): g is GameContainer =>
         !!g && g.maxTeamSize == teamSize && g.allowJoin && !g.over);
@@ -146,25 +146,25 @@ export async function findGame(teamSize: TeamSize): Promise<GetGameResponse> {
         : { success: false };
 }
 
-export async function newGame(maxTeamSize?: TeamSize): Promise<number> {
+export async function newGame(maxTeamSize?: MODE): Promise<number> {
     return new Promise<number>(resolve => {
-        const teamSize = maxTeamSize ? maxTeamSize : TeamSize.Solo;
+        const teamSize = maxTeamSize ? maxTeamSize : MODE.Solo;
         let startGameId = Config.soloPort;
 
         switch (maxTeamSize) {
-            case TeamSize.Solo:
+            case MODE.Solo:
                 startGameId = Config.soloPort;
                 break;
                 
-            case TeamSize.Squad:
+            case MODE.Squad:
                 startGameId = Config.squadPort;
                 break;
 
-            case TeamSize.V50:
+            case MODE.V50:
                 startGameId = Config.v50Port;
                 break;
 
-            case TeamSize.CursedIsland:
+            case MODE.CursedIsland:
                 startGameId = Config.cursedIslandPort;
                 break;
         }

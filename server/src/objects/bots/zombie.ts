@@ -8,6 +8,7 @@ import { Skins } from "@common/definitions/skins";
 import { Gamer } from "../gamer";
 import { Scopes } from "@common/definitions/scopes";
 import { Config } from "../../config";
+import { DamageParams } from "../gameObject";
 
 /**
  * Zombie Class

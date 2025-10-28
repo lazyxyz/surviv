@@ -9,7 +9,6 @@ import { ExtendedMap } from "@common/utils/misc";
 import { type PlayerModifiers } from "@common/utils/objectDefinitions";
 import { Vector } from "@common/utils/vector";
 import { Config } from "./config";
-import { Airdrop, Game } from "./game";
 import { type InventoryItem } from "./inventory/inventoryItem";
 import { Building } from "./objects/building";
 import { DamageParams } from "./objects/gameObject";
@@ -18,6 +17,8 @@ import { Obstacle } from "./objects/obstacle";
 import { Player } from "./objects/player";
 import { Logger } from "./utils/misc";
 import { PlayerData } from "@common/packets/joinPacket";
+import { Airdrop } from "./game/airdropManager";
+import { Game } from "./game";
 
 interface PlayerDamageEvent extends DamageParams {
     readonly player: Player

@@ -1,7 +1,7 @@
 import { GameConstants, Layer, ObjectCategory } from "@common/constants";
 import { Buildings, type BuildingDefinition } from "@common/definitions/buildings";
 import { Obstacles, RotationMode, type ObstacleDefinition } from "@common/definitions/obstacles";
-import { Mode, ObstacleModeVariations } from "@common/definitions/modes";
+import { ObstacleModeVariations } from "@common/definitions/modes";
 import { MapPacket, type MapPacketData } from "@common/packets/mapPacket";
 import { PacketStream } from "@common/packets/packetStream";
 import { type Orientation, type Variation } from "@common/typings";
@@ -24,7 +24,8 @@ import { CARDINAL_DIRECTIONS, Logger, getRandomIDString } from "./utils/misc";
 export class GameMap {
     readonly game: Game;
 
-    private readonly mapDef: MapDefinition;
+    mapDef: MapDefinition;
+
     private readonly quadBuildings: Record<1 | 2 | 3 | 4, string[]> = { 1: [], 2: [], 3: [], 4: [] };
     private readonly quadMajorBuildings: Array<1 | 2 | 3 | 4> = [];
     private readonly majorBuildingPositions: Vector[] = [];
@@ -83,7 +84,7 @@ export class GameMap {
     constructor(game: Game) {
         this.game = game;
 
-        const mapDef: MapDefinition = Config.testMode ? Maps[Config.testMode as MapName] : Maps[game.gameMode];
+        const mapDef: MapDefinition = Config.testMode ? Maps[Config.testMode as MapName] : Maps[game.gameMap];
 
         // @ts-expect-error I don't know why this rule exists
         type PacketType = this["_packet"];
@@ -167,7 +168,7 @@ export class GameMap {
 
         Object.entries(mapDef.loots ?? {}).forEach(([loot, count]) => this._generateLoots(loot, count));
 
-        mapDef.onGenerate?.(this, [game.gameMode]);
+        mapDef.onGenerate?.(this, [game.gameMap]);
 
         if (mapDef.places) {
             packet.places = mapDef.places.map(({ name, position }) => {
@@ -580,7 +581,7 @@ export class GameMap {
                 ReferenceTo<ObstacleDefinition> | typeof NullString
             >(obstacleData.idString);
             if (idString === NullString) continue;
-            const gameMode = this.game.gameMode;
+            const gameMode = this.game.gameMap;
             if (obstacleData.modeVariant) {
                 idString = `${idString}${ObstacleModeVariations[gameMode] ?? ""}`;
             }
@@ -623,7 +624,7 @@ export class GameMap {
         }
 
         for (const lootData of definition.lootSpawners) {
-            for (const item of getLootFromTable(this.game.gameMode, lootData.table)) {
+            for (const item of getLootFromTable(this.game.gameMap, lootData.table)) {
                 this.game.addLoot(
                     item.idString,
                     Vec.addAdjust(position, lootData.position, orientation),
@@ -661,7 +662,7 @@ export class GameMap {
         return building;
     }
 
-    private _generateObstacles(definition: ReifiableDef<ObstacleDefinition>, count: number, getPosition?: () => Vector): void {
+    _generateObstacles(definition: ReifiableDef<ObstacleDefinition>, count: number, getPosition?: () => Vector): void {
         const def = Obstacles.reify(definition);
 
         const { scale = { spawnMin: 1, spawnMax: 1 }, variations, rotationMode } = def;
@@ -794,7 +795,7 @@ export class GameMap {
         return obstacle;
     }
 
-    private _generateObstacleClumps(clumpDef: ObstacleClump): void {
+    _generateObstacleClumps(clumpDef: ObstacleClump): void {
         const clumpAmount = clumpDef.clumpAmount;
         const firstObstacle = Obstacles.reify(clumpDef.clump.obstacles[0]);
 
@@ -831,7 +832,7 @@ export class GameMap {
 
     private _generateLoots(table: string, count: number): void {
         for (let i = 0; i < count; i++) {
-            const loot = getLootFromTable(this.game.gameMode, table);
+            const loot = getLootFromTable(this.game.gameMap, table);
 
             const position = this.getRandomPosition(
                 new CircleHitbox(5),
