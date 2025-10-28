@@ -11,7 +11,6 @@ import { Ghost } from "../objects/bots/ghost";
 
 export class BotManager {
     private game: Game;
-    private totalBots: number = 0;
     private bots: Set<Player> = new Set();
 
     constructor(game: Game) {
@@ -68,7 +67,7 @@ export class BotManager {
         bot.joined = true;
 
         this.bots.add(bot);
-        this.totalBots++;
+        this.game.totalBots++;
 
         this.game.addTimeout(() => { bot.disableInvulnerability(); }, 5000);
         return bot;
@@ -102,8 +101,8 @@ export class BotManager {
         //     this.createBot(BotType.Assassin, botData);
         // }
 
-        this.totalBots = zombieCount + ninjaCount + assassinCount;
-        Logger.log(`Bots added to game: Total Bots = ${this.totalBots} (Zombies: ${zombieCount}, Ninjas: ${ninjaCount}, Assassins: ${assassinCount})`);
+        this.game.totalBots = zombieCount + ninjaCount + assassinCount;
+        Logger.log(`Bots added to game: Total Bots = ${this.game.totalBots} (Zombies: ${zombieCount}, Ninjas: ${ninjaCount}, Assassins: ${assassinCount})`);
     }
 
     removeBots(): void {
@@ -117,10 +116,10 @@ export class BotManager {
             bot.destroy();
         }
         this.bots.clear();
-        this.totalBots = 0;
+        this.game.totalBots = 0;
         this.game.aliveCountDirty = true;
         this.game.updateObjects = true;
         this.game.updateGameData({ aliveCount: this.game.aliveCount });
-        Logger.log(`All bots removed. Total bots cleaned: ${this.totalBots}`);
+        Logger.log(`All bots removed. Total bots cleaned: ${this.game.totalBots}`);
     }
 }

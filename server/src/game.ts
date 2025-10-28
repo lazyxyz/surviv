@@ -85,6 +85,7 @@ export class Game implements GameData {
     readonly teamMode: boolean;
 
     readonly gameMap: MAP;
+    totalBots: number = 0;
 
     destroyedObstacles: Array<{
         definition: ObstacleDefinition
@@ -197,7 +198,7 @@ export class Game implements GameData {
     // New managers
     spawnManager: SpawnManager;
     objectSpawner: ObjectSpawner;
-    private botManager: BotManager;
+    botManager: BotManager;
     private connectionManager: ConnectionManager;
     private playerManager: PlayerManager;
     private airdropManager: AirdropManager;
