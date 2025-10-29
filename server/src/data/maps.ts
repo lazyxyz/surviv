@@ -671,6 +671,12 @@ const maps = {
             outhouse: 10
         },
         obstacles: {
+            cauldron: 100,
+            small_tombstone: 80,
+            modern_tombstone: 80,
+            pumpkin: 80,
+            large_pumpkin: 60,
+            jack_o_lantern: 100,
             palm_tree: 100,
             date_palm_tree: 150,
             small_palm_tree: 50,
@@ -678,8 +684,6 @@ const maps = {
             doum_palm_tree: 100,
             quiver_tree: 60,
             wood_barrel: 100,
-            ceramic_jar: 60,
-            barrel_cactus: 100,
             century_plant: 100,
             ghost_plant: 80,
             pencil_cactus: 80,

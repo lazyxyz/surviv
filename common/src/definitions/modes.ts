@@ -119,7 +119,7 @@ export const Modes: Record<Mode, ModeDefinition> = {
         modeLogoImage: "./img/game/winter/obstacles/red_gift.svg"
     },
     desert: {
-        idString: "fall",
+        idString: "desert",
         colors: {
             grass: "hsl(42.94, 87.93%, 77.25%)",
             water: "hsl(211, 63%, 42%)",
@@ -133,7 +133,7 @@ export const Modes: Record<Mode, ModeDefinition> = {
         ambience: "wind_ambience",
         inheritTexturesFrom: "fall",
         defaultScope: "2x_scope",
-        reskin: "fall",
+        reskin: "desert",
         particleEffects: {
             frames: ["weed_1", "weed_2"],
             delay: 1000,
@@ -157,12 +157,13 @@ export const Modes: Record<Mode, ModeDefinition> = {
             gas: "hsla(17, 100%, 50%, 0.35)",
             void: "hsl(25, 80%, 6%)"
         },
+        reskin: "cursedIsland",
+        specialSounds: [
+            "airdrop_plane"
+        ],
         ambience: "horror_ambience",
         inheritTexturesFrom: "desert",
         defaultScope: "8x_scope",
-        reskin: "fall",
-        darkShaders: true,
-        bulletTrailAdjust: "hsl(280, 50%, 70%)",
         specialPlayButtons: true,
         // Icons
         modeLogoImage: {

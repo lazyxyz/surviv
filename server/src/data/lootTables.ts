@@ -1889,13 +1889,20 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "scopes", weight: 0.3 },
         ],
         regular_crate: [
-            { table: "guns", weight: 1.25 },
-            { table: "healing_items", weight: 1 },
-            { table: "equipment", weight: 0.6 },
-            { table: "ammo", weight: 0.5 },
-            { table: "scopes", weight: 0.3 },
-            { table: "throwables", weight: 0.3 },
-            { table: "melee", weight: 0.04 }
+            // { table: "guns", weight: 1.25 },
+            // { table: "healing_items", weight: 1 },
+            // { table: "equipment", weight: 0.6 },
+            // { table: "ammo", weight: 0.5 },
+            // { table: "scopes", weight: 0.3 },
+            // { table: "throwables", weight: 0.3 },
+            // { table: "melee", weight: 0.04 }
+
+            // Test
+            [
+                { item: "radio", weight: 100 },
+                { item: "curadell", weight: 100 }
+            ]
+
         ],
         wood_barrel: [
             { table: "guns", weight: 1.25 },
@@ -1906,7 +1913,25 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "throwables", weight: 0.3 },
             { table: "melee", weight: 0.04 }
         ],
-        ceramic_jar: [
+        small_tombstone: [
+            { table: "guns", weight: 1.25 },
+            { table: "healing_items", weight: 1 },
+            { table: "equipment", weight: 0.6 },
+            { table: "ammo", weight: 0.5 },
+            { table: "scopes", weight: 0.3 },
+            { table: "throwables", weight: 0.3 },
+            { table: "melee", weight: 0.04 }
+        ],
+        modern_tombstone: [
+            { table: "guns", weight: 1.25 },
+            { table: "healing_items", weight: 1 },
+            { table: "equipment", weight: 0.6 },
+            { table: "ammo", weight: 0.5 },
+            { table: "scopes", weight: 0.3 },
+            { table: "throwables", weight: 0.3 },
+            { table: "melee", weight: 0.04 }
+        ],
+        cauldron: [
             { table: "guns", weight: 1.25 },
             { table: "healing_items", weight: 1 },
             { table: "equipment", weight: 0.6 },
