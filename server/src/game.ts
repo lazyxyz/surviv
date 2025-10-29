@@ -84,6 +84,8 @@ export class Game implements GameData {
 
     readonly teamMode: boolean;
 
+    readonly rainDrops: number;
+
     readonly gameMap: MAP;
     totalBots: number = 0;
 
@@ -204,12 +206,31 @@ export class Game implements GameData {
     private airdropManager: AirdropManager;
     private gameLifecycle: GameLifecycle;
 
-    getRandomMap(): MAP {
-        const random = Math.random() * 100;
-        if (random < 40) return "desert";
-        if (random < 70) return "fall";
-        return "winter";
+    getRandomMap(): { map: MAP, rainDrops: number } {
+        const r = Math.random() * 100;
+        let map: MAP;
+        let rainChance = 0;
+
+        if (r < 40) {
+            map = "desert";
+            rainChance = 0;   // desert no rain!
+        } else if (r < 70) {
+            map = "fall";
+            rainChance = 0.5;
+        } else {
+            map = "winter";
+            rainChance = 0.7;
+        }
+
+        const rainValues = [100, 200, 300, 400, 500];
+        const rainDrops = Math.random() < rainChance
+            ? rainValues[(Math.random() * rainValues.length) | 0]
+            : 0;
+
+        return { map, rainDrops };
     }
+
+
 
     constructor(port: number, maxTeamSize: MODE, gameId: string) {
         this.port = port;
@@ -217,11 +238,14 @@ export class Game implements GameData {
         this.gameId = gameId;
         this.gameMap = "cursedIsland";
 
-        // if (maxTeamSize == MODE.CursedIsland) {
-        //     this.gameMap = "cursedIsland";
-        // } else {
-        //     this.gameMap = this.getRandomMap();
-        // }
+        if (maxTeamSize == MODE.CursedIsland) {
+            this.rainDrops = 300;
+            this.gameMap = "cursedIsland";
+        } else {
+            const randMap = this.getRandomMap();
+            this.gameMap = randMap.map;
+            this.rainDrops = randMap.rainDrops;
+        }
 
         this.teamMode = this.maxTeamSize > MODE.Solo;
         this.updateGameData({

@@ -112,6 +112,7 @@ export class ConnectionManager {
                         skin: Skins.fromStringSafe(data.skin),
                         melee: Melees.fromStringSafe(data.melee),
                         gun: Guns.fromStringSafe(data.gun),
+                        rainDrops: this.game.rainDrops,
                     })
                 );
                 socket.send(stream.getBuffer(), true, false);

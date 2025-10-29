@@ -23,7 +23,7 @@ import { type ObjectsNetData } from "@common/utils/objectsSerializations";
 import { randomFloat, randomVector } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound, type Sound } from "@pixi/sound";
-import $ from "jquery";
+import $, { data } from "jquery";
 import { Application, Color } from "pixi.js";
 import "pixi.js/prepare";
 import { getTranslatedString } from "../translations";
@@ -299,20 +299,26 @@ export class Game {
     };
 
 
-    setupGame() {
+    setupGame(rainDrops: number) {
         this.gasRender = new GasRender(PIXI_SCALE);
 
         this.camera.addObject(this.gasRender.graphics);
         this.map.indicator.setFrame("player_indicator");
 
-        this.rainEffect = new RainEffect(
-            this.pixi.stage,
-            this.pixi.screen.width,
-            this.pixi.screen.height,
-            // 100 -> 500
-            500
-        );
-        this.rainEffect.updatePosition(this.pixi.screen.width / 2, this.pixi.screen.height / 2);
+        if (rainDrops > 0) {
+            this.rainEffect = new RainEffect(
+                this.pixi.stage,
+                this.pixi.screen.width,
+                this.pixi.screen.height,
+                // 100 -> 500
+                rainDrops
+            );
+            this.rainEffect.updatePosition(this.pixi.screen.width / 2, this.pixi.screen.height / 2);
+        } else if (this.rainEffect) {
+            // Clean if not refresh
+            this.rainEffect.destroy();
+            this.rainEffect = undefined;
+        }
 
         const particleEffects = Maps[this.gameMap].particleEffects;
         if (particleEffects !== undefined) {
@@ -581,7 +587,7 @@ export class Game {
                     console.log(`JoinPacket attempt ${attempts} (initial)`);
 
                     this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
-                    this.setupGame();
+                    this.setupGame(packet.output.rainDrops);
 
                     // updateUsersBadge(packet.output.badge?.idString) // Temporarily closed since no way to check
                 });
