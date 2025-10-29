@@ -4,7 +4,8 @@ export enum BotType{
     Assassin,
     Ghost,
     Butcher,
-    Werewolf
+    Werewolf,
+    Boomer
 }
 
 export * from './zombie';

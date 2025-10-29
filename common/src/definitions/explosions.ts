@@ -465,7 +465,7 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
                 rangeVariance: 1,
                 shrapnel: true
             }
-        }
+        },
     ].map(def => {
         return {
             idString: def.idString ?? `${def.name.toLowerCase().replace(/ /g, "_")}_explosion`,

@@ -10,6 +10,7 @@ import { Layer, MODE } from "@common/constants";
 import { Ghost } from "../objects/bots/ghost";
 import { Butcher } from "../objects/bots/butcher";
 import { Werewolf } from "../objects/bots/werewolf";
+import { Boomer } from "../objects/bots/boomer";
 
 export class BotManager {
     private game: Game;
@@ -73,6 +74,10 @@ export class BotManager {
                 bot = new Werewolf(this.game, botData, spawnPosition, spawnLayer);    
                 break;
             }
+            case BotType.Boomer: {
+                bot = new Boomer(this.game, botData, spawnPosition, spawnLayer);    
+                break;
+            }
         }
 
         // this.game.livingPlayers.add(bot);
@@ -108,7 +113,7 @@ export class BotManager {
         };
 
         for (let i = 0; i < 50; i++) {
-            this.createBot(BotType.Werewolf, botData);
+            this.createBot(BotType.Boomer, botData);
         }
 
         // for (let i = 0; i < zombieCount; i++) {
