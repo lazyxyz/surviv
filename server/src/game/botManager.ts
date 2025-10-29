@@ -20,7 +20,7 @@ export class BotManager {
         this.game = game;
     }
 
-    createBot(botType: BotType, botData: ActorContainer): Player {
+    createBot(botType: BotType, botData: ActorContainer, level?: number): Player {
         let spawnPosition = Vec.create(this.game.map.width / 2, this.game.map.height / 2);
         let spawnLayer: Layer | undefined;
 
@@ -45,37 +45,37 @@ export class BotManager {
                 spawnPosition = position;
                 foundPosition = true;
             }
-        }  
+        }
 
         let bot: Player;
         switch (botType) {
             case BotType.Zombie: {
-                bot = new Zombie(this.game, botData, spawnPosition, spawnLayer);    
+                bot = new Zombie(this.game, botData, spawnPosition, spawnLayer, undefined, level);
                 break;
             }
 
             case BotType.Ninja: {
-                bot = new Ninja(this.game, botData, spawnPosition, spawnLayer);    
+                bot = new Ninja(this.game, botData, spawnPosition, spawnLayer, undefined);
                 break;
             }
             case BotType.Assassin: {
-                bot = new Assassin(this.game, botData, spawnPosition, spawnLayer);    
+                bot = new Assassin(this.game, botData, spawnPosition, spawnLayer, undefined);
                 break;
             }
             case BotType.Ghost: {
-                bot = new Ghost(this.game, botData, spawnPosition, spawnLayer);    
+                bot = new Ghost(this.game, botData, spawnPosition, spawnLayer, undefined, level);
                 break;
             }
             case BotType.Butcher: {
-                bot = new Butcher(this.game, botData, spawnPosition, spawnLayer);    
+                bot = new Butcher(this.game, botData, spawnPosition, spawnLayer, undefined, level);
                 break;
             }
             case BotType.Werewolf: {
-                bot = new Werewolf(this.game, botData, spawnPosition, spawnLayer);    
+                bot = new Werewolf(this.game, botData, spawnPosition, spawnLayer, undefined, level);
                 break;
             }
             case BotType.Boomer: {
-                bot = new Boomer(this.game, botData, spawnPosition, spawnLayer);    
+                bot = new Boomer(this.game, botData, spawnPosition, spawnLayer, undefined, level);
                 break;
             }
         }
@@ -98,12 +98,10 @@ export class BotManager {
         return bot;
     }
 
-    activateBots(): void {
-        const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-        const zombieCount = randomInRange(10, 20);
-        const ninjaCount = randomInRange(5, 10);
-        const assassinCount = randomInRange(3, 5);
+    activateBots(): void {
+
+        const FIXED_BOTS = 75; // Fixed total bots per wave (adjust as needed, e.g., 100 for harder)
 
         const botData: ActorContainer = {
             autoFill: false,
@@ -112,22 +110,66 @@ export class BotManager {
             ip: undefined
         };
 
-        for (let i = 0; i < 50; i++) {
-            this.createBot(BotType.Boomer, botData);
+        if (this.game.maxTeamSize == MODE.CursedIsland) {
+            const wave = this.game.gameWave;
+
+            // Determine available types: progressive for waves 1-5, all after
+            let availableTypes: BotType[] = [];
+            if (wave <= 5) {
+                // Waves 1-5: Introduce one new type per wave
+                if (wave >= 1) availableTypes.push(BotType.Zombie);
+                if (wave >= 2) availableTypes.push(BotType.Werewolf);
+                if (wave >= 3) availableTypes.push(BotType.Ghost);
+                if (wave >= 4) availableTypes.push(BotType.Boomer);
+                if (wave >= 5) availableTypes.push(BotType.Butcher);
+            } else {
+                // Waves 6+: Always all types
+                availableTypes = [BotType.Zombie, BotType.Werewolf, BotType.Ghost, BotType.Boomer, BotType.Butcher];
+            }
+
+            if (availableTypes.length === 0) {
+                Logger.log(`No bots spawned for wave ${wave}`);
+                return;
+            }
+
+            // Base level = wave, +2 on milestone waves (5,10,15,...)
+            const isMilestone = wave % 5 === 0;
+            const level = wave + (isMilestone ? 2 : 0);
+
+            // Fixed total bots, distributed evenly
+            const perType = Math.floor(FIXED_BOTS / availableTypes.length);
+            let remainder = FIXED_BOTS % availableTypes.length;
+            let spawned = 0;
+
+            for (const type of availableTypes) {
+                const count = perType + (remainder > 0 ? 1 : 0);
+                remainder = Math.max(0, remainder - 1);
+
+                for (let i = 0; i < count; i++) {
+                    this.createBot(type, botData, level);
+                    spawned++;
+                }
+            }
+
+            this.game.totalBots = spawned;
+            Logger.log(`Wave ${wave} Bots activated: ${spawned} fixed total (level ${level}), types: ${availableTypes.join(', ')} (milestone: ${isMilestone})`);
+        } else {
+            const zombieCount = 15; // Fixed for non-dungeon mode too
+            const ninjaCount = 7;
+            const assassinCount = 4;
+
+            for (let i = 0; i < zombieCount; i++) {
+                this.createBot(BotType.Zombie, botData);
+            }
+            for (let i = 0; i < ninjaCount; i++) {
+                this.createBot(BotType.Ninja, botData);
+            }
+            for (let i = 0; i < assassinCount; i++) {
+                this.createBot(BotType.Assassin, botData);
+            }
+            this.game.totalBots = zombieCount + ninjaCount + assassinCount;
+            Logger.log(`Bots added to game: Total Bots = ${this.game.totalBots} (Zombies: ${zombieCount}, Ninjas: ${ninjaCount}, Assassins: ${assassinCount})`);
         }
-
-        // for (let i = 0; i < zombieCount; i++) {
-        //     this.createBot(BotType.Zombie, botData);
-        // }
-        // for (let i = 0; i < ninjaCount; i++) {
-        //     this.createBot(BotType.Ninja, botData);
-        // }
-        // for (let i = 0; i < assassinCount; i++) {
-        //     this.createBot(BotType.Assassin, botData);
-        // }
-
-        this.game.totalBots = zombieCount + ninjaCount + assassinCount;
-        Logger.log(`Bots added to game: Total Bots = ${this.game.totalBots} (Zombies: ${zombieCount}, Ninjas: ${ninjaCount}, Assassins: ${assassinCount})`);
     }
 
     removeBots(): void {

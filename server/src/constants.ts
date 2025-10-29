@@ -1,1 +1,1 @@
-export const KNOCK_BACK_AMOUNT = 0.5; // knockback distance when bullet/explosion hit bot 
+export const KNOCK_BACK_AMOUNT = 0.6; // knockback distance when bullet/explosion hit bot 

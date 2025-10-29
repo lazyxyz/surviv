@@ -106,7 +106,7 @@ export class Explosion {
 
                         // Apply pushback if the object is a Ghost
                         if (object instanceof Player && object.isBot()) {
-                            const knockbackAmount = KNOCK_BACK_AMOUNT; // Configurable knockback distance
+                            const knockbackAmount = KNOCK_BACK_AMOUNT / 3; // Configurable knockback distance
                             const direction = Vec.normalize(Vec.sub(object.position, this.position));
                             object.position = Vec.add(object.position, Vec.scale(direction, knockbackAmount));
                             this.game.grid.updateObject(object);
