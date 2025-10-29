@@ -5,7 +5,7 @@ import { findGame } from "./gameManager";
 import { type Player } from "./objects/player";
 import { CUSTOM_TEAMS } from "./server";
 import { removeFrom } from "./utils/misc";
-import { TEAMMATE_COLORS, MODE } from "@common/constants";
+import {  MODE } from "@common/constants";
 import { ServerChatPacket, ServerChatPacketData } from "@common/packets/chatPacket";
 
 export class Team {

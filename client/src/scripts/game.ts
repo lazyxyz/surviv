@@ -524,6 +524,7 @@ export class Game {
         switch (true) {
             case packet instanceof JoinPacket: {
                 this.gameMap = NumberToMode[packet.output.gameMode];
+
                 this.initPixi(this.gameMap).then(async _ => {
                     this.uiManager.ui.loadingText.text(getTranslatedString("verifying_game_assets"));
                     this.uiManager.ui.splashMsg.hide();

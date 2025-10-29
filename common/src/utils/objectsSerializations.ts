@@ -31,7 +31,6 @@ export interface ObjectsNetData extends BaseObjectsNetData {
     //
     readonly [ObjectCategory.Player]: {
         readonly position: Vector
-        readonly radius: number
         readonly rotation: number
         readonly animation?: AnimationType
         readonly action?: ({
@@ -57,7 +56,8 @@ export interface ObjectsNetData extends BaseObjectsNetData {
             readonly halloweenThrowableSkin: boolean
             readonly activeDisguise?: ObstacleDefinition
             readonly blockEmoting: boolean
-        }
+        },
+        readonly noSize?: boolean,
     }
     //
     // Obstacle Data
@@ -184,9 +184,8 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
     // Player serialization
     //
     [ObjectCategory.Player]: {
-        serializePartial(stream, { position, radius,  rotation, animation, action }): void {
+        serializePartial(stream, { position, rotation, animation, action, noSize }): void {
             stream.writePosition(position);
-            stream.writeFloat(radius,  0, 5, 2);
             stream.writeRotation2(rotation);
 
             /*
@@ -219,6 +218,16 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
             if (actionDirty && action.item !== undefined) {
                 Loots.writeToStream(stream, action.item);
             }
+
+            /*
+                1 bit for noSize dirty, 1 bit for value
+            */
+            const noSizeDirty = noSize !== undefined;
+            let noSizeByte = noSizeDirty ? 128 : 0;
+            if (noSizeDirty) {
+                noSizeByte += noSize ? 1 : 0;
+            }
+            stream.writeUint8(noSizeByte);
         },
         serializeFull(
             stream,
@@ -273,10 +282,10 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
 
             if (hasDisguise) Obstacles.writeToStream(stream, activeDisguise);
         },
+      
         deserializePartial(stream) {
             const data: Mutable<ObjectsNetData[ObjectCategory.Player]> = {
                 position: stream.readPosition(),
-                radius: stream.readFloat(0, 5, 2),
                 rotation: stream.readRotation2()
             };
 
@@ -298,6 +307,13 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 }
 
                 data.action = act;
+            }
+
+            // see serialization comment for noSize
+            const noSizeByte = stream.readUint8();
+            const hasNoSize = (noSizeByte & 128) !== 0;
+            if (hasNoSize) {
+                data.noSize = (noSizeByte & 1) !== 0;
             }
 
             return data;

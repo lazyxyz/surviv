@@ -39,6 +39,7 @@ export class Ghost extends Player {
     private attackCooldown: number = 0; // Cooldown timer for attacks (in ticks)
     private readonly attackInterval: number; // Interval between attacks (in ticks)
 
+    
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team, level: number = 1) {
         super(game, userData, position, layer, team);
         this.isMobile = true;
@@ -65,7 +66,6 @@ export class Ghost extends Player {
         // Ghost ability
         {
             this._hitbox = new CircleHitbox(0, this.position);
-            // this.damageable = false;
         }
     }
 

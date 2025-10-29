@@ -84,10 +84,6 @@ export class Bullet extends BaseBullet {
             for (const collision of this.updateAndGetCollisions(delta, this.game.objects)) {
                 const object = collision.object;
 
-                if (object.isPlayer && object.hitbox.radius === 0) { // skip bots
-                    continue;
-                }
-
                 if (object.isObstacle && object.definition.isStair) {
                     this.setLayer(resolveStairInteraction(
                         object.definition,
