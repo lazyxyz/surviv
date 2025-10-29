@@ -8,6 +8,8 @@ import { Game } from "../game";
 import { Logger } from "../utils/misc";
 import { Layer, MODE } from "@common/constants";
 import { Ghost } from "../objects/bots/ghost";
+import { Butcher } from "../objects/bots/butcher";
+import { Werewolf } from "../objects/bots/werewolf";
 
 export class BotManager {
     private game: Game;
@@ -42,17 +44,35 @@ export class BotManager {
                 spawnPosition = position;
                 foundPosition = true;
             }
-        }
+        }  
 
         let bot: Player;
-        if (botType === BotType.Zombie) {
-            bot = new Zombie(this.game, botData, spawnPosition, spawnLayer);
-        } else if (botType === BotType.Ninja) {
-            bot = new Ninja(this.game, botData, spawnPosition, spawnLayer);
-        } else if(botType == BotType.Assassin) {
-            bot = new Assassin(this.game, botData, spawnPosition, spawnLayer);
-        } else {
-            bot = new Ghost(this.game, botData, spawnPosition, spawnLayer);
+        switch (botType) {
+            case BotType.Zombie: {
+                bot = new Zombie(this.game, botData, spawnPosition, spawnLayer);    
+                break;
+            }
+
+            case BotType.Ninja: {
+                bot = new Ninja(this.game, botData, spawnPosition, spawnLayer);    
+                break;
+            }
+            case BotType.Assassin: {
+                bot = new Assassin(this.game, botData, spawnPosition, spawnLayer);    
+                break;
+            }
+            case BotType.Ghost: {
+                bot = new Ghost(this.game, botData, spawnPosition, spawnLayer);    
+                break;
+            }
+            case BotType.Butcher: {
+                bot = new Butcher(this.game, botData, spawnPosition, spawnLayer);    
+                break;
+            }
+            case BotType.Werewolf: {
+                bot = new Werewolf(this.game, botData, spawnPosition, spawnLayer);    
+                break;
+            }
         }
 
         // this.game.livingPlayers.add(bot);
@@ -88,7 +108,7 @@ export class BotManager {
         };
 
         for (let i = 0; i < 50; i++) {
-            this.createBot(BotType.Zombie, botData);
+            this.createBot(BotType.Werewolf, botData);
         }
 
         // for (let i = 0; i < zombieCount; i++) {
