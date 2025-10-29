@@ -18,6 +18,7 @@ import { Loot } from "./loot";
 import { Obstacle } from "./obstacle";
 import { Player } from "./player";
 import { ThrowableProjectile } from "./throwableProj";
+import { KNOCK_BACK_AMOUNT } from "../constants";
 
 export class Explosion {
     readonly definition: ExplosionDefinition;
@@ -99,6 +100,16 @@ export class Explosion {
                         // Destroy pallets
                         if (object.isObstacle && object.definition.pallet) {
                             object.dead = true;
+                            object.setDirty();
+                        }
+
+
+                        // Apply pushback if the object is a Ghost
+                        if (object instanceof Player && object.isBot()) {
+                            const knockbackAmount = KNOCK_BACK_AMOUNT / 3; // Configurable knockback distance
+                            const direction = Vec.normalize(Vec.sub(object.position, this.position));
+                            object.position = Vec.add(object.position, Vec.scale(direction, knockbackAmount));
+                            this.game.grid.updateObject(object);
                             object.setDirty();
                         }
                     }

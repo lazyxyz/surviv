@@ -12,6 +12,7 @@ import { PlayerContainer, Gamer } from "../objects/gamer";
 import { Player } from "../objects/player";
 import { cleanUsername, Logger, removeFrom } from "../utils/misc";
 import { type WebSocket } from "uWebSockets.js";
+import { PerkIds, Perks } from "@common/definitions/perks";
 
 export class PlayerManager {
     private game: Game;

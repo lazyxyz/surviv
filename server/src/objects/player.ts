@@ -52,7 +52,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     private static readonly baseHitbox = new CircleHitbox(GameConstants.player.radius);
 
     override readonly fullAllocBytes = 16;
-    override readonly partialAllocBytes = 12;
+    override readonly partialAllocBytes = 14;
     override readonly damageable = true;
 
     // Delegated modules
@@ -664,6 +664,13 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 : { type: (this.action?.type ?? PlayerActions.None) as Exclude<PlayerActions, PlayerActions.UseItem> };
         }
 
+        if(this.hitbox.radius === 0) {
+            data.noSize = true;
+        }
         return data;
+    }
+
+    isBot(): boolean {
+        return false;
     }
 }

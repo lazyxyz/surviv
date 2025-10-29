@@ -1,4 +1,5 @@
-import { GameConstants, KillfeedEventType, Layer } from "@common/constants";
+import { GameConstants, Layer } from "@common/constants";
+import { Explosions, type ExplosionDefinition } from "@common/definitions/explosions";
 import { type Vector, Vec } from "@common/utils/vector";
 import { Game } from "../../game";
 import { Team } from "../../team";
@@ -10,68 +11,69 @@ import { Scopes } from "@common/definitions/scopes";
 import { Config } from "../../config";
 import { DamageParams } from "../gameObject";
 import { randomFloat } from "@common/utils/random";
-import { CircleHitbox } from "@common/utils/hitbox";
-import { SyncedParticle } from "../syncedParticle";
-import { adjacentOrEqualLayer } from "@common/utils/layer";
+import { Explosion } from "../explosion";
 
 /**
- * Ghost Class
- * Represents a specialized player character with unique traits and behaviors.
- * Ghosts directly chase a random living Gamer player and attack when in range at a leveled rate.
+ * Boomer Class
+ * Represents a specialized boss player character with unique traits and behaviors.
+ * Moves like a Ghost: directly chases a random living Gamer player and attacks when in range.
+ * On death, triggers a massive explosion damaging nearby entities.
  */
-export class Ghost extends Player {
+export class Boomer extends Player {
     private static readonly CHASE_DISTANCE = 40; // Rage radius to start attacking
     private static readonly ROTATION_RATE = 0.35; // Maximum rotation speed per update
     private static readonly IDLE_ROTATION_SPEED = 0.1; // Rotation speed when idling
     private static readonly SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance from target
-    private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.5;
-    private static readonly BASE_APS = 2; // Base attacks per second (2 attack per second)
-    private static readonly HEALTH_MULTIPLIER_PER_LEVEL = 0.05; // 5% health increase per level
-    private static readonly SPEED_MULTIPLIER_PER_LEVEL = 0.02; // 2% speed increase per level
-    private static readonly APS_MULTIPLIER_PER_LEVEL = 0.03; // 3% attack speed increase per level
-    private static readonly NAMES = ["Wraith", "Specter", "Phantom", "Shade", "Apparition", "Spirit", "Banshee", "Poltergeist"]; // Thematic names for Ghost
+    private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.5; // Base speed for chasing
+    private static readonly BASE_APS = 0.8; // Base attacks per second (slower attack)
+    private static readonly HEALTH_MULTIPLIER_PER_LEVEL = 0.1; // 10% health increase per level (tankier)
+    private static readonly SPEED_MULTIPLIER_PER_LEVEL = 0.01; // 1% speed increase per level
+    private static readonly APS_MULTIPLIER_PER_LEVEL = 0.02; // 2% attack speed increase per level
+    private static readonly EXPLOSION_DAMAGE_MOD_BASE = 0.5; // Base explosion damage mod
+    private static readonly EXPLOSION_DAMAGE_MOD_PER_LEVEL = 0.1; // 10% increase per level
+    private static readonly NAMES = ["Boomer", "Exploder", "Detonator", "Burster", "Blast", "Kaboom", "Fuser", "Volatile"]; // Thematic names for Boomer
 
     private rotationDirection: number = 1; // Direction for idle rotation (1 or -1)
     private target: Gamer | null = null; // Current target Gamer to chase
     private attackCooldown: number = 0; // Cooldown timer for attacks (in ticks)
     private readonly attackInterval: number; // Interval between attacks (in ticks)
+    private readonly explosionDamageMod: number; // Level-based explosion damage multiplier
 
-    
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team, level: number = 1) {
         super(game, userData, position, layer, team);
-        this.isMobile = true;
-        this.name = this.getRandomName(); // Assign random name
-        this.loadout.skin = Skins.fromString("ghost");
-        this.inventory.scope = Scopes.definitions[0];
-        this.health = this.health * 0.3; // Reduce health
-
-        // this.perks.addItem(Perks.fromString(PerkIds.AdvancedAthletics));
-        // this.updateAndApplyModifiers();
+        this.health = this.health * 0.8; // Base health adjustment for Boomer (tankier)
 
         // Apply level-based multipliers
-        const healthMultiplier = 1 + Ghost.HEALTH_MULTIPLIER_PER_LEVEL * (level - 1);
+        const healthMultiplier = 1 + Boomer.HEALTH_MULTIPLIER_PER_LEVEL * (level - 1);
         this.health *= healthMultiplier;
 
-        this.baseSpeed = Ghost.BASE_SPEED * (1 + Ghost.SPEED_MULTIPLIER_PER_LEVEL * (level - 1));
+        this.baseSpeed = Boomer.BASE_SPEED * (1 + Boomer.SPEED_MULTIPLIER_PER_LEVEL * (level - 1));
 
-        const aps = Ghost.BASE_APS * (1 + Ghost.APS_MULTIPLIER_PER_LEVEL * (level - 1));
-        this.attackInterval = Math.floor(Config.tps / aps); // TPS is 40, base interval = 40 / 1 = 40 ticks (1s)
+        const aps = Boomer.BASE_APS * (1 + Boomer.APS_MULTIPLIER_PER_LEVEL * (level - 1));
+        this.attackInterval = Math.floor(Config.tps / aps);
+
+        // Calculate level-based explosion damage mod: starts at 0.5, +10% per level
+        this.explosionDamageMod = Boomer.EXPLOSION_DAMAGE_MOD_BASE * (1 + Boomer.EXPLOSION_DAMAGE_MOD_PER_LEVEL * (level - 1));
+
+        this.isMobile = true;
+        this.name = this.getRandomName(); // Assign random name
+        this.loadout.skin = Skins.fromString("zone"); // Assuming a boomer skin exists
+        this.inventory.scope = Scopes.definitions[0];
+
+        // Set initial inventory with 20% chance for cola
+        const randomCola = Math.random() < 0.2 ? 1 : 0;
+        this.inventory.items.setItem('cola', randomCola);
 
         // Pick initial target
         this.target = this.pickNewTarget();
-
-        // Ghost ability
-        {
-            this._hitbox = new CircleHitbox(0, this.position);
-        }
     }
 
     /**
      * Generate a random name from the NAMES list.
      */
     private getRandomName(): string {
-        const index = Math.floor(Math.random() * Ghost.NAMES.length);
-        return Ghost.NAMES[index];
+        const index = Math.floor(Math.random() * Boomer.NAMES.length);
+        return Boomer.NAMES[index];
     }
 
     /**
@@ -85,68 +87,67 @@ export class Ghost extends Player {
         return candidates[Math.floor(Math.random() * candidates.length)];
     }
 
-
     die(params: Omit<DamageParams, "amount">) {
+        // Set dead first to prevent self-damage recursion in explosion
+        this.dead = true;
+        this.setDirty();
+
         this.game.totalBots--;
         this.dropLoot();
+
+        // Trigger explosion on death (now safe since dead is set)
+        const explosion = new Explosion(
+            this.game,
+            Explosions.fromString('barrel_explosion'),
+            this.position,
+            this, // Source is the Boomer itself
+            this.layer,
+            undefined, // No specific weapon
+            this.explosionDamageMod // Use level-based damage mod
+        );
+        explosion.explode();
+
         super.die(params);
     }
 
     /**
-     * Drop loot based on probabilities when the ghost dies.
+     * Drop loot based on probabilities when the boomer dies.
      */
     private dropLoot(): void {
-        // 1% chance for each ammo type with random amount in range
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(50, 100));
+        // Higher chances for loot since it's a boss
+        if (Math.random() < 0.05) {
+            const amount = Math.floor(randomFloat(100, 200));
             this.game.addLoot('9mm', this.position, this.layer, { count: amount });
         }
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(20, 50));
+        if (Math.random() < 0.05) {
+            const amount = Math.floor(randomFloat(40, 100));
             this.game.addLoot('12g', this.position, this.layer, { count: amount });
         }
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(40, 80));
+        if (Math.random() < 0.05) {
+            const amount = Math.floor(randomFloat(80, 160));
             this.game.addLoot('556mm', this.position, this.layer, { count: amount });
         }
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(40, 80));
+        if (Math.random() < 0.05) {
+            const amount = Math.floor(randomFloat(80, 160));
             this.game.addLoot('762mm', this.position, this.layer, { count: amount });
         }
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(20, 50));
+        if (Math.random() < 0.05) {
+            const amount = Math.floor(randomFloat(40, 100));
             this.game.addLoot('50cal', this.position, this.layer, { count: amount });
         }
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(20, 50));
+        if (Math.random() < 0.05) {
+            const amount = Math.floor(randomFloat(40, 100));
             this.game.addLoot('338lap', this.position, this.layer, { count: amount });
         }
 
-        // 0.05% chance for curadell (1 amount)
-        if (Math.random() < 0.0005) {
+        // 1% chance for curadell (1 amount) - higher for boss
+        if (Math.random() < 0.01) {
             this.game.addLoot('curadell', this.position, this.layer, { count: 1 });
         }
     }
 
-
     update(): void {
         super.update();
-
-        // Special smoke/particle check for Ghosts (point-in-hitbox since radius=0)
-        const depleters = new Set<SyncedParticle>();
-
-        for (const object of this.nearObjects) {
-            if (
-                object.isSyncedParticle
-                && adjacentOrEqualLayer(object.layer, this.layer)
-                // For Ghosts with radius=0, check if position is inside the particle hitbox
-                && object.hitbox?.isPointInside(this.position)
-            ) {
-                this.health = 0;
-                this.die({});
-                return;
-            }
-        }
 
         // Re-pick target if current is invalid
         if (!this.target || this.target.dead || this.target.downed) {
@@ -161,13 +162,13 @@ export class Ghost extends Player {
             this.attackCooldown -= 1;
 
             let isAttacking = false;
-            if (distToTarget < Ghost.CHASE_DISTANCE && this.attackCooldown <= 0) {
+            if (distToTarget < Boomer.CHASE_DISTANCE && this.attackCooldown <= 0) {
                 isAttacking = true;
                 this.attackCooldown = this.attackInterval; // Reset cooldown
             }
 
             // Move towards target
-            this.moveToTarget(this.target.position, Ghost.SAFE_DISTANCE_FROM_PLAYER, isAttacking);
+            this.moveToTarget(this.target.position, Boomer.SAFE_DISTANCE_FROM_PLAYER, isAttacking);
         } else {
             // Idle if no target
             this.idle();
@@ -184,7 +185,7 @@ export class Ghost extends Player {
             this.rotationDirection *= -1;
         }
 
-        this.rotation += Ghost.IDLE_ROTATION_SPEED * this.rotationDirection;
+        this.rotation += Boomer.IDLE_ROTATION_SPEED * this.rotationDirection;
         const packet: PlayerInputData = {
             movement: { up: false, down: false, left: false, right: false },
             attacking: false,
@@ -219,7 +220,7 @@ export class Ghost extends Player {
         // Only adjust rotation if the difference exceeds a threshold to prevent jitter
         const rotationThreshold = 0.05;
         if (Math.abs(rotationDifference) > rotationThreshold) {
-            this.rotation += Math.min(Math.abs(rotationDifference), Ghost.ROTATION_RATE) * Math.sign(rotationDifference);
+            this.rotation += Math.min(Math.abs(rotationDifference), Boomer.ROTATION_RATE) * Math.sign(rotationDifference);
         }
 
         const packet: PlayerInputData = {

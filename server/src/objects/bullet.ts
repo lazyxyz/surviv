@@ -12,7 +12,8 @@ import { Building } from "./building";
 import { type Explosion } from "./explosion";
 import { type GameObject } from "./gameObject";
 import { Obstacle } from "./obstacle";
-import { type Player } from "./player";
+import { Player } from "./player";
+import { KNOCK_BACK_AMOUNT } from "../constants";
 
 type Weapon = GunItem | Explosion;
 
@@ -147,6 +148,13 @@ export class Bullet extends BaseBullet {
                     this.reflect(rotation);
                     this.reflected = true;
                 }
+            }
+
+            // Apply pushback if the object is a Bot
+            if (object instanceof Player && object.isBot()) {
+                object.position = Vec.add(object.position, Vec.scale(this.direction, KNOCK_BACK_AMOUNT));
+                this.game.grid.updateObject(object);
+                object.setDirty();
             }
 
             this.dead = true;

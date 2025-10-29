@@ -9,51 +9,56 @@ import { Gamer } from "../gamer";
 import { Scopes } from "@common/definitions/scopes";
 import { Config } from "../../config";
 import { DamageParams } from "../gameObject";
+import { randomFloat } from "@common/utils/random";
 
 /**
- * Zombie Class
+ * Werewolf Class
  * Represents a specialized player character with unique traits and behaviors.
+ * Moves like a Zombie: wanders toward safe zone, chases nearest player if in range.
+ * Enraged ability: 50% faster movement and attack speed when health < `ENRAGED_HEALTH_THRESHOLD`% of max.
  */
-export class Zombie extends Player {
+export class Werewolf extends Player {
     private static readonly CHASE_DISTANCE = 40; // Distance to chase players
     private static readonly ROTATION_RATE = 0.35; // Maximum rotation speed per update
     private static readonly IDLE_ROTATION_SPEED = 0.1; // Rotation speed when idling
     private static readonly SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance from players
-    private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.5; // Base speed for chasing
+    private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.8; // Base speed for chasing
     private static readonly WANDER_SPEED = GameConstants.player.baseSpeed * 0.3; // Slower speed for wandering
     private static readonly BASE_APS = 1; // Base attacks per second (1 attack per second)
+    private static readonly ENRAGED_MULTIPLIER = 1.5; // 50% faster move and attack when low health
+    private static readonly ENRAGED_HEALTH_THRESHOLD = 0.5; // Under 50% health
     private static readonly HEALTH_MULTIPLIER_PER_LEVEL = 0.05; // 5% health increase per level
     private static readonly SPEED_MULTIPLIER_PER_LEVEL = 0.02; // 2% speed increase per level
     private static readonly APS_MULTIPLIER_PER_LEVEL = 0.03; // 3% attack speed increase per level
     private static readonly MIN_MOVE_DURATION = 1; // Minimum seconds before picking new wander target
     private static readonly MAX_MOVE_DURATION = 5; // Maximum seconds before picking new wander target
     private static readonly CENTER_PROXIMITY = 150; // Distance to consider bot "at" the gas safe zone
-    private static readonly NAMES = ["Ghoul", "Walker", "Rotter", "Shambler", "Undead", "Zed", "Lurker", "Crawler"]; // Thematic names for Zombie
+    private static readonly NAMES = ["Werewolf", "Lycan", "Wolfman", "Beast", "Fang", "Howler", "Alpha", "Lupine"]; // Thematic names for Werewolf
 
     private rotationDirection: number = 1; // Direction for idle rotation (1 or -1)
     private moveTimer: number = 0; // Tracks time since last wander target change
     private currentMoveDuration: number = this.getRandomMoveDuration(); // Current random wander duration
     private wanderTarget: Vector | null = null; // Current wander target position
     private speedMult: number; // Level-based speed multiplier
+    private baseAps: number; // Level-adjusted base attacks per second
     private attackCooldown: number = 0; // Cooldown timer for attacks (in ticks)
-    private readonly attackInterval: number; // Interval between attacks (in ticks)
 
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team, level: number = 1) {
         super(game, userData, position, layer, team);
-        this.health = this.health * 0.5; // Reduce health by 50%
+        this.health = this.health * 0.6; // Base health adjustment for Werewolf
 
         // Apply level-based multipliers
-        const healthMultiplier = 1 + Zombie.HEALTH_MULTIPLIER_PER_LEVEL * (level - 1);
+        const healthMultiplier = 1 + Werewolf.HEALTH_MULTIPLIER_PER_LEVEL * (level - 1);
         this.health *= healthMultiplier;
+        this.maxHealth = this.health;
 
-        this.speedMult = 1 + Zombie.SPEED_MULTIPLIER_PER_LEVEL * (level - 1);
+        this.speedMult = 1 + Werewolf.SPEED_MULTIPLIER_PER_LEVEL * (level - 1);
 
-        const aps = Zombie.BASE_APS * (1 + Zombie.APS_MULTIPLIER_PER_LEVEL * (level - 1));
-        this.attackInterval = Math.floor(Config.tps / aps);
+        this.baseAps = Werewolf.BASE_APS * (1 + Werewolf.APS_MULTIPLIER_PER_LEVEL * (level - 1));
 
         this.isMobile = true;
         this.name = this.getRandomName(); // Assign random name
-        this.loadout.skin = Skins.fromString("zombie");
+        this.loadout.skin = Skins.fromString("werewolf");
         this.inventory.scope = Scopes.definitions[0];
 
         // Set initial inventory with 30% chance for cola
@@ -65,8 +70,8 @@ export class Zombie extends Player {
      * Generate a random name from the NAMES list.
      */
     private getRandomName(): string {
-        const index = Math.floor(Math.random() * Zombie.NAMES.length);
-        return Zombie.NAMES[index];
+        const index = Math.floor(Math.random() * Werewolf.NAMES.length);
+        return Werewolf.NAMES[index];
     }
 
     /**
@@ -79,7 +84,7 @@ export class Zombie extends Player {
             return 0;
         }
         // Generate random duration between MIN_MOVE_DURATION and MAX_MOVE_DURATION
-        return Math.random() * (Zombie.MAX_MOVE_DURATION - Zombie.MIN_MOVE_DURATION) + Zombie.MIN_MOVE_DURATION;
+        return Math.random() * (Werewolf.MAX_MOVE_DURATION - Werewolf.MIN_MOVE_DURATION) + Werewolf.MIN_MOVE_DURATION;
     }
 
     /**
@@ -94,11 +99,56 @@ export class Zombie extends Player {
         });
     }
 
+    die(params: Omit<DamageParams, "amount">) {
+        this.game.totalBots--;
+        this.dropLoot();
+        super.die(params);
+    }
+
+    /**
+     * Drop loot based on probabilities when the werewolf dies.
+     */
+    private dropLoot(): void {
+        // 1% chance for each ammo type with random amount in range
+        if (Math.random() < 0.01) {
+            const amount = Math.floor(randomFloat(50, 100));
+            this.game.addLoot('9mm', this.position, this.layer, { count: amount });
+        }
+        if (Math.random() < 0.01) {
+            const amount = Math.floor(randomFloat(20, 50));
+            this.game.addLoot('12g', this.position, this.layer, { count: amount });
+        }
+        if (Math.random() < 0.01) {
+            const amount = Math.floor(randomFloat(40, 80));
+            this.game.addLoot('556mm', this.position, this.layer, { count: amount });
+        }
+        if (Math.random() < 0.01) {
+            const amount = Math.floor(randomFloat(40, 80));
+            this.game.addLoot('762mm', this.position, this.layer, { count: amount });
+        }
+        if (Math.random() < 0.01) {
+            const amount = Math.floor(randomFloat(20, 50));
+            this.game.addLoot('50cal', this.position, this.layer, { count: amount });
+        }
+        if (Math.random() < 0.01) {
+            const amount = Math.floor(randomFloat(20, 50));
+            this.game.addLoot('338lap', this.position, this.layer, { count: amount });
+        }
+
+        // 0.05% chance for curadell (1 amount)
+        if (Math.random() < 0.0005) {
+            this.game.addLoot('curadell', this.position, this.layer, { count: 1 });
+        }
+    }
+
     update(): void {
         super.update();
 
         // Decrement attack cooldown every update
         this.attackCooldown = Math.max(0, this.attackCooldown - 1);
+
+        // Check enraged state
+        const enraged = this.health < this.maxHealth * Werewolf.ENRAGED_HEALTH_THRESHOLD;
 
         // Find the nearest living player within chase distance
         let target: Gamer | null = null;
@@ -106,7 +156,7 @@ export class Zombie extends Player {
         for (const obj of this.visibleObjects) {
             if (obj instanceof Gamer && !obj.dead && !obj.downed) {
                 const dist = Vec.length(Vec.sub(obj.position, this.position));
-                if (dist < Zombie.CHASE_DISTANCE && dist < minDist) {
+                if (dist < Werewolf.CHASE_DISTANCE && dist < minDist) {
                     minDist = dist;
                     target = obj;
                 }
@@ -115,30 +165,32 @@ export class Zombie extends Player {
 
         if (target) {
             // Chase and attack logic
-            this.baseSpeed = Zombie.BASE_SPEED * this.speedMult;
+            const enragedSpeedMult = enraged ? Werewolf.ENRAGED_MULTIPLIER : 1;
+            this.baseSpeed = Werewolf.BASE_SPEED * this.speedMult * enragedSpeedMult;
             let isAttacking = false;
             if (this.attackCooldown <= 0) {
                 isAttacking = true;
-                this.attackCooldown = this.attackInterval; // Reset cooldown
+                const currentAps = this.baseAps * (enraged ? Werewolf.ENRAGED_MULTIPLIER : 1);
+                this.attackCooldown = Math.floor(Config.tps / currentAps);
             }
-            this.moveToTarget(target.position, Zombie.SAFE_DISTANCE_FROM_PLAYER, isAttacking);
+            this.moveToTarget(target.position, Werewolf.SAFE_DISTANCE_FROM_PLAYER, isAttacking);
             return;
         }
 
         // Wander toward safe zone or idle
-        this.wanderOrIdle();
+        this.wanderOrIdle(enraged);
     }
 
     /**
      * Move toward a random point on the gas radius or idle.
      */
-    private wanderOrIdle(): void {
+    private wanderOrIdle(enraged: boolean): void {
         this.moveTimer += 1 / Config.tps; // Assuming update per tick
 
         const currentDistanceToGas = Vec.length(Vec.sub(this.game.gas.newPosition, this.position));
 
         // If within safe zone proximity, idle
-        if (currentDistanceToGas <= Zombie.CENTER_PROXIMITY || !this.game.isStarted()) {
+        if (currentDistanceToGas <= Werewolf.CENTER_PROXIMITY || !this.game.isStarted()) {
             this.moveTimer = 0;
             this.wanderTarget = null;
             this.idle();
@@ -151,12 +203,14 @@ export class Zombie extends Player {
             this.wanderTarget = this.getRandomRadiusPosition();
             this.moveTimer = 0;
             this.currentMoveDuration = this.getRandomMoveDuration();
-            this.baseSpeed = Zombie.WANDER_SPEED * this.speedMult;
+            const enragedSpeedMult = enraged ? Werewolf.ENRAGED_MULTIPLIER : 1;
+            this.baseSpeed = Werewolf.WANDER_SPEED * this.speedMult * enragedSpeedMult;
             this.moveToTarget(this.wanderTarget, 0, false);
         } else {
             // Continue moving to current wander target
             if (this.wanderTarget) {
-                this.baseSpeed = Zombie.WANDER_SPEED * this.speedMult;
+                const enragedSpeedMult = enraged ? Werewolf.ENRAGED_MULTIPLIER : 1;
+                this.baseSpeed = Werewolf.WANDER_SPEED * this.speedMult * enragedSpeedMult;
                 this.moveToTarget(this.wanderTarget, 0, false);
             } else {
                 // Fallback to idling if no target
@@ -175,7 +229,7 @@ export class Zombie extends Player {
             this.rotationDirection *= -1;
         }
 
-        this.rotation += Zombie.IDLE_ROTATION_SPEED * this.rotationDirection;
+        this.rotation += Werewolf.IDLE_ROTATION_SPEED * this.rotationDirection;
         const packet: PlayerInputData = {
             movement: { up: false, down: false, left: false, right: false },
             attacking: false,
@@ -210,7 +264,7 @@ export class Zombie extends Player {
         // Only adjust rotation if the difference exceeds a threshold to prevent jitter
         const rotationThreshold = 0.05;
         if (Math.abs(rotationDifference) > rotationThreshold) {
-            this.rotation += Math.min(Math.abs(rotationDifference), Zombie.ROTATION_RATE) * Math.sign(rotationDifference);
+            this.rotation += Math.min(Math.abs(rotationDifference), Werewolf.ROTATION_RATE) * Math.sign(rotationDifference);
         }
 
         const packet: PlayerInputData = {
@@ -231,7 +285,7 @@ export class Zombie extends Player {
         this.processInputs(packet);
     }
 
-     override isBot(): boolean {
+    override isBot(): boolean {
         return true;
     }
 }

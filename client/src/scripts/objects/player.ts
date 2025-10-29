@@ -293,6 +293,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
         });
 
         this.updateFromData(data, true);
+        if (data.noSize) this.hitbox.radius = 0;
     }
 
     override updateContainerPosition(): void {
@@ -1728,19 +1729,19 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                         );
                     }
 
-                     if (weaponDef.bulletFlyingSound) {
-                            // 5% chance bullet flying sounds
-                            if (Math.random() < 0.05) {
-                                const variant = Math.floor(Math.random() * 3) + 1;
-                                this.playSound(
-                                    `bullet_fly_${variant}`,
-                                    {
-                                        falloff: 0.5,
-                                        dynamic: true,
-                                    }
-                                );
-                            }
+                    if (weaponDef.bulletFlyingSound) {
+                        // 5% chance bullet flying sounds
+                        if (Math.random() < 0.05) {
+                            const variant = Math.floor(Math.random() * 3) + 1;
+                            this.playSound(
+                                `bullet_fly_${variant}`,
+                                {
+                                    falloff: 0.5,
+                                    dynamic: true,
+                                }
+                            );
                         }
+                    }
                 }
 
                 const isAltFire = weaponDef.isDual
