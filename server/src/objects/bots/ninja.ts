@@ -9,6 +9,7 @@ import { Gamer } from "../gamer";
 import { MeleeItem } from "../../inventory/meleeItem";
 import { Obstacle } from "../obstacle";
 import { Config } from "../../config";
+import { SAFE_DISTANCE_FROM_PLAYER } from "./common";
 
 /**
  * Ninja Class
@@ -17,7 +18,6 @@ import { Config } from "../../config";
 export class Ninja extends Player {
     private static readonly BASE_CHASE_RADIUS: number = 30;
     private static readonly ROTATION_RATE: number = 0.35;
-    private static readonly SAFE_DISTANCE_PLAYER: number = 5;
     private static readonly SAFE_DISTANCE_HIDE_SPOT: number = 0.5;
     private static readonly BASE_ATTACK_SPEED: number = GameConstants.player.baseSpeed * 0.6;
     private static readonly RADIUS_INCREMENT: number = 0.05;
@@ -125,7 +125,7 @@ export class Ninja extends Player {
 
     private attackNearestPlayer(player: Gamer): void {
         this.baseSpeed = this.attackSpeed;
-        this.moveToTarget(player.position, Ninja.SAFE_DISTANCE_PLAYER, !this.attacking);
+        this.moveToTarget(player.position, SAFE_DISTANCE_FROM_PLAYER, !this.attacking);
     }
 
     private holdPositionPreGame(): void {

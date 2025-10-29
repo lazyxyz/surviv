@@ -1,4 +1,4 @@
-import { GameConstants, GasState } from "@common/constants";
+import { GameConstants, GasState, MODE } from "@common/constants";
 import { CircleHitbox } from "@common/utils/hitbox";
 import { Geometry, Numeric } from "@common/utils/math";
 import { MapObjectSpawnMode } from "@common/utils/objectDefinitions";
@@ -113,9 +113,14 @@ export class Gas {
         if (currentStage === undefined) return;
 
         const isDebug = gas.mode === GasMode.Debug;
-        const duration = isDebug && gas.overrideDuration !== undefined && currentStage.duration !== 0
+        let duration = isDebug && gas.overrideDuration !== undefined && currentStage.duration !== 0
             ? gas.overrideDuration
             : currentStage.duration;
+
+        // Halve duration for CursedIsland mode
+        if (this.game.gameMode === MODE.CursedIsland) {
+            duration = Math.floor(duration / 2);
+        }
 
         this.stage++;
         this.state = currentStage.state;

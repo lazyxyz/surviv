@@ -110,7 +110,7 @@ export class BotManager {
             ip: undefined
         };
 
-        if (this.game.maxTeamSize == MODE.CursedIsland) {
+        if (this.game.gameMode == MODE.CursedIsland) {
             const wave = this.game.gameWave;
 
             // Determine available types: progressive for waves 1-5, all after

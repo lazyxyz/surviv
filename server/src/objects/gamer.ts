@@ -282,7 +282,7 @@ export class Gamer extends Player {
         }
 
         // Skip 50vs50 Mode
-        if (this.game.maxTeamSize == MODE.V50) {
+        if (this.game.gameMode == MODE.V50) {
             processRewardsPacket(true, rank, 0, 0);
             return;
         }

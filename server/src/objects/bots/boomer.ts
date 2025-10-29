@@ -12,6 +12,7 @@ import { Config } from "../../config";
 import { DamageParams } from "../gameObject";
 import { randomFloat } from "@common/utils/random";
 import { Explosion } from "../explosion";
+import { SAFE_DISTANCE_FROM_PLAYER } from "./common";
 
 /**
  * Boomer Class
@@ -23,7 +24,6 @@ export class Boomer extends Player {
     private static readonly CHASE_DISTANCE = 40; // Rage radius to start attacking
     private static readonly ROTATION_RATE = 0.35; // Maximum rotation speed per update
     private static readonly IDLE_ROTATION_SPEED = 0.1; // Rotation speed when idling
-    private static readonly SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance from target
     private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.5; // Base speed for chasing
     private static readonly BASE_APS = 0.8; // Base attacks per second (slower attack)
     private static readonly HEALTH_MULTIPLIER_PER_LEVEL = 0.1; // 10% health increase per level (tankier)
@@ -168,7 +168,7 @@ export class Boomer extends Player {
             }
 
             // Move towards target
-            this.moveToTarget(this.target.position, Boomer.SAFE_DISTANCE_FROM_PLAYER, isAttacking);
+            this.moveToTarget(this.target.position, SAFE_DISTANCE_FROM_PLAYER, isAttacking);
         } else {
             // Idle if no target
             this.idle();

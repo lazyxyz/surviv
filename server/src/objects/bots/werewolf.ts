@@ -10,6 +10,7 @@ import { Scopes } from "@common/definitions/scopes";
 import { Config } from "../../config";
 import { DamageParams } from "../gameObject";
 import { randomFloat } from "@common/utils/random";
+import { SAFE_DISTANCE_FROM_PLAYER } from "./common";
 
 /**
  * Werewolf Class
@@ -21,7 +22,6 @@ export class Werewolf extends Player {
     private static readonly CHASE_DISTANCE = 40; // Distance to chase players
     private static readonly ROTATION_RATE = 0.35; // Maximum rotation speed per update
     private static readonly IDLE_ROTATION_SPEED = 0.1; // Rotation speed when idling
-    private static readonly SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance from players
     private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.8; // Base speed for chasing
     private static readonly WANDER_SPEED = GameConstants.player.baseSpeed * 0.3; // Slower speed for wandering
     private static readonly BASE_APS = 1; // Base attacks per second (1 attack per second)
@@ -173,7 +173,7 @@ export class Werewolf extends Player {
                 const currentAps = this.baseAps * (enraged ? Werewolf.ENRAGED_MULTIPLIER : 1);
                 this.attackCooldown = Math.floor(Config.tps / currentAps);
             }
-            this.moveToTarget(target.position, Werewolf.SAFE_DISTANCE_FROM_PLAYER, isAttacking);
+            this.moveToTarget(target.position, SAFE_DISTANCE_FROM_PLAYER, isAttacking);
             return;
         }
 

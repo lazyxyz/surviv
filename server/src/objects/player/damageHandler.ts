@@ -497,6 +497,84 @@ export class DamageHandler {
         this.player._team?.setDirty();
     }
 
+    resurrect(params?: {
+        health?: number;  // Optional: Restore health (default: 100)
+        adrenaline?: number;  // Optional: Restore adrenaline (default: 0)
+        restoreLoot?: boolean;  // Optional: Attempt to restore dropped loot (default: false; complex to implement fully)
+        source?: Player | string;  // Optional: Who/what caused the resurrection (for killfeed/logging)
+    }): void {
+        if (!this.player.dead || this.player.health > 0) {
+            console.warn(`Cannot resurrect player ${this.player.name} (id: ${this.player.id}): Not dead.`);
+            return;
+        }
+
+        const { health = 100, adrenaline = 0, restoreLoot = false, source } = params ?? {};
+
+        // // Emit pre-resurrection event for plugins to hook/modify
+        // if (this.player.game.pluginManager.emit("player_will_resurrect", {
+        //     player: this.player,
+        //     health,
+        //     adrenaline,
+        //     source
+        // })) {
+        //     return;  // Plugin cancelled the resurrection
+        // }
+
+        // Core resurrection logic: Undo death state
+        this.player.dead = false;
+        this.player.health = Math.min(health, this.player.maxHealth);
+        this.player.adrenaline = adrenaline;
+        this.player.downed = false;  // Ensure not stuck in downed
+        this.player.canDespawn = true;  // Allow despawn again
+        this.player.killedBy = undefined;  // Clear killer reference
+
+        // Reset movement/attack states (similar to die, but reversing)
+        this.player.movement.up = this.player.movement.down = this.player.movement.left = this.player.movement.right = false;
+        this.player.startedAttacking = false;
+        this.player.attacking = false;
+        this.player.stoppedAttacking = false;
+
+        // Re-add to living players and update counts
+        this.player.game.livingPlayers.add(this.player);
+        this.player.game.aliveCountDirty = true;
+        this.player.game.updateGameData({ aliveCount: this.player.game.aliveCount });
+
+        // Remove death marker if present (find and destroy it)
+        // Note: This assumes DeathMarker is trackable; you may need to store a reference or query the grid
+        // For simplicity, we'll emit an event for plugins to handle removal; implement grid cleanup as needed
+        // this.player.game.pluginManager.emit("remove_death_marker", { player: this.player });
+
+        // Restore inventory slots (re-lock if needed post-death)
+        this.player.inventory.lockAllSlots();  // Assuming a method to re-lock; adjust based on your Inventory class
+
+        // Optionally restore dropped loot (complex: would require tracking dropped items per player)
+        if (restoreLoot) {
+            // Placeholder: Emit event for plugins or implement loot tracking
+            // e.g., this.player.game.pluginManager.emit("restore_dropped_loot", { player: this.player });
+            console.log(`Loot restoration for ${this.player.name} not fully implemented.`);
+        }
+
+        // Team updates
+        this.player._team?.setDirty();
+        this.player.dirty.modifiers = true;
+        this.player.dirty.items = true;
+        this.player.game.fullDirtyObjects.add(this.player);
+        this.player.game.spectatablePlayers.push(this.player);  // Re-add to spectatables
+
+        // If this was the kill leader, re-evaluate
+        // if (this.player.kills >= this.player.game.killLeader?.kills) {
+        //     this.player.game.killLeader = this.player;
+        // }
+
+        // // Emit post-resurrection event
+        // this.player.game.pluginManager.emit("player_did_resurrect", {
+        //     player: this.player,
+        //     health: this.player.health,
+        //     adrenaline: this.player.adrenaline,
+        //     source
+        // });
+    }
+
     canInteract(player: Player): boolean {
         return !player.downed
             && this.player.downed

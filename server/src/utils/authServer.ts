@@ -28,7 +28,7 @@ export class AuthServer {
             },
             body: JSON.stringify({
                 createdAt: new Date(this.game.startedTime),
-                mode: MODE[this.game.maxTeamSize],
+                mode: MODE[this.game.gameMode],
                 region: process.env.REGION
             })
         });
