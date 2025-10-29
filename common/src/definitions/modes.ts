@@ -119,7 +119,7 @@ export const Maps: Record<MAP, ModeDefinition> = {
         modeLogoImage: "./img/game/winter/obstacles/red_gift.svg"
     },
     desert: {
-        idString: "fall",
+        idString: "desert",
         colors: {
             grass: "hsl(42.94, 87.93%, 77.25%)",
             water: "hsl(211, 63%, 42%)",
@@ -133,7 +133,7 @@ export const Maps: Record<MAP, ModeDefinition> = {
         ambience: "wind_ambience",
         inheritTexturesFrom: "fall",
         defaultScope: "2x_scope",
-        reskin: "fall",
+        reskin: "desert",
         particleEffects: {
             frames: ["weed_1", "weed_2"],
             delay: 1000,
@@ -145,26 +145,25 @@ export const Maps: Record<MAP, ModeDefinition> = {
             squads: "./img/misc/user-group.svg"
         },
     },
-   
     cursedIsland: {
-        idString: "fall",
+        idString: "cursedIsland",
         colors: {
-            grass: "hsl(42.94, 87.93%, 77.25%)",
-            water: "hsl(211, 63%, 42%)",
+            grass: "hsl(224, 43%, 21%)",
+            water: "hsl(331, 49%, 39%)",
             border: "hsl(211, 63%, 30%)",
-            beach: "hsl(40, 39%, 55%)",
-            riverBank: "hsl(33, 50%, 30%)",
-            trail: "hsl(35, 50%, 40%)",
-            gas: "hsla(17, 100%, 50%, 0.55)",
+            beach: "hsl(229, 18%, 36%)",
+            riverBank: "hsl(229, 18%, 36%)",
+            trail: "hsl(229, 18%, 36%)",
+            gas: "hsla(17, 100%, 50%, 0.35)",
             void: "hsl(25, 80%, 6%)"
         },
-        ambience: "wind_ambience",
+        reskin: "cursedIsland",
+        specialSounds: [
+            "airdrop_plane"
+        ],
+        ambience: "horror_ambience",
         inheritTexturesFrom: "desert",
-        reskin: "desert",
-        particleEffects: {
-            frames: ["weed_1", "weed_2"],
-            delay: 1000,
-        },
+        defaultScope: "8x_scope",
         specialPlayButtons: true,
         // Icons
         modeLogoImage: {

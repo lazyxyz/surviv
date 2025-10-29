@@ -886,6 +886,43 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
         );
 
         return ([
+            // curseIsland
+            {
+                idString: "cauldron",
+                name: "Cauldron",
+                material: "porcelain",
+                health: 80,
+                scale: { spawnMin: 0.9, spawnMax: 0.9, destroy: 0.6 },
+                hitbox: new CircleHitbox(3.75),
+                rotationMode: RotationMode.Full,
+                spawnMode: MapObjectSpawnMode.GrassAndAroundOasis,
+                hasLoot: true,
+                frames: { particle: "cauldron_particle", residue: "cauldron_residue" }
+            },
+            {
+                idString: "small_tombstone",
+                name: "Small Tombstone",
+                material: "stone",
+                health: 200,
+                scale: { spawnMin: 0.8, spawnMax: 0.8, destroy: 0.5 },
+                hitbox: new CircleHitbox(3.75),
+                rotationMode: RotationMode.None,
+                hasLoot: true,
+                frames: { particle: "tombstone_particle", residue: "tombstone_residue" }
+            },
+            {
+                idString: "modern_tombstone",
+                name: "Modern Tombstone",
+                material: "stone",
+                health: 220,
+                scale: { spawnMin: 0.9, spawnMax: 0.9, destroy: 0.65 },
+                hitbox: new CircleHitbox(3.75),
+                rotationMode: RotationMode.None,
+                hasLoot: true,
+                frames: { particle: "tombstone_particle", residue: "tombstone_residue" }
+
+            },
+            // desert
             {
                 idString: "bull_skeleton",
                 name: "Bull Skeleton",
