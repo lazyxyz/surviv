@@ -88,7 +88,7 @@ export class BotManager {
         };
 
         for (let i = 0; i < 50; i++) {
-            this.createBot(BotType.Ghost, botData);
+            this.createBot(BotType.Zombie, botData);
         }
 
         // for (let i = 0; i < zombieCount; i++) {

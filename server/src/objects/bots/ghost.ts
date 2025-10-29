@@ -10,11 +10,9 @@ import { Scopes } from "@common/definitions/scopes";
 import { Config } from "../../config";
 import { DamageParams } from "../gameObject";
 import { randomFloat } from "@common/utils/random";
-import { Perks, PerkIds } from "@common/definitions/perks";
 import { CircleHitbox } from "@common/utils/hitbox";
 import { SyncedParticle } from "../syncedParticle";
 import { adjacentOrEqualLayer } from "@common/utils/layer";
-import { KillFeedPacket } from "@common/packets/killFeedPacket";
 
 /**
  * Ghost Class
@@ -32,7 +30,6 @@ export class Ghost extends Player {
     private static readonly SPEED_MULTIPLIER_PER_LEVEL = 0.02; // 2% speed increase per level
     private static readonly APS_MULTIPLIER_PER_LEVEL = 0.03; // 3% attack speed increase per level
     private static readonly NAMES = ["Wraith", "Specter", "Phantom", "Shade", "Apparition", "Spirit", "Banshee", "Poltergeist"]; // Thematic names for Ghost
-    private static readonly RAGE_SKILL_CHANCE = 0.05; // 5% chance to have Rage skill (configurable)
 
     private rotationDirection: number = 1; // Direction for idle rotation (1 or -1)
     private target: Gamer | null = null; // Current target Gamer to chase

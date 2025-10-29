@@ -19,8 +19,12 @@ export class Zombie extends Player {
     private static readonly ROTATION_RATE = 0.35; // Maximum rotation speed per update
     private static readonly IDLE_ROTATION_SPEED = 0.1; // Rotation speed when idling
     private static readonly SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance from players
-    private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.8; // Base speed for chasing
+    private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.5; // Base speed for chasing
     private static readonly WANDER_SPEED = GameConstants.player.baseSpeed * 0.3; // Slower speed for wandering
+    private static readonly BASE_APS = 1; // Base attacks per second (1 attack per second)
+    private static readonly HEALTH_MULTIPLIER_PER_LEVEL = 0.05; // 5% health increase per level
+    private static readonly SPEED_MULTIPLIER_PER_LEVEL = 0.02; // 2% speed increase per level
+    private static readonly APS_MULTIPLIER_PER_LEVEL = 0.03; // 3% attack speed increase per level
     private static readonly MIN_MOVE_DURATION = 1; // Minimum seconds before picking new wander target
     private static readonly MAX_MOVE_DURATION = 5; // Maximum seconds before picking new wander target
     private static readonly CENTER_PROXIMITY = 150; // Distance to consider bot "at" the gas safe zone
@@ -30,10 +34,23 @@ export class Zombie extends Player {
     private moveTimer: number = 0; // Tracks time since last wander target change
     private currentMoveDuration: number = this.getRandomMoveDuration(); // Current random wander duration
     private wanderTarget: Vector | null = null; // Current wander target position
+    private speedMult: number; // Level-based speed multiplier
+    private attackCooldown: number = 0; // Cooldown timer for attacks (in ticks)
+    private readonly attackInterval: number; // Interval between attacks (in ticks)
 
-    constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team) {
+    constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team, level: number = 1) {
         super(game, userData, position, layer, team);
         this.health = this.health * 0.5; // Reduce health by 50%
+
+        // Apply level-based multipliers
+        const healthMultiplier = 1 + Zombie.HEALTH_MULTIPLIER_PER_LEVEL * (level - 1);
+        this.health *= healthMultiplier;
+
+        this.speedMult = 1 + Zombie.SPEED_MULTIPLIER_PER_LEVEL * (level - 1);
+
+        const aps = Zombie.BASE_APS * (1 + Zombie.APS_MULTIPLIER_PER_LEVEL * (level - 1));
+        this.attackInterval = Math.floor(Config.tps / aps);
+
         this.isMobile = true;
         this.name = this.getRandomName(); // Assign random name
         this.loadout.skin = Skins.fromString("zombie");
@@ -79,33 +96,44 @@ export class Zombie extends Player {
 
     update(): void {
         super.update();
+
+        // Decrement attack cooldown every update
+        this.attackCooldown = Math.max(0, this.attackCooldown - 1);
+
+        // Find the nearest living player within chase distance
+        let target: Gamer | null = null;
+        let minDist = Infinity;
         for (const obj of this.visibleObjects) {
             if (obj instanceof Gamer && !obj.dead && !obj.downed) {
-                if (Vec.length(Vec.sub(obj.position, this.position)) < Zombie.CHASE_DISTANCE) {
-                    // Chase nearest player
-                    this.attackNearestPlayer(obj);
-                    return;
+                const dist = Vec.length(Vec.sub(obj.position, this.position));
+                if (dist < Zombie.CHASE_DISTANCE && dist < minDist) {
+                    minDist = dist;
+                    target = obj;
                 }
             }
+        }
+
+        if (target) {
+            // Chase and attack logic
+            this.baseSpeed = Zombie.BASE_SPEED * this.speedMult;
+            let isAttacking = false;
+            if (this.attackCooldown <= 0) {
+                isAttacking = true;
+                this.attackCooldown = this.attackInterval; // Reset cooldown
+            }
+            this.moveToTarget(target.position, Zombie.SAFE_DISTANCE_FROM_PLAYER, isAttacking);
+            return;
         }
 
         // Wander toward safe zone or idle
         this.wanderOrIdle();
     }
 
-    private attackNearestPlayer(player: Gamer): void {
-        if (player) {
-            // Attack nearest player with melee
-            this.baseSpeed = Zombie.BASE_SPEED;
-            this.moveToTarget(player.position, Zombie.SAFE_DISTANCE_FROM_PLAYER, !this.attacking);
-        }
-    }
-
     /**
      * Move toward a random point on the gas radius or idle.
      */
     private wanderOrIdle(): void {
-        this.moveTimer += 1 / Config.tps; // Assuming 60 FPS
+        this.moveTimer += 1 / Config.tps; // Assuming update per tick
 
         const currentDistanceToGas = Vec.length(Vec.sub(this.game.gas.newPosition, this.position));
 
@@ -123,12 +151,12 @@ export class Zombie extends Player {
             this.wanderTarget = this.getRandomRadiusPosition();
             this.moveTimer = 0;
             this.currentMoveDuration = this.getRandomMoveDuration();
-            this.baseSpeed = Zombie.WANDER_SPEED;
+            this.baseSpeed = Zombie.WANDER_SPEED * this.speedMult;
             this.moveToTarget(this.wanderTarget, 0, false);
         } else {
             // Continue moving to current wander target
             if (this.wanderTarget) {
-                this.baseSpeed = Zombie.WANDER_SPEED;
+                this.baseSpeed = Zombie.WANDER_SPEED * this.speedMult;
                 this.moveToTarget(this.wanderTarget, 0, false);
             } else {
                 // Fallback to idling if no target
@@ -201,5 +229,9 @@ export class Zombie extends Player {
 
         // Process movement input
         this.processInputs(packet);
+    }
+
+     override isBot(): boolean {
+        return true;
     }
 }
