@@ -215,12 +215,13 @@ export class Game implements GameData {
         this.port = port;
         this.maxTeamSize = maxTeamSize;
         this.gameId = gameId;
+        this.gameMap = "cursedIsland";
 
-        if (maxTeamSize == MODE.CursedIsland) {
-            this.gameMap = "cursedIsland";
-        } else {
-            this.gameMap = this.getRandomMap();
-        }
+        // if (maxTeamSize == MODE.CursedIsland) {
+        //     this.gameMap = "cursedIsland";
+        // } else {
+        //     this.gameMap = this.getRandomMap();
+        // }
 
         this.teamMode = this.maxTeamSize > MODE.Solo;
         this.updateGameData({

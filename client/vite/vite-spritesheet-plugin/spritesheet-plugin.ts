@@ -23,12 +23,12 @@ export type CacheData = {
 };
 
 export const GAME_MAPS: (MAP | "shared")[] = [
-  "normal",
-  "fall",
-  "winter",
-  "desert",
-  "cursedIsland",
-  "shared",
+    "normal",
+    "fall",
+    "winter",
+    "desert",
+    "cursedIsland",
+    "shared",
 ];
 
 

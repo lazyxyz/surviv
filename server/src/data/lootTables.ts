@@ -2322,7 +2322,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "baseball_bat", weight: 2 },
             { item: "gas_can", weight: 0 } // somewhat hack in order to make the gas can obtainable through mini plumpkins
         ]
-    }
+    },
 };
 
 
