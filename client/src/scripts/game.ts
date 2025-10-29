@@ -63,6 +63,8 @@ import { autoPickup, updateChatSendAllVisibility, updateUsersBadge } from "./ui/
 import { teamSocket } from "./ui/play";
 import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 import { CustomTeamMessages } from "@common/typings";
+import { FogOfWar } from "./fogOfWar";
+import { RainEffect } from "./rainEffect";
 
 /* eslint-disable @stylistic/indent */
 
@@ -104,6 +106,7 @@ export class Game {
     readonly bullets = new Set<Bullet>();
     readonly planes = new Set<Plane>();
 
+    rainEffect?: RainEffect;
 
     readonly spinningImages = new Map<SuroiSprite, number>();
     readonly tweens = new Set<Tween<unknown>>();
@@ -155,6 +158,7 @@ export class Game {
     readonly soundManager: SoundManager;
     gasRender: GasRender | undefined;
     readonly particleManager: ParticleManager;
+    readonly fogOfWar: FogOfWar;
 
     readonly pixi: Application;
     readonly inputManager: InputManager;
@@ -180,6 +184,7 @@ export class Game {
         this.map = new Minimap(this);
         this.camera = new Camera(this);
         this.particleManager = new ParticleManager(this);
+        this.fogOfWar = new FogOfWar(this.pixi, this.camera);
 
         this.soundManager = new SoundManager(this);
         this.inputManager.generateBindsConfigScreen();
@@ -269,6 +274,9 @@ export class Game {
             this.map.expanded = GAME_CONSOLE.getBuiltInCVar("cv_map_expanded");
             this.uiManager.ui.gameUi.toggle(GAME_CONSOLE.getBuiltInCVar("cv_draw_hud"));
         }
+        if (this.gameMap === "cursedIsland") {
+            this.fogOfWar.init();
+        }
 
         await loadTextures(
             pixi.renderer,
@@ -296,6 +304,15 @@ export class Game {
 
         this.camera.addObject(this.gasRender.graphics);
         this.map.indicator.setFrame("player_indicator");
+
+        this.rainEffect = new RainEffect(
+            this.pixi.stage,
+            this.pixi.screen.width,
+            this.pixi.screen.height,
+            // 100 -> 500
+            500
+        );
+        this.rainEffect.updatePosition(this.pixi.screen.width / 2, this.pixi.screen.height / 2);
 
         const particleEffects = Maps[this.gameMap].particleEffects;
         if (particleEffects !== undefined) {
@@ -340,6 +357,14 @@ export class Game {
     resize(): void {
         this.map.resize();
         this.camera.resize(this.pixi.screen.width, this.pixi.screen.height, true);
+        if (this.gameMap === "cursedIsland") {
+            this.fogOfWar.resize();
+        }
+
+        if (this.rainEffect) {
+            this.rainEffect.resize(this.pixi.screen.width, this.pixi.screen.height);
+            this.rainEffect.updatePosition(this.pixi.screen.width / 2, this.pixi.screen.height / 2);
+        }
     }
 
     sendChatMessage(message: string, isTeamChat: boolean = true) {
@@ -751,6 +776,12 @@ export class Game {
                 this.gasRender?.graphics.clear();
                 this.gasRender = undefined;
 
+                // Cleanup rain effect
+                if (this.rainEffect) {
+                    this.rainEffect.destroy();
+                    this.rainEffect = undefined;
+                }
+
                 this.map.clear();
 
                 this.playerNames.clear();
@@ -851,6 +882,10 @@ export class Game {
         for (const bullet of this.bullets) bullet.update(delta);
 
         this.particleManager.update(delta);
+
+        if (this.rainEffect) {
+            this.rainEffect.update();
+        }
 
         this.map.update();
         if (this.gasRender) this.gasRender.update(this.gas);

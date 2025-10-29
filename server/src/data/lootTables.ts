@@ -2586,7 +2586,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "8x_scope", weight: 0.2 },
             { item: "15x_scope", weight: 0.0005 }
         ]
-    }
+    },
 };
 
 
