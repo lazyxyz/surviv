@@ -243,4 +243,10 @@ export class Ghost extends Player {
     override isBot(): boolean {
         return true;
     }
+
+    override handleDeathDrops(position: Vector, layer: number): void {
+        this.inventory.cleanInventory();
+    }
+
+    override handleDeathMarker(): void {}
 }

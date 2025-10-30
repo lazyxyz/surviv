@@ -231,7 +231,13 @@ export class Zombie extends Player {
         this.processInputs(packet);
     }
 
-     override isBot(): boolean {
+    override isBot(): boolean {
         return true;
     }
+
+    override handleDeathDrops(position: Vector, layer: number): void {
+        this.inventory.cleanInventory();
+    }
+    
+    override handleDeathMarker(): void {}
 }

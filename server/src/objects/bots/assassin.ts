@@ -473,4 +473,10 @@ export class Assassin extends Player {
             this.moveToTarget(radiusTarget, 0, !this.attacking);
         }
     }
+
+    override handleDeathDrops(position: Vector, layer: number): void {
+        this.inventory.cleanInventory();
+    }
+
+    override handleDeathMarker(): void {}
 }

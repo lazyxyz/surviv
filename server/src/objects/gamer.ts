@@ -94,6 +94,14 @@ export class Gamer extends Player {
         }
     }
 
+    override handleDeathDrops(position: Vector, layer: number): void {
+        if(this.game.gameMode == MODE.CursedIsland) {
+            this.inventory.cleanInventory();
+        } else {
+            super.handleDeathDrops(position, layer);
+        }
+    }
+
     spectate(packet: SpectatePacketData): void {
         if (!this.dead) return;
         const game = this.game;

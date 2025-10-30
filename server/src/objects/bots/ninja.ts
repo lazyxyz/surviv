@@ -335,4 +335,9 @@ export class Ninja extends Player {
         return nearestObject;
     }
 
+    override handleDeathDrops(position: Vector, layer: number): void {
+        this.inventory.cleanInventory();
+    }
+
+    override handleDeathMarker(): void {}
 }

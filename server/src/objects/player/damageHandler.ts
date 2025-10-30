@@ -14,7 +14,7 @@ import { DeathMarker } from "../deathMarker";
 import { Action, ReviveAction } from "../../inventory/action";
 import { BaseGameObject } from "../gameObject";
 import { Player } from "../player";  // Adjust import
-import { Vec } from "@common/utils/vector";
+import { Vec, Vector } from "@common/utils/vector";
 import { ExtendedWearerAttributes, ItemType } from "@common/utils/objectDefinitions";
 import { Obstacles } from "@common/definitions/obstacles";
 import { ThrowableItem } from "../../inventory/throwableItem";
@@ -22,7 +22,7 @@ import { Team } from "../../team";
 import { removeFrom } from "../../utils/misc";
 
 export class DamageHandler {
-    constructor(private player: Player) {}
+    constructor(private player: Player) { }
 
     private _clampDamageAmount(amount: number): number {
         if (this.player.health - amount > this.player.maxHealth) {
@@ -179,6 +179,11 @@ export class DamageHandler {
         }
     }
 
+    handleDeathMarker(layer: number): void {
+        this.player.game.grid.addObject(new DeathMarker(this.player, layer));
+    }
+
+    
     die(params: Omit<DamageParams, "amount">): void {
         if (this.player.health > 0 || this.player.dead) return;
 
@@ -208,7 +213,7 @@ export class DamageHandler {
             if (source !== this.player && (!this.player.game.teamMode || source.teamID !== this.player.teamID)) source.kills++;
         }
 
-            if (
+        if (
             sourceIsPlayer
             // firstly, 'GameObject in KillfeedEventType' returns false;
             // secondly, so does 'undefined in KillfeedEventType';
@@ -351,72 +356,8 @@ export class DamageHandler {
 
         const { position, layer } = this.player;
 
-        this.player.inventory.unlockAllSlots();
-        this.player.inventory.dropWeapons();
-
-        for (const item in this.player.inventory.items.asRecord()) {
-            const count = this.player.inventory.items.getItem(item);
-            const def = Loots.fromString(item);
-
-            if (count > 0) {
-                if (
-                    def.noDrop
-                    || ("ephemeral" in def && def.ephemeral)
-                ) continue;
-
-                if (def.itemType === ItemType.Ammo && count !== Infinity) {
-                    let left = count;
-                    let subtractAmount = 0;
-
-                    do {
-                        left -= subtractAmount = Numeric.min(left, def.maxStackSize);
-                        this.player.game.addLoot(item, position, layer, { count: subtractAmount });
-                    } while (left > 0);
-
-                    continue;
-                }
-
-                this.player.game.addLoot(item, position, layer, { count });
-                this.player.inventory.items.setItem(item, 0);
-            }
-        }
-
-        for (const itemType of ["helmet", "vest", "backpack"] as const) {
-            const item = this.player.inventory[itemType];
-            if (item?.noDrop === false) {
-                this.player.game.addLoot(item, position, layer);
-            }
-        }
-
-        this.player.inventory.helmet = this.player.inventory.vest = undefined;
-
-        const { skin } = this.player.loadout;
-        if (skin.hideFromLoadout && !skin.noDrop) {
-            this.player.game.addLoot(skin, position, layer);
-        }
-
-        for (const perk of this.player.perks) {
-            if (!perk.noDrop) {
-                this.player.game.addLoot(perk, position, layer);
-            }
-        }
-
-        if (this.player.activeDisguise !== undefined) {
-            const disguiseObstacle = this.player.game.map.generateObstacle(this.player.activeDisguise?.idString, this.player.position, { layer: this.player.layer });
-            const disguiseDef = Obstacles.reify(this.player.activeDisguise);
-
-            if (disguiseObstacle !== undefined) {
-                this.player.game.addTimeout(() => {
-                    disguiseObstacle.damage({
-                        amount: disguiseObstacle.health
-                    });
-                }, 10);
-            }
-
-            if (disguiseDef.explosion) {
-                this.player.game.addExplosion(disguiseDef.explosion, this.player.position, this.player, this.player.layer);
-            }
-        }
+        this.player.handleDeathDrops(position, layer);
+        this.player.handleDeathMarker(layer);
 
         this.player.game.grid.addObject(new DeathMarker(this.player, layer));
 

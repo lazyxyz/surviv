@@ -431,20 +431,26 @@ export class Game implements GameData {
         }
 
         // game wave end
-        if (this.gameMode == MODE.CursedIsland && this.gas.isFinal()) {
-            this.gas.reset();
-            setTimeout(() => this.gas.advanceGasStage(), 50);
-
-            this.gameWave++;
-            this.botManager.removeBots();
-
-            for (const player of this.connectedPlayers) {
-                if (player.dead) {
-                    player.damageHandler.resurrect();
-                };
+        if (this.gameMode == MODE.CursedIsland && this._started && !this.over) {
+            if (this.aliveCount == 0) {
+                this.gameLifecycle.endGame();
             }
 
-            setTimeout(() => this.botManager.activateBots(), 5000);
+            if (this.gas.isFinal()) {
+                this.gas.reset();
+                setTimeout(() => this.gas.advanceGasStage(), 50);
+
+                this.gameWave++;
+                this.botManager.removeBots();
+
+                for (const player of this.connectedPlayers) {
+                    if (player.dead) {
+                        player.damageHandler.resurrect();
+                    };
+                }
+
+                setTimeout(() => this.botManager.activateBots(), 5000);
+            }
         }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {

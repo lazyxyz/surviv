@@ -512,6 +512,14 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this.damageHandler.die(params);
     }
 
+    handleDeathMarker(layer: number): void {
+        this.damageHandler.handleDeathMarker(layer);
+    }
+
+    handleDeathDrops(position: Vector, layer: number): void {
+        this.inventoryHelper.handleDeathDrops(position, layer);
+    }
+
     updateAndApplyModifiers(): void {
         this.modifierCalculator.updateAndApplyModifiers();
     }
@@ -665,7 +673,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 : { type: (this.action?.type ?? PlayerActions.None) as Exclude<PlayerActions, PlayerActions.UseItem> };
         }
 
-        if(this.hitbox.radius === 0) {
+        if (this.hitbox.radius === 0) {
             data.noSize = true;
         }
         return data;
