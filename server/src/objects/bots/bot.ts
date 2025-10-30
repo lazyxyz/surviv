@@ -45,7 +45,7 @@ export abstract class Bot extends Player {
      * Base attacks per second (APS) for the bot.
      * Used to calculate attack interval: Math.floor(Config.tps / baseAps).
      */
-    protected baseAps: number = 1;
+    protected baseAps: number = 2;
 
     /**
      * Flag to determine if the bot uses an attack cooldown mechanism.
