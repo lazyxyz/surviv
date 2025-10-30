@@ -525,7 +525,7 @@ export class DamageHandler {
         this.player.health = Math.min(health, this.player.maxHealth);
         this.player.adrenaline = adrenaline;
         this.player.downed = false;  // Ensure not stuck in downed
-        this.player.canDespawn = true;  // Allow despawn again
+        this.player.canDespawn = false;  // Allow despawn again
         this.player.killedBy = undefined;  // Clear killer reference
 
         // Reset movement/attack states (similar to die, but reversing)
@@ -533,6 +533,10 @@ export class DamageHandler {
         this.player.startedAttacking = false;
         this.player.attacking = false;
         this.player.stoppedAttacking = false;
+        this.player.startedSpectating = false;
+        this.player.spectating = undefined;
+        this.player.joined = true;
+        this.player.resurrected = true;
 
         // Re-add to living players and update counts
         this.player.game.livingPlayers.add(this.player);
@@ -547,24 +551,12 @@ export class DamageHandler {
         // Restore inventory slots (re-lock if needed post-death)
         this.player.inventory.lockAllSlots();  // Assuming a method to re-lock; adjust based on your Inventory class
 
-        // Optionally restore dropped loot (complex: would require tracking dropped items per player)
-        if (restoreLoot) {
-            // Placeholder: Emit event for plugins or implement loot tracking
-            // e.g., this.player.game.pluginManager.emit("restore_dropped_loot", { player: this.player });
-            console.log(`Loot restoration for ${this.player.name} not fully implemented.`);
-        }
-
         // Team updates
         this.player._team?.setDirty();
         this.player.dirty.modifiers = true;
         this.player.dirty.items = true;
         this.player.game.fullDirtyObjects.add(this.player);
         this.player.game.spectatablePlayers.push(this.player);  // Re-add to spectatables
-
-        // If this was the kill leader, re-evaluate
-        // if (this.player.kills >= this.player.game.killLeader?.kills) {
-        //     this.player.game.killLeader = this.player;
-        // }
 
         // // Emit post-resurrection event
         // this.player.game.pluginManager.emit("player_did_resurrect", {

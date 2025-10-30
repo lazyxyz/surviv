@@ -5,7 +5,7 @@ import { type EmoteDefinition } from "@common/definitions/emotes";
 import { type GunDefinition } from "@common/definitions/guns";
 import { Loots } from "@common/definitions/loots";
 import { MapPings, type PlayerPing } from "@common/definitions/mapPings";
-import {  PerkIds, type PerkDefinition } from "@common/definitions/perks";
+import { PerkIds, type PerkDefinition } from "@common/definitions/perks";
 import { DEFAULT_SCOPE, type ScopeDefinition } from "@common/definitions/scopes";
 import { type GameOverData } from "@common/packets/gameOverPacket";
 import { type KillFeedPacketData } from "@common/packets/killFeedPacket";
@@ -21,14 +21,14 @@ import { type TranslationKeys } from "../../typings/translations";
 import { type Game } from "../game";
 import { type GameObject } from "../objects/gameObject";
 import { Player } from "../objects/player";
-import {  PIXI_TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/constants";
+import { PIXI_TEAMMATE_COLORS, UI_DEBUG_MODE } from "../utils/constants";
 import { formatDate, html } from "../utils/misc";
 import { SuroiSprite } from "../utils/pixi";
 import { ClientPerkManager } from "./perkManager";
 import type { RewardsData } from "@common/packets/rewardsPacket";
 import { getBadgeImage } from "../inventory/badges";
 import { GAME_CONSOLE } from "../..";
-import type {  ServerChatPacketData } from "@common/packets/chatPacket";
+import type { ServerChatPacketData } from "@common/packets/chatPacket";
 import { Maps } from "@common/definitions/modes";
 
 function safeRound(value: number): number {
@@ -660,9 +660,8 @@ export class UIManager {
             perks
         } = data;
 
-        if (id !== undefined) this.game.activePlayerID = id.id;
-
         if (id) {
+            this.game.activePlayerID = id.id 
             const spectating = id.spectating;
             this.game.spectating = spectating;
 
@@ -672,6 +671,9 @@ export class UIManager {
 
                 this.ui.gameOverOverlay.fadeOut();
                 this.ui.spectatingMsgPlayer.html(playerName + badge);
+            } else {
+                this.ui.gameOverOverlay.hide();
+                this.ui.spectatingMsgPlayer.hide();
             }
             this.ui.spectatingContainer.toggle(spectating && this.ui.spectatingOptions.hasClass("fa-eye-slash"));
             this.ui.spectatingMsg.toggle(spectating);

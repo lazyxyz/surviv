@@ -89,6 +89,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     joined = false;
     disconnected = false;
+    resurrected = false;
 
     _team?: Team;
     get team(): Team | undefined { return this._team; }
