@@ -148,7 +148,7 @@ export enum MODE {
     Solo = 1,
     Squad = 4,
     V50 = 50,
-    CursedIsland = 10,
+    Dungeon = 10,
 }
 
 export enum ObjectCategory {

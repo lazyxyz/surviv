@@ -1,13 +1,15 @@
 export enum BotType{
     Zombie,
     Ninja,
-    Assassin,
     Ghost,
     Butcher,
     Werewolf,
     Boomer
 }
 
-export * from './zombie';
+export * from './boomer';
+export * from './butcher';
+export * from './ghost';
 export * from './ninja';
-export * from './assassin';
+export * from './werewolf';
+export * from './zombie';

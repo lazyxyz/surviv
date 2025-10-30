@@ -164,7 +164,7 @@ export async function newGame(maxTeamSize?: MODE): Promise<number> {
                 startGameId = Config.v50Port;
                 break;
 
-            case MODE.CursedIsland:
+            case MODE.Dungeon:
                 startGameId = Config.cursedIslandPort;
                 break;
         }

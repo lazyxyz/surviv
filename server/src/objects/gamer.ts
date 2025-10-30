@@ -95,7 +95,7 @@ export class Gamer extends Player {
     }
 
     override handleDeathDrops(position: Vector, layer: number): void {
-        if(this.game.gameMode == MODE.CursedIsland) {
+        if(this.game.gameMode == MODE.Dungeon) {
             this.inventory.cleanInventory();
         } else {
             super.handleDeathDrops(position, layer);

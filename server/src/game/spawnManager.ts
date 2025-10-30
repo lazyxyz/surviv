@@ -97,7 +97,7 @@ export class SpawnManager {
         if (this.game.teamMode) {
             const { teamID, autoFill, roomMode } = socket.getUserData();
 
-            if (this.game.gameMode == MODE.CursedIsland) {
+            if (this.game.gameMode == MODE.Dungeon) {
                 const vacantTeams = this.game.teams.valueArray.filter(
                     team => team.players.length < (this.game.gameMode as number)
                         && team.hasLivingPlayers()

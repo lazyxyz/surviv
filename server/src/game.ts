@@ -238,13 +238,12 @@ export class Game implements GameData {
         this.gameId = gameId;
         this.gameMap = "cursedIsland";
 
-        if (maxTeamSize == MODE.CursedIsland) {
+        if (maxTeamSize == MODE.Dungeon) {
             this.rainDrops = 300;
             this.gameMap = "cursedIsland";
         } else {
-            const randMap = this.getRandomMap();
-            this.gameMap = randMap.map;
-            this.rainDrops = randMap.rainDrops;
+            this.gameMap = "cursedIsland";
+            this.rainDrops = 300;
         }
 
         this.teamMode = this.gameMode > MODE.Solo;
@@ -420,7 +419,7 @@ export class Game implements GameData {
             this._started
             && !this.over
             && !Config.startImmediately
-            && this.gameMode != MODE.CursedIsland
+            && this.gameMode != MODE.Dungeon
             && (
                 this.teamMode
                     ? this.aliveCount <= (this.gameMode as number) && new Set([...this.livingPlayers].map(p => p.teamID)).size <= 1
@@ -431,7 +430,7 @@ export class Game implements GameData {
         }
 
         // game wave end
-        if (this.gameMode == MODE.CursedIsland && this._started && !this.over) {
+        if (this.gameMode == MODE.Dungeon && this._started && !this.over) {
             if (this.aliveCount == 0) {
                 this.gameLifecycle.endGame();
             }
