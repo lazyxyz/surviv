@@ -1,7 +1,7 @@
 import { type ReferenceTo } from "@common/utils/objectDefinitions";
 import { type GunDefinition } from "@common/definitions/guns";
 import { type ThrowableDefinition } from "@common/definitions/throwables";
-import { WeaponDefinition } from "@common/definitions/loots";
+import { Loots, WeaponDefinition } from "@common/definitions/loots";
 import { Guns } from "@common/definitions/guns";
 import { Melees } from "@common/definitions/melees";
 import { Throwables } from "@common/definitions/throwables";
@@ -18,6 +18,8 @@ import { ItemType } from "@common/utils/objectDefinitions";
 import { Emotes } from "@common/definitions/emotes";
 import { GameConstants } from "@common/constants";
 import { ThrowableItem } from "../../inventory/throwableItem";
+import { Obstacles } from "@common/definitions/obstacles";
+import { Vector } from "@common/utils/vector";
 
 export class InventoryHelper {
     constructor(private player: Player) { }
@@ -180,4 +182,74 @@ export class InventoryHelper {
         this.player.inventory.addOrReplaceWeapon(2, pickRandomInArray(Melees.definitions));
         this.player.dirty.modifiers = true;
     }
+
+    handleDeathDrops(position: Vector, layer: number): void {
+            this.player.inventory.unlockAllSlots();
+            this.player.inventory.dropWeapons();
+    
+            for (const item in this.player.inventory.items.asRecord()) {
+                const count = this.player.inventory.items.getItem(item);
+                const def = Loots.fromString(item);
+    
+                if (count > 0) {
+                    if (
+                        def.noDrop
+                        || ("ephemeral" in def && def.ephemeral)
+                    ) continue;
+    
+                    if (def.itemType === ItemType.Ammo && count !== Infinity) {
+                        let left = count;
+                        let subtractAmount = 0;
+    
+                        do {
+                            left -= subtractAmount = Numeric.min(left, def.maxStackSize);
+                            this.player.game.addLoot(item, position, layer, { count: subtractAmount });
+                        } while (left > 0);
+    
+                        continue;
+                    }
+    
+                    this.player.game.addLoot(item, position, layer, { count });
+                    this.player.inventory.items.setItem(item, 0);
+                }
+            }
+    
+            for (const itemType of ["helmet", "vest", "backpack"] as const) {
+                const item = this.player.inventory[itemType];
+                if (item?.noDrop === false) {
+                    this.player.game.addLoot(item, position, layer);
+                }
+            }
+    
+            this.player.inventory.helmet = this.player.inventory.vest = undefined;
+    
+            const { skin } = this.player.loadout;
+            if (skin.hideFromLoadout && !skin.noDrop) {
+                this.player.game.addLoot(skin, position, layer);
+            }
+    
+            for (const perk of this.player.perks) {
+                if (!perk.noDrop) {
+                    this.player.game.addLoot(perk, position, layer);
+                }
+            }
+    
+            if (this.player.activeDisguise !== undefined) {
+                const disguiseObstacle = this.player.game.map.generateObstacle(this.player.activeDisguise?.idString, position, { layer });
+                const disguiseDef = Obstacles.reify(this.player.activeDisguise);
+    
+                if (disguiseObstacle !== undefined) {
+                    this.player.game.addTimeout(() => {
+                        disguiseObstacle.damage({
+                            amount: disguiseObstacle.health
+                        });
+                    }, 10);
+                }
+    
+                if (disguiseDef.explosion) {
+                    this.player.game.addExplosion(disguiseDef.explosion, position, this.player, layer);
+                }
+            }
+    
+        }
 }

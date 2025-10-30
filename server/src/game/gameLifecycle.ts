@@ -20,7 +20,6 @@ export class GameLifecycle {
 
     endGame(): void {
         this.game.setGameData({ allowJoin: false, over: true });
-        console.log("endGame!");
 
         for (const player of this.game.livingPlayers) {
             const { movement } = player;
@@ -68,7 +67,7 @@ export class GameLifecycle {
         if (!this.game.allowJoin) return;
 
         parentPort?.postMessage({
-            type: WorkerMessages.CreateNewGame, maxTeamSize: this.game.maxTeamSize
+            type: WorkerMessages.CreateNewGame, maxTeamSize: this.game.gameMode
         });
         Logger.log(`Game ${this.game.port} | Attempting to create new game`);
         this.game.setGameData({ allowJoin: false });

@@ -348,265 +348,268 @@ export class UpdateManager {
      */
     secondUpdate(): void {
         const packet: SMutable<Partial<UpdatePacketDataIn>> = {};
-       
-               const player = this.player.spectating ?? this.player;
-               if (this.player.spectating) {
-                   this.player.layer = this.player.spectating.layer;
-               }
-               const game = this.player.game;
-       
-               const fullObjects = new Set<BaseGameObject>();
-       
-               // Calculate visible objects
-               this.player.ticksSinceLastUpdate++;
-               if (this.player.ticksSinceLastUpdate > 8 || game.updateObjects || this.player.updateObjects) {
-                   this.player.ticksSinceLastUpdate = 0;
-                   this.player.updateObjects = false;
-       
-                   const dim = player.zoom * 2 + 8;
-                   this.player.screenHitbox = RectangleHitbox.fromRect(dim, dim, player.position);
-       
-                   const visCache = new ExtendedMap<GameObject, boolean>();
-                   const newVisibleObjects = game.grid.intersectsHitbox(this.player.screenHitbox);
-       
-                   packet.deletedObjects = [...this.player.visibleObjects]
-                       .filter(
-                           object => (
-                               (
-                                   !newVisibleObjects.has(object)
-                                   || !isVisibleFromLayer(this.player.layer, object, object?.hitbox && [...game.grid.intersectsHitbox(object.hitbox)])
-                               )
-                               && (this.player.visibleObjects.delete(object), true)
-                               && (!object.isObstacle || !object.definition.isStair)
-                           )
-                       )
-                       .map(({ id }) => id);
-       
-                   newVisibleObjects
-                       .forEach(
-                           object => {
-                               if (
-                                   (
-                                       this.player.visibleObjects.has(object)
-                                       || !(
-                                           visCache.getAndGetDefaultIfAbsent(
-                                               object,
-                                               () => isVisibleFromLayer(this.player.layer, object, object?.hitbox && [...game.grid.intersectsHitbox(object.hitbox)])
-                                           )
-                                       )
-                                   )
-                                   && (!object.isObstacle || !object.definition.isStair)
-                               ) return;
-       
-                               this.player.visibleObjects.add(object);
-                               fullObjects.add(object);
-                           }
-                       );
-               }
-       
-               for (const object of game.fullDirtyObjects) {
-                   if (!this.player.visibleObjects.has(object as GameObject)) continue;
-                   fullObjects.add(object);
-               }
-       
-               packet.partialObjectsCache = [...game.partialDirtyObjects].filter(
-                   object => this.player.visibleObjects.has(object as GameObject) && !fullObjects.has(object)
-               );
-       
-               const inventory = player.inventory;
-               let forceInclude = false;
-       
-               if (this.player.startedSpectating && this.player.spectating) {
-                   forceInclude = true;
-       
-                   // this line probably doesn't do anything
-                   // packet.fullObjectsCache.push(this.player.spectating);
-                   this.player.startedSpectating = false;
-               }
-       
-               packet.playerData = {
-                   ...(
-                       player.dirty.maxMinStats || forceInclude
-                           ? {
-                               minMax: {
-                                   maxHealth: player.maxHealth,
-                                   minAdrenaline: player.minAdrenaline,
-                                   maxAdrenaline: player.maxAdrenaline
-                               }
-                           }
-                           : {}
-                   ),
-                   ...(
-                       player.dirty.health || forceInclude
-                           ? { health: player._normalizedHealth }
-                           : {}
-                   ),
-                   ...(
-                       player.dirty.adrenaline || forceInclude
-                           ? { adrenaline: player._normalizedAdrenaline }
-                           : {}
-                   ),
-                   ...(
-                       player.dirty.zoom || forceInclude
-                           ? { zoom: player._scope.zoomLevel }
-                           : {}
-                   ),
-                   ...(
-                       player.dirty.id || forceInclude
-                           ? {
-                               id: {
-                                   id: player.id,
-                                   spectating: this.player.spectating !== undefined
-                               }
-                           }
-                           : {}
-                   ),
-                   ...(
-                       player.dirty.teammates || forceInclude
-                           ? { teammates: player._team?.players ?? [] }
-                           : {}
-                   ),
-                   ...(
-                       player.dirty.weapons || forceInclude
-                           ? {
-                               inventory: {
-                                   activeWeaponIndex: inventory.activeWeaponIndex,
-                                   weapons: inventory.weapons.map(slot => {
-                                       const item = slot;
-       
-                                       return (item && {
-                                           definition: item.definition,
-                                           count: item instanceof GunItem
-                                               ? item.ammo
-                                               : item instanceof CountableInventoryItem
-                                                   ? item.count
-                                                   : undefined,
-                                           stats: item.stats
-                                       }) satisfies ((PlayerData["inventory"] & object)["weapons"] & object)[number];
-                                   })
-                               }
-                           }
-                           : {}
-                   ),
-                   ...(
-                       player.dirty.slotLocks || forceInclude
-                           ? { lockedSlots: player.inventory.lockedSlots }
-                           : {}
-                   ),
-                   ...(
-                       player.dirty.items || forceInclude
-                           ? {
-                               items: {
-                                   items: inventory.items.asRecord(),
-                                   scope: inventory.scope
-                               }
-                           }
-                           : {}
-                   ),
-                   ...(
-                       player.dirty.layer || forceInclude
-                           ? { layer: player.layer }
-                           : {}
-                   ),
-                   ...(
-                       player.dirty.perks || forceInclude
-                           ? { perks: this.player.perks }
-                           : {}
-                   ),
-                   ...(
-                       player.dirty.teamID || forceInclude
-                           ? { teamID: player.teamID }
-                           : {}
-                   )
-               };
-       
-               // Cull bullets
-               /*
-                   oversight: this works by checking if the bullet's trajectory overlaps the player's
-                              viewing port; if it does, the player will eventually see the bullet,
-                              and we should thus send it. however, it overlooks the fact that the
-                              viewing port can move as the bullet travels. this causes a potential
-                              for ghost bullets, but since most projectiles travel their range within
-                              well under a second (usually between 0.3–0.8 seconds), the chance of this
-                              happening is quite low (except with slow-projectile weapons like the radio
-                              and firework launcher).
-       
-                              fixing this is therefore not worth the performance penalty
-               */
-               packet.bullets = game.newBullets.filter(
-                   ({ initialPosition, finalPosition }) => Collision.lineIntersectsRectTest(
-                       initialPosition,
-                       finalPosition,
-                       this.player.screenHitbox.min,
-                       this.player.screenHitbox.max
-                   )
-               );
-       
-               /**
-                * It's in times like these where `inline constexpr`
-                * would be very cool.
-                */
-               const maxDistSquared = 128 ** 2;
-       
-               // Cull explosions
-               packet.explosions = game.explosions.filter(
-                   ({ position }) => this.player.screenHitbox.isPointInside(position)
-                       || Geometry.distanceSquared(position, this.player.position) < maxDistSquared
-               );
-       
-               // Emotes
-               packet.emotes = game.emotes.filter(({ player }) => this.player.visibleObjects.has(player));
-       
-               const gas = game.gas;
-       
-               packet.gas = gas.dirty || this._firstPacket ? { ...gas } : undefined;
-               packet.gasProgress = gas.completionRatioDirty || this._firstPacket ? gas.completionRatio : undefined;
-       
-               const newPlayers = this._firstPacket
-                   ? [...game.grid.pool.getCategory(ObjectCategory.Player)]
-                   : game.newPlayers;
-       
-               // new and deleted players
-               packet.newPlayers = newPlayers.map(({ id, name, hasColor, nameColor, loadout: { badge } }) => ({
-                   id,
-                   name,
-                   hasColor,
-                   nameColor: hasColor ? nameColor : undefined,
-                   badge
-               } as (UpdatePacketDataCommon["newPlayers"] & object)[number]));
-       
-               if (this.player.game.teamMode) {
-                   for (const teammate of newPlayers.filter(({ teamID }) => teamID === player.teamID)) {
-                       fullObjects.add(teammate);
-                   }
-               }
-       
-               packet.fullObjectsCache = [...fullObjects];
-       
-               packet.deletedPlayers = game.deletedPlayers;
-       
-               // alive count
-               packet.aliveCount = game.aliveCountDirty || this._firstPacket ? game.aliveCount : undefined;
-       
-               // killfeed messages
-               const killLeader = game.killLeader;
-       
-               packet.planes = game.planes;
-               packet.mapPings = [...game.mapPings, ...this.player._mapPings];
-               this.player._mapPings.length = 0;
 
-               // serialize and send update packet
-               this.player.sendPacket(UpdatePacket.create(packet as UpdatePacketDataIn));
-       
-               if (this._firstPacket && killLeader) {
-                   this.player.sendPacket(KillFeedPacket.create({
-                       messageType: KillfeedMessageType.KillLeaderAssigned,
-                       victimId: killLeader.id,
-                       attackerKills: killLeader.kills,
-                       hideFromKillfeed: true
-                   }));
-               }
-       
-               this._firstPacket = false;
+        const player = this.player.spectating ?? this.player;
+        if (this.player.spectating) {
+            this.player.layer = this.player.spectating.layer;
+        }
+        const game = this.player.game;
+
+        const fullObjects = new Set<BaseGameObject>();
+
+        // Calculate visible objects
+        this.player.ticksSinceLastUpdate++;
+        if (this.player.ticksSinceLastUpdate > 8 || game.updateObjects || this.player.updateObjects) {
+            this.player.ticksSinceLastUpdate = 0;
+            this.player.updateObjects = false;
+
+            const dim = player.zoom * 2 + 8;
+            this.player.screenHitbox = RectangleHitbox.fromRect(dim, dim, player.position);
+
+            const visCache = new ExtendedMap<GameObject, boolean>();
+            const newVisibleObjects = game.grid.intersectsHitbox(this.player.screenHitbox);
+
+            packet.deletedObjects = [...this.player.visibleObjects]
+                .filter(
+                    object => (
+                        (
+                            !newVisibleObjects.has(object)
+                            || !isVisibleFromLayer(this.player.layer, object, object?.hitbox && [...game.grid.intersectsHitbox(object.hitbox)])
+                        )
+                        && (this.player.visibleObjects.delete(object), true)
+                        && (!object.isObstacle || !object.definition.isStair)
+                    )
+                )
+                .map(({ id }) => id);
+
+            newVisibleObjects
+                .forEach(
+                    object => {
+                        if (
+                            (
+                                this.player.visibleObjects.has(object)
+                                || !(
+                                    visCache.getAndGetDefaultIfAbsent(
+                                        object,
+                                        () => isVisibleFromLayer(this.player.layer, object, object?.hitbox && [...game.grid.intersectsHitbox(object.hitbox)])
+                                    )
+                                )
+                            )
+                            && (!object.isObstacle || !object.definition.isStair)
+                        ) return;
+
+                        this.player.visibleObjects.add(object);
+                        fullObjects.add(object);
+                    }
+                );
+        }
+
+        for (const object of game.fullDirtyObjects) {
+            if (!this.player.visibleObjects.has(object as GameObject)) continue;
+            fullObjects.add(object);
+        }
+
+        packet.partialObjectsCache = [...game.partialDirtyObjects].filter(
+            object => this.player.visibleObjects.has(object as GameObject) && !fullObjects.has(object)
+        );
+
+        const inventory = player.inventory;
+        let forceInclude = false;
+
+        if (this.player.startedSpectating && this.player.spectating) {
+            forceInclude = true;
+
+            // this line probably doesn't do anything
+            // packet.fullObjectsCache.push(this.player.spectating);
+            this.player.startedSpectating = false;
+        } else if (this.player.resurrected) {
+            forceInclude = true;
+            this.player.resurrected = false;
+        }
+
+        packet.playerData = {
+            ...(
+                player.dirty.maxMinStats || forceInclude
+                    ? {
+                        minMax: {
+                            maxHealth: player.maxHealth,
+                            minAdrenaline: player.minAdrenaline,
+                            maxAdrenaline: player.maxAdrenaline
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                player.dirty.health || forceInclude
+                    ? { health: player._normalizedHealth }
+                    : {}
+            ),
+            ...(
+                player.dirty.adrenaline || forceInclude
+                    ? { adrenaline: player._normalizedAdrenaline }
+                    : {}
+            ),
+            ...(
+                player.dirty.zoom || forceInclude
+                    ? { zoom: player._scope.zoomLevel }
+                    : {}
+            ),
+            ...(
+                player.dirty.id || forceInclude
+                    ? {
+                        id: {
+                            id: player.id,
+                            spectating: this.player.spectating !== undefined
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                player.dirty.teammates || forceInclude
+                    ? { teammates: player._team?.players ?? [] }
+                    : {}
+            ),
+            ...(
+                player.dirty.weapons || forceInclude
+                    ? {
+                        inventory: {
+                            activeWeaponIndex: inventory.activeWeaponIndex,
+                            weapons: inventory.weapons.map(slot => {
+                                const item = slot;
+
+                                return (item && {
+                                    definition: item.definition,
+                                    count: item instanceof GunItem
+                                        ? item.ammo
+                                        : item instanceof CountableInventoryItem
+                                            ? item.count
+                                            : undefined,
+                                    stats: item.stats
+                                }) satisfies ((PlayerData["inventory"] & object)["weapons"] & object)[number];
+                            })
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                player.dirty.slotLocks || forceInclude
+                    ? { lockedSlots: player.inventory.lockedSlots }
+                    : {}
+            ),
+            ...(
+                player.dirty.items || forceInclude
+                    ? {
+                        items: {
+                            items: inventory.items.asRecord(),
+                            scope: inventory.scope
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                player.dirty.layer || forceInclude
+                    ? { layer: player.layer }
+                    : {}
+            ),
+            ...(
+                player.dirty.perks || forceInclude
+                    ? { perks: this.player.perks }
+                    : {}
+            ),
+            ...(
+                player.dirty.teamID || forceInclude
+                    ? { teamID: player.teamID }
+                    : {}
+            )
+        };
+
+        // Cull bullets
+        /*
+            oversight: this works by checking if the bullet's trajectory overlaps the player's
+                       viewing port; if it does, the player will eventually see the bullet,
+                       and we should thus send it. however, it overlooks the fact that the
+                       viewing port can move as the bullet travels. this causes a potential
+                       for ghost bullets, but since most projectiles travel their range within
+                       well under a second (usually between 0.3–0.8 seconds), the chance of this
+                       happening is quite low (except with slow-projectile weapons like the radio
+                       and firework launcher).
+ 
+                       fixing this is therefore not worth the performance penalty
+        */
+        packet.bullets = game.newBullets.filter(
+            ({ initialPosition, finalPosition }) => Collision.lineIntersectsRectTest(
+                initialPosition,
+                finalPosition,
+                this.player.screenHitbox.min,
+                this.player.screenHitbox.max
+            )
+        );
+
+        /**
+         * It's in times like these where `inline constexpr`
+         * would be very cool.
+         */
+        const maxDistSquared = 128 ** 2;
+
+        // Cull explosions
+        packet.explosions = game.explosions.filter(
+            ({ position }) => this.player.screenHitbox.isPointInside(position)
+                || Geometry.distanceSquared(position, this.player.position) < maxDistSquared
+        );
+
+        // Emotes
+        packet.emotes = game.emotes.filter(({ player }) => this.player.visibleObjects.has(player));
+
+        const gas = game.gas;
+
+        packet.gas = gas.dirty || this._firstPacket ? { ...gas } : undefined;
+        packet.gasProgress = gas.completionRatioDirty || this._firstPacket ? gas.completionRatio : undefined;
+
+        const newPlayers = this._firstPacket
+            ? [...game.grid.pool.getCategory(ObjectCategory.Player)]
+            : game.newPlayers;
+
+        // new and deleted players
+        packet.newPlayers = newPlayers.map(({ id, name, hasColor, nameColor, loadout: { badge } }) => ({
+            id,
+            name,
+            hasColor,
+            nameColor: hasColor ? nameColor : undefined,
+            badge
+        } as (UpdatePacketDataCommon["newPlayers"] & object)[number]));
+
+        if (this.player.game.teamMode) {
+            for (const teammate of newPlayers.filter(({ teamID }) => teamID === player.teamID)) {
+                fullObjects.add(teammate);
+            }
+        }
+
+        packet.fullObjectsCache = [...fullObjects];
+
+        packet.deletedPlayers = game.deletedPlayers;
+
+        // alive count
+        packet.aliveCount = game.aliveCountDirty || this._firstPacket ? game.aliveCount : undefined;
+
+        // killfeed messages
+        const killLeader = game.killLeader;
+
+        packet.planes = game.planes;
+        packet.mapPings = [...game.mapPings, ...this.player._mapPings];
+        this.player._mapPings.length = 0;
+
+        // serialize and send update packet
+        this.player.sendPacket(UpdatePacket.create(packet as UpdatePacketDataIn));
+
+        if (this._firstPacket && killLeader) {
+            this.player.sendPacket(KillFeedPacket.create({
+                messageType: KillfeedMessageType.KillLeaderAssigned,
+                victimId: killLeader.id,
+                attackerKills: killLeader.kills,
+                hideFromKillfeed: true
+            }));
+        }
+
+        this._firstPacket = false;
     }
 }

@@ -256,7 +256,7 @@ export const GasStages: GasStage[] = [
 //     },
 //     // Round 10 (final)
 //     {
-//         state: GasState.End,
+//         state: GasState.Final,
 //         duration: 0,
 //         oldRadius: 0,
 //         newRadius: 0,

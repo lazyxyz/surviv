@@ -12,7 +12,6 @@ import { PlayerContainer, Gamer } from "../objects/gamer";
 import { Player } from "../objects/player";
 import { cleanUsername, Logger, removeFrom } from "../utils/misc";
 import { type WebSocket } from "uWebSockets.js";
-import { PerkIds, Perks } from "@common/definitions/perks";
 
 export class PlayerManager {
     private game: Game;
@@ -92,7 +91,7 @@ export class PlayerManager {
         player.sendPacket(
             JoinedPacket.create(
                 {
-                    maxTeamSize: this.game.maxTeamSize,
+                    maxTeamSize: this.game.gameMode,
                     teamID: player.teamID ?? 0,
                     emotes: player.loadout.emotes,
                     gameId: this.game.gameId,
@@ -111,7 +110,6 @@ export class PlayerManager {
             !this.game._started
             && this.game.startTimeout === undefined
         ) {
-            console.log("START THE GAME!");
             this.game.startTimeout = this.game.addTimeout(() => {
                 this.game.addTimeout(this.game.postGameStarted.bind(this.game), Config.gameJoinTime * 1000);
             }, 3000);

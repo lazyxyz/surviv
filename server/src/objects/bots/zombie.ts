@@ -9,6 +9,7 @@ import { Gamer } from "../gamer";
 import { Scopes } from "@common/definitions/scopes";
 import { Config } from "../../config";
 import { DamageParams } from "../gameObject";
+import { SAFE_DISTANCE_FROM_PLAYER } from "./common";
 
 /**
  * Zombie Class
@@ -18,7 +19,6 @@ export class Zombie extends Player {
     private static readonly CHASE_DISTANCE = 40; // Distance to chase players
     private static readonly ROTATION_RATE = 0.35; // Maximum rotation speed per update
     private static readonly IDLE_ROTATION_SPEED = 0.1; // Rotation speed when idling
-    private static readonly SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance from players
     private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.5; // Base speed for chasing
     private static readonly WANDER_SPEED = GameConstants.player.baseSpeed * 0.3; // Slower speed for wandering
     private static readonly BASE_APS = 1; // Base attacks per second (1 attack per second)
@@ -121,7 +121,7 @@ export class Zombie extends Player {
                 isAttacking = true;
                 this.attackCooldown = this.attackInterval; // Reset cooldown
             }
-            this.moveToTarget(target.position, Zombie.SAFE_DISTANCE_FROM_PLAYER, isAttacking);
+            this.moveToTarget(target.position, SAFE_DISTANCE_FROM_PLAYER, isAttacking);
             return;
         }
 
@@ -231,7 +231,13 @@ export class Zombie extends Player {
         this.processInputs(packet);
     }
 
-     override isBot(): boolean {
+    override isBot(): boolean {
         return true;
     }
+
+    override handleDeathDrops(position: Vector, layer: number): void {
+        this.inventory.cleanInventory();
+    }
+    
+    override handleDeathMarker(): void {}
 }

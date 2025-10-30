@@ -23,13 +23,11 @@ export class DeathMarker extends BaseGameObject.derive(ObjectCategory.DeathMarke
             this.isNew = false;
             this.setPartialDirty();
         }, 100);
-        
+
         // Remove death maker after 30s
-        if(Config.objectLifetime) {
-            this.game.addTimeout(() => {
-                this.game.removeObject(this);
-            }, Config.objectLifetime);
-        }
+        this.game.addTimeout(() => {
+            this.game.removeObject(this);
+        }, 30000);
     }
 
     override get data(): FullData<ObjectCategory.DeathMarker> {

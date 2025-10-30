@@ -816,6 +816,51 @@ export class Inventory {
             }
         }
     }
+
+
+    cleanInventory(): void {
+        // Unlock all slots
+        this.unlockAllSlots();
+
+        // Clear weapons: Set to fixed-length array of undefined (preserves type/structure)
+        this.dropWeapons();
+        // Reset active/last indices to default (melee slot)
+        this._activeWeaponIndex = 2;
+        this._lastWeaponIndex = 0;
+
+        // Clear throwable cache
+        for (const throwable of this.throwableItemMap.values()) {
+            throwable.destroy();  // Clean up instances if needed
+        }
+        this.throwableItemMap.clear();
+
+        // Clear all stackable items (ammo, healing, scopes, etc.)
+        for (const item in this.items.asRecord()) {
+            this.items.setItem(item, 0);
+        }
+
+        // Clear armor slots
+        this.helmet = undefined;
+        this.vest = undefined;
+
+        // Reset backpack to default
+        this.backpack = Loots.fromString("bag");
+
+        // Reset scope to default
+        this.scope = DEFAULT_SCOPE;
+
+       for (const perk of this.owner.perks) {
+            this.owner.perks.removeItem(perk);
+        }
+        this.owner.dirty.perks = true;
+
+        // Set dirty flags for full sync
+        this.owner.dirty.items = true;
+        this.owner.dirty.weapons = true;
+        this.owner.dirty.slotLocks = true;
+        this.owner.setDirty();
+    }
+
 }
 
 export class ItemCollection<ItemDef extends LootDefinition> {

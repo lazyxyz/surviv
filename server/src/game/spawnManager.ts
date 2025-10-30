@@ -1,4 +1,4 @@
-import { Layer } from "@common/constants";
+import { Layer, MODE } from "@common/constants";
 import { CircleHitbox } from "@common/utils/hitbox";
 import { Geometry } from "@common/utils/math";
 import { MapObjectSpawnMode } from "@common/utils/objectDefinitions";
@@ -97,12 +97,25 @@ export class SpawnManager {
         if (this.game.teamMode) {
             const { teamID, autoFill, roomMode } = socket.getUserData();
 
-            if (teamID && !roomMode) {
+            if (this.game.gameMode == MODE.CursedIsland) {
+                const vacantTeams = this.game.teams.valueArray.filter(
+                    team => team.players.length < (this.game.gameMode as number)
+                        && team.hasLivingPlayers()
+                );
+                
+                if (vacantTeams.length > 0) {
+                    team = vacantTeams[0];
+                } else {
+                    this.game.teams.add(team = new Team(this.game.nextTeamID));
+                }
+
+                console.log("TEAM: ", team.id);
+            } else if (teamID && !roomMode) {
                 team = this.game.teamsMapping.get(teamID);
                 if (
                     !team // team doesn't exist
                     || (team.players.length && !team.hasLivingPlayers()) // team isn't empty but has no living players
-                    || team.players.length >= (this.game.maxTeamSize as number) // team is full
+                    || team.players.length >= (this.game.gameMode as number) // team is full
                 ) {
                     this.game.teams.add(team = new Team(this.game.nextTeamID, autoFill));
                     this.game.teamsMapping.set(teamID, team);
@@ -111,7 +124,7 @@ export class SpawnManager {
                 const vacantTeams = this.game.teams.valueArray.filter(
                     team =>
                         team.autoFill
-                        && team.players.length < (this.game.maxTeamSize as number)
+                        && team.players.length < (this.game.gameMode as number)
                         && team.hasLivingPlayers()
                 );
                 if (vacantTeams.length > 1) {

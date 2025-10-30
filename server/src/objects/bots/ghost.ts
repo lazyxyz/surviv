@@ -13,6 +13,7 @@ import { randomFloat } from "@common/utils/random";
 import { CircleHitbox } from "@common/utils/hitbox";
 import { SyncedParticle } from "../syncedParticle";
 import { adjacentOrEqualLayer } from "@common/utils/layer";
+import { SAFE_DISTANCE_FROM_PLAYER } from "./common";
 
 /**
  * Ghost Class
@@ -23,7 +24,6 @@ export class Ghost extends Player {
     private static readonly CHASE_DISTANCE = 40; // Rage radius to start attacking
     private static readonly ROTATION_RATE = 0.35; // Maximum rotation speed per update
     private static readonly IDLE_ROTATION_SPEED = 0.1; // Rotation speed when idling
-    private static readonly SAFE_DISTANCE_FROM_PLAYER = 5; // Minimum distance from target
     private static readonly BASE_SPEED = GameConstants.player.baseSpeed * 0.5;
     private static readonly BASE_APS = 2; // Base attacks per second (2 attack per second)
     private static readonly HEALTH_MULTIPLIER_PER_LEVEL = 0.05; // 5% health increase per level
@@ -167,7 +167,7 @@ export class Ghost extends Player {
             }
 
             // Move towards target
-            this.moveToTarget(this.target.position, Ghost.SAFE_DISTANCE_FROM_PLAYER, isAttacking);
+            this.moveToTarget(this.target.position, SAFE_DISTANCE_FROM_PLAYER, isAttacking);
         } else {
             // Idle if no target
             this.idle();
@@ -243,4 +243,10 @@ export class Ghost extends Player {
     override isBot(): boolean {
         return true;
     }
+
+    override handleDeathDrops(position: Vector, layer: number): void {
+        this.inventory.cleanInventory();
+    }
+
+    override handleDeathMarker(): void {}
 }

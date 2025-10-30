@@ -80,7 +80,7 @@ export class Game implements GameData {
 
     readonly packets: InputPacket[] = [];
 
-    readonly maxTeamSize: MODE;
+    readonly gameMode: MODE;
 
     readonly teamMode: boolean;
 
@@ -234,7 +234,7 @@ export class Game implements GameData {
 
     constructor(port: number, maxTeamSize: MODE, gameId: string) {
         this.port = port;
-        this.maxTeamSize = maxTeamSize;
+        this.gameMode = maxTeamSize;
         this.gameId = gameId;
         this.gameMap = "cursedIsland";
 
@@ -247,7 +247,7 @@ export class Game implements GameData {
             this.rainDrops = randMap.rainDrops;
         }
 
-        this.teamMode = this.maxTeamSize > MODE.Solo;
+        this.teamMode = this.gameMode > MODE.Solo;
         this.updateGameData({
             aliveCount: 0,
             allowJoin: false,
@@ -420,10 +420,10 @@ export class Game implements GameData {
             this._started
             && !this.over
             && !Config.startImmediately
-            && this.maxTeamSize != MODE.CursedIsland
+            && this.gameMode != MODE.CursedIsland
             && (
                 this.teamMode
-                    ? this.aliveCount <= (this.maxTeamSize as number) && new Set([...this.livingPlayers].map(p => p.teamID)).size <= 1
+                    ? this.aliveCount <= (this.gameMode as number) && new Set([...this.livingPlayers].map(p => p.teamID)).size <= 1
                     : this.aliveCount <= 1
             )
         ) {
@@ -431,13 +431,26 @@ export class Game implements GameData {
         }
 
         // game wave end
-        if (this.maxTeamSize == MODE.CursedIsland && this.gas.isFinal()) {
-            this.gas.reset();
-            setTimeout(() => this.gas.advanceGasStage(), 50);
+        if (this.gameMode == MODE.CursedIsland && this._started && !this.over) {
+            if (this.aliveCount == 0) {
+                this.gameLifecycle.endGame();
+            }
 
-            this.gameWave++;
-            this.botManager.removeBots();
-            setTimeout(() => this.botManager.activateBots(), 5000);
+            if (this.gas.isFinal()) {
+                this.gas.reset();
+                setTimeout(() => this.gas.advanceGasStage(), 50);
+
+                this.gameWave++;
+                this.botManager.removeBots();
+
+                for (const player of this.connectedPlayers) {
+                    if (player.dead) {
+                        player.damageHandler.resurrect();
+                    };
+                }
+
+                setTimeout(() => this.botManager.activateBots(), 5000);
+            }
         }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {
