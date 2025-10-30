@@ -35,6 +35,10 @@ export class Boomer extends Bot {
     }
 
     protected onDie(): void {
+        // Set dead first to prevent self-damage recursion in explosion
+        this.dead = true;
+        this.setDirty();
+
         this.game.totalBots--;
         this.dropLoot();
         const explosion = new Explosion(
@@ -46,8 +50,10 @@ export class Boomer extends Bot {
             undefined,
             this.explosionDamageMod
         );
-        this.dead = true; // no loop call
+        
         explosion.explode();
+
+        this.dead = false;
     }
 
     private dropLoot(): void {
