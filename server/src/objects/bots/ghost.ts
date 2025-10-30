@@ -7,6 +7,7 @@ import { Team } from "../../team";
 import { ActorContainer } from "../player";
 import { BehaviorType, Bot } from "./bot"; // Adjust path as needed
 import { Skins } from "@common/definitions/skins";
+import { calculateLevelStat } from "./common";
 
 /**
  * Ghost Class
@@ -18,8 +19,12 @@ export class Ghost extends Bot {
 
     constructor(game: Game, userData: ActorContainer, position: Vector, behaviorType = BehaviorType.ChaseRandom, layer?: Layer, team?: Team, level: number = 1) {
         super(game, userData, position, behaviorType, Ghost.NAMES, Ghost.SKIN_ID, layer, team);
+
+        const healthMultiplier = calculateLevelStat(1, 0.05, level);
+        this.speedMult = calculateLevelStat(1, 0.1, level);
+        this.apsMult = calculateLevelStat(1, 0.1, level);
+
         this.health *= 0.3;
-        const healthMultiplier = 1 + 0.05 * (level - 1);
         this.health *= healthMultiplier;
         this.baseChaseSpeed = GameConstants.player.baseSpeed * 0.5;
         this.speedMult = 1 + 0.02 * (level - 1);

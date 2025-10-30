@@ -242,16 +242,16 @@ export const GasStages: GasStage[] = [
     // Round 9 
     {
         state: GasState.Waiting,
-        duration: 15,
+        duration: 5,
         oldRadius: 0.035,
-        newRadius: 0,
+        newRadius: 0.035,
         dps: 14
     },
     {
         state: GasState.Advancing,
         duration: 5,
         oldRadius: 0.035,
-        newRadius: 0,
+        newRadius: 0.035,
         dps: 15
     },
     // Round 10 (final)

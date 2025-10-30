@@ -18,7 +18,8 @@ const SAFE_DISTANCE_FROM_PLAYER = 5.5;
 export enum BehaviorType {
     ProximityAttack, // Attack when player is near (like Zombie/Werewolf)
     ChaseRandom,     // Chase a random player directly (like Ghost)
-    HideAndAttack    // Hide in trees/bushes, attack if near (like Ninja)
+    HideAndAttack,    // Hide in trees/bushes, attack if near (like Ninja)
+    LockOnChase, // Combination: Acquire target if player enters chase range, then chase forever until invalid; wander otherwise
 }
 
 /**
@@ -283,25 +284,51 @@ export abstract class Bot extends Player {
     }
 
     protected findTarget(): Gamer | null {
-        if (this.behaviorType === BehaviorType.ChaseRandom) {
-            if (!this.target || this.target.dead || this.target.downed) {
-                this.target = this.pickNewTarget();
-            }
-            return this.target;
-        } else {
-            let minDist = Infinity;
-            let target: Gamer | null = null;
-            const chaseDist = this.getChaseDistance();
-            for (const obj of this.visibleObjects) {
-                if (obj instanceof Gamer && !obj.dead && !obj.downed) {
-                    const dist = Vec.length(Vec.sub(obj.position, this.position));
-                    if (dist < chaseDist && dist < minDist) {
-                        minDist = dist;
-                        target = obj;
+        switch (this.behaviorType) {
+            case BehaviorType.ChaseRandom:
+                if (!this.target || this.target.dead || this.target.downed) {
+                    this.target = this.pickNewTarget();
+                }
+                return this.target;
+            case BehaviorType.ProximityAttack:
+            case BehaviorType.HideAndAttack:
+                let minDist = Infinity;
+                let nearest: Gamer | null = null;
+                const chaseDist = this.getChaseDistance();
+                for (const obj of this.visibleObjects) {
+                    if (obj instanceof Gamer && !obj.dead && !obj.downed) {
+                        const dist = Vec.length(Vec.sub(obj.position, this.position));
+                        if (dist < chaseDist && dist < minDist) {
+                            minDist = dist;
+                            nearest = obj;
+                        }
                     }
                 }
-            }
-            return target;
+                return nearest;
+            case BehaviorType.LockOnChase:
+                if (this.target && !this.target.dead && !this.target.downed) {
+                    return this.target;
+                } else {
+                    this.target = null;
+                    let minDist = Infinity;
+                    let nearest: Gamer | null = null;
+                    const chaseDist = this.getChaseDistance();
+                    for (const obj of this.visibleObjects) {
+                        if (obj instanceof Gamer && !obj.dead && !obj.downed) {
+                            const dist = Vec.length(Vec.sub(obj.position, this.position));
+                            if (dist < chaseDist && dist < minDist) {
+                                minDist = dist;
+                                nearest = obj;
+                            }
+                        }
+                    }
+                    if (nearest) {
+                        this.target = nearest;
+                    }
+                    return this.target;
+                }
+            default:
+                return null;
         }
     }
 
@@ -334,6 +361,7 @@ export abstract class Bot extends Player {
                 this.idle();
                 break;
             case BehaviorType.ProximityAttack:
+            case BehaviorType.LockOnChase:
                 this.wanderOrIdle();
                 break;
             case BehaviorType.HideAndAttack:
@@ -619,4 +647,6 @@ export abstract class Bot extends Player {
     }
 
     override handleDeathMarker(): void { }
+
+
 }

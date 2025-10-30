@@ -190,19 +190,19 @@ export class BotManager {
                 this.createBot(BotType.Zombie, botData, BehaviorType.ProximityAttack, undefined, undefined, 5);
             }
             for (let i = 0; i < ninjaCount; i++) {
-                this.createBot(BotType.Ninja, botData, BehaviorType.HideAndAttack, undefined, undefined, 5);
+                this.createBot(BotType.Ninja, botData, BehaviorType.HideAndAttack, undefined, undefined, 1);
             }
             for (let i = 0; i < werewolfCount; i++) {
-                this.createBot(BotType.Werewolf, botData, BehaviorType.ProximityAttack, undefined, undefined, 10);
+                this.createBot(BotType.Werewolf, botData, BehaviorType.HideAndAttack, undefined, undefined, 5);
             }
             for (let i = 0; i < boomerCount; i++) {
-                this.createBot(BotType.Boomer, botData, BehaviorType.ProximityAttack, undefined, undefined, 10);
+                this.createBot(BotType.Boomer, botData, BehaviorType.ProximityAttack, undefined, undefined, 5);
             }
             for (let i = 0; i < ghostCount; i++) {
-                this.createBot(BotType.Ghost, botData, BehaviorType.ProximityAttack, undefined, undefined, 10);
+                this.createBot(BotType.Ghost, botData, BehaviorType.LockOnChase, undefined, undefined, 5);
             }
             for (let i = 0; i < butcherCount; i++) {
-                this.createBot(BotType.Butcher, botData, BehaviorType.HideAndAttack, undefined, undefined, 10);
+                this.createBot(BotType.Butcher, botData, BehaviorType.LockOnChase, undefined, undefined, 5);
             }
 
             this.game.totalBots = totalBots;

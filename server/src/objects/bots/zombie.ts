@@ -4,6 +4,7 @@ import { Game } from "../../game";
 import { Team } from "../../team";
 import { ActorContainer } from "../player";
 import { BehaviorType, Bot } from "./bot"; // Adjust path as needed
+import { calculateLevelStat } from "./common";
 
 /**
  * Zombie Class
@@ -15,8 +16,12 @@ export class Zombie extends Bot {
 
     constructor(game: Game, userData: ActorContainer, position: Vector, behaviorType = BehaviorType.ProximityAttack, layer?: Layer, team?: Team, level: number = 1) {
         super(game, userData, position, behaviorType, Zombie.NAMES, Zombie.SKIN_ID, layer, team);
+
+        const healthMultiplier = calculateLevelStat(1, 0.05, level);
+        this.speedMult = calculateLevelStat(1, 0.1, level);
+        this.apsMult = calculateLevelStat(1, 0.1, level);
+
         this.health *= 0.5;
-        const healthMultiplier = 1 + 0.05 * (level - 1);
         this.health *= healthMultiplier;
         this.baseChaseSpeed = GameConstants.player.baseSpeed * 0.5;
         this.wanderSpeed = GameConstants.player.baseSpeed * 0.3;

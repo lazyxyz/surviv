@@ -5,6 +5,8 @@ import { Game } from "../../game";
 import { Team } from "../../team";
 import { ActorContainer } from "../player";
 import { BehaviorType, Bot } from "./bot"; // Adjust path as needed
+import { calculateLevelStat } from "./common";
+import { MeleeItem } from "../../inventory/meleeItem";
 
 /**
  * Werewolf Class
@@ -16,20 +18,25 @@ export class Werewolf extends Bot {
 
     constructor(game: Game, userData: ActorContainer, position: Vector, behaviorType = BehaviorType.ProximityAttack, layer?: Layer, team?: Team, level: number = 1) {
         super(game, userData, position, behaviorType, Werewolf.NAMES, Werewolf.SKIN_ID, layer, team);
+
+        const healthMultiplier = calculateLevelStat(1, 0.05, level);
+        this.speedMult = calculateLevelStat(1, 0.1, level);
+        this.apsMult = calculateLevelStat(1, 0.1, level);
+
         this.health *= 0.6;
-        const healthMultiplier = 1 + 0.05 * (level - 1);
         this.health *= healthMultiplier;
         this.maxHealth = this.health;
         this.baseChaseSpeed = GameConstants.player.baseSpeed * 0.8;
         this.wanderSpeed = GameConstants.player.baseSpeed * 0.3;
         this.speedMult = 1 + 0.02 * (level - 1);
-        this.baseAps = 1;
+        this.baseAps = 3;
         this.apsMult = 1 + 0.03 * (level - 1);
         this.enragedMultiplier = 1.5;
         this.enragedHealthThreshold = 0.5;
         const randomCola = Math.random() < 0.3 ? 1 : 0;
         this.inventory.items.setItem('cola', randomCola);
         this.currentMoveDuration = this.getRandomMoveDuration();
+        this.inventory.weapons[2] = new MeleeItem("feral_claws", this);
     }
 
     protected checkEnraged(): boolean {

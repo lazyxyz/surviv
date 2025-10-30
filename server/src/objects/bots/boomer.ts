@@ -7,6 +7,7 @@ import { Vector } from "@common/utils/vector";
 import { Game } from "../../game";
 import { Team } from "../../team";
 import { ActorContainer } from "../player";
+import { calculateLevelStat } from "./common";
 
 /**
  * Boomer Class
@@ -21,8 +22,12 @@ export class Boomer extends Bot {
     constructor(game: Game, userData: ActorContainer, position: Vector, behaviorType = BehaviorType.ChaseRandom,
         layer?: Layer, team?: Team, level: number = 1) {
         super(game, userData, position, behaviorType, Boomer.NAMES, Boomer.SKIN_ID, layer, team);
+
+        const healthMultiplier = calculateLevelStat(1, 0.05, level);
+        this.speedMult = calculateLevelStat(1, 0.1, level);
+        this.apsMult = calculateLevelStat(1, 0.1, level);
+
         this.health *= 0.8;
-        const healthMultiplier = 1 + 0.1 * (level - 1);
         this.health *= healthMultiplier;
         this.baseChaseSpeed = GameConstants.player.baseSpeed * 0.5;
         this.speedMult = 1 + 0.01 * (level - 1);
@@ -50,7 +55,7 @@ export class Boomer extends Bot {
             undefined,
             this.explosionDamageMod
         );
-        
+
         explosion.explode();
 
         this.dead = false;
