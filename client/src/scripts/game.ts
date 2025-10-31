@@ -194,15 +194,17 @@ export class Game {
         const url = (() => {
             // List of available music files
             const musicFiles = [
-                "menu_music1.mp3"
+                // "menu_music1.mp3",
+                "halloween_theme.mp3"
             ];
             const randomFile = musicFiles[Math.floor(Math.random() * musicFiles.length)];
             return `./audio/music/${randomFile}`;
         })();
 
 
-        this.music = sound.add("menu_music", {
+        this.music = sound.add("halloween_theme", {
             url: url,
+            loop: true,
             singleInstance: true,
             preload: true,
             autoPlay: true,
