@@ -1889,7 +1889,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "equipment", weight: 0.6 },
             { table: "scopes", weight: 0.3 },
         ],
-        regular_crate: [
+        webbed_crate: [
             { table: "guns", weight: 0.625 },
             { table: "healing_items", weight: 1 },
             { table: "equipment", weight: 0.6 },
@@ -1905,7 +1905,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "scopes", weight: 0.3 },
             { table: "throwables", weight: 0.3 }
         ],
-        ceramic_jar: [
+        cauldron: [
             { table: "guns", weight: 0.625 },
             { table: "healing_items", weight: 1 },
             { table: "equipment", weight: 0.6 },
@@ -1957,15 +1957,24 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "scopes", weight: 0.3 }
             ]
         },
-        bull_skeleton: {
-            min: 2,
-            max: 3,
+        small_tombstone: {
+            min: 1,
+            max: 1,
             loot: [
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
-                { table: "ammo", weight: 1.45 },
-                { table: "guns", weight: 0.45 },
-                { table: "scopes", weight: 0.3 }
+                { table: "ammo", weight: 1 },
+                { table: "guns", weight: 0.1 },
+            ]
+        },
+        modern_tombstone: {
+            min: 1,
+            max: 2,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1 },
+                { table: "guns", weight: 0.1 },
             ]
         },
         airdrop_crate: [
@@ -2165,6 +2174,19 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "scopes", weight: 1 },
                 { table: "healing_items", weight: 1 }
             ]
+        ],
+        wood_coffin: {
+            min: 3,
+            max: 5,
+            loot: [
+                { table: "special_guns", weight: 1 },
+                { table: "special_equipment", weight: 0.65 },
+                { table: "special_healing_items", weight: 0.15 },
+                { table: "special_scopes", weight: 0.3 }
+            ]
+        },
+        titanium_coffin: [
+            { table: "gold_airdrop_guns", weight: 1 }
         ],
         gun_locker: {
             min: 1,
@@ -2385,21 +2407,6 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "15x_scope", weight: 0.005 }
         ],
         gold_airdrop_guns: [
-            // 50% chance for one of these
-            { item: "g19", weight: 10 },
-            { item: "cz75a", weight: 10 },
-            { item: "m1895", weight: 10 },
-            { item: "deagle", weight: 10 },
-            { item: "rsh12", weight: 10 },
-            // 30% chance for one of these
-            { item: "m3k", weight: 3.75 },
-            { item: "model_37", weight: 3.75 },
-            { item: "hp18", weight: 3.75 },
-            { item: "flues", weight: 3.75 },
-            { item: "vepr12", weight: 3.75 },
-            { item: "dt11", weight: 3.75 },
-            { item: "spas12", weight: 3.75 },
-            // 10% chance for one of these
             { item: "ak47", weight: 0.833 },
             { item: "mcx_spear", weight: 0.833 },
             { item: "m16a2", weight: 0.833 },
@@ -2412,34 +2419,17 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "famas", weight: 0.833 },
             { item: "mk18", weight: 0.833 },
             { item: "rgs", weight: 0.833 },
-            // 3% chance for one of these
+            
+            
             { item: "lewis_gun", weight: 0.5 },
             { item: "stoner_63", weight: 0.5 },
             { item: "mg5", weight: 0.5 },
             { item: "negev", weight: 0.5 },
             { item: "mg36", weight: 0.5 },
             { item: "rpk", weight: 0.5 },
-            // 5% chance for one of these
-            { item: "mosin_nagant", weight: 0.357 },
-            { item: "tango_51", weight: 0.357 },
-            { item: "cz600", weight: 0.357 },
-            { item: "l115a1", weight: 0.357 },
-            { item: "vks", weight: 0.357 },
-            { item: "vss", weight: 0.357 },
-            { item: "sr25", weight: 0.357 },
-            { item: "mini14", weight: 0.357 },
-            { item: "m1_garand", weight: 0.357 },
-            { item: "sks", weight: 0.357 },
-            { item: "blr", weight: 0.357 },
-            { item: "barrett_m82", weight: 0.357 },
-            { item: "mk12", weight: 0.357 },
-            { item: "model_89", weight: 0.357 },
-            // 1% chance for this
+           
+            { item: "barrett_m82", weight: 1 },
             { item: "m134_minigun", weight: 1 },
-            { item: "m590m", weight: 1 },
-            // 0.01% chance for one of these
-            { item: "radio", weight: 0.005 },
-            { item: "usas12", weight: 0.005 }
         ],
         viking_chest_guns: [
             // 50% chance for one of these

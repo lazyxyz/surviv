@@ -1,6 +1,6 @@
 import { GameConstants, Layers, TentTints, ZIndexes } from "../constants";
 import { type Variation } from "../typings";
-import { CircleHitbox, GroupHitbox, RectangleHitbox, type Hitbox } from "../utils/hitbox";
+import { CircleHitbox, GroupHitbox, PolygonHitbox, RectangleHitbox, type Hitbox } from "../utils/hitbox";
 import { type DeepPartial, type GetEnumMemberName, type Mutable } from "../utils/misc";
 import { MapObjectSpawnMode, ObjectDefinitions, ObstacleSpecialRoles, type ObjectDefinition, type RawDefinition, type ReferenceOrRandom, type ReferenceTo } from "../utils/objectDefinitions";
 import { Vec, type Vector } from "../utils/vector";
@@ -942,42 +942,62 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     destroy: 0.9
                 },
                 hideOnMap: true,
+                hasLoot: true,
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
                 hitbox: RectangleHitbox.fromRect(11.2, 16),
                 rotationMode: RotationMode.Limited,
-                allowFlyover: FlyoverPref.Always
+                allowFlyover: FlyoverPref.Always,
+                frames: {
+                    particle: "crate_particle",
+                    residue: "regular_crate_residue"
+                }
             },
             {
                 idString: "titanium_coffin",
                 name: "Titanium Coffin",
-                material: "metal_heavy",
-                health: 100,
+                material: "iron",
+                health: 500,
                 scale: {
                     spawnMin: 1,
                     spawnMax: 1,
                     destroy: 0.9
                 },
+                impenetrable: true,
+                reflectBullets: true,
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
                 hideOnMap: true,
-                hitbox: RectangleHitbox.fromRect(11.2, 16),
+                hasLoot: true,
+                hitbox: RectangleHitbox.fromRect(9, 16),
                 rotationMode: RotationMode.Limited,
-                allowFlyover: FlyoverPref.Always
+                allowFlyover: FlyoverPref.Never,
+                frames: {
+                    particle: "metal_particle",
+                    residue: "stove_residue"
+                }
             },
+
             tree([{
                 name: "Cursed Tree",
-                health: 240,
+                health: 180,
                 scaleProps: {
-                    spawnMin: 0.9,
-                    spawnMax: 1.1,
-                    destroy: 0.75
+                    spawnMin: 0.6,
+                    spawnMax: 0.9,
+                    destroy: 0.55
                 },
-                hitbox: new CircleHitbox(3.5),
                 spawnHitbox: new CircleHitbox(8.5),
                 rotationMode: RotationMode.Full,
-                variations: 1,
-                allowFlyOver: FlyoverPref.Never
+                hitbox: new CircleHitbox(3.5),
+                zIndex: ZIndexes.ObstaclesLayer3,
+                variations: 2,
+                frames: {
+                    particle: "dormant_oak_tree_particle",
+                    residue: "dormant_oak_tree_residue"
+                }
             }]),
+
             {
-                idString: "skeleton",
-                name: "Skeleton",
+                idString: "skeleton_bone",
+                name: "Skeleton Bone",
                 material: "stone",
                 health: 100,
                 scale: {
@@ -1890,6 +1910,18 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     particle: "window_particle"
                 },
                 hideOnMap: true
+            },
+            {
+                [inheritFrom]: "regular_crate",
+                idString: "webbed_crate",
+                name: "Webbed Crate",
+                health: 50,
+                variations: 1,
+                frames: {
+                    residue: "regular_crate_residue",
+                    particle: "crate_particle"
+                },
+                hideOnMap: false
             },
             ...withWinterVariation([
                 {

@@ -614,13 +614,14 @@ const maps = {
             { name: "Shadow Sands", position: Vec.create(0.5, 0.65) }
         ]
     },
+
     cursedIsland: {
         width: 1924,
         height: 1924,
         oceanSize: 64,
         beachSize: 16,
         oases: {
-            minAmount: 1,
+            minAmount: 2,
             maxAmount: 3,
             minRadius: 40,
             maxRadius: 80,
@@ -637,8 +638,8 @@ const maps = {
             maxWideAmount: 1
         },
         trails: {
-            minAmount: 7,
-            maxAmount: 7,
+            minAmount: 2,
+            maxAmount: 5,
             wideChance: 0.2,
             minWidth: 2,
             maxWidth: 4,
@@ -685,22 +686,32 @@ const maps = {
             doum_palm_tree: 100,
             quiver_tree: 60,
             wood_barrel: 100,
-            ceramic_jar: 60,
-            barrel_cactus: 100,
+            // ceramic_jar: 60,
+            cauldron: 60,
+            // barrel_cactus: 100,
+            jack_o_lantern: 120,
             century_plant: 100,
             ghost_plant: 80,
             pencil_cactus: 80,
-            bull_skeleton: 60,
-            dinosaur_skeleton: 15,
-            mammoth_skeleton: 5,
-            dry_tree: 100,
+            // bull_skeleton: 60,
+            // dinosaur_skeleton: 15,
+            // mammoth_skeleton: 5,
+            small_tombstone: 50,
+            modern_tombstone: 20,
+            skeleton_bone: 10,
+            // dry_tree: 100,
+            cursed_tree: 150,
+
             stump: 40,
             hatchet_stump: 3,
-            regular_crate: 100,
+            // regular_crate: 100,
+            webbed_crate: 100,
+            // halloween_crate: 100,
+
             grenade_crate: 50,
             rock: 220,
             clearing_boulder: 15,
-            river_chest: 7,
+            river_chest: 3,
             river_rock: 20,
             lily_pad: 15,
             barrel: 90,
@@ -710,8 +721,11 @@ const maps = {
             gold_rock: 1,
             loot_tree: 4,
             loot_barrel: 1,
-            flint_stone: 1,
-            pebble: 110
+            pebble: 110,
+
+            flint_stone: 3,
+            wood_coffin: 10,
+            titanium_coffin: 5,
         },
         loots: {
             ground_loot: 40
