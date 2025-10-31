@@ -922,6 +922,76 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 frames: { particle: "tombstone_particle", residue: "tombstone_residue" }
 
             },
+            {
+                idString: "halloween_crate",
+                name: "Halloween Crate",
+                rotationMode: RotationMode.Binary,
+                frames: {
+                    particle: "crate_particle",
+                    residue: "regular_crate_residue"
+                }
+            },
+            {
+                idString: "wood_coffin",
+                name: "Wood Coffin",
+                material: "wood",
+                health: 100,
+                scale: {
+                    spawnMin: 1,
+                    spawnMax: 1,
+                    destroy: 0.9
+                },
+                hideOnMap: true,
+                hitbox: RectangleHitbox.fromRect(11.2, 16),
+                rotationMode: RotationMode.Limited,
+                allowFlyover: FlyoverPref.Always
+            },
+            {
+                idString: "titanium_coffin",
+                name: "Titanium Coffin",
+                material: "metal_heavy",
+                health: 100,
+                scale: {
+                    spawnMin: 1,
+                    spawnMax: 1,
+                    destroy: 0.9
+                },
+                hideOnMap: true,
+                hitbox: RectangleHitbox.fromRect(11.2, 16),
+                rotationMode: RotationMode.Limited,
+                allowFlyover: FlyoverPref.Always
+            },
+            tree([{
+                name: "Cursed Tree",
+                health: 240,
+                scaleProps: {
+                    spawnMin: 0.9,
+                    spawnMax: 1.1,
+                    destroy: 0.75
+                },
+                hitbox: new CircleHitbox(3.5),
+                spawnHitbox: new CircleHitbox(8.5),
+                rotationMode: RotationMode.Full,
+                variations: 1,
+                allowFlyOver: FlyoverPref.Never
+            }]),
+            {
+                idString: "skeleton",
+                name: "Skeleton",
+                material: "stone",
+                health: 100,
+                scale: {
+                    spawnMin: 1,
+                    spawnMax: 1,
+                    destroy: 0.5
+                },
+                hitbox: new CircleHitbox(4),
+                spawnHitbox: new CircleHitbox(4.5),
+                rotationMode: RotationMode.Full,
+                frames: { particle: "bull_skeleton_particle", residue: "bull_skeleton_residue" }
+            },
+
+
             // desert
             {
                 idString: "bull_skeleton",
