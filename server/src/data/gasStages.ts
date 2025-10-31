@@ -22,7 +22,7 @@ export interface GasStage {
 //     // Round 1
 //     {
 //         state: GasState.Waiting,
-//         duration: 60,
+//         duration: 5,
 //         oldRadius: 0.762,
 //         newRadius: 0.68,
 //         dps: 0,
@@ -93,8 +93,8 @@ export interface GasStage {
 //         state: GasState.Advancing,
 //         duration: 5,
 //         oldRadius: 0.2,
-//         newRadius: 0.07,
-//         dps: 0
+//         newRadius: 0,
+//         dps: 2
 //     },
 //     // End
 //     {
@@ -102,7 +102,7 @@ export interface GasStage {
 //         duration: 0,
 //         oldRadius: 0,
 //         newRadius: 0,
-//         dps: 0
+//         dps: 2
 //     },
 // ];
 
@@ -244,14 +244,14 @@ export const GasStages: GasStage[] = [
         state: GasState.Waiting,
         duration: 5,
         oldRadius: 0.035,
-        newRadius: 0.035,
+        newRadius: 0,
         dps: 14
     },
     {
         state: GasState.Advancing,
         duration: 5,
         oldRadius: 0.035,
-        newRadius: 0.035,
+        newRadius: 0,
         dps: 15
     },
     // Round 10 (final)

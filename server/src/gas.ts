@@ -64,7 +64,7 @@ export class Gas {
             this._lastDamageTimestamp = this.game.now;
             this._doDamage = true;
 
-            if (this.state === GasState.Advancing || this.state === GasState.Final) {
+            if (this.state === GasState.Advancing) {
                 this.currentPosition = Vec.lerp(this.oldPosition, this.newPosition, this.completionRatio);
                 this.currentRadius = Numeric.lerp(this.oldRadius, this.newRadius, this.completionRatio);
             }
@@ -130,7 +130,7 @@ export class Gas {
 
 
 
-        if (currentStage.state === GasState.Waiting) {
+        if (currentStage.state === GasState.Waiting || currentStage.state === GasState.Final) {
             this.oldPosition = Vec.clone(this.newPosition);
             if (currentStage.newRadius !== 0) {
                 const { width, height } = this.game.map;
