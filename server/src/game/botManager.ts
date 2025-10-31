@@ -149,26 +149,26 @@ export class BotManager {
             console.log(`Wave ${wave} Bots activated: ${spawned} fixed total (level ${level}), types: ${availableTypes.join(', ')} (milestone: ${isMilestone})`);
         } else {
             // Generate random total bots between 20 and 30
-            const totalBots = Math.floor(Math.random() * (30 - 20 + 1)) + 20;
+            const totalBots = 30;
 
             // Calculate counts based on percentages (proportional distribution with flooring and remainder assignment)
-            let zombieCount = Math.floor(totalBots * 0.40);
-            let ninjaCount = Math.floor(totalBots * 0.20);
-            let werewolfCount = Math.floor(totalBots * 0.20);
-            let boomerCount = Math.floor(totalBots * 0.10);
-            let ghostCount = Math.floor(totalBots * 0.05);
-            let butcherCount = Math.floor(totalBots * 0.05);
+            let zombieCount = Math.floor(totalBots * 0.2);
+            let ninjaCount = Math.floor(totalBots * 0.2);
+            let werewolfCount = Math.floor(totalBots * 0.2);
+            let ghostCount = Math.floor(totalBots * 0.2);
+            let boomerCount = Math.floor(totalBots * 0.1);
+            let butcherCount = Math.floor(totalBots * 0.1);
 
             // Distribute any remainder to ensure exact total
             const currentTotal = zombieCount + ninjaCount + werewolfCount + boomerCount + ghostCount + butcherCount;
             const remainder = totalBots - currentTotal;
             const types = [
-                { count: zombieCount, weight: 0.40 },
-                { count: ninjaCount, weight: 0.20 },
-                { count: werewolfCount, weight: 0.20 },
-                { count: boomerCount, weight: 0.10 },
-                { count: ghostCount, weight: 0.05 },
-                { count: butcherCount, weight: 0.05 }
+                { count: zombieCount, weight: 0.2 },
+                { count: ninjaCount, weight: 0.2 },
+                { count: werewolfCount, weight: 0.2 },
+                { count: ghostCount, weight: 0.1 },
+                { count: boomerCount, weight: 0.1 },
+                { count: butcherCount, weight: 0.1 }
             ];
             for (let i = 0; i < remainder; i++) {
                 // Add to the type with highest weight proportionally
