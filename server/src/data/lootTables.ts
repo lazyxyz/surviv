@@ -1897,7 +1897,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "scopes", weight: 0.3 },
             { table: "throwables", weight: 0.3 }
         ],
-        wood_barrel: [
+        haunted_tree: [
             { table: "guns", weight: 0.625 },
             { table: "healing_items", weight: 1 },
             { table: "equipment", weight: 0.6 },
@@ -2419,15 +2419,15 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "famas", weight: 0.833 },
             { item: "mk18", weight: 0.833 },
             { item: "rgs", weight: 0.833 },
-            
-            
+
+
             { item: "lewis_gun", weight: 0.5 },
             { item: "stoner_63", weight: 0.5 },
             { item: "mg5", weight: 0.5 },
             { item: "negev", weight: 0.5 },
             { item: "mg36", weight: 0.5 },
             { item: "rpk", weight: 0.5 },
-           
+
             { item: "barrett_m82", weight: 1 },
             { item: "m134_minigun", weight: 1 },
         ],

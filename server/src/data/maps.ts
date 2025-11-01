@@ -679,18 +679,25 @@ const maps = {
             outhouse: 10
         },
         obstacles: {
-            palm_tree: 100,
-            date_palm_tree: 150,
-            small_palm_tree: 50,
-            child_palm_tree: 60,
-            doum_palm_tree: 100,
-            quiver_tree: 60,
-            wood_barrel: 100,
+            // palm_tree: 100,
+            // date_palm_tree: 150,
+            // small_palm_tree: 50,
+            // child_palm_tree: 60,
+            // doum_palm_tree: 100,
+            // quiver_tree: 60,
+            spooky_oak_tree: 300,
+
+            // wood_barrel: 100,
+            haunted_tree: 50,
+
             // ceramic_jar: 60,
             cauldron: 60,
             // barrel_cactus: 100,
             jack_o_lantern: 120,
-            century_plant: 100,
+            
+            // century_plant: 100,
+            spooky_bush: 120,
+
             ghost_plant: 80,
             pencil_cactus: 80,
             // bull_skeleton: 60,
