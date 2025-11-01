@@ -16,7 +16,7 @@ import { isArray } from "@common/utils/misc";
 import { ItemType, NullString, type ObjectDefinition, type ObjectDefinitions, type ReferenceOrRandom, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { random, weightedRandom } from "@common/utils/random";
 import { Maps } from "./maps";
-import { Mode } from "@common/definitions/modes";
+import { MAP } from "@common/definitions/modes";
 
 export type WeightedItem =
     (
@@ -50,8 +50,8 @@ export class LootItem {
     ) { }
 }
 
-export function getLootFromTable(gameMode: Mode, tableID: string): LootItem[] {
-    const lootTable = resolveTable(gameMode, tableID);
+export function getLootFromTable(gameMap: MAP, tableID: string): LootItem[] {
+    const lootTable = resolveTable(gameMap, tableID);
     if (lootTable === undefined) {
         throw new ReferenceError(`Unknown loot table: ${tableID}`);
     }
@@ -70,27 +70,27 @@ export function getLootFromTable(gameMode: Mode, tableID: string): LootItem[] {
 
     return (
         isSimple && isArray(loot[0])
-            ? (loot as readonly WeightedItem[][]).map(innerTable => getLoot(gameMode, innerTable))
+            ? (loot as readonly WeightedItem[][]).map(innerTable => getLoot(gameMap, innerTable))
             : min === 1 && max === 1
-                ? getLoot(gameMode, loot as WeightedItem[], noDuplicates)
+                ? getLoot(gameMap, loot as WeightedItem[], noDuplicates)
                 : Array.from(
                     { length: random(min, max) },
-                    () => getLoot(gameMode, loot as WeightedItem[], noDuplicates)
+                    () => getLoot(gameMap, loot as WeightedItem[], noDuplicates)
                 )
     ).flat();
 }
 
-export function resolveTable(gameMode: Mode, tableID: string): LootTable {
-    return LootTables[gameMode]?.[tableID] ?? LootTables.normal[tableID];
+export function resolveTable(gameMap: MAP, tableID: string): LootTable {
+    return LootTables[gameMap]?.[tableID] ?? LootTables.normal[tableID];
 }
 
-function getLoot(gameMode: Mode, items: WeightedItem[], noDuplicates?: boolean): LootItem[] {
+function getLoot(gameMap: MAP, items: WeightedItem[], noDuplicates?: boolean): LootItem[] {
     const selection = items.length === 1
         ? items[0]
         : weightedRandom(items, items.map(({ weight }) => weight));
 
     if ("table" in selection) {
-        return getLootFromTable(gameMode, selection.table);
+        return getLootFromTable(gameMap, selection.table);
     }
 
     const item = selection.item;
@@ -1434,7 +1434,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ]
     },
 
-    desert: 
+    desert:
     {
         ground_loot: [
             { table: "healing_items", weight: 1 },
@@ -1877,7 +1877,706 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "baseball_bat", weight: 2 },
             { item: "gas_can", weight: 0 } // somewhat hack in order to make the gas can obtainable through mini plumpkins
         ]
-    }
+    },
+
+    cursedIsland:
+    {
+        ground_loot: [
+            { table: "healing_items", weight: 1 },
+            { table: "ammo", weight: 1.5 },
+            // { table: "guns", weight: 0.5 },
+            { table: "guns", weight: 5 },
+            { table: "equipment", weight: 0.6 },
+            { table: "scopes", weight: 0.3 },
+        ],
+        webbed_crate: [
+            { table: "guns", weight: 0.625 },
+            { table: "healing_items", weight: 1 },
+            { table: "equipment", weight: 0.6 },
+            { table: "ammo", weight: 1.125 },
+            { table: "scopes", weight: 0.3 },
+            { table: "throwables", weight: 0.3 }
+        ],
+        haunted_tree: [
+            { table: "guns", weight: 0.625 },
+            { table: "healing_items", weight: 1 },
+            { table: "equipment", weight: 0.6 },
+            { table: "ammo", weight: 1.125 },
+            { table: "scopes", weight: 0.3 },
+            { table: "throwables", weight: 0.3 }
+        ],
+        cauldron: [
+            { table: "guns", weight: 0.625 },
+            { table: "healing_items", weight: 1 },
+            { table: "equipment", weight: 0.6 },
+            { table: "ammo", weight: 1.125 },
+            { table: "scopes", weight: 0.3 },
+            { table: "throwables", weight: 0.3 }
+        ],
+        barrel_cactus: {
+            min: 2,
+            max: 3,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1.45 },
+                { table: "guns", weight: 0.45 },
+                { table: "scopes", weight: 0.3 }
+            ]
+        },
+        century_plant: {
+            min: 2,
+            max: 3,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1.45 },
+                { table: "guns", weight: 0.45 },
+                { table: "scopes", weight: 0.3 }
+            ]
+        },
+        pencil_cactus: {
+            min: 2,
+            max: 3,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1.45 },
+                { table: "guns", weight: 0.45 },
+                { table: "scopes", weight: 0.3 }
+            ]
+        },
+        ghost_plan: {
+            min: 2,
+            max: 3,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1.45 },
+                { table: "guns", weight: 0.45 },
+                { table: "scopes", weight: 0.3 }
+            ]
+        },
+        small_tombstone: {
+            min: 1,
+            max: 1,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1 },
+                { table: "guns", weight: 0.1 },
+            ]
+        },
+        modern_tombstone: {
+            min: 1,
+            max: 2,
+            loot: [
+                { table: "equipment", weight: 1 },
+                { table: "healing_items", weight: 1 },
+                { table: "ammo", weight: 1 },
+                { table: "guns", weight: 0.1 },
+            ]
+        },
+        airdrop_crate: [
+            [{ table: "airdrop_equipment", weight: 1 }],
+            [{ table: "airdrop_scopes", weight: 1 }],
+            [{ table: "airdrop_healing_items", weight: 1 }],
+            [{ table: "airdrop_skins", weight: 1 }],
+            [{ table: "ammo", weight: 1 }],
+            [{ table: "airdrop_guns", weight: 1 }],
+            [
+                { table: "fall_perks", weight: 0.5 },
+                { item: NullString, weight: 1 }
+            ],
+            [
+                { item: "frag_grenade", count: 3, weight: 1 },
+                { item: NullString, weight: 2 }
+            ]
+        ],
+        gold_airdrop_crate: [
+            [{ table: "airdrop_equipment", weight: 1 }],
+            [{ table: "airdrop_scopes", weight: 1 }],
+            [{ table: "airdrop_healing_items", weight: 1 }],
+            [{ table: "airdrop_skins", weight: 1 }],
+            [{ table: "ammo", weight: 1 }],
+            [{ table: "gold_airdrop_guns", weight: 1 }],
+            [{ table: "fall_perks", weight: 1 }],
+            [{ item: "frag_grenade", count: 3, weight: 1 }]
+        ],
+        briefcase: [
+            { item: "g19", weight: 10 },
+            { item: "cz75a", weight: 10 },
+            { item: "m1895", weight: 10 },
+            { item: "deagle", weight: 10 },
+            { item: "rsh12", weight: 10 },
+            { item: "m3k", weight: 3.75 },
+            { item: "model_37", weight: 3.75 },
+            { item: "hp18", weight: 3.75 },
+            { item: "flues", weight: 3.75 },
+            { item: "vepr12", weight: 3.75 },
+            { item: "dt11", weight: 3.75 },
+            { item: "m590m", weight: 3.75 },
+            { item: "spas12", weight: 3.75 },
+            { item: "ak47", weight: 0.833 },
+            { item: "mcx_spear", weight: 0.833 },
+            { item: "m16a2", weight: 0.833 },
+            { item: "aug", weight: 0.833 },
+            { item: "arx160", weight: 0.833 },
+            { item: "acr", weight: 0.833 },
+            { item: "m4a1", weight: 0.833 },
+            { item: "scar_l", weight: 0.833 },
+            { item: "groza", weight: 0.833 },
+            { item: "famas", weight: 0.833 },
+            { item: "mk18", weight: 0.833 },
+            { item: "rgs", weight: 0.833 },
+            { item: "lewis_gun", weight: 0.5 },
+            { item: "stoner_63", weight: 0.5 },
+            { item: "mg5", weight: 0.5 },
+            { item: "negev", weight: 0.5 },
+            { item: "mg36", weight: 0.5 },
+            { item: "rpk", weight: 0.5 },
+            { item: "mosin_nagant", weight: 0.357 },
+            { item: "tango_51", weight: 0.357 },
+            { item: "cz600", weight: 0.357 },
+            { item: "l115a1", weight: 0.357 },
+            { item: "vks", weight: 0.357 },
+            { item: "vss", weight: 0.357 },
+            { item: "sr25", weight: 0.357 },
+            { item: "mini14", weight: 0.357 },
+            { item: "m1_garand", weight: 0.357 },
+            { item: "sks", weight: 0.357 },
+            { item: "blr", weight: 0.357 },
+            { item: "barrett_m82", weight: 0.357 },
+            { item: "mk12", weight: 0.357 },
+            { item: "model_89", weight: 0.357 }
+        ],
+        ammo_crate: [
+            [{ table: "ammo", weight: 1 }],
+            [{ table: "ammo", weight: 1 }],
+            [
+                { item: NullString, weight: 2 },
+                { item: "50cal", count: 8, weight: 0.5 },
+                { item: "338lap", count: 2, weight: 0.15 },
+                { item: "curadell", weight: 0.05 }
+            ]
+        ],
+        loot_tree: [
+            [
+                { item: "g19", weight: 10 },
+                { item: "cz75a", weight: 10 },
+                { item: "m1895", weight: 10 },
+                { item: "deagle", weight: 10 },
+                { item: "rsh12", weight: 10 },
+                { item: "m3k", weight: 3.75 },
+                { item: "model_37", weight: 3.75 },
+                { item: "hp18", weight: 3.75 },
+                { item: "flues", weight: 3.75 },
+                { item: "vepr12", weight: 3.75 },
+                { item: "dt11", weight: 3.75 },
+                { item: "m590m", weight: 3.75 },
+                { item: "spas12", weight: 3.75 },
+                { item: "ak47", weight: 0.833 },
+                { item: "mcx_spear", weight: 0.833 },
+                { item: "m16a2", weight: 0.833 },
+                { item: "aug", weight: 0.833 },
+                { item: "arx160", weight: 0.833 },
+                { item: "acr", weight: 0.833 },
+                { item: "m4a1", weight: 0.833 },
+                { item: "scar_l", weight: 0.833 },
+                { item: "groza", weight: 0.833 },
+                { item: "famas", weight: 0.833 },
+                { item: "mk18", weight: 0.833 },
+                { item: "rgs", weight: 0.833 },
+                { item: "lewis_gun", weight: 0.5 },
+                { item: "stoner_63", weight: 0.5 },
+                { item: "mg5", weight: 0.5 },
+                { item: "negev", weight: 0.5 },
+                { item: "mg36", weight: 0.5 },
+                { item: "rpk", weight: 0.5 },
+                { item: "mosin_nagant", weight: 0.357 },
+                { item: "tango_51", weight: 0.357 },
+                { item: "cz600", weight: 0.357 },
+                { item: "l115a1", weight: 0.357 },
+                { item: "vks", weight: 0.357 },
+                { item: "vss", weight: 0.357 },
+                { item: "sr25", weight: 0.357 },
+                { item: "mini14", weight: 0.357 },
+                { item: "m1_garand", weight: 0.357 },
+                { item: "sks", weight: 0.357 },
+                { item: "blr", weight: 0.357 },
+                { item: "barrett_m82", weight: 0.357 },
+                { item: "mk12", weight: 0.357 },
+                { item: "model_89", weight: 0.357 }
+            ],
+            [{ item: "woody", weight: 1 }],
+            [{ item: "regular_helmet", weight: 1 }],
+            [{ item: "regular_pack", weight: 1 }],
+            [{ item: "9mm", count: 24, weight: 1 }]
+        ],
+        lux_crate: [
+            [
+                { item: "g19", weight: 10 },
+                { item: "cz75a", weight: 10 },
+                { item: "m1895", weight: 10 },
+                { item: "deagle", weight: 10 },
+                { item: "rsh12", weight: 10 },
+                { item: "m3k", weight: 3.75 },
+                { item: "model_37", weight: 3.75 },
+                { item: "hp18", weight: 3.75 },
+                { item: "flues", weight: 3.75 },
+                { item: "vepr12", weight: 3.75 },
+                { item: "dt11", weight: 3.75 },
+                { item: "m590m", weight: 3.75 },
+                { item: "spas12", weight: 3.75 },
+                { item: "ak47", weight: 0.833 },
+                { item: "mcx_spear", weight: 0.833 },
+                { item: "m16a2", weight: 0.833 },
+                { item: "aug", weight: 0.833 },
+                { item: "arx160", weight: 0.833 },
+                { item: "acr", weight: 0.833 },
+                { item: "m4a1", weight: 0.833 },
+                { item: "scar_l", weight: 0.833 },
+                { item: "groza", weight: 0.833 },
+                { item: "famas", weight: 0.833 },
+                { item: "mk18", weight: 0.833 },
+                { item: "rgs", weight: 0.833 },
+                { item: "lewis_gun", weight: 0.5 },
+                { item: "stoner_63", weight: 0.5 },
+                { item: "mg5", weight: 0.5 },
+                { item: "negev", weight: 0.5 },
+                { item: "mg36", weight: 0.5 },
+                { item: "rpk", weight: 0.5 },
+                { item: "mosin_nagant", weight: 0.357 },
+                { item: "tango_51", weight: 0.357 },
+                { item: "cz600", weight: 0.357 },
+                { item: "l115a1", weight: 0.357 },
+                { item: "vks", weight: 0.357 },
+                { item: "vss", weight: 0.357 },
+                { item: "sr25", weight: 0.357 },
+                { item: "mini14", weight: 0.357 },
+                { item: "m1_garand", weight: 0.357 },
+                { item: "sks", weight: 0.357 },
+                { item: "blr", weight: 0.357 },
+                { item: "barrett_m82", weight: 0.357 },
+                { item: "mk12", weight: 0.357 },
+                { item: "model_89", weight: 0.357 }
+            ],
+            [{ table: "special_scopes", weight: 1 }]
+        ],
+        gold_rock: [
+            [{ item: "tango_51", weight: 1 }],
+            [{ table: "scopes", weight: 1 }]
+        ],
+        loot_barrel: [
+            [{ item: "tango_51", weight: 1 }],
+            [
+                { table: "equipment", weight: 1 },
+                { table: "scopes", weight: 1 },
+                { table: "healing_items", weight: 1 }
+            ]
+        ],
+        wood_coffin: {
+            min: 3,
+            max: 5,
+            loot: [
+                { table: "special_guns", weight: 1 },
+                { table: "special_equipment", weight: 0.65 },
+                { table: "special_healing_items", weight: 0.15 },
+                { table: "special_scopes", weight: 0.3 }
+            ]
+        },
+        titanium_coffin: [
+            { table: "gold_airdrop_guns", weight: 1 }
+        ],
+        gun_locker: {
+            min: 1,
+            max: 2,
+            loot: [
+                { item: "g19", weight: 10 },
+                { item: "cz75a", weight: 10 },
+                { item: "m1895", weight: 10 },
+                { item: "deagle", weight: 10 },
+                { item: "rsh12", weight: 10 },
+                { item: "m3k", weight: 3.75 },
+                { item: "model_37", weight: 3.75 },
+                { item: "hp18", weight: 3.75 },
+                { item: "flues", weight: 3.75 },
+                { item: "vepr12", weight: 3.75 },
+                { item: "dt11", weight: 3.75 },
+                { item: "m590m", weight: 3.75 },
+                { item: "spas12", weight: 3.75 },
+                { item: "ak47", weight: 0.833 },
+                { item: "mcx_spear", weight: 0.833 },
+                { item: "m16a2", weight: 0.833 },
+                { item: "aug", weight: 0.833 },
+                { item: "arx160", weight: 0.833 },
+                { item: "acr", weight: 0.833 },
+                { item: "m4a1", weight: 0.833 },
+                { item: "scar_l", weight: 0.833 },
+                { item: "groza", weight: 0.833 },
+                { item: "famas", weight: 0.833 },
+                { item: "mk18", weight: 0.833 },
+                { item: "rgs", weight: 0.833 },
+                { item: "lewis_gun", weight: 0.5 },
+                { item: "stoner_63", weight: 0.5 },
+                { item: "mg5", weight: 0.5 },
+                { item: "negev", weight: 0.5 },
+                { item: "mg36", weight: 0.5 },
+                { item: "rpk", weight: 0.5 },
+                { item: "mosin_nagant", weight: 0.357 },
+                { item: "tango_51", weight: 0.357 },
+                { item: "cz600", weight: 0.357 },
+                { item: "l115a1", weight: 0.357 },
+                { item: "vks", weight: 0.357 },
+                { item: "vss", weight: 0.357 },
+                { item: "sr25", weight: 0.357 },
+                { item: "mini14", weight: 0.357 },
+                { item: "m1_garand", weight: 0.357 },
+                { item: "sks", weight: 0.357 },
+                { item: "blr", weight: 0.357 },
+                { item: "barrett_m82", weight: 0.357 },
+                { item: "mk12", weight: 0.357 },
+                { item: "model_89", weight: 0.357 }
+            ]
+        },
+        guns: [
+            // 50% chance for one of these
+            { item: "g19", weight: 10 },
+            { item: "cz75a", weight: 10 },
+            { item: "m1895", weight: 10 },
+            { item: "deagle", weight: 10 },
+            { item: "rsh12", weight: 10 },
+            // 30% chance for one of these
+            { item: "m3k", weight: 3.75 },
+            { item: "model_37", weight: 3.75 },
+            { item: "hp18", weight: 3.75 },
+            { item: "flues", weight: 3.75 },
+            { item: "vepr12", weight: 3.75 },
+            { item: "dt11", weight: 3.75 },
+            { item: "m590m", weight: 3.75 },
+            { item: "spas12", weight: 3.75 },
+            // 10% chance for one of these
+            { item: "ak47", weight: 0.833 },
+            { item: "mcx_spear", weight: 0.833 },
+            { item: "m16a2", weight: 0.833 },
+            { item: "aug", weight: 0.833 },
+            { item: "arx160", weight: 0.833 },
+            { item: "acr", weight: 0.833 },
+            { item: "m4a1", weight: 0.833 },
+            { item: "scar_l", weight: 0.833 },
+            { item: "groza", weight: 0.833 },
+            { item: "famas", weight: 0.833 },
+            { item: "mk18", weight: 0.833 },
+            { item: "rgs", weight: 0.833 },
+            // 3% chance for one of these
+            { item: "lewis_gun", weight: 0.5 },
+            { item: "stoner_63", weight: 0.5 },
+            { item: "mg5", weight: 0.5 },
+            { item: "negev", weight: 0.5 },
+            { item: "mg36", weight: 0.5 },
+            { item: "rpk", weight: 0.5 },
+            // 5% chance for one of these
+            { item: "mosin_nagant", weight: 0.357 },
+            { item: "tango_51", weight: 0.357 },
+            { item: "cz600", weight: 0.357 },
+            { item: "l115a1", weight: 0.357 },
+            { item: "vks", weight: 0.357 },
+            { item: "vss", weight: 0.357 },
+            { item: "sr25", weight: 0.357 },
+            { item: "mini14", weight: 0.357 },
+            { item: "m1_garand", weight: 0.357 },
+            { item: "sks", weight: 0.357 },
+            { item: "blr", weight: 0.357 },
+            { item: "barrett_m82", weight: 0.357 },
+            { item: "mk12", weight: 0.357 },
+            { item: "model_89", weight: 0.357 }
+        ],
+        special_guns: [
+            // 50% chance for one of these
+            { item: "g19", weight: 10 },
+            { item: "cz75a", weight: 10 },
+            { item: "m1895", weight: 10 },
+            { item: "deagle", weight: 10 },
+            { item: "rsh12", weight: 10 },
+            // 30% chance for one of these
+            { item: "m3k", weight: 3.75 },
+            { item: "model_37", weight: 3.75 },
+            { item: "hp18", weight: 3.75 },
+            { item: "flues", weight: 3.75 },
+            { item: "vepr12", weight: 3.75 },
+            { item: "dt11", weight: 3.75 },
+            { item: "m590m", weight: 3.75 },
+            { item: "spas12", weight: 3.75 },
+            // 10% chance for one of these
+            { item: "ak47", weight: 0.833 },
+            { item: "mcx_spear", weight: 0.833 },
+            { item: "m16a2", weight: 0.833 },
+            { item: "aug", weight: 0.833 },
+            { item: "arx160", weight: 0.833 },
+            { item: "acr", weight: 0.833 },
+            { item: "m4a1", weight: 0.833 },
+            { item: "scar_l", weight: 0.833 },
+            { item: "groza", weight: 0.833 },
+            { item: "famas", weight: 0.833 },
+            { item: "mk18", weight: 0.833 },
+            { item: "rgs", weight: 0.833 },
+            // 3% chance for one of these
+            { item: "lewis_gun", weight: 0.5 },
+            { item: "stoner_63", weight: 0.5 },
+            { item: "mg5", weight: 0.5 },
+            { item: "negev", weight: 0.5 },
+            { item: "mg36", weight: 0.5 },
+            { item: "rpk", weight: 0.5 },
+            // 5% chance for one of these
+            { item: "mosin_nagant", weight: 0.357 },
+            { item: "tango_51", weight: 0.357 },
+            { item: "cz600", weight: 0.357 },
+            { item: "l115a1", weight: 0.357 },
+            { item: "vks", weight: 0.357 },
+            { item: "vss", weight: 0.357 },
+            { item: "sr25", weight: 0.357 },
+            { item: "mini14", weight: 0.357 },
+            { item: "m1_garand", weight: 0.357 },
+            { item: "sks", weight: 0.357 },
+            { item: "blr", weight: 0.357 },
+            { item: "barrett_m82", weight: 0.357 },
+            { item: "mk12", weight: 0.357 },
+            { item: "model_89", weight: 0.357 }
+        ],
+        airdrop_guns: [
+            // 50% chance for one of these
+            { item: "g19", weight: 10 },
+            { item: "cz75a", weight: 10 },
+            { item: "m1895", weight: 10 },
+            { item: "deagle", weight: 10 },
+            { item: "rsh12", weight: 10 },
+            // 30% chance for one of these
+            { item: "m3k", weight: 3.75 },
+            { item: "model_37", weight: 3.75 },
+            { item: "hp18", weight: 3.75 },
+            { item: "flues", weight: 3.75 },
+            { item: "vepr12", weight: 3.75 },
+            { item: "dt11", weight: 3.75 },
+            { item: "spas12", weight: 3.75 },
+            // 10% chance for one of these
+            { item: "ak47", weight: 0.833 },
+            { item: "mcx_spear", weight: 0.833 },
+            { item: "m16a2", weight: 0.833 },
+            { item: "aug", weight: 0.833 },
+            { item: "arx160", weight: 0.833 },
+            { item: "acr", weight: 0.833 },
+            { item: "m4a1", weight: 0.833 },
+            { item: "scar_l", weight: 0.833 },
+            { item: "groza", weight: 0.833 },
+            { item: "famas", weight: 0.833 },
+            { item: "mk18", weight: 0.833 },
+            { item: "rgs", weight: 0.833 },
+            // 3% chance for one of these
+            { item: "lewis_gun", weight: 0.5 },
+            { item: "stoner_63", weight: 0.5 },
+            { item: "mg5", weight: 0.5 },
+            { item: "negev", weight: 0.5 },
+            { item: "mg36", weight: 0.5 },
+            { item: "rpk", weight: 0.5 },
+            // 5% chance for one of these
+            { item: "mosin_nagant", weight: 0.357 },
+            { item: "tango_51", weight: 0.357 },
+            { item: "cz600", weight: 0.357 },
+            { item: "l115a1", weight: 0.357 },
+            { item: "vks", weight: 0.357 },
+            { item: "vss", weight: 0.357 },
+            { item: "sr25", weight: 0.357 },
+            { item: "mini14", weight: 0.357 },
+            { item: "m1_garand", weight: 0.357 },
+            { item: "sks", weight: 0.357 },
+            { item: "blr", weight: 0.357 },
+            { item: "barrett_m82", weight: 0.357 },
+            { item: "mk12", weight: 0.357 },
+            { item: "model_89", weight: 0.357 }
+        ],
+        airdrop_skins: [
+            { item: NullString, weight: 3 },
+            { item: "smug", weight: 0.2 },
+            { item: "slime", weight: 0.7 },
+            { item: "skeleton", weight: 0.6 },
+            { item: "shishi", weight: 0.1 },
+            { item: "roll_safe", weight: 0.001 }
+        ],
+        airdrop_scopes: [
+            { item: "8x_scope", weight: 1 },
+            { item: "15x_scope", weight: 0.005 }
+        ],
+        gold_airdrop_guns: [
+            { item: "ak47", weight: 0.833 },
+            { item: "mcx_spear", weight: 0.833 },
+            { item: "m16a2", weight: 0.833 },
+            { item: "aug", weight: 0.833 },
+            { item: "arx160", weight: 0.833 },
+            { item: "acr", weight: 0.833 },
+            { item: "m4a1", weight: 0.833 },
+            { item: "scar_l", weight: 0.833 },
+            { item: "groza", weight: 0.833 },
+            { item: "famas", weight: 0.833 },
+            { item: "mk18", weight: 0.833 },
+            { item: "rgs", weight: 0.833 },
+
+
+            { item: "lewis_gun", weight: 0.5 },
+            { item: "stoner_63", weight: 0.5 },
+            { item: "mg5", weight: 0.5 },
+            { item: "negev", weight: 0.5 },
+            { item: "mg36", weight: 0.5 },
+            { item: "rpk", weight: 0.5 },
+
+            { item: "barrett_m82", weight: 1 },
+            { item: "m134_minigun", weight: 1 },
+        ],
+        viking_chest_guns: [
+            // 50% chance for one of these
+            { item: "g19", weight: 10 },
+            { item: "cz75a", weight: 10 },
+            { item: "m1895", weight: 10 },
+            { item: "deagle", weight: 10 },
+            { item: "rsh12", weight: 10 },
+            // 30% chance for one of these
+            { item: "m3k", weight: 3.75 },
+            { item: "model_37", weight: 3.75 },
+            { item: "hp18", weight: 3.75 },
+            { item: "flues", weight: 3.75 },
+            { item: "vepr12", weight: 3.75 },
+            { item: "dt11", weight: 3.75 },
+            { item: "spas12", weight: 3.75 },
+            // 10% chance for one of these
+            { item: "ak47", weight: 0.833 },
+            { item: "mcx_spear", weight: 0.833 },
+            { item: "m16a2", weight: 0.833 },
+            { item: "aug", weight: 0.833 },
+            { item: "arx160", weight: 0.833 },
+            { item: "acr", weight: 0.833 },
+            { item: "m4a1", weight: 0.833 },
+            { item: "scar_l", weight: 0.833 },
+            { item: "groza", weight: 0.833 },
+            { item: "famas", weight: 0.833 },
+            { item: "mk18", weight: 0.833 },
+            { item: "rgs", weight: 0.833 },
+            // 3% chance for one of these
+            { item: "lewis_gun", weight: 0.5 },
+            { item: "stoner_63", weight: 0.5 },
+            { item: "mg5", weight: 0.5 },
+            { item: "negev", weight: 0.5 },
+            { item: "mg36", weight: 0.5 },
+            { item: "rpk", weight: 0.5 },
+            // 5% chance for one of these
+            { item: "mosin_nagant", weight: 0.357 },
+            { item: "tango_51", weight: 0.357 },
+            { item: "cz600", weight: 0.357 },
+            { item: "l115a1", weight: 0.357 },
+            { item: "vks", weight: 0.357 },
+            { item: "vss", weight: 0.357 },
+            { item: "sr25", weight: 0.357 },
+            { item: "mini14", weight: 0.357 },
+            { item: "m1_garand", weight: 0.357 },
+            { item: "sks", weight: 0.357 },
+            { item: "blr", weight: 0.357 },
+            { item: "barrett_m82", weight: 0.357 },
+            { item: "mk12", weight: 0.357 },
+            { item: "model_89", weight: 0.357 }
+        ],
+        river_chest_guns: [
+            // 50% chance for one of these
+            { item: "g19", weight: 10 },
+            { item: "cz75a", weight: 10 },
+            { item: "m1895", weight: 10 },
+            { item: "deagle", weight: 10 },
+            { item: "rsh12", weight: 10 },
+            // 30% chance for one of these
+            { item: "m3k", weight: 3.75 },
+            { item: "model_37", weight: 3.75 },
+            { item: "hp18", weight: 3.75 },
+            { item: "flues", weight: 3.75 },
+            { item: "vepr12", weight: 3.75 },
+            { item: "dt11", weight: 3.75 },
+            { item: "spas12", weight: 3.75 },
+            // 10% chance for one of these
+            { item: "ak47", weight: 0.833 },
+            { item: "mcx_spear", weight: 0.833 },
+            { item: "m16a2", weight: 0.833 },
+            { item: "aug", weight: 0.833 },
+            { item: "arx160", weight: 0.833 },
+            { item: "acr", weight: 0.833 },
+            { item: "m4a1", weight: 0.833 },
+            { item: "scar_l", weight: 0.833 },
+            { item: "groza", weight: 0.833 },
+            { item: "famas", weight: 0.833 },
+            { item: "mk18", weight: 0.833 },
+            { item: "rgs", weight: 0.833 },
+            // 3% chance for one of these
+            { item: "lewis_gun", weight: 0.5 },
+            { item: "stoner_63", weight: 0.5 },
+            { item: "mg5", weight: 0.5 },
+            { item: "negev", weight: 0.5 },
+            { item: "mg36", weight: 0.5 },
+            { item: "rpk", weight: 0.5 },
+            // 5% chance for one of these
+            { item: "mosin_nagant", weight: 0.357 },
+            { item: "tango_51", weight: 0.357 },
+            { item: "cz600", weight: 0.357 },
+            { item: "l115a1", weight: 0.357 },
+            { item: "vks", weight: 0.357 },
+            { item: "vss", weight: 0.357 },
+            { item: "sr25", weight: 0.357 },
+            { item: "mini14", weight: 0.357 },
+            { item: "m1_garand", weight: 0.357 },
+            { item: "sks", weight: 0.357 },
+            { item: "blr", weight: 0.357 },
+            { item: "barrett_m82", weight: 0.357 },
+            { item: "mk12", weight: 0.357 },
+            { item: "model_89", weight: 0.357 }
+        ],
+        ammo: [
+            { item: "9mm", count: 24, weight: 1 },
+            { item: "556mm", count: 24, weight: 1 },
+            { item: "762mm", count: 24, weight: 1 },
+            { item: "50cal", count: 8, weight: 0.2 },
+            { item: "338lap", count: 2, weight: 0.05 }
+        ],
+        throwables: [
+            { item: "frag_grenade", count: 2, weight: 1 },
+            { item: "smoke_grenade", count: 2, weight: 1 }
+        ],
+        equipment: [
+            { item: "regular_helmet", weight: 1 },
+            { item: "tactical_helmet", weight: 0.2 },
+
+            { item: "regular_vest", weight: 1 },
+            { item: "tactical_vest", weight: 0.2 },
+
+            { item: "basic_pack", weight: 0.9 },
+            { item: "regular_pack", weight: 0.2 },
+            { item: "tactical_pack", weight: 0.07 }
+        ],
+        special_equipment: [
+            { item: "regular_helmet", weight: 1 },
+            { item: "tactical_helmet", weight: 0.35 },
+
+            { item: "regular_vest", weight: 1 },
+            { item: "tactical_vest", weight: 0.35 },
+
+            { item: "basic_pack", weight: 0.8 },
+            { item: "regular_pack", weight: 0.5 },
+            { item: "tactical_pack", weight: 0.09 }
+        ],
+        scopes: [
+            { item: "4x_scope", weight: 1 },
+            { item: "8x_scope", weight: 0.1 },
+            { item: "15x_scope", weight: 0.00025 }
+        ],
+        special_scopes: [
+            { item: "4x_scope", weight: 1 },
+            { item: "8x_scope", weight: 0.2 },
+            { item: "15x_scope", weight: 0.0005 }
+        ]
+    },
 };
 
 
@@ -1917,14 +2616,14 @@ const spawnableItemTypeCache = [] as Cache;
 
 // has to lazy-loaded to avoid circular dependency issues
 let spawnableLoots: SpawnableItemRegistry | undefined = undefined;
-export const SpawnableLoots = (gameMode: Mode): SpawnableItemRegistry => spawnableLoots ??= (() => {
+export const SpawnableLoots = (gameMap: MAP): SpawnableItemRegistry => spawnableLoots ??= (() => {
     /*
         we have a collection of loot tables, but not all of them are necessarily reachable
         for example, if loot table A belongs to obstacle A, but said obstacle is never spawned,
         then we mustn't take loot table A into account
     */
 
-    const mainMap = Maps[gameMode];
+    const mainMap = Maps[gameMap];
 
     // first, get all the reachable buildings
     // to do this, we get all the buildings in the map def, then for each one, include itself and any subbuildings
@@ -1962,13 +2661,13 @@ export const SpawnableLoots = (gameMode: Mode): SpawnableItemRegistry => spawnab
     // both the obstacles and the buildings
     const reachableLootTables = [
         ...new Set(
-            Object.keys(mainMap.loots ?? {}).map(t => resolveTable(gameMode, t)).concat(
+            Object.keys(mainMap.loots ?? {}).map(t => resolveTable(gameMap, t)).concat(
                 reachableObstacles.filter(({ hasLoot }) => hasLoot).map(
-                    ({ lootTable, idString }) => resolveTable(gameMode, lootTable ?? idString)
+                    ({ lootTable, idString }) => resolveTable(gameMap, lootTable ?? idString)
                 )
             ).concat(
                 reachableBuildings.map(
-                    ({ lootSpawners }) => lootSpawners.map(({ table }) => resolveTable(gameMode, table))
+                    ({ lootSpawners }) => lootSpawners.map(({ table }) => resolveTable(gameMap, table))
                 ).flat()
             )
         )
@@ -1981,7 +2680,7 @@ export const SpawnableLoots = (gameMode: Mode): SpawnableItemRegistry => spawnab
                 : (table as FullLootTable).loot
         )
             .flat()
-            .map(entry => "item" in entry ? entry.item : getAllItemsFromTable(resolveTable(gameMode, entry.table)))
+            .map(entry => "item" in entry ? entry.item : getAllItemsFromTable(resolveTable(gameMap, entry.table)))
             .filter(item => item !== NullString)
             .flat();
 

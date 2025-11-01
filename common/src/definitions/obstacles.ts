@@ -1,6 +1,6 @@
 import { GameConstants, Layers, TentTints, ZIndexes } from "../constants";
 import { type Variation } from "../typings";
-import { CircleHitbox, GroupHitbox, RectangleHitbox, type Hitbox } from "../utils/hitbox";
+import { CircleHitbox, GroupHitbox, PolygonHitbox, RectangleHitbox, type Hitbox } from "../utils/hitbox";
 import { type DeepPartial, type GetEnumMemberName, type Mutable } from "../utils/misc";
 import { MapObjectSpawnMode, ObjectDefinitions, ObstacleSpecialRoles, type ObjectDefinition, type RawDefinition, type ReferenceOrRandom, type ReferenceTo } from "../utils/objectDefinitions";
 import { Vec, type Vector } from "../utils/vector";
@@ -147,6 +147,7 @@ type RawObstacleDefinition = ObjectDefinition & {
         readonly maxRange?: number
         readonly falloff?: number
     }
+
 } & ObstacleRoleMixin & VariationMixin;
 
 export type VariationMixin = {
@@ -272,6 +273,16 @@ export const Materials = [
     "trash_bag",
     "ice"
 ] as const;
+
+export const RevivableMaterials: Array<typeof Materials[number]> = [
+    "tree",
+    "stone",
+    "bush",
+    "pumpkin",
+    "porcelain",
+];
+
+export const RevivableMaterialSet = new Set<typeof RevivableMaterials[number]>(RevivableMaterials);
 
 export const MaterialSounds: Record<string, { hit?: string, destroyed?: string }> = {
     cardboard: { hit: "stone", destroyed: "crate" },
@@ -875,6 +886,222 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
         );
 
         return ([
+            // curseIsland
+            {
+                idString: "cauldron",
+                name: "Cauldron",
+                material: "porcelain",
+                health: 80,
+                scale: { spawnMin: 0.9, spawnMax: 0.9, destroy: 0.6 },
+                hitbox: new CircleHitbox(3.75),
+                rotationMode: RotationMode.Full,
+                spawnMode: MapObjectSpawnMode.GrassAndAroundOasis,
+                hasLoot: true,
+                frames: { particle: "cauldron_particle", residue: "cauldron_residue" }
+            },
+            {
+                idString: "small_tombstone",
+                name: "Small Tombstone",
+                material: "stone",
+                health: 200,
+                scale: { spawnMin: 0.8, spawnMax: 0.8, destroy: 0.5 },
+                hitbox: new CircleHitbox(3.75),
+                rotationMode: RotationMode.None,
+                hasLoot: true,
+                frames: { particle: "tombstone_particle", residue: "tombstone_residue" }
+            },
+            {
+                idString: "modern_tombstone",
+                name: "Modern Tombstone",
+                material: "stone",
+                health: 220,
+                scale: { spawnMin: 0.9, spawnMax: 0.9, destroy: 0.65 },
+                hitbox: new CircleHitbox(3.75),
+                rotationMode: RotationMode.None,
+                hasLoot: true,
+                frames: { particle: "tombstone_particle", residue: "tombstone_residue" }
+
+            },
+            {
+                idString: "halloween_crate",
+                name: "Halloween Crate",
+                rotationMode: RotationMode.Binary,
+                frames: {
+                    particle: "crate_particle",
+                    residue: "regular_crate_residue"
+                }
+            },
+            {
+                idString: "wood_coffin",
+                name: "Wood Coffin",
+                material: "wood",
+                health: 100,
+                scale: {
+                    spawnMin: 1,
+                    spawnMax: 1,
+                    destroy: 0.9
+                },
+                hideOnMap: true,
+                hasLoot: true,
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
+                hitbox: RectangleHitbox.fromRect(11.2, 16),
+                rotationMode: RotationMode.Limited,
+                allowFlyover: FlyoverPref.Always,
+                frames: {
+                    particle: "crate_particle",
+                    residue: "wood_coffin_residue"
+                }
+            },
+            {
+                idString: "titanium_coffin",
+                name: "Titanium Coffin",
+                material: "iron",
+                health: 500,
+                scale: {
+                    spawnMin: 1,
+                    spawnMax: 1,
+                    destroy: 0.9
+                },
+                impenetrable: true,
+                reflectBullets: true,
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
+                hideOnMap: true,
+                hasLoot: true,
+                hitbox: RectangleHitbox.fromRect(9, 16),
+                rotationMode: RotationMode.Limited,
+                allowFlyover: FlyoverPref.Never,
+                frames: {
+                    particle: "titanium_coffin_particle",
+                    residue: "titanium_coffin_residue"
+                }
+            },
+
+            tree([{
+                name: "Cursed Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.6,
+                    spawnMax: 0.9,
+                    destroy: 0.55
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                zIndex: ZIndexes.ObstaclesLayer3,
+                variations: 2,
+                frames: {
+                    particle: "dormant_oak_tree_particle",
+                    residue: "dormant_oak_tree_residue"
+                }
+            }]),
+
+            {
+                idString: "skeleton_bone",
+                name: "Skeleton Bone",
+                material: "stone",
+                health: 100,
+                scale: {
+                    spawnMin: 1,
+                    spawnMax: 1,
+                    destroy: 0.5
+                },
+                hitbox: new CircleHitbox(4),
+                spawnHitbox: new CircleHitbox(4.5),
+                rotationMode: RotationMode.Full,
+                frames: { particle: "skeleton_bone_particle", residue: "skeleton_bone_residue" }
+            },
+
+            tree([{
+                name: "Spooky Oak Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.7,
+                    spawnMax: 1,
+                    destroy: 0.65
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                frames: {
+                    particle: "spooky_oak_tree_particle",
+                    residue: "spooky_oak_tree_residue"
+                }
+            }]),
+
+            tree([{
+                name: "Mutant Oak Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.7,
+                    spawnMax: 1,
+                    destroy: 0.65
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                frames: {
+                    particle: "mutant_oak_tree_particle",
+                    residue: "mutant_oak_tree_residue"
+                }
+            }]),
+
+            tree([{
+                name: "Skull Oak Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.7,
+                    spawnMax: 1,
+                    destroy: 0.65
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                frames: {
+                    particle: "skull_oak_tree_particle",
+                    residue: "skull_oak_tree_residue"
+                }
+            }]),
+
+            {
+                idString: "haunted_tree",
+                name: "Haunted Tree",
+                material: "wood",
+                health: 120,
+                scale: { spawnMin: 1, spawnMax: 1, destroy: 0.7 },
+                hitbox: new CircleHitbox(3.75),
+                rotationMode: RotationMode.Full,
+                hasLoot: true,
+                frames: {
+                    particle: "dormant_oak_tree_particle",
+                    residue: "dormant_oak_tree_residue"
+                }
+            },
+
+            {
+                idString: "spooky_bush",
+                name: "Spooky Bush",
+                material: "bush",
+                health: 80,
+                scale: {
+                    spawnMin: 0.5,
+                    spawnMax: 0.7,
+                    destroy: 0.45
+                },
+                hitbox: new CircleHitbox(4.2),
+                noCollisions: true,
+                rotationMode: RotationMode.Full,
+                zIndex: ZIndexes.ObstaclesLayer3,
+                frames: {
+                    particle: "spooky_bush_particle",
+                    residue: "spooky_bush_residue"
+                }
+            },
+
+
+            // desert
             {
                 idString: "bull_skeleton",
                 name: "Bull Skeleton",
@@ -1772,6 +1999,18 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     particle: "window_particle"
                 },
                 hideOnMap: true
+            },
+            {
+                [inheritFrom]: "regular_crate",
+                idString: "webbed_crate",
+                name: "Webbed Crate",
+                health: 50,
+                variations: 2,
+                frames: {
+                    residue: "regular_crate_residue",
+                    particle: "crate_particle"
+                },
+                hideOnMap: false
             },
             ...withWinterVariation([
                 {

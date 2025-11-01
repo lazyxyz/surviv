@@ -75,9 +75,9 @@ export class Loot extends GameObject.derive(ObjectCategory.Loot) {
                     .setAngle(90);
 
                 if (definition.grassTint) {
-                    this.images.item.setTint(getGhillieTint(this.game.gameMode));
-                    this.images.skinFistLeft.setTint(getGhillieTint(this.game.gameMode));
-                    this.images.skinFistRight.setTint(getGhillieTint(this.game.gameMode));
+                    this.images.item.setTint(getGhillieTint(this.game.gameMap));
+                    this.images.skinFistLeft.setTint(getGhillieTint(this.game.gameMap));
+                    this.images.skinFistRight.setTint(getGhillieTint(this.game.gameMap));
                 }
 
                 this.container.addChild(this.images.skinFistLeft, this.images.skinFistRight);

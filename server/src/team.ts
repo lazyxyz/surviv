@@ -5,7 +5,7 @@ import { findGame } from "./gameManager";
 import { type Player } from "./objects/player";
 import { CUSTOM_TEAMS } from "./server";
 import { removeFrom } from "./utils/misc";
-import { TEAMMATE_COLORS, TeamSize } from "@common/constants";
+import {  MODE } from "@common/constants";
 import { ServerChatPacket, ServerChatPacketData } from "@common/packets/chatPacket";
 
 export class Team {
@@ -83,7 +83,7 @@ export class CustomTeam {
     autoFill = true;
     locked = false;
     roomMode = false; // allow more than 4 players join
-    teamSize = TeamSize.Squad;
+    teamSize = MODE.Squad;
 
     gameID?: number;
     resetTimeout?: NodeJS.Timeout;

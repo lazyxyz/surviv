@@ -141,7 +141,6 @@ const perks = [
         name: "Infinite Ammo",
         description: "All weapons have unlimited ammo. Electronic devices may break if overused.",
         category: PerkCategories.Normal,
-
         airdropCallerLimit: 3
     },
     {

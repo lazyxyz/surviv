@@ -1,0 +1,1 @@
+export const KNOCK_BACK_AMOUNT = 0.6; // knockback distance when bullet/explosion hit bot 

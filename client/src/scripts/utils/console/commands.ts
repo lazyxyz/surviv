@@ -1,5 +1,5 @@
 // noinspection JSConstantReassignment
-import { GameConstants, InputActions, SpectateActions, TeamSize } from "@common/constants";
+import { GameConstants, InputActions, SpectateActions, MODE } from "@common/constants";
 import { HealingItems, type HealingItemDefinition } from "@common/definitions/healingItems";
 import { Loots } from "@common/definitions/loots";
 import { Scopes, type ScopeDefinition } from "@common/definitions/scopes";
@@ -855,7 +855,7 @@ export function setUpCommands(game: Game): void {
             );
 
             const canvas = game.pixi.renderer.extract.canvas({
-                clearColor: getColors(game.gameMode).grass,
+                clearColor: getColors(game.gameMap).grass,
                 target: container,
                 frame: rectangle,
                 resolution: container.scale.x,
@@ -1829,7 +1829,7 @@ export function setUpCommands(game: Game): void {
                                     {
                                         ...v,
                                         ...(typeof v.nextSwitchTime === "number" ? { nextSwitchTime: new Date(v.nextSwitchTime) } : {}),
-                                        ...(typeof v.maxTeamSize === "number" ? { maxTeamSize: TeamSize[v.maxTeamSize] } : {})
+                                        ...(typeof v.maxTeamSize === "number" ? { maxTeamSize: MODE[v.maxTeamSize] } : {})
                                     }
                                 ]
                             )

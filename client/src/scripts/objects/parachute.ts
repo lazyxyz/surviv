@@ -59,7 +59,7 @@ export class Parachute extends GameObject.derive(ObjectCategory.Parachute) {
         }
 
         if (data.height === 0) {
-            const floor = this.game.map.terrain.getFloor(this.position, 0, this.game.gameMode);
+            const floor = this.game.map.terrain.getFloor(this.position, 0, this.game.gameMap);
 
             this.playSound(floor === FloorNames.Water ? "airdrop_land_water" : "airdrop_land");
 

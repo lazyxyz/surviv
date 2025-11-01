@@ -1,11 +1,11 @@
-import { GameConstants, TeamSize } from "@common/constants";
+import { GameConstants, MODE } from "@common/constants";
 import { URLSearchParams } from "node:url";
 import { TemplatedApp, type WebSocket } from "uWebSockets.js";
 import { Config } from "../config";
 import { CustomTeam, CustomTeamPlayer, type CustomTeamPlayerContainer } from "../team";
 import { Logger, cleanUsername } from "../utils/misc";
 import { forbidden, getIP, textDecoder } from "../utils/serverHelpers";
-import { CUSTOM_TEAMS, maxTeamSize, teamsCreated } from "../server";
+import { CUSTOM_TEAMS, teamsCreated } from "../server";
 
 export function initTeamRoutes(app: TemplatedApp) {
     app.ws("/team", {
@@ -17,14 +17,6 @@ export function initTeamRoutes(app: TemplatedApp) {
             res.onAborted((): void => { /* Handle errors in WS connection */ });
 
             const ip = getIP(res, req);
-            const maxTeams = Config.protection?.maxTeams;
-            if (
-                maxTeamSize === TeamSize.Solo
-                || (maxTeams && teamsCreated[ip] > maxTeams)
-            ) {
-                forbidden(res);
-                return;
-            }
 
             const searchParams = new URLSearchParams(req.getQuery());
             const teamID = searchParams.get("teamID");
@@ -41,7 +33,7 @@ export function initTeamRoutes(app: TemplatedApp) {
             }
 
             if (noTeamIdGiven) {
-                if (team.locked || (!team.roomMode && team.players.length >= (maxTeamSize as number) )) {
+                if (team.locked || (!team.roomMode && team.players.length >= team.teamSize )) {
                     forbidden(res); // TODO "Team is locked" and "Team is full" messages
                     return;
                 }

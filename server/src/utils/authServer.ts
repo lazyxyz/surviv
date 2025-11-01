@@ -1,4 +1,4 @@
-import { TeamSize } from "@common/constants";
+import { MODE } from "@common/constants";
 import { Config } from "../config";
 import { Game } from "../game";
 
@@ -28,7 +28,7 @@ export class AuthServer {
             },
             body: JSON.stringify({
                 createdAt: new Date(this.game.startedTime),
-                mode: TeamSize[this.game.maxTeamSize],
+                mode: MODE[this.game.gameMode],
                 region: process.env.REGION
             })
         });

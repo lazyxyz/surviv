@@ -1,4 +1,4 @@
-import { GameConstants, InputActions, ObjectCategory, SpectateActions, TeamSize } from "@common/constants";
+import { GameConstants, InputActions, ObjectCategory, SpectateActions } from "@common/constants";
 import { Ammos, type AmmoDefinition } from "@common/definitions/ammos";
 import { type ArmorDefinition } from "@common/definitions/armors";
 import { HealType, HealingItems, type HealingItemDefinition } from "@common/definitions/healingItems";
@@ -10,7 +10,6 @@ import { sound } from "@pixi/sound";
 import { body } from "../uiHelpers";
 import { Crosshairs, getCrosshair } from "../utils/crosshairs";
 import { EMOTE_SLOTS, PIXI_SCALE, UI_DEBUG_MODE } from "../utils/constants";
-import { Modes } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "../../";
 import $ from "jquery";
 import type { Game } from "../game";
@@ -23,6 +22,7 @@ import type { TranslationKeys } from "../../typings/translations";
 import { errorAlert } from "../modal";
 import { joinGame, teamSocket } from "./play";
 import { setUpCommands } from "../utils/console/commands";
+import { Maps } from "@common/definitions/modes";
 
 export let autoPickup = true;
 
@@ -267,7 +267,7 @@ function setupCrosshair(game: Game): void {
 }
 
 function setupGameModeStyles(game: Game): void {
-    if (Modes[game.gameMode].darkShaders) {
+    if (Maps[game.gameMap].darkShaders) {
         $("#game-canvas").css({
             "filter": "brightness(0.65) saturate(0.85)",
             "position": "relative",

@@ -200,7 +200,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             weapon: new SuroiSprite().setZIndex(3),
             altWeapon: new SuroiSprite().setZIndex(3),
             muzzleFlash: new SuroiSprite("muzzle_flash").setVisible(false).setZIndex(7).setAnchor(Vec.create(0, 0.5)),
-            waterOverlay: new SuroiSprite("water_overlay").setVisible(false).setTint(getColors(this.game.gameMode).water),
+            waterOverlay: new SuroiSprite("water_overlay").setVisible(false).setTint(getColors(this.game.gameMap).water),
             blood: new Container(),
             disguiseSprite: new SuroiSprite()
         };
@@ -293,6 +293,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
         });
 
         this.updateFromData(data, true);
+        if (data.noSize) this.hitbox.radius = 0;
     }
 
     override updateContainerPosition(): void {
@@ -429,7 +430,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             }
         }
 
-        const floorType = game.map.terrain.getFloor(this.position, this.layer, this.game.gameMode);
+        const floorType = game.map.terrain.getFloor(this.position, this.layer, this.game.gameMap);
 
         const doOverlay = FloorTypes[floorType].overlay;
         const layerChanged = previousLayer !== this.layer || game.activePlayer?.layer !== this.layer || isNew;
@@ -713,7 +714,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             }
             this._skin = skinID;
             const skinDef = Loots.fromString<SkinDefinition>(skinID);
-            const tint = skinDef.grassTint ? getGhillieTint(this.game.gameMode) : 0xffffff;
+            const tint = skinDef.grassTint ? getGhillieTint(this.game.gameMap) : 0xffffff;
 
             const { body, leftFist, rightFist, leftLeg, rightLeg } = this.images;
 
@@ -1728,19 +1729,19 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                         );
                     }
 
-                     if (weaponDef.bulletFlyingSound) {
-                            // 5% chance bullet flying sounds
-                            if (Math.random() < 0.05) {
-                                const variant = Math.floor(Math.random() * 3) + 1;
-                                this.playSound(
-                                    `bullet_fly_${variant}`,
-                                    {
-                                        falloff: 0.5,
-                                        dynamic: true,
-                                    }
-                                );
-                            }
+                    if (weaponDef.bulletFlyingSound) {
+                        // 5% chance bullet flying sounds
+                        if (Math.random() < 0.05) {
+                            const variant = Math.floor(Math.random() * 3) + 1;
+                            this.playSound(
+                                `bullet_fly_${variant}`,
+                                {
+                                    falloff: 0.5,
+                                    dynamic: true,
+                                }
+                            );
                         }
+                    }
                 }
 
                 const isAltFire = weaponDef.isDual

@@ -6,7 +6,7 @@ export type ColorKeys = "grass" | "water" | "border" | "beach" | "riverBank" | "
 export interface ModeDefinition {
     readonly idString: string
     readonly colors: Record<ColorKeys, string>
-    readonly inheritTexturesFrom?: Mode | Mode[]
+    readonly inheritTexturesFrom?: MAP | MAP[]
     readonly specialMenuMusic?: boolean
     readonly ambience?: string
     readonly specialSounds?: string[]
@@ -26,28 +26,30 @@ export interface ModeDefinition {
     readonly modeLogoImage?: string | { solo: string, squads: string }
 }
 
-export type Mode = "normal" | "fall" | "winter" | "desert";
+export type MAP = "normal" | "fall" | "winter" | "desert" | "cursedIsland";
 
-export const ModeToNumber: Record<Mode, number> = {
+export const ModeToNumber: Record<MAP, number> = {
     normal: 0,
     fall: 1,
     winter: 2,
     desert: 3,
+    cursedIsland: 4,
 };
 
-export const NumberToMode: Record<number, Mode> = {
+export const NumberToMode: Record<number, MAP> = {
     0: "normal",
     1: "fall",
     2: "winter",
     3: "desert",
+    4: "cursedIsland"
 };
 
-export function getRandomMode(): Mode {
-    const modes: Mode[] = ["normal", "fall", "winter", "desert"];
+export function getRandomMode(): MAP {
+    const modes: MAP[] = ["normal", "fall", "winter", "desert", "cursedIsland"];
     return modes[Math.floor(Math.random() * modes.length)];
 }
 
-export const Modes: Record<Mode, ModeDefinition> = {
+export const Maps: Record<MAP, ModeDefinition> = {
     normal: {
         idString: "normal",
         colors: {
@@ -117,7 +119,7 @@ export const Modes: Record<Mode, ModeDefinition> = {
         modeLogoImage: "./img/game/winter/obstacles/red_gift.svg"
     },
     desert: {
-        idString: "fall",
+        idString: "desert",
         colors: {
             grass: "hsl(42.94, 87.93%, 77.25%)",
             water: "hsl(211, 63%, 42%)",
@@ -131,7 +133,7 @@ export const Modes: Record<Mode, ModeDefinition> = {
         ambience: "wind_ambience",
         inheritTexturesFrom: "fall",
         defaultScope: "2x_scope",
-        reskin: "fall",
+        reskin: "desert",
         particleEffects: {
             frames: ["weed_1", "weed_2"],
             delay: 1000,
@@ -143,7 +145,33 @@ export const Modes: Record<Mode, ModeDefinition> = {
             squads: "./img/misc/user-group.svg"
         },
     },
+    cursedIsland: {
+        idString: "cursedIsland",
+        colors: {
+            grass: "hsl(224, 43%, 21%)",
+            water: "hsl(331, 49%, 39%)",
+            border: "hsl(211, 63%, 30%)",
+            beach: "hsl(229, 18%, 36%)",
+            riverBank: "hsl(229, 18%, 36%)",
+            trail: "hsl(229, 18%, 36%)",
+            gas: "hsla(17, 100%, 50%, 0.35)",
+            void: "hsl(25, 80%, 6%)"
+        },
+        reskin: "cursedIsland",
+        specialSounds: [
+            "airdrop_plane"
+        ],
+        ambience: "horror_ambience",
+        inheritTexturesFrom: "desert",
+        defaultScope: "2x_scope",
+        specialPlayButtons: true,
+        // Icons
+        modeLogoImage: {
+            solo: "./img/misc/user.svg",
+            squads: "./img/misc/user-group.svg"
+        },
+    },
 };
-export const ObstacleModeVariations: Partial<Record<Mode, string>> = {
+export const ObstacleModeVariations: Partial<Record<MAP, string>> = {
     winter: "_winter"
 };

@@ -3,8 +3,9 @@ import { CircleHitbox } from "@common/utils/hitbox";
 import { Angle, Numeric } from "@common/utils/math";
 import { type FullData } from "@common/utils/objectsSerializations";
 import { type Vector } from "@common/utils/vector";
-import { type Airdrop, type Game } from "../game";
 import { BaseGameObject } from "./gameObject";
+import { Airdrop } from "../game/airdropManager";
+import { Game } from "../game";
 
 export class Parachute extends BaseGameObject.derive(ObjectCategory.Parachute) {
     override readonly fullAllocBytes = 8;
@@ -55,7 +56,7 @@ export class Parachute extends BaseGameObject.derive(ObjectCategory.Parachute) {
                 if (object.hitbox?.collidesWith(crate.hitbox)) {
                     switch (true) {
                         case object.isPlayer: {
-                            object.piercingDamage({
+                            object.damageHandler.piercingDamage({
                                 amount: GameConstants.airdrop.damage,
                                 source: KillfeedEventType.Airdrop
                             });
