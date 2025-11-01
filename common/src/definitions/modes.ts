@@ -163,7 +163,7 @@ export const Maps: Record<MAP, ModeDefinition> = {
         ],
         ambience: "horror_ambience",
         inheritTexturesFrom: "desert",
-        defaultScope: "8x_scope",
+        defaultScope: "2x_scope",
         specialPlayButtons: true,
         // Icons
         modeLogoImage: {

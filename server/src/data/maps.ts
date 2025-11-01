@@ -685,7 +685,9 @@ const maps = {
             // child_palm_tree: 60,
             // doum_palm_tree: 100,
             // quiver_tree: 60,
-            spooky_oak_tree: 300,
+            spooky_oak_tree: 100,
+            mutant_oak_tree: 100,
+            skull_oak_tree: 100,
 
             // wood_barrel: 100,
             haunted_tree: 50,
@@ -694,7 +696,7 @@ const maps = {
             cauldron: 60,
             // barrel_cactus: 100,
             jack_o_lantern: 120,
-            
+
             // century_plant: 100,
             spooky_bush: 120,
 
