@@ -949,7 +949,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 allowFlyover: FlyoverPref.Always,
                 frames: {
                     particle: "crate_particle",
-                    residue: "regular_crate_residue"
+                    residue: "wood_coffin_residue"
                 }
             },
             {
@@ -971,8 +971,8 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 rotationMode: RotationMode.Limited,
                 allowFlyover: FlyoverPref.Never,
                 frames: {
-                    particle: "metal_particle",
-                    residue: "stove_residue"
+                    particle: "titanium_coffin_particle",
+                    residue: "titanium_coffin_residue"
                 }
             },
 
@@ -1008,7 +1008,96 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 hitbox: new CircleHitbox(4),
                 spawnHitbox: new CircleHitbox(4.5),
                 rotationMode: RotationMode.Full,
-                frames: { particle: "bull_skeleton_particle", residue: "bull_skeleton_residue" }
+                frames: { particle: "skeleton_bone_particle", residue: "skeleton_bone_residue" }
+            },
+
+            tree([{
+                name: "Spooky Oak Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.7,
+                    spawnMax: 1,
+                    destroy: 0.65
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                frames: {
+                    particle: "spooky_oak_tree_particle",
+                    residue: "spooky_oak_tree_residue"
+                }
+            }]),
+
+            tree([{
+                name: "Mutant Oak Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.7,
+                    spawnMax: 1,
+                    destroy: 0.65
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                frames: {
+                    particle: "mutant_oak_tree_particle",
+                    residue: "mutant_oak_tree_residue"
+                }
+            }]),
+
+            tree([{
+                name: "Skull Oak Tree",
+                health: 180,
+                scaleProps: {
+                    spawnMin: 0.7,
+                    spawnMax: 1,
+                    destroy: 0.65
+                },
+                spawnHitbox: new CircleHitbox(8.5),
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
+                rotationMode: RotationMode.Full,
+                hitbox: new CircleHitbox(3.5),
+                frames: {
+                    particle: "skull_oak_tree_particle",
+                    residue: "skull_oak_tree_residue"
+                }
+            }]),
+
+            {
+                idString: "haunted_tree",
+                name: "Haunted Tree",
+                material: "wood",
+                health: 120,
+                scale: { spawnMin: 1, spawnMax: 1, destroy: 0.7 },
+                hitbox: new CircleHitbox(3.75),
+                rotationMode: RotationMode.Full,
+                hasLoot: true,
+                frames: {
+                    particle: "dormant_oak_tree_particle",
+                    residue: "dormant_oak_tree_residue"
+                }
+            },
+
+            {
+                idString: "spooky_bush",
+                name: "Spooky Bush",
+                material: "bush",
+                health: 80,
+                scale: {
+                    spawnMin: 0.5,
+                    spawnMax: 0.7,
+                    destroy: 0.45
+                },
+                hitbox: new CircleHitbox(4.2),
+                noCollisions: true,
+                rotationMode: RotationMode.Full,
+                zIndex: ZIndexes.ObstaclesLayer3,
+                frames: {
+                    particle: "spooky_bush_particle",
+                    residue: "spooky_bush_residue"
+                }
             },
 
 
@@ -1258,55 +1347,6 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     residue: "dormant_oak_tree_residue"
                 }
             }]),
-            
-            tree([{
-                name: "Spooky Oak Tree",
-                health: 180,
-                scaleProps: {
-                    spawnMin: 0.7,
-                    spawnMax: 1,
-                    destroy: 0.65
-                },
-                spawnHitbox: new CircleHitbox(8.5),
-                spawnMode: MapObjectSpawnMode.GrassAndSand,
-                rotationMode: RotationMode.Full,
-                hitbox: new CircleHitbox(3.5),
-                variations: 3,
-                frames: {
-                    particle: "dormant_oak_tree_particle",
-                    residue: "dormant_oak_tree_residue"
-                }
-            }]),
-
-             {
-                idString: "haunted_tree",
-                name: "Haunted Tree",
-                material: "wood",
-                health: 120,
-                scale: { spawnMin: 1, spawnMax: 1, destroy: 0.7 },
-                hitbox: new CircleHitbox(3.75),
-                rotationMode: RotationMode.Full,
-                hasLoot: true,
-                frames: { particle: "wood_barrel_particle", residue: "wood_barrel_residue" }
-            },
-
-             {
-                idString: "spooky_bush",
-                name: "Spooky Bush",
-                material: "bush",
-                health: 80,
-                scale: {
-                    spawnMin: 0.5,
-                    spawnMax: 0.7,
-                    destroy: 0.45
-                },
-                hitbox: new CircleHitbox(4.2),
-                noCollisions: true,
-                rotationMode: RotationMode.Full,
-                zIndex: ZIndexes.ObstaclesLayer3,
-                frames: { particle: "century_plant_particle", residue: "century_plant_residue" }
-            },
-
 
             tree([{
                 name: "Quiver Tree",

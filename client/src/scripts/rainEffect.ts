@@ -4,7 +4,7 @@ class RainDrop {
     graphics: PIXI.Graphics;
     length = 0;
     speed = 0;
-    opacity = 0;
+    // opacity = 0;
 
     private readonly screenWidth: number;
     private readonly screenHeight: number;
@@ -21,7 +21,7 @@ class RainDrop {
         this.graphics
             .moveTo(0, 0)
             .lineTo(0, this.length)
-            .stroke({ width: 1, color: 0xffffff, alpha: this.opacity });
+            .stroke({ width: 1, color: 0xffffff, alpha: 0.2 });
     }
 
     reset(): void {
@@ -29,7 +29,7 @@ class RainDrop {
         this.graphics.y = Math.random() * -this.screenHeight - this.screenHeight / 2;
         this.length = Math.random() * 15 + 10;
         this.speed = Math.random() * 3 + 5;
-        this.opacity = Math.random() * 0.3 + 0.3;
+        // this.opacity = Math.random() * 0.3 + 0.3;
 
         this.draw();
     }
