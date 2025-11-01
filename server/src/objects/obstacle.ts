@@ -1,5 +1,5 @@
 import { ObjectCategory } from "@common/constants";
-import { Obstacles, RotationMode, type ObstacleDefinition } from "@common/definitions/obstacles";
+import { Obstacles, RevivableMaterialSet, RotationMode, type ObstacleDefinition } from "@common/definitions/obstacles";
 import { PerkIds } from "@common/definitions/perks";
 import { type Orientation, type Variation } from "@common/typings";
 import { CircleHitbox, RectangleHitbox, type Hitbox } from "@common/utils/hitbox";
@@ -16,6 +16,8 @@ import { type Building } from "./building";
 import { type Bullet } from "./bullet";
 import { BaseGameObject, DamageParams, type GameObject } from "./gameObject";
 import { type Player } from "./player";
+import { Timeout } from "@common/utils/misc";
+import { Config } from "../config";
 
 export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
     override readonly fullAllocBytes = 10;
@@ -34,7 +36,7 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
 
     spawnHitbox: Hitbox;
 
-    readonly loot: LootItem[] = [];
+    loot: LootItem[] = [];
     readonly lootSpawnOffset?: Vector;
 
     readonly definition: ObstacleDefinition;
@@ -61,6 +63,8 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
     puzzlePiece?: string | boolean;
 
     detectedMetal?: boolean;
+
+    private _revivalTimeout?: Timeout;
 
     constructor(
         game: Game,
@@ -102,11 +106,11 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
         this.collidable = !definition.noCollisions;
 
         if (definition.hasLoot) {
-            this.loot = getLootFromTable(this.game.gameMode, definition.lootTable ?? definition.idString);
+            this.loot = getLootFromTable(this.game.gameMap, definition.lootTable ?? definition.idString);
         }
 
         if (definition.spawnWithLoot) {
-            for (const item of getLootFromTable(this.game.gameMode, definition.lootTable ?? definition.idString)) {
+            for (const item of getLootFromTable(this.game.gameMap, definition.lootTable ?? definition.idString)) {
                 this.game.addLoot(
                     item.idString,
                     this.position,
@@ -156,7 +160,7 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
                     )
                     || source instanceof Obstacle
                 )
-                || (weaponDef?.itemType === ItemType.Melee && definition.material === "stone" && !weaponDef?.stonePiercing))
+                    || (weaponDef?.itemType === ItemType.Melee && definition.material === "stone" && !weaponDef?.stonePiercing))
             )
             || this.game.pluginManager.emit("obstacle_will_damage", {
                 obstacle: this,
@@ -188,7 +192,7 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
             this.health = 0;
             this.dead = true;
             if (definition.weaponSwap && source instanceof BaseGameObject && source.isPlayer) {
-                source.swapWeaponRandomly(weaponIsItem ? weaponUsed : weaponUsed?.weapon, true);
+                source.inventoryHelper.swapWeaponRandomly(weaponIsItem ? weaponUsed : weaponUsed?.weapon, true);
             }
 
             if (
@@ -266,7 +270,44 @@ export class Obstacle extends BaseGameObject.derive(ObjectCategory.Obstacle) {
                 weaponUsed,
                 amount
             });
+
+            if (Config.obstacleRevivalDelay && RevivableMaterialSet.has(this.definition.material)) {
+                this._revivalTimeout = this.game.addTimeout(() => {
+                    this.revive();
+                }, Config.obstacleRevivalDelay);
+            }
         }
+    }
+
+    private revive(): void {
+        if (!this.dead) return; // Already revived or not dead
+
+        this.dead = false;
+        this.health = this.maxHealth;
+        this.scale = this.maxScale;
+        this.collidable = !this.definition.noCollisions;
+
+        // Recalculate hitbox
+        const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
+        this.hitbox = this.definition.hitbox.transform(this.position, this.scale, hitboxRotation);
+        this.spawnHitbox = (this.definition.spawnHitbox ?? this.definition.hitbox).transform(this.position, this.scale, hitboxRotation);
+
+        // Regenerate loot for variety on next destruction
+        if (this.definition.hasLoot) {
+            this.loot = getLootFromTable(this.game.gameMap, this.definition.lootTable ?? this.definition.idString);
+        }
+
+        // Update grid
+        this.game.grid.updateObject(this);
+
+        this.setDirty();
+
+        // // Optional: Emit revival event for plugins
+        // this.game.pluginManager.emit("obstacle_did_revive", {
+        //     obstacle: this
+        // });
+
+        this._revivalTimeout = undefined;
     }
 
     canInteract(player?: Player): boolean {

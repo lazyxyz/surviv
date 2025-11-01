@@ -56,7 +56,8 @@ export interface ObjectsNetData extends BaseObjectsNetData {
             readonly halloweenThrowableSkin: boolean
             readonly activeDisguise?: ObstacleDefinition
             readonly blockEmoting: boolean
-        }
+        },
+        readonly noSize?: boolean,
     }
     //
     // Obstacle Data
@@ -183,7 +184,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
     // Player serialization
     //
     [ObjectCategory.Player]: {
-        serializePartial(stream, { position, rotation, animation, action }): void {
+        serializePartial(stream, { position, rotation, animation, action, noSize }): void {
             stream.writePosition(position);
             stream.writeRotation2(rotation);
 
@@ -217,6 +218,16 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
             if (actionDirty && action.item !== undefined) {
                 Loots.writeToStream(stream, action.item);
             }
+
+            /*
+                1 bit for noSize dirty, 1 bit for value
+            */
+            const noSizeDirty = noSize !== undefined;
+            let noSizeByte = noSizeDirty ? 128 : 0;
+            if (noSizeDirty) {
+                noSizeByte += noSize ? 1 : 0;
+            }
+            stream.writeUint8(noSizeByte);
         },
         serializeFull(
             stream,
@@ -271,6 +282,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
 
             if (hasDisguise) Obstacles.writeToStream(stream, activeDisguise);
         },
+      
         deserializePartial(stream) {
             const data: Mutable<ObjectsNetData[ObjectCategory.Player]> = {
                 position: stream.readPosition(),
@@ -295,6 +307,13 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 }
 
                 data.action = act;
+            }
+
+            // see serialization comment for noSize
+            const noSizeByte = stream.readUint8();
+            const hasNoSize = (noSizeByte & 128) !== 0;
+            if (hasNoSize) {
+                data.noSize = (noSizeByte & 1) !== 0;
             }
 
             return data;

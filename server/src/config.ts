@@ -1,4 +1,4 @@
-import { Layer, TeamSize } from "@common/constants";
+import { Layer, MODE } from "@common/constants";
 import { type Vector } from "@common/utils/vector";
 import { type Game } from "./game";
 import { type GamePlugin } from "./pluginManager";
@@ -22,7 +22,8 @@ export const Config = {
     soloPort: 8001,
     squadPort: 9001,
     v50Port: 9500,
-    
+    cursedIslandPort: 9600,
+
     addBot: true,
 
     // addBot: false,
@@ -30,15 +31,13 @@ export const Config = {
 
     spawn: { mode: SpawnMode.Normal },
 
-    maxTeamSize: {
-        rotation: [TeamSize.Solo, TeamSize.Squad],
-        switchSchedule: 'all' // open all
-    },
-
     maxPlayersPerGame: 100,
 
     maxGames: 20,
     gameJoinTime: 90,
+
+    objectLifetime: 60000, // Remove loot after 60s
+    obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
 
     gas: { mode: GasMode.Normal },
 
@@ -46,6 +45,10 @@ export const Config = {
 
     plugins: [],
     disableLobbyClearing: true,
+
+    authServer: {
+        address: "http://localhost:8080"
+    },
 
     earnConfig: {
         rank: 5,
@@ -69,10 +72,12 @@ export interface ConfigType {
     readonly soloPort: number;
     readonly squadPort: number;
     readonly v50Port: number;
+    readonly cursedIslandPort: number;
     readonly addBot: boolean;
 
     readonly testMode?: string;
-    
+
+
     /**
      * HTTPS/SSL options. Not used if running locally or with nginx.
      */
@@ -89,37 +94,19 @@ export interface ConfigType {
      * - `SpawnMode.Center` always spawns the player in the center of the map.
      */
     readonly spawn:
-        | { readonly mode: SpawnMode.Normal }
-        | {
-            readonly mode: SpawnMode.Radius
-            readonly position: Vector
-            readonly radius: number
-        }
-        | {
-            readonly mode: SpawnMode.Fixed
-            readonly position: Vector
-            readonly layer?: Layer
-        }
-        | { readonly mode: SpawnMode.Center }
-
-    /**
-     * The maximum number of players allowed to join a team.
-     *
-     * Specifying a {@link TeamSize} causes the team size to
-     * simply remain at that value indefinitely; alternatively,
-     * specifying a cron pattern and an array of team sizes
-     * allows for team sizes to change periodically
-     */
-    readonly maxTeamSize: TeamSize | {
-        /**
-         * The duration between switches. Must be a cron pattern.
-         */
-        readonly switchSchedule: string
-        /**
-         * The team sizes to switch between.
-         */
-        readonly rotation: TeamSize[]
+    | { readonly mode: SpawnMode.Normal }
+    | {
+        readonly mode: SpawnMode.Radius
+        readonly position: Vector
+        readonly radius: number
     }
+    | {
+        readonly mode: SpawnMode.Fixed
+        readonly position: Vector
+        readonly layer?: Layer
+    }
+    | { readonly mode: SpawnMode.Center }
+
 
     /**
      * Whether to start the game as soon as joining (debug feature, also disables winning when 1 player is remaining for obvious reasons).
@@ -141,6 +128,9 @@ export interface ConfigType {
      */
     readonly gameJoinTime: number
 
+    readonly objectLifetime?: number; // Auto-removal lifetime in ms of loot/deathMarker
+    readonly obstacleRevivalDelay?: number; // Auto-revival obstacle delay in ms
+
     /**
      * There are 3 gas modes: GasMode.Normal, GasMode.Debug, and GasMode.Disabled.
      * GasMode.Normal: Default gas behavior. overrideDuration is ignored.
@@ -148,13 +138,13 @@ export interface ConfigType {
      * GasMode.Disabled: Gas is disabled.
      */
     readonly gas:
-        | { readonly mode: GasMode.Disabled }
-        | { readonly mode: GasMode.Normal }
-        | {
-            readonly mode: GasMode.Debug
-            readonly overridePosition?: boolean
-            readonly overrideDuration?: number
-        }
+    | { readonly mode: GasMode.Disabled }
+    | { readonly mode: GasMode.Normal }
+    | {
+        readonly mode: GasMode.Debug
+        readonly overridePosition?: boolean
+        readonly overrideDuration?: number
+    }
 
     /**
      * The number of game ticks that occur per second.
@@ -232,8 +222,18 @@ export interface ConfigType {
      */
     readonly disableLobbyClearing?: boolean
 
+    /**
+     * Options for the authentication server
+     *
+     * Optional; If not specified, the server will not use an authentication server
+     */
+    readonly authServer?: {
+        readonly address: string
+    }
+
+
     readonly earnConfig: {
         readonly rank: number, // Rank receive rewards
         readonly api: string,
-    }; 
+    };
 }

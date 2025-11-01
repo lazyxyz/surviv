@@ -1,6 +1,6 @@
 import { Ammos } from "./definitions/ammos";
 import { HealingItems } from "./definitions/healingItems";
-import { type Mode } from "./definitions/modes";
+import { type MAP } from "./definitions/modes";
 import { Scopes } from "./definitions/scopes";
 import { DEFAULT_SKIN } from "./definitions/skins";
 import { Throwables } from "./definitions/throwables";
@@ -51,7 +51,7 @@ export const GameConstants = freezeDeep({
     gridSize: 32,
     maxPosition: Constants.MAX_POSITION,
     // modeName: "fall" satisfies Mode as Mode,
-    modeName: "winter" satisfies Mode as Mode,
+    modeName: "winter" satisfies MAP as MAP,
     player: {
         radius: 2.25,
         baseSpeed: 0.02655,
@@ -144,10 +144,11 @@ export const enum Layers {
     Equal     // Only collide with objects on the same layer
 }
 
-export enum TeamSize {
+export enum MODE {
     Solo = 1,
     Squad = 4,
     V50 = 50,
+    Dungeon = 10,
 }
 
 export enum ObjectCategory {
@@ -159,7 +160,7 @@ export enum ObjectCategory {
     Decal,
     Parachute,
     ThrowableProjectile,
-    SyncedParticle
+    SyncedParticle,
 }
 
 export const enum AnimationType {
@@ -187,7 +188,8 @@ export const enum KillfeedMessageType {
 export const enum GasState {
     Inactive,
     Waiting,
-    Advancing
+    Advancing,
+    Final
 }
 
 export const enum FireMode {

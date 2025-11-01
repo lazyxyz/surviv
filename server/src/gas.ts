@@ -1,4 +1,4 @@
-import { GameConstants, GasState } from "@common/constants";
+import { GameConstants, GasState, MODE } from "@common/constants";
 import { CircleHitbox } from "@common/utils/hitbox";
 import { Geometry, Numeric } from "@common/utils/math";
 import { MapObjectSpawnMode } from "@common/utils/objectDefinitions";
@@ -30,6 +30,8 @@ export class Gas {
     completionRatioDirty = false;
 
     private _doDamage = false;
+    private _isFinal = false;
+
     get doDamage(): boolean { return this._doDamage; }
 
     readonly game: Game;
@@ -111,9 +113,14 @@ export class Gas {
         if (currentStage === undefined) return;
 
         const isDebug = gas.mode === GasMode.Debug;
-        const duration = isDebug && gas.overrideDuration !== undefined && currentStage.duration !== 0
+        let duration = isDebug && gas.overrideDuration !== undefined && currentStage.duration !== 0
             ? gas.overrideDuration
             : currentStage.duration;
+
+        // Halve duration for CursedIsland mode
+        if (this.game.gameMode === MODE.Dungeon) {
+            duration = Math.floor(duration / 2);
+        }
 
         this.stage++;
         this.state = currentStage.state;
@@ -121,7 +128,9 @@ export class Gas {
         this.completionRatio = 1;
         this.countdownStart = this.game.now;
 
-        if (currentStage.state === GasState.Waiting) {
+
+
+        if (currentStage.state === GasState.Waiting || currentStage.state === GasState.Final) {
             this.oldPosition = Vec.clone(this.newPosition);
             if (currentStage.newRadius !== 0) {
                 const { width, height } = this.game.map;
@@ -171,6 +180,10 @@ export class Gas {
             );
         }
 
+        if (currentStage.state == GasState.Final) {
+            this._isFinal = true;
+        }
+
         // Start the next stage
         if (duration !== 0) {
             this.game.addTimeout(() => this.advanceGasStage(), duration * 1000);
@@ -179,5 +192,37 @@ export class Gas {
 
     isInGas(position: Vector): boolean {
         return Geometry.distanceSquared(position, this.currentPosition) >= this.currentRadius ** 2;
+    }
+
+
+    isFinal(): boolean {
+        return this._isFinal;
+    }
+
+    reset(): void {
+        this.stage = 0;
+        this.state = GasState.Inactive;
+        this.currentDuration = 0;
+        this.countdownStart = 0;
+        this.completionRatio = 0;
+
+        const firstStage = GasStages[0];
+        this.oldRadius = firstStage.oldRadius * this.mapSize;
+        this.newRadius = firstStage.newRadius * this.mapSize;
+        this.currentRadius = firstStage.oldRadius * this.mapSize;
+
+        this.oldPosition = Vec.create(this.game.map.width / 2, this.game.map.height / 2);
+        this.newPosition = Vec.clone(this.oldPosition);
+        this.currentPosition = Vec.clone(this.oldPosition);
+
+        this.dps = 0;
+        this._lastDamageTimestamp = this.game.now;
+
+        this._isFinal = false;
+
+        this.dirty = true;
+        this.completionRatioDirty = false;
+
+        this._doDamage = false;
     }
 }

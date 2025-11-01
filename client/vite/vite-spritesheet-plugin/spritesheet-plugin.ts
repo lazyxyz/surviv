@@ -5,7 +5,7 @@ import { type SpritesheetData } from "pixi.js";
 import { type FSWatcher, type Plugin, type ResolvedConfig } from "vite";
 import readDirectory from "./utils/readDirectory.js";
 import { type CompilerOptions, createSpritesheets, type MultiResAtlasList } from "./utils/spritesheet.js";
-import { Mode, Modes } from "../../../common/src/definitions/modes";
+import { MAP, Maps } from "../../../common/src/definitions/modes";
 import { mkdir, readFile, stat } from "fs/promises";
 import { existsSync } from "fs";
 
@@ -22,7 +22,15 @@ export type CacheData = {
     }
 };
 
-const GAME_MODES = ["fall", "winter", "normal", "desert", "shared"];
+export const GAME_MAPS: (MAP | "shared")[] = [
+    "normal",
+    "fall",
+    "winter",
+    "desert",
+    "cursedIsland",
+    "shared",
+];
+
 
 const defaultGlob = "**/*.{png,gif,jpg,bmp,tiff,svg}";
 const imagesMatcher = new Minimatch(defaultGlob);
@@ -37,16 +45,16 @@ const compilerOpts = {
     packerOptions: {}
 } satisfies CompilerOptions as CompilerOptions;
 
-const getImageDirs = (modeName: Mode | "shared", imageDirs: string[] = []): string[] => {
-    imageDirs.push(`public/img/game/${modeName}`);
-    return modeName === "shared"
+const getImageDirs = (mapName: MAP | "shared", imageDirs: string[] = []): string[] => {
+    imageDirs.push(`public/img/game/${mapName}`);
+    return mapName === "shared"
         ? imageDirs
-        : getImageDirs(Modes[modeName].inheritTexturesFrom ?? "shared", imageDirs);
+        : getImageDirs(Maps[mapName].inheritTexturesFrom ?? "shared", imageDirs);
 };
 
-async function buildSpritesheets(modeName: Mode | "shared"): Promise<MultiResAtlasList> {
-    const cacheDir = getCacheDir(modeName);
-    const imageDirs = getImageDirs(modeName).reverse();
+async function buildSpritesheets(mapName: MAP | "shared"): Promise<MultiResAtlasList> {
+    const cacheDir = getCacheDir(mapName);
+    const imageDirs = getImageDirs(mapName).reverse();
     const fileMap = new Map<string, { lastModified: number, path: string }>();
 
     for (const imagePath of imageDirs.map(dir => readDirectory(dir).filter(x => imagesMatcher.match(x))).flat()) {
@@ -88,13 +96,13 @@ async function buildSpritesheets(modeName: Mode | "shared"): Promise<MultiResAtl
             if (Object.entries(cacheData.fileMap).find(([name, path]) => fileMap.get(name)?.path !== path)) isCached = false;
             if (Array.from(fileMap.entries()).find(([name, data]) => data.path !== cacheData.fileMap[name])) isCached = false;
         } catch (e) {
-            console.error(`Failed to read cache for mode ${modeName}:`, e);
+            console.error(`Failed to read cache for mode ${mapName}:`, e);
             isCached = false;
         }
     }
 
     if (isCached) {
-        console.log(`Spritesheets for mode ${modeName} are cached and valid! Skipping build.`);
+        console.log(`Spritesheets for mode ${mapName} are cached and valid! Skipping build.`);
         return {
             low: await Promise.all(cacheData.atlasFiles.low.map(async file => ({
                 json: JSON.parse(await readFile(path.join(cacheDir, `${file}.json`), "utf8")) as SpritesheetData,
@@ -107,9 +115,9 @@ async function buildSpritesheets(modeName: Mode | "shared"): Promise<MultiResAtl
         };
     }
 
-    console.log(`Building spritesheets for mode ${modeName}...`);
+    console.log(`Building spritesheets for mode ${mapName}...`);
 
-    return await createSpritesheets(fileMap, compilerOpts, modeName);
+    return await createSpritesheets(fileMap, compilerOpts, mapName);
 }
 
 const getHighResVirtualModuleId = (modeName: string) => `virtual:spritesheets-jsons-high-res-${modeName}`;
@@ -119,7 +127,7 @@ const getLowResVirtualModuleId = (modeName: string) => `virtual:spritesheets-jso
 const getLowResResolvedVirtualModuleId = (modeName: string) => `\0${getLowResVirtualModuleId(modeName)}`;
 
 const resolveId = (id: string): string | undefined => {
-    for (const mode of GAME_MODES) {
+    for (const mode of GAME_MAPS) {
         const highResId = getHighResVirtualModuleId(mode);
         const lowResId = getLowResVirtualModuleId(mode);
         if (id === highResId) return getHighResResolvedVirtualModuleId(mode);
@@ -138,11 +146,12 @@ export function spritesheet(): Plugin[] {
         fall: { low: [], high: [] },
         winter: { low: [], high: [] },
         desert: { low: [], high: [] },
+        cursedIsland: { low: [], high: [] },
         shared: { low: [], high: [] }
     };
 
     const load = (id: string): string | undefined => {
-        for (const mode of GAME_MODES) {
+        for (const mode of GAME_MAPS) {
             if (id === getHighResResolvedVirtualModuleId(mode)) {
                 return `
                     export const atlases = ${JSON.stringify(exportedAtlasesByMode[mode].high)};
@@ -164,7 +173,7 @@ export function spritesheet(): Plugin[] {
             name: `${PLUGIN_NAME}:build`,
             apply: "build",
             async buildStart() {
-                for (const mode of GAME_MODES) {
+                for (const mode of GAME_MAPS) {
                     const atlases = await buildSpritesheets(mode);
                     atlasesByMode[mode] = atlases;
                     exportedAtlasesByMode[mode].high = atlasesByMode[mode].high.map(sheet => sheet.json);
@@ -172,7 +181,7 @@ export function spritesheet(): Plugin[] {
                 }
             },
             generateBundle() {
-                for (const mode of GAME_MODES) {
+                for (const mode of GAME_MAPS) {
                     if (atlasesByMode[mode]) {
                         for (const sheet of [...atlasesByMode[mode].low, ...atlasesByMode[mode].high]) {
                             this.emitFile({
@@ -200,7 +209,7 @@ export function spritesheet(): Plugin[] {
 
                     buildTimeout = setTimeout(() => {
                         buildSheets().then(() => {
-                            for (const mode of GAME_MODES) {
+                            for (const mode of GAME_MAPS) {
                                 const moduleHigh = server.moduleGraph.getModuleById(getHighResResolvedVirtualModuleId(mode));
                                 if (moduleHigh !== undefined) void server.reloadModule(moduleHigh);
                                 const moduleLow = server.moduleGraph.getModuleById(getLowResResolvedVirtualModuleId(mode));
@@ -221,7 +230,7 @@ export function spritesheet(): Plugin[] {
                 const files = new Map<string, Buffer | string>();
 
                 async function buildSheets(): Promise<void> {
-                    for (const mode of GAME_MODES) {
+                    for (const mode of GAME_MAPS) {
                         const cacheDir = getCacheDir(mode);
                         const cacheDataPath = path.join(cacheDir, "data.json");
                         let isCached = existsSync(cacheDir) && existsSync(cacheDataPath);

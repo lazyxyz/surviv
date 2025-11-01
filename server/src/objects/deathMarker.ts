@@ -3,6 +3,7 @@ import { RectangleHitbox } from "@common/utils/hitbox";
 import { type FullData } from "@common/utils/objectsSerializations";
 import { BaseGameObject } from "./gameObject";
 import { type Player } from "./player";
+import { Config } from "../config";
 
 export class DeathMarker extends BaseGameObject.derive(ObjectCategory.DeathMarker) {
     override readonly fullAllocBytes = 1;
@@ -22,6 +23,11 @@ export class DeathMarker extends BaseGameObject.derive(ObjectCategory.DeathMarke
             this.isNew = false;
             this.setPartialDirty();
         }, 100);
+
+        // Remove death maker after 30s
+        this.game.addTimeout(() => {
+            this.game.removeObject(this);
+        }, 30000);
     }
 
     override get data(): FullData<ObjectCategory.DeathMarker> {

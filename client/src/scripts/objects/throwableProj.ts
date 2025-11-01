@@ -17,7 +17,7 @@ import { GAME_CONSOLE } from "../..";
 
 export class ThrowableProjectile extends GameObject.derive(ObjectCategory.ThrowableProjectile) {
     readonly image = new SuroiSprite();
-    readonly waterOverlay = new SuroiSprite("water_overlay").setVisible(false).setScale(0.75).setTint(getColors(this.game.gameMode).water);
+    readonly waterOverlay = new SuroiSprite("water_overlay").setVisible(false).setScale(0.75).setTint(getColors(this.game.gameMap).water);
 
     private _definition!: ThrowableDefinition;
     get definition(): ThrowableDefinition { return this._definition; }
@@ -63,7 +63,7 @@ export class ThrowableProjectile extends GameObject.derive(ObjectCategory.Throwa
         if (data.airborne) {
             this.container.zIndex = getEffectiveZIndex(ZIndexes.AirborneThrowables, this.layer, this.game.layer);
         } else {
-            const floorType = this.game.map.terrain.getFloor(this.position, this.layer, this.game.gameMode);
+            const floorType = this.game.map.terrain.getFloor(this.position, this.layer, this.game.gameMap);
             const doOverlay = FloorTypes[floorType].overlay;
 
             this.container.zIndex = getEffectiveZIndex(doOverlay ? ZIndexes.UnderwaterGroundedThrowables : ZIndexes.GroundedThrowables, this.layer, this.game.layer);

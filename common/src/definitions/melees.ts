@@ -125,7 +125,6 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             radius: 1.75,
             offset: Vec.create(2.5, 0),
             cooldown: 150,
-            // noDrop: true,
             fists: {
                 animationDuration: 100,
                 randomFist: true,
@@ -465,6 +464,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             devItem: true,
             default: true,
             damage: 25,
+            noDrop: true,
             fireMode: FireMode.Auto,
             obstacleMultiplier: 2,
             piercingMultiplier: 2,
