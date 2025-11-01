@@ -166,7 +166,7 @@ export class BotManager {
                 { count: zombieCount, weight: 0.2 },
                 { count: ninjaCount, weight: 0.2 },
                 { count: werewolfCount, weight: 0.2 },
-                { count: ghostCount, weight: 0.1 },
+                { count: ghostCount, weight: 0.2 },
                 { count: boomerCount, weight: 0.1 },
                 { count: butcherCount, weight: 0.1 }
             ];

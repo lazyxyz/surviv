@@ -34,8 +34,7 @@ export const Config = {
     maxPlayersPerGame: 100,
 
     maxGames: 20,
-    // gameJoinTime: 90,
-    gameJoinTime: 10,
+    gameJoinTime: 90,
 
     objectLifetime: 60000, // Remove loot after 60s
     obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
