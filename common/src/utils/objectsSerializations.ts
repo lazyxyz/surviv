@@ -9,6 +9,7 @@ import { Obstacles, RotationMode, type ObstacleDefinition } from "../definitions
 import { Skins, type SkinDefinition } from "../definitions/skins";
 import { SyncedParticles, type SyncedParticleDefinition } from "../definitions/syncedParticles";
 import { type ThrowableDefinition } from "../definitions/throwables";
+import { VehicleDefinition, Vehicles } from "../definitions/vehicle";
 import { type Orientation, type Variation } from "../typings";
 import { Angle, halfπ } from "./math";
 import { type Mutable, type SDeepMutable } from "./misc";
@@ -170,6 +171,18 @@ export interface ObjectsNetData extends BaseObjectsNetData {
             readonly creatorID?: number
         }
     }
+
+    //
+    // Vehicle data
+    //
+    readonly [ObjectCategory.Vehicle]: {
+        readonly position: Vector
+        readonly rotation: number
+        readonly layer: Layer
+        readonly full?: {
+            readonly definition: VehicleDefinition
+        }
+    }
 }
 
 interface ObjectSerialization<T extends ObjectCategory> {
@@ -282,7 +295,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
 
             if (hasDisguise) Obstacles.writeToStream(stream, activeDisguise);
         },
-      
+
         deserializePartial(stream) {
             const data: Mutable<ObjectsNetData[ObjectCategory.Player]> = {
                 position: stream.readPosition(),
@@ -701,6 +714,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
         },
         deserializeFull() { /* decals have no full serialization */ }
     },
+
     [ObjectCategory.Parachute]: {
         serializePartial(stream, data) {
             stream.writeFloat(data.height, 0, 1, 1);
@@ -721,6 +735,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
             };
         }
     },
+
     [ObjectCategory.SyncedParticle]: {
         serializePartial(stream, data) {
             const { position, rotation, layer, scale, alpha } = data;
@@ -794,6 +809,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
             };
         }
     },
+
     [ObjectCategory.ThrowableProjectile]: {
         serializePartial(strm, data) {
             strm.writeBooleanGroup(
@@ -832,5 +848,35 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 tintIndex: stream.readUint8()
             };
         }
-    }
+    },
+
+    [ObjectCategory.Vehicle]: {
+        serializePartial(stream, data) {
+            const { position, rotation, layer } = data;
+
+            stream.writePosition(position);
+            stream.writeRotation2(rotation);
+            stream.writeLayer(layer);
+        },
+        serializeFull(stream, { full }) {
+            Vehicles.writeToStream(stream, full.definition);
+            const {  } = full;
+        },
+        deserializePartial(stream) {
+            const data: Mutable<ObjectsNetData[ObjectCategory.SyncedParticle]> = {
+                position: stream.readPosition(),
+                rotation: stream.readRotation2(),
+                layer: stream.readLayer()
+            };
+
+            return data;
+        },
+        deserializeFull(stream) {
+            const definition = Vehicles.readFromStream(stream);
+
+            return {
+                definition,
+            };
+        }
+    },
 };

@@ -65,6 +65,7 @@ import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 import { CustomTeamMessages } from "@common/typings";
 import { FogOfWar } from "./fogOfWar";
 import { RainEffect } from "./rainEffect";
+import { Vehicle } from "./objects/vehicle";
 
 /* eslint-disable @stylistic/indent */
 
@@ -78,6 +79,7 @@ type ObjectClassMapping = {
     readonly [ObjectCategory.Parachute]: typeof Parachute
     readonly [ObjectCategory.ThrowableProjectile]: typeof ThrowableProjectile
     readonly [ObjectCategory.SyncedParticle]: typeof SyncedParticle
+    readonly [ObjectCategory.Vehicle]: typeof Vehicle
 };
 
 const ObjectClassMapping: ObjectClassMapping = Object.freeze<{
@@ -91,7 +93,8 @@ const ObjectClassMapping: ObjectClassMapping = Object.freeze<{
     [ObjectCategory.Decal]: Decal,
     [ObjectCategory.Parachute]: Parachute,
     [ObjectCategory.ThrowableProjectile]: ThrowableProjectile,
-    [ObjectCategory.SyncedParticle]: SyncedParticle
+    [ObjectCategory.SyncedParticle]: SyncedParticle,
+    [ObjectCategory.Vehicle]: Vehicle,
 });
 
 type ObjectMapping = {

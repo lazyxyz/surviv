@@ -46,6 +46,8 @@ import { PlayerManager } from "./game/playerManager";
 import { BotManager } from "./game/botManager";
 import { ConnectionManager } from "./game/connectionManager";
 import { SpawnManager } from "./game/spawnManager";
+import { VehicleDefinition } from "@common/definitions/vehicle";
+import { Vehicle } from "./objects/vehicle";
 
 /*
     eslint-disable
@@ -84,7 +86,7 @@ export class Game implements GameData {
 
     readonly teamMode: boolean;
 
-    readonly rainDrops: number;
+    readonly rainDrops: number = 0;
 
     readonly gameMap: MAP;
     totalBots: number = 0;
@@ -236,15 +238,15 @@ export class Game implements GameData {
         this.port = port;
         this.gameMode = maxTeamSize;
         this.gameId = gameId;
-        this.gameMap = "cursedIsland";
+        this.gameMap = "fall";
 
-        if (maxTeamSize == MODE.Dungeon) {
-            this.rainDrops = 300;
-            this.gameMap = "cursedIsland";
-        } else {
-            this.gameMap = "cursedIsland";
-            this.rainDrops = 300;
-        }
+        // if (maxTeamSize == MODE.Dungeon) {
+        //     this.rainDrops = 300;
+        //     this.gameMap = "cursedIsland";
+        // } else {
+        //     this.gameMap = "cursedIsland";
+        //     this.rainDrops = 300;
+        // }
 
         this.teamMode = this.gameMode > MODE.Solo;
         this.updateGameData({
@@ -561,6 +563,14 @@ export class Game implements GameData {
 
     removeObject(object: GameObject): void {
         this.objectSpawner.removeObject(object);
+    }
+
+    addVehicle(definition: VehicleDefinition, position: Vector, layer: Layer): Vehicle {
+        return this.objectSpawner.addVehicle(definition, position, layer);
+    }
+
+    removeVehicle(vehicle: Vehicle): void {
+        this.objectSpawner.removeVehicle(vehicle);
     }
 
     // Delegated to airdropManager

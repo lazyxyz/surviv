@@ -559,7 +559,7 @@ export enum ItemType {
     Backpack,
     Scope,
     Skin,
-    Perk
+    Perk,
 }
 
 export enum ObstacleSpecialRoles {

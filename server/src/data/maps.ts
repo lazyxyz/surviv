@@ -17,6 +17,7 @@ import { getLootFromTable, LootTables } from "./lootTables";
 import { PerkCategories, Perks } from "@common/definitions/perks";
 import { Melees } from "@common/definitions/melees";
 import { Scopes } from "@common/definitions/scopes";
+import { Vehicles } from "@common/definitions/vehicle";
 
 export interface RiverDefinition {
     readonly minAmount: number
@@ -973,11 +974,12 @@ const maps = {
                         map.game.addLoot(item.ammoType, itemPos, 0, { count: Infinity });
                     }
 
-                    itemPos.x += colSpacing;
                     if (itemPos.x > maxX) {
                         itemPos.x = 0;
                         itemPos.y += rowSpacing;
                     }
+                    itemPos.x += colSpacing;
+
                 };
 
                 // Place guns
@@ -999,6 +1001,8 @@ const maps = {
                 for (const item of Scopes.definitions) {
                     placeItem(item);
                 }
+
+                map.game.addVehicle(Vehicles.fromString('buggy'), itemPos, 0);
             }
         };
     })(),
