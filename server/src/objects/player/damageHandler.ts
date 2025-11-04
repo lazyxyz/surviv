@@ -363,11 +363,6 @@ export class DamageHandler {
             player: this.player,
             ...params
         });
-
-
-        setTimeout(() => {
-            this.resurrect();
-        }, 5000);
     }
 
     teamWipe(): void {
