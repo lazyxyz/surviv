@@ -4,7 +4,8 @@ import { Game } from "../../game";
 import { Team } from "../../team";
 import { ActorContainer } from "../player";
 import { BehaviorType, Bot } from "./bot"; // Adjust path as needed
-import { calculateLevelStat } from "./common";
+import { APS_LEVEL_MULT, calculateLevelStat, SPEED_LEVEL_MULT } from "./common";
+import { randomFloat } from "@common/utils/random";
 
 /**
  * Zombie Class
@@ -18,16 +19,15 @@ export class Zombie extends Bot {
         super(game, userData, position, behaviorType, Zombie.NAMES, Zombie.SKIN_ID, layer, team);
 
         const healthMultiplier = calculateLevelStat(1, 0.05, level);
-        this.speedMult = calculateLevelStat(1, 0.1, level);
-        this.apsMult = calculateLevelStat(1, 0.1, level);
+
+        this.speedMult = calculateLevelStat(1, SPEED_LEVEL_MULT, level);
+        this.apsMult = calculateLevelStat(1, APS_LEVEL_MULT, level);
 
         this.health *= 0.5;
         this.health *= healthMultiplier;
-        this.baseChaseSpeed = GameConstants.player.baseSpeed * 0.5;
+        this.baseChaseSpeed = GameConstants.player.baseSpeed * 0.3;
         this.wanderSpeed = GameConstants.player.baseSpeed * 0.3;
-        this.speedMult = 1 + 0.02 * (level - 1);
         this.baseAps = 1;
-        this.apsMult = 1 + 0.03 * (level - 1);
         this.currentMoveDuration = this.getRandomMoveDuration();
     }
 }

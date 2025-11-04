@@ -303,4 +303,6 @@
   "create_team_room": "방"
   "create_team_autofill": "자동 채우기"
   "create_team_lock": "잠금"
+  "play_dungeon": "던전"
+  "new_dungeon_wave": "웨이브 <waves> — 좀비가 온다!"
 }

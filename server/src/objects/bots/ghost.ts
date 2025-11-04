@@ -7,7 +7,7 @@ import { Team } from "../../team";
 import { ActorContainer } from "../player";
 import { BehaviorType, Bot } from "./bot"; // Adjust path as needed
 import { Skins } from "@common/definitions/skins";
-import { calculateLevelStat } from "./common";
+import { APS_LEVEL_MULT, calculateLevelStat, SPEED_LEVEL_MULT } from "./common";
 
 /**
  * Ghost Class
@@ -21,15 +21,13 @@ export class Ghost extends Bot {
         super(game, userData, position, behaviorType, Ghost.NAMES, Ghost.SKIN_ID, layer, team);
 
         const healthMultiplier = calculateLevelStat(1, 0.05, level);
-        this.speedMult = calculateLevelStat(1, 0.1, level);
-        this.apsMult = calculateLevelStat(1, 0.1, level);
+        this.speedMult = calculateLevelStat(1, SPEED_LEVEL_MULT, level);
+        this.apsMult = calculateLevelStat(1, APS_LEVEL_MULT, level);
 
         this.health *= 0.3;
         this.health *= healthMultiplier;
-        this.baseChaseSpeed = GameConstants.player.baseSpeed * 0.5;
-        this.speedMult = 1 + 0.02 * (level - 1);
+        this.baseChaseSpeed = GameConstants.player.baseSpeed * 0.4;
         this.baseAps = 2;
-        this.apsMult = 1 + 0.03 * (level - 1);
         this.target = this.pickNewTarget();
         this.loadout.skin = Skins.fromString('ghost');
 

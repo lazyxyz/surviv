@@ -74,8 +74,10 @@ export class BotManager {
             }
         }
 
-        this.game.livingPlayers.add(bot);
-        // this.game.spectatablePlayers.push(bot);
+        if (this.game.gameMode !== MODE.Dungeon) {
+            this.game.livingPlayers.add(bot);
+        }
+
         this.game.connectedPlayers.add(bot);
         this.game.newPlayers.push(bot);
         this.game.grid.addObject(bot);
@@ -94,7 +96,6 @@ export class BotManager {
 
 
     activateBots(): void {
-
         const FIXED_BOTS = 75; // Fixed total bots per wave (adjust as needed, e.g., 100 for harder)
 
         const botData: ActorContainer = {
@@ -126,9 +127,18 @@ export class BotManager {
                 return;
             }
 
-            // Base level = wave, +2 on milestone waves (5,10,15,...)
-            const isMilestone = wave % 5 === 0;
-            const level = wave + (isMilestone ? 2 : 0);
+            // Dungeon-specific behavior mapping (different "skills" from non-Dungeon)
+            const dungeonBehaviorMap: Record<BotType, BehaviorType> = {
+                [BotType.Zombie]: BehaviorType.LockOnChase,
+                [BotType.Werewolf]: BehaviorType.ChaseRandom,
+                [BotType.Ghost]: BehaviorType.ChaseRandom,
+                [BotType.Boomer]: BehaviorType.ChaseRandom,
+                [BotType.Butcher]: BehaviorType.ChaseRandom,
+                [BotType.Ninja]: BehaviorType.HideAndAttack,
+
+            };
+
+            const level = wave;
 
             // Fixed total bots, distributed evenly
             const perType = Math.floor(FIXED_BOTS / availableTypes.length);
@@ -136,77 +146,62 @@ export class BotManager {
             let spawned = 0;
 
             for (const type of availableTypes) {
+                const behavior = dungeonBehaviorMap[type]; // Dungeon-specific skill/behavior
                 const count = perType + (remainder > 0 ? 1 : 0);
                 remainder = Math.max(0, remainder - 1);
 
                 for (let i = 0; i < count; i++) {
-                    // this.createBot(type, botData, level);
+                    // Pass behavior, undefined for layer/team, wave-based level
+                    this.createBot(type, botData, behavior, undefined, undefined, level);
                     spawned++;
                 }
             }
 
-            this.game.totalBots = spawned;
-            console.log(`Wave ${wave} Bots activated: ${spawned} fixed total (level ${level}), types: ${availableTypes.join(', ')} (milestone: ${isMilestone})`);
+            // Let createBot handle totalBots increments
+            console.log(`Wave ${wave} Bots activated: ${spawned} fixed total (level ${level}), types: ${availableTypes.join(', ')}`);
         } else {
-            // Generate random total bots between 20 and 30
-            const totalBots = 30;
+            // Non-Dungeon: Use original ("old") skills/behaviors and levels
+            // Random total bots between 20 and 30
+            const totalBots = Math.floor(Math.random() * 11) + 20; // 20-30 inclusive
 
-            // Calculate counts based on percentages (proportional distribution with flooring and remainder assignment)
-            let zombieCount = Math.floor(totalBots * 0.2);
-            let ninjaCount = Math.floor(totalBots * 0.2);
-            let werewolfCount = Math.floor(totalBots * 0.2);
-            let ghostCount = Math.floor(totalBots * 0.2);
-            let boomerCount = Math.floor(totalBots * 0.1);
-            let butcherCount = Math.floor(totalBots * 0.1);
-
-            // Distribute any remainder to ensure exact total
-            const currentTotal = zombieCount + ninjaCount + werewolfCount + boomerCount + ghostCount + butcherCount;
-            const remainder = totalBots - currentTotal;
-            const types = [
-                { count: zombieCount, weight: 0.2 },
-                { count: ninjaCount, weight: 0.2 },
-                { count: werewolfCount, weight: 0.2 },
-                { count: ghostCount, weight: 0.2 },
-                { count: boomerCount, weight: 0.1 },
-                { count: butcherCount, weight: 0.1 }
+            // Original 20% distribution for all types
+            const typeConfigs: Array<{ type: BotType; percentage: number; behavior: BehaviorType; level: number }> = [
+                { type: BotType.Zombie, percentage: 0.2, behavior: BehaviorType.ProximityAttack, level: 5 },
+                { type: BotType.Ninja, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 1 },
+                { type: BotType.Werewolf, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 5 },
+                { type: BotType.Boomer, percentage: 0.2, behavior: BehaviorType.ProximityAttack, level: 5 },
+                { type: BotType.Butcher, percentage: 0.2, behavior: BehaviorType.LockOnChase, level: 5 }
             ];
+
+            // Calculate base counts
+            let counts: Record<BotType, number> = {} as Record<BotType, number>;
+            let currentTotal = 0;
+            for (const { type, percentage } of typeConfigs) {
+                counts[type] = Math.floor(totalBots * percentage);
+                currentTotal += counts[type];
+            }
+
+            // Distribute remainder round-robin (fair)
+            const remainder = totalBots - currentTotal;
+            const typeOrder = typeConfigs.map(({ type }) => type);
             for (let i = 0; i < remainder; i++) {
-                // Add to the type with highest weight proportionally
-                const maxWeightIndex = types.reduce((maxIdx, type, idx) => type.weight > types[maxIdx].weight ? idx : maxIdx, 0);
-                types[maxWeightIndex].count++;
-                types[maxWeightIndex].weight -= 0.01; // Slightly reduce to avoid always picking the same
+                const type = typeOrder[i % typeOrder.length];
+                counts[type]++;
             }
 
-            // Extract updated counts
-            ({ count: zombieCount } = types[0]);
-            ({ count: ninjaCount } = types[1]);
-            ({ count: werewolfCount } = types[2]);
-            ({ count: boomerCount } = types[3]);
-            ({ count: ghostCount } = types[4]);
-            ({ count: butcherCount } = types[5]);
+            // Spawn using original skills
+            let spawned = 0;
+            for (const { type, behavior, level } of typeConfigs) {
+                const count = counts[type];
 
-            // Create bots with correct behaviors (based on class definitions)
-            for (let i = 0; i < zombieCount; i++) {
-                this.createBot(BotType.Zombie, botData, BehaviorType.ProximityAttack, undefined, undefined, 5);
-            }
-            for (let i = 0; i < ninjaCount; i++) {
-                this.createBot(BotType.Ninja, botData, BehaviorType.HideAndAttack, undefined, undefined, 1);
-            }
-            for (let i = 0; i < werewolfCount; i++) {
-                this.createBot(BotType.Werewolf, botData, BehaviorType.HideAndAttack, undefined, undefined, 5);
-            }
-            for (let i = 0; i < boomerCount; i++) {
-                this.createBot(BotType.Boomer, botData, BehaviorType.ProximityAttack, undefined, undefined, 5);
-            }
-            for (let i = 0; i < ghostCount; i++) {
-                this.createBot(BotType.Ghost, botData, BehaviorType.LockOnChase, undefined, undefined, 5);
-            }
-            for (let i = 0; i < butcherCount; i++) {
-                this.createBot(BotType.Butcher, botData, BehaviorType.LockOnChase, undefined, undefined, 5);
+                for (let i = 0; i < count; i++) {
+                    this.createBot(type, botData, behavior, undefined, undefined, level);
+                    spawned++;
+                }
             }
 
-            this.game.totalBots = totalBots;
-            Logger.log(`Bots added to game: Total Bots = ${this.game.totalBots} (Zombies: ${zombieCount}, Ninjas: ${ninjaCount}, Werewolves: ${werewolfCount}, Boomers: ${boomerCount}, Ghosts: ${ghostCount}, Butchers: ${butcherCount})`);
+            // Let createBot handle totalBots increments
+            Logger.log(`Bots added to game: Total Bots = ${spawned} (random ${totalBots}) (${Object.entries(counts).map(([t, c]) => `${t}: ${c}`).join(', ')})`);
         }
     }
 

@@ -823,7 +823,10 @@ export class Inventory {
         this.unlockAllSlots();
 
         // Clear weapons: Set to fixed-length array of undefined (preserves type/structure)
-        this.dropWeapons();
+        for (let slot = 0; slot < GameConstants.player.maxWeapons; slot++) {
+            this.destroyWeapon(slot);
+        }
+
         // Reset active/last indices to default (melee slot)
         this._activeWeaponIndex = 2;
         this._lastWeaponIndex = 0;
@@ -849,7 +852,7 @@ export class Inventory {
         // Reset scope to default
         this.scope = DEFAULT_SCOPE;
 
-       for (const perk of this.owner.perks) {
+        for (const perk of this.owner.perks) {
             this.owner.perks.removeItem(perk);
         }
         this.owner.dirty.perks = true;
