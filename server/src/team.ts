@@ -82,7 +82,7 @@ export class CustomTeam {
 
     autoFill = true;
     locked = false;
-    roomMode = false; // allow more than 4 players join
+    roomMode = true; // always room mode
     teamSize = MODE.Squad;
 
     gameID?: number;
