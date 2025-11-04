@@ -280,6 +280,8 @@ export class Game {
             this.fogOfWar.init();
         }
 
+        this.soundManager.loadSounds(gameMode);
+
         await loadTextures(
             pixi.renderer,
             this.inputManager.isMobile
@@ -790,6 +792,7 @@ export class Game {
                     this.rainEffect = undefined;
                 }
 
+                this.fogOfWar.destroy();
                 this.map.clear();
 
                 this.playerNames.clear();

@@ -1392,6 +1392,7 @@
     width: 55px;
     height: 55px;
     transition-property: width height;
+    pointer-events: auto;
 
     cursor: crosshair;
 
@@ -2148,7 +2149,8 @@
 //   }
 // }
 
-#chat-send, #chat-send-all {
+#chat-send,
+#chat-send-all {
   position: absolute;
   bottom: 8px;
   font-size: 12px;
@@ -2162,7 +2164,8 @@
   width: fit-content;
 }
 
-#chat-send:hover, #chat-send-all:hover {
+#chat-send:hover,
+#chat-send-all:hover {
   opacity: 0.65;
 }
 
