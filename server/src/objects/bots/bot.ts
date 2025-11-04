@@ -10,6 +10,7 @@ import { Scopes } from "@common/definitions/scopes";
 import { Config } from "../../config";
 import { DamageParams } from "../gameObject";
 import { Obstacle } from "../obstacle";
+import { randomFloat } from "@common/utils/random";
 const SAFE_DISTANCE_FROM_PLAYER = 5.5;
 
 /**
@@ -267,8 +268,40 @@ export abstract class Bot extends Player {
         // Override in subclasses if needed (e.g., Ghost particle check)
     }
 
+    protected dropLoot(): void {
+        // Ammo drops: 10% chance to drop one random ammo type with amount biased toward higher end (min 70% of range)
+        const ammoTypes = [
+            { type: '9mm', min: 50, max: 100 },
+            { type: '12g', min: 20, max: 50 },
+            { type: '556mm', min: 40, max: 80 },
+            { type: '762mm', min: 40, max: 80 },
+            { type: '50cal', min: 20, max: 50 },
+            { type: '338lap', min: 20, max: 50 }
+        ];
+        if (Math.random() < 0.1) {
+            const selectedAmmo = ammoTypes[Math.floor(Math.random() * ammoTypes.length)];
+            const range = selectedAmmo.max - selectedAmmo.min;
+            const amount = Math.floor(selectedAmmo.min + range * 0.7 + randomFloat(0, range * 0.3));
+            this.game.addLoot(selectedAmmo.type, this.position, this.layer, { count: amount });
+        }
+
+        // Consumable drops: 5% chance to drop one random consumable with uniform random amount
+        const consumables = [
+            { type: 'cola', min: 1, max: 3 },
+            { type: 'tablets', min: 1, max: 2 },
+            { type: 'medikit', min: 1, max: 2 },
+            { type: 'gauze', min: 3, max: 5 }
+        ];
+        if (Math.random() < 0.05) {
+            const selectedConsumable = consumables[Math.floor(Math.random() * consumables.length)];
+            const amount = Math.floor(randomFloat(selectedConsumable.min, selectedConsumable.max + 1)); // +1 to include max
+            this.game.addLoot(selectedConsumable.type, this.position, this.layer, { count: amount });
+        }
+    }
+
     protected onDie(): void {
-        // Override in subclasses if needed (e.g., decrement totalBots)
+        this.game.totalBots--;
+        this.dropLoot();
     }
 
     update(): void {

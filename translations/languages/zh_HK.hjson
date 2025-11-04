@@ -303,4 +303,6 @@
   "create_team_room": "房間"
   "create_team_autofill": "自動填寫"
   "create_team_lock": "鎖定"
+  "play_dungeon": "地下城"
+  "new_dungeon_wave": "波次 <waves> — 殭屍來襲！"
 }

@@ -279,7 +279,7 @@ export const RevivableMaterials: Array<typeof Materials[number]> = [
     "stone",
     "bush",
     "pumpkin",
-    "porcelain",
+    "crate"
 ];
 
 export const RevivableMaterialSet = new Set<typeof RevivableMaterials[number]>(RevivableMaterials);

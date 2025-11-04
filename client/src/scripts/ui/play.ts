@@ -96,13 +96,12 @@ async function initializePlayButtons(game: Game, account: Account): Promise<void
     });
     
     playButtons[2].on("click", async () => {
-        console.log("HELLO")
         if (!account.address) {
             warningAlert("Please connect your wallet to continue!");
             return;
         }
         if (!isClickAllowed()) return;
-        await joinGame(MODE.CursedIsland, game, account);
+        await joinGame(MODE.Dungeon, game, account);
     });
 }
 
