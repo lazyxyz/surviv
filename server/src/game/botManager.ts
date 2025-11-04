@@ -161,16 +161,16 @@ export class BotManager {
             console.log(`Wave ${wave} Bots activated: ${spawned} fixed total (level ${level}), types: ${availableTypes.join(', ')}`);
         } else {
             // Non-Dungeon: Use original ("old") skills/behaviors and levels
-            // Random total bots between 20 and 30
-            const totalBots = Math.floor(Math.random() * 11) + 20; // 20-30 inclusive
+            // Random total bots between 10 and 15
+            const totalBots = Math.floor(Math.random() * 6) + 10; // 10–15 inclusive
 
             // Original 20% distribution for all types
             const typeConfigs: Array<{ type: BotType; percentage: number; behavior: BehaviorType; level: number }> = [
-                { type: BotType.Zombie, percentage: 0.2, behavior: BehaviorType.ProximityAttack, level: 5 },
-                { type: BotType.Ninja, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 1 },
-                { type: BotType.Werewolf, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 5 },
-                { type: BotType.Boomer, percentage: 0.2, behavior: BehaviorType.ProximityAttack, level: 5 },
-                { type: BotType.Butcher, percentage: 0.2, behavior: BehaviorType.LockOnChase, level: 5 }
+                { type: BotType.Zombie, percentage: 0.2, behavior: BehaviorType.ProximityAttack, level: 10 },
+                { type: BotType.Ninja, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 5 },
+                { type: BotType.Werewolf, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 7 },
+                { type: BotType.Boomer, percentage: 0.2, behavior: BehaviorType.ProximityAttack, level: 7 },
+                { type: BotType.Butcher, percentage: 0.2, behavior: BehaviorType.LockOnChase, level: 7 }
             ];
 
             // Calculate base counts

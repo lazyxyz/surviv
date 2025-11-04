@@ -138,11 +138,11 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "equipment", weight: 1 },
             { table: "healing_items", weight: 1 },
             { table: "ammo", weight: 1 },
-            { table: "guns", weight: 0.9 },
+            { table: "guns", weight: 0.5 },
             { table: "scopes", weight: 0.3 }
         ],
         regular_crate: [
-            { table: "guns", weight: 1.25 },
+            { table: "guns", weight: 0.75 },
             { table: "equipment", weight: 1 },
             { table: "healing_items", weight: 1 },
             { table: "ammo", weight: 0.5 },
@@ -212,7 +212,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             min: 1,
             max: 2,
             loot: [
-                { table: "guns", weight: 0.8 },
+                { table: "guns", weight: 0.4 },
                 { table: "healing_items", weight: 0.6 },
                 { table: "scopes", weight: 0.4 },
                 { table: "equipment", weight: 0.3 }
@@ -292,7 +292,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "equipment", weight: 1 },
             { table: "healing_items", weight: 1 },
             { table: "ammo", weight: 1 },
-            { table: "guns", weight: 0.9 },
+            { table: "guns", weight: 0.5 },
             { table: "scopes", weight: 0.3 }
         ],
         large_pumpkin: {
@@ -302,7 +302,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1 },
-                { table: "guns", weight: 0.9 },
+                { table: "guns", weight: 0.6 },
                 { table: "scopes", weight: 0.3 }
             ]
         },
@@ -324,7 +324,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "special_equipment", weight: 0.65 }
         ],
         large_drawer: [
-            { table: "guns", weight: 1 },
+            { table: "guns", weight: 0.5 },
             { table: "equipment", weight: 0.65 },
             { table: "scopes", weight: 0.3 }
         ],
@@ -417,7 +417,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             min: 2,
             max: 3,
             loot: [
-                { table: "guns", weight: 1.25 },
+                { table: "guns", weight: 0.75 },
                 { table: "equipment", weight: 1 },
                 { table: "scopes", weight: 0.35 },
                 { table: "special_guns", weight: 0.8 },
@@ -428,7 +428,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             min: 2,
             max: 3,
             loot: [
-                { table: "guns", weight: 1.25 },
+                { table: "guns", weight: 0.75 },
                 { table: "healing_items", weight: 1 },
                 { table: "equipment", weight: 0.9 },
                 { table: "special_guns", weight: 0.8 },
@@ -1063,19 +1063,17 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ground_loot: [
             { table: "healing_items", weight: 1 },
             { table: "ammo", weight: 1 },
-            { table: "guns", weight: 1 },
+            { table: "guns", weight: 0.5 },
             { table: "equipment", weight: 0.6 },
             { table: "scopes", weight: 0.3 },
-            // { item: "deer_season", weight: 0.2 }
         ],
         regular_crate: [
-            { table: "guns", weight: 1.25 },
+            { table: "guns", weight: 0.75 },
             { table: "healing_items", weight: 1 },
             { table: "equipment", weight: 0.6 },
             { table: "ammo", weight: 0.5 },
             { table: "scopes", weight: 0.3 },
             { table: "throwables", weight: 0.3 },
-            // { item: "deer_season", weight: 0.2 },
             { table: "melee", weight: 0.04 }
         ],
         airdrop_crate: [
@@ -1119,7 +1117,6 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             [{ table: "ammo", weight: 1 }],
             [{ table: "ammo", weight: 1 }],
             [
-                { item: NullString, weight: 1 },
                 { item: "50cal", count: 20, weight: 0.7 },
                 { item: "338lap", count: 6, weight: 0.2 },
                 { item: "curadell", weight: 0.1 }
@@ -1173,7 +1170,6 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "flues", weight: 0.1083 },
                 { item: "dual_m1895", weight: 0.1083 },
                 { item: "blr", weight: 0.1083 },
-                { item: "mp5", weight: 0.1083 },
                 { item: "m4a1", weight: 0.1083 },
                 { item: "scar_l", weight: 0.1083 },
                 { item: "groza", weight: 0.1083 },
@@ -1205,7 +1201,6 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "m1895", weight: 0.166 },
             { item: "hp18", weight: 0.166 },
             { item: "sks", weight: 0.166 },
-            { item: "mp5", weight: 0.166 },
 
             // 28% chance for one of these
             { item: "dt11", weight: 0.14 },
@@ -1255,7 +1250,6 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "scar_l", weight: 0.074 },
             { item: "groza", weight: 0.074 },
             { item: "famas", weight: 0.074 },
-            { item: "mp5", weight: 0.074 },
 
             // 15% chance for one of these (L unlucky)
             { item: "sks", weight: 0.075 },
@@ -1439,12 +1433,12 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ground_loot: [
             { table: "healing_items", weight: 1 },
             { table: "ammo", weight: 1 },
-            { table: "guns", weight: 1 },
+            { table: "guns", weight: 0.5 },
             { table: "equipment", weight: 0.6 },
             { table: "scopes", weight: 0.3 },
         ],
         regular_crate: [
-            { table: "guns", weight: 1.25 },
+            { table: "guns", weight: 0.625 },
             { table: "healing_items", weight: 1 },
             { table: "equipment", weight: 0.6 },
             { table: "ammo", weight: 0.5 },
@@ -1453,7 +1447,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "melee", weight: 0.04 }
         ],
         wood_barrel: [
-            { table: "guns", weight: 1.25 },
+            { table: "guns", weight: 0.625 },
             { table: "healing_items", weight: 1 },
             { table: "equipment", weight: 0.6 },
             { table: "ammo", weight: 0.5 },
@@ -1462,7 +1456,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "melee", weight: 0.04 }
         ],
         ceramic_jar: [
-            { table: "guns", weight: 1.25 },
+            { table: "guns", weight: 0.625 },
             { table: "healing_items", weight: 1 },
             { table: "equipment", weight: 0.6 },
             { table: "ammo", weight: 0.5 },
@@ -1477,7 +1471,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1 },
-                { table: "guns", weight: 0.9 },
+                { table: "guns", weight: 0.45 },
                 { table: "scopes", weight: 0.3 }
             ]
         },
@@ -1488,7 +1482,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1 },
-                { table: "guns", weight: 0.9 },
+                { table: "guns", weight: 0.45 },
                 { table: "scopes", weight: 0.3 }
             ]
         },
@@ -1499,7 +1493,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1 },
-                { table: "guns", weight: 0.9 },
+                { table: "guns", weight: 0.45 },
                 { table: "scopes", weight: 0.3 }
             ]
         },
@@ -1510,7 +1504,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1 },
-                { table: "guns", weight: 0.9 },
+                { table: "guns", weight: 0.45 },
                 { table: "scopes", weight: 0.3 }
             ]
         },
@@ -1521,7 +1515,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1 },
-                { table: "guns", weight: 0.9 },
+                { table: "guns", weight: 0.45 },
                 { table: "scopes", weight: 0.3 }
             ]
         },
@@ -1532,14 +1526,15 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             [{ table: "airdrop_skins", weight: 1 }],
             [{ table: "airdrop_melee", weight: 1 }],
             [{ table: "ammo", weight: 1 }],
-            [{ table: "airdrop_guns", weight: 1 }],
             [
-                { table: "fall_perks", weight: 0.5 },
+                { table: "airdrop_guns", weight: 1 },
                 { item: NullString, weight: 1 }
             ],
             [
+                { table: "fall_perks", weight: 0.5 },
+            ],
+            [
                 { item: "frag_grenade", count: 3, weight: 1 },
-                { item: NullString, weight: 2 }
             ]
         ],
         gold_airdrop_crate: [
@@ -1549,7 +1544,10 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             [{ table: "airdrop_skins", weight: 1 }],
             [{ table: "airdrop_melee", weight: 1 }],
             [{ table: "ammo", weight: 1 }],
-            [{ table: "gold_airdrop_guns", weight: 1 }],
+            [
+                { table: "gold_airdrop_guns", weight: 1 },
+                { item: NullString, weight: 1 }
+            ],
             [{ table: "fall_perks", weight: 1 }],
             [{ item: "frag_grenade", count: 3, weight: 1 }]
         ],
@@ -1557,13 +1555,13 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "l115a1", weight: 0.0001 },
             { item: "mk18", weight: 0.0001 },
             { item: "deagle", weight: 1 },
-            { item: "barrett_m82", weight: 0.0001 }
+            { item: "barrett_m82", weight: 0.0001 },
+            { item: NullString, weight: 1 }
         ],
         ammo_crate: [
             [{ table: "ammo", weight: 1 }],
             [{ table: "ammo", weight: 1 }],
             [
-                { item: NullString, weight: 2 },
                 { item: "50cal", count: 8, weight: 0.5 },
                 { item: "338lap", count: 2, weight: 0.15 },
                 { item: "curadell", weight: 0.05 }
@@ -1578,7 +1576,8 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "deagle", weight: 0.1 },
                 { item: "l115a1", weight: 0.01 },
                 { item: "mk12", weight: 0.5 },
-                { item: "barrett_m82", weight: 0.01 }
+                { item: "barrett_m82", weight: 0.01 },
+                { item: NullString, weight: 3 }
             ],
             [{ item: "hatchet", weight: 1 }],
             [{ item: "woody", weight: 1 }],
@@ -1593,17 +1592,24 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "rgs", weight: 0.4 },
                 { item: "l115a1", weight: 0.05 },
                 { item: "mk18", weight: 0.05 },
-                { item: "barrett_m82", weight: 0.05 }
+                { item: "barrett_m82", weight: 0.05 },
+                { item: NullString, weight: 0.5 }
             ],
             [{ table: "special_scopes", weight: 1 }]
         ],
         gold_rock: [
-            [{ item: "tango_51", weight: 1 }],
+            [
+                { item: "tango_51", weight: 1 },
+                { item: NullString, weight: 1 }
+            ],
             [{ table: "scopes", weight: 1 }]
         ],
         loot_barrel: [
             [{ item: "crowbar", weight: 1 }],
-            [{ item: "tango_51", weight: 1 }],
+            [
+                { item: "tango_51", weight: 1 },
+                { item: NullString, weight: 1 }
+            ],
             [
                 { table: "equipment", weight: 1 },
                 { table: "scopes", weight: 1 },
@@ -1639,7 +1645,8 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 // 5% chance for one of these
                 { item: "l115a1", weight: 0.03 },
                 { item: "mk18", weight: 0.03 },
-                { item: "barrett_m82", weight: 0.03 }
+                { item: "barrett_m82", weight: 0.03 },
+                { item: NullString, weight: 2 }
             ]
         },
         guns: [
@@ -1727,7 +1734,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "barrett_m82", weight: 0.1 }
         ],
         airdrop_skins: [
-            { item: NullString, weight: 3 },
+            { item: NullString, weight: 0.5 },
             { item: "smug", weight: 0.2 },
             { item: "slime", weight: 0.7 },
             { item: "skeleton", weight: 0.6 },
@@ -1739,7 +1746,6 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "15x_scope", weight: 0.005 }
         ],
         airdrop_melee: [
-            { item: NullString, weight: 3 },
             { item: "hatchet", weight: 0.2 },
             { item: "kbar", weight: 0.2 },
             { item: "maul", weight: 0.1 }
@@ -1885,12 +1891,12 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ground_loot: [
             { table: "healing_items", weight: 1 },
             { table: "ammo", weight: 1.5 },
-            { table: "guns", weight: 0.5 },
+            { table: "guns", weight: 0.25 },
             { table: "equipment", weight: 0.6 },
             { table: "scopes", weight: 0.3 },
         ],
         webbed_crate: [
-            { table: "guns", weight: 0.625 },
+            { table: "guns", weight: 0.3125 },
             { table: "healing_items", weight: 1 },
             { table: "equipment", weight: 0.6 },
             { table: "ammo", weight: 1.125 },
@@ -1898,7 +1904,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "throwables", weight: 0.3 }
         ],
         haunted_tree: [
-            { table: "guns", weight: 0.625 },
+            { table: "guns", weight: 0.3125 },
             { table: "healing_items", weight: 1 },
             { table: "equipment", weight: 0.6 },
             { table: "ammo", weight: 1.125 },
@@ -1906,7 +1912,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { table: "throwables", weight: 0.3 }
         ],
         cauldron: [
-            { table: "guns", weight: 0.625 },
+            { table: "guns", weight: 0.3125 },
             { table: "healing_items", weight: 1 },
             { table: "equipment", weight: 0.6 },
             { table: "ammo", weight: 1.125 },
@@ -1920,7 +1926,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1.45 },
-                { table: "guns", weight: 0.45 },
+                { table: "guns", weight: 0.225 },
                 { table: "scopes", weight: 0.3 }
             ]
         },
@@ -1931,7 +1937,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1.45 },
-                { table: "guns", weight: 0.45 },
+                { table: "guns", weight: 0.225 },
                 { table: "scopes", weight: 0.3 }
             ]
         },
@@ -1942,7 +1948,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1.45 },
-                { table: "guns", weight: 0.45 },
+                { table: "guns", weight: 0.225 },
                 { table: "scopes", weight: 0.3 }
             ]
         },
@@ -1953,7 +1959,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1.45 },
-                { table: "guns", weight: 0.45 },
+                { table: "guns", weight: 0.225 },
                 { table: "scopes", weight: 0.3 }
             ]
         },
@@ -1964,7 +1970,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1 },
-                { table: "guns", weight: 0.1 },
+                { table: "guns", weight: 0.05 },
             ]
         },
         modern_tombstone: {
@@ -1974,7 +1980,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { table: "equipment", weight: 1 },
                 { table: "healing_items", weight: 1 },
                 { table: "ammo", weight: 1 },
-                { table: "guns", weight: 0.1 },
+                { table: "guns", weight: 0.05 },
             ]
         },
         airdrop_crate: [
@@ -1983,14 +1989,15 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             [{ table: "airdrop_healing_items", weight: 1 }],
             [{ table: "airdrop_skins", weight: 1 }],
             [{ table: "ammo", weight: 1 }],
-            [{ table: "airdrop_guns", weight: 1 }],
             [
-                { table: "fall_perks", weight: 0.5 },
+                { table: "airdrop_guns", weight: 1 },
                 { item: NullString, weight: 1 }
             ],
             [
+                { table: "fall_perks", weight: 0.5 },
+            ],
+            [
                 { item: "frag_grenade", count: 3, weight: 1 },
-                { item: NullString, weight: 2 }
             ]
         ],
         gold_airdrop_crate: [
@@ -1999,7 +2006,10 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             [{ table: "airdrop_healing_items", weight: 1 }],
             [{ table: "airdrop_skins", weight: 1 }],
             [{ table: "ammo", weight: 1 }],
-            [{ table: "gold_airdrop_guns", weight: 1 }],
+            [
+                { table: "gold_airdrop_guns", weight: 1 },
+                { item: NullString, weight: 1 }
+            ],
             [{ table: "fall_perks", weight: 1 }],
             [{ item: "frag_grenade", count: 3, weight: 1 }]
         ],
@@ -2048,13 +2058,13 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "blr", weight: 0.357 },
             { item: "barrett_m82", weight: 0.357 },
             { item: "mk12", weight: 0.357 },
-            { item: "model_89", weight: 0.357 }
+            { item: "model_89", weight: 0.357 },
+            { item: NullString, weight: 50 }
         ],
         ammo_crate: [
             [{ table: "ammo", weight: 1 }],
             [{ table: "ammo", weight: 1 }],
             [
-                { item: NullString, weight: 2 },
                 { item: "50cal", count: 8, weight: 0.5 },
                 { item: "338lap", count: 2, weight: 0.15 },
                 { item: "curadell", weight: 0.05 }
@@ -2106,7 +2116,8 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "blr", weight: 0.357 },
                 { item: "barrett_m82", weight: 0.357 },
                 { item: "mk12", weight: 0.357 },
-                { item: "model_89", weight: 0.357 }
+                { item: "model_89", weight: 0.357 },
+                { item: NullString, weight: 50 }
             ],
             [{ item: "woody", weight: 1 }],
             [{ item: "regular_helmet", weight: 1 }],
@@ -2159,16 +2170,23 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "blr", weight: 0.357 },
                 { item: "barrett_m82", weight: 0.357 },
                 { item: "mk12", weight: 0.357 },
-                { item: "model_89", weight: 0.357 }
+                { item: "model_89", weight: 0.357 },
+                { item: NullString, weight: 50 }
             ],
             [{ table: "special_scopes", weight: 1 }]
         ],
         gold_rock: [
-            [{ item: "tango_51", weight: 1 }],
+            [
+                { item: "tango_51", weight: 1 },
+                { item: NullString, weight: 1 }
+            ],
             [{ table: "scopes", weight: 1 }]
         ],
         loot_barrel: [
-            [{ item: "tango_51", weight: 1 }],
+            [
+                { item: "tango_51", weight: 1 },
+                { item: NullString, weight: 1 }
+            ],
             [
                 { table: "equipment", weight: 1 },
                 { table: "scopes", weight: 1 },
@@ -2179,14 +2197,17 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             min: 3,
             max: 5,
             loot: [
-                { table: "special_guns", weight: 1 },
+                { table: "special_guns", weight: 0.5 },
                 { table: "special_equipment", weight: 0.65 },
                 { table: "special_healing_items", weight: 0.15 },
                 { table: "special_scopes", weight: 0.3 }
             ]
         },
         titanium_coffin: [
-            { table: "gold_airdrop_guns", weight: 1 }
+            [
+                { table: "gold_airdrop_guns", weight: 1 },
+                { item: NullString, weight: 1 }
+            ]
         ],
         gun_locker: {
             min: 1,
@@ -2236,7 +2257,8 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "blr", weight: 0.357 },
                 { item: "barrett_m82", weight: 0.357 },
                 { item: "mk12", weight: 0.357 },
-                { item: "model_89", weight: 0.357 }
+                { item: "model_89", weight: 0.357 },
+                { item: NullString, weight: 50 }
             ]
         },
         guns: [
@@ -2395,7 +2417,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "model_89", weight: 0.357 }
         ],
         airdrop_skins: [
-            { item: NullString, weight: 3 },
+            { item: NullString, weight: 0.5 },
             { item: "smug", weight: 0.2 },
             { item: "slime", weight: 0.7 },
             { item: "skeleton", weight: 0.6 },

@@ -230,7 +230,6 @@ export class Game implements GameData {
         this.port = port;
         this.gameMode = maxTeamSize;
         this.gameId = gameId;
-
        
         const randMap = this.getRandomMap();
         this.gameMap = randMap.map;
