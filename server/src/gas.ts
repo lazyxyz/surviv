@@ -117,9 +117,11 @@ export class Gas {
             ? gas.overrideDuration
             : currentStage.duration;
 
+        let dps = currentStage.dps;
         // Halve duration for CursedIsland mode
         if (this.game.gameMode === MODE.Dungeon) {
             duration = Math.floor(duration / 2);
+            dps = Math.floor(dps / 2);
         }
 
         this.stage++;
@@ -163,7 +165,7 @@ export class Gas {
 
         this.oldRadius = currentStage.oldRadius * this.mapSize;
         this.newRadius = currentStage.newRadius * this.mapSize;
-        this.dps = currentStage.dps;
+        this.dps = dps;
         this.dirty = true;
         this.completionRatioDirty = true;
 
