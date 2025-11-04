@@ -58,34 +58,4 @@ export class Boomer extends Bot {
 
         this.dead = false;
     }
-
-    private dropLoot(): void {
-        if (Math.random() < 0.05) {
-            const amount = Math.floor(randomFloat(100, 200));
-            this.game.addLoot('9mm', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.05) {
-            const amount = Math.floor(randomFloat(40, 100));
-            this.game.addLoot('12g', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.05) {
-            const amount = Math.floor(randomFloat(80, 160));
-            this.game.addLoot('556mm', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.05) {
-            const amount = Math.floor(randomFloat(80, 160));
-            this.game.addLoot('762mm', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.05) {
-            const amount = Math.floor(randomFloat(40, 100));
-            this.game.addLoot('50cal', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.05) {
-            const amount = Math.floor(randomFloat(40, 100));
-            this.game.addLoot('338lap', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.01) {
-            this.game.addLoot('curadell', this.position, this.layer, { count: 1 });
-        }
-    }
 }

@@ -32,39 +32,4 @@ export class Butcher extends Bot {
         this.target = this.pickNewTarget();
         this.inventory.weapons[2] = new MeleeItem("chainsaw", this);
     }
-
-    protected onDie(): void {
-        this.game.totalBots--;
-        this.dropLoot();
-    }
-
-    private dropLoot(): void {
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(50, 100));
-            this.game.addLoot('9mm', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(20, 50));
-            this.game.addLoot('12g', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(40, 80));
-            this.game.addLoot('556mm', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(40, 80));
-            this.game.addLoot('762mm', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(20, 50));
-            this.game.addLoot('50cal', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.01) {
-            const amount = Math.floor(randomFloat(20, 50));
-            this.game.addLoot('338lap', this.position, this.layer, { count: amount });
-        }
-        if (Math.random() < 0.0005) {
-            this.game.addLoot('curadell', this.position, this.layer, { count: 1 });
-        }
-    }
 }
