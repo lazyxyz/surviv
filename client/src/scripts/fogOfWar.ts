@@ -46,4 +46,12 @@ export class FogOfWar {
             this.maskSprite.y = this.pixi.screen.height / 2;
         }
     }
+    destroy(): void {
+        if (this.maskSprite) {
+            this.pixi.stage.removeChild(this.maskSprite);
+            this.maskSprite.destroy();
+            this.maskSprite = undefined;
+            this.camera.container.mask = null;
+        }
+    }
 }
