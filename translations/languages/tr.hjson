@@ -304,4 +304,5 @@
   "create_team_autofill": "Otomatik"
   "create_team_lock": "Kilit"
   "play_dungeon": "Zindan"
+  "new_dungeon_wave": "Dalga <waves> — Zombiler geliyor!"
 }

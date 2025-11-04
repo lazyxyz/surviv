@@ -285,22 +285,17 @@ export abstract class Bot extends Player {
             this.game.addLoot(selectedAmmo.type, this.position, this.layer, { count: amount });
         }
 
-        // Consumable drops: 20% chance to drop one random consumable with uniform random amount
+        // Consumable drops: 5% chance to drop one random consumable with uniform random amount
         const consumables = [
             { type: 'cola', min: 1, max: 3 },
             { type: 'tablets', min: 1, max: 2 },
             { type: 'medikit', min: 1, max: 2 },
             { type: 'gauze', min: 3, max: 5 }
         ];
-        if (Math.random() < 0.2) {
+        if (Math.random() < 0.05) {
             const selectedConsumable = consumables[Math.floor(Math.random() * consumables.length)];
             const amount = Math.floor(randomFloat(selectedConsumable.min, selectedConsumable.max + 1)); // +1 to include max
             this.game.addLoot(selectedConsumable.type, this.position, this.layer, { count: amount });
-        }
-
-        // Special low-probability drop for curadell
-        if (Math.random() < 0.0005) {
-            this.game.addLoot('curadell', this.position, this.layer, { count: 1 });
         }
     }
 

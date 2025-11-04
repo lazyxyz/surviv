@@ -230,16 +230,11 @@ export class Game implements GameData {
         this.port = port;
         this.gameMode = maxTeamSize;
         this.gameId = gameId;
-        this.gameWave = 5;
 
-        if (maxTeamSize == MODE.Dungeon) {
-            this.rainDrops = 300;
-            this.gameMap = "cursedIsland";
-        } else {
-            const randMap = this.getRandomMap();
-            this.gameMap = randMap.map;
-            this.rainDrops = randMap.rainDrops;
-        }
+       
+        const randMap = this.getRandomMap();
+        this.gameMap = randMap.map;
+        this.rainDrops = randMap.rainDrops;
 
         this.teamMode = this.gameMode > MODE.Solo;
         this.updateGameData({
@@ -389,7 +384,6 @@ export class Game implements GameData {
         // Third loop over players: clean up after all packets have been sent
         for (const player of this.connectedPlayers) {
             if (!player.joined) continue;
-
             player.postPacket();
         }
 
@@ -443,13 +437,14 @@ export class Game implements GameData {
                     };
                 }
 
-                this.packets.push(
-                    DungeonPacket.create({
-                        waves: this.gameWave,
-                    } as DungeonPacketData)
-                );
-
-                setTimeout(() => this.botManager.activateBots(), 5000);
+                setTimeout(() => {
+                    this.packets.push(
+                        DungeonPacket.create({
+                            waves: this.gameWave,
+                        } as DungeonPacketData)
+                    );
+                    this.botManager.activateBots()
+                }, 5000);
             }
         }
 
@@ -509,6 +504,14 @@ export class Game implements GameData {
     // Delegated to gameLifecycle
     postGameStarted(): void {
         this.gameLifecycle.postGameStarted();
+
+        if (this.gameMode === MODE.Dungeon) {
+            this.packets.push(
+                DungeonPacket.create({
+                    waves: this.gameWave,
+                } as DungeonPacketData)
+            );
+        }
     }
 
     // Delegated to objectSpawner

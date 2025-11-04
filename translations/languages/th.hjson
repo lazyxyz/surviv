@@ -304,4 +304,5 @@
   "create_team_autofill": "เติมอัตโนมัติ"
   "create_team_lock": "ล็อก"
   "play_dungeon": "คุกใต้ดิน"
+  "new_dungeon_wave": "คลื่น <waves> — ซอมบี้กำลังมา!"
 }

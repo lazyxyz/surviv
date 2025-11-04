@@ -304,4 +304,5 @@
   "create_team_autofill": "自動入力"
   "create_team_lock": "ロック"
   "play_dungeon": "ダンジョン"
+  "new_dungeon_wave": "ウェーブ <waves> — ゾンビが来る！"
 }

@@ -433,9 +433,14 @@ export class UIManager {
         this.gameOverScreenTimeout = window.setTimeout(() => gameOverOverlay.fadeIn(500), 500);
     }
 
-    updateWaveCounter(value: number) {
-        if (!this.ui.waveMsgCounter) return;
-        this.ui.waveMsgCounter.text(value.toString());
+    updateWaveCounter(waves: number) {
+        this.ui.waveMsgCounter.text(waves.toString());
+
+        const newWave = getTranslatedString("new_dungeon_wave", { waves: waves.toString() });
+        this.ui.gasMsgInfo.text(newWave);
+
+        this.ui.gasMsg.fadeIn();
+        setTimeout(() => this.ui.gasMsg.fadeOut(1000), 3000);
     }
 
 

@@ -304,4 +304,5 @@
   "create_team_autofill": "Remplir"
   "create_team_lock": "Verrou"
   "play_dungeon": "Donjon"
+  "new_dungeon_wave": "Vague <waves> — Les zombies arrivent!"
 }
