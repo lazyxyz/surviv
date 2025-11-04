@@ -303,4 +303,6 @@
   "create_team_room": "Phòng"
   "create_team_autofill": "Tự Điền"
   "create_team_lock": "Khóa"
+  "play_dungeon": "Ngục Tối"
+  "new_dungeon_wave": "Sóng <waves> — Zombie đang đến!"
 }

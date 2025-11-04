@@ -5,7 +5,7 @@ import { MeleeItem } from "../../inventory/meleeItem";
 import { Team } from "../../team";
 import { ActorContainer } from "../player";
 import { BehaviorType, Bot } from "./bot"; // Adjust path as needed
-import { calculateLevelStat } from "./common";
+import { APS_LEVEL_MULT, calculateLevelStat, SPEED_LEVEL_MULT } from "./common";
 
 /**
  * Ninja Class
@@ -19,13 +19,14 @@ export class Ninja extends Bot {
     constructor(game: Game, userData: ActorContainer, position: Vector, behaviorType = BehaviorType.HideAndAttack, layer?: Layer, team?: Team, level: number = 1) {
         super(game, userData, position, behaviorType, Ninja.NAMES, Ninja.SKIN_ID, layer, team);
         const healthMultiplier = calculateLevelStat(1, 0.05, level);
-        this.speedMult = calculateLevelStat(1, 0.1, level);
-        this.apsMult = calculateLevelStat(1, 0.1, level);
+
+        this.speedMult = calculateLevelStat(1, SPEED_LEVEL_MULT, level);
+        this.apsMult = calculateLevelStat(1, APS_LEVEL_MULT, level);
 
         this.health *= 0.7;
         this.health *= healthMultiplier;
         this.useAttackCooldown = false; // Ninjas attack constantly when chasing
-        this.baseChaseSpeed = GameConstants.player.baseSpeed * 0.6;
+        this.baseChaseSpeed = GameConstants.player.baseSpeed * 0.4;
         this.chaseDistance = 30;
         this.centerProximity = 100;
         this.minMoveDuration = 5;

@@ -118,7 +118,7 @@ export const GasStages: GasStage[] = [
     // Round 1
     {
         state: GasState.Waiting,
-        duration: 35,
+        duration: 40,
         oldRadius: 0.762,
         newRadius: 0.68,
         dps: 0,
@@ -149,11 +149,10 @@ export const GasStages: GasStage[] = [
     // Round 3
     {
         state: GasState.Waiting,
-        duration: 30,
+        duration: 25,
         oldRadius: 0.55,
         newRadius: 0.42,
         dps: 2,
-        summonAirdrop: true
     },
     {
         state: GasState.Advancing,
@@ -165,26 +164,26 @@ export const GasStages: GasStage[] = [
     // Round 4
     {
         state: GasState.Waiting,
-        duration: 30,
+        duration: 25,
         oldRadius: 0.42,
         newRadius: 0.3,
-        dps: 3
+        dps: 3,
+        summonAirdrop: true
     },
     {
         state: GasState.Advancing,
         duration: 10,
         oldRadius: 0.42,
         newRadius: 0.3,
-        dps: 3.5
+        dps: 3.5,
     },
     // Round 5
     {
         state: GasState.Waiting,
-        duration: 25,
+        duration: 20,
         oldRadius: 0.3,
         newRadius: 0.2,
         dps: 4,
-        summonAirdrop: true
     },
     {
         state: GasState.Advancing,
@@ -196,7 +195,7 @@ export const GasStages: GasStage[] = [
     // Round 6
     {
         state: GasState.Waiting,
-        duration: 25,
+        duration: 20,
         oldRadius: 0.2,
         newRadius: 0.12,
         dps: 6
@@ -227,14 +226,14 @@ export const GasStages: GasStage[] = [
     // Round 8
     {
         state: GasState.Waiting,
-        duration: 18,
+        duration: 20,
         oldRadius: 0.07,
         newRadius: 0.035,
         dps: 11
     },
     {
         state: GasState.Advancing,
-        duration: 6,
+        duration: 5,
         oldRadius: 0.07,
         newRadius: 0.035,
         dps: 13
@@ -242,7 +241,7 @@ export const GasStages: GasStage[] = [
     // Round 9 
     {
         state: GasState.Waiting,
-        duration: 5,
+        duration: 20,
         oldRadius: 0.035,
         newRadius: 0,
         dps: 14

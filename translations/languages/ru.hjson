@@ -303,4 +303,6 @@
   "create_team_room": "Комната"
   "create_team_autofill": "Авто"
   "create_team_lock": "Блок"
+  "play_dungeon": "Подземелье"
+  "new_dungeon_wave": "Волна <waves> — Зомби идут!"
 }

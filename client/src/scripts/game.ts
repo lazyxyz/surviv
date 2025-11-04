@@ -65,6 +65,7 @@ import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 import { CustomTeamMessages } from "@common/typings";
 import { FogOfWar } from "./fogOfWar";
 import { RainEffect } from "./rainEffect";
+import { DungeonPacket } from "@common/packets/dungeonPackage";
 
 /* eslint-disable @stylistic/indent */
 
@@ -279,6 +280,8 @@ export class Game {
         if (this.gameMap === "cursedIsland") {
             this.fogOfWar.init();
         }
+
+        this.soundManager.loadSounds(gameMode);
 
         await loadTextures(
             pixi.renderer,
@@ -613,6 +616,9 @@ export class Game {
             case packet instanceof GameOverPacket:
                 this.uiManager.showGameOverScreen(packet.output);
                 break;
+            case packet instanceof DungeonPacket:
+                this.uiManager.updateWaveCounter(packet.output.waves);
+                break;
             case packet instanceof RewardsPacket:
                 this.uiManager.showRewardsScreen(packet.output);
                 break;
@@ -708,6 +714,7 @@ export class Game {
         this.gameId = packet.gameId;
 
         const ui = this.uiManager.ui;
+        this.teamSize = packet.maxTeamSize;
 
         if (packet.maxTeamSize !== MODE.Solo) {
             this.teamMode = true;
@@ -790,6 +797,7 @@ export class Game {
                     this.rainEffect = undefined;
                 }
 
+                this.fogOfWar.destroy();
                 this.map.clear();
 
                 this.playerNames.clear();

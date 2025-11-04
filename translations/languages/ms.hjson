@@ -303,4 +303,6 @@
   "create_team_room": "Bilik"
   "create_team_autofill": "Isi Auto"
   "create_team_lock": "Kunci"
+  "play_dungeon": "Penjara Bawah"
+  "new_dungeon_wave": "Gelombang <waves> — Zombie datang!"
 }

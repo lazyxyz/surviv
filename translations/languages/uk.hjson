@@ -303,4 +303,6 @@
   "create_team_room": "Кімната"
   "create_team_autofill": "Авто"
   "create_team_lock": "Блок"
+  "play_dungeon": "Підземелля"
+  "new_dungeon_wave": "Хвиля <waves> — Зомбі йдуть!"
 }

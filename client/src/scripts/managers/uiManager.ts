@@ -233,6 +233,7 @@ export class UIManager {
         killMsgModal: $<HTMLDivElement>("#kill-msg"),
         killMsgHeader: $<HTMLDivElement>("#kill-msg-kills"),
         killMsgCounter: $<HTMLDivElement>("#ui-kills"),
+        waveMsgCounter: $<HTMLDivElement>("#ui-waves"),
         killMsgContainer: $<HTMLDivElement>("#kill-msg-cont"),
 
         killLeaderLeader: $<HTMLSpanElement>("#kill-leader-leader"),
@@ -431,6 +432,17 @@ export class UIManager {
 
         this.gameOverScreenTimeout = window.setTimeout(() => gameOverOverlay.fadeIn(500), 500);
     }
+
+    updateWaveCounter(waves: number) {
+        this.ui.waveMsgCounter.text(waves.toString());
+
+        const newWave = getTranslatedString("new_dungeon_wave", { waves: waves.toString() });
+        this.ui.gasMsgInfo.text(newWave);
+
+        this.ui.gasMsg.fadeIn();
+        setTimeout(() => this.ui.gasMsg.fadeOut(1000), 5000);
+    }
+
 
     showRewardsScreen(packet: RewardsData): void {
         const { eligible, rank, crates, keys } = packet;
@@ -661,7 +673,7 @@ export class UIManager {
         } = data;
 
         if (id) {
-            this.game.activePlayerID = id.id 
+            this.game.activePlayerID = id.id
             const spectating = id.spectating;
             this.game.spectating = spectating;
 
