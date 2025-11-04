@@ -792,6 +792,7 @@ export class Game {
                     this.rainEffect = undefined;
                 }
 
+                this.fogOfWar.destroy();
                 this.map.clear();
 
                 this.playerNames.clear();
