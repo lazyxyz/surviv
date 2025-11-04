@@ -206,23 +206,18 @@ export class Game implements GameData {
     private airdropManager: AirdropManager;
     private gameLifecycle: GameLifecycle;
 
-    getRandomMap(): { map: MAP, rainDrops: number } {
-        const r = Math.random() * 100;
-        let map: MAP;
-        let rainChance = 0;
+    getRandomMap(): { map: MAP; rainDrops: number } {
+        const configs: { map: MAP; rainChance: number }[] = [
+            { map: "desert", rainChance: 0 },
+            { map: "fall", rainChance: 0.5 },
+            { map: "winter", rainChance: 0.5 },
+            { map: "cursedIsland", rainChance: 1 },
+        ];
 
-        if (r < 40) {
-            map = "desert";
-            rainChance = 0;   // desert no rain!
-        } else if (r < 70) {
-            map = "fall";
-            rainChance = 0.5;
-        } else {
-            map = "winter";
-            rainChance = 0.7;
-        }
+        const selectedConfig = configs[(Math.random() * configs.length) | 0];
+        const { map, rainChance } = selectedConfig;
 
-        const rainValues = [100, 200, 300, 400, 500];
+        const rainValues = [200, 300, 400, 500];
         const rainDrops = Math.random() < rainChance
             ? rainValues[(Math.random() * rainValues.length) | 0]
             : 0;
@@ -230,20 +225,18 @@ export class Game implements GameData {
         return { map, rainDrops };
     }
 
-
-
     constructor(port: number, maxTeamSize: MODE, gameId: string) {
         this.port = port;
         this.gameMode = maxTeamSize;
         this.gameId = gameId;
-        this.gameMap = "cursedIsland";
 
         if (maxTeamSize == MODE.Dungeon) {
             this.rainDrops = 300;
             this.gameMap = "cursedIsland";
         } else {
-            this.gameMap = "cursedIsland";
-            this.rainDrops = 300;
+            const randMap = this.getRandomMap();
+            this.gameMap = randMap.map;
+            this.rainDrops = randMap.rainDrops;
         }
 
         this.teamMode = this.gameMode > MODE.Solo;
@@ -430,7 +423,7 @@ export class Game implements GameData {
         }
 
         // game wave end
-        if (this.gameMode == MODE.Dungeon && this._started && !this.over) {
+        if (this.gameMode === MODE.Dungeon && this._started && !this.over) {
             if (this.aliveCount == 0) {
                 this.gameLifecycle.endGame();
             }
