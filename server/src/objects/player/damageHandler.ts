@@ -363,6 +363,11 @@ export class DamageHandler {
             player: this.player,
             ...params
         });
+
+
+        setTimeout(() => {
+            this.resurrect();
+        }, 5000);
     }
 
     teamWipe(): void {
@@ -483,15 +488,13 @@ export class DamageHandler {
         // For simplicity, we'll emit an event for plugins to handle removal; implement grid cleanup as needed
         // this.player.game.pluginManager.emit("remove_death_marker", { player: this.player });
 
-        // Restore inventory slots (re-lock if needed post-death)
-        this.player.inventory.lockAllSlots();  // Assuming a method to re-lock; adjust based on your Inventory class
 
         // Team updates
         this.player._team?.setDirty();
         this.player.dirty.modifiers = true;
         this.player.dirty.items = true;
         this.player.game.fullDirtyObjects.add(this.player);
-        this.player.game.spectatablePlayers.push(this.player);  // Re-add to spectatables
+        this.player.game.spectatablePlayers.push(this.player);
 
         // // Emit post-resurrection event
         // this.player.game.pluginManager.emit("player_did_resurrect", {
