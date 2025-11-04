@@ -1770,7 +1770,8 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             // 32% chance for one of these, not sure
             { item: "l115a1", weight: 0.2 },
             { item: "mk18", weight: 0.2 },
-            { item: "barrett_m82", weight: 0.2 }
+            { item: "barrett_m82", weight: 0.2 },
+            { item: "m134_minigun", weight: 0.2 },
         ],
         viking_chest_guns: [
             // 32% chance for one of these
@@ -2427,7 +2428,6 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "mg36", weight: 0.5 },
             { item: "rpk", weight: 0.5 },
 
-            { item: "barrett_m82", weight: 1 },
             { item: "m134_minigun", weight: 1 },
         ],
         viking_chest_guns: [

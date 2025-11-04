@@ -61,49 +61,43 @@ function setTeamParameters(params: URLSearchParams): void {
     }
 }
 
-
 async function initializePlayButtons(game: Game, account: Account): Promise<void> {
-    const playButtons = [$("#btn-play-solo"), $("#btn-play-squad"), $('#btn-play-cursed-island')];
+    const playConfigs:
+        {
+            selector: string;
+            mode: MODE;
+            key: string;
+            icon: string;
+            spanMargin?: string;
+        }[] = [
+            { selector: "#btn-play-solo", mode: MODE.Solo, key: "solo", icon: "./img/misc/user.svg", spanMargin: "0" },
+            { selector: "#btn-play-squad", mode: MODE.Squad, key: "squad", icon: "./img/misc/user-group.svg", spanMargin: "20px" },
+            { selector: "#btn-play-dungeon", mode: MODE.Dungeon, key: "dungeon", icon: "./img/misc/gate.svg", spanMargin: "20px" }
+        ];
 
-    playButtons.forEach((button, index) => {
+    playConfigs.forEach(config => {
+        const button = $(config.selector);
         button.addClass("play-button");
-        const translationString = `play_${["solo", "squad", "cursed_island"][index]}` as TranslationKeys;
-        const logoSrc = index === 0 ? "./img/misc/user.svg" : "./img/misc/user-group.svg";
+        const translationString = `play_${config.key}` as TranslationKeys;
+        const margin = config.spanMargin ?? "0";
         button.html(`
-            <img class="btn-icon" width="26" height="26" src="${logoSrc}">
-            <span style="margin-left: ${index > 0 ? "20px;" : "0"}" translation="${translationString}">
+            <img class="btn-icon" width="26" height="26" src="${config.icon}">
+            <span style="margin-left: ${margin};" translation="${translationString}">
                 ${getTranslatedString(translationString)}
             </span>
         `);
-    });
 
-    playButtons[0].on("click", async () => {
-        if (!account.address) {
-            warningAlert("Please connect your wallet to continue!");
-            return;
-        }
-        if (!isClickAllowed()) return;
-        await joinGame(MODE.Solo, game, account);
-    });
-
-    playButtons[1].on("click", async () => {
-        if (!account.address) {
-            warningAlert("Please connect your wallet to continue!");
-            return;
-        }
-        if (!isClickAllowed()) return;
-        await joinGame(MODE.Squad, game, account);
-    });
-    
-    playButtons[2].on("click", async () => {
-        if (!account.address) {
-            warningAlert("Please connect your wallet to continue!");
-            return;
-        }
-        if (!isClickAllowed()) return;
-        await joinGame(MODE.Dungeon, game, account);
+        button.on("click", async () => {
+            if (!account.address) {
+                warningAlert("Please connect your wallet to continue!");
+                return;
+            }
+            if (!isClickAllowed()) return;
+            await joinGame(config.mode, game, account);
+        });
     });
 }
+
 
 function setupTeamMenu(game: Game, account: Account): void {
     const { ui } = game.uiManager;

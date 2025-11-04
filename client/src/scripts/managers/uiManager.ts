@@ -440,7 +440,7 @@ export class UIManager {
         this.ui.gasMsgInfo.text(newWave);
 
         this.ui.gasMsg.fadeIn();
-        setTimeout(() => this.ui.gasMsg.fadeOut(1000), 3000);
+        setTimeout(() => this.ui.gasMsg.fadeOut(1000), 5000);
     }
 
 

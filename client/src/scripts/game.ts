@@ -714,6 +714,7 @@ export class Game {
         this.gameId = packet.gameId;
 
         const ui = this.uiManager.ui;
+        this.teamSize = packet.maxTeamSize;
 
         if (packet.maxTeamSize !== MODE.Solo) {
             this.teamMode = true;
