@@ -5,6 +5,7 @@ import { Team } from "../../team";
 import { ActorContainer } from "../player";
 import { BehaviorType, Bot } from "./bot"; // Adjust path as needed
 import { APS_LEVEL_MULT, calculateLevelStat, SPEED_LEVEL_MULT } from "./common";
+import { randomFloat } from "@common/utils/random";
 
 /**
  * Zombie Class

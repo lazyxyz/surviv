@@ -39,8 +39,4 @@ export class Werewolf extends Bot {
     protected checkEnraged(): boolean {
         return this.health < this.maxHealth * this.enragedHealthThreshold;
     }
-
-    protected onDie(): void {
-        this.game.totalBots--;
-    }
 }

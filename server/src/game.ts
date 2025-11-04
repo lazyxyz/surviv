@@ -46,6 +46,7 @@ import { PlayerManager } from "./game/playerManager";
 import { BotManager } from "./game/botManager";
 import { ConnectionManager } from "./game/connectionManager";
 import { SpawnManager } from "./game/spawnManager";
+import { DungeonPacketData, DungeonPacket } from "@common/packets/dungeonPackage";
 
 /*
     eslint-disable
@@ -229,6 +230,7 @@ export class Game implements GameData {
         this.port = port;
         this.gameMode = maxTeamSize;
         this.gameId = gameId;
+        this.gameWave = 5;
 
         if (maxTeamSize == MODE.Dungeon) {
             this.rainDrops = 300;
@@ -440,6 +442,12 @@ export class Game implements GameData {
                         player.damageHandler.resurrect();
                     };
                 }
+
+                this.packets.push(
+                    DungeonPacket.create({
+                        waves: this.gameWave,
+                    } as DungeonPacketData)
+                );
 
                 setTimeout(() => this.botManager.activateBots(), 5000);
             }

@@ -65,6 +65,7 @@ import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 import { CustomTeamMessages } from "@common/typings";
 import { FogOfWar } from "./fogOfWar";
 import { RainEffect } from "./rainEffect";
+import { DungeonPacket } from "@common/packets/dungeonPackage";
 
 /* eslint-disable @stylistic/indent */
 
@@ -612,6 +613,9 @@ export class Game {
                 break;
             case packet instanceof GameOverPacket:
                 this.uiManager.showGameOverScreen(packet.output);
+                break;
+            case packet instanceof DungeonPacket:
+                this.uiManager.updateWaveCounter(packet.output.waves);
                 break;
             case packet instanceof RewardsPacket:
                 this.uiManager.showRewardsScreen(packet.output);

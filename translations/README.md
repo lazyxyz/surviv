@@ -1,6 +1,6 @@
 # Translation File Reports
 
-This file is a report of all errors and missing keys in the translation files of this game. Last generated Tue, 04 Nov 2025 02:48:41 GMT
+This file is a report of all errors and missing keys in the translation files of this game. Last generated Tue, 04 Nov 2025 02:53:52 GMT
 
 ## 🇸🇦 العربية (99% Complete) - ar.hjson
 
