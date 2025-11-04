@@ -1884,8 +1884,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
         ground_loot: [
             { table: "healing_items", weight: 1 },
             { table: "ammo", weight: 1.5 },
-            // { table: "guns", weight: 0.5 },
-            { table: "guns", weight: 5 },
+            { table: "guns", weight: 0.5 },
             { table: "equipment", weight: 0.6 },
             { table: "scopes", weight: 0.3 },
         ],
