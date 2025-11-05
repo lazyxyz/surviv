@@ -8,8 +8,9 @@ import {
     SurvivAssetsMapping,
 } from "@common/blockchain";
 import { ShopCache } from ".";
-import { Account, SurvivItems, type MintResult } from "../../account";
-import { ChainConfig } from "../../../config";
+import { Account, type MintResult } from "../../account";
+import { getSurvivAddress } from "@common/blockchain/contracts";
+import { assetsMapping } from "@common/blockchain/SurvivAssets";
 
 const MAX_RENDER_CRATES = 1000;
 const TESTNET_EXPLORER = "https://shannon-explorer.somnia.network/";
@@ -184,10 +185,8 @@ async function renderClaimButton(account: Account): Promise<HTMLButtonElement | 
  * @param mintedItems - Array of minted items with contract address and token ID/balance pairs.
  * @param explorerLink - Link to the blockchain explorer for transaction details.
  */
-function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): void {
-    const collectionMappings: { [key: string]: { address: string; assets: string[][] } } = {
-        SurvivAssets: SurvivAssetsMapping
-    };
+function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string, account: Account): void {
+    const assetAddress = getSurvivAddress(account.blockchain, "SurvivAssets");
 
     // Map tiers to background images
     const tierBackgrounds: Record<AssetTier, string> = {
@@ -196,25 +195,23 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
         [AssetTier.Divine]: "./img/game/shared/patterns/divine.svg"
     };
 
-    const getImagePath = (address: string, tokenId: number, assetName: string): string => {
-        if (address.toLowerCase() === SurvivAssetsMapping.address.toLowerCase()) {
-            for (const [category, { mappingIndices }] of Object.entries(SurvivAssetRanges)) {
-                for (const index of mappingIndices) {
-                    const startId = index * 1000;
-                    const subArray = (SurvivAssetsMapping.assets[index] || []) as string[];
-                    if (tokenId >= startId && tokenId < startId + subArray.length) {
-                        switch (Number(category)) {
-                            case SurvivAssets.Skins:
-                                return `./img/game/shared/skins/${assetName}_base.svg`;
-                            case SurvivAssets.Emotes:
-                                return `./img/game/shared/emotes/${assetName}.svg`;
-                            case SurvivAssets.Arms:
-                                return `./img/game/shared/weapons/${assetName}.svg`;
-                            case SurvivAssets.Guns:
-                                return `./img/game/shared/weapons/${assetName}.svg`;
-                            default:
-                                break;
-                        }
+    const getImagePath = (tokenId: number, assetName: string): string => {
+        for (const [category, { mappingIndices }] of Object.entries(SurvivAssetRanges)) {
+            for (const index of mappingIndices) {
+                const startId = index * 1000;
+                const subArray = (SurvivAssetsMapping.assets[index] || []) as string[];
+                if (tokenId >= startId && tokenId < startId + subArray.length) {
+                    switch (Number(category)) {
+                        case SurvivAssets.Skins:
+                            return `./img/game/shared/skins/${assetName}_base.svg`;
+                        case SurvivAssets.Emotes:
+                            return `./img/game/shared/emotes/${assetName}.svg`;
+                        case SurvivAssets.Arms:
+                            return `./img/game/shared/weapons/${assetName}.svg`;
+                        case SurvivAssets.Guns:
+                            return `./img/game/shared/weapons/${assetName}.svg`;
+                        default:
+                            break;
                     }
                 }
             }
@@ -222,15 +219,13 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
         return `./img/game/shared/skins/${assetName}_base.svg`; // Default fallback
     };
 
-    const isSkinItem = (address: string, tokenId: number): boolean => {
-        if (address.toLowerCase() === SurvivAssetsMapping.address.toLowerCase()) {
-            const skinIndices = SurvivAssetRanges[SurvivAssets.Skins].mappingIndices;
-            for (const index of skinIndices) {
-                const startId = index * 1000;
-                const subArray = SurvivAssetsMapping.assets[index] || [];
-                if (tokenId >= startId && tokenId < startId + subArray.length) {
-                    return true;
-                }
+    const isSkinItem = (tokenId: number): boolean => {
+        const skinIndices = SurvivAssetRanges[SurvivAssets.Skins].mappingIndices;
+        for (const index of skinIndices) {
+            const startId = index * 1000;
+            const subArray = SurvivAssetsMapping.assets[index] || [];
+            if (tokenId >= startId && tokenId < startId + subArray.length) {
+                return true;
             }
         }
         return false;
@@ -271,25 +266,23 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): 
     const idRandom = Math.floor(Math.random() * 10000000);
     const popupContent = mintedItems.length > 0
         ? mintedItems.flatMap(item => {
-            const mapping = Object.values(collectionMappings).find(
-                m => m.address.toLowerCase() === item.address.toLowerCase()
+            const mapping = Object.values(assetsMapping).find(
+                m => assetAddress === item.address.toLowerCase()
             );
             if (!mapping) return [];
             return item.values.map(([tokenId, value]) => {
                 let assetName: string = `unknown_${tokenId}`;
-                if (mapping === SurvivAssetsMapping) {
-                    for (const index of Object.values(SurvivAssetRanges).flatMap(r => r.mappingIndices)) {
-                        const startId = index * 1000;
-                        const subArray = mapping.assets[index] || [];
-                        if (tokenId >= startId && tokenId < startId + subArray.length) {
-                            assetName = subArray[tokenId - startId];
-                            break;
-                        }
+                for (const index of Object.values(SurvivAssetRanges).flatMap(r => r.mappingIndices)) {
+                    const startId = index * 1000;
+                    const subArray = SurvivAssetsMapping.assets[index] || [];
+                    if (tokenId >= startId && tokenId < startId + subArray.length) {
+                        assetName = subArray[tokenId - startId];
+                        break;
                     }
                 }
 
-                const imageUrl = getImagePath(item.address, tokenId, assetName);
-                const rotationClass = isSkinItem(item.address, tokenId) ? ' rotated' : '';
+                const imageUrl = getImagePath(tokenId, assetName);
+                const rotationClass = isSkinItem(tokenId) ? ' rotated' : '';
                 const tier = getTier(tokenId);
                 const backgroundImage = tierBackgrounds[tier];
 
@@ -345,11 +338,11 @@ async function updateClaimButton(account: Account): Promise<void> {
                 errorAlert(result.error);
             } else {
                 if (result.hash) {
-                    const explorerLink = `${ChainConfig.blockExplorerUrls?.[0] ?? TESTNET_EXPLORER}tx/${result.hash}?tab=index"`;
+                    const explorerLink = `${account.chainConfig.blockExplorerUrls?.[0] ?? TESTNET_EXPLORER}tx/${result.hash}?tab=index"`;
                     if (result.balances) {
-                        showMintedItemsPopup(result.balances, explorerLink);
+                        showMintedItemsPopup(result.balances, explorerLink, account);
                     } else {
-                        showMintedItemsPopup([], explorerLink);
+                        showMintedItemsPopup([], explorerLink, account);
                     }
                 }
 
@@ -386,7 +379,7 @@ export async function loadBase(account: Account): Promise<void> {
     }
 
     if (!ShopCache.baseLoaded) {
-        const kitsBalance = await account.getItemBalances(SurvivItems.SurvivKits);
+        const kitsBalance = await account.getItemBalances("SurvivKits");
 
         ShopCache.assetsBalance.key = Number(kitsBalance["key"]) || 0;
         ShopCache.assetsBalance.crate = Number(kitsBalance["crate"]) || 0;

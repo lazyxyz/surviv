@@ -268,6 +268,7 @@
         </button>
         <div id="languages-selector" class="dropdown-content persistent-scrollbar"></div>
       </div>
+
       <!-- Connect wallet button -->
       <div id="wallet-inactive" class="account-wallet-container dropdown" style="display: block;">
         <button id="connect-wallet-btn" class="btn btn-darken btn-primary account-wallet-button">
@@ -315,7 +316,7 @@
                 <img src="./img/misc/skull_icon.svg" />
                 <span class="counter-text" id="ui-kills">0</span>
               </div>
-              
+
               <div class="gas-card" id="wave-counter">
                 <img src="./img/misc/gate.svg" />
                 <span class="counter-text" id="ui-waves">1</span>
@@ -1182,7 +1183,10 @@
         <div class="connect-wallet-header">
           <img src="./img/logos/surviv.fun.webp" alt="survin.fun" />
 
-          <p>Connect to <span>Surviv.fun</span></p>
+          <!-- <p>Connect to <span>Surviv.fun</span></p> -->
+
+          <div class="chain-select"> </div>
+
         </div>
 
         <div class="connect-wallet-list">
@@ -1224,7 +1228,6 @@
       </div>
     </div>
   </div>
-
 
   <script src="./src/index.ts" type="module"></script>
 </body>

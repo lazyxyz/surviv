@@ -2,7 +2,7 @@ import $ from "jquery";
 import { loadStore } from "./store";
 import { loadBase } from "./base";
 import { loadRewards } from "./rewards";
-import type { Account, SaleItems, ValidRewards } from "../../account";
+import type { Account, SaleCollections, ValidRewards } from "../../account";
 
 
 function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeListOf<HTMLElement>) {
@@ -27,8 +27,18 @@ function setupTabs(tabButtons: NodeListOf<HTMLButtonElement>, tabContents: NodeL
 export let ShopCache: {
     storeLoaded: boolean,
     baseLoaded: boolean,
-    assetsBalance: Record<SaleItems, number>;
-    assetsPrice: Record<SaleItems, string>;
+    assetsBalance: {
+        crate: number;
+        key: number;
+        surviv_card: number;
+        surviv_pass: number;
+    };
+    assetsPrice: {
+        crate: string;
+        key: string;
+        surviv_card: string;
+        surviv_pass: string;
+    };
     PlayerValidRewards: ValidRewards | undefined;
     discountEligible: boolean;
 }

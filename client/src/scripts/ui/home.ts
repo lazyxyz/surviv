@@ -4,12 +4,9 @@ import { TRANSLATIONS, getTranslatedString } from "../../translations";
 import { Config, type ServerInfo } from "../../config";
 import { createDropdown } from "../uiHelpers";
 import type { TranslationKeys } from "../../typings/translations";
-import { errorAlert, successAlert, warningAlert } from "../modal";
-import { SurvivBadges, type Account } from "../account";
+import { type Account } from "../account";
 import { GAME_CONSOLE } from "../..";
 import $ from "jquery";
-import { SURVIV_SHOP_VERSION } from "@common/blockchain";
-import { ethers } from "ethers";
 
 export interface RegionInfo {
     readonly name: string;

@@ -1,7 +1,7 @@
 import { getTranslatedString } from "../../translations";
 import $ from "jquery";
 import { html } from "../utils/misc";
-import { Account, SurvivItems } from "../account";
+import { Account } from "../account";
 import { Badges } from "@common/definitions/badges";
 import { GAME_CONSOLE } from "../..";
 import { SurvivBadgesMapping } from "@common/blockchain";
@@ -29,7 +29,7 @@ export async function showBadges(account: Account) {
     const currentBadge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
 
     // Get user badge balances
-    const userBadgeBalances = await account.getItemBalances(SurvivItems.SurvivBadges);
+    const userBadgeBalances = await account.getItemBalances("SurvivBadges");
     const userOwnedBadges = new Map(Object.entries(userBadgeBalances).map(([id, balance]) => [id, Number(balance)]));
 
     // Calculate total boost

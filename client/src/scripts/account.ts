@@ -6,11 +6,11 @@ import { ethers, toBeHex } from "ethers";
 
 import {
     SurvivAssetsMapping,
-    SurvivKitsMapping,
-    SurvivBadgesMapping,
     SurvivAssets,
     SurvivAssetRanges,
-    AssetTier
+    AssetTier,
+    SurvivKitsMapping,
+    SurvivBadgesMapping,
 } from "@common/blockchain";
 
 import { abi as survivRewardsABI } from "@common/abis/ISurvivRewards.json";
@@ -23,36 +23,16 @@ import { errorAlert, warningAlert } from "./modal";
 import { resetPlayButtons } from "./ui/home";
 import { getWalletConnectInfo, getWalletConnectInit } from "./wallet/walletConnect";
 import type { EthereumProviderOptions } from "@walletconnect/ethereum-provider";
-import { Blockchain, getSurvivAddress } from "@common/blockchain/contracts";
+import { Blockchain, getSurvivAddress, type SurvivContractName } from "@common/blockchain/contracts";
 import { getChainConfig, type ChainInfo } from "@common/blockchain/config";
 
-export enum SurvivKits {
-    Crates = "crate",
-    Keys = "key",
-}
 
-export enum SurvivBadges {
-    Cards = "surviv_card",
-    Pass = "surviv_pass",
-}
-export type SaleItems = SurvivKits | SurvivBadges;
+export type SaleCollections = "SurvivKits" | "SurvivBadges";
+export type SaleItems = "crate" | "key" | "surviv_pass" | "surviv_card";
 
-export enum SurvivItems {
-    SurvivKits,
-    SurvivBadges
-};
-
-// Mapping of SurvivItems enums to their contract mappings
-const itemMappings: Record<SurvivItems, { address: string; assets: string[] }> = {
-    [SurvivItems.SurvivKits]: SurvivKitsMapping,
-    [SurvivItems.SurvivBadges]: SurvivBadgesMapping
-};
-
-const saleMappings: Record<SaleItems, { address: string; assets: string[] }> = {
-    [SurvivKits.Crates]: SurvivKitsMapping,
-    [SurvivKits.Keys]: SurvivKitsMapping,
-    [SurvivBadges.Cards]: SurvivBadgesMapping,
-    [SurvivBadges.Pass]: SurvivBadgesMapping,
+const saleMappings: Record<SaleCollections, { assets: string[] }> = {
+    ["SurvivKits"]: SurvivKitsMapping,
+    ["SurvivBadges"]: SurvivBadgesMapping
 };
 
 
@@ -150,7 +130,7 @@ export class Account extends EIP6963 {
 
         if (getSelectorFromStorage?.length) {
             if (getSelectorFromStorage === WalletType.WalletConnect) {
-                getWalletConnectInit({
+                getWalletConnectInit(this.chainConfig.chainId, {
                     session: JSON.parse(localStorage.getItem(SESSION_WALLETCONNECT) as string) as EthereumProviderOptions['session'],
                 }).then(provider => {
                     const parseProvider = {
@@ -341,17 +321,11 @@ export class Account extends EIP6963 {
     async getAssetBalances(
         returnAll: boolean = false
     ): Promise<Record<SurvivAssets, Record<AssetTier, Record<string, number>>>> {
-
-
         if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
 
-        if (!SurvivAssetsMapping || !SurvivAssetsMapping.address || !Array.isArray(SurvivAssetsMapping.assets)) {
-            throw new Error('Invalid SurvivAssetsMapping configuration');
-        }
-
-        const assetsAddress = SurvivAssetsMapping.address;
+        const assetsAddress = getSurvivAddress(this.blockchain, "SurvivAssets");
         if (!ethers.isAddress(assetsAddress)) {
             throw new Error('Invalid contract address in SurvivAssetsMapping');
         }
@@ -453,7 +427,7 @@ export class Account extends EIP6963 {
      * @throws Error if the contract address is invalid, provider is unavailable, or mapping is invalid.
      */
     async getItemBalances(
-        assetType: SurvivItems,
+        assetType: SaleCollections,
         returnAll: boolean = false
     ): Promise<Record<string, number>> {
         // Ensure RPC URL is available
@@ -461,13 +435,10 @@ export class Account extends EIP6963 {
             throw new Error('RPC URL not configured');
         }
 
+        const assetsAddress = getSurvivAddress(this.blockchain, assetType);
+        const selectedMapping = saleMappings[assetType];
 
-        const selectedMapping = itemMappings[assetType];
-        if (!selectedMapping || !selectedMapping.address || !Array.isArray(selectedMapping.assets)) {
-            throw new Error(`Invalid mapping configuration for asset type ${assetType}`);
-        }
-
-        const assetsAddress = selectedMapping.address;
+        // const assetsAddress = selectedMapping.address;
         if (!ethers.isAddress(assetsAddress)) {
             throw new Error(`Invalid contract address: ${assetsAddress}`);
         }
@@ -714,9 +685,9 @@ export class Account extends EIP6963 {
             const signer = await ethersProvider.getSigner();
 
             const crateBaseContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivBase"), crateBaseABI, signer);
-            const cratesContract = new ethers.Contract(SurvivKitsMapping.address, erc1155ABI, signer);
+            const cratesContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivKits"), erc1155ABI, signer);
 
-            const kitsMapping = itemMappings[SurvivItems.SurvivKits];
+            const kitsMapping = saleMappings["SurvivKits"];
             const crateIndex = kitsMapping.assets.indexOf("crate");
             const keyIndex = kitsMapping.assets.indexOf("key");
 
@@ -808,20 +779,20 @@ export class Account extends EIP6963 {
 
     /**
      * Purchases a specified item with a given payment token.
-     * @param item - The ID of the item to purchase.
+     * @param collection - The ID of the item to purchase.
      * @param amount - The quantity of the item to purchase.
      * @param paymentToken - Token payment ID.
      * @returns A promise resolving to the API response.
      * @throws Error if the API request fails, authentication is invalid, or payment fails.
      */
-    async buyItems(item: SaleItems, amount: number, paymentToken: string, value: bigint): Promise<any> {
+    async buyItems(collection: SaleCollections, item: SaleItems, amount: number, paymentToken: string, value: bigint): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
-        let itemAddress = saleMappings[item].address;
-        let itemIndex = saleMappings[item].assets.indexOf(item);
+        let itemAddress = getSurvivAddress(this.blockchain, collection);
+        let itemIndex = saleMappings[collection].assets.indexOf(item);
         if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
-            throw new Error(`Invalid contract address or tokenId for ${item}`);
+            throw new Error(`Invalid contract address or tokenId for ${collection}`);
         }
 
         // Set fetch timeout
@@ -845,16 +816,15 @@ export class Account extends EIP6963 {
     }
 
 
-    async buyItemsV2(item: SaleItems, amount: number, value: bigint): Promise<any> {
+    async buyItemsV2(collection: SaleCollections, item: SaleItems, amount: number, value: bigint): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
-        let itemAddress = saleMappings[item].address;
-        let itemIndex = saleMappings[item].assets.indexOf(item);
+        let itemAddress = getSurvivAddress(this.blockchain, collection);
+        let itemIndex = saleMappings[collection].assets.indexOf(item);
         if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
             throw new Error(`Invalid contract address or tokenId for ${item}`);
         }
-
 
         // Set fetch timeout
         const controller = new AbortController();
@@ -877,20 +847,16 @@ export class Account extends EIP6963 {
         }
     }
 
-    async queryPrice(
-        item: SaleItems, // Use SaleItems key type ("Crates" | "Cards" | "Keys")
-        paymentToken: string // Use PaymentTokens key type ("NativeToken")
-    ): Promise<any> {
+    async queryPrice(collection: SaleCollections, item: SaleItems, paymentToken: string): Promise<any> {
         // Ensure RPC URL is available
         if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
 
-        let itemValue = saleMappings[item];
-        let itemAddress = itemValue.address;
+        let itemAddress = getSurvivAddress(this.blockchain, collection);
 
-        let itemIndex = itemValue.assets.indexOf(item);
-        if (!ethers.isAddress(itemValue.address) || itemIndex === -1) {
+        let itemIndex = saleMappings[collection].assets.indexOf(item);
+        if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
             throw new Error(`Invalid contract address or tokenId for ${item}`);
         }
 
@@ -917,19 +883,15 @@ export class Account extends EIP6963 {
         }
     }
 
-    async queryPriceV2(
-        item: SaleItems // Use SaleItems key type ("Crates" | "Cards" | "Keys")
-    ): Promise<any> {
+    async queryPriceV2(collection: SaleCollections, item: SaleItems): Promise<any> {
         // Ensure RPC URL is available
         if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
 
-        let itemValue = saleMappings[item];
-        let itemAddress = itemValue.address;
-
-        let itemIndex = itemValue.assets.indexOf(item);
-        if (!ethers.isAddress(itemValue.address) || itemIndex === -1) {
+        let itemAddress = getSurvivAddress(this.blockchain, collection);
+        let itemIndex = saleMappings[collection].assets.indexOf(item);
+        if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
             throw new Error(`Invalid contract address or tokenId for ${item}`);
         }
 
@@ -1229,7 +1191,7 @@ export class Account extends EIP6963 {
                 throw new Error(`Badge "${badgeName}" not found in assets mapping`);
             }
 
-            const contractAddress = SurvivBadgesMapping.address;
+            const contractAddress = getSurvivAddress(this.blockchain, "SurvivBadges");
             const apiUrl = `${this.chainConfig.blockExplorerAPI}/api/v2/tokens/${contractAddress}/instances/${tokenId}/holders`;
 
             const response = await fetch(apiUrl, {
