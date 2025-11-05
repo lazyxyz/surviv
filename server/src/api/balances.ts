@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { SurvivAssetRanges, SurvivAssetsMapping, SurvivBadgesMapping } from '@common/mappings'; // Adjust path as needed
+import { SurvivAssetRanges, SurvivAssetsMapping, SurvivBadgesMapping } from '@common/blockchain'; // Adjust path as needed
 import { EMOTE_SLOTS } from '@common/constants';
 import { BadgeDefinition, Badges } from '@common/definitions/badges';
 import { EmoteDefinition, Emotes } from '@common/definitions/emotes';

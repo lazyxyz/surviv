@@ -6,7 +6,7 @@ import {
     SurvivAssetRanges,
     SurvivAssets,
     SurvivAssetsMapping,
-} from "@common/mappings";
+} from "@common/blockchain";
 import { ShopCache } from ".";
 import { Account, SurvivItems, type MintResult } from "../../account";
 import { ChainConfig } from "../../../config";

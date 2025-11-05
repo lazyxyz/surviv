@@ -1,11 +1,11 @@
 import $ from "jquery";
-import { formatEther } from "ethers";
-import { Account, SurvivBadges, SurvivItems, SurvivKits, type PaymentTokenType, type SaleItems } from "../../account";
+import { ethers, formatEther } from "ethers";
+import { Account, SurvivBadges, SurvivItems, SurvivKits, type SaleItems } from "../../account";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 import { ShopCache } from ".";
 import { GAME_CONSOLE } from "../../..";
 import { ChainConfig } from "../../../config";
-import { SURVIV_SHOP_VERSION } from "@common/mappings";
+import { SURVIV_SHOP_VERSION } from "@common/blockchain";
 
 const DISCOUNT = 20; // DISCOUNT 20%
 const MAX_BADGES_CAP = 1000;
@@ -21,7 +21,7 @@ interface StoreItem {
 async function fetchPrice(
     account: Account,
     itemType: SaleItems,
-    paymentToken: PaymentTokenType = "NativeToken"
+    paymentToken: string = ethers.ZeroAddress
 ): Promise<string> {
     // Return cached price if available
     if (ShopCache.assetsPrice[itemType]) {
@@ -263,7 +263,7 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
                 if (SURVIV_SHOP_VERSION == 2) {
                     await account.buyItemsV2(itemType, amount, value);
                 } else {
-                    await account.buyItems(itemType, amount, "NativeToken", value);
+                    await account.buyItems(itemType, amount, ethers.ZeroAddress, value);
                 }
                 // Update balance locally
                 const item = storeItems.find(item => item.itemType === itemType);

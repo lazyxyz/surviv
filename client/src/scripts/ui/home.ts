@@ -8,7 +8,7 @@ import { errorAlert, successAlert, warningAlert } from "../modal";
 import { SurvivBadges, type Account } from "../account";
 import { GAME_CONSOLE } from "../..";
 import $ from "jquery";
-import { SURVIV_SHOP_VERSION } from "@common/mappings";
+import { SURVIV_SHOP_VERSION } from "@common/blockchain";
 import { ethers } from "ethers";
 
 export interface RegionInfo {

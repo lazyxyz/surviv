@@ -4,7 +4,7 @@ import { html } from "../utils/misc";
 import { Account, SurvivItems } from "../account";
 import { Badges } from "@common/definitions/badges";
 import { GAME_CONSOLE } from "../..";
-import { SurvivBadgesMapping } from "@common/mappings";
+import { SurvivBadgesMapping } from "@common/blockchain";
 
 export function getBadgeImage(badgeId: string): string {
     if (!badgeId) return "";

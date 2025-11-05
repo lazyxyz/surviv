@@ -1,6 +1,6 @@
 import $, { error } from "jquery";
 
-import { ACCESS_TOKEN, PUBLIC_KEY, SELECTOR_WALLET, SESSION_WALLETCONNECT, shorten, WalletType } from "./utils/constants";
+import { ACCESS_TOKEN, CHAIN_NAME, PUBLIC_KEY, SELECTOR_WALLET, SESSION_WALLETCONNECT, shorten, WalletType } from "./utils/constants";
 import { EIP6963, type Provider6963Props } from "./eip6963";
 import { ethers, toBeHex } from "ethers";
 
@@ -8,11 +8,10 @@ import {
     SurvivAssetsMapping,
     SurvivKitsMapping,
     SurvivBadgesMapping,
-    SurvivMapping,
     SurvivAssets,
     SurvivAssetRanges,
     AssetTier
-} from "@common/mappings";
+} from "@common/blockchain";
 
 import { abi as survivRewardsABI } from "@common/abis/ISurvivRewards.json";
 import { abi as crateBaseABI } from "@common/abis/ICrateBase.json";
@@ -22,14 +21,10 @@ import { abi as survivShopV2ABI } from "@common/abis/ISurvivShopV2.json";
 import { abi as seasonRewardsABI } from "@common/abis/INFTDistribution.json";
 import { errorAlert, warningAlert } from "./modal";
 import { resetPlayButtons } from "./ui/home";
-import { ChainConfig } from "../config";
 import { getWalletConnectInfo, getWalletConnectInit } from "./wallet/walletConnect";
 import type { EthereumProviderOptions } from "@walletconnect/ethereum-provider";
-
-const SURVIV_REWARD_ADDRESS = SurvivMapping.SurvivRewards.address;
-const SURVIV_BASE_ADDRESS = SurvivMapping.SurvivBase.address;
-const SURVIV_SHOP_ADDRESS = SurvivMapping.SurvivShop.address;
-const SURVIV_SHOPV2_ADDRESS = SurvivMapping.SurvivShopV2.address;
+import { Blockchain, getSurvivAddress } from "@common/blockchain/contracts";
+import { getChainConfig, type ChainInfo } from "@common/blockchain/config";
 
 export enum SurvivKits {
     Crates = "crate",
@@ -60,11 +55,6 @@ const saleMappings: Record<SaleItems, { address: string; assets: string[] }> = {
     [SurvivBadges.Pass]: SurvivBadgesMapping,
 };
 
-export const PaymentTokens = {
-    NativeToken: SurvivMapping.NativeToken.address,
-} as const;
-
-export type PaymentTokenType = keyof typeof PaymentTokens;
 
 /**
 * Interface for crate data structure
@@ -120,10 +110,23 @@ export class Account extends EIP6963 {
     address: string | null | undefined;
     token: string | null | undefined;
     api: string | null | undefined;
+    blockchain: Blockchain = Blockchain.Shannon;
+    chainConfig: ChainInfo;
+
     readonly eip6963 = new EIP6963();
 
     constructor() {
         super();
+
+        {
+            const storedChainName = localStorage.getItem(CHAIN_NAME);
+            this.blockchain = (storedChainName && storedChainName in Blockchain
+                ? (Blockchain[storedChainName as keyof typeof Blockchain] as Blockchain)
+                : Blockchain.Shannon
+            );
+            this.chainConfig = getChainConfig(this.blockchain);
+        }
+
         const getAddressFromStorage = localStorage.getItem(PUBLIC_KEY);
         const getTokenFromStorage = localStorage.getItem(ACCESS_TOKEN);
         const getSelectorFromStorage = localStorage.getItem(SELECTOR_WALLET);
@@ -176,6 +179,11 @@ export class Account extends EIP6963 {
         this.api = api;
     }
 
+    setBlockchain(newChain: Blockchain) {
+        this.blockchain = newChain;
+        this.chainConfig = getChainConfig(this.blockchain);
+    }
+
     disconnect(): void {
         // clear localStorage
         {
@@ -209,11 +217,12 @@ export class Account extends EIP6963 {
                 method: "eth_chainId"
             }) as string;
 
-            if (currentChainId !== ChainConfig.chainId) {
+
+            if (currentChainId !== this.chainConfig.chainId) {
                 try {
                     await getProvider.provider.request({
                         method: "wallet_switchEthereumChain",
-                        params: [{ chainId: ChainConfig.chainId }]
+                        params: [{ chainId: this.chainConfig.chainId }]
                     });
                 } catch (switchError: any) {
                     // If the chain is not added (e.g., error code 4902), add it
@@ -221,7 +230,7 @@ export class Account extends EIP6963 {
                         try {
                             await getProvider.provider.request({
                                 method: "wallet_addEthereumChain",
-                                params: [ChainConfig]
+                                params: [this.chainConfig]
                             });
                         } catch (addError) {
                             errorAlert("Failed to add the Somnia Testnet. Please add it manually in your wallet.");
@@ -334,7 +343,7 @@ export class Account extends EIP6963 {
     ): Promise<Record<SurvivAssets, Record<AssetTier, Record<string, number>>>> {
 
 
-        if (!ChainConfig.rpcUrls[0]) {
+        if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
 
@@ -348,7 +357,7 @@ export class Account extends EIP6963 {
         }
 
         // Initialize the ethers contract
-        const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+        const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
         const contract = new ethers.Contract(assetsAddress, erc1155ABI, ethersProvider);
 
         // Initialize result with nested structure: SurvivAssets -> Tier -> assetName -> balance
@@ -448,7 +457,7 @@ export class Account extends EIP6963 {
         returnAll: boolean = false
     ): Promise<Record<string, number>> {
         // Ensure RPC URL is available
-        if (!ChainConfig.rpcUrls[0]) {
+        if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
 
@@ -471,7 +480,7 @@ export class Account extends EIP6963 {
         }
 
         // Initialize the ethers contract
-        const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+        const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
         const contract = new ethers.Contract(assetsAddress, erc1155ABI, ethersProvider);
 
         // Batch query balances
@@ -521,7 +530,7 @@ export class Account extends EIP6963 {
             // Initialize contract
             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
             const signer = await ethersProvider.getSigner();
-            const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, signer);
+            const contract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivRewards"), survivRewardsABI, signer);
 
             // Execute claim transaction
             const tx = await contract.claimBatch(validCrates, validSignatures);
@@ -548,7 +557,7 @@ export class Account extends EIP6963 {
         }
 
         // Ensure RPC URL is available
-        if (!ChainConfig.rpcUrls[0]) {
+        if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
 
@@ -601,8 +610,8 @@ export class Account extends EIP6963 {
             }
 
             // Initialize contract with read-only provider
-            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
-            const contract = new ethers.Contract(SURVIV_REWARD_ADDRESS, survivRewardsABI, ethersProvider);
+            const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
+            const contract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivRewards"), survivRewardsABI, ethersProvider);
 
             // Batch check used signatures
             const validIndices: number[] = [];
@@ -704,7 +713,7 @@ export class Account extends EIP6963 {
             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
             const signer = await ethersProvider.getSigner();
 
-            const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
+            const crateBaseContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivBase"), crateBaseABI, signer);
             const cratesContract = new ethers.Contract(SurvivKitsMapping.address, erc1155ABI, signer);
 
             const kitsMapping = itemMappings[SurvivItems.SurvivKits];
@@ -751,7 +760,7 @@ export class Account extends EIP6963 {
             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
             const signer = await ethersProvider.getSigner();
 
-            const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, signer);
+            const crateBaseContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivBase"), crateBaseABI, signer);
             const remainingCommits = await crateBaseContract.getCommits(signer.address);
 
             if (remainingCommits.length > 0n) {
@@ -805,7 +814,7 @@ export class Account extends EIP6963 {
      * @returns A promise resolving to the API response.
      * @throws Error if the API request fails, authentication is invalid, or payment fails.
      */
-    async buyItems(item: SaleItems, amount: number, paymentToken: PaymentTokenType, value: bigint): Promise<any> {
+    async buyItems(item: SaleItems, amount: number, paymentToken: string, value: bigint): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
@@ -823,17 +832,12 @@ export class Account extends EIP6963 {
             // Initialize contract
             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
             const signer = await ethersProvider.getSigner();
-            let paymentTokenValue = PaymentTokens[paymentToken];
 
-            const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, signer);
-            if (paymentTokenValue == PaymentTokens.NativeToken) {
-                const tx = await survivShopContract.buyItems(itemAddress, itemIndex, amount, paymentTokenValue, { value });
-                const receipt = await tx.wait();
-                clearTimeout(timeoutId);
-                return receipt;
-            } else {
-                throw new Error('Payment supported yet.');
-            }
+            const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShop"), survivShopABI, signer);
+            const tx = await survivShopContract.buyItems(itemAddress, itemIndex, amount, paymentToken, { value });
+            const receipt = await tx.wait();
+            clearTimeout(timeoutId);
+            return receipt;
         } catch (error: any) {
             clearTimeout(timeoutId);
             throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
@@ -860,7 +864,7 @@ export class Account extends EIP6963 {
             // Initialize contract
             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
             const signer = await ethersProvider.getSigner();
-            const survivShopContract = new ethers.Contract(SURVIV_SHOPV2_ADDRESS, survivShopV2ABI, signer);
+            const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShopV2"), survivShopV2ABI, signer);
 
             const tx = await survivShopContract.buyItems(itemAddress, itemIndex, amount, { value });
             const receipt = await tx.wait();
@@ -875,10 +879,10 @@ export class Account extends EIP6963 {
 
     async queryPrice(
         item: SaleItems, // Use SaleItems key type ("Crates" | "Cards" | "Keys")
-        paymentToken: PaymentTokenType // Use PaymentTokens key type ("NativeToken")
+        paymentToken: string // Use PaymentTokens key type ("NativeToken")
     ): Promise<any> {
         // Ensure RPC URL is available
-        if (!ChainConfig.rpcUrls[0]) {
+        if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
 
@@ -896,13 +900,13 @@ export class Account extends EIP6963 {
 
         try {
             // Initialize JSON-RPC provider
-            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+            const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
 
             // Initialize contract with read-only provider (no signer needed)
-            const survivShopContract = new ethers.Contract(SURVIV_SHOP_ADDRESS, survivShopABI, ethersProvider);
+            const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShop"), survivShopABI, ethersProvider);
 
             // Call the getPrice function
-            const price = await survivShopContract.getPrice(PaymentTokens[paymentToken], itemAddress, itemIndex);
+            const price = await survivShopContract.getPrice(paymentToken, itemAddress, itemIndex);
 
             clearTimeout(timeoutId);
             return price;
@@ -917,7 +921,7 @@ export class Account extends EIP6963 {
         item: SaleItems // Use SaleItems key type ("Crates" | "Cards" | "Keys")
     ): Promise<any> {
         // Ensure RPC URL is available
-        if (!ChainConfig.rpcUrls[0]) {
+        if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
 
@@ -935,10 +939,10 @@ export class Account extends EIP6963 {
 
         try {
             // Initialize JSON-RPC provider
-            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+            const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
 
             // Initialize contract with read-only provider (no signer needed)
-            const survivShopContract = new ethers.Contract(SURVIV_SHOPV2_ADDRESS, survivShopV2ABI, ethersProvider);
+            const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShopV2"), survivShopV2ABI, ethersProvider);
 
             // Call the getPrice function
             const price = await survivShopContract.getPrice(itemAddress, itemIndex);
@@ -954,7 +958,7 @@ export class Account extends EIP6963 {
 
     async getCommits(): Promise<any> {
         // Ensure RPC URL is available
-        if (!ChainConfig.rpcUrls[0]) {
+        if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
 
@@ -970,10 +974,10 @@ export class Account extends EIP6963 {
 
         try {
             // Initialize JSON-RPC provider
-            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+            const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
 
             // Initialize contract with read-only provider (no signer needed)
-            const crateBaseContract = new ethers.Contract(SURVIV_BASE_ADDRESS, crateBaseABI, ethersProvider);
+            const crateBaseContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivBase"), crateBaseABI, ethersProvider);
 
             // Call the getCommits function with the provided user address
             const remainingCommits = await crateBaseContract.getCommits(this.address);
@@ -989,13 +993,13 @@ export class Account extends EIP6963 {
 
     async getTokenMints(txnHash: string): Promise<MintResult[]> {
         // Ensure RPC URL is available
-        if (!ChainConfig.rpcUrls[0]) {
+        if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
 
         try {
             // Initialize JSON-RPC provider
-            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+            const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
 
             // Fetch the transaction receipt using the provider
             const receipt = await ethersProvider.getTransactionReceipt(txnHash);
@@ -1075,7 +1079,7 @@ export class Account extends EIP6963 {
     }
 
     async getSeasonRewards(season: string = "1"): Promise<SeasonRewardsData> {
-        if (!ChainConfig.rpcUrls[0]) {
+        if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
         // Validate userAddress
@@ -1101,7 +1105,7 @@ export class Account extends EIP6963 {
             const rewardsData: SeasonRewardsData = await response.json();
 
             if (rewardsData.success) {
-                const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+                const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
 
                 const distributionContract = new ethers.Contract(
                     rewardsData.distributionContract,
@@ -1188,7 +1192,7 @@ export class Account extends EIP6963 {
 
     async isDiscountEligible(): Promise<boolean> {
         // Ensure RPC URL is available
-        if (!ChainConfig.rpcUrls[0]) {
+        if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
         }
 
@@ -1200,10 +1204,10 @@ export class Account extends EIP6963 {
 
         try {
             // Initialize JSON-RPC provider
-            const ethersProvider = new ethers.JsonRpcProvider(ChainConfig.rpcUrls[0]);
+            const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
 
             // Initialize contract with read-only provider (no signer needed)
-            const survivShopContract = new ethers.Contract(SURVIV_SHOPV2_ADDRESS, survivShopV2ABI, ethersProvider);
+            const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShopV2"), survivShopV2ABI, ethersProvider);
 
             // Call the getPrice function
             const isEligible = await survivShopContract.isEligible(this.address);
@@ -1226,7 +1230,7 @@ export class Account extends EIP6963 {
             }
 
             const contractAddress = SurvivBadgesMapping.address;
-            const apiUrl = `${ChainConfig.blockExplorerAPI}/api/v2/tokens/${contractAddress}/instances/${tokenId}/holders`;
+            const apiUrl = `${this.chainConfig.blockExplorerAPI}/api/v2/tokens/${contractAddress}/instances/${tokenId}/holders`;
 
             const response = await fetch(apiUrl, {
                 method: 'GET',
