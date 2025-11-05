@@ -1,3 +1,4 @@
+import { Blockchain } from "@common/blockchain/contracts";
 import { type MODE } from "@common/constants";
 
 export const Config = {
@@ -18,6 +19,13 @@ export interface ConfigType {
     readonly regions: Record<string, Region>
     readonly defaultRegion: string,
 }
+
+export const Chains: Record<string, Blockchain> = {
+    shannon: Blockchain.Shannon,
+    minato: Blockchain.Minato,
+    // somnia: Blockchain.Somnia,
+    // soneium: Blockchain.Soneium,
+} as const;
 
 export interface Region {
     /**

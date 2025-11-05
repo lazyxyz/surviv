@@ -4,7 +4,6 @@ import { Account, type SaleCollections, type SaleItems } from "../../account";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 import { ShopCache } from ".";
 import { GAME_CONSOLE } from "../../..";
-import { SURVIV_SHOP_VERSION } from "@common/blockchain";
 
 const DISCOUNT = 20; // DISCOUNT 20%
 const MAX_BADGES_CAP = 1000;
@@ -31,12 +30,7 @@ async function fetchPrice(
 
     try {
         let price = "";
-        if (SURVIV_SHOP_VERSION == 2) {
-            let actualPrice = await account.queryPriceV2(collection, itemType);
-            price = actualPrice.toString();
-        } else {
-            price = await account.queryPrice(collection, itemType, paymentToken);
-        }
+        price = await account.queryPrice(collection, itemType, paymentToken);
         ShopCache.assetsPrice[itemType] = price; // Cache the formatted price
         return price;
     } catch (err) {
@@ -123,28 +117,31 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
         fetchPrice(account, item.collection, item.itemType).then(price => {
             const rawPrice = Number(formatEther(price));
             let effectivePrice = rawPrice;
-            if (ShopCache.discountEligible) {
-                effectivePrice = rawPrice - (rawPrice * DISCOUNT / 100);
-                const formatted = rawPrice.toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 2
+
+            let formatted;
+            if (rawPrice >= 1) {
+                // >= 1 → always 2 decimals, no scientific notation
+                formatted = rawPrice.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                    useGrouping: false // optional: remove commas
                 });
-                const formattedDiscount = effectivePrice.toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 2
-                });
-                $card.find(".price-placeholder").html(
-                    `<span>${formatted}</span> ${formattedDiscount} ${account.chainConfig.nativeCurrency.symbol}`
-                );
             } else {
-                const formatted = rawPrice.toLocaleString(undefined, {
+                // < 1 → show up to 2 significant digits, no scientific notation
+                const precise = rawPrice.toPrecision(2);
+                // Convert from scientific (e.g., 5.1e-7) to normal string
+                formatted = Number(precise).toLocaleString(undefined, {
                     minimumFractionDigits: 0,
-                    maximumFractionDigits: 2
+                    maximumFractionDigits: 15,
+                    useGrouping: false
                 });
-                $card.find(".price-placeholder").text(`${formatted} ${account.chainConfig.nativeCurrency.symbol}`);
             }
+
+            $card.find(".price-placeholder").text(`${formatted} ${account.chainConfig.nativeCurrency.symbol}`);
             $card.data("effective-price", effectivePrice);
         });
+
+
         // Fetch balances asynchronously and update the UI
         fetchBalances(account).then(balances => {
             // Map itemType to the correct index in the balances array
@@ -257,17 +254,10 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
             $buyButton.prop("disabled", true);
             try {
                 const originalPriceWei = BigInt(ShopCache.assetsPrice[itemType]);
-                let pricePerItemWei = originalPriceWei;
-                if (ShopCache.discountEligible) {
-                    pricePerItemWei = (originalPriceWei * BigInt(100 - DISCOUNT)) / BigInt(100);
-                }
-                const value = pricePerItemWei * BigInt(amount);
+                const value = originalPriceWei * BigInt(amount);
 
-                if (SURVIV_SHOP_VERSION == 2) {
-                    await account.buyItemsV2(collection, itemType, amount, value);
-                } else {
-                    await account.buyItems(collection, itemType, amount, ethers.ZeroAddress, value);
-                }
+                await account.buyItems(collection, itemType, amount, value);
+
                 // Update balance locally
                 const item = storeItems.find(item => item.itemType === itemType);
                 if (item) {
@@ -288,6 +278,7 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
                     GAME_CONSOLE.setBuiltInCVar("cv_loadout_badge", "surviv_card"); // Set card as badge after purchased
                 }
             } catch (err: any) {
+                console.log("error: ", err);
                 errorAlert("Transaction Failed: Please check your wallet balance or try again.", 3000);
             } finally {
                 isProcessing = false;
@@ -332,10 +323,6 @@ export async function loadStore(account: Account): Promise<void> {
             collection: "SurvivBadges",
         },
     ];
-
-    await account.isDiscountEligible().then(isEligible => {
-        ShopCache.discountEligible = isEligible;
-    }).catch(err => { })
 
     renderStoreItems(account, storeItems);
     setupPurchaseInteractions(account, storeItems);

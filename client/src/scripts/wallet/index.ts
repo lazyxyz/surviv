@@ -4,7 +4,7 @@ import { CHAIN_NAME, WalletType, parseJWT, shorten } from "../utils/constants";
 import type { Account } from "../account";
 import { errorAlert, warningAlert } from "../modal";
 import { getWalletConnectProvider } from "./walletConnect";
-import { Blockchain } from "@common/blockchain/contracts";
+import { Chains } from "../../config";
 
 const walletPriority = [
     WalletType.MetaMask,
@@ -299,25 +299,19 @@ export function showWallet(account: Account): void {
 }
 
 
-const chainMap: Record<string, Blockchain> = {
-    shannon: Blockchain.Shannon,
-    somnia: Blockchain.Somnia,
-    minato: Blockchain.Minato,
-    soneium: Blockchain.Soneium,
-} as const;
 
-type ChainStr = keyof typeof chainMap;
+type ChainStr = keyof typeof Chains;
 
 // Function to generate chain-select HTML dynamically
 function generateChainSelectHTML(): string {
     let html = '<div class="chain-select">';
     let defaultChainStr: ChainStr = 'somnia'; // Default fallback
     const storedChain = localStorage.getItem(CHAIN_NAME);
-    if (storedChain && (storedChain as ChainStr in chainMap)) {
+    if (storedChain && (storedChain as ChainStr in Chains)) {
         defaultChainStr = storedChain as ChainStr;
     }
 
-    Object.entries(chainMap).forEach(([key, _value]) => {
+    Object.entries(Chains).forEach(([key, _value]) => {
         const isActive = key === defaultChainStr;
         const activeClass = isActive ? ' active' : '';
         html += `
@@ -348,7 +342,7 @@ function initializeChainSelection(account: Account): void {
     // Re-query chainItems after generation
     const chainItems = document.querySelectorAll<HTMLElement>('.chain-item');
     const defaultChainStr = (localStorage.getItem(CHAIN_NAME) || 'somnia') as ChainStr;
-    const defaultChain = chainMap[defaultChainStr];
+    const defaultChain = Chains[defaultChainStr];
 
     // Ensure active class is set (in case localStorage changed)
     chainItems.forEach((item) => {
@@ -362,20 +356,16 @@ function initializeChainSelection(account: Account): void {
     chainItems.forEach((item) => {
         item.addEventListener('click', () => {
             const selectedChainStr = item.dataset.chain as ChainStr;
-            if (!selectedChainStr || !(selectedChainStr in chainMap)) return;
+            if (!selectedChainStr || !(selectedChainStr in Chains)) return;
 
-            const selectedChain = chainMap[selectedChainStr];
+            const selectedChain = Chains[selectedChainStr];
 
             // Remove active from all
             chainItems.forEach((i) => i.classList.remove('active'));
             // Add to clicked
             item.classList.add('active');
-            // Store selected (short key)
             localStorage.setItem(CHAIN_NAME, selectedChainStr);
-            // Update account.chainConfig
             account.setBlockchain(selectedChain);
-            // Optional: Trigger custom event or callback
-            console.log(`Selected chain: ${selectedChainStr}`);
         });
     });
 }

@@ -185,9 +185,7 @@ async function renderClaimButton(account: Account): Promise<HTMLButtonElement | 
  * @param mintedItems - Array of minted items with contract address and token ID/balance pairs.
  * @param explorerLink - Link to the blockchain explorer for transaction details.
  */
-function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string, account: Account): void {
-    const assetAddress = getSurvivAddress(account.blockchain, "SurvivAssets");
-
+function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string): void {
     // Map tiers to background images
     const tierBackgrounds: Record<AssetTier, string> = {
         [AssetTier.Silver]: "./img/game/shared/patterns/silver.svg",
@@ -266,10 +264,6 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string, a
     const idRandom = Math.floor(Math.random() * 10000000);
     const popupContent = mintedItems.length > 0
         ? mintedItems.flatMap(item => {
-            const mapping = Object.values(assetsMapping).find(
-                m => assetAddress === item.address.toLowerCase()
-            );
-            if (!mapping) return [];
             return item.values.map(([tokenId, value]) => {
                 let assetName: string = `unknown_${tokenId}`;
                 for (const index of Object.values(SurvivAssetRanges).flatMap(r => r.mappingIndices)) {
@@ -285,7 +279,6 @@ function showMintedItemsPopup(mintedItems: MintResult[], explorerLink: string, a
                 const rotationClass = isSkinItem(tokenId) ? ' rotated' : '';
                 const tier = getTier(tokenId);
                 const backgroundImage = tierBackgrounds[tier];
-
                 return `
             <div class="minted-item" style="background-image: url('${backgroundImage}')">
               <img src="${imageUrl}" alt="${assetName}" data-balance="${value}" class="minted-item-image${rotationClass}">
@@ -340,9 +333,9 @@ async function updateClaimButton(account: Account): Promise<void> {
                 if (result.hash) {
                     const explorerLink = `${account.chainConfig.blockExplorerUrls?.[0] ?? TESTNET_EXPLORER}tx/${result.hash}?tab=index"`;
                     if (result.balances) {
-                        showMintedItemsPopup(result.balances, explorerLink, account);
+                        showMintedItemsPopup(result.balances, explorerLink);
                     } else {
-                        showMintedItemsPopup([], explorerLink, account);
+                        showMintedItemsPopup([], explorerLink);
                     }
                 }
 

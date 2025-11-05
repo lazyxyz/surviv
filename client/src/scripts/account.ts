@@ -2,7 +2,7 @@ import $, { error } from "jquery";
 
 import { ACCESS_TOKEN, CHAIN_NAME, PUBLIC_KEY, SELECTOR_WALLET, SESSION_WALLETCONNECT, shorten, WalletType } from "./utils/constants";
 import { EIP6963, type Provider6963Props } from "./eip6963";
-import { ethers, toBeHex } from "ethers";
+import { ethers } from "ethers";
 
 import {
     SurvivAssetsMapping,
@@ -25,8 +25,9 @@ import { getWalletConnectInfo, getWalletConnectInit } from "./wallet/walletConne
 import type { EthereumProviderOptions } from "@walletconnect/ethereum-provider";
 import { Blockchain, getSurvivAddress, type SurvivContractName } from "@common/blockchain/contracts";
 import { getChainConfig, type ChainInfo } from "@common/blockchain/config";
+import { Chains } from "../config";
 
-
+type ChainStr = keyof typeof Chains;
 export type SaleCollections = "SurvivKits" | "SurvivBadges";
 export type SaleItems = "crate" | "key" | "surviv_pass" | "surviv_card";
 
@@ -99,11 +100,8 @@ export class Account extends EIP6963 {
         super();
 
         {
-            const storedChainName = localStorage.getItem(CHAIN_NAME);
-            this.blockchain = (storedChainName && storedChainName in Blockchain
-                ? (Blockchain[storedChainName as keyof typeof Blockchain] as Blockchain)
-                : Blockchain.Shannon
-            );
+            const storedChain = (localStorage.getItem(CHAIN_NAME) || 'somnia') as ChainStr;
+            this.blockchain = Chains[storedChain];
             this.chainConfig = getChainConfig(this.blockchain);
         }
 
@@ -781,11 +779,10 @@ export class Account extends EIP6963 {
      * Purchases a specified item with a given payment token.
      * @param collection - The ID of the item to purchase.
      * @param amount - The quantity of the item to purchase.
-     * @param paymentToken - Token payment ID.
      * @returns A promise resolving to the API response.
      * @throws Error if the API request fails, authentication is invalid, or payment fails.
      */
-    async buyItems(collection: SaleCollections, item: SaleItems, amount: number, paymentToken: string, value: bigint): Promise<any> {
+    async buyItems(collection: SaleCollections, item: SaleItems, amount: number, value: bigint, paymentToken = ethers.ZeroAddress): Promise<any> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
         }
@@ -800,12 +797,32 @@ export class Account extends EIP6963 {
         const timeoutId = setTimeout(() => controller.abort(), 10000);
 
         try {
-            // Initialize contract
+            // Initialize provider and signer
             const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
             const signer = await ethersProvider.getSigner();
 
-            const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShop"), survivShopABI, signer);
-            const tx = await survivShopContract.buyItems(itemAddress, itemIndex, amount, paymentToken, { value });
+            // Check which shop contract to use (prefer V2 if not zero address, else V1)
+            const shopV2Addr = getSurvivAddress(this.blockchain, "SurvivShopV2");
+            const shopV1Addr = getSurvivAddress(this.blockchain, "SurvivShop");
+            const useV2 = shopV2Addr && shopV2Addr !== ethers.ZeroAddress;
+            const shopAddress = useV2 ? shopV2Addr : shopV1Addr;
+            const shopABI = useV2 ? survivShopV2ABI : survivShopABI; // Assuming survivShopV2ABI is imported
+
+            if (!ethers.isAddress(shopAddress) || shopAddress === ethers.ZeroAddress) {
+                throw new Error('No valid shop contract available');
+            }
+
+            const shopContract = new ethers.Contract(shopAddress, shopABI, signer);
+
+            let tx;
+            if (useV2) {
+                // V2 call: no paymentToken param
+                tx = await shopContract.buyItems(itemAddress, itemIndex, amount, { value });
+            } else {
+                // V1 call: includes paymentToken
+                tx = await shopContract.buyItems(itemAddress, itemIndex, amount, paymentToken, { value });
+            }
+
             const receipt = await tx.wait();
             clearTimeout(timeoutId);
             return receipt;
@@ -814,76 +831,47 @@ export class Account extends EIP6963 {
             throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
         }
     }
+    // async buyItemsV2(collection: SaleCollections, item: SaleItems, amount: number, value: bigint): Promise<any> {
+    //     if (!this.provider?.provider) {
+    //         throw new Error('Web3 provider not initialized');
+    //     }
+    //     let itemAddress = getSurvivAddress(this.blockchain, collection);
+    //     let itemIndex = saleMappings[collection].assets.indexOf(item);
+    //     if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
+    //         throw new Error(`Invalid contract address or tokenId for ${item}`);
+    //     }
 
+    //     // Set fetch timeout
+    //     const controller = new AbortController();
+    //     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    async buyItemsV2(collection: SaleCollections, item: SaleItems, amount: number, value: bigint): Promise<any> {
-        if (!this.provider?.provider) {
-            throw new Error('Web3 provider not initialized');
-        }
-        let itemAddress = getSurvivAddress(this.blockchain, collection);
-        let itemIndex = saleMappings[collection].assets.indexOf(item);
-        if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
-            throw new Error(`Invalid contract address or tokenId for ${item}`);
-        }
+    //     try {
+    //         // Initialize contract
+    //         const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
+    //         const signer = await ethersProvider.getSigner();
+    //         const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShopV2"), survivShopV2ABI, signer);
 
-        // Set fetch timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+    //         const tx = await survivShopContract.buyItems(itemAddress, itemIndex, amount, { value });
+    //         const receipt = await tx.wait();
+    //         clearTimeout(timeoutId);
+    //         return receipt;
 
-        try {
-            // Initialize contract
-            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-            const signer = await ethersProvider.getSigner();
-            const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShopV2"), survivShopV2ABI, signer);
+    //     } catch (error: any) {
+    //         console.log("error: ", error);
+    //         clearTimeout(timeoutId);
+    //         throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
+    //     }
+    // }
 
-            const tx = await survivShopContract.buyItems(itemAddress, itemIndex, amount, { value });
-            const receipt = await tx.wait();
-            clearTimeout(timeoutId);
-            return receipt;
-
-        } catch (error: any) {
-            clearTimeout(timeoutId);
-            throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
-        }
-    }
-
-    async queryPrice(collection: SaleCollections, item: SaleItems, paymentToken: string): Promise<any> {
-        // Ensure RPC URL is available
-        if (!this.chainConfig.rpcUrls[0]) {
-            throw new Error('RPC URL not configured');
-        }
-
-        let itemAddress = getSurvivAddress(this.blockchain, collection);
-
-        let itemIndex = saleMappings[collection].assets.indexOf(item);
-        if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
-            throw new Error(`Invalid contract address or tokenId for ${item}`);
-        }
-
-        // Set fetch timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-        try {
-            // Initialize JSON-RPC provider
-            const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
-
-            // Initialize contract with read-only provider (no signer needed)
-            const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShop"), survivShopABI, ethersProvider);
-
-            // Call the getPrice function
-            const price = await survivShopContract.getPrice(paymentToken, itemAddress, itemIndex);
-
-            clearTimeout(timeoutId);
-            return price;
-        } catch (error: any) {
-            console.log("error: ", error);
-            clearTimeout(timeoutId);
-            throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
-        }
-    }
-
-    async queryPriceV2(collection: SaleCollections, item: SaleItems): Promise<any> {
+    /**
+     * Queries the price for a specified item.
+     * @param collection - The collection of the item.
+     * @param item - The specific item to query.
+     * @param paymentToken - The payment token address (required for V1, ignored for V2).
+     * @returns A promise resolving to the price from the contract.
+     * @throws Error if RPC is not configured, invalid params, or query fails.
+     */
+    async queryPrice(collection: SaleCollections, item: SaleItems, paymentToken = ethers.ZeroAddress): Promise<any> {
         // Ensure RPC URL is available
         if (!this.chainConfig.rpcUrls[0]) {
             throw new Error('RPC URL not configured');
@@ -903,11 +891,28 @@ export class Account extends EIP6963 {
             // Initialize JSON-RPC provider
             const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
 
-            // Initialize contract with read-only provider (no signer needed)
-            const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShopV2"), survivShopV2ABI, ethersProvider);
+            // Check which shop contract to use (prefer V2 if not zero address, else V1)
+            const shopV2Addr = getSurvivAddress(this.blockchain, "SurvivShopV2");
+            const shopV1Addr = getSurvivAddress(this.blockchain, "SurvivShop");
+            const useV2 = shopV2Addr && shopV2Addr !== ethers.ZeroAddress;
+            const shopAddress = useV2 ? shopV2Addr : shopV1Addr;
+            const shopABI = useV2 ? survivShopV2ABI : survivShopABI; // Assuming survivShopV2ABI is imported
 
-            // Call the getPrice function
-            const price = await survivShopContract.getPrice(itemAddress, itemIndex);
+            if (!ethers.isAddress(shopAddress) || shopAddress === ethers.ZeroAddress) {
+                throw new Error('No valid shop contract available for price query');
+            }
+
+            // Initialize contract with read-only provider (no signer needed)
+            const shopContract = new ethers.Contract(shopAddress, shopABI, ethersProvider);
+
+            let price;
+            if (useV2) {
+                // V2 call: no paymentToken param
+                price = await shopContract.getPrice(itemAddress, itemIndex);
+            } else {
+                // V1 call: includes paymentToken as first param
+                price = await shopContract.getPrice(paymentToken, itemAddress, itemIndex);
+            }
 
             clearTimeout(timeoutId);
             return price;
@@ -917,6 +922,41 @@ export class Account extends EIP6963 {
             throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
         }
     }
+
+    // async queryPriceV2(collection: SaleCollections, item: SaleItems): Promise<any> {
+    //     // Ensure RPC URL is available
+    //     if (!this.chainConfig.rpcUrls[0]) {
+    //         throw new Error('RPC URL not configured');
+    //     }
+
+    //     let itemAddress = getSurvivAddress(this.blockchain, collection);
+    //     let itemIndex = saleMappings[collection].assets.indexOf(item);
+    //     if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
+    //         throw new Error(`Invalid contract address or tokenId for ${item}`);
+    //     }
+
+    //     // Set fetch timeout
+    //     const controller = new AbortController();
+    //     const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    //     try {
+    //         // Initialize JSON-RPC provider
+    //         const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
+
+    //         // Initialize contract with read-only provider (no signer needed)
+    //         const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShopV2"), survivShopV2ABI, ethersProvider);
+
+    //         // Call the getPrice function
+    //         const price = await survivShopContract.getPrice(itemAddress, itemIndex);
+
+    //         clearTimeout(timeoutId);
+    //         return price;
+    //     } catch (error: any) {
+    //         console.log("error: ", error);
+    //         clearTimeout(timeoutId);
+    //         throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
+    //     }
+    // }
 
     async getCommits(): Promise<any> {
         // Ensure RPC URL is available
@@ -1151,38 +1191,6 @@ export class Account extends EIP6963 {
         }
     }
 
-
-    async isDiscountEligible(): Promise<boolean> {
-        // Ensure RPC URL is available
-        if (!this.chainConfig.rpcUrls[0]) {
-            throw new Error('RPC URL not configured');
-        }
-
-        if (!this.address) { return false }
-
-        // Set fetch timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-        try {
-            // Initialize JSON-RPC provider
-            const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
-
-            // Initialize contract with read-only provider (no signer needed)
-            const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShopV2"), survivShopV2ABI, ethersProvider);
-
-            // Call the getPrice function
-            const isEligible = await survivShopContract.isEligible(this.address);
-            clearTimeout(timeoutId);
-            return isEligible;
-        } catch (error: any) {
-            console.log("error: ", error);
-            clearTimeout(timeoutId);
-            throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
-        }
-    }
-
-
     async getBadgeSupply(badgeName: string) {
         try {
             // Find index of badgeName in assets array
@@ -1192,7 +1200,7 @@ export class Account extends EIP6963 {
             }
 
             const contractAddress = getSurvivAddress(this.blockchain, "SurvivBadges");
-            const apiUrl = `${this.chainConfig.blockExplorerAPI}/api/v2/tokens/${contractAddress}/instances/${tokenId}/holders`;
+            const apiUrl = `${this.chainConfig.blockExplorerAPI}/tokens/${contractAddress}/instances/${tokenId}/holders`;
 
             const response = await fetch(apiUrl, {
                 method: 'GET',

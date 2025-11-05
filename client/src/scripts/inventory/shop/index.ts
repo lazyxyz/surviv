@@ -40,7 +40,6 @@ export let ShopCache: {
         surviv_pass: string;
     };
     PlayerValidRewards: ValidRewards | undefined;
-    discountEligible: boolean;
 }
 
 export async function updateRewardsTab(rewards: number) {
@@ -70,7 +69,6 @@ export async function showShop(account: Account) {
             surviv_pass: "",
         },
         PlayerValidRewards: undefined,
-        discountEligible: false,
     }
 
 
