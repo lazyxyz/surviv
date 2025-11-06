@@ -12,6 +12,9 @@ import { PlayerContainer, Gamer } from "../objects/gamer";
 import { Player } from "../objects/player";
 import { cleanUsername, Logger, removeFrom } from "../utils/misc";
 import { type WebSocket } from "uWebSockets.js";
+import { validateJWT } from "../api/api";
+import { blockchainByNumber, getSurvivAddress } from "@common/blockchain/contracts";
+import { chainToConfig } from "@common/blockchain/config";
 
 export class PlayerManager {
     private game: Game;
@@ -53,27 +56,47 @@ export class PlayerManager {
             player.disconnect(`Invalid game version (expected ${GameConstants.protocolVersion}, was ${packet.protocolVersion})`);
             return;
         }
-        player.address = packet.address;
         player.isMobile = packet.isMobile;
         player.name = cleanUsername(packet.name);
+        player.chain = blockchainByNumber[packet.chain];
 
-        if (packet.badge?.idString) {
-            const badgeResults = await verifyBadges(packet.address, packet.badge?.idString);
-            player.loadout.badge = badgeResults.badgeDefinition;
-            player.rewardsBoost = badgeResults.totalBoost;
+        if (packet.address) {
+            const token = packet.token;
+            const rpcURL = chainToConfig[player.chain].rpcUrls[0];
+
+            if (!token) {
+                player.disconnect(`Authentication token not found. Please reconnect your wallet.`);
+                return;
+            }
+
+            const payload = await validateJWT(token);
+
+            if (payload.walletAddress != packet.address?.toLowerCase()) {
+                player.disconnect(`Invalid address. Please reconnect your wallet.`);
+                return;
+            }
+
+            player.address = packet.address;
+            if (packet.badge) {
+                const badgesAddress = getSurvivAddress(player.chain, "SurvivBadges");
+                const badgeResults = await verifyBadges(packet.address, rpcURL, badgesAddress, packet.badge);
+                player.loadout.badge = badgeResults.badgeDefinition;
+                player.rewardsBoost = badgeResults.totalBoost;
+            }
+
+            const assetsAddress = getSurvivAddress(player.chain, "SurvivAssets");
+            const assets = await verifyAllAssets(packet.address, rpcURL, assetsAddress, {
+                skin: packet.skin,
+                melee: packet.melee,
+                gun: packet.gun,
+                emotes: packet.emotes?.split(",").map(v => v === "" ? undefined : v),
+            });
+
+            player.loadout.emotes = assets.emotes;
+            if (assets.skin) player.loadout.skin = assets.skin;
+            if (assets.melee) player.inventory.weapons[2] = new MeleeItem(assets.melee, player);
+            if (assets.gun) player.inventory.weapons[0] = new GunItem(assets.gun, player);
         }
-
-        const assets = await verifyAllAssets(packet.address, {
-            skin: packet.skin?.idString,
-            melee: packet.melee?.idString,
-            gun: packet.gun?.idString,
-            emotes: packet.emotes.map(e => e?.idString),
-        });
-
-        player.loadout.emotes = assets.emotes;
-        if (assets.skin) player.loadout.skin = assets.skin;
-        if (assets.melee) player.inventory.weapons[2] = new MeleeItem(assets.melee, player);
-        if (assets.gun) player.inventory.weapons[0] = new GunItem(assets.gun, player);
 
         this.game.livingPlayers.add(player);
         this.game.spectatablePlayers.push(player);

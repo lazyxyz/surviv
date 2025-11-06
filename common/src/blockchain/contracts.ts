@@ -5,6 +5,22 @@ export enum Blockchain {
     Soneium = "Soneium Mainnet"
 }
 
+// Number → Enum
+export const blockchainByNumber: Record<number, Blockchain> = {
+  0: Blockchain.Shannon,
+  1: Blockchain.Somnia,
+  2: Blockchain.Minato,
+  3: Blockchain.Soneium
+};
+
+// Enum → Number
+export const numberByBlockchain: Record<Blockchain, number> = {
+  [Blockchain.Shannon]: 0,
+  [Blockchain.Somnia]: 1,
+  [Blockchain.Minato]: 2,
+  [Blockchain.Soneium]: 3
+};
+
 export type SurvivContractName = keyof typeof chainToAssetsMapping[Blockchain.Shannon];
 
 export const chainToAssetsMapping = {

@@ -15,6 +15,7 @@ import { RewardsData, RewardsPacket } from "@common/packets/rewardsPacket";
 import { savePlayerGame, savePlayerRank } from "../api/api";
 import { GameOverData, GameOverPacket } from "@common/packets/gameOverPacket";
 import { DamageParams } from "./gameObject";
+import { Blockchain } from "@common/blockchain/contracts";
 
 export interface PlayerContainer {
     readonly name: string
@@ -23,16 +24,9 @@ export interface PlayerContainer {
     readonly roomMode: boolean
     player?: Gamer
     readonly address?: string
-    readonly token?: string
     readonly ip: string | undefined
     readonly nameColor?: number
     readonly lobbyClearing: boolean
-    readonly weaponPreset: string
-    readonly skin: string
-    readonly badge: string
-    readonly emotes: string
-    readonly melee: string
-    readonly gun: string
 }
 
 export class Gamer extends Player {
@@ -40,6 +34,7 @@ export class Gamer extends Player {
     readonly socket: WebSocket<PlayerContainer>;
     gameOver: boolean = false;
     rewardsBoost: number = 0;
+    chain: Blockchain = Blockchain.Somnia;
 
     constructor(game: Game, socket: WebSocket<PlayerContainer>, position: Vector, layer?: Layer, team?: Team) {
         const userData = socket.getUserData();
@@ -49,7 +44,6 @@ export class Gamer extends Player {
             ip: userData.ip,
             nameColor: userData.nameColor,
             lobbyClearing: userData.lobbyClearing,
-            weaponPreset: userData.weaponPreset,
         };
         super(game, actorData, position, layer, team);
         this.socket = socket;

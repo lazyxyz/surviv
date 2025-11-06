@@ -22,6 +22,7 @@ import { OutputPacket } from "@common/packets/packet";
 import { PingPacket } from "@common/packets/pingPacket";
 import { SpectatePacket } from "@common/packets/spectatePacket";
 import { Player } from "../objects/player";
+import { ConnectPacket } from "@common/packets/connectPacket";
 
 
 
@@ -44,7 +45,6 @@ export class ConnectionManager {
 
                 // Extract token from Authorization header
                 const searchParams = new URLSearchParams(req.getQuery());
-                const token = searchParams.get('token');
 
                 let nameColor = 0xffffff;
 
@@ -58,16 +58,9 @@ export class ConnectionManager {
                         autoFill: Boolean(searchParams.get("autoFill")),
                         roomMode: Boolean(searchParams.get("roomMode")),
                         address: searchParams.get("address") ?? "",
-                        token: token,
                         ip,
                         nameColor,
                         lobbyClearing: searchParams.get("lobbyClearing") === "true",
-                        weaponPreset: searchParams.get("weaponPreset") ?? "",
-                        skin: searchParams.get("skin") ?? "",
-                        emotes: searchParams.get("emotes") ?? "",
-                        badge: searchParams.get("badge") ?? "",
-                        melee: searchParams.get("melee") ?? "",
-                        gun: searchParams.get("gun") ?? "",
                     },
                     req.getHeader("sec-websocket-key"),
                     req.getHeader("sec-websocket-protocol"),
@@ -77,49 +70,27 @@ export class ConnectionManager {
             },
 
             open: async (socket: WebSocket<PlayerContainer>) => {
-               try {
-                const data = socket.getUserData();
+                try {
+                    const data = socket.getUserData();
 
-                if (!data.token) {
-                    this.disconnect(socket, `Authentication token not found. Please reconnect your wallet.`);
-                    return;
+                    if ((data.player = this.game.addPlayer(socket)) === undefined) {
+                        this.disconnect(socket, `Authentication failed. Please reconnect your wallet.`);
+                        return;
+                    }
+
+                    const stream = new PacketStream(new ArrayBuffer(32));
+                    stream.serializeServerPacket(
+                        ConnectPacket.create({
+                            gameMode: ModeToNumber[this.game.gameMap],
+                            rainDrops: this.game.rainDrops,
+                        })
+                    );
+                    socket.send(stream.getBuffer(), true, false);
+
+                } catch (err: any) {
+                    console.log("Open websocket failed: ", err);
+                    this.disconnect(socket, "Unknown error. Please contact Surviv team.");
                 }
-                const token = data.token;
-                const payload = await validateJWT(token);
-
-                if (payload.walletAddress != data.address?.toLowerCase()) {
-                    this.disconnect(socket, `Invalid address. Please reconnect your wallet.`);
-                    return;
-                }
-
-                if ((data.player = this.game.addPlayer(socket)) === undefined) {
-                    this.disconnect(socket, `Authentication failed. Please reconnect your wallet.`);
-                    return;
-                }
-
-                const ownedEmotes = data.emotes.split(',');
-                const emotes = EMOTE_SLOTS.map((_, i) => Emotes.fromStringSafe(ownedEmotes[i] || ''))
-
-                const stream = new PacketStream(new ArrayBuffer(1024));
-                stream.serializeServerPacket(
-                    JoinPacket.create({
-                        isMobile: false,
-                        address: data.address ? data.address : "",
-                        gameMode: ModeToNumber[this.game.gameMap],
-                        emotes: emotes,
-                        name: data.name,
-                        badge: Badges.fromStringSafe(data.badge),
-                        skin: Skins.fromStringSafe(data.skin),
-                        melee: Melees.fromStringSafe(data.melee),
-                        gun: Guns.fromStringSafe(data.gun),
-                        rainDrops: this.game.rainDrops,
-                    })
-                );
-                socket.send(stream.getBuffer(), true, false);
-            } catch (err: any) {
-                console.log("Open websocket failed: ", err);
-                this.disconnect(socket, "Unknown error. Please contact Surviv team.");
-            }
             },
 
             message: (socket: WebSocket<PlayerContainer>, message: ArrayBuffer) => {

@@ -1,6 +1,6 @@
-import { InputActions, InventoryMessages, Layer, ObjectCategory, MODE } from "@common/constants";
+import { InputActions, InventoryMessages, Layer, ObjectCategory, MODE, EMOTE_SLOTS } from "@common/constants";
 import { ArmorType } from "@common/definitions/armors";
-import { type BadgeDefinition } from "@common/definitions/badges";
+import { Badges, type BadgeDefinition } from "@common/definitions/badges";
 import { type DualGunNarrowing } from "@common/definitions/guns";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { GameOverPacket } from "@common/packets/gameOverPacket";
@@ -66,6 +66,11 @@ import { CustomTeamMessages } from "@common/typings";
 import { FogOfWar } from "./fogOfWar";
 import { RainEffect } from "./rainEffect";
 import { DungeonPacket } from "@common/packets/dungeonPackage";
+import { ConnectPacket } from "@common/packets/connectPacket";
+import { numberByBlockchain } from "@common/blockchain/contracts";
+import { Emotes } from "@common/definitions/emotes";
+import { Loots } from "@common/definitions/loots";
+import { Skins } from "@common/definitions/skins";
 
 /* eslint-disable @stylistic/indent */
 
@@ -558,17 +563,37 @@ export class Game {
 
     onPacket(packet: OutputPacket): void {
         switch (true) {
-            case packet instanceof JoinPacket: {
+            case packet instanceof ConnectPacket: {
                 this.gameMap = NumberToMode[packet.output.gameMode];
 
                 this.initPixi(this.gameMap).then(async _ => {
                     this.uiManager.ui.loadingText.text(getTranslatedString("verifying_game_assets"));
                     this.uiManager.ui.splashMsg.hide();
 
+                    const emoteIds = EMOTE_SLOTS.map(slot => {
+                        const emote = Emotes.fromStringSafe(GAME_CONSOLE.getBuiltInCVar(`cv_loadout_${slot}_emote`));
+                        return emote?.idString ?? "";
+                    });
+
+
+                    let weaponPreset;
+                    try {
+                        weaponPreset = JSON.parse(GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset"));
+                    } catch (err) { };
+
+
                     // Prepare the client JoinPacket data (do this once)
                     const clientJoinPacket = JoinPacket.create({
-                        ...packet.output,
-                        isMobile: this.inputManager.isMobile
+                        address: this.account?.address,
+                        token: this.account?.token,
+                        isMobile: this.inputManager.isMobile,
+                        emotes: emoteIds.join(","),
+                        name: GAME_CONSOLE.getBuiltInCVar("cv_player_name"),
+                        chain: this.account?.blockchain ? numberByBlockchain[this.account?.blockchain] : 0,
+                        badge: GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge"),
+                        gun: weaponPreset ? weaponPreset.gun : undefined,
+                        melee: weaponPreset ? weaponPreset.melee : undefined,
+                        skin: GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin"),
                     });
 
                     let attempts = 0;
@@ -593,12 +618,9 @@ export class Game {
 
                     this.uiManager.ui.loadingText.text(getTranslatedString("loading_joining_game"));
                     this.setupGame(packet.output.rainDrops);
-
-                    // updateUsersBadge(packet.output.badge?.idString) // Temporarily closed since no way to check
                 });
                 break;
             }
-
             case packet instanceof JoinedPacket: {
                 this.startGame(packet.output);
                 if (this.joinRetryInterval) {

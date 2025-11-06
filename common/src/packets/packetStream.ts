@@ -63,6 +63,7 @@ export const ServerToClientPackets = new PacketRegister(
     DisconnectPacket,
     ServerChatPacket,
     DungeonPacket,
+    ConnectPacket,
 );
 
 export class PacketStream {

@@ -1,7 +1,8 @@
 import { createPacket } from "./packet";
 
 export type ConnectData = {
-    readonly url: string
+    readonly gameMode: number,
+    readonly rainDrops: number
 };
 
 // protocol version is automatically set; use this type when
@@ -10,12 +11,15 @@ export type ConnectPacketCreation = Omit<ConnectData, "protocolVersion">;
 
 export const ConnectPacket = createPacket("ConnectPacket")<ConnectPacketCreation, ConnectData>({
     serialize(stream, data) {
-        stream.writePlayerName(data.url);
+         stream.writeInt8(data.gameMode);
+
+        stream.writeUint16(data.rainDrops);
     },
 
     deserialize(stream) {
         return {
-            url: stream.readURL().replaceAll(/<[^>]+>/g, "").trim(),
+            gameMode: stream.readInt8(),
+            rainDrops: stream.readUint16(),
         };
     }
 });

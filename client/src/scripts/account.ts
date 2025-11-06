@@ -88,9 +88,9 @@ const TRANSFER_SINGLE_ABI = [
 ];
 
 export class Account extends EIP6963 {
-    address: string | null | undefined;
-    token: string | null | undefined;
-    api: string | null | undefined;
+    address?: string;
+    token?: string;
+    api?: string;
     blockchain: Blockchain = Blockchain.Shannon;
     chainConfig: ChainInfo;
 
@@ -173,8 +173,8 @@ export class Account extends EIP6963 {
 
         // clear fields & delete assets
         {
-            this.address = null;
-            this.token = null;
+            this.address = undefined;
+            this.token = undefined;
         }
 
         // visible elements
