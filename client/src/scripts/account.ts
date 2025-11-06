@@ -24,7 +24,7 @@ import { resetPlayButtons } from "./ui/home";
 import { getWalletConnectInfo, getWalletConnectInit } from "./wallet/walletConnect";
 import type { EthereumProviderOptions } from "@walletconnect/ethereum-provider";
 import { Blockchain, getSurvivAddress, type SurvivContractName } from "@common/blockchain/contracts";
-import { getChainConfig, type ChainInfo } from "@common/blockchain/config";
+import { chainIdToHex, getChainConfig, type ChainInfo } from "@common/blockchain/config";
 import { Chains } from "../config";
 
 type ChainStr = keyof typeof Chains;
@@ -56,7 +56,10 @@ interface ClaimResponse {
     claims: Array<{
         reward: Reward;
         signature: string;
+        chainId: number,
+        survivRewards: string,
     }>;
+
 }
 
 /**
@@ -128,7 +131,7 @@ export class Account extends EIP6963 {
 
         if (getSelectorFromStorage?.length) {
             if (getSelectorFromStorage === WalletType.WalletConnect) {
-                getWalletConnectInit(this.chainConfig.chainId, {
+                getWalletConnectInit(chainIdToHex(this.chainConfig.chainId), {
                     session: JSON.parse(localStorage.getItem(SESSION_WALLETCONNECT) as string) as EthereumProviderOptions['session'],
                 }).then(provider => {
                     const parseProvider = {
@@ -196,11 +199,11 @@ export class Account extends EIP6963 {
             }) as string;
 
 
-            if (currentChainId !== this.chainConfig.chainId) {
+            if (currentChainId !== chainIdToHex(this.chainConfig.chainId)) {
                 try {
                     await getProvider.provider.request({
                         method: "wallet_switchEthereumChain",
-                        params: [{ chainId: this.chainConfig.chainId }]
+                        params: [{ chainId: chainIdToHex(this.chainConfig.chainId) }]
                     });
                 } catch (switchError: any) {
                     // If the chain is not added (e.g., error code 4902), add it
@@ -208,7 +211,14 @@ export class Account extends EIP6963 {
                         try {
                             await getProvider.provider.request({
                                 method: "wallet_addEthereumChain",
-                                params: [this.chainConfig]
+                                params: [{
+                                    chainId: chainIdToHex(this.chainConfig.chainId),
+                                    chainName: this.chainConfig.chainName,
+                                    rpcUrls: this.chainConfig.rpcUrls,
+                                    nativeCurrency: this.chainConfig.nativeCurrency,
+                                    blockExplorerUrls: this.chainConfig.blockExplorerUrls,
+                                    blockExplorerAPI: this.chainConfig.blockExplorerAPI,
+                                }]
                             });
                         } catch (addError) {
                             errorAlert("Failed to add the Somnia Testnet. Please add it manually in your wallet.");
@@ -558,6 +568,8 @@ export class Account extends EIP6963 {
 
             for (const claim of data.claims) {
                 if (
+                    claim.chainId !== this.chainConfig.chainId ||
+                    claim.survivRewards !== getSurvivAddress(this.blockchain, "SurvivRewards") ||
                     !claim.reward?.to ||
                     !ethers.isAddress(claim.reward.to) ||
                     !Number.isInteger(claim.reward.amount) ||

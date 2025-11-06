@@ -2,7 +2,7 @@ import { toBeHex } from "ethers";
 import { Blockchain } from "./contracts"; // Adjust import path as needed
 
 export interface ChainInfo {
-    readonly chainId: string;
+    readonly chainId: number;
     readonly chainName: string;
     readonly rpcUrls: string[];
     readonly nativeCurrency: {
@@ -19,7 +19,7 @@ export interface ChainInfo {
 // Chain-specific configurations
 export const chainToConfig: Record<Blockchain, ChainInfo> = {
     [Blockchain.Shannon]: {
-        chainId: toBeHex(50312),
+        chainId: 50312,
         chainName: Blockchain.Shannon,
         rpcUrls: ["https://dream-rpc.somnia.network/"],
         nativeCurrency: {
@@ -33,7 +33,7 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         badgesSale: true,
     },
     [Blockchain.Somnia]: {
-        chainId: toBeHex(5031),
+        chainId: 5031,
         chainName: Blockchain.Somnia,
         rpcUrls: ["https://api.infra.mainnet.somnia.network/"],
         nativeCurrency: {
@@ -47,7 +47,8 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         badgesSale: false,
     },
     [Blockchain.Minato]: {
-        chainId: '0x' + Number(1946).toString(16),
+        // chainId: '0x' + Number(1946).toString(16),
+        chainId: 1946,
         chainName: Blockchain.Minato,
         rpcUrls: ["https://rpc.minato.soneium.org/"],
         nativeCurrency: {
@@ -61,7 +62,7 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         badgesSale: true,
     },
     [Blockchain.Soneium]: {
-        chainId: toBeHex(1868),
+        chainId: 1868,
         chainName: Blockchain.Soneium,
         rpcUrls: ["https://rpc.soneium.org/"],
         nativeCurrency: {
@@ -79,4 +80,8 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
 // Helper function to get config for a specific chain
 export function getChainConfig(chain: Blockchain): ChainInfo {
     return chainToConfig[chain];
+}
+
+export function chainIdToHex(chainId: number): string {
+    return '0x' + Number(chainId).toString(16);
 }

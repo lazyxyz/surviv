@@ -5,6 +5,7 @@ import type { Account } from "../account";
 import { errorAlert, warningAlert } from "../modal";
 import { getWalletConnectProvider } from "./walletConnect";
 import { Chains } from "../../config";
+import { chainIdToHex } from "@common/blockchain/config";
 
 const walletPriority = [
     WalletType.MetaMask,
@@ -91,7 +92,7 @@ export function onConnectWallet(account: Account): void {
                     // Hide logo to show loading icon
                     $(logoElement).css("display", "none");
 
-                    const wcProvider = await getWalletConnectProvider(account.chainConfig.chainId);
+                    const wcProvider = await getWalletConnectProvider(chainIdToHex(account.chainConfig.chainId));
 
                     // update providers for eip6963
                     {

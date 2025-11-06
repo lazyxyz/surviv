@@ -289,6 +289,7 @@ export class Gamer extends Player {
 
         try {
             const data = await savePlayerRank(
+                this.chain,
                 this.address,
                 rank,
                 this.game.teamMode,
@@ -313,6 +314,7 @@ export class Gamer extends Player {
         try {
             const timeAlive = (this.game.now - this.joinTime) / 1000;
             await savePlayerGame(
+                this.chain,
                 this.address,
                 rank,
                 this.game.teamMode,
