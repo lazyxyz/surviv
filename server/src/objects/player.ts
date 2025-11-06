@@ -45,7 +45,6 @@ export interface ActorContainer {
     readonly ip: string | undefined
     readonly nameColor?: number
     readonly lobbyClearing: boolean
-    readonly weaponPreset: string
 }
 
 export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
@@ -424,8 +423,8 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this.loadout = {
             skin: Loots.fromString("unknown"),
             emotes: [
-                Emotes.fromStringSafe("happy_face"),
-                Emotes.fromStringSafe("thumbs_up"),
+                undefined,
+                undefined,
                 undefined,
                 undefined,
                 undefined,
@@ -447,52 +446,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             this.inventory.scope = DEFAULT_SCOPE.idString;
         }
         this.effectiveScope = DEFAULT_SCOPE;
-
-        // Inventory preset
-        {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const getWeapon: weaponPresentType = userData?.weaponPreset.startsWith("{")
-                ? JSON.parse(userData.weaponPreset)
-                : undefined;
-
-            const backpack = this.inventory.backpack;
-            const determinePreset = (
-                slot: 0 | 1 | 2,
-                weaponName: ReferenceTo<GunDefinition | MeleeDefinition>
-            ): void => {
-                const weaponDef = Loots.fromStringSafe<GunDefinition | MeleeDefinition>(weaponName);
-                let itemType: ItemType;
-
-                if (
-                    weaponDef === undefined // no such item
-                    || ![ItemType.Gun, ItemType.Melee].includes(itemType = weaponDef.itemType) // neither gun nor melee
-                    || GameConstants.player.inventorySlotTypings[slot] !== itemType // invalid type
-                ) return;
-
-                this.inventory.addOrReplaceWeapon(slot, weaponDef);
-                const weapon = this.inventory.getWeapon(slot) as GunItem | MeleeItem;
-
-                if (!(weapon instanceof GunItem)) return;
-                weapon.ammo = (weaponDef as GunDefinition).capacity;
-                const ammoPtr = (weaponDef as GunDefinition).ammoType;
-                const ammoType = Ammos.fromString(ammoPtr);
-
-                if (ammoType.ephemeral) return;
-                this.inventory.items.setItem(ammoPtr, backpack.maxCapacity[ammoPtr]);
-            };
-
-            if (getWeapon?.gun) determinePreset(0, getWeapon.gun);
-            if (getWeapon?.throwable) determinePreset(1, getWeapon.throwable);
-            if (getWeapon?.melee) determinePreset(2, getWeapon.melee);
-
-            if (this.maxAdrenaline !== GameConstants.player.maxAdrenaline) {
-                this.adrenaline = this.maxAdrenaline;
-            }
-
-            this.dirty.weapons = true;
-            this.dirty.modifiers = true; // Added: Mark modifiers dirty after inventory changes
-            this.modifierCalculator.updateAndApplyModifiers();
-        }
     }
 
     spawnPos(position: Vector): void {

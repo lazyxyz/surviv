@@ -1,5 +1,5 @@
+import { Blockchain } from "@common/blockchain/contracts";
 import { type MODE } from "@common/constants";
-import { toBeHex } from "ethers";
 
 export const Config = {
     regions: {
@@ -8,30 +8,24 @@ export const Config = {
             mainAddress: "http://127.0.0.1:8000",
             gameAddress: "ws://127.0.0.1:<ID>",
             teamAddress: "ws://127.0.0.1:8000",
-            apiAddress: "https://admin.surviv.fun",
-            // apiAddress: "http://localhost:3001",
+            // apiAddress: "https://admin.surviv.fun",
+            apiAddress: "http://localhost:3001",
         },
     },
     defaultRegion: "dev",
 } satisfies ConfigType as ConfigType;
 
-export const ChainConfig = {
-    chainId: toBeHex(50312),
-    chainName: "Somnia Testnet",
-    rpcUrls: ["https://dream-rpc.somnia.network/"],
-    nativeCurrency: {
-        name: "Somnia Testnet Token",
-        symbol: "STT",
-        decimals: 18
-    },
-    blockExplorerUrls: ["https://shannon-explorer.somnia.network/"],
-    blockExplorerAPI: "https://somnia.w3us.site",
-} satisfies ChainInfo as ChainInfo;
-
 export interface ConfigType {
     readonly regions: Record<string, Region>
     readonly defaultRegion: string,
 }
+
+export const Chains: Record<string, Blockchain> = {
+    shannon: Blockchain.Shannon,
+    minato: Blockchain.Minato,
+    // somnia: Blockchain.Somnia,
+    // soneium: Blockchain.Soneium,
+} as const;
 
 export interface Region {
     /**
@@ -64,15 +58,3 @@ export interface ServerInfo {
     readonly nextSwitchTime: number
 };
 
-export interface ChainInfo {
-    readonly chainId: string
-    readonly chainName: string
-    readonly rpcUrls: string[]
-    readonly nativeCurrency: {
-        name: string,
-        symbol: string,
-        decimals: number,
-    }
-    readonly blockExplorerUrls: string[],
-    readonly blockExplorerAPI: string
-}

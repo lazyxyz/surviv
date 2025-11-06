@@ -44,6 +44,4 @@ void (async () => {
     setupRangeInputs();
     setupTabNavigation();
     setupSettingsImportExport();
-
-
 })();

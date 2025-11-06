@@ -1,10 +1,11 @@
 import $ from "jquery";
 import { createDropdown } from "../uiHelpers";
-import { WalletType, parseJWT, shorten } from "../utils/constants";
+import { CHAIN_NAME, WalletType, parseJWT, shorten } from "../utils/constants";
 import type { Account } from "../account";
 import { errorAlert, warningAlert } from "../modal";
 import { getWalletConnectProvider } from "./walletConnect";
-import { ethers } from "ethers";
+import { Chains } from "../../config";
+import { chainIdToHex } from "@common/blockchain/config";
 
 const walletPriority = [
     WalletType.MetaMask,
@@ -58,6 +59,9 @@ function sortAndRenderWalletList($walletList: JQuery, account: Account): void {
 }
 
 export function onConnectWallet(account: Account): void {
+
+    initializeChainSelection(account);
+
     $("#connect-wallet-btn").on("click", async () => {
         $(".connect-wallet-portal").css("display", "block");
 
@@ -88,7 +92,7 @@ export function onConnectWallet(account: Account): void {
                     // Hide logo to show loading icon
                     $(logoElement).css("display", "none");
 
-                    const wcProvider = await getWalletConnectProvider();
+                    const wcProvider = await getWalletConnectProvider(chainIdToHex(account.chainConfig.chainId));
 
                     // update providers for eip6963
                     {
@@ -293,4 +297,76 @@ export function showWallet(account: Account): void {
     }
 
     createDropdown(".account-wallet-container");
+}
+
+
+
+type ChainStr = keyof typeof Chains;
+
+// Function to generate chain-select HTML dynamically
+function generateChainSelectHTML(): string {
+    let html = '<div class="chain-select">';
+    let defaultChainStr: ChainStr = 'somnia'; // Default fallback
+    const storedChain = localStorage.getItem(CHAIN_NAME);
+    if (storedChain && (storedChain as ChainStr in Chains)) {
+        defaultChainStr = storedChain as ChainStr;
+    }
+
+    Object.entries(Chains).forEach(([key, _value]) => {
+        const isActive = key === defaultChainStr;
+        const activeClass = isActive ? ' active' : '';
+        html += `
+            <div class="chain-item${activeClass}" data-chain="${key}">
+                <img src="./img/wallet/${key}.svg" alt="${key}" />
+                <p>${key}</p>
+            </div>
+        `;
+    });
+    html += '</div>';
+    return html;
+}
+
+function initializeChainSelection(account: Account): void {
+    const header = document.querySelector('.connect-wallet-header') as HTMLElement;
+    if (!header) return;
+
+    // Remove existing chain-select if present (to regenerate on modal open)
+    const existingSelect = header.querySelector('.chain-select');
+    if (existingSelect) {
+        existingSelect.remove();
+    }
+
+    // Generate and append new chain-select
+    const chainSelectHTML = generateChainSelectHTML();
+    header.insertAdjacentHTML('beforeend', chainSelectHTML);
+
+    // Re-query chainItems after generation
+    const chainItems = document.querySelectorAll<HTMLElement>('.chain-item');
+    const defaultChainStr = (localStorage.getItem(CHAIN_NAME) || 'somnia') as ChainStr;
+    const defaultChain = Chains[defaultChainStr];
+
+    // Ensure active class is set (in case localStorage changed)
+    chainItems.forEach((item) => {
+        item.classList.toggle('active', item.dataset.chain === defaultChainStr);
+    });
+
+    // Update account.chainConfig to default
+    account.setBlockchain(defaultChain);
+
+    // Add click handlers
+    chainItems.forEach((item) => {
+        item.addEventListener('click', () => {
+            const selectedChainStr = item.dataset.chain as ChainStr;
+            if (!selectedChainStr || !(selectedChainStr in Chains)) return;
+
+            const selectedChain = Chains[selectedChainStr];
+
+            // Remove active from all
+            chainItems.forEach((i) => i.classList.remove('active'));
+            // Add to clicked
+            item.classList.add('active');
+            localStorage.setItem(CHAIN_NAME, selectedChainStr);
+            account.setBlockchain(selectedChain);
+        });
+    });
 }

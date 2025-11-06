@@ -101,7 +101,6 @@ export class BotManager {
         const botData: ActorContainer = {
             autoFill: false,
             lobbyClearing: true,
-            weaponPreset: "",
             ip: undefined
         };
 

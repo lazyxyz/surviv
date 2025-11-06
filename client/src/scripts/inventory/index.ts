@@ -6,7 +6,7 @@ import { showSkins } from "./skins";
 import { showWeapons } from "./weapons";
 import type { Account } from '../account';
 import { GAME_CONSOLE } from '../..';
-import { AssetTier, SurvivAssets } from '@common/mappings';
+import { AssetTier, SurvivAssets } from '@common/blockchain';
 import { warningAlert } from '../modal';
 
 // handler display change preview
