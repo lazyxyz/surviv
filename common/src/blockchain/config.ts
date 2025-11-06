@@ -12,6 +12,8 @@ export interface ChainInfo {
     };
     readonly blockExplorerUrls: string[];
     readonly blockExplorerAPI: string;
+    readonly kitsSale: boolean;
+    readonly badgesSale: boolean;
 }
 
 // Chain-specific configurations
@@ -27,6 +29,8 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         },
         blockExplorerUrls: ["https://shannon-explorer.somnia.network/"],
         blockExplorerAPI: "https://somnia.w3us.site/api/v2",
+        kitsSale: true,
+        badgesSale: true,
     },
     [Blockchain.Somnia]: {
         chainId: toBeHex(5031),
@@ -39,6 +43,8 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         },
         blockExplorerUrls: ["https://explorer.somnia.network/"],
         blockExplorerAPI: "https://mainnet.somnia.w3us.site/api/v2",
+        kitsSale: false,
+        badgesSale: false,
     },
     [Blockchain.Minato]: {
         chainId: '0x' + Number(1946).toString(16),
@@ -51,6 +57,8 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         },
         blockExplorerUrls: ["https://soneium-minato.blockscout.com/"],
         blockExplorerAPI: "https://soneium-minato.blockscout.com/api/v2", // Blockscout API endpoint
+        kitsSale: true,
+        badgesSale: true,
     },
     [Blockchain.Soneium]: {
         chainId: toBeHex(1868),
@@ -63,6 +71,8 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         },
         blockExplorerUrls: ["https://soneium.blockscout.com/"],
         blockExplorerAPI: "https://soneium.blockscout.com/api/api/v2", // Blockscout API endpoint
+        kitsSale: true,
+        badgesSale: true,
     },
 } as const;
 

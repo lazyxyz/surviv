@@ -9,8 +9,6 @@ import {
 } from "@common/blockchain";
 import { ShopCache } from ".";
 import { Account, type MintResult } from "../../account";
-import { getSurvivAddress } from "@common/blockchain/contracts";
-import { assetsMapping } from "@common/blockchain/SurvivAssets";
 
 const MAX_RENDER_CRATES = 1000;
 const TESTNET_EXPLORER = "https://shannon-explorer.somnia.network/";

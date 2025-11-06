@@ -4,6 +4,7 @@ import { Account, type SaleCollections, type SaleItems } from "../../account";
 import { successAlert, errorAlert, warningAlert } from "../../modal";
 import { ShopCache } from ".";
 import { GAME_CONSOLE } from "../../..";
+import { getSurvivAddress } from "@common/blockchain/contracts";
 
 const DISCOUNT = 20; // DISCOUNT 20%
 const MAX_BADGES_CAP = 1000;
@@ -293,37 +294,58 @@ function setupPurchaseInteractions(account: Account, storeItems: StoreItem[]): v
 }
 
 export async function loadStore(account: Account): Promise<void> {
-    const storeItems: StoreItem[] = [
-        {
-            name: "Surviv Keys",
-            image: "./img/assets/surviv_kit_key.webp",
-            price: "Loading...",
-            itemType: "key",
-            collection: "SurvivKits",
-        },
-        {
-            name: "Surviv Crates",
-            image: "./img/assets/surviv_kit_crate.webp",
-            price: "Loading...",
-            itemType: "crate",
-            collection: "SurvivKits",
-        },
-        {
-            name: "Survivor's Pass",
-            image: "./img/game/shared/badges/surviv_pass.svg",
-            price: "Loading...",
-            itemType: "surviv_pass",
-            collection: "SurvivBadges",
-        },
-        {
-            name: "Genesis Survivor's Card",
-            image: "./img/game/shared/badges/surviv_card.svg",
-            price: "Loading...",
-            itemType: "surviv_card",
-            collection: "SurvivBadges",
-        },
-    ];
+    let storeItems: StoreItem[] = [];
 
-    renderStoreItems(account, storeItems);
-    setupPurchaseInteractions(account, storeItems);
+    if (account.chainConfig.kitsSale) {
+        const kitItems: StoreItem[] = [
+            {
+                name: "Surviv Keys",
+                image: "./img/assets/surviv_kit_key.webp",
+                price: "Loading...",
+                itemType: "key",
+                collection: "SurvivKits",
+            },
+            {
+                name: "Surviv Crates",
+                image: "./img/assets/surviv_kit_crate.webp",
+                price: "Loading...",
+                itemType: "crate",
+                collection: "SurvivKits",
+            },
+        ];
+        storeItems.push(...kitItems);  // Flatten and add as individual items
+    };
+
+    if (account.chainConfig.badgesSale) {
+        const kitItems: StoreItem[] = [
+            {
+                name: "Survivor's Pass",
+                image: "./img/game/shared/badges/surviv_pass.svg",
+                price: "Loading...",
+                itemType: "surviv_pass",
+                collection: "SurvivBadges",
+            },
+            {
+                name: "Genesis Survivor's Card",
+                image: "./img/game/shared/badges/surviv_card.svg",
+                price: "Loading...",
+                itemType: "surviv_card",
+                collection: "SurvivBadges",
+            },
+        ];
+        storeItems.push(...kitItems);  // Flatten and add as individual items
+    };
+
+    const $storeContainer = $("#buy-customize-items");
+    if (storeItems.length === 0) {
+        // Show empty state message
+        $storeContainer.empty().html(`
+            <div class="no-sales-message" style="text-align: center; padding: 40px; color: #ffd23a; font-size: 18px;">
+                Sales have ended. Check back later!
+            </div>
+        `);
+    } else {
+        renderStoreItems(account, storeItems);
+        setupPurchaseInteractions(account, storeItems);
+    }
 }
