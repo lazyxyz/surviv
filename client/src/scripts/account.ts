@@ -711,10 +711,10 @@ export class Account extends EIP6963 {
     }
 
     /**
-     * Claims all items from previously requested crate openings.
-     * @returns A promise resolving to the API response.
-     * @throws Error if the API request fails or authentication is invalid.
-     */
+ * Claims all items from previously requested crate openings.
+ * @returns A promise resolving to the API response.
+ * @throws Error if the API request fails or authentication is invalid.
+ */
     async claimItems(): Promise<{ hash?: string; balances?: MintResult[], error?: string }> {
         if (!this.provider?.provider) {
             throw new Error('Web3 provider not initialized');
@@ -734,32 +734,20 @@ export class Account extends EIP6963 {
 
             if (remainingCommits.length > 0n) {
 
-                const feeData = await ethersProvider.getFeeData();
                 const remainingCommitsArray = Array.from(remainingCommits);
 
                 const numberOfCrates = remainingCommitsArray.reduce(
                     (sum: number, item: any) => sum + Number(item[1] ?? 0),
                     0
                 );
-                let gasPrice;
-                const gasPriceMultiplier = 1.3 + 0.005 * numberOfCrates; // 30% base increase + 0.5% per crate
+                const gasLimitMultiplier = 1.3 + 0.005 * numberOfCrates; // 30% base increase + 0.5% per crate
 
-                // Check if the network supports EIP-1559
-                if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas) {
-                    // Increase maxFeePerGas by 1% per crate
-                    gasPrice = {
-                        maxFeePerGas: (feeData.maxFeePerGas * BigInt(Math.round(gasPriceMultiplier * 100))) / 100n,
-                        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas, // Keep priority fee as suggested
-                    };
-                } else if (feeData.gasPrice) {
-                    // For non-EIP-1559 networks, increase gasPrice by 1% per crate
-                    gasPrice = {
-                        gasPrice: (feeData.gasPrice * BigInt(Math.round(gasPriceMultiplier * 100))) / 100n,
-                    };
-                }
+                // Estimate gas and apply multiplier
+                const gasEstimate = await crateBaseContract.openCratesBatch.estimateGas();
+                const gasLimit = (gasEstimate * BigInt(Math.round(gasLimitMultiplier * 100))) / 100n;
 
-                // Execute claim transaction
-                const tx = await crateBaseContract.openCratesBatch(gasPrice);
+                // Execute claim transaction with gasLimit override
+                const tx = await crateBaseContract.openCratesBatch({ gasLimit });
                 await tx.wait();
 
                 const claimItems = await this.getTokenMints(tx.hash)
