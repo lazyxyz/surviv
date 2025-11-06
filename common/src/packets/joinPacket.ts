@@ -61,7 +61,6 @@ export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, PlayerD
         if (hasBadge) stream.writeLootStringId(data.badge);
         if (hasMelee) stream.writeLootStringId(data.melee);
         if (hasGun) stream.writeLootStringId(data.gun);
-
     },
 
     deserialize(stream) {

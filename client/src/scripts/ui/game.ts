@@ -59,12 +59,8 @@ function setupMenuButtons(game: Game): void {
         if (teamSocket) {
             teamSocket.send(JSON.stringify({ type: CustomTeamMessages.Start }));
         } else {
-            if (game.account) {
-                // async sleep
-                joinGame(game.teamSize, game, game.account);
-            } else {
-                errorAlert("Please connect your wallet to continue!");
-            }
+            // async sleep
+            joinGame(game.teamSize, game, game.account);
         }
     });
 

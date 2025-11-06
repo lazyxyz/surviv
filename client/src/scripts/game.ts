@@ -475,27 +475,23 @@ export class Game {
     }
 
 
-    async connect(raw_url: string, account: Account) {
+    async connect(raw_url: string, account?: Account) {
         this.account = account;
         const url = new URL(raw_url);
 
         this.error = false;
 
-        if (this.gameStarted || !account.token?.length) return;
+        if (this.gameStarted) return;
 
-        // token is expired
-        const { exp } = parseJWT(account.token);
-        if (new Date().getTime() >= (exp * 1000)) {
-            return account.sessionExpired();
+        if(account?.token) {
+            // token is expired
+            const { exp } = parseJWT(account.token);
+            if (new Date().getTime() >= (exp * 1000)) {
+                return account.sessionExpired();
+            }
         }
 
         // append token intro params
-        if (url.search) {
-            url.searchParams.append("token", account.token);
-        } else {
-            url.searchParams.set("token", account.token);
-        }
-
         this._socket = await this.connectWebSocket(url.toString(), 10000, 1000, {
             onopen: () => {
                 if (this.music) {

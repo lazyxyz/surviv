@@ -188,10 +188,8 @@ export class Gamer extends Player {
     }
 
     handleGameOver(won = false): void {
-        if (!this.address || this.gameOver) return;
+        if (this.gameOver) return;
         this.gameOver = true;
-
-        console.log("handleGameOver!");
 
         const rank = this.calculateRank(won);
         if (!rank) {

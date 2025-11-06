@@ -88,10 +88,6 @@ async function initializePlayButtons(game: Game, account: Account): Promise<void
         `);
 
         button.on("click", async () => {
-            if (!account.address) {
-                warningAlert("Please connect your wallet to continue!");
-                return;
-            }
             if (!isClickAllowed()) return;
             await joinGame(config.mode, game, account);
         });
@@ -407,14 +403,19 @@ function attachKickListeners(ui: Game['uiManager']['ui']): void {
     });
 }
 
-export async function joinGame(teamSize: number, game: Game, account: Account): Promise<void> {
+export async function joinGame(teamSize: number, game: Game, account?: Account): Promise<void> {
     const { ui } = game.uiManager;
 
-    if (!selectedRegion || !account.token?.length) return;
-    if (new Date().getTime() >= (parseJWT(account.token).exp * 1000)) {
-        return account.sessionExpired();
+    if (account) {
+        if (new Date().getTime() >= (parseJWT(account.token).exp * 1000)) {
+            return account.sessionExpired();
+        }
     }
 
+    if (!selectedRegion) {
+        warningAlert("Please select a server to play!");
+        return;
+    }
     ui.splashOptions.addClass("loading");
     ui.loadingText.text(getTranslatedString("loading_finding_game"));
 
@@ -433,7 +434,7 @@ export async function joinGame(teamSize: number, game: Game, account: Account): 
 }
 
 
-async function connectToGame(data: GetGameResponse, gameAddress: string, game: Game, account: Account): Promise<void> {
+async function connectToGame(data: GetGameResponse, gameAddress: string, game: Game, account?: Account): Promise<void> {
     const { ui } = game.uiManager;
 
     if (!data.success) {
@@ -457,56 +458,13 @@ async function connectToGame(data: GetGameResponse, gameAddress: string, game: G
 
     if (autoFill) params.set("autoFill", String(autoFill));
     if (roomMode) params.set("roomMode", String(roomMode));
-    setGameParameters(params, account);
+    const lobbyClearing = GAME_CONSOLE.getBuiltInCVar("dv_lobby_clearing");
+    if (lobbyClearing) params.set("lobbyClearing", "true");
+
     const websocketURL = `${gameAddress.replace("<ID>", data.gameID.toString())}/play?${params.toString()}`;
     await game.connect(websocketURL, account);
     ui.splashMsg.hide();
 }
-
-function setGameParameters(params: URLSearchParams, account: Account): void {
-    const name = GAME_CONSOLE.getBuiltInCVar("cv_player_name");
-    if (name) params.set("name", name);
-    if (account.address) params.set("address", account.address);
-
-    const playerSkin = Loots.fromStringSafe(GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin")) ??
-        Loots.fromString(typeof defaultClientCVars.cv_loadout_skin === "object"
-            ? defaultClientCVars.cv_loadout_skin.value
-            : defaultClientCVars.cv_loadout_skin);
-    if (playerSkin) params.set("skin", playerSkin.idString);
-
-    const badge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
-    if (badge) {
-        params.set("badge", badge)
-    } else {
-        params.set("badge", DEFAULT_BADGE)
-    };
-
-    const weaponPreset = GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset");
-    if (weaponPreset) {
-        const preset = JSON.parse(weaponPreset);
-        if (preset.melee) params.set("melee", preset.melee);
-        if (preset.gun) params.set("gun", preset.gun);
-    }
-
-    const lobbyClearing = GAME_CONSOLE.getBuiltInCVar("dv_lobby_clearing");
-    if (lobbyClearing) params.set("lobbyClearing", "true");
-
-    const nameColor = GAME_CONSOLE.getBuiltInCVar("dv_name_color");
-    if (nameColor) {
-        try {
-            params.set("nameColor", new Color(nameColor).toNumber().toString());
-        } catch (e) {
-            GAME_CONSOLE.setBuiltInCVar("dv_name_color", "");
-            console.error(e);
-        }
-    }
-
-    const emoteIds = EMOTE_SLOTS.map(slot =>
-        Emotes.fromStringSafe(GAME_CONSOLE.getBuiltInCVar(`cv_loadout_${slot}_emote`))?.idString
-    ).filter(Boolean);
-    if (emoteIds.length > 0) params.set("emotes", emoteIds.join(","));
-}
-
 
 export async function setupPlay(game: Game, account: Account): Promise<void> {
     await initializePlayButtons(game, account);
