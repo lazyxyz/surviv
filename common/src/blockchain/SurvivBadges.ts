@@ -7,10 +7,10 @@ export const assetsMapping = {
     "surviv_pass",
   ],
   "boosts": [
-    50,
-    50,
-    50,
-    50,
+    60,
+    60,
+    60,
+    60,
     15
   ],
 };
