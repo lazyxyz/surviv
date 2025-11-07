@@ -281,8 +281,8 @@ export class Gamer extends Player {
             return;
         }
 
-        // Skip 50vs50 Mode
-        if (this.game.gameMode == MODE.V50) {
+        // Only Solo and Squad allow to earn loots atm
+        if (this.game.gameMode !== MODE.Solo && this.game.gameMode !== MODE.Squad) {
             processRewardsPacket(true, rank, 0, 0);
             return;
         }

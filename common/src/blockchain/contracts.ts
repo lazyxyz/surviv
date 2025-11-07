@@ -40,25 +40,25 @@ export const chainToAssetsMapping = {
         SurvivRewards: "0x2CE90d50B240E9243A9C4DEea46f362F331E7127", 
         SurvivBase: "0x102143C4A493f99117179008C9De79Ae85C010be", 
         SurvivShop: "0x220204B77B9461301F8278448Bea3EbaBa2E0B71", 
-        SurvivShopV2: "", // Replace with actual
+        SurvivShopV2: "", 
     },
     [Blockchain.Somnia]: {
         SurvivAssets: "0x32d2FbF76E0B43A77C92429433a5BfB9b5addCd4",
         SurvivBadges: "0x0a65a380A5fc7E623F997ad81c4393C825F6329a",
         SurvivKits: "0x460b62aF271A06b101A6f4AaA20f6623cc4B28d7",
-        SurvivRewards: "0x50fFa867ad37022fd4f19404A8De1Ce9909b7a53", // Replace with actual
-        SurvivBase: "0x9AA9d6b7966F20b60e813D88cb9604E0e943e608", // Replace with actual
-        SurvivShop: "", // Replace with actual
+        SurvivRewards: "0x50fFa867ad37022fd4f19404A8De1Ce9909b7a53", 
+        SurvivBase: "0x9AA9d6b7966F20b60e813D88cb9604E0e943e608", 
+        SurvivShop: "", 
         SurvivShopV2: "0x680179f4cc4f6B727d8a4A14F082ebe40642Fda9",
     },
     [Blockchain.Soneium]: {
-        SurvivAssets: "",
-        SurvivBadges: "",
-        SurvivKits: "",
-        SurvivRewards: "0x0000000000000000000000000000000000000000", // Replace with actual
-        SurvivBase: "0x0000000000000000000000000000000000000000", // Replace with actual
-        SurvivShop: "0x0000000000000000000000000000000000000000", // Replace with actual
-        SurvivShopV2: "0x0000000000000000000000000000000000000000", // Replace with actual
+        SurvivAssets: "0x32d2FbF76E0B43A77C92429433a5BfB9b5addCd4",
+        SurvivBadges: "0x0a65a380A5fc7E623F997ad81c4393C825F6329a",
+        SurvivKits: "0x460b62aF271A06b101A6f4AaA20f6623cc4B28d7",
+        SurvivRewards: "0x74fD4541Ce9A144e9cA92D75DC71EB103B083a64", 
+        SurvivBase: "0xDFb67a8c4Bf0C0b29d269C0d595d6e5B3d6606FE", 
+        SurvivShop: "0x9AA9d6b7966F20b60e813D88cb9604E0e943e608", 
+        SurvivShopV2: "", 
     },
 } as const;
 

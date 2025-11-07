@@ -71,7 +71,7 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
             decimals: 18,
         },
         blockExplorerUrls: ["https://soneium.blockscout.com/"],
-        blockExplorerAPI: "https://soneium.blockscout.com/api/api/v2", // Blockscout API endpoint
+        blockExplorerAPI: "https://soneium.blockscout.com/api/v2", // Blockscout API endpoint
         kitsSale: true,
         badgesSale: true,
     },

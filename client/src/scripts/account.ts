@@ -577,7 +577,6 @@ export class Account extends EIP6963 {
                     !Number.isInteger(claim.reward.expiry) ||
                     !claim.signature
                 ) {
-                    console.warn('Invalid claim data, skipping:', claim);
                     continue;
                 }
                 crates.push({

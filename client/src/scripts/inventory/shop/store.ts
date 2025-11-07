@@ -40,6 +40,28 @@ async function fetchPrice(
     }
 }
 
+function formatPrice(rawPrice: number): string {
+    let formatted;
+    if (rawPrice >= 1) {
+        // >= 1 → always 2 decimals, no scientific notation
+        formatted = rawPrice.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+            useGrouping: false // optional: remove commas
+        });
+    } else {
+        // < 1 → show up to 2 significant digits, no scientific notation
+        const precise = rawPrice.toPrecision(2);
+        // Convert from scientific (e.g., 5.1e-7) to normal string
+        formatted = Number(precise).toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 15,
+            useGrouping: false
+        });
+    }
+    return formatted;
+}
+
 async function fetchBalances(account: Account): Promise<number[]> {
     if (!ShopCache.storeLoaded) {
         let kitsBalance: Record<string, number> = {};
@@ -119,24 +141,7 @@ function renderStoreItems(account: Account, storeItems: StoreItem[]): void {
             const rawPrice = Number(formatEther(price));
             let effectivePrice = rawPrice;
 
-            let formatted;
-            if (rawPrice >= 1) {
-                // >= 1 → always 2 decimals, no scientific notation
-                formatted = rawPrice.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                    useGrouping: false // optional: remove commas
-                });
-            } else {
-                // < 1 → show up to 2 significant digits, no scientific notation
-                const precise = rawPrice.toPrecision(2);
-                // Convert from scientific (e.g., 5.1e-7) to normal string
-                formatted = Number(precise).toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 15,
-                    useGrouping: false
-                });
-            }
+            let formatted = formatPrice(rawPrice);
 
             $card.find(".price-placeholder").text(`${formatted} ${account.chainConfig.nativeCurrency.symbol}`);
             $card.data("effective-price", effectivePrice);
@@ -167,9 +172,9 @@ function updateTotalPurchase($card: JQuery<HTMLElement>, amount: number) {
     const effectivePrice = $card.data("effective-price");
     const $buyButton = $card.find(".buy-now-btn");
     if (effectivePrice !== undefined && amount > 0) {
-        const total = (effectivePrice * amount).toFixed(1);
         // $buyButton.text(`Buy ${total} ${account.chainConfig.nativeCurrency.symbol}`);
-        $buyButton.text(`Buy ${total}`);
+        let formatted = formatPrice(effectivePrice * amount);
+        $buyButton.text(`Buy ${formatted}`);
     } else {
         $buyButton.text("Buy now");
         $buyButton.prop("disabled", true).removeClass("active");

@@ -11,6 +11,27 @@ export const Config = {
             // apiAddress: "https://admin.surviv.fun",
             apiAddress: "http://localhost:3001",
         },
+        // as: {
+        //     name: "Asia",
+        //     mainAddress: "https://as.surviv.fun",
+        //     gameAddress: "wss://<ID>.as.surviv.fun",
+        //     teamAddress: "wss://team.as.surviv.fun",
+        //     apiAddress: "https://admin.surviv.fun",
+        // },
+        // eu: {
+        //     name: "Europe",
+        //     mainAddress: "https://eu.surviv.fun",
+        //     gameAddress: "wss://<ID>.eu.surviv.fun",
+        //     teamAddress: "wss://team.eu.surviv.fun",
+        //     apiAddress: "https://admin.surviv.fun",
+        // },
+        // na: {
+        //     name: "North America",
+        //     mainAddress: "https://na.surviv.fun",
+        //     gameAddress: "wss://<ID>.na.surviv.fun",
+        //     teamAddress: "wss://team.na.surviv.fun",
+        //     apiAddress: "https://admin.surviv.fun",
+        // },
     },
     defaultRegion: "dev",
 } satisfies ConfigType as ConfigType;
@@ -23,8 +44,8 @@ export interface ConfigType {
 export const Chains: Record<string, Blockchain> = {
     shannon: Blockchain.Shannon,
     minato: Blockchain.Minato,
-    // somnia: Blockchain.Somnia,
-    // soneium: Blockchain.Soneium,
+    somnia: Blockchain.Somnia,
+    soneium: Blockchain.Soneium,
 } as const;
 
 export interface Region {
