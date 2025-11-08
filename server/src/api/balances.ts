@@ -1,11 +1,12 @@
 import { ethers } from 'ethers';
-import { SurvivAssetRanges, SurvivAssetsMapping, SurvivBadgesMapping } from '@common/mappings'; // Adjust path as needed
+import { SurvivAssetRanges, SurvivAssetsMapping, SurvivBadgesMapping } from '@common/blockchain'; // Adjust path as needed
 import { EMOTE_SLOTS } from '@common/constants';
 import { BadgeDefinition, Badges } from '@common/definitions/badges';
 import { EmoteDefinition, Emotes } from '@common/definitions/emotes';
 import { GunDefinition, Guns } from '@common/definitions/guns';
 import { MeleeDefinition, Melees } from '@common/definitions/melees';
 import { SkinDefinition, Skins, DEFAULT_SKIN } from '@common/definitions/skins';
+import { Blockchain, getSurvivAddress } from '@common/blockchain/contracts';
 
 interface Mapping {
     address: string;
@@ -38,19 +39,12 @@ interface VerifiedAssets {
  */
 async function getAssetsBalance(
     player: string,
+    rpc: string,
+    assetsAddress: string,
     items: string[],
     timeout: number = 3000
 ): Promise<AssetCheckResult> {
-    const rpc = process.env.RPC;
     if (!rpc) throw new Error('RPC configuration not found');
-
-    if (!SurvivAssetsMapping || !SurvivAssetsMapping.address || !Array.isArray(SurvivAssetsMapping.assets)) {
-        throw new Error('Invalid SurvivAssetsMapping configuration');
-    }
-
-    if (!ethers.isAddress(SurvivAssetsMapping.address)) {
-        throw new Error(`Invalid contract address: ${SurvivAssetsMapping.address}`);
-    }
 
     const provider = new ethers.JsonRpcProvider(rpc);
 
@@ -85,7 +79,7 @@ async function getAssetsBalance(
 
     try {
         const contract = new ethers.Contract(
-            SurvivAssetsMapping.address,
+            assetsAddress,
             ['function balanceOfBatch(address[] accounts, uint256[] ids) view returns (uint256[])'],
             provider
         );
@@ -141,11 +135,11 @@ async function getAssetsBalance(
  */
 async function getBalance(
     player: string,
+    rpc: string,
     items: string[],
     mapping: Mapping,
     timeout: number = 3000
 ): Promise<AssetCheckResult> {
-    const rpc = process.env.RPC;
     if (!rpc) throw new Error('RPC configuration not found');
 
     if (!mapping || !mapping.address || !Array.isArray(mapping.assets)) {
@@ -228,14 +222,11 @@ async function getBalance(
     }
 }
 
-/**
- * Verify assets for a player using SurvivAssetsMapping.
- * @param player - The player's address
- * @param assets - Object containing skin, melee, gun, and emotes
- * @param timeout - Timeout in milliseconds
- */
+
 export async function verifyAllAssets(
     player: string,
+    rpc: string,
+    assetsAddress: string,
     assets: {
         skin?: string;
         melee?: string;
@@ -270,7 +261,7 @@ export async function verifyAllAssets(
         }
 
         // Verify balances
-        const checkResult = await getAssetsBalance(player, items, timeout);
+        const checkResult = await getAssetsBalance(player, rpc, assetsAddress, items, timeout);
 
         // Process results
         const emoteResults: string[] = [];
@@ -310,6 +301,8 @@ export async function verifyAllAssets(
  */
 export async function verifyBadges(
     player: string,
+    rpc: string,
+    badgeAddress: string,
     badge: string,
     timeout: number = 2000
 ): Promise<{ badgeDefinition: BadgeDefinition | undefined; totalBoost: number }> {
@@ -319,7 +312,8 @@ export async function verifyBadges(
 
     try {
         // Pass all badges from SurvivBadgesMapping.assets to getBalance
-        const checkResult = await getBalance(player, SurvivBadgesMapping.assets, SurvivBadgesMapping, timeout);
+        const checkResult = await getBalance(player, rpc, SurvivBadgesMapping.assets,
+            { address: badgeAddress, assets: SurvivBadgesMapping.assets }, timeout);
 
         let totalBoost = 0;
         if (checkResult.isValid && checkResult.validItems.length > 0) {

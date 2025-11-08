@@ -10,20 +10,19 @@ import { createPacket } from "./packet";
 export type PlayerData = {
     readonly protocolVersion: number
     readonly name: string
-    readonly address: string
+
     readonly isMobile: boolean
-    readonly emotes: ReadonlyArray<EmoteDefinition | undefined>
-
-    readonly skin?: SkinDefinition
-    readonly badge?: BadgeDefinition
-
-    readonly melee?: MeleeDefinition
-    readonly gun?: GunDefinition
+    readonly address?: string
+    readonly token?: string
+    readonly chain: number
 } & {
-    readonly gameMode: number
-} & {
-    readonly rainDrops: number, // num
-};
+    readonly emotes?: string
+    readonly skin?: string
+    readonly badge?: string
+
+    readonly melee?: string
+    readonly gun?: string
+}
 
 // protocol version is automatically set; use this type when
 // creating an object for use by a ReadyPacket
@@ -31,7 +30,9 @@ export type JoinPacketCreation = Omit<PlayerData, "protocolVersion">;
 
 export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, PlayerData>({
     serialize(stream, data) {
-        const emotes = data.emotes;
+        const hasAddress = data.address !== undefined;
+        const hasToken = data.token !== undefined;
+        const hasEmotes = data.emotes !== undefined;
         const hasSkin = data.skin !== undefined;
         const hasBadge = data.badge !== undefined;
         const hasMelee = data.melee !== undefined;
@@ -39,78 +40,55 @@ export const JoinPacket = createPacket("JoinPacket")<JoinPacketCreation, PlayerD
 
         stream.writeBooleanGroup(
             data.isMobile,
+            hasAddress,
+            hasToken,
+            hasEmotes,
             hasSkin,
             hasBadge,
             hasMelee,
             hasGun,
         );
-        stream.writeBooleanGroup(
-            emotes[0] !== undefined,
-            emotes[1] !== undefined,
-            emotes[2] !== undefined,
-            emotes[3] !== undefined,
-            emotes[4] !== undefined,
-            emotes[5] !== undefined
-        );
 
         stream.writeUint16(GameConstants.protocolVersion);
         stream.writePlayerName(data.name);
-        stream.writePlayerAddress(data.address);
 
-        if (hasSkin) {
-            Loots.writeToStream(stream, data.skin);
-        }
+        if (hasAddress) stream.writePlayerAddress(data.address);
+        if (hasToken) stream.writeToken(data.token);
+        stream.writeUint8(data.chain);
 
-        if (hasBadge) {
-            Badges.writeToStream(stream, data.badge);
-        }
-
-        for (let i = 0; i < 6; i++) {
-            const emote = emotes[i];
-            if (emote !== undefined) {
-                Emotes.writeToStream(stream, emote);
-            }
-        }
-
-        if (hasMelee) {
-            Melees.writeToStream(stream, data.melee);
-        }
-
-        if (hasGun) {
-            Guns.writeToStream(stream, data.gun);
-        }
-        stream.writeInt8(data.gameMode);
-
-        stream.writeUint16(data.rainDrops);
+        if (hasEmotes) stream.writeEmoteIds(data.emotes);
+        if (hasSkin) stream.writeLootStringId(data.skin);
+        if (hasBadge) stream.writeLootStringId(data.badge);
+        if (hasMelee) stream.writeLootStringId(data.melee);
+        if (hasGun) stream.writeLootStringId(data.gun);
     },
 
     deserialize(stream) {
         const [
             isMobile,
+            hasAddress,
+            hasToken,
+            hasEmotes,
             hasSkin,
             hasBadge,
             hasMelee,
-            hasGun
+            hasGun,
         ] = stream.readBooleanGroup();
 
-        const [
-            ...emotes
-        ] = stream.readBooleanGroup();
 
         return {
             protocolVersion: stream.readUint16(),
             name: stream.readPlayerName().replaceAll(/<[^>]+>/g, "").trim(), // Regex strips out HTML
-            address: stream.readPlayerAddress().replaceAll(/<[^>]+>/g, "").trim(), // Regex strips out HTML
             isMobile,
+            address: hasAddress ? stream.readPlayerAddress().replaceAll(/<[^>]+>/g, "").trim() : undefined, // Regex strips out HTML
+            token: hasToken ? stream.readToken() : undefined,
+            chain: stream.readUint8(),
 
-            skin: hasSkin ? Skins.readFromStream(stream) : undefined,
-            badge: hasBadge ? Badges.readFromStream(stream) : undefined,
-
-            emotes: Array.from({ length: 6 }, (_, i) => emotes[i] ? Emotes.readFromStream(stream) : undefined),
-            melee: hasMelee ? Melees.readFromStream(stream) : undefined,
-            gun: hasGun ? Guns.readFromStream(stream) : undefined,
-            gameMode: stream.readInt8(),
-            rainDrops: stream.readUint16(),
+            emotes: hasEmotes ? stream.readEmoteIds() : undefined,
+            skin: hasSkin ? stream.readLootStringId() : undefined,
+            badge: hasBadge ? stream.readLootStringId() : undefined,
+            melee: hasMelee ? stream.readLootStringId() : undefined,
+            gun: hasGun ? stream.readLootStringId() : undefined,
         };
     }
 });

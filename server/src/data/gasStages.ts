@@ -102,7 +102,7 @@ export interface GasStage {
 //         duration: 0,
 //         oldRadius: 0,
 //         newRadius: 0,
-//         dps: 2
+//         dps: 5
 //     },
 // ];
 

@@ -1,5 +1,5 @@
+import { Blockchain } from "@common/blockchain/contracts";
 import { type MODE } from "@common/constants";
-import { toBeHex } from "ethers";
 
 export const Config = {
     regions: {
@@ -28,23 +28,17 @@ export const Config = {
     defaultRegion: "as",
 } satisfies ConfigType as ConfigType;
 
-export const ChainConfig = {
-    chainId: toBeHex(5031),
-    chainName: "Somnia Mainnet",
-    rpcUrls: ["https://api.infra.mainnet.somnia.network/"],
-    nativeCurrency: {
-        name: "Somnia Token",
-        symbol: "SOMI",
-        decimals: 18
-    },
-    blockExplorerUrls: ["https://mainnet.somnia.w3us.site/"],
-    blockExplorerAPI: "https://mainnet.somnia.w3us.site"
-} satisfies ChainInfo as ChainInfo;
-
 export interface ConfigType {
     readonly regions: Record<string, Region>
     readonly defaultRegion: string,
 }
+
+export const Chains: Record<string, Blockchain> = {
+    // shannon: Blockchain.Shannon,
+    // minato: Blockchain.Minato,
+    somnia: Blockchain.Somnia,
+    soneium: Blockchain.Soneium,
+} as const;
 
 export interface Region {
     /**
@@ -77,15 +71,3 @@ export interface ServerInfo {
     readonly nextSwitchTime: number
 };
 
-export interface ChainInfo {
-    readonly chainId: string
-    readonly chainName: string
-    readonly rpcUrls: string[]
-    readonly nativeCurrency: {
-        name: string,
-        symbol: string,
-        decimals: number,
-    }
-    readonly blockExplorerUrls: string[],
-    readonly blockExplorerAPI: string
-}

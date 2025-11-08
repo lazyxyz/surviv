@@ -69,6 +69,7 @@ export const SELECTOR_WALLET = "SELECTOR_WALLET";
 export const PUBLIC_KEY = "PUBLIC_KEY";
 export const ACCESS_TOKEN = "ACCESS_TOKEN";
 export const SESSION_WALLETCONNECT = 'SESSION_WALLETCONNECT';
+export const CHAIN_NAME = 'CHAIN_NAME';
 
 export enum WalletType {
     MetaMask = "MetaMask",
