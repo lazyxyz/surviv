@@ -48,5 +48,4 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     }
 
     override damage(): void { }
-
 }

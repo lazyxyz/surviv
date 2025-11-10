@@ -109,6 +109,7 @@ export enum ZIndexes {
     ObstaclesLayer1,
     Loot,
     GroundedThrowables,
+    Vehicles,
     ObstaclesLayer2,
     TeammateName,
     Bullets,

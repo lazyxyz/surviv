@@ -979,7 +979,6 @@ const maps = {
                         itemPos.y += rowSpacing;
                     }
                     itemPos.x += colSpacing;
-
                 };
 
                 // Place guns
@@ -1002,6 +1001,10 @@ const maps = {
                     placeItem(item);
                 }
 
+                if (itemPos.x > maxX) {
+                    itemPos.x = 0;
+                    itemPos.y += rowSpacing;
+                }
                 map.game.addVehicle(Vehicles.fromString('buggy'), itemPos, 0);
             }
         };

@@ -35,8 +35,8 @@ export const Config = {
     gameJoinTime: 900,
     // gameJoinTime: 0,
 
-    objectLifetime: 180000, // Remove loot after 3 mins
-    obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
+    // objectLifetime: 180000, // Remove loot after 3 mins
+    // obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
 
     gas: { mode: GasMode.Normal },
 

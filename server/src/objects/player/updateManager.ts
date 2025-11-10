@@ -26,6 +26,7 @@ import { ReferenceTo } from "@common/utils/objectDefinitions";
 import { SyncedParticleDefinition } from "@common/definitions/syncedParticles";
 import { GunItem } from "../../inventory/gunItem";
 import { CountableInventoryItem } from "../../inventory/inventoryItem";
+import { Vehicle } from "../vehicle";
 
 export class UpdateManager {
     constructor(private player: Player) { }
@@ -371,14 +372,20 @@ export class UpdateManager {
 
             packet.deletedObjects = [...this.player.visibleObjects]
                 .filter(
-                    object => (
-                        (
-                            !newVisibleObjects.has(object)
-                            || !isVisibleFromLayer(this.player.layer, object, object?.hitbox && [...game.grid.intersectsHitbox(object.hitbox)])
-                        )
-                        && (this.player.visibleObjects.delete(object), true)
-                        && (!object.isObstacle || !object.definition.isStair)
-                    )
+                    object => {
+                        if (object.isVehicle) {
+                            return false;
+                        }
+
+                        return (
+                            (
+                                !newVisibleObjects.has(object)
+                                || !isVisibleFromLayer(this.player.layer, object, object?.hitbox && [...game.grid.intersectsHitbox(object.hitbox)])
+                            )
+                            && (this.player.visibleObjects.delete(object), true)
+                            && (!object.isObstacle || !object.definition.isStair)  // Existing stair skip
+                        );
+                    }
                 )
                 .map(({ id }) => id);
 

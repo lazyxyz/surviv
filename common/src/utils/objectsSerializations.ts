@@ -853,29 +853,26 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
     [ObjectCategory.Vehicle]: {
         serializePartial(stream, data) {
             const { position, rotation, layer } = data;
-
             stream.writePosition(position);
             stream.writeRotation2(rotation);
             stream.writeLayer(layer);
         },
         serializeFull(stream, { full }) {
             Vehicles.writeToStream(stream, full.definition);
-            const {  } = full;
+            // Add more full props later (e.g., health, passengers)
         },
         deserializePartial(stream) {
-            const data: Mutable<ObjectsNetData[ObjectCategory.SyncedParticle]> = {
+            return {  
                 position: stream.readPosition(),
                 rotation: stream.readRotation2(),
                 layer: stream.readLayer()
             };
-
-            return data;
         },
         deserializeFull(stream) {
             const definition = Vehicles.readFromStream(stream);
-
             return {
                 definition,
+                // Add more full props later
             };
         }
     },
