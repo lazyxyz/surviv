@@ -53,9 +53,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
         // Position/rotate
         this.container.position.copyFrom(toPixiCoords(this.position));
-        this.container.rotation = this.rotation;
-
-        console.log("this.hitbox: ", this.hitbox);
+        this.container.rotation = this.rotation;    
         // Visibility: Like Obstacle—hide only on layer mismatch (prevents close-range overwrite)
         this.container.visible = true;  // Default visible unless dead/invisible
 
@@ -63,7 +61,6 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     }
 
     override updateZIndex(): void {
-        // Like Obstacle: Base zIndex with dead/overlay handling
         const baseZIndex = this.definition?.zIndex ?? ZIndexes.Vehicles ?? ZIndexes.ObstaclesLayer1;
         const zIndex = this.dead  // Assuming you add dead later; stub for now
             ? this.doOverlay()  // doOverlay now works via floorType
@@ -95,5 +92,14 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             this.debugGraphics,
             alpha
         );
+    }
+
+
+    interact(): void {
+        console.log(`Interacted with vehicle: ${this.definition.idString}`);  // Expand: e.g., enter vehicle logic
+    }
+
+    canInteract(player: any): boolean {  // 'any' for Player type—fix import if needed
+        return true;  // Interact if not destroyed
     }
 }

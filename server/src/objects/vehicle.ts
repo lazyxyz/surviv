@@ -19,6 +19,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 8;
     override readonly partialAllocBytes = 14;
     declare hitbox: Hitbox;
+    collidable: boolean = true;
 
     private _height = 1;
 
@@ -51,4 +52,13 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     }
 
     override damage(): void { }
+
+    canInteract(player: any): boolean {  // 'any' for Player type—fix import if needed
+        return true;  // Interact if not destroyed
+    }
+
+    interact(): void {
+        console.log(`Interacted with vehicle: ${this.definition.idString}`);  // Expand: e.g., enter vehicle logic
+    }
+
 }

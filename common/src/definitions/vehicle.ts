@@ -1,7 +1,7 @@
 import { ZIndexes } from "../constants";
 import { Hitbox, RectangleHitbox } from "../utils/hitbox";
 import { ObjectDefinitions, type ObjectDefinition } from "../utils/objectDefinitions";
-import { RotationMode } from "./obstacles";  // Reuse from obstacles, as vehicles rotate like them
+import { Materials, RotationMode } from "./obstacles";  // Reuse from obstacles, as vehicles rotate like them
 
 export interface VehicleDefinition extends ObjectDefinition {
     readonly image: string;
@@ -12,6 +12,7 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly rotationMode: RotationMode;
     readonly zIndex?: ZIndexes;
     readonly hitbox: Hitbox;
+    readonly material?: typeof Materials[number]
 }
 
 export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
@@ -33,6 +34,7 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
         return {
             idString,
             image: `${idString}`,  // Frame ID for sprite loader (matches your SVG path)
+            material: "metal_heavy",
             ...def
         };
     })

@@ -155,10 +155,10 @@ export class UpdateManager {
             let collided = false;
 
             for (const potential of this.player.nearObjects) {
-                const { isObstacle, isBuilding } = potential;
+                const { isObstacle, isBuilding, isVehicle } = potential;
 
                 if (
-                    (isObstacle || isBuilding)
+                    (isObstacle || isBuilding || isVehicle)
                     && this.player.hitbox.radius > 0
                     && this.player.mapPerkOrDefault(
                         PerkIds.AdvancedAthletics,

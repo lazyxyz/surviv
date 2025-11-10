@@ -486,7 +486,7 @@ export class Game {
 
         if (this.gameStarted) return;
 
-        if(account?.token) {
+        if (account?.token) {
             // token is expired
             const { exp } = parseJWT(account.token);
             if (new Date().getTime() >= (exp * 1000)) {
@@ -1146,7 +1146,7 @@ export class Game {
          * - whether the user can interact with it
         */
         const cache: {
-            object?: Loot | Obstacle | Player
+            object?: Loot | Obstacle | Player | Vehicle
             offset?: number
             isAction?: boolean
             bind?: string
@@ -1181,7 +1181,7 @@ export class Game {
             }
 
             interface CloseObject {
-                object?: Loot | Obstacle | Player
+                object?: Loot | Obstacle | Player | Vehicle
                 dist: number
             }
 
@@ -1196,8 +1196,8 @@ export class Game {
             const detectionHitbox = new CircleHitbox(3 * player.sizeMod, player.position);
 
             for (const object of this.objects) {
-                const { isLoot, isObstacle, isPlayer, isBuilding } = object;
-                const isInteractable = (isLoot || isObstacle || isPlayer) && object.canInteract(player);
+                const { isLoot, isObstacle, isPlayer, isBuilding, isVehicle } = object;
+                const isInteractable = (isLoot || isObstacle || isPlayer || isVehicle) && object.canInteract(player);
 
                 if (
                     (isLoot || isInteractable)
@@ -1285,6 +1285,10 @@ export class Game {
                                     : getTranslatedString(definition.idString as TranslationKeys);
 
                                 text = `${itemName}${object.count > 1 ? ` (${object.count})` : ""}`;
+                                break;
+                            }
+                            case object?.isVehicle: {
+                                text = getTranslatedString(object.definition.idString as TranslationKeys);
                                 break;
                             }
                             case object?.isPlayer: {

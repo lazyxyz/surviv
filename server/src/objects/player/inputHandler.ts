@@ -9,6 +9,7 @@ import { type Obstacle } from "../obstacle";
 import { type Player } from "../player";  // Adjust import
 import { ItemType } from "@common/utils/objectDefinitions";
 import { GunItem } from "../../inventory/gunItem";
+import { Vehicle } from "../vehicle";
 
 export class InputHandler {
     constructor(private player: Player) { }
@@ -96,7 +97,7 @@ export class InputHandler {
                 case InputActions.Loot:
                 case InputActions.Interact: {
                     interface CloseObject {
-                        object: Obstacle | Player | Loot | undefined
+                        object: Obstacle | Player | Loot | Vehicle| undefined
                         dist: number
                     }
 
@@ -112,8 +113,8 @@ export class InputHandler {
                     const nearObjects = this.player.game.grid.intersectsHitbox(detectionHitbox);
 
                     for (const object of nearObjects) {
-                        const { isLoot, isObstacle, isPlayer } = object;
-                        const isInteractable = (isLoot || isObstacle || isPlayer) && object.canInteract(this.player) === true;
+                        const { isLoot, isObstacle, isPlayer, isVehicle } = object;
+                        const isInteractable = (isLoot || isObstacle || isPlayer || isVehicle) && object.canInteract(this.player) === true;
 
                         if (
                             (isLoot || (type === InputActions.Interact && isInteractable))
