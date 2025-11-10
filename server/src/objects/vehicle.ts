@@ -1,5 +1,5 @@
 import { Layer, ObjectCategory, PlayerActions } from "@common/constants";
-import { CircleHitbox, RectangleHitbox } from "@common/utils/hitbox";
+import { CircleHitbox, Hitbox, RectangleHitbox } from "@common/utils/hitbox";
 import { BaseGameObject } from "./gameObject";
 import { SDeepMutable } from "@common/utils/misc";
 import { FullData } from "@common/utils/objectsSerializations";
@@ -10,18 +10,19 @@ import { Vector } from "@common/utils/vector";
 import { Game } from "../game";
 import { ThrowableItem } from "../inventory/throwableItem";
 import { VehicleDefinition } from "@common/definitions/vehicle";
+import { RotationMode } from "@common/definitions/obstacles";
+import { Orientation } from "@common/typings";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private static readonly baseHitbox = RectangleHitbox.fromRect(9.2, 9.2);
 
     override readonly fullAllocBytes = 8;
     override readonly partialAllocBytes = 14;
+    declare hitbox: Hitbox;
 
     private _height = 1;
 
     get height(): number { return this._height; }
-
-    hitbox = RectangleHitbox.fromRect(9.2, 9.2);
 
     constructor(
         game: Game,
@@ -31,6 +32,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     ) {
         super(game, position);
         this.layer = layer;
+        const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
+        this.hitbox = this.definition.hitbox.transform(this.position, this.definition.scale, hitboxRotation);
     }
 
 

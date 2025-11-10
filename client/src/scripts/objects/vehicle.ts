@@ -4,8 +4,11 @@ import { getEffectiveZIndex, adjacentOrEqualLayer } from "@common/utils/layer";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";  // Import for floorType
 import { type ObjectsNetData } from "@common/utils/objectsSerializations";
 import { type Game } from "../game";
-import { SuroiSprite, toPixiCoords } from "../utils/pixi";
+import { drawHitbox, SuroiSprite, toPixiCoords } from "../utils/pixi";
 import { GameObject } from "./gameObject";
+import type { Hitbox } from "@common/utils/hitbox";
+import type { Orientation } from "@common/typings";
+import { DIFF_LAYER_HITBOX_OPACITY, HITBOX_COLORS, HITBOX_DEBUG_MODE } from "../utils/constants";
 
 export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     definition!: VehicleDefinition;
@@ -13,6 +16,8 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     readonly image: SuroiSprite;
 
     floorType: FloorNames = FloorNames.Grass;  // Add: Like Player/Obstacle
+    hitbox!: Hitbox;
+    orientation: Orientation = 0;
 
     constructor(game: Game, id: number, data: ObjectsNetData[ObjectCategory.Vehicle]) {
         super(game, id);
@@ -37,6 +42,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         // Handle definition (from full on spawn/update)
         if (data.full?.definition) {
             this.definition = data.full.definition;
+            this.hitbox = this.definition.hitbox.transform(this.position, 1, this.orientation);
         }
 
         // Set image frame from definition.image (e.g., "vehicles/buggy")
@@ -49,6 +55,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.container.position.copyFrom(toPixiCoords(this.position));
         this.container.rotation = this.rotation;
 
+        console.log("this.hitbox: ", this.hitbox);
         // Visibility: Like Obstacle—hide only on layer mismatch (prevents close-range overwrite)
         this.container.visible = true;  // Default visible unless dead/invisible
 
@@ -73,5 +80,20 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     override destroy(): void {
         this.image.destroy();
         super.destroy();
+    }
+
+    override updateDebugGraphics(): void {
+        if (!HITBOX_DEBUG_MODE) return;
+
+        const alpha = this.game.activePlayer !== undefined && this.layer === this.game.activePlayer.layer
+            ? 1
+            : DIFF_LAYER_HITBOX_OPACITY;
+
+        drawHitbox(
+            this.hitbox,
+            this.dead ? HITBOX_COLORS.obstacleNoCollision : HITBOX_COLORS.obstacle,  // Vehicle color
+            this.debugGraphics,
+            alpha
+        );
     }
 }
