@@ -9,6 +9,7 @@ import { GameObject } from "./gameObject";
 import type { Hitbox } from "@common/utils/hitbox";
 import type { Orientation } from "@common/typings";
 import { DIFF_LAYER_HITBOX_OPACITY, HITBOX_COLORS, HITBOX_DEBUG_MODE } from "../utils/constants";
+import type { Vector } from "@common/utils/vector";
 
 export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     definition!: VehicleDefinition;
@@ -18,6 +19,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     floorType: FloorNames = FloorNames.Grass;  // Add: Like Player/Obstacle
     hitbox!: Hitbox;
     orientation: Orientation = 0;
+    dead = false;
 
     constructor(game: Game, id: number, data: ObjectsNetData[ObjectCategory.Vehicle]) {
         super(game, id);
@@ -45,15 +47,27 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             this.hitbox = this.definition.hitbox.transform(this.position, 1, this.orientation);
         }
 
-        // Set image frame from definition.image (e.g., "vehicles/buggy")
-        if (this.definition) {
-            this.image.setFrame(this.definition.image);
-            this.container.scale.set(this.definition.scale);  // Resize
+        const wasDead = this.dead;
+        this.dead = wasDead;  // From partial
+
+        let texture: string | undefined;
+        texture = !this.dead
+            ? this.definition.idString  // Normal: "vehicles/buggy"
+            : `${this.definition.idString}_residue`;  // Destroyed: "vehicles/buggy_residue"
+
+
+        if (texture) {
+            this.image.setFrame(texture);
         }
+
+        // if (this.definition) {
+        //     this.image.setFrame(this.definition.idString);
+        //     this.container.scale.set(this.definition.scale);  // Resize
+        // }
 
         // Position/rotate
         this.container.position.copyFrom(toPixiCoords(this.position));
-        this.container.rotation = this.rotation;    
+        this.container.rotation = this.rotation;
         // Visibility: Like Obstacle—hide only on layer mismatch (prevents close-range overwrite)
         this.container.visible = true;  // Default visible unless dead/invisible
 
@@ -71,8 +85,6 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.container.zIndex = getEffectiveZIndex(zIndex, this.layer, this.game.layer);
     }
 
-    // Stub dead for future (like Obstacle)
-    dead = false;
 
     override destroy(): void {
         this.image.destroy();
@@ -100,6 +112,35 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     }
 
     canInteract(player: any): boolean {  // 'any' for Player type—fix import if needed
-        return true;  // Interact if not destroyed
+        return !this.dead;
     }
+
+    hitEffect(position: Vector, angle: number): void {
+        // if (this.definition.noHitEffect) return;
+
+        // if (!this.definition.hitSoundVariations) this.hitSound?.stop();
+
+        // const { material } = this.definition;
+        // this.hitSound = this.game.soundManager.play(
+        //     `${MaterialSounds[material]?.hit ?? material}_hit_${this.definition.hitSoundVariations ? random(1, this.definition.hitSoundVariations) : randomBoolean() ? "1" : "2"}`,
+        //     {
+        //         position,
+        //         falloff: 0.2,
+        //         maxRange: 96,
+        //         layer: this.layer
+        //     }
+        // );
+
+        // this.game.particleManager.spawnParticle({
+        //     frames: this.particleFrames,
+        //     position,
+        //     zIndex: Numeric.max((this.definition.zIndex ?? ZIndexes.Players) + 1, 4),
+        //     lifetime: 600,
+        //     layer: this.layer,
+        //     scale: { start: 0.9, end: 0.2 },
+        //     alpha: { start: 1, end: 0.65 },
+        //     speed: Vec.fromPolar((angle + randomFloat(-0.3, 0.3)), randomFloat(2.5, 4.5))
+        // });
+    }
+
 }

@@ -16,6 +16,7 @@ import { type Obstacle } from "./obstacle";
 import { Player } from "./player";
 import { GAME_CONSOLE } from "../..";
 import { Maps } from "@common/definitions/modes";
+import type { Vehicle } from "./vehicle";
 
 const white = 0xFFFFFF;
 
@@ -97,7 +98,7 @@ export class Bullet extends BaseBullet {
 
                 const { point, normal } = collision.intersection;
 
-                (object as Player | Obstacle | Building).hitEffect(point, Math.atan2(normal.y, normal.x));
+                (object as Player | Obstacle | Building | Vehicle).hitEffect(point, Math.atan2(normal.y, normal.x));
 
                 this.damagedIDs.add(object.id);
 

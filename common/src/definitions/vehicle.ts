@@ -1,18 +1,20 @@
-import { ZIndexes } from "../constants";
+import { Layers, ZIndexes } from "../constants";
 import { Hitbox, RectangleHitbox } from "../utils/hitbox";
 import { ObjectDefinitions, type ObjectDefinition } from "../utils/objectDefinitions";
 import { Materials, RotationMode } from "./obstacles";  // Reuse from obstacles, as vehicles rotate like them
 
 export interface VehicleDefinition extends ObjectDefinition {
-    readonly image: string;
-    readonly scale: number;  // For resize—e.g., 1.0 default, 0.5 for smaller
+    readonly scale: number;
     /**
      * @default {RotationMode.Limited}
      */
     readonly rotationMode: RotationMode;
-    readonly zIndex?: ZIndexes;
     readonly hitbox: Hitbox;
-    readonly material?: typeof Materials[number]
+    readonly health: number;
+    readonly zIndex?: ZIndexes;
+    readonly reflectBullets: boolean;
+    readonly material?: typeof Materials[number];
+    readonly explosion?: string
 }
 
 export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
@@ -21,20 +23,21 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
         scale: 1,  // Default size
         rotationMode: RotationMode.Limited,
         hitbox: RectangleHitbox.fromRect(9.2, 15),
+        health: 1000,
+        reflectBullets: true,
+        material: "metal_heavy",
     },
     () => [
         {
             name: "Buggy",
-            hitbox: RectangleHitbox.fromRect(9.2, 15),
-        }
-        // Add more vehicles here later, e.g., { name: "Truck", scale: 1.5 }
-    ].map(def => {
-        const idString = def.name.toLowerCase().replace(/ /g, "_");
+            idString: "buggy",
+            hitbox: RectangleHitbox.fromRect(7.6, 26),
+            health: 100,
+             explosion: "super_barrel_explosion",
 
+        }
+    ].map(def => {
         return {
-            idString,
-            image: `${idString}`,  // Frame ID for sprite loader (matches your SVG path)
-            material: "metal_heavy",
             ...def
         };
     })

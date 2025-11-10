@@ -14,11 +14,12 @@ import { type GameObject } from "./gameObject";
 import { Obstacle } from "./obstacle";
 import { Player } from "./player";
 import { KNOCK_BACK_AMOUNT } from "../constants";
+import { Vehicle } from "./vehicle";
 
 type Weapon = GunItem | Explosion;
 
 export interface DamageRecord {
-    readonly object: Obstacle | Building | Player
+    readonly object: Obstacle | Building | Player | Vehicle
     readonly damage: number
     readonly weapon: Weapon
     readonly source: GameObject
@@ -105,7 +106,7 @@ export class Bullet extends BaseBullet {
         const damageMod = (this.modifiers?.damage ?? 1) / (this.reflectionCount + 1);
         for (const collision of this.updateAndGetCollisions(dt, objects)) {
             const object = collision.object as DamageRecord["object"];
-            const { isObstacle, isBuilding } = object;
+            const { isObstacle, isBuilding, isVehicle} = object;
 
             if (isObstacle && object.definition.isStair) {
                 object.handleStairInteraction(this);
@@ -128,7 +129,7 @@ export class Bullet extends BaseBullet {
             if (isObstacle && object.definition.noCollisions) continue;
 
             if (
-                (isObstacle || isBuilding)
+                (isObstacle || isBuilding || isVehicle)
                 && object.definition.reflectBullets
                 && this.reflectionCount < 3
             ) {
