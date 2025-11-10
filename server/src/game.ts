@@ -48,6 +48,7 @@ import { ConnectionManager } from "./game/connectionManager";
 import { SpawnManager } from "./game/spawnManager";
 import { VehicleDefinition } from "@common/definitions/vehicle";
 import { Vehicle } from "./objects/vehicle";
+import { DungeonPacketData, DungeonPacket } from "@common/packets/dungeonPackage";
 
 /*
     eslint-disable
@@ -208,23 +209,18 @@ export class Game implements GameData {
     private airdropManager: AirdropManager;
     private gameLifecycle: GameLifecycle;
 
-    getRandomMap(): { map: MAP, rainDrops: number } {
-        const r = Math.random() * 100;
-        let map: MAP;
-        let rainChance = 0;
+    getRandomMap(): { map: MAP; rainDrops: number } {
+        const configs: { map: MAP; rainChance: number }[] = [
+            { map: "desert", rainChance: 0 },
+            { map: "fall", rainChance: 0.5 },
+            { map: "winter", rainChance: 0.5 },
+            { map: "cursedIsland", rainChance: 1 },
+        ];
 
-        if (r < 40) {
-            map = "desert";
-            rainChance = 0;   // desert no rain!
-        } else if (r < 70) {
-            map = "fall";
-            rainChance = 0.5;
-        } else {
-            map = "winter";
-            rainChance = 0.7;
-        }
+        const selectedConfig = configs[(Math.random() * configs.length) | 0];
+        const { map, rainChance } = selectedConfig;
 
-        const rainValues = [100, 200, 300, 400, 500];
+        const rainValues = [200, 300, 400, 500];
         const rainDrops = Math.random() < rainChance
             ? rainValues[(Math.random() * rainValues.length) | 0]
             : 0;
@@ -232,21 +228,17 @@ export class Game implements GameData {
         return { map, rainDrops };
     }
 
-
-
     constructor(port: number, maxTeamSize: MODE, gameId: string) {
         this.port = port;
         this.gameMode = maxTeamSize;
         this.gameId = gameId;
+       
         this.gameMap = "fall";
+        this.rainDrops = 0;
 
-        // if (maxTeamSize == MODE.Dungeon) {
-        //     this.rainDrops = 300;
-        //     this.gameMap = "cursedIsland";
-        // } else {
-        //     this.gameMap = "cursedIsland";
-        //     this.rainDrops = 300;
-        // }
+        // const randMap = this.getRandomMap();
+        // this.gameMap = randMap.map;
+        // this.rainDrops = randMap.rainDrops;
 
         this.teamMode = this.gameMode > MODE.Solo;
         this.updateGameData({
@@ -396,7 +388,6 @@ export class Game implements GameData {
         // Third loop over players: clean up after all packets have been sent
         for (const player of this.connectedPlayers) {
             if (!player.joined) continue;
-
             player.postPacket();
         }
 
@@ -432,7 +423,7 @@ export class Game implements GameData {
         }
 
         // game wave end
-        if (this.gameMode == MODE.Dungeon && this._started && !this.over) {
+        if (this.gameMode === MODE.Dungeon && this._started && !this.over) {
             if (this.aliveCount == 0) {
                 this.gameLifecycle.endGame();
             }
@@ -450,7 +441,14 @@ export class Game implements GameData {
                     };
                 }
 
-                setTimeout(() => this.botManager.activateBots(), 5000);
+                setTimeout(() => {
+                    this.packets.push(
+                        DungeonPacket.create({
+                            waves: this.gameWave,
+                        } as DungeonPacketData)
+                    );
+                    this.botManager.activateBots()
+                }, 5000);
             }
         }
 
@@ -510,6 +508,14 @@ export class Game implements GameData {
     // Delegated to gameLifecycle
     postGameStarted(): void {
         this.gameLifecycle.postGameStarted();
+
+        if (this.gameMode === MODE.Dungeon) {
+            this.packets.push(
+                DungeonPacket.create({
+                    waves: this.gameWave,
+                } as DungeonPacketData)
+            );
+        }
     }
 
     // Delegated to objectSpawner

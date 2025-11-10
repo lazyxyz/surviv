@@ -6,7 +6,7 @@ import { type Game } from "../game";
 import { /* , SOUND_FILTER_FOR_LAYERS */ } from "../utils/constants";
 // add a namespace to pixi sound imports because it has annoying generic names like "sound" and "filters" without a namespace
 import * as PixiSound from "@pixi/sound";
-import { getRandomMode, Maps } from "@common/definitions/modes";
+import { getRandomMode, Maps, type MAP } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "../..";
 
 export interface SoundOptions {
@@ -156,7 +156,6 @@ export class SoundManager {
         SoundManager._instantiated = true;
         this.sfxVolume = GAME_CONSOLE.getBuiltInCVar("cv_sfx_volume");
         this.ambienceVolume = GAME_CONSOLE.getBuiltInCVar("cv_ambience_volume");
-        this.loadSounds();
     }
 
     play(name: string, options?: Partial<SoundOptions>): GameSound {
@@ -191,7 +190,7 @@ export class SoundManager {
         PixiSound.sound.stopAll();
     }
 
-    loadSounds(): void {
+    loadSounds(gameMap: MAP): void {
         for (const path in import.meta.glob(["/public/audio/sfx/**/*.mp3", "/public/audio/ambience/**/*.mp3"])) {
             /**
              * For some reason, PIXI will call the `loaded` callback twice
@@ -201,7 +200,7 @@ export class SoundManager {
 
             const name = path.slice(path.lastIndexOf("/") + 1, -4); // removes path and extension
             let url = path.slice(7); // removes the "/public"
-            const mode = Maps[getRandomMode()];
+            const mode = Maps[gameMap];
             if (mode.specialSounds?.includes(name)) {
                 url = url.replace(name, `${name}_${mode.reskin}`);
             }

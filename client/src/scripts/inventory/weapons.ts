@@ -3,7 +3,7 @@ import { Melees } from "@common/definitions/melees";
 import { Guns } from "@common/definitions/guns";
 import { Account } from "../account";
 import { GAME_CONSOLE } from "../..";
-import { SurvivAssets, AssetTier } from "@common/mappings";
+import { SurvivAssets, AssetTier } from "@common/blockchain";
 import { SurvivAssetBalances } from ".";
 
 // Constants for repeated strings

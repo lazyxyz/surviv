@@ -7,7 +7,7 @@ import type { TranslationKeys } from "../../typings/translations";
 import { SurvivAssetBalances, updateSplashCustomize } from ".";
 import { Account } from "../account";
 import { GAME_CONSOLE } from "../..";
-import { AssetTier, SurvivAssets } from "@common/mappings";
+import { AssetTier, SurvivAssets } from "@common/blockchain";
 
 // handler select and save skin
 function selectSkin(idString: ReferenceTo<SkinDefinition>): void {

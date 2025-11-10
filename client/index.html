@@ -191,11 +191,11 @@
                 </button>
               </div>
 
-              <!-- <button class="btn btn-lg btn-darken btn-success" id="btn-play-cursed-island">
+              <button class="btn btn-lg btn-darken btn-success" id="btn-play-dungeon">
                 <div class="pulsating-circle" style="display: block"></div>
                 <i class="fa-solid fa-crown"></i>
-                <span translation="cursed_island"></span>
-              </button> -->
+                <span translation="play_dungeon"></span>
+              </button>
 
               <div id="option-btns-group" class="team-btns-container">
                 <button class="btn btn-lg btn-darken btn-purple" id="btn-join-team" translation="join_team"></button>
@@ -204,8 +204,6 @@
               </div>
 
             </div>
-
-
             <a href="/leaderboard/" target="_blank">
               <button class="btn btn-lg btn-darken btn-success btn-leaderboard" id="btn-single-home">
                 <div class="pulsating-circle" style="display: none"></div>
@@ -270,6 +268,7 @@
         </button>
         <div id="languages-selector" class="dropdown-content persistent-scrollbar"></div>
       </div>
+
       <!-- Connect wallet button -->
       <div id="wallet-inactive" class="account-wallet-container dropdown" style="display: block;">
         <button id="connect-wallet-btn" class="btn btn-darken btn-primary account-wallet-button">
@@ -318,6 +317,10 @@
                 <span class="counter-text" id="ui-kills">0</span>
               </div>
 
+              <div class="gas-card" id="wave-counter">
+                <img src="./img/misc/gate.svg" />
+                <span class="counter-text" id="ui-waves">1</span>
+              </div>
 
               <div id="debug-hud">
                 <div id="fps-counter"></div>
@@ -1136,6 +1139,7 @@
               <option value="Solo" translation="play_solo"></option>
               <option value="Squad" translation="play_squad"></option>
               <option value="V50">50v50</option>
+              <option value="Dungeon" translation="play_dungeon"></option>
             </select>
           </label>
           <!-- <label>
@@ -1179,7 +1183,10 @@
         <div class="connect-wallet-header">
           <img src="./img/logos/surviv.fun.webp" alt="survin.fun" />
 
-          <p>Connect to <span>Surviv.fun</span></p>
+          <!-- <p>Connect to <span>Surviv.fun</span></p> -->
+
+          <div class="chain-select"> </div>
+
         </div>
 
         <div class="connect-wallet-list">
@@ -1221,7 +1228,6 @@
       </div>
     </div>
   </div>
-
 
   <script src="./src/index.ts" type="module"></script>
 </body>

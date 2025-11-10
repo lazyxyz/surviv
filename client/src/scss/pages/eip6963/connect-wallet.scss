@@ -117,3 +117,52 @@
 .wallet-installed {
   background-color: #2b2d35;
 }
+
+
+.chain-select {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chain-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  background-color: transparent;
+  min-width: 80px; /* Fixed minimum width for consistency */
+  height: 48px; /* Fixed height for uniform size */
+  justify-content: center;
+}
+
+.chain-item:hover {
+  background-color: #f0f0f0;
+}
+
+.chain-item.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.chain-item img {
+  width: 30px; /* Slightly smaller for better fit */
+  height: 30px;
+  margin-bottom: 2px; /* Reduced margin */
+  flex-shrink: 0; /* Prevent image shrinking */
+}
+
+.chain-item p {
+  margin: 0;
+  font-size: 11px; /* Slightly smaller font for compactness */
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.1;
+}

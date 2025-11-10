@@ -303,4 +303,6 @@
   "create_team_room": "Raum"
   "create_team_autofill": "Autoausfüllen"
   "create_team_lock": "Sperren"
+  "play_dungeon": "Dungeon"
+  "new_dungeon_wave": "Welle <waves> — Die Zombies kommen!"
 }

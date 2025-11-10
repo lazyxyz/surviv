@@ -6,7 +6,7 @@ import type { ReferenceTo } from "@common/utils/objectDefinitions";
 import type { TranslationKeys } from "../../typings/translations";
 import { Account } from '../account';
 import { GAME_CONSOLE } from '../..';
-import { SurvivAssets } from '@common/mappings';
+import { SurvivAssets } from '@common/blockchain';
 import { SurvivAssetBalances } from '.';
 
 export async function showEmotes(account: Account) {

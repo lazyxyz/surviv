@@ -61,50 +61,39 @@ function setTeamParameters(params: URLSearchParams): void {
     }
 }
 
-
 async function initializePlayButtons(game: Game, account: Account): Promise<void> {
-    const playButtons = [$("#btn-play-solo"), $("#btn-play-squad"), $('#btn-play-cursed-island')];
+    const playConfigs:
+        {
+            selector: string;
+            mode: MODE;
+            key: string;
+            icon: string;
+            spanMargin?: string;
+        }[] = [
+            { selector: "#btn-play-solo", mode: MODE.Solo, key: "solo", icon: "./img/misc/user.svg", spanMargin: "0" },
+            { selector: "#btn-play-squad", mode: MODE.Squad, key: "squad", icon: "./img/misc/user-group.svg", spanMargin: "20px" },
+            { selector: "#btn-play-dungeon", mode: MODE.Dungeon, key: "dungeon", icon: "./img/misc/gate.svg", spanMargin: "20px" }
+        ];
 
-    playButtons.forEach((button, index) => {
+    playConfigs.forEach(config => {
+        const button = $(config.selector);
         button.addClass("play-button");
-        const translationString = `play_${["solo", "squad", "cursed_island"][index]}` as TranslationKeys;
-        const logoSrc = index === 0 ? "./img/misc/user.svg" : "./img/misc/user-group.svg";
+        const translationString = `play_${config.key}` as TranslationKeys;
+        const margin = config.spanMargin ?? "0";
         button.html(`
-            <img class="btn-icon" width="26" height="26" src="${logoSrc}">
-            <span style="margin-left: ${index > 0 ? "20px;" : "0"}" translation="${translationString}">
+            <img class="btn-icon" width="26" height="26" src="${config.icon}">
+            <span style="margin-left: ${margin};" translation="${translationString}">
                 ${getTranslatedString(translationString)}
             </span>
         `);
-    });
 
-    playButtons[0].on("click", async () => {
-        if (!account.address) {
-            warningAlert("Please connect your wallet to continue!");
-            return;
-        }
-        if (!isClickAllowed()) return;
-        await joinGame(MODE.Solo, game, account);
-    });
-
-    playButtons[1].on("click", async () => {
-        if (!account.address) {
-            warningAlert("Please connect your wallet to continue!");
-            return;
-        }
-        if (!isClickAllowed()) return;
-        await joinGame(MODE.Squad, game, account);
-    });
-    
-    playButtons[2].on("click", async () => {
-        console.log("HELLO")
-        if (!account.address) {
-            warningAlert("Please connect your wallet to continue!");
-            return;
-        }
-        if (!isClickAllowed()) return;
-        await joinGame(MODE.CursedIsland, game, account);
+        button.on("click", async () => {
+            if (!isClickAllowed()) return;
+            await joinGame(config.mode, game, account);
+        });
     });
 }
+
 
 function setupTeamMenu(game: Game, account: Account): void {
     const { ui } = game.uiManager;
@@ -414,14 +403,19 @@ function attachKickListeners(ui: Game['uiManager']['ui']): void {
     });
 }
 
-export async function joinGame(teamSize: number, game: Game, account: Account): Promise<void> {
+export async function joinGame(teamSize: number, game: Game, account?: Account): Promise<void> {
     const { ui } = game.uiManager;
 
-    if (!selectedRegion || !account.token?.length) return;
-    if (new Date().getTime() >= (parseJWT(account.token).exp * 1000)) {
-        return account.sessionExpired();
+    if (account) {
+        if (new Date().getTime() >= (parseJWT(account.token).exp * 1000)) {
+            return account.sessionExpired();
+        }
     }
 
+    if (!selectedRegion) {
+        warningAlert("Please select a server to play!");
+        return;
+    }
     ui.splashOptions.addClass("loading");
     ui.loadingText.text(getTranslatedString("loading_finding_game"));
 
@@ -440,7 +434,7 @@ export async function joinGame(teamSize: number, game: Game, account: Account): 
 }
 
 
-async function connectToGame(data: GetGameResponse, gameAddress: string, game: Game, account: Account): Promise<void> {
+async function connectToGame(data: GetGameResponse, gameAddress: string, game: Game, account?: Account): Promise<void> {
     const { ui } = game.uiManager;
 
     if (!data.success) {
@@ -464,56 +458,13 @@ async function connectToGame(data: GetGameResponse, gameAddress: string, game: G
 
     if (autoFill) params.set("autoFill", String(autoFill));
     if (roomMode) params.set("roomMode", String(roomMode));
-    setGameParameters(params, account);
+    const lobbyClearing = GAME_CONSOLE.getBuiltInCVar("dv_lobby_clearing");
+    if (lobbyClearing) params.set("lobbyClearing", "true");
+
     const websocketURL = `${gameAddress.replace("<ID>", data.gameID.toString())}/play?${params.toString()}`;
     await game.connect(websocketURL, account);
     ui.splashMsg.hide();
 }
-
-function setGameParameters(params: URLSearchParams, account: Account): void {
-    const name = GAME_CONSOLE.getBuiltInCVar("cv_player_name");
-    if (name) params.set("name", name);
-    if (account.address) params.set("address", account.address);
-
-    const playerSkin = Loots.fromStringSafe(GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin")) ??
-        Loots.fromString(typeof defaultClientCVars.cv_loadout_skin === "object"
-            ? defaultClientCVars.cv_loadout_skin.value
-            : defaultClientCVars.cv_loadout_skin);
-    if (playerSkin) params.set("skin", playerSkin.idString);
-
-    const badge = GAME_CONSOLE.getBuiltInCVar("cv_loadout_badge");
-    if (badge) {
-        params.set("badge", badge)
-    } else {
-        params.set("badge", DEFAULT_BADGE)
-    };
-
-    const weaponPreset = GAME_CONSOLE.getBuiltInCVar("dv_weapon_preset");
-    if (weaponPreset) {
-        const preset = JSON.parse(weaponPreset);
-        if (preset.melee) params.set("melee", preset.melee);
-        if (preset.gun) params.set("gun", preset.gun);
-    }
-
-    const lobbyClearing = GAME_CONSOLE.getBuiltInCVar("dv_lobby_clearing");
-    if (lobbyClearing) params.set("lobbyClearing", "true");
-
-    const nameColor = GAME_CONSOLE.getBuiltInCVar("dv_name_color");
-    if (nameColor) {
-        try {
-            params.set("nameColor", new Color(nameColor).toNumber().toString());
-        } catch (e) {
-            GAME_CONSOLE.setBuiltInCVar("dv_name_color", "");
-            console.error(e);
-        }
-    }
-
-    const emoteIds = EMOTE_SLOTS.map(slot =>
-        Emotes.fromStringSafe(GAME_CONSOLE.getBuiltInCVar(`cv_loadout_${slot}_emote`))?.idString
-    ).filter(Boolean);
-    if (emoteIds.length > 0) params.set("emotes", emoteIds.join(","));
-}
-
 
 export async function setupPlay(game: Game, account: Account): Promise<void> {
     await initializePlayButtons(game, account);

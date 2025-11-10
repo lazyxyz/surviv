@@ -258,12 +258,12 @@ export class SuroiByteStream extends ByteStream {
      /**
      * Writes a player's name to the stream, as if by `name => writeString(16, name)`
      */
-    writeURL(name: string): this {
+    writeToken(name: string): this {
         const byteArray = ByteStream.encoder.encode(name);
 
         // you fuckin stupid or something?
         // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-        for (let i = 0; i < Constants.URL_MAX_LENGTH; i++) {
+        for (let i = 0; i < Constants.TOKEN_MAX_LENGTH; i++) {
             const val = byteArray[i] ?? 0;
             this.writeUint8(val);
 
@@ -276,7 +276,7 @@ export class SuroiByteStream extends ByteStream {
     /**
      * Reads a player's name to the stream, as if by `() => readString(16, name)`
      */
-    readURL(): string {
+    readToken(): string {
         const chars = [];
         let c: number;
         let i = 0;
@@ -288,7 +288,7 @@ export class SuroiByteStream extends ByteStream {
 
             chars[i++] = c;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-        } while (i < Constants.URL_MAX_LENGTH);
+        } while (i < Constants.TOKEN_MAX_LENGTH);
 
         return new TextDecoder().decode(new Uint8Array(chars));
     }
@@ -365,6 +365,71 @@ export class SuroiByteStream extends ByteStream {
             chars[i++] = c;
             // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
         } while (i < Constants.PLAYER_ADDRESS_MAX_LENGTH);
+
+        return new TextDecoder().decode(new Uint8Array(chars));
+    }
+
+
+    writeLootStringId(stringId: string): this {
+        const byteArray = ByteStream.encoder.encode(stringId);
+
+        // you fuckin stupid or something?
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+        for (let i = 0; i < Constants.LOOT_MAX_LENGTH; i++) {
+            const val = byteArray[i] ?? 0;
+            this.writeUint8(val);
+
+            if (val === 0) { break; }
+        }
+
+        return this;
+    }
+   
+    readLootStringId(): string {
+        const chars = [];
+        let c: number;
+        let i = 0;
+
+        do {
+            if ((c = this.readUint8()) === 0) {
+                break;
+            }
+
+            chars[i++] = c;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+        } while (i < Constants.LOOT_MAX_LENGTH);
+
+        return new TextDecoder().decode(new Uint8Array(chars));
+    }
+
+    writeEmoteIds(emotes: string): this {
+        const byteArray = ByteStream.encoder.encode(emotes);
+
+        // you fuckin stupid or something?
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+        for (let i = 0; i < Constants.EMOTES_MAX_LENGTH; i++) {
+            const val = byteArray[i] ?? 0;
+            this.writeUint8(val);
+
+            if (val === 0) { break; }
+        }
+
+        return this;
+    }
+   
+    readEmoteIds(): string {
+        const chars = [];
+        let c: number;
+        let i = 0;
+
+        do {
+            if ((c = this.readUint8()) === 0) {
+                break;
+            }
+
+            chars[i++] = c;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+        } while (i < Constants.EMOTES_MAX_LENGTH);
 
         return new TextDecoder().decode(new Uint8Array(chars));
     }

@@ -1,5 +1,5 @@
+import { Blockchain } from "@common/blockchain/contracts";
 import { type MODE } from "@common/constants";
-import { toBeHex } from "ethers";
 
 export const Config = {
     regions: {
@@ -11,27 +11,42 @@ export const Config = {
             apiAddress: "https://admin.surviv.fun",
             // apiAddress: "http://localhost:3001",
         },
+        // as: {
+        //     name: "Asia",
+        //     mainAddress: "https://as.surviv.fun",
+        //     gameAddress: "wss://<ID>.as.surviv.fun",
+        //     teamAddress: "wss://team.as.surviv.fun",
+        //     apiAddress: "https://admin.surviv.fun",
+        // },
+        // eu: {
+        //     name: "Europe",
+        //     mainAddress: "https://eu.surviv.fun",
+        //     gameAddress: "wss://<ID>.eu.surviv.fun",
+        //     teamAddress: "wss://team.eu.surviv.fun",
+        //     apiAddress: "https://admin.surviv.fun",
+        // },
+        // na: {
+        //     name: "North America",
+        //     mainAddress: "https://na.surviv.fun",
+        //     gameAddress: "wss://<ID>.na.surviv.fun",
+        //     teamAddress: "wss://team.na.surviv.fun",
+        //     apiAddress: "https://admin.surviv.fun",
+        // },
     },
     defaultRegion: "dev",
 } satisfies ConfigType as ConfigType;
-
-export const ChainConfig = {
-    chainId: toBeHex(50312),
-    chainName: "Somnia Testnet",
-    rpcUrls: ["https://dream-rpc.somnia.network/"],
-    nativeCurrency: {
-        name: "Somnia Testnet Token",
-        symbol: "STT",
-        decimals: 18
-    },
-    blockExplorerUrls: ["https://shannon-explorer.somnia.network/"],
-    blockExplorerAPI: "https://somnia.w3us.site",
-} satisfies ChainInfo as ChainInfo;
 
 export interface ConfigType {
     readonly regions: Record<string, Region>
     readonly defaultRegion: string,
 }
+
+export const Chains: Record<string, Blockchain> = {
+    shannon: Blockchain.Shannon,
+    // minato: Blockchain.Minato,
+    // somnia: Blockchain.Somnia,
+    // soneium: Blockchain.Soneium,
+} as const;
 
 export interface Region {
     /**
@@ -64,15 +79,3 @@ export interface ServerInfo {
     readonly nextSwitchTime: number
 };
 
-export interface ChainInfo {
-    readonly chainId: string
-    readonly chainName: string
-    readonly rpcUrls: string[]
-    readonly nativeCurrency: {
-        name: string,
-        symbol: string,
-        decimals: number,
-    }
-    readonly blockExplorerUrls: string[],
-    readonly blockExplorerAPI: string
-}
