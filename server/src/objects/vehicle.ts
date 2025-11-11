@@ -20,6 +20,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 8;
     override readonly partialAllocBytes = 14;
     declare hitbox: Hitbox;
+    declare bulletHitbox: Hitbox;
     collidable: boolean = true;
     damageable: boolean = true;
 
@@ -38,6 +39,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         this.layer = layer;
         const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
         this.hitbox = this.definition.hitbox.transform(this.position, this.definition.scale, hitboxRotation);
+        this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, this.definition.scale, hitboxRotation);
         this.health = this.definition.health;
     }
 

@@ -18,6 +18,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
     floorType: FloorNames = FloorNames.Grass;  // Add: Like Player/Obstacle
     hitbox!: Hitbox;
+    bulletHitbox!: Hitbox;
     orientation: Orientation = 0;
     dead = false;
     damageable = true;
@@ -46,6 +47,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         if (data.full?.definition) {
             this.definition = data.full.definition;
             this.hitbox = this.definition.hitbox.transform(this.position, 1, this.orientation);
+            this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, 1, this.orientation);
         }
 
         const wasDead = data.dead;
@@ -102,6 +104,13 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         drawHitbox(
             this.hitbox,
             this.dead ? HITBOX_COLORS.obstacleNoCollision : HITBOX_COLORS.obstacle,  // Vehicle color
+            this.debugGraphics,
+            alpha
+        );
+
+        drawHitbox(
+            this.bulletHitbox,
+            this.dead ? HITBOX_COLORS.obstacleNoCollision : HITBOX_COLORS.obstacleNoCollision,  // Vehicle color
             this.debugGraphics,
             alpha
         );
