@@ -142,6 +142,7 @@ export class BaseBullet {
 
         for (const object of objects) {
             const { isPlayer, isObstacle, isBuilding } = object;
+
             if (
                 ((isObstacle || isBuilding) && (
                     object.definition.noBulletCollision

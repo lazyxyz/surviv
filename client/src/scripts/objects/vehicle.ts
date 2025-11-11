@@ -20,6 +20,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     hitbox!: Hitbox;
     orientation: Orientation = 0;
     dead = false;
+    damageable = true;
 
     constructor(game: Game, id: number, data: ObjectsNetData[ObjectCategory.Vehicle]) {
         super(game, id);
@@ -47,7 +48,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             this.hitbox = this.definition.hitbox.transform(this.position, 1, this.orientation);
         }
 
-        const wasDead = this.dead;
+        const wasDead = data.dead;
         this.dead = wasDead;  // From partial
 
         let texture: string | undefined;

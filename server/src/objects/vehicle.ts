@@ -95,6 +95,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             position: this.position,
             rotation: this.rotation,
             layer: this.layer,
+            dead: this.dead,
             full: {
                 definition: this.definition,
             }

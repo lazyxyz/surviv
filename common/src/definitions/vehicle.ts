@@ -32,7 +32,7 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
             name: "Buggy",
             idString: "buggy",
             hitbox: RectangleHitbox.fromRect(7.6, 26),
-            health: 100,
+            health: 10000,
              explosion: "super_barrel_explosion",
 
         }
