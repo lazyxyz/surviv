@@ -199,9 +199,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         // Enforce boundaries
         this.enforceWorldBoundaries();
 
-        // Update driver position (rotated offset)
+        // Update driver position and rotation (sync to vehicle)
         const rotatedOffset = Vec.rotate(this.driverOffset, this.rotation);
         this.driver.position = Vec.add(this.position, rotatedOffset);
+        this.driver.rotation = this.rotation; // Sync player rotation to vehicle
         this.driver.layer = this.layer;
 
         // Update movement state
@@ -211,6 +212,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         }
         this.driver.isMoving = isMoving;
         this.game.grid.updateObject(this.driver);
+        this.driver.setPartialDirty(); // Ensure rotation update is sent
 
         this.setPartialDirty();
     }

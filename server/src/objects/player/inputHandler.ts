@@ -28,6 +28,7 @@ export class InputHandler {
         this.player.stoppedAttacking ||= wasAttacking && !isAttacking;
 
         if (this.player.turning = packet.turning) {
+
             this.player.rotation = packet.rotation;
             this.player.distanceToMouse = (packet as typeof packet).distanceToMouse ?? 0;
             /*

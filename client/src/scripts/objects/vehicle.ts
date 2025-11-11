@@ -120,16 +120,17 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         // Visibility: Like Obstacle—hide only on layer mismatch (prevents close-range overwrite)
         this.container.visible = true;  // Default visible unless dead/invisible
 
-        // Update front wheels steering angle
+        // Update front wheels steering angle (relative to vehicle body)
+        // Back wheels remain aligned with vehicle body (rotation = 0 relative)
         const quantizedAngle = data.steeringAngle;
         const steeringAngle = quantizedAngle / STEERING_SCALE; // Dequantize to radians
-        // Assume first two wheels are front wheels
+        // Front wheels: steer relative to body
         this.wheels[0].rotation = steeringAngle; // Front-left
         this.wheels[1].rotation = steeringAngle; // Front-right
-        // Back wheels remain at 0 (no rolling or steering)
+        
         if (this.wheels.length > 2) {
-            this.wheels[2].rotation = 0; // Rear-left
-            this.wheels[3].rotation = 0; // Rear-right
+            this.wheels[2].rotation = 0; // Rear-left aligned
+            this.wheels[3].rotation = 0; // Rear-right aligned
         }
 
         this.updateZIndex();
