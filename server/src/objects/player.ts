@@ -37,6 +37,7 @@ import { InventoryHelper } from "./player/inventoryHelper";
 import { CommunicationHandler } from "./player/communicationHandler";
 import { DamageHandler } from "./player/damageHandler";
 import { UpdateManager } from "./player/updateManager";
+import { Vehicle } from "./vehicle";
 
 
 export interface ActorContainer {
@@ -475,6 +476,34 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     updateAndApplyModifiers(): void {
         this.modifierCalculator.updateAndApplyModifiers();
+    }
+
+    /** VEHICLE LOGICS */
+    inVehicle?: Vehicle;
+    enterVehicle(vehicle: Vehicle): void {
+        if (this.inVehicle) return;  // Already in one
+
+        this.inVehicle = vehicle;
+        // Offset inside (e.g., cab center, avoid hitbox center)
+        const offset = Vec.create(0, 2);  // Tweak: Forward in cab
+        this.position = Vec.add(vehicle.position, offset);
+        this.layer = vehicle.layer;
+        // Stop movement
+        this.movement.up = this.movement.down = this.movement.left = this.movement.right = false;
+        // Disable collision with vehicle
+        this.setPartialDirty();  // Sync flag
+        console.log(`Player ${this.name} entered ${vehicle.definition.idString} at offset ${offset}`);
+    }
+
+    exitVehicle(): void {
+        if (!this.inVehicle) return;
+
+        const vehicle = this.inVehicle;
+        this.inVehicle = undefined;
+        // Eject forward (slight push)
+        this.position = Vec.add(vehicle.position, Vec.fromPolar(vehicle.rotation, 3));  // 3 units ahead
+        this.setPartialDirty();
+        console.log(`Player ${this.name} exited ${vehicle.definition.idString}`);
     }
 
     /**

@@ -13,6 +13,7 @@ import { VehicleDefinition } from "@common/definitions/vehicle";
 import { RotationMode } from "@common/definitions/obstacles";
 import { Orientation } from "@common/typings";
 import { InventoryItem } from "../inventory/inventoryItem";
+import { Player } from "./player";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private static readonly baseHitbox = RectangleHitbox.fromRect(9.2, 9.2);
@@ -44,13 +45,18 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     }
 
 
-   
+
     canInteract(player: any): boolean {  // 'any' for Player type—fix import if needed
         return true;  // Interact if not destroyed
     }
 
-    interact(): void {
-        console.log(`Interacted with vehicle: ${this.definition.idString}`);  // Expand: e.g., enter vehicle logic
+    interact(player: Player): void {
+        // player.enterVehicle(this);
+        if (player.inVehicle) {
+            player.exitVehicle();  // Toggle: Exit if already in
+        } else {
+            player.enterVehicle(this);
+        }
     }
 
     damage(params: DamageParams & { position?: Vector }): void {
@@ -80,8 +86,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             //         amount
             //     })
             // ) return;
-            
-             const weaponIsItem = weaponUsed instanceof InventoryItem;
+
+            const weaponIsItem = weaponUsed instanceof InventoryItem;
             if (definition.explosion !== undefined && source instanceof BaseGameObject) {
                 //                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
                 // FIXME This is implying that obstacles won't explode if destroyed by non–game objects
@@ -92,7 +98,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     }
 
 
-     override get data(): FullData<ObjectCategory.Vehicle> {
+    override get data(): FullData<ObjectCategory.Vehicle> {
         const data: SDeepMutable<FullData<ObjectCategory.Vehicle>> = {
             position: this.position,
             rotation: this.rotation,

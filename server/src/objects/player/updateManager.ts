@@ -26,21 +26,11 @@ import { ReferenceTo } from "@common/utils/objectDefinitions";
 import { SyncedParticleDefinition } from "@common/definitions/syncedParticles";
 import { GunItem } from "../../inventory/gunItem";
 import { CountableInventoryItem } from "../../inventory/inventoryItem";
-import { Vehicle } from "../vehicle";
 
 export class UpdateManager {
     constructor(private player: Player) { }
 
-    update(): void {
-        const dt = this.player.game.dt;
-
-        // Improvement: Only update modifiers if dirty
-        if (this.player.dirty.modifiers) {
-            this.player.updateAndApplyModifiers();
-            this.player.dirty.modifiers = false;
-        }
-
-        // Calculate movement
+    private calculateMovement(): Vector {
         let movement: Vector;
 
         const playerMovement = this.player.movement;
@@ -58,14 +48,17 @@ export class UpdateManager {
 
             movement = Vec.create(x, y);
         }
+        return movement;
+    }
 
-        // Rate Limiting: Team Pings & Emotes
+    private handleRateLimiting(): void {
         if (this.player.emoteCount > 0 && !this.player.blockEmoting && (this.player.game.now - this.player.lastRateLimitUpdate > GameConstants.player.rateLimitInterval)) {
             this.player.emoteCount--;
             this.player.lastRateLimitUpdate = this.player.game.now;
         }
+    }
 
-        // Perks
+    private updatePerks(): void {
         if (this.player.perkUpdateMap !== undefined) {
             for (const [perk, lastUpdated] of this.player.perkUpdateMap.entries()) {
                 if (this.player.game.now - lastUpdated <= perk.updateInterval) continue;
@@ -73,15 +66,18 @@ export class UpdateManager {
                 this.player.perkUpdateMap.set(perk, this.player.game.now);
             }
         }
+    }
 
-        // Recoil
-        const recoilMultiplier = this.player.recoil.active && (this.player.recoil.active = (this.player.recoil.time >= this.player.game.now))
+    private handleRecoil(): number {
+        return this.player.recoil.active && (this.player.recoil.active = (this.player.recoil.time >= this.player.game.now))
             ? this.player.recoil.multiplier
             : 1;
+    }
 
-        // building & smoke checks
+    private checkBuildingsAndSmoke(): { isInsideBuilding: boolean; depleters: Set<SyncedParticle> } {
         let isInsideBuilding = false;
         const depleters = new Set<SyncedParticle>();
+
         for (const object of this.player.nearObjects) {
             if (
                 !isInsideBuilding
@@ -99,33 +95,21 @@ export class UpdateManager {
                 depleters.add(object);
             }
         }
+        return { isInsideBuilding, depleters }
+    }
 
-        // Speed multiplier for perks
-        const perkSpeedMod
-            = this.player.mapPerkOrDefault(
-                PerkIds.AdvancedAthletics,
-                ({ waterSpeedMod, smokeSpeedMod }) => {
-                    return (
-                        (FloorTypes[this.player.floor].overlay ? waterSpeedMod : 1) // man do we need a better way of detecting water lol
-                        * (depleters.size !== 0 ? smokeSpeedMod : 1)
-                    );
-                },
-                1
-            );
-
-        // Calculate speed
-        const speed = this.player.baseSpeed                                          // Base speed
+    private calculateSpeed(recoilMultiplier: number, dt: number): number {
+        return this.player.baseSpeed                                          // Base speed
             * (FloorTypes[this.player.floor].speedMultiplier ?? 1)                   // Speed multiplier from floor player is standing in
             * recoilMultiplier                                                // Recoil from items
-            * perkSpeedMod                                                    // See above
             * (this.player.action?.speedMultiplier ?? 1)                             // Speed modifier from performing actions
             * (1 + (this.player.adrenaline / 1000))                                  // Linear speed boost from adrenaline
             * (this.player.downed ? 0.5 : this.player.activeItemDefinition.speedMultiplier) // Active item/knocked out speed modifier
             * (this.player.beingRevivedBy ? 0.5 : 1)                                 // Being revived speed multiplier
-            * this.player._modifiers.baseSpeed;                                      // Current on-wearer modifier
+            * this.player._modifiers.baseSpeed;                                      // Current on-wearer modifier                              // Current on-wearer modifier
+    }
 
-        // Update position
-        const oldPosition = Vec.clone(this.player.position);
+    private updatePosition(movement: Vector, speed: number, dt: number): void {
         const movementVector = Vec.scale(movement, speed);
         this.player._movementVector = movementVector;
 
@@ -133,8 +117,9 @@ export class UpdateManager {
             this.player.position,
             Vec.scale(this.player.movementVector, dt)
         );
+    }
 
-        // Cancel reviving when out of range
+    private handleReviving(): void {
         if (this.player.action instanceof ReviveAction) {
             if (
                 Vec.squaredLength(
@@ -147,14 +132,17 @@ export class UpdateManager {
                 this.player.action.cancel();
             }
         }
+    }
 
-        // Find and resolve collisions
+    private resolveCollisions(): void {
         this.player.nearObjects = this.player.game.grid.intersectsHitbox(this.player._hitbox, this.player.layer);
 
         for (let step = 0; step < 10; step++) {
             let collided = false;
 
             for (const potential of this.player.nearObjects) {
+                if (potential.isVehicle && potential === this.player.inVehicle) continue;
+
                 const { isObstacle, isBuilding, isVehicle } = potential;
 
                 if (
@@ -189,17 +177,23 @@ export class UpdateManager {
 
             if (!collided) break;
         }
+    }
 
-        // World boundaries
+    private enforceWorldBoundaries(): void {
         this.player.position.x = Numeric.clamp(this.player.position.x, this.player._hitbox.radius, this.player.game.map.width - this.player._hitbox.radius);
         this.player.position.y = Numeric.clamp(this.player.position.y, this.player._hitbox.radius, this.player.game.map.height - this.player._hitbox.radius);
 
+    }
+
+    private updateMovementState(oldPosition: Vector): void {
         this.player.isMoving = !Vec.equals(oldPosition, this.player.position);
         if (this.player.isMoving) {
             this.player.game.grid.updateObject(this.player);
+            if (this.player.inVehicle) this.player.game.grid.updateObject(this.player.inVehicle);
         }
+    }
 
-        // Disable invulnerability if the player moves or turns
+    private handleInvulnerabilityAndFloor(): void {
         if (this.player.isMoving || this.player.turning) {
             this.player.disableInvulnerability();
             this.player.setPartialDirty();
@@ -208,7 +202,10 @@ export class UpdateManager {
                 this.player.floor = this.player.game.map.terrain.getFloor(this.player.position, this.player.layer, this.player.game.gameMap);
             }
         }
+    }
 
+
+    private handleHealthRegeneration(dt: number): void {
         let toRegen = this.player._modifiers.hpRegen;
         if (this.player._adrenaline > 0) {
             // Drain adrenaline
@@ -219,8 +216,9 @@ export class UpdateManager {
         }
 
         this.player.health += dt / 900 * toRegen;
+    }
 
-        // Shoot gun/use item
+    private handleAttackingActions(): void {
         if (this.player.startedAttacking) {
             if (this.player.game.pluginManager.emit("player_start_attacking", this.player) === undefined) {
                 this.player.startedAttacking = false;
@@ -235,8 +233,9 @@ export class UpdateManager {
                 this.player.activeItem.stopUse();
             }
         }
+    }
 
-        // Gas damage
+    private applyDamages(dt: number): void {
         const gas = this.player.game.gas;
         if (gas.doDamage && gas.isInGas(this.player.position)) {
             this.player.damageHandler.piercingDamage({
@@ -245,14 +244,15 @@ export class UpdateManager {
             });
         }
 
-        // Knocked out damage
         if (this.player.downed && !this.player.beingRevivedBy) {
             this.player.damageHandler.piercingDamage({
                 amount: GameConstants.player.bleedOutDPMs * dt,
                 source: KillfeedEventType.BleedOut
             });
         }
+    }
 
+    private updateScopeAndBuildingStatus(isInsideBuilding: boolean, depleters: Set<SyncedParticle>, dt: number): void {
         // Determine if player is inside building + reduce scope in buildings
         if (!this.player.isInsideBuilding) {
             this.player.effectiveScope = isInsideBuilding
@@ -294,8 +294,9 @@ export class UpdateManager {
         if (scopeTarget !== undefined || this.player.isInsideBuilding || this.player.downed) {
             this.player.effectiveScope = scopeTarget ?? DEFAULT_SCOPE;
         }
+    }
 
-        // Automatic doors
+    private handleAutomaticDoors(isInsideBuilding: boolean): void {
         const openedDoors: Obstacle[] = [];
         const unopenedDoors: Obstacle[] = [];
 
@@ -335,6 +336,46 @@ export class UpdateManager {
             }
         };
         this.player.game.addTimeout(closeDoors, 1000);
+    }
+
+    update(): void {
+        const dt = this.player.game.dt;
+
+        // Improvement: Only update modifiers if dirty
+        if (this.player.dirty.modifiers) {
+            this.player.updateAndApplyModifiers();
+            this.player.dirty.modifiers = false;
+        }
+
+        const movement = this.calculateMovement();
+        this.handleRateLimiting();
+        this.updatePerks();
+
+        const recoilMultiplier = this.handleRecoil();
+        const speed = this.calculateSpeed(recoilMultiplier, dt);
+
+        const { isInsideBuilding, depleters } = this.checkBuildingsAndSmoke();
+
+        const oldPosition = Vec.clone(this.player.position);
+        this.updatePosition(movement, speed, dt);
+
+        this.handleReviving();
+        this.resolveCollisions();
+
+        this.enforceWorldBoundaries();
+        this.updateMovementState(oldPosition);
+
+        this.handleInvulnerabilityAndFloor();
+
+        this.handleHealthRegeneration(dt);
+
+        this.handleAttackingActions();
+
+        this.applyDamages(dt);
+
+        this.updateScopeAndBuildingStatus(isInsideBuilding, depleters, dt);
+
+        this.handleAutomaticDoors(isInsideBuilding);
 
         this.player.turning = false;
         this.player.game.pluginManager.emit("player_update", this.player);
