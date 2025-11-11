@@ -314,6 +314,10 @@ export class Game implements GameData {
         for (const syncedParticle of this.grid.pool.getCategory(ObjectCategory.SyncedParticle)) {
             syncedParticle.update();
         }
+       
+        for (const vehicle of this.grid.pool.getCategory(ObjectCategory.Vehicle)) {
+            vehicle.update();
+        }
 
         // Update bullets
         let records: DamageRecord[] = [];

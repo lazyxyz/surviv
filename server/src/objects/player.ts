@@ -481,30 +481,31 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     /** VEHICLE LOGICS */
     inVehicle?: Vehicle;
     enterVehicle(vehicle: Vehicle): void {
-        if (this.inVehicle) return;  // Already in one
-
+        if (this.inVehicle) return; // Already in one
         this.inVehicle = vehicle;
         // Offset inside (e.g., cab center, avoid hitbox center)
-        const offset = Vec.create(0, 2);  // Tweak: Forward in cab
-        this.position = Vec.add(vehicle.position, offset);
+        const offset = Vec.create(0, 2); // Tweak: Forward in cab
+        const rotatedOffset = Vec.rotate(offset, vehicle.rotation);
+        this.position = Vec.add(vehicle.position, rotatedOffset);
         this.layer = vehicle.layer;
         // Stop movement
         this.movement.up = this.movement.down = this.movement.left = this.movement.right = false;
         // Disable collision with vehicle
-        this.setPartialDirty();  // Sync flag
+        this.setDirty();
         console.log(`Player ${this.name} entered ${vehicle.definition.idString} at offset ${offset}`);
     }
-
+    
     exitVehicle(): void {
         if (!this.inVehicle) return;
-
         const vehicle = this.inVehicle;
+        if (vehicle.driver === this) vehicle.driver = undefined;
         this.inVehicle = undefined;
         // Eject forward (slight push)
-        this.position = Vec.add(vehicle.position, Vec.fromPolar(vehicle.rotation, 3));  // 3 units ahead
+        this.position = Vec.add(vehicle.position, Vec.fromPolar(vehicle.rotation, 3)); // 3 units ahead
         this.setPartialDirty();
         console.log(`Player ${this.name} exited ${vehicle.definition.idString}`);
     }
+
 
     /**
      * Clean up internal state after all packets have been sent

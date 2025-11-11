@@ -98,7 +98,7 @@ export class UpdateManager {
         return { isInsideBuilding, depleters }
     }
 
-    private calculateSpeed(recoilMultiplier: number, dt: number): number {
+    private calculateSpeed(recoilMultiplier: number): number {
         return this.player.baseSpeed                                          // Base speed
             * (FloorTypes[this.player.floor].speedMultiplier ?? 1)                   // Speed multiplier from floor player is standing in
             * recoilMultiplier                                                // Recoil from items
@@ -109,12 +109,12 @@ export class UpdateManager {
             * this.player._modifiers.baseSpeed;                                      // Current on-wearer modifier                              // Current on-wearer modifier
     }
 
-    private updatePosition(movement: Vector, speed: number, dt: number): void {
+    private updatePosition(position: Vector, movement: Vector, speed: number, dt: number): void {
         const movementVector = Vec.scale(movement, speed);
         this.player._movementVector = movementVector;
 
         this.player.position = Vec.add(
-            this.player.position,
+            position,
             Vec.scale(this.player.movementVector, dt)
         );
     }
@@ -347,22 +347,27 @@ export class UpdateManager {
             this.player.dirty.modifiers = false;
         }
 
-        const movement = this.calculateMovement();
         this.handleRateLimiting();
         this.updatePerks();
-
+        
         const recoilMultiplier = this.handleRecoil();
-        const speed = this.calculateSpeed(recoilMultiplier, dt);
-
+        const speed = this.calculateSpeed(recoilMultiplier);
+        
         const { isInsideBuilding, depleters } = this.checkBuildingsAndSmoke();
-
+        
         const oldPosition = Vec.clone(this.player.position);
-        this.updatePosition(movement, speed, dt);
+        
+        const movement = this.calculateMovement();
+        if (!this.player.inVehicle) {
+            this.updatePosition(this.player.position, movement, speed, dt);
+            this.handleReviving();
+            this.resolveCollisions();
+            this.enforceWorldBoundaries();
+        } else {
+            this.updatePosition(this.player.inVehicle.position, movement, speed, dt);
 
-        this.handleReviving();
-        this.resolveCollisions();
+        }
 
-        this.enforceWorldBoundaries();
         this.updateMovementState(oldPosition);
 
         this.handleInvulnerabilityAndFloor();

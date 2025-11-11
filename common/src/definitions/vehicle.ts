@@ -23,6 +23,11 @@ export interface VehicleDefinition extends ObjectDefinition {
         scale: number;   // Wheel size multiplier
         zIndex: ZIndexes; // Layer (e.g., behind body)
     }>;
+
+    readonly maxSpeed: number;
+    readonly acceleration: number;
+    readonly turnSpeed: number;
+    readonly drag: number;
 }
 
 export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
@@ -41,6 +46,12 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
         health: 1000,
         reflectBullets: true,
         material: "metal_heavy",
+
+        maxSpeed: 0.1, // Default slower than player
+        acceleration: 0.0005, // Reach maxSpeed in ~1s (tune as needed)
+        turnSpeed: 0.002, // ~114 deg/s (tune for feel)
+        drag: 0.001, // Decel time constant ~1s
+        
         wheels: [
             {  // Front-left
                 offset: Vec.create(-120, -230),
