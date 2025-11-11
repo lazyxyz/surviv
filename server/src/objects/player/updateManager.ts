@@ -365,7 +365,6 @@ export class UpdateManager {
             this.enforceWorldBoundaries();
         } else {
             this.updatePosition(this.player.inVehicle.position, movement, speed, dt);
-
         }
 
         this.updateMovementState(oldPosition);

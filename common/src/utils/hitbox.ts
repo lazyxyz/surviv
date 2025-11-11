@@ -261,6 +261,14 @@ export class RectangleHitbox extends BaseHitbox<HitboxType.Rect> {
     min: Vector;
     max: Vector;
 
+    get width(): number {
+        return this.max.x - this.min.x;
+    }
+
+    get height(): number {
+        return this.max.y - this.min.y;
+    }
+
     static fromLine(a: Vector, b: Vector): RectangleHitbox {
         return new RectangleHitbox(
             Vec.create(

@@ -11,6 +11,8 @@ import type { Orientation } from "@common/typings";
 import { DIFF_LAYER_HITBOX_OPACITY, HITBOX_COLORS, HITBOX_DEBUG_MODE } from "../utils/constants";
 import { Vec, type Vector } from "@common/utils/vector";
 
+const STEERING_SCALE = 100; // Matches backend quantization
+
 export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     definition!: VehicleDefinition;
 
@@ -94,8 +96,8 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             }
         }
 
-        const wasDead = data.dead;
-        this.dead = wasDead;  // From partial
+        const wasDead = this.dead;
+        this.dead = data.dead ?? false;  // From partial
 
         let texture: string | undefined;
         texture = !this.dead
@@ -117,6 +119,18 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.container.rotation = this.rotation;
         // Visibility: Like Obstacle—hide only on layer mismatch (prevents close-range overwrite)
         this.container.visible = true;  // Default visible unless dead/invisible
+
+        // Update front wheels steering angle
+        const quantizedAngle = data.steeringAngle;
+        const steeringAngle = quantizedAngle / STEERING_SCALE; // Dequantize to radians
+        // Assume first two wheels are front wheels
+        this.wheels[0].rotation = steeringAngle; // Front-left
+        this.wheels[1].rotation = steeringAngle; // Front-right
+        // Back wheels remain at 0 (no rolling or steering)
+        if (this.wheels.length > 2) {
+            this.wheels[2].rotation = 0; // Rear-left
+            this.wheels[3].rotation = 0; // Rear-right
+        }
 
         this.updateZIndex();
     }

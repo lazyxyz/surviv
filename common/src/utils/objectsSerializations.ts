@@ -180,6 +180,7 @@ export interface ObjectsNetData extends BaseObjectsNetData {
         readonly rotation: number
         readonly layer: Layer
         readonly dead: boolean
+        readonly steeringAngle: number
         readonly full?: {
             readonly definition: VehicleDefinition
         }
@@ -853,7 +854,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
 
     [ObjectCategory.Vehicle]: {
         serializePartial(stream, data) {
-            const { position, rotation, layer, dead } = data;
+            const { position, rotation, layer, dead, steeringAngle } = data;
             stream.writeBooleanGroup(
                 dead,
             );
@@ -861,7 +862,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
             stream.writePosition(position);
             stream.writeRotation2(rotation);
             stream.writeLayer(layer);
-
+            stream.writeInt8(steeringAngle);
         },
         serializeFull(stream, { full }) {
             Vehicles.writeToStream(stream, full.definition);
@@ -876,7 +877,8 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 position: stream.readPosition(),
                 rotation: stream.readRotation2(),
                 layer: stream.readLayer(),
-                dead
+                dead,
+                steeringAngle: stream.readInt8()
             };
         },
         deserializeFull(stream) {

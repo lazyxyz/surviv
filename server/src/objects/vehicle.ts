@@ -16,6 +16,8 @@ import { InventoryItem } from "../inventory/inventoryItem";
 import { Player } from "./player";
 import { Geometry, Numeric } from "@common/utils/math";
 
+const STEERING_SCALE = 100; // Arbitrary scale for quantization: e.g., 0.01 rad precision fits well in int8 (-128 to 127 covers ~±1.28 rad, more than enough for ±0.26 rad)
+
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private static readonly baseHitbox = RectangleHitbox.fromRect(9.2, 9.2);
 
@@ -32,6 +34,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     // Vehicle physics state
     private currentSpeed: number = 0;
+    private steeringAngle: number = 0;
+    private wheelbase: number;
     private readonly driverOffset: Vector = Vec.create(0, -2); // Relative offset for driver position (forward in cab)
 
     get height(): number { return this._height; }
@@ -44,6 +48,19 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     ) {
         super(game, position);
         this.layer = layer;
+
+        // Compute wheelbase from wheels offsets (adjusted scale factor for realistic turning radius)
+        if (this.definition.wheels && this.definition.wheels.length >= 2) {
+            let minY = Infinity, maxY = -Infinity;
+            for (const w of this.definition.wheels) {
+                minY = Math.min(minY, w.offset.y);
+                maxY = Math.max(maxY, w.offset.y);
+            }
+            this.wheelbase = ((maxY - minY) / 20) * this.definition.scale; // Adjusted divisor for larger wheelbase (~20 units)
+        } else {
+            this.wheelbase = this.definition.hitbox.toRectangle().height * 0.8; // ~80% of vehicle length
+        }
+
         const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
         this.hitbox = this.definition.hitbox.transform(this.position, this.definition.scale, hitboxRotation);
         this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, this.definition.scale, hitboxRotation);
@@ -64,48 +81,56 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         }
     }
 
-    private resolveCollisions(): void {
-        const nearObjects = this.game.grid.intersectsHitbox(this.hitbox, this.layer);
+    // private resolveCollisions(): void {
+    //     const nearObjects = this.game.grid.intersectsHitbox(this.hitbox, this.layer);
 
-        for (let step = 0; step < 10; step++) {
-            let collided = false;
+    //     for (let step = 0; step < 10; step++) {
+    //         let collided = false;
 
-            for (const potential of nearObjects) {
-                if (potential === this || (potential.isPlayer && potential === this.driver)) continue;
+    //         for (const potential of nearObjects) {
+    //             if (potential === this || (potential.isPlayer && potential === this.driver)) continue;
 
-                const { isObstacle, isBuilding, isVehicle } = potential;
+    //             const { isObstacle, isBuilding, isVehicle } = potential;
 
-                if (
-                    (isObstacle || isBuilding || isVehicle)
-                    && potential.collidable
-                    && potential.hitbox?.collidesWith(this.hitbox)
-                ) {
-                    // Skip stair handling for vehicles
-                    collided = true;
-                    this.hitbox.resolveCollision(potential.hitbox);
-                }
-            }
+    //             if (
+    //                 (isObstacle || isBuilding || isVehicle)
+    //                 && potential.collidable
+    //                 && potential.hitbox?.collidesWith(this.hitbox)
+    //             ) {
+    //                 // Skip stair handling for vehicles
+    //                 collided = true;
+    //                 this.hitbox.resolveCollision(potential.hitbox);
+    //                 // After resolution, sync position back (assuming resolve mutates hitbox.position)
+    //                 this.position = this.hitbox.position;
+    //             }
+    //         }
 
-            if (!collided) break;
-        }
-    }
+    //         if (!collided) break;
+    //     }
 
-    // private enforceWorldBoundaries(): void {
-    //     // Approximate clamp using unrotated half dimensions (ignores rotation for simplicity)
-    //     const halfWidth = (this.definition.hitbox.toRectangle(). / 2) * this.definition.scale;
-    //     const halfHeight = (this.definition.hitbox.height / 2) * this.definition.scale;
-
-    //     this.position.x = Numeric.clamp(
-    //         this.position.x,
-    //         halfWidth,
-    //         this.game.map.width - halfWidth
-    //     );
-    //     this.position.y = Numeric.clamp(
-    //         this.position.y,
-    //         halfHeight,
-    //         this.game.map.height - halfHeight
-    //     );
+    //     // Re-transform hitboxes after collision resolution
+    //     const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
+    //     this.hitbox = this.definition.hitbox.transform(this.position, this.definition.scale, hitboxRotation);
+    //     this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, this.definition.scale, hitboxRotation);
     // }
+
+    private enforceWorldBoundaries(): void {
+        // Approximate clamp using unrotated half dimensions (ignores rotation for simplicity)
+        const rect = this.definition.hitbox.toRectangle();
+        const halfWidth = (rect.width / 2) * this.definition.scale;
+        const halfHeight = (rect.height / 2) * this.definition.scale;
+
+        this.position.x = Numeric.clamp(
+            this.position.x,
+            halfWidth,
+            this.game.map.width - halfWidth
+        );
+        this.position.y = Numeric.clamp(
+            this.position.y,
+            halfHeight,
+            this.game.map.height - halfHeight
+        );
+    }
 
     update(): void {
         const dt = this.game.dt;
@@ -118,7 +143,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         }
 
         const oldPosition = Vec.clone(this.position);
-        const oldDriverPosition = Vec.clone(this.driver.position);
 
         // Compute input forward and steer (handles both mobile and keys)
         let inputForward = 0;
@@ -139,25 +163,27 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
         // Physics update (units: speed in pixels/ms, accel/turn/drag in per-ms units, dt in ms)
         const accel = this.definition.acceleration;
-        const turnSpeed = this.definition.turnSpeed;
+        const turnSpeed = this.definition.turnSpeed; // Not used in new model
         const drag = this.definition.drag;
         const maxSpeed = this.definition.maxSpeed;
         const maxReverseSpeed = maxSpeed * 0.5;
 
-        // Accelerate/decelerate
+        // Always apply drag
+        this.currentSpeed *= Math.exp(-drag * dt);
+
+        // Then accelerate/decelerate based on input
         this.currentSpeed += inputForward * accel * dt;
-        if (inputForward === 0) {
-            // Drag when no input
-            this.currentSpeed *= Math.exp(-drag * dt);
-        }
         this.currentSpeed = Numeric.clamp(this.currentSpeed, -maxReverseSpeed, maxSpeed);
 
-        // Turn (scale by speed factor for more responsive low-speed turning)
-        const speedFactor = Math.min(Math.abs(this.currentSpeed) / maxSpeed + 0.3, 1); // Min 0.3 at standstill
-        const turnRate = turnSpeed * inputSteer * dt * speedFactor;
-        this.rotation += turnRate;
+        // Steering and turning (simple car model: turn rate = speed * tan(steer) / wheelbase)
+        const maxSteerRad = Math.PI / 12; // Reduced to ~15 degrees for slower turning
+        this.steeringAngle = inputSteer * maxSteerRad;
+        const steerAngle = this.steeringAngle;
+        let turnRate = (this.currentSpeed * Math.tan(steerAngle)) / this.wheelbase;
+        // Removed inversion to fix opposite turning direction
+        this.rotation += turnRate * dt;
 
-        // Compute velocity and update position
+        // Compute velocity along body direction and update position
         const forwardDir = Vec.fromPolar(this.rotation - Math.PI / 2);
         const velocity = Vec.scale(forwardDir, this.currentSpeed * dt);
         this.position = Vec.add(this.position, velocity);
@@ -171,7 +197,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         // this.resolveCollisions();
 
         // Enforce boundaries
-        // this.enforceWorldBoundaries();
+        this.enforceWorldBoundaries();
 
         // Update driver position (rotated offset)
         const rotatedOffset = Vec.rotate(this.driverOffset, this.rotation);
@@ -238,6 +264,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             rotation: this.rotation,
             layer: this.layer,
             dead: this.dead,
+            steeringAngle: Math.round(this.steeringAngle * STEERING_SCALE), // Quantized to int (fits in int8)
             full: {
                 definition: this.definition,
             }
