@@ -18,7 +18,7 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly material?: typeof Materials[number];
     readonly explosion?: string;
     // readonly wheels?: Vector[];
-    readonly wheels?: Array<{  // NEW: Per-wheel config
+    readonly wheels: Array<{  // NEW: Per-wheel config
         offset: Vector;     // Position relative to vehicle center
         scale: number;   // Wheel size multiplier
         zIndex: ZIndexes; // Layer (e.g., behind body)
@@ -28,6 +28,11 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly acceleration: number;
     readonly turnSpeed: number;
     readonly drag: number;
+    readonly seats: Array<{
+        readonly offset: Vector;     // Position relative to vehicle center
+        readonly type: 'driver' | 'passenger'; // Seat type
+        readonly zIndex?: ZIndexes;  // Optional zIndex for rendering adjustments
+    }>;
 }
 
 export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
@@ -51,7 +56,7 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
         acceleration: 0.00008, // Reach maxSpeed in ~4s (tune as needed)
         turnSpeed: 0.002, // ~114 deg/s (tune for feel)
         drag: 0.001, // Decel time constant ~1s
-        
+
         wheels: [
             {  // Front-left
                 offset: Vec.create(-120, -230),
@@ -72,6 +77,17 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
                 offset: Vec.create(140, 170),
                 scale: 1.0,
                 zIndex: ZIndexes.Ground
+            }
+        ],
+
+        seats: [
+            {
+                offset: Vec.create(0, -1.4), // Driver seat, centered forward
+                type: 'driver'
+            },
+            {
+                offset: Vec.create(0, 10), // Passenger seat, offset to the right
+                type: 'passenger'
             }
         ]
     },

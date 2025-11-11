@@ -189,7 +189,6 @@ export class UpdateManager {
         this.player.isMoving = !Vec.equals(oldPosition, this.player.position);
         if (this.player.isMoving) {
             this.player.game.grid.updateObject(this.player);
-            if (this.player.inVehicle) this.player.game.grid.updateObject(this.player.inVehicle);
         }
     }
 
@@ -349,23 +348,23 @@ export class UpdateManager {
 
         this.handleRateLimiting();
         this.updatePerks();
-        
+
         const recoilMultiplier = this.handleRecoil();
         const speed = this.calculateSpeed(recoilMultiplier);
-        
+
         const { isInsideBuilding, depleters } = this.checkBuildingsAndSmoke();
-        
+
         const oldPosition = Vec.clone(this.player.position);
-        
+
         const movement = this.calculateMovement();
         if (!this.player.inVehicle) {
             this.updatePosition(this.player.position, movement, speed, dt);
             this.handleReviving();
             this.resolveCollisions();
             this.enforceWorldBoundaries();
-        } else {
-            this.updatePosition(this.player.inVehicle.position, movement, speed, dt);
-        }
+            this.handleAttackingActions();
+            this.handleAutomaticDoors(isInsideBuilding);
+        } 
 
         this.updateMovementState(oldPosition);
 
@@ -373,13 +372,9 @@ export class UpdateManager {
 
         this.handleHealthRegeneration(dt);
 
-        this.handleAttackingActions();
-
         this.applyDamages(dt);
 
         this.updateScopeAndBuildingStatus(isInsideBuilding, depleters, dt);
-
-        this.handleAutomaticDoors(isInsideBuilding);
 
         this.player.turning = false;
         this.player.game.pluginManager.emit("player_update", this.player);

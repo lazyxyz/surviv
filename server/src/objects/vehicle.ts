@@ -30,13 +30,12 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     private _height = 1;
     health: number;
-    driver?: Player;
 
     // Vehicle physics state
     private currentSpeed: number = 0;
     private steeringAngle: number = 0;
     private wheelbase: number;
-    private readonly driverOffset: Vector = Vec.create(0, -2); // Relative offset for driver position (forward in cab)
+    private occupants: (Player | undefined)[] = [];
 
     get height(): number { return this._height; }
 
@@ -49,216 +48,190 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         super(game, position);
         this.layer = layer;
 
-        // Compute wheelbase from wheels offsets (adjusted scale factor for realistic turning radius)
+        // Initialize wheelbase
         if (this.definition.wheels && this.definition.wheels.length >= 2) {
             let minY = Infinity, maxY = -Infinity;
             for (const w of this.definition.wheels) {
                 minY = Math.min(minY, w.offset.y);
                 maxY = Math.max(maxY, w.offset.y);
             }
-            this.wheelbase = ((maxY - minY) / 20) * this.definition.scale; // Adjusted divisor for larger wheelbase (~20 units)
+            this.wheelbase = ((maxY - minY) / 20) * this.definition.scale;
         } else {
-            this.wheelbase = this.definition.hitbox.toRectangle().height * 0.8; // ~80% of vehicle length
+            this.wheelbase = this.definition.hitbox.toRectangle().height * 0.8;
         }
 
+        // Initialize hitboxes
         const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
         this.hitbox = this.definition.hitbox.transform(this.position, this.definition.scale, hitboxRotation);
         this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, this.definition.scale, hitboxRotation);
+
+        // Initialize occupants array
+        this.occupants = new Array(this.definition.seats.length).fill(undefined);
+
         this.health = this.definition.health;
     }
 
-    canInteract(player: any): boolean {  // 'any' for Player type—fix import if needed
-        return true;  // Interact if not destroyed
+    canInteract(player: Player): boolean {
+        return !this.dead;
     }
 
     interact(player: Player): void {
-        // player.enterVehicle(this);
-        if (player.inVehicle) {
-            player.exitVehicle();  // Toggle: Exit if already in
+        const seatIndex = this.occupants.indexOf(player);
+        if (seatIndex !== -1) {
+            // Exit seat
+            const seatOffset = this.definition.seats[seatIndex].offset;
+            const rotatedOffset = Vec.rotate(seatOffset, this.rotation);
+            const ejectOffset = Vec.fromPolar(this.rotation, 3);
+            player.position = Vec.add(this.position, Vec.add(rotatedOffset, ejectOffset));
+            player.inVehicle = undefined;
+            player.seatIndex = undefined;
+            player.setPartialDirty();
+            this.occupants[seatIndex] = undefined;
         } else {
-            player.enterVehicle(this);
-            this.driver = player;
+            // Enter available seat (prefer driver if empty, else first available)
+            let availableSeat = 0; // Driver by default
+            if (this.occupants[0]) {
+                availableSeat = this.occupants.findIndex(p => !p);
+            }
+            if (availableSeat !== -1 && availableSeat < this.occupants.length) {
+                this.occupants[availableSeat] = player;
+                player.inVehicle = this;
+                player.seatIndex = availableSeat;
+                this.updateOccupantPosition(player, availableSeat);
+                player.setPartialDirty();
+            }
         }
+        this.setPartialDirty();
     }
 
-    // private resolveCollisions(): void {
-    //     const nearObjects = this.game.grid.intersectsHitbox(this.hitbox, this.layer);
-
-    //     for (let step = 0; step < 10; step++) {
-    //         let collided = false;
-
-    //         for (const potential of nearObjects) {
-    //             if (potential === this || (potential.isPlayer && potential === this.driver)) continue;
-
-    //             const { isObstacle, isBuilding, isVehicle } = potential;
-
-    //             if (
-    //                 (isObstacle || isBuilding || isVehicle)
-    //                 && potential.collidable
-    //                 && potential.hitbox?.collidesWith(this.hitbox)
-    //             ) {
-    //                 // Skip stair handling for vehicles
-    //                 collided = true;
-    //                 this.hitbox.resolveCollision(potential.hitbox);
-    //                 // After resolution, sync position back (assuming resolve mutates hitbox.position)
-    //                 this.position = this.hitbox.position;
-    //             }
-    //         }
-
-    //         if (!collided) break;
-    //     }
-
-    //     // Re-transform hitboxes after collision resolution
-    //     const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
-    //     this.hitbox = this.definition.hitbox.transform(this.position, this.definition.scale, hitboxRotation);
-    //     this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, this.definition.scale, hitboxRotation);
-    // }
+    private updateOccupantPosition(player: Player, seatIndex: number): void {
+        const seatOffset = this.definition.seats[seatIndex].offset;
+        const rotatedOffset = Vec.rotate(seatOffset, this.rotation);
+        player.position = Vec.add(this.position, rotatedOffset);
+        player.rotation = this.rotation;
+        player.layer = this.layer;
+    }
 
     private enforceWorldBoundaries(): void {
-        // Approximate clamp using unrotated half dimensions (ignores rotation for simplicity)
         const rect = this.definition.hitbox.toRectangle();
         const halfWidth = (rect.width / 2) * this.definition.scale;
         const halfHeight = (rect.height / 2) * this.definition.scale;
 
-        this.position.x = Numeric.clamp(
-            this.position.x,
-            halfWidth,
-            this.game.map.width - halfWidth
-        );
-        this.position.y = Numeric.clamp(
-            this.position.y,
-            halfHeight,
-            this.game.map.height - halfHeight
-        );
+        this.position.x = Numeric.clamp(this.position.x, halfWidth, this.game.map.width - halfWidth);
+        this.position.y = Numeric.clamp(this.position.y, halfHeight, this.game.map.height - halfHeight);
     }
 
     update(): void {
         const dt = this.game.dt;
 
-        if (!this.driver || this.dead) {
-            if (this.driver) {
-                this.driver.isMoving = false;
+        const driver = this.occupants[0]; // Driver is always seat 0
+        if (!driver || this.dead) {
+            this.currentSpeed *= Math.exp(-this.definition.drag * dt);
+            if (driver) {
+                driver.isMoving = false;
+                this.updateOccupantPosition(driver, 0);
+                driver.setPartialDirty();
             }
+            this.updateHitboxes();
             return;
         }
 
         const oldPosition = Vec.clone(this.position);
 
-        // Compute input forward and steer (handles both mobile and keys)
+        // Calculate input from driver
+        const pm = driver.movement;
         let inputForward = 0;
         let inputSteer = 0;
-        const pm = this.driver.movement;
-
-        if (this.driver.isMobile && pm.moving) {
-            // Mobile: Map joystick angle to relative forward/steer
+        if (driver.isMobile && pm.moving) {
             let angleDiff = pm.angle - this.rotation + Math.PI / 2;
-            angleDiff = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI; // Signed diff in [-pi, pi]
+            angleDiff = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI;
             inputForward = Math.cos(angleDiff);
             inputSteer = Math.sin(angleDiff);
         } else {
-            // Keys: Direct mapping (diagonals allow accel + turn)
             inputForward = +pm.up - +pm.down;
             inputSteer = +pm.right - +pm.left;
         }
 
-        // Physics update (units: speed in pixels/ms, accel/turn/drag in per-ms units, dt in ms)
+        // Physics update
         const accel = this.definition.acceleration;
-        const turnSpeed = this.definition.turnSpeed; // Not used in new model
         const drag = this.definition.drag;
         const maxSpeed = this.definition.maxSpeed;
         const maxReverseSpeed = maxSpeed * 0.5;
 
-        // Always apply drag
         this.currentSpeed *= Math.exp(-drag * dt);
-
-        // Then accelerate/decelerate based on input
         this.currentSpeed += inputForward * accel * dt;
         this.currentSpeed = Numeric.clamp(this.currentSpeed, -maxReverseSpeed, maxSpeed);
 
-        // Steering and turning (simple car model: turn rate = speed * tan(steer) / wheelbase)
-        const maxSteerRad = Math.PI / 12; // Reduced to ~15 degrees for slower turning
+        // Steering
+        const maxSteerRad = Math.PI / 12;
         this.steeringAngle = inputSteer * maxSteerRad;
         const steerAngle = this.steeringAngle;
         let turnRate = (this.currentSpeed * Math.tan(steerAngle)) / this.wheelbase;
-        // Removed inversion to fix opposite turning direction
         this.rotation += turnRate * dt;
 
-        // Compute velocity along body direction and update position
+        // Update position
         const forwardDir = Vec.fromPolar(this.rotation - Math.PI / 2);
         const velocity = Vec.scale(forwardDir, this.currentSpeed * dt);
         this.position = Vec.add(this.position, velocity);
 
         // Update hitboxes
-        const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
-        this.hitbox = this.definition.hitbox.transform(this.position, this.definition.scale, hitboxRotation);
-        this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, this.definition.scale, hitboxRotation);
+        this.updateHitboxes();
 
-        // Resolve collisions
-        // this.resolveCollisions();
-
-        // Enforce boundaries
         this.enforceWorldBoundaries();
 
-        // Update driver position and rotation (sync to vehicle)
-        const rotatedOffset = Vec.rotate(this.driverOffset, this.rotation);
-        this.driver.position = Vec.add(this.position, rotatedOffset);
-        this.driver.rotation = this.rotation; // Sync player rotation to vehicle
-        this.driver.layer = this.layer;
-
-        // Update movement state
+        // Update all occupants
         const isMoving = !Vec.equals(oldPosition, this.position) || Math.abs(this.currentSpeed) > 0.01;
+        for (let i = 0; i < this.occupants.length; i++) {
+            const player = this.occupants[i];
+            if (player) {
+                this.updateOccupantPosition(player, i);
+                player.isMoving = isMoving;
+                player.setPartialDirty();
+                this.game.grid.updateObject(player);
+            }
+        }
+
         if (isMoving) {
             this.game.grid.updateObject(this);
         }
-        this.driver.isMoving = isMoving;
-        this.game.grid.updateObject(this.driver);
-        this.driver.setPartialDirty(); // Ensure rotation update is sent
 
         this.setPartialDirty();
+    }
+
+    private updateHitboxes(): void {
+        const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
+        this.hitbox = this.definition.hitbox.transform(this.position, this.definition.scale, hitboxRotation);
+        this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, this.definition.scale, hitboxRotation);
     }
 
     damage(params: DamageParams & { position?: Vector }): void {
         const definition = this.definition;
 
         const { amount, source, weaponUsed, position } = params;
-        if (this.health === 0) return;
+        if (this.health <= 0) return;
 
         this.health -= amount;
         this.setPartialDirty();
-
-        // this.game.pluginManager.emit("obstacle_did_damage", {
-        //     obstacle: this,
-        //     ...params
-        // });
 
         const notDead = this.health > 0 && !this.dead;
         if (!notDead) {
             this.health = 0;
             this.dead = true;
             this.collidable = false;
-            // if (
-            //     this.game.pluginManager.emit("obstacle_will_destroy", {
-            //         obstacle: this,
-            //         source,
-            //         weaponUsed,
-            //         amount
-            //     })
-            // ) return;
 
             const weaponIsItem = weaponUsed instanceof InventoryItem;
             if (definition.explosion !== undefined && source instanceof BaseGameObject) {
-                //                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-                // FIXME This is implying that obstacles won't explode if destroyed by non–game objects
                 this.game.addExplosion(definition.explosion, this.position, source, source.layer, weaponIsItem ? weaponUsed : weaponUsed?.weapon);
             }
 
-            // Eject driver on destruction
-            if (this.driver) {
-                this.driver.exitVehicle();
-            }
+            // Eject all occupants
+            // for (let i = 0; i < this.occupants.length; i++) {
+            //     if (this.occupants[i]) {
+            //         this.interact(this.occupants[i]); // Reuse interact to exit
+            //     }
+            // }
         }
     }
-
 
     override get data(): FullData<ObjectCategory.Vehicle> {
         const data: SDeepMutable<FullData<ObjectCategory.Vehicle>> = {
@@ -274,5 +247,4 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
         return data;
     }
-
 }
