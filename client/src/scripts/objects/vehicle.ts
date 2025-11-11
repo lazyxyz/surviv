@@ -9,14 +9,15 @@ import { GameObject } from "./gameObject";
 import type { Hitbox } from "@common/utils/hitbox";
 import type { Orientation } from "@common/typings";
 import { DIFF_LAYER_HITBOX_OPACITY, HITBOX_COLORS, HITBOX_DEBUG_MODE } from "../utils/constants";
-import type { Vector } from "@common/utils/vector";
+import { Vec, type Vector } from "@common/utils/vector";
 
 export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     definition!: VehicleDefinition;
 
     readonly image: SuroiSprite;
+    readonly wheels: SuroiSprite[] = [];
 
-    floorType: FloorNames = FloorNames.Grass;  // Add: Like Player/Obstacle
+    floorType: FloorNames = FloorNames.Grass;
     hitbox!: Hitbox;
     bulletHitbox!: Hitbox;
     orientation: Orientation = 0;
@@ -30,6 +31,13 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.container.addChild(this.image);
 
         this.layer = data.layer;
+        for (let i = 0; i < 4; i++) {
+            const wheel = new SuroiSprite("basic_wheel")
+                .setScale(0.8)  // Adjust size (e.g., 0.8 for smaller wheels)
+            // .setZIndex(-1);  // Behind main body
+            this.wheels.push(wheel);
+            this.container.addChild(wheel);  // Add to container (rotates/scales with vehicle)
+        }
 
         this.updateFromData(data);
     }
@@ -48,6 +56,42 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             this.definition = data.full.definition;
             this.hitbox = this.definition.hitbox.transform(this.position, 1, this.orientation);
             this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, 1, this.orientation);
+
+
+            if (this.definition && this.definition.wheels) {
+                const wheelConfig = this.definition.wheels;
+
+                // Create missing wheels (one-time or on change)
+                while (this.wheels.length < wheelConfig.length) {
+                    const wheel = new SuroiSprite("basic_wheel")
+                        .setZIndex(ZIndexes.Ground);  // Default; overridden below
+                    this.container.addChild(wheel);
+                    this.wheels.push(wheel);
+                }
+
+                // Position/scale/zIndex each
+                wheelConfig.forEach((config, i) => {
+                    if (i < this.wheels.length) {
+                        const wheel = this.wheels[i];
+                        // Offset scaled by vehicle scale
+                        wheel.position.copyFrom(Vec.scale(config.offset, this.definition.scale));
+                        // Per-wheel scale
+                        wheel.scale.set(config.scale);
+                        // Per-wheel zIndex
+                        wheel.zIndex = getEffectiveZIndex(config.zIndex, this.layer, this.game.layer);
+                        // Visible unless dead
+                        wheel.visible = !this.dead;
+                    }
+                });
+
+                // Hide extras
+                for (let i = wheelConfig.length; i < this.wheels.length; i++) {
+                    this.wheels[i].visible = false;
+                }
+            } else {
+                // No config: Hide all
+                this.wheels.forEach(wheel => wheel.visible = false);
+            }
         }
 
         const wasDead = data.dead;
@@ -91,6 +135,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
     override destroy(): void {
         this.image.destroy();
+        this.wheels.forEach(wheel => wheel.destroy());
         super.destroy();
     }
 

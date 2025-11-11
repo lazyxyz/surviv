@@ -1,7 +1,7 @@
 import { Layers, ZIndexes } from "../constants";
 import { GroupHitbox, Hitbox, RectangleHitbox } from "../utils/hitbox";
 import { ObjectDefinitions, type ObjectDefinition } from "../utils/objectDefinitions";
-import { Vec } from "../utils/vector";
+import { Vec, Vector } from "../utils/vector";
 import { Materials, RotationMode } from "./obstacles";  // Reuse from obstacles, as vehicles rotate like them
 
 export interface VehicleDefinition extends ObjectDefinition {
@@ -16,7 +16,13 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly zIndex?: ZIndexes;
     readonly reflectBullets: boolean;
     readonly material?: typeof Materials[number];
-    readonly explosion?: string
+    readonly explosion?: string;
+    // readonly wheels?: Vector[];
+    readonly wheels?: Array<{  // NEW: Per-wheel config
+        offset: Vector;     // Position relative to vehicle center
+        scale: number;   // Wheel size multiplier
+        zIndex: ZIndexes; // Layer (e.g., behind body)
+    }>;
 }
 
 export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
@@ -35,6 +41,28 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
         health: 1000,
         reflectBullets: true,
         material: "metal_heavy",
+        wheels: [
+            {  // Front-left
+                offset: Vec.create(-120, -230),
+                scale: 0.8,
+                zIndex: ZIndexes.Vehicles + 1
+            },
+            {  // Front-right
+                offset: Vec.create(120, -230),
+                scale: 0.8,
+                zIndex: ZIndexes.Vehicles + 1
+            },
+            {  // Rear-left
+                offset: Vec.create(-140, 170),
+                scale: 1.0,  // Standard rear
+                zIndex: ZIndexes.Vehicles + 1
+            },
+            {  // Rear-right
+                offset: Vec.create(140, 170),
+                scale: 1.0,
+                zIndex: ZIndexes.Ground
+            }
+        ]
     },
     () => [
         {

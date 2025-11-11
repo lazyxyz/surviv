@@ -105,8 +105,6 @@ export class Bullet extends BaseBullet {
                 this.position = point;
 
                 if (object.isObstacle && object.definition.noCollisions) continue;
-
-                console.log("Hit object: ", object);
                 this.dead = true;
                 break;
             }
