@@ -85,7 +85,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             player.position = Vec.add(this.position, Vec.add(rotatedOffset, ejectOffset));
             player.inVehicle = undefined;
             player.seatIndex = undefined;
-            player.setPartialDirty();
             this.occupants[seatIndex] = undefined;
         } else {
             // Enter available seat (prefer driver if empty, else first available)
@@ -98,7 +97,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 player.inVehicle = this;
                 player.seatIndex = availableSeat;
                 this.updateOccupantPosition(player, availableSeat);
-                player.setPartialDirty();
             }
         }
         this.setPartialDirty();

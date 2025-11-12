@@ -109,16 +109,16 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             this.image.setFrame(texture);
         }
 
-        // if (this.definition) {
-        //     this.image.setFrame(this.definition.idString);
-        //     this.container.scale.set(this.definition.scale);  // Resize
-        // }
-
         // Position/rotate
         this.container.position.copyFrom(toPixiCoords(this.position));
         this.container.rotation = this.rotation;
         // Visibility: Like Obstacle—hide only on layer mismatch (prevents close-range overwrite)
         this.container.visible = true;  // Default visible unless dead/invisible
+
+        if (this.definition) {
+            this.hitbox = this.definition.hitbox.transform(this.position, 1, this.orientation);
+            this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, 1, this.orientation);
+        }
 
         // Update front wheels steering angle (relative to vehicle body)
         // Back wheels remain aligned with vehicle body (rotation = 0 relative)
@@ -127,13 +127,14 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         // Front wheels: steer relative to body
         this.wheels[0].rotation = steeringAngle; // Front-left
         this.wheels[1].rotation = steeringAngle; // Front-right
-        
+
         if (this.wheels.length > 2) {
             this.wheels[2].rotation = 0; // Rear-left aligned
             this.wheels[3].rotation = 0; // Rear-right aligned
         }
 
         this.updateZIndex();
+        this.updateDebugGraphics();
     }
 
     override updateZIndex(): void {
@@ -156,6 +157,9 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
     override updateDebugGraphics(): void {
         if (!HITBOX_DEBUG_MODE) return;
+
+        const ctx = this.debugGraphics;
+        ctx.clear();
 
         const alpha = this.game.activePlayer !== undefined && this.layer === this.game.activePlayer.layer
             ? 1
