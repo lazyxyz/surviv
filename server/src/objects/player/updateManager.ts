@@ -359,14 +359,13 @@ export class UpdateManager {
         const movement = this.calculateMovement();
         if (!this.player.inVehicle) {
             this.updatePosition(this.player.position, movement, speed, dt);
-            this.handleReviving();
-            this.resolveCollisions();
+            this.updateMovementState(oldPosition);
             this.enforceWorldBoundaries();
-            this.handleAttackingActions();
-            this.handleAutomaticDoors(isInsideBuilding);
         } 
-
-        this.updateMovementState(oldPosition);
+        this.handleAutomaticDoors(isInsideBuilding);
+        this.handleReviving();
+        this.resolveCollisions();
+        this.handleAttackingActions();
 
         this.handleInvulnerabilityAndFloor();
 

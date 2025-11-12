@@ -9,7 +9,7 @@ import { ObjectDefinition } from "@common/utils/objectDefinitions";
 import { Vec, Vector } from "@common/utils/vector";
 import { Game } from "../game";
 import { ThrowableItem } from "../inventory/throwableItem";
-import { VehicleDefinition } from "@common/definitions/vehicle";
+import { SeatType, VehicleDefinition } from "@common/definitions/vehicle";
 import { RotationMode } from "@common/definitions/obstacles";
 import { Orientation } from "@common/typings";
 import { InventoryItem } from "../inventory/inventoryItem";
@@ -60,6 +60,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     canInteract(player: Player): boolean {
         return !this.dead;
     }
+    
     interact(player: Player): void {
         const seatIndex = this.occupants.indexOf(player);
         if (seatIndex !== -1) {
@@ -90,7 +91,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         const seatOffset = this.definition.seats[seatIndex].offset;
         const rotatedOffset = Vec.rotate(seatOffset, this.rotation);
         player.position = Vec.add(this.position, rotatedOffset);
-        player.rotation = this.rotation;
+        if(seatIndex == SeatType.Driver) player.rotation = this.rotation;
         player.layer = this.layer;
     }
 
