@@ -44,7 +44,7 @@ const defaultVehicle: VehicleDefinition = {
     idString: "buggy",
     name: "Buggy",
     scale: 1,
-    rotationMode: RotationMode.Limited,
+    rotationMode: RotationMode.Full,
     hitbox: RectangleHitbox.fromRect(9.2, 15),
     bulletHitbox: new GroupHitbox(
         // Hood (front)

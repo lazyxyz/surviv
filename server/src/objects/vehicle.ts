@@ -15,30 +15,23 @@ import { Orientation } from "@common/typings";
 import { InventoryItem } from "../inventory/inventoryItem";
 import { Player } from "./player";
 import { Geometry, Numeric } from "@common/utils/math";
-
 const STEERING_SCALE = 100; // Arbitrary scale for quantization: e.g., 0.01 rad precision fits well in int8 (-128 to 127 covers ~±1.28 rad, more than enough for ±0.26 rad)
-
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private static readonly baseHitbox = RectangleHitbox.fromRect(9.2, 9.2);
-
     override readonly fullAllocBytes = 8;
     override readonly partialAllocBytes = 14;
     declare hitbox: Hitbox;
     declare bulletHitbox: Hitbox;
     collidable: boolean = true;
     damageable: boolean = true;
-
     private _height = 1;
     health: number;
-
     // Vehicle physics state
     private currentSpeed: number = 0;
     private steeringAngle: number = 0;
     private wheelbase: number;
     private occupants: (Player | undefined)[] = [];
-
     get height(): number { return this._height; }
-
     constructor(
         game: Game,
         position: Vector,
@@ -47,7 +40,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     ) {
         super(game, position);
         this.layer = layer;
-
         // Initialize wheelbase
         if (this.definition.wheels && this.definition.wheels.length >= 2) {
             let minY = Infinity, maxY = -Infinity;
@@ -59,22 +51,15 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         } else {
             this.wheelbase = this.definition.hitbox.toRectangle().height * 0.8;
         }
-
         // Initialize hitboxes
-        const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
-        this.hitbox = this.definition.hitbox.transform(this.position, this.definition.scale, hitboxRotation);
-        this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, this.definition.scale, hitboxRotation);
-
+        this.updateHitboxes();
         // Initialize occupants array
         this.occupants = new Array(this.definition.seats.length).fill(undefined);
-
         this.health = this.definition.health;
     }
-
     canInteract(player: Player): boolean {
         return !this.dead;
     }
-
     interact(player: Player): void {
         const seatIndex = this.occupants.indexOf(player);
         if (seatIndex !== -1) {
@@ -101,7 +86,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         }
         this.setPartialDirty();
     }
-
     private updateOccupantPosition(player: Player, seatIndex: number): void {
         const seatOffset = this.definition.seats[seatIndex].offset;
         const rotatedOffset = Vec.rotate(seatOffset, this.rotation);
@@ -109,19 +93,15 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         player.rotation = this.rotation;
         player.layer = this.layer;
     }
-
     private enforceWorldBoundaries(): void {
         const rect = this.definition.hitbox.toRectangle();
         const halfWidth = (rect.width / 2) * this.definition.scale;
         const halfHeight = (rect.height / 2) * this.definition.scale;
-
         this.position.x = Numeric.clamp(this.position.x, halfWidth, this.game.map.width - halfWidth);
         this.position.y = Numeric.clamp(this.position.y, halfHeight, this.game.map.height - halfHeight);
     }
-
     update(): void {
         const dt = this.game.dt;
-
         const driver = this.occupants[0]; // Driver is always seat 0
         if (!driver || this.dead) {
             this.currentSpeed *= Math.exp(-this.definition.drag * dt);
@@ -133,9 +113,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             this.updateHitboxes();
             return;
         }
-
         const oldPosition = Vec.clone(this.position);
-
         // Calculate input from driver
         const pm = driver.movement;
         let inputForward = 0;
@@ -149,34 +127,27 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             inputForward = +pm.up - +pm.down;
             inputSteer = +pm.right - +pm.left;
         }
-
         // Physics update
         const accel = this.definition.acceleration;
         const drag = this.definition.drag;
         const maxSpeed = this.definition.maxSpeed;
         const maxReverseSpeed = maxSpeed * 0.5;
-
         this.currentSpeed *= Math.exp(-drag * dt);
         this.currentSpeed += inputForward * accel * dt;
         this.currentSpeed = Numeric.clamp(this.currentSpeed, -maxReverseSpeed, maxSpeed);
-
         // Steering
         const maxSteerRad = Math.PI / 12;
         this.steeringAngle = inputSteer * maxSteerRad;
         const steerAngle = this.steeringAngle;
         let turnRate = (this.currentSpeed * Math.tan(steerAngle)) / this.wheelbase;
         this.rotation += turnRate * dt;
-
         // Update position
         const forwardDir = Vec.fromPolar(this.rotation - Math.PI / 2);
         const velocity = Vec.scale(forwardDir, this.currentSpeed * dt);
         this.position = Vec.add(this.position, velocity);
-
         // Update hitboxes
         this.updateHitboxes();
-
         this.enforceWorldBoundaries();
-
         // Update all occupants
         const isMoving = !Vec.equals(oldPosition, this.position) || Math.abs(this.currentSpeed) > 0.01;
         for (let i = 0; i < this.occupants.length; i++) {
@@ -188,49 +159,40 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 this.game.grid.updateObject(player);
             }
         }
-
         if (isMoving) {
             this.game.grid.updateObject(this);
         }
-
         this.setPartialDirty();
     }
-
+    
     private updateHitboxes(): void {
-        const hitboxRotation = this.definition.rotationMode === RotationMode.Limited ? this.rotation as Orientation : 0;
-        this.hitbox = this.definition.hitbox.transform(this.position, this.definition.scale, hitboxRotation);
-        this.bulletHitbox = this.definition.bulletHitbox.transform(this.position, this.definition.scale, hitboxRotation);
+        this.hitbox = this.definition.hitbox.transformRotate(this.position, this.definition.scale, this.rotation);
+        this.bulletHitbox = this.definition.bulletHitbox.transformRotate(this.position, this.definition.scale, this.rotation);
     }
 
     damage(params: DamageParams & { position?: Vector }): void {
         const definition = this.definition;
-
         const { amount, source, weaponUsed, position } = params;
         if (this.health <= 0) return;
-
         this.health -= amount;
         this.setPartialDirty();
-
         const notDead = this.health > 0 && !this.dead;
         if (!notDead) {
             this.health = 0;
             this.dead = true;
             this.collidable = false;
-
             const weaponIsItem = weaponUsed instanceof InventoryItem;
             if (definition.explosion !== undefined && source instanceof BaseGameObject) {
                 this.game.addExplosion(definition.explosion, this.position, source, source.layer, weaponIsItem ? weaponUsed : weaponUsed?.weapon);
             }
-
             // Eject all occupants
             // for (let i = 0; i < this.occupants.length; i++) {
-            //     if (this.occupants[i]) {
-            //         this.interact(this.occupants[i]); // Reuse interact to exit
-            //     }
+            // if (this.occupants[i]) {
+            // this.interact(this.occupants[i]); // Reuse interact to exit
+            // }
             // }
         }
     }
-
     override get data(): FullData<ObjectCategory.Vehicle> {
         const data: SDeepMutable<FullData<ObjectCategory.Vehicle>> = {
             position: this.position,
@@ -242,7 +204,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 definition: this.definition,
             }
         };
-
         return data;
     }
 }
