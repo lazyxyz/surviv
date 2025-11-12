@@ -17,7 +17,7 @@ import { Player } from "./player";
 import { Geometry, Numeric } from "@common/utils/math";
 const STEERING_SCALE = 100; // Arbitrary scale for quantization: e.g., 0.01 rad precision fits well in int8 (-128 to 127 covers ~±1.28 rad, more than enough for ±0.26 rad)
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
-    private static readonly baseHitbox = RectangleHitbox.fromRect(9.2, 9.2);
+
     override readonly fullAllocBytes = 8;
     override readonly partialAllocBytes = 14;
     declare hitbox: Hitbox;
@@ -93,6 +93,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         player.rotation = this.rotation;
         player.layer = this.layer;
     }
+
     private enforceWorldBoundaries(): void {
         const rect = this.definition.hitbox.toRectangle();
         const halfWidth = (rect.width / 2) * this.definition.scale;
@@ -100,6 +101,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         this.position.x = Numeric.clamp(this.position.x, halfWidth, this.game.map.width - halfWidth);
         this.position.y = Numeric.clamp(this.position.y, halfHeight, this.game.map.height - halfHeight);
     }
+
     update(): void {
         const dt = this.game.dt;
         const driver = this.occupants[0]; // Driver is always seat 0
@@ -147,7 +149,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         this.position = Vec.add(this.position, velocity);
         // Update hitboxes
         this.updateHitboxes();
-        this.enforceWorldBoundaries();
+        // this.enforceWorldBoundaries();
         // Update all occupants
         const isMoving = !Vec.equals(oldPosition, this.position) || Math.abs(this.currentSpeed) > 0.01;
         for (let i = 0; i < this.occupants.length; i++) {

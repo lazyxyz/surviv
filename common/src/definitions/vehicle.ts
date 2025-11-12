@@ -45,7 +45,12 @@ const defaultVehicle: VehicleDefinition = {
     name: "Buggy",
     scale: 1,
     rotationMode: RotationMode.Full,
-    hitbox: RectangleHitbox.fromRect(9.2, 15),
+    hitbox: new GroupHitbox(
+        // Hood (front)
+        new CircleHitbox(4, Vec.create(0, -9)),
+        // Back (rear)
+        new CircleHitbox(3.6, Vec.create(0, 4.6)),
+    ),
     bulletHitbox: new GroupHitbox(
         // Hood (front)
         RectangleHitbox.fromRect(7.6, 8, Vec.create(0, -9)),
@@ -104,7 +109,12 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
             name: "Buggy",
             scale: 1,  // Default size
             rotationMode: RotationMode.Limited,
-            hitbox: RectangleHitbox.fromRect(7.6, 26),
+            hitbox: new GroupHitbox(
+                new CircleHitbox(3.6, Vec.create(0, -10)),
+                new CircleHitbox(4, Vec.create(0, -4.6)),
+                new CircleHitbox(5, Vec.create(0, 0)),
+                new CircleHitbox(3.8, Vec.create(0, 9)),
+            ),
             bulletHitbox: new GroupHitbox(
                 // Hood (front)
                 new CircleHitbox(4, Vec.create(0, -9)),
