@@ -31,7 +31,10 @@ export interface VehicleDefinition extends ObjectDefinition {
 
     readonly maxSpeed: number;
     readonly acceleration: number;
-    readonly turnSpeed: number;
+
+    readonly maxSteerAngle: number;  // Max front wheel deflection (radians, e.g., Math.PI / 6 ≈ 30°)
+    readonly steerRate: number;     // Max rate of steering change (rad/s, e.g., Math.PI / 2 for quick response)
+
     readonly drag: number;
     readonly seats: Array<{
         readonly offset: Vector;     // Position relative to vehicle center
@@ -63,7 +66,8 @@ const defaultVehicle: VehicleDefinition = {
     material: "metal_heavy",
     maxSpeed: 0.09,
     acceleration: 0.00008,
-    turnSpeed: 0.2618, // PI/12 ~15 degrees/s
+    maxSteerAngle: Math.PI / 6,  // 30° max wheel turn
+    steerRate: Math.PI / 2,     // 90°/s response
     drag: 0.001,
     wheels: [
         {
@@ -126,9 +130,12 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
             reflectBullets: true,
             material: Materials[5],
 
-            maxSpeed: 0.09, // Default slower than player
+            maxSpeed: 0.07,
             acceleration: 0.00008, // Reach maxSpeed in ~4s (tune as needed)
-            turnSpeed: 0.2618, // PI/12 ~15 degrees/s
+
+            maxSteerAngle: Math.PI / 8,
+            steerRate: Math.PI / 2,
+
             drag: 0.001, // Decel time constant ~1s
             explosion: "super_barrel_explosion",
 

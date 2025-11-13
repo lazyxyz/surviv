@@ -35,7 +35,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         super(game, position);
         this.layer = layer ?? Layer.Ground;
         this.rotation = rotation ?? 0;
-        
+
         // Initialize wheelbase
         if (this.definition.wheels && this.definition.wheels.length >= 2) {
             let minY = Infinity, maxY = -Infinity;
@@ -137,8 +137,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         this.currentSpeed = Numeric.clamp(this.currentSpeed, -maxReverseSpeed, maxSpeed);
 
         // Steering: FIXED - Negate to invert (right input → CW turn → right turn when facing right)
-        const maxSteerRad = this.definition.turnSpeed;
-        this.steeringAngle = inputSteer * maxSteerRad;  // Snaps/decays to 0 naturally with 0 input
+        const targetSteer = inputSteer * this.definition.maxSteerAngle;
+        const maxSteerDelta = this.definition.steerRate * dt / 1000;
+        this.steeringAngle += Numeric.clamp(targetSteer - this.steeringAngle, -maxSteerDelta, maxSteerDelta);
+
         const steerAngle = this.steeringAngle;
         let turnRate = (this.currentSpeed * Math.tan(steerAngle)) / this.wheelbase;
         this.rotation += turnRate * dt;
