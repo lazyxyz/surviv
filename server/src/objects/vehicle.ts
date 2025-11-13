@@ -1,5 +1,5 @@
 import { Layer, ObjectCategory, STEERING_SCALE } from "@common/constants";
-import {  Hitbox } from "@common/utils/hitbox";
+import { Hitbox } from "@common/utils/hitbox";
 import { BaseGameObject, DamageParams } from "./gameObject";
 import { SDeepMutable } from "@common/utils/misc";
 import { FullData } from "@common/utils/objectsSerializations";
@@ -50,6 +50,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         this.occupants = new Array(this.definition.seats.length).fill(undefined);
         this.health = this.definition.health;
     }
+
     canInteract(player: Player): boolean {
         return !this.dead;
     }
@@ -68,6 +69,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         } else {
             // Enter available seat (prefer driver if empty, else first available)
             let availableSeat = 0; // Driver by default
+            player.inventory.lockAllSlots();
             if (this.occupants[0]) {
                 availableSeat = this.occupants.findIndex(p => !p);
             }

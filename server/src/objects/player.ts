@@ -4,7 +4,7 @@ import { type BadgeDefinition } from "@common/definitions/badges";
 import { Emotes, type EmoteDefinition } from "@common/definitions/emotes";
 import { type GunDefinition } from "@common/definitions/guns";
 import { Loots, type WeaponDefinition } from "@common/definitions/loots";
-import { type MeleeDefinition } from "@common/definitions/melees";
+import { Melees, type MeleeDefinition } from "@common/definitions/melees";
 import { type ObstacleDefinition } from "@common/definitions/obstacles";
 import { Perks, type PerkDefinition, type PerkNames } from "@common/definitions/perks";
 import { DEFAULT_SCOPE, Scopes, type ScopeDefinition } from "@common/definitions/scopes";
@@ -260,6 +260,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     get activeItem(): InventoryItem {
+        if (this.seatIndex == SeatType.Driver) return this.DEFAULT_WEAPON;
         return this.inventory.activeWeapon;
     }
 
@@ -395,6 +396,8 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     readonly perks = new ServerPerkManager(this, Perks.defaults);
     perkUpdateMap?: Map<UpdatablePerkDefinition, number>; // key = perk, value = last updated
 
+    readonly DEFAULT_WEAPON = new MeleeItem("fists", this);
+
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team) {
         super(game, position);
 
@@ -482,7 +485,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     /** VEHICLE LOGICS */
     inVehicle?: Vehicle;
     seatIndex?: number;
-    
+
     /**
      * Clean up internal state after all packets have been sent
      * to all recipients. The only code that should be present here
