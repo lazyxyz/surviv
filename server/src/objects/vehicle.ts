@@ -60,7 +60,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     canInteract(player: Player): boolean {
         return !this.dead;
     }
-    
+
     interact(player: Player): void {
         const seatIndex = this.occupants.indexOf(player);
         if (seatIndex !== -1) {
@@ -85,13 +85,15 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 this.updateOccupantPosition(player, availableSeat);
             }
         }
-        this.setPartialDirty();
+        this.setDirty();
+        player.setDirty();
     }
+
     private updateOccupantPosition(player: Player, seatIndex: number): void {
         const seatOffset = this.definition.seats[seatIndex].offset;
         const rotatedOffset = Vec.rotate(seatOffset, this.rotation);
         player.position = Vec.add(this.position, rotatedOffset);
-        if(seatIndex == SeatType.Driver) player.rotation = this.rotation;
+        if (seatIndex == SeatType.Driver) player.rotation = this.rotation;
         player.layer = this.layer;
     }
 
@@ -122,13 +124,15 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         let inputForward = 0;
         let inputSteer = 0;
         if (driver.isMobile && pm.moving) {
-            let angleDiff = pm.angle - this.rotation + Math.PI / 2;
+            // Fixed: Remove +π/2 offset, compute pure relative angle to vehicle rotation (now facing right at 0°)
+            let angleDiff = pm.angle - this.rotation;
             angleDiff = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI;
             inputForward = Math.cos(angleDiff);
             inputSteer = Math.sin(angleDiff);
         } else {
+            // Keyboard: Assume relative (up=forward, left=steer left). No change needed here.
             inputForward = +pm.up - +pm.down;
-            inputSteer = +pm.right - +pm.left;
+            inputSteer = +pm.right - +pm.left;  // right=+1 (will be negated below for correct turn)
         }
         // Physics update
         const accel = this.definition.acceleration;
@@ -138,18 +142,19 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         this.currentSpeed *= Math.exp(-drag * dt);
         this.currentSpeed += inputForward * accel * dt;
         this.currentSpeed = Numeric.clamp(this.currentSpeed, -maxReverseSpeed, maxSpeed);
-        // Steering
+        // Steering: FIXED - Negate to invert (right input → CW turn → right turn when facing right)
         const maxSteerRad = Math.PI / 12;
-        this.steeringAngle = inputSteer * maxSteerRad;
+        this.steeringAngle = inputSteer * maxSteerRad;  // Negation fixes inversion
         const steerAngle = this.steeringAngle;
         let turnRate = (this.currentSpeed * Math.tan(steerAngle)) / this.wheelbase;
         this.rotation += turnRate * dt;
-        // Update position
-        const forwardDir = Vec.fromPolar(this.rotation - Math.PI / 2);
+        // Update position: FIXED - Remove -π/2 so rotation 0 faces right
+        const forwardDir = Vec.fromPolar(this.rotation);  // Now 0° = right
         const velocity = Vec.scale(forwardDir, this.currentSpeed * dt);
         this.position = Vec.add(this.position, velocity);
         // Update hitboxes
         this.updateHitboxes();
+        // Uncomment if you want boundary clamping (prevents going off-map)s
         // this.enforceWorldBoundaries();
         // Update all occupants
         const isMoving = !Vec.equals(oldPosition, this.position) || Math.abs(this.currentSpeed) > 0.01;
@@ -167,7 +172,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         }
         this.setPartialDirty();
     }
-    
+
     private updateHitboxes(): void {
         this.hitbox = this.definition.hitbox.transformRotate(this.position, this.definition.scale, this.rotation);
         this.bulletHitbox = this.definition.bulletHitbox.transformRotate(this.position, this.definition.scale, this.rotation);

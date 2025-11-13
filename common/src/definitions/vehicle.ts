@@ -68,22 +68,22 @@ const defaultVehicle: VehicleDefinition = {
         {
             offset: Vec.create(-120, -230),
             scale: 0.8,
-            zIndex: ZIndexes.Vehicles + 1
+            zIndex: ZIndexes.Vehicles - 1
         },
         {
             offset: Vec.create(120, -230),
             scale: 0.8,
-            zIndex: ZIndexes.Vehicles + 1
+            zIndex: ZIndexes.Vehicles - 1
         },
         {
             offset: Vec.create(-140, 170),
             scale: 1.0, // Standard rear
-            zIndex: ZIndexes.Vehicles + 1
+            zIndex: ZIndexes.Vehicles - 1
         },
         {
             offset: Vec.create(140, 170),
             scale: 1.0,
-            zIndex: ZIndexes.Ground
+            zIndex: ZIndexes.Vehicles - 1
         }
     ],
 
@@ -110,16 +110,16 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
             scale: 1,  // Default size
             rotationMode: RotationMode.Limited,
             hitbox: new GroupHitbox(
-                new CircleHitbox(3.6, Vec.create(0, -10)),
-                new CircleHitbox(4, Vec.create(0, -4.6)),
+                new CircleHitbox(3.6, Vec.create(10, 0)),
+                new CircleHitbox(4, Vec.create(4.6, 0)),
                 new CircleHitbox(5, Vec.create(0, 0)),
-                new CircleHitbox(3.8, Vec.create(0, 9)),
+                new CircleHitbox(3.8, Vec.create(-9, 0)),
             ),
             bulletHitbox: new GroupHitbox(
                 // Hood (front)
-                new CircleHitbox(4, Vec.create(0, -9)),
+                new CircleHitbox(3.8, Vec.create(9, 0)),
                 // Back (rear)
-                new CircleHitbox(3.6, Vec.create(0, 4.6)),
+                new CircleHitbox(3.6, Vec.create(-4.6, 0)),
             ),
             health: 1000,
             reflectBullets: true,
@@ -133,22 +133,22 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
 
             wheels: [
                 {  // Front-left
-                    offset: Vec.create(-120, -230),
+                    offset: Vec.create(230, -120), // forward, left/right
                     scale: 0.8,
                     zIndex: ZIndexes.Vehicles + 1
                 },
                 {  // Front-right
-                    offset: Vec.create(120, -230),
+                    offset: Vec.create(230, 120),
                     scale: 0.8,
                     zIndex: ZIndexes.Vehicles + 1
                 },
                 {  // Rear-left
-                    offset: Vec.create(-140, 170),
+                    offset: Vec.create(-170, -140),
                     scale: 1.0,  // Standard rear
                     zIndex: ZIndexes.Vehicles + 1
                 },
                 {  // Rear-right
-                    offset: Vec.create(140, 170),
+                    offset: Vec.create(-170, 140),
                     scale: 1.0,
                     zIndex: ZIndexes.Ground
                 }
@@ -156,11 +156,11 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
 
             seats: [
                 {
-                    offset: Vec.create(0, -1.4), // Driver seat, centered forward
+                    offset: Vec.create(1.4, 0), // Driver seat, centered forward
                     type: SeatType.Driver,
                 },
                 {
-                    offset: Vec.create(0, 10), // Passenger seat, offset to the right
+                    offset: Vec.create(-10, 0), // Passenger seat, offset to the right
                     type: SeatType.Passenger
                 }
             ]

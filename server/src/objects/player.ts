@@ -38,6 +38,7 @@ import { CommunicationHandler } from "./player/communicationHandler";
 import { DamageHandler } from "./player/damageHandler";
 import { UpdateManager } from "./player/updateManager";
 import { Vehicle } from "./vehicle";
+import { SeatType } from "@common/definitions/vehicle";
 
 
 export interface ActorContainer {
@@ -51,7 +52,7 @@ export interface ActorContainer {
 export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     private static readonly baseHitbox = new CircleHitbox(GameConstants.player.radius);
 
-    override readonly fullAllocBytes = 16;
+    override readonly fullAllocBytes = 17;
     override readonly partialAllocBytes = 14;
     override readonly damageable = true;
 
@@ -613,7 +614,8 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 backpack: this.inventory.backpack,
                 halloweenThrowableSkin: false,
                 activeDisguise: this.activeDisguise,
-                blockEmoting: this.blockEmoting
+                blockEmoting: this.blockEmoting,
+                isDriver: this.seatIndex == SeatType.Driver
             }
         };
 

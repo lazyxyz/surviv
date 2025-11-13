@@ -51,6 +51,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     meleeAttackCounter = 0;
     gunAttackCounter = 0;
     private _stopTimeout?: NodeJS.Timeout;
+    isDriver: boolean = false;
 
     // Function to handle gun attack image/frame changes
     gunAttackCount(): void {
@@ -415,7 +416,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
         const noMovementSmoothing = !GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing");
 
-        if (noMovementSmoothing || isNew) this.container.rotation = this.rotation;
+        if (noMovementSmoothing || isNew || this.isDriver) this.container.rotation = this.rotation;
 
         if (this.isActivePlayer) {
             game.soundManager.position = this.position;
@@ -550,7 +551,8 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     backpack,
                     halloweenThrowableSkin,
                     activeDisguise,
-                    blockEmoting
+                    blockEmoting,
+                    isDriver
                 }
             } = data;
 
@@ -559,6 +561,8 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             if (layerChange) game.changeLayer(this.layer);
 
             this.container.visible = !dead;
+            this.isDriver = isDriver;
+
             this.disguiseContainer.visible = this.container.visible;
 
             if (
