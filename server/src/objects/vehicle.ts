@@ -1,25 +1,18 @@
-import { Layer, ObjectCategory, PlayerActions } from "@common/constants";
-import { CircleHitbox, Hitbox, RectangleHitbox } from "@common/utils/hitbox";
+import { Layer, ObjectCategory, STEERING_SCALE } from "@common/constants";
+import {  Hitbox } from "@common/utils/hitbox";
 import { BaseGameObject, DamageParams } from "./gameObject";
 import { SDeepMutable } from "@common/utils/misc";
 import { FullData } from "@common/utils/objectsSerializations";
-import { HealingAction } from "../inventory/action";
-import { ThrowableDefinition } from "@common/definitions/throwables";
-import { ObjectDefinition } from "@common/utils/objectDefinitions";
 import { Vec, Vector } from "@common/utils/vector";
 import { Game } from "../game";
-import { ThrowableItem } from "../inventory/throwableItem";
 import { SeatType, VehicleDefinition } from "@common/definitions/vehicle";
-import { RotationMode } from "@common/definitions/obstacles";
-import { Orientation } from "@common/typings";
 import { InventoryItem } from "../inventory/inventoryItem";
 import { Player } from "./player";
-import { Geometry, Numeric } from "@common/utils/math";
-const STEERING_SCALE = 100; // Arbitrary scale for quantization: e.g., 0.01 rad precision fits well in int8 (-128 to 127 covers ~±1.28 rad, more than enough for ±0.26 rad)
+import { Numeric } from "@common/utils/math";
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
+    override readonly fullAllocBytes = 20;
+    override readonly partialAllocBytes = 10;
 
-    override readonly fullAllocBytes = 8;
-    override readonly partialAllocBytes = 14;
     declare hitbox: Hitbox;
     declare bulletHitbox: Hitbox;
     collidable: boolean = true;
@@ -199,17 +192,18 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             // this.interact(this.occupants[i]); // Reuse interact to exit
             // }
             // }
+            this.setDirty();
         }
     }
     override get data(): FullData<ObjectCategory.Vehicle> {
         const data: SDeepMutable<FullData<ObjectCategory.Vehicle>> = {
             position: this.position,
             rotation: this.rotation,
-            layer: this.layer,
-            dead: this.dead,
             steeringAngle: Math.round(this.steeringAngle * STEERING_SCALE), // Quantized to int (fits in int8)
             full: {
                 definition: this.definition,
+                layer: this.layer,
+                dead: this.dead,
             }
         };
         return data;

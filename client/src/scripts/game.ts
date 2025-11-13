@@ -904,6 +904,11 @@ export class Game {
                 syncedParticle.updateContainerRotation();
                 syncedParticle.updateContainerScale();
             }
+
+            for (const vehicle of this.objects.getCategory(ObjectCategory.Vehicle)) {
+                vehicle.updateContainerPosition();
+                vehicle.updateContainerRotation();
+            }
         }
 
         for (const player of players ?? this.objects.getCategory(ObjectCategory.Player)) {

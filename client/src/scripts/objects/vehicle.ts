@@ -1,7 +1,7 @@
-import { GameConstants, Layer, Layers, ObjectCategory, ZIndexes } from "@common/constants";
+import { ObjectCategory, STEERING_SCALE, ZIndexes } from "@common/constants";
 import { type VehicleDefinition } from "@common/definitions/vehicle";
-import { getEffectiveZIndex, adjacentOrEqualLayer } from "@common/utils/layer";
-import { FloorNames, FloorTypes } from "@common/utils/terrain"; // Import for floorType
+import { getEffectiveZIndex } from "@common/utils/layer";
+import { FloorNames } from "@common/utils/terrain"; // Import for floorType
 import { type ObjectsNetData } from "@common/utils/objectsSerializations";
 import { type Game } from "../game";
 import { drawHitbox, SuroiSprite, toPixiCoords } from "../utils/pixi";
@@ -10,9 +10,7 @@ import type { Hitbox } from "@common/utils/hitbox";
 import type { Orientation } from "@common/typings";
 import { DIFF_LAYER_HITBOX_OPACITY, HITBOX_COLORS, HITBOX_DEBUG_MODE } from "../utils/constants";
 import { Vec, type Vector } from "@common/utils/vector";
-import { RotationMode } from "@common/definitions/obstacles";
-
-const STEERING_SCALE = 100; // Matches backend quantization
+import { GAME_CONSOLE } from "../..";
 
 export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     definition!: VehicleDefinition;
@@ -28,7 +26,6 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         super(game, id);
         this.image = new SuroiSprite();
         this.container.addChild(this.image);
-        this.layer = data.layer;
         for (let i = 0; i < 4; i++) {
             const wheel = new SuroiSprite("basic_wheel")
                 .setScale(0.8) // Adjust size (e.g., 0.8 for smaller wheels)
@@ -36,18 +33,19 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             this.wheels.push(wheel);
             this.container.addChild(wheel); // Add to container (rotates/scales with vehicle)
         }
-        this.updateFromData(data);
+        this.updateFromData(data, true);
     }
-    override updateFromData(data: ObjectsNetData[ObjectCategory.Vehicle]): void {
+
+    override updateFromData(data: ObjectsNetData[ObjectCategory.Vehicle], isNew = false): void {
         // Compute floorType like Player/Obstacle (fixes doOverlay)
         const floorType = this.game.map.terrain.getFloor(this.position, this.layer, this.game.gameMap);
         this.floorType = floorType; // Cache for doOverlay/zIndex
         this.position = data.position;
         this.rotation = data.rotation;
         // console.log("Vehicle rotation: ", data.rotation);
-        this.layer = data.layer;
         // Handle definition (from full on spawn/update)
         if (data.full?.definition) {
+            this.layer = data.full.layer;
             this.definition = data.full.definition;
             if (this.definition && this.definition.wheels) {
                 const wheelConfig = this.definition.wheels;
@@ -72,17 +70,15 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
                         wheel.visible = !this.dead;
                     }
                 });
-                // Hide extras
-                for (let i = wheelConfig.length; i < this.wheels.length; i++) {
-                    this.wheels[i].visible = false;
-                }
+
             } else {
                 // No config: Hide all
                 this.wheels.forEach(wheel => wheel.visible = false);
             }
+            this.dead = data.full.dead ?? false; // From partial
+            if (this.dead) this.wheels.forEach(wheel => wheel.visible = false);
         }
-        const wasDead = this.dead;
-        this.dead = data.dead ?? false; // From partial
+
         let texture: string | undefined;
         texture = !this.dead
             ? this.definition.idString // Normal: "vehicles/buggy"
@@ -95,10 +91,14 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.bulletHitbox = this.definition.bulletHitbox.transformRotate(this.position, 1, this.rotation);
 
         // Position/rotate
-        this.container.position.copyFrom(toPixiCoords(this.position));
-        this.container.rotation = this.rotation;
+        const noMovementSmoothing = !GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing");
+        if (noMovementSmoothing || isNew) {
+            this.container.position.copyFrom(toPixiCoords(this.position));
+            this.container.rotation = this.rotation;
+        }
+
         // Visibility: Like Obstacle—hide only on layer mismatch (prevents close-range overwrite)
-        this.container.visible = true; // Default visible unless dead/invisible
+
         // Update front wheels steering angle (relative to vehicle body)
         // Back wheels remain aligned with vehicle body (rotation = 0 relative)
         const quantizedAngle = data.steeringAngle;

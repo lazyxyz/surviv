@@ -179,11 +179,11 @@ export interface ObjectsNetData extends BaseObjectsNetData {
     readonly [ObjectCategory.Vehicle]: {
         readonly position: Vector
         readonly rotation: number
-        readonly layer: Layer
-        readonly dead: boolean
         readonly steeringAngle: number
         readonly full?: {
             readonly definition: VehicleDefinition
+            readonly dead: boolean
+            readonly layer: Layer
         }
     }
 }
@@ -859,37 +859,38 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
 
     [ObjectCategory.Vehicle]: {
         serializePartial(stream, data) {
-            const { position, rotation, layer, dead, steeringAngle } = data;
-            stream.writeBooleanGroup(
-                dead,
-            );
-
+            const { position, rotation, steeringAngle } = data;
+            
             stream.writePosition(position);
             stream.writeRotation2(rotation);
-            stream.writeLayer(layer);
             stream.writeInt8(steeringAngle);
         },
         serializeFull(stream, { full }) {
+            stream.writeBooleanGroup(
+                full.dead,
+            );
+            stream.writeLayer(full.layer);
+
             Vehicles.writeToStream(stream, full.definition);
             // Add more full props later (e.g., health, passengers)
         },
         deserializePartial(stream) {
-            const [
-                dead,
-            ] = stream.readBooleanGroup();
-
             return {
                 position: stream.readPosition(),
                 rotation: stream.readRotation2(),
-                layer: stream.readLayer(),
-                dead,
                 steeringAngle: stream.readInt8()
             };
         },
         deserializeFull(stream) {
+              const [
+                dead,
+            ] = stream.readBooleanGroup();
+            const layer = stream.readLayer();
             const definition = Vehicles.readFromStream(stream);
             return {
                 definition,
+                dead,
+                layer
                 // Add more full props later
             };
         }

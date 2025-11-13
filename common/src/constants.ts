@@ -19,6 +19,8 @@ export const enum Constants {
     TOKEN_MAX_LENGTH = 500,
 }
 
+export const STEERING_SCALE = 100; // Maximum degree steering wheel
+
 /* eslint-disable @typescript-eslint/prefer-literal-enum-member */
 // the point of "derived" is to have them not be hardcoded
 
