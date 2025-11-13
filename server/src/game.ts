@@ -233,7 +233,7 @@ export class Game implements GameData {
         this.gameMode = maxTeamSize;
         this.gameId = gameId;
        
-        this.gameMap = "fall";
+        this.gameMap = "desert";
         this.rainDrops = 0;
 
         // const randMap = this.getRandomMap();

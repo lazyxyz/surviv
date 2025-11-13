@@ -38,6 +38,7 @@ export interface VehicleDefinition extends ObjectDefinition {
         readonly type: SeatType; // Seat type
         readonly zIndex?: ZIndexes;  // Optional zIndex for rendering adjustments
     }>;
+    readonly exitOffset: Vector;
 }
 
 const defaultVehicle: VehicleDefinition = {
@@ -62,7 +63,7 @@ const defaultVehicle: VehicleDefinition = {
     material: "metal_heavy",
     maxSpeed: 0.09,
     acceleration: 0.00008,
-    turnSpeed: 0.002,
+    turnSpeed: 0.2618, // PI/12 ~15 degrees/s
     drag: 0.001,
     wheels: [
         {
@@ -97,7 +98,7 @@ const defaultVehicle: VehicleDefinition = {
             type: SeatType.Passenger
         }
     ],
-
+    exitOffset: Vec.create(140, 170),
 };
 
 export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
@@ -127,7 +128,7 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
 
             maxSpeed: 0.09, // Default slower than player
             acceleration: 0.00008, // Reach maxSpeed in ~4s (tune as needed)
-            turnSpeed: 0.002, // ~114 deg/s (tune for feel)
+            turnSpeed: 0.2618, // PI/12 ~15 degrees/s
             drag: 0.001, // Decel time constant ~1s
             explosion: "super_barrel_explosion",
 
@@ -163,7 +164,9 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
                     offset: Vec.create(-10, 0), // Passenger seat, offset to the right
                     type: SeatType.Passenger
                 }
-            ]
+            ],
+
+            exitOffset: Vec.create(0, -10),
         }
     ].map(def => ({
         ...defaultVehicle,

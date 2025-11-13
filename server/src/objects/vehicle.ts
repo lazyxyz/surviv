@@ -27,12 +27,15 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     get height(): number { return this._height; }
     constructor(
         game: Game,
-        position: Vector,
-        layer: Layer,
         readonly definition: VehicleDefinition,
+        position: Vector,
+        layer?: Layer,
+        rotation?: number,
     ) {
         super(game, position);
-        this.layer = layer;
+        this.layer = layer ?? Layer.Ground;
+        this.rotation = rotation ?? 0;
+        
         // Initialize wheelbase
         if (this.definition.wheels && this.definition.wheels.length >= 2) {
             let minY = Infinity, maxY = -Infinity;
@@ -60,9 +63,9 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         if (seatIndex !== -1) {
             // Exit seat
             const seatOffset = this.definition.seats[seatIndex].offset;
-            const rotatedOffset = Vec.rotate(seatOffset, this.rotation);
-            const ejectOffset = Vec.fromPolar(this.rotation, 3);
-            player.position = Vec.add(this.position, Vec.add(rotatedOffset, ejectOffset));
+            const rotatedSeatOffset = Vec.rotate(seatOffset, this.rotation);
+            const exitOffset = Vec.rotate(this.definition.exitOffset, this.rotation); // Use definition's exitOffset (rotated)
+            player.position = Vec.add(this.position, Vec.add(rotatedSeatOffset, exitOffset));
             player.inVehicle = undefined;
             player.seatIndex = undefined;
             this.occupants[seatIndex] = undefined;
@@ -103,33 +106,28 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     update(): void {
         const dt = this.game.dt;
         const driver = this.occupants[0]; // Driver is always seat 0
-        if (!driver || this.dead) {
-            this.currentSpeed *= Math.exp(-this.definition.drag * dt);
-            if (driver) {
-                driver.isMoving = false;
-                this.updateOccupantPosition(driver, 0);
-                driver.setPartialDirty();
-            }
-            this.updateHitboxes();
-            return;
-        }
-        const oldPosition = Vec.clone(this.position);
-        // Calculate input from driver
-        const pm = driver.movement;
+
+        // Compute inputs (0 if no driver)
         let inputForward = 0;
         let inputSteer = 0;
-        if (driver.isMobile && pm.moving) {
-            // Fixed: Remove +π/2 offset, compute pure relative angle to vehicle rotation (now facing right at 0°)
-            let angleDiff = pm.angle - this.rotation;
-            angleDiff = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI;
-            inputForward = Math.cos(angleDiff);
-            inputSteer = Math.sin(angleDiff);
-        } else {
-            // Keyboard: Assume relative (up=forward, left=steer left). No change needed here.
-            inputForward = +pm.up - +pm.down;
-            inputSteer = +pm.right - +pm.left;  // right=+1 (will be negated below for correct turn)
+        if (driver && !this.dead) {
+            const pm = driver.movement;
+            if (driver.isMobile && pm.moving) {
+                // Fixed: Remove +π/2 offset, compute pure relative angle to vehicle rotation (now facing right at 0°)
+                let angleDiff = pm.angle - this.rotation;
+                angleDiff = ((angleDiff + Math.PI) % (2 * Math.PI)) - Math.PI;
+                inputForward = Math.cos(angleDiff);
+                inputSteer = Math.sin(angleDiff);
+            } else {
+                // Keyboard: Assume relative (up=forward, left=steer left). No change needed here.
+                inputForward = +pm.up - +pm.down;
+                inputSteer = +pm.right - +pm.left;  // right=+1 (will be negated below for correct turn)
+            }
         }
-        // Physics update
+
+        const oldPosition = Vec.clone(this.position);
+
+        // Physics update (always, with 0 input if no driver)
         const accel = this.definition.acceleration;
         const drag = this.definition.drag;
         const maxSpeed = this.definition.maxSpeed;
@@ -137,22 +135,26 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         this.currentSpeed *= Math.exp(-drag * dt);
         this.currentSpeed += inputForward * accel * dt;
         this.currentSpeed = Numeric.clamp(this.currentSpeed, -maxReverseSpeed, maxSpeed);
+
         // Steering: FIXED - Negate to invert (right input → CW turn → right turn when facing right)
-        const maxSteerRad = Math.PI / 12;
-        this.steeringAngle = inputSteer * maxSteerRad;  // Negation fixes inversion
+        const maxSteerRad = this.definition.turnSpeed;
+        this.steeringAngle = inputSteer * maxSteerRad;  // Snaps/decays to 0 naturally with 0 input
         const steerAngle = this.steeringAngle;
         let turnRate = (this.currentSpeed * Math.tan(steerAngle)) / this.wheelbase;
         this.rotation += turnRate * dt;
+
         // Update position: FIXED - Remove -π/2 so rotation 0 faces right
         const forwardDir = Vec.fromPolar(this.rotation);  // Now 0° = right
         const velocity = Vec.scale(forwardDir, this.currentSpeed * dt);
         this.position = Vec.add(this.position, velocity);
+
         // Update hitboxes
         this.updateHitboxes();
-        // Uncomment if you want boundary clamping (prevents going off-map)s
-        // this.enforceWorldBoundaries();
-        // Update all occupants
+
+        // Determine if moving
         const isMoving = !Vec.equals(oldPosition, this.position) || Math.abs(this.currentSpeed) > 0.01;
+
+        // Update all occupants (if any)
         for (let i = 0; i < this.occupants.length; i++) {
             const player = this.occupants[i];
             if (player) {
@@ -162,10 +164,22 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 this.game.grid.updateObject(player);
             }
         }
+
+        // Update grid for vehicle if moving
         if (isMoving) {
             this.game.grid.updateObject(this);
         }
+
         this.setPartialDirty();
+
+        // Early dead stop (optional: strong drag instead of hard stop)
+        if (this.dead) {
+            this.currentSpeed = 0;
+            this.steeringAngle = 0;
+        }
+
+        // Uncomment if you want boundary clamping (prevents going off-map)
+        // this.enforceWorldBoundaries();
     }
 
     private updateHitboxes(): void {
