@@ -1,6 +1,6 @@
 import { Layer, ObjectCategory, STEERING_SCALE } from "@common/constants";
 import { Hitbox } from "@common/utils/hitbox";
-import { BaseGameObject, DamageParams } from "./gameObject";
+import { BaseGameObject, DamageParams, GameObject } from "./gameObject";
 import { SDeepMutable } from "@common/utils/misc";
 import { FullData } from "@common/utils/objectsSerializations";
 import { Vec, Vector } from "@common/utils/vector";
@@ -17,20 +17,26 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     declare hitbox: Hitbox;
     declare bulletHitbox: Hitbox;
+
     collidable: boolean = true;
     damageable: boolean = true;
+
     private _height = 1;
     health: number;
-    baseDamage = 50;
+
     // Vehicle physics state
-    private velocity: Vector = Vec.create(0, 0); // NEW: Vector velocity instead of scalar speed
+    private velocity: Vector = Vec.create(0, 0); // Vector velocity for realistic direction/momentum
     private steeringAngle: number = 0;
     private wheelbase: number = 4;
     private occupants: (Player | undefined)[] = [];
-    private frictionFactor = 0.5; // Tune 0-1; higher=more slide reduction
-    private velocityThreshold = 0.0001;
+    private frictionFactor; // Tune 0-1; higher=more slide reduction (real tire grip)
+    private velocityThreshold = 0.0001; // Squared speed threshold for "moving" (fine-grained stop detection)
+    private maxBounceDist = 0.5; // Max depenetration distance per step (prevents unrealistic far jumps)
+    private baseDamage; // Base factor for collision damage calculation
+    private deadImpact = 0.3; // When obstacle dies, reduce bounce/speed loss by 70% (plow through debris with less resistance)
 
     get height(): number { return this._height; }
+
     constructor(
         game: Game,
         readonly definition: VehicleDefinition,
@@ -42,7 +48,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         this.layer = layer ?? Layer.Ground;
         this.rotation = rotation ?? 0;
 
-        // Initialize wheelbase
+        // Initialize wheelbase based on wheel positions
         if (this.definition.wheels && this.definition.wheels.length >= 2) {
             let minY = Infinity, maxY = -Infinity;
             for (const w of this.definition.wheels) {
@@ -54,9 +60,13 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
         // Initialize hitboxes
         this.updateHitboxes();
+
         // Initialize occupants array
         this.occupants = new Array(this.definition.seats.length).fill(undefined);
+
         this.health = this.definition.health;
+        this.baseDamage = this.definition.baseDamage;
+        this.frictionFactor = this.definition.frictionFactor;
     }
 
     canInteract(player: Player): boolean {
@@ -101,6 +111,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     }
 
     private enforceWorldBoundaries(): void {
+        // Clamp position to map boundaries using approximate vehicle dimensions
         const rect = this.definition.hitbox.toRectangle();
         const halfWidth = (rect.width / 2) * this.definition.scale;
         const halfHeight = (rect.height / 2) * this.definition.scale;
@@ -108,96 +119,115 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         this.position.y = Numeric.clamp(this.position.y, halfHeight, this.game.map.height - halfHeight);
     }
 
-    private resolveCollisions(): void {
-
-        const nearObjects = this.game.grid.intersectsHitbox(this.hitbox, this.layer);
-
-        for (let step = 0; step < 10; step++) {
-            let collided = false;
-
-            for (const potential of nearObjects) {
-                if (
-                    (!potential.isObstacle && !potential.isBuilding) ||
-                    !potential.collidable ||
-                    potential.dead ||
-                    !potential.hitbox
-                ) {
-                    continue;
-                }
-
-                if (this.hitbox.collidesWith(potential.hitbox)) {
-                    collided = true;
-
-                    const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.5); // Tune factor (0.5=half push, reduce if too far)
-                    this.position = Vec.sub(this.position, adjust); // FIXED: Subtract to push back (assume adjust dir is inward/from vehicle to obstacle)
-                    const speed = Vec.squaredLength(this.velocity);
-
-                    if (speed > 0.003) { // FIXED: Lower threshold to 0.003 as per feedback
-                        const normal = Vec.normalizeSafe(adjust); // Direction of push (from obstacle to vehicle)
-                        const impactVel = Vec.dotProduct(this.velocity, normal); // Component along normal (negative if approaching)
-                        
-                        let materialFactor = 1.0;
-                        let inverseMaterialFactor = 1.0; // For obstacle damage (soft = high damage to obstacle)
-                        if (potential.definition.material) {
-                            const material = potential.definition.material;
-                            materialFactor = materialMultipliers[material] ?? 1.0;
-                            inverseMaterialFactor = 1 / materialFactor; // Soft materials break easier
-                        }
-                        console.log("material: ", potential.definition.material);
-                        const damageToVehicle = (Math.abs(impactVel) * 100) * this.baseDamage * materialFactor; // Align with speed^2
-                        console.log("damageToVehicle: ", damageToVehicle);
-                        this.damage({
-                            amount: Math.min(damageToVehicle, this.health * 0.1),
-                            source: potential,
-                            weaponUsed: undefined,
-                        });
-
-                        const damageToObstacle = (Math.abs(impactVel) * 100) * this.baseDamage * inverseMaterialFactor; // Higher for soft
-                        console.log("damageToObstacle: ", damageToObstacle);
-                        potential.damage({
-                            amount: damageToObstacle,
-                            source: this,
-                            weaponUsed: undefined,
-                        });
-
-                        // If obstacle dead after damage, no bounce/push back (break through)
-                        if (potential.dead) {
-                            // // Reverse bounce and speed loss for break through
-                            // this.velocity = Vec.sub(this.velocity, Vec.scale(normal, bounceImpulse)); // Remove bounce
-                            // this.velocity = Vec.scale(this.velocity, 1 / speedLossFactor); // Restore speed
-                        } else {
-                            // Bounce: reflect normal component with restitution (reduced for realism)
-                            // const restitution = 0.1; // FIXED: Lower restitution to 0.1 for less bounce, more real
-                            // const bounceImpulse = -impactVel * (1 + restitution); // Positive to add back
-                            // this.velocity = Vec.add(this.velocity, Vec.scale(normal, bounceImpulse));
-
-                            // Friction on tangent (for slicing/glancing)
-                            const tangent = Vec.perpendicular(normal);
-                            const tangentVel = Vec.dotProduct(this.velocity, tangent);
-                            this.velocity = Vec.sub(this.velocity, Vec.scale(tangent, tangentVel * this.frictionFactor));
-
-                            // Overall speed loss (energy absorption)
-                            const speedLossFactor = 0.6 + (0.3 * materialFactor); // 0.6-0.9
-                            this.velocity = Vec.scale(this.velocity, speedLossFactor);
-                        }
-                    } else {
-                        // Low speed: just stop completely
-                        this.velocity = Vec.create(0, 0);
-                    }
-                }
-            }
-
-            if (!collided) break;
+    private handleCollision(potential: GameObject): boolean {
+        // Check if the potential object is collidable and intersects
+        if (
+            (!potential.isObstacle && !potential.isBuilding) ||
+            !potential.collidable ||
+            potential.dead ||
+            !potential.hitbox
+        ) {
+            return false;
         }
 
-        // this.enforceWorldBoundaries();
+        if (this.hitbox.collidesWith(potential.hitbox)) {
+            // Calculate adjustment to resolve penetration
+            const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.3); // Tune factor (0.5=half push, reduce if too far)
+            // Clamp adjustment magnitude to prevent far jumps
+            const adjustLen = Vec.length(adjust);
+            if (adjustLen > this.maxBounceDist) {
+                const clampedAdjust = Vec.scale(adjust, this.maxBounceDist / adjustLen);
+                this.position = Vec.sub(this.position, clampedAdjust);
+            } else {
+                this.position = Vec.sub(this.position, adjust);
+            }
+
+            const speed = Vec.squaredLength(this.velocity);
+            if (speed > 0.003) { // Threshold: only apply effects if fast enough
+                const normal = Vec.normalizeSafe(adjust); // Direction of push (from obstacle to vehicle)
+                const impactVel = Vec.dotProduct(this.velocity, normal); // Component along normal (negative if approaching)
+                if (impactVel > 0.005) { // Approaching (threshold; note sign convention assuming dir points out)
+                    let materialFactor = 1.0;
+                    let inverseMaterialFactor = 1.0; // For obstacle damage (soft = high damage to obstacle)
+                    if (potential.definition.material) {
+                        const material = potential.definition.material;
+                        materialFactor = materialMultipliers[material] ?? 1.0;
+                        inverseMaterialFactor = 1 / materialFactor; // Higher for soft
+                    }
+
+                    const damageToVehicle = (Math.abs(impactVel) * 100) * this.baseDamage * materialFactor; // Align with speed^2
+                    this.damage({
+                        amount: Math.min(damageToVehicle, this.health * 0.1),
+                        source: potential,
+                        weaponUsed: undefined,
+                    });
+
+                    // Apply 5% of damageToVehicle to all occupants
+                    const playerDamage = 0.05 * damageToVehicle;
+                    for (const occupant of this.occupants) {
+                        if (occupant) {
+                            occupant.damage({
+                                amount: playerDamage,
+                                source: potential,
+                                weaponUsed: undefined,
+                            });
+                        }
+                    }
+
+                    const damageToObstacle = (Math.abs(impactVel) * 100) * this.baseDamage * inverseMaterialFactor; // Higher for soft
+                    potential.damage({
+                        amount: damageToObstacle,
+                        source: this,
+                        weaponUsed: undefined,
+                    });
+
+                    // NEW: Check if obstacle died
+                    let restitution = 0.1 * Math.min(1, Math.abs(impactVel) / 0.05); // Scale: full at high, zero at low
+                    let speedLossFactor = 0.1 + (0.3 * materialFactor); // 0.6-0.9
+                    if (potential.dead) { // If died from impact, reduce effects by 70% (less bounce, less speed loss = more penetration/continue)
+                        restitution *= this.deadImpact;
+                        speedLossFactor = 1 - (1 - speedLossFactor) * this.deadImpact;
+                    }
+
+                    // Bounce: reflect normal component with restitution
+                    const bounceImpulse = -impactVel * (1 + restitution); // Positive to add back
+                    this.velocity = Vec.add(this.velocity, Vec.scale(normal, bounceImpulse));
+
+                    // Friction on tangent (for slicing/glancing)
+                    const tangent = Vec.perpendicular(normal);
+                    const tangentVel = Vec.dotProduct(this.velocity, tangent);
+                    this.velocity = Vec.sub(this.velocity, Vec.scale(tangent, tangentVel * this.frictionFactor));
+
+                    // Overall speed loss
+                    this.velocity = Vec.scale(this.velocity, speedLossFactor);
+                }
+            } else {
+                // Low speed: just stop completely
+                this.velocity = Vec.create(0, 0);
+            }
+
+            return true;
+        }
+        return false;
     }
 
-    update(): void {
-        const dt = this.game.dt;
-        const driver = this.occupants[0]; // Driver is always seat 0
+    private resolveCollisions(): void {
+        const nearObjects = this.game.grid.intersectsHitbox(this.hitbox, this.layer);
+        for (let step = 0; step < 10; step++) {
+            let collided = false;
+            for (const potential of nearObjects) {
+                if (this.handleCollision(potential)) {
+                    collided = true;
+                }
+            }
+            if (!collided) break;
+        }
+        this.enforceWorldBoundaries();
+    }
 
-        // Compute inputs (0 if no driver)
+    private getInputs(): { inputForward: number; inputSteer: number } {
+        // Compute inputs from driver (0 if no driver)
+        const driver = this.occupants[0]; // Driver is always seat 0
         let inputForward = 0;
         let inputSteer = 0;
         if (driver && !this.dead) {
@@ -211,51 +241,93 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             } else {
                 // Keyboard: Assume relative (up=forward, left=steer left). No change needed here.
                 inputForward = +pm.up - +pm.down;
-                inputSteer = +pm.right - +pm.left;  // right=+1 (will be negated below for correct turn)
+                inputSteer = +pm.right - +pm.left; // right=+1 (will be negated below for correct turn)
             }
         }
+        return { inputForward, inputSteer };
+    }
 
-        const oldPosition = Vec.clone(this.position);
-
-        // Physics update (always, with 0 input if no driver)
+    private applyAcceleration(dt: number, inputForward: number): void {
+        // Accelerate along forward (or reverse)
         const forwardDir = Vec.fromPolar(this.rotation);
         const accel = this.definition.acceleration;
-        const drag = this.definition.drag;
-        const maxSpeed = this.definition.maxSpeed;
-        const maxReverseSpeed = maxSpeed * 0.5;
-
-        // Accelerate along forward (or reverse)
         const accelVec = Vec.scale(forwardDir, inputForward * accel * dt);
         this.velocity = Vec.add(this.velocity, accelVec);
+    }
 
+    private applyDrag(dt: number): void {
         // Drag (proportional to velocity)
+        const drag = this.definition.drag;
         const dragFactor = Math.exp(-drag * dt);
         this.velocity = Vec.scale(this.velocity, dragFactor);
+    }
 
+    private applyLateralFriction(dt: number): void {
         // Lateral friction (reduce drift: stronger at low speeds)
         const lateralDrag = 1.5; // Tune: higher = less drift (real tire grip)
+        const forwardDir = Vec.fromPolar(this.rotation);
         const sideDir = Vec.perpendicular(forwardDir);
         const sideVel = Vec.dotProduct(this.velocity, sideDir);
         this.velocity = Vec.sub(this.velocity, Vec.scale(sideDir, sideVel * Math.min(1, lateralDrag * dt)));
+    }
 
+    private clampSpeed(): void {
         // Clamp speed (along forward; allow lateral for drifts)
+        const forwardDir = Vec.fromPolar(this.rotation);
+        const maxSpeed = this.definition.maxSpeed;
+        const maxReverseSpeed = maxSpeed * 0.5;
         const forwardSpeed = Vec.dotProduct(this.velocity, forwardDir);
         const clampedForward = Numeric.clamp(forwardSpeed, -maxReverseSpeed, maxSpeed);
         const forwardDiff = clampedForward - forwardSpeed;
         this.velocity = Vec.add(this.velocity, Vec.scale(forwardDir, forwardDiff));
+    }
 
+    private applySteering(dt: number, inputSteer: number): void {
         // Steering: Use forward component as 'speed' for turn rate
+        const forwardDir = Vec.fromPolar(this.rotation);
+        const forwardSpeed = Vec.dotProduct(this.velocity, forwardDir);
         const speedForTurn = forwardSpeed; // Positive for forward turn, negative for reverse (flips turn dir)
         const targetSteer = inputSteer * this.definition.maxSteerAngle;
         const maxSteerDelta = this.definition.steerRate * dt / 1000;
         this.steeringAngle += Numeric.clamp(targetSteer - this.steeringAngle, -maxSteerDelta, maxSteerDelta);
-
         const steerAngle = this.steeringAngle;
         let turnRate = (speedForTurn * Math.tan(steerAngle)) / this.wheelbase;
         this.rotation += turnRate * dt;
+    }
 
-        // Update position
-        if (Vec.squaredLength(this.velocity) > this.velocityThreshold) this.position = Vec.add(this.position, Vec.scale(this.velocity, dt));
+    private updatePosition(dt: number): void {
+        // Update position if velocity is above threshold
+        if (Vec.squaredLength(this.velocity) > this.velocityThreshold) {
+            this.position = Vec.add(this.position, Vec.scale(this.velocity, dt));
+        }
+    }
+
+    private updateOccupants(isMoving: boolean): void {
+        // Update all occupants' positions and states
+        for (let i = 0; i < this.occupants.length; i++) {
+            const player = this.occupants[i];
+            if (player) {
+                this.updateOccupantPosition(player, i);
+                player.isMoving = isMoving;
+                player.setPartialDirty();
+                this.game.grid.updateObject(player);
+            }
+        }
+    }
+
+    update(): void {
+        const dt = this.game.dt;
+        const oldPosition = Vec.clone(this.position);
+
+        const { inputForward, inputSteer } = this.getInputs();
+
+        // Physics update (always, with 0 input if no driver)
+        this.applyAcceleration(dt, inputForward);
+        this.applyDrag(dt);
+        this.applyLateralFriction(dt);
+        this.clampSpeed();
+        this.applySteering(dt, inputSteer);
+        this.updatePosition(dt);
 
         this.resolveCollisions();
 
@@ -266,15 +338,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         const isMoving = !Vec.equals(oldPosition, this.position) || Vec.squaredLength(this.velocity) > this.velocityThreshold;
 
         // Update all occupants (if any)
-        for (let i = 0; i < this.occupants.length; i++) {
-            const player = this.occupants[i];
-            if (player) {
-                this.updateOccupantPosition(player, i);
-                player.isMoving = isMoving;
-                player.setPartialDirty();
-                this.game.grid.updateObject(player);
-            }
-        }
+        this.updateOccupants(isMoving);
 
         // Update grid for vehicle if moving
         if (isMoving) {
@@ -302,8 +366,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         const definition = this.definition;
         const { amount, source, weaponUsed, position } = params;
         if (this.health <= 0) return;
+
         this.health -= amount;
         this.setPartialDirty();
+
         const notDead = this.health > 0 && !this.dead;
         if (!notDead) {
             this.health = 0;
@@ -313,15 +379,19 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             if (definition.explosion !== undefined && source instanceof BaseGameObject) {
                 this.game.addExplosion(definition.explosion, this.position, source, source.layer, weaponIsItem ? weaponUsed : weaponUsed?.weapon);
             }
+
             // Eject all occupants
-            // for (let i = 0; i < this.occupants.length; i++) {
-            // if (this.occupants[i]) {
-            // this.interact(this.occupants[i]); // Reuse interact to exit
-            // }
-            // }
+            for (let i = 0; i < this.occupants.length; i++) {
+                const occupant = this.occupants?.[i];
+                if (occupant) {
+                    occupant.exitVehicle();
+                }
+            }
+
             this.setDirty();
         }
     }
+
     override get data(): FullData<ObjectCategory.Vehicle> {
         const data: SDeepMutable<FullData<ObjectCategory.Vehicle>> = {
             position: this.position,

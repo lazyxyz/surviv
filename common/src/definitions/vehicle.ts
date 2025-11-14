@@ -42,6 +42,8 @@ export interface VehicleDefinition extends ObjectDefinition {
         readonly zIndex?: ZIndexes;  // Optional zIndex for rendering adjustments
     }>;
     readonly exitOffset: Vector;
+    readonly baseDamage: number;
+    readonly frictionFactor: number; // Tune 0-1; higher=more slide reduction (real tire grip)
 }
 
 const defaultVehicle: VehicleDefinition = {
@@ -103,6 +105,8 @@ const defaultVehicle: VehicleDefinition = {
         }
     ],
     exitOffset: Vec.create(140, 170),
+    baseDamage: 30,
+    frictionFactor: 0.6,
 };
 
 export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
@@ -174,6 +178,8 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
             ],
 
             exitOffset: Vec.create(0, -10),
+            baseDamage: 50,
+            frictionFactor: 0.4,
         }
     ].map(def => ({
         ...defaultVehicle,

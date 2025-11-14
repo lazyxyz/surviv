@@ -486,6 +486,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     inVehicle?: Vehicle;
     seatIndex?: number;
 
+    exitVehicle(): void {
+        this.inVehicle = undefined;
+        this.seatIndex = undefined;
+    }
+
     /**
      * Clean up internal state after all packets have been sent
      * to all recipients. The only code that should be present here

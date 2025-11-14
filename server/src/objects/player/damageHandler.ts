@@ -336,7 +336,7 @@ export class DamageHandler {
         this.player.dirty.items = true;
         this.player.action?.cancel();
         this.player.communicationHandler.sendEmote(this.player.loadout.emotes[5]);
-        if (this.player.inVehicle) this.player.inVehicle.interact(this.player);
+        this.player.exitVehicle();
         this.player.game.livingPlayers.delete(this.player);
         this.player.game.updateGameData({ aliveCount: this.player.game.aliveCount });
         this.player.game.fullDirtyObjects.add(this.player);
