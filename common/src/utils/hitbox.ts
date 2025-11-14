@@ -57,7 +57,8 @@ export abstract class BaseHitbox<T extends HitboxType = HitboxType> implements D
         }
     }
     abstract collidesWith(that: Hitbox): boolean;
-    abstract resolveCollision(that: Hitbox): void;
+    abstract resolveCollision(that: Hitbox): void; // Kept as is for compatibility
+    abstract getAdjustment(that: Hitbox, factor: number): Vector; // NEW: With factor to scale the push (1=full resolve, 0.5=half, etc.)
     abstract distanceTo(that: Hitbox): CollisionRecord;
     abstract clone(deep?: boolean): HitboxMapping[T];
     [cloneSymbol](): HitboxMapping[T] { return this.clone(false); }
@@ -72,6 +73,12 @@ export abstract class BaseHitbox<T extends HitboxType = HitboxType> implements D
     abstract getCenter(): Vector;
     protected throwUnknownSubclassError(that: Hitbox): never {
         throw new Error(`Hitbox type ${HitboxType[this.type]} doesn't support this operation with hitbox type ${HitboxType[that.type]}`);
+    }
+    protected getIntersection(that: Hitbox): { dir: Vector; pen: number } | null {
+        this.throwUnknownSubclassError(that);
+    }
+    protected applyAdjust(adjust: Vector): void {
+        // this.throwUnknownSubclassError(this); // Not used, but for completeness
     }
 }
 export class CircleHitbox extends BaseHitbox<HitboxType.Circle> {
@@ -144,6 +151,36 @@ export class CircleHitbox extends BaseHitbox<HitboxType.Circle> {
             }
         }
     }
+    override getAdjustment(that: Hitbox, factor: number = 1): Vector {
+        const collision = this.getIntersection(that);
+        if (collision) {
+            return Vec.scale(collision.dir, collision.pen * factor);
+        }
+        return Vec.create(0, 0);
+    }
+    protected override getIntersection(that: Hitbox): { dir: Vector; pen: number } | null {
+        switch (that.type) {
+            case HitboxType.Circle:
+                return Collision.circleCircleIntersection(this.position, this.radius, that.position, that.radius);
+            case HitboxType.Rect:
+                return Collision.rectCircleIntersection(that.min, that.max, this.position, this.radius);
+            case HitboxType.Group:
+                let maxPen = 0;
+                let selected: { dir: Vector; pen: number } | null = null;
+                for (const h of that.hitboxes) {
+                    const coll = this.getIntersection(h);
+                    if (coll && coll.pen > maxPen) {
+                        maxPen = coll.pen;
+                        selected = coll;
+                    }
+                }
+                return selected;
+            case HitboxType.Polygon:
+                // Approximate
+                const rect = that.toRectangle();
+                return Collision.rectCircleIntersection(rect.min, rect.max, this.position, this.radius);
+        }
+    }
     override distanceTo(that: Hitbox): CollisionRecord {
         switch (that.type) {
             case HitboxType.Circle:
@@ -194,6 +231,7 @@ export class CircleHitbox extends BaseHitbox<HitboxType.Circle> {
         return this.position;
     }
 }
+
 export class RectangleHitbox extends BaseHitbox<HitboxType.Rect> {
     override readonly type = HitboxType.Rect;
     min: Vector;
@@ -292,6 +330,36 @@ export class RectangleHitbox extends BaseHitbox<HitboxType.Rect> {
             }
         }
     }
+    override getAdjustment(that: Hitbox, factor: number = 1): Vector {
+        const collision = this.getIntersection(that);
+        if (collision) {
+            return Vec.scale(collision.dir, collision.pen * factor);
+        }
+        return Vec.create(0, 0);
+    }
+    override getIntersection(that: Hitbox): { dir: Vector; pen: number } | null {
+        switch (that.type) {
+            case HitboxType.Circle:
+                return Collision.rectCircleIntersection(this.min, this.max, that.position, that.radius);
+            case HitboxType.Rect:
+                return Collision.rectRectIntersection(this.min, this.max, that.min, that.max);
+            case HitboxType.Group:
+                let maxPen = 0;
+                let selected: { dir: Vector; pen: number } | null = null;
+                for (const h of that.hitboxes) {
+                    const coll = this.getIntersection(h);
+                    if (coll && coll.pen > maxPen) {
+                        maxPen = coll.pen;
+                        selected = coll;
+                    }
+                }
+                return selected;
+            case HitboxType.Polygon:
+                // Approximate
+                const rect = that.toRectangle();
+                return Collision.rectRectIntersection(this.min, this.max, rect.min, rect.max);
+        }
+    }
     override distanceTo(that: Hitbox): CollisionRecord {
         switch (that.type) {
             case HitboxType.Circle:
@@ -324,6 +392,7 @@ export class RectangleHitbox extends BaseHitbox<HitboxType.Rect> {
         const rect = Geometry.transformRectangle(position, this.min, this.max, scale, orientation);
         return new RectangleHitbox(rect.min, rect.max);
     }
+
     override transformRotate(position: Vector, scale = 1, rotation = 0): PolygonHitbox {
         const corners = [
             Vec.create(this.min.x, this.min.y),
@@ -340,6 +409,7 @@ export class RectangleHitbox extends BaseHitbox<HitboxType.Rect> {
         const translatedCenter = Vec.add(rotatedCenter, position);
         return new PolygonHitbox(translatedCorners, translatedCenter);
     }
+
     override scale(scale: number): void {
         const centerX = (this.min.x + this.max.x) / 2;
         const centerY = (this.min.y + this.max.y) / 2;
@@ -402,14 +472,29 @@ export class GroupHitbox<GroupType extends Array<RectangleHitbox | CircleHitbox 
     override resolveCollision(that: Hitbox): void {
         that.resolveCollision(this);
     }
+    override getAdjustment(that: Hitbox, factor: number = 1): Vector {
+        let totalAdjust = Vec.create(0, 0);
+        let count = 0;
+        for (const h of this.hitboxes) {
+            const adjust = h.getAdjustment(that, factor);
+            if (adjust.x !== 0 || adjust.y !== 0) {
+                totalAdjust = Vec.add(totalAdjust, adjust);
+                count++;
+            }
+        }
+        if (count > 0) {
+            return Vec.scale(totalAdjust, 1 / count); // Average for smooth resolution
+        }
+        return Vec.create(0, 0);
+    }
     override distanceTo(that: Hitbox): CollisionRecord {
-        let distance = Number.MAX_VALUE;
+        let minDist = Number.MAX_VALUE;
         let record: CollisionRecord;
         for (const hitbox of this.hitboxes) {
             const newRecord = hitbox.distanceTo(that);
-            if (newRecord.distance < distance) {
+            if (newRecord.distance < minDist) {
+                minDist = newRecord.distance;
                 record = newRecord;
-                distance = newRecord.distance;
             }
         }
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -534,6 +619,36 @@ export class PolygonHitbox extends BaseHitbox<HitboxType.Polygon> {
             case HitboxType.Group: {
                 that.resolveCollision(this);
                 break;
+            }
+        }
+    }
+    override getAdjustment(that: Hitbox, factor: number = 1): Vector {
+        const collision = this.getIntersection(that);
+        if (collision) {
+            return Vec.scale(collision.dir, collision.pen * factor);
+        }
+        return Vec.create(0, 0);
+    }
+    protected override getIntersection(that: Hitbox): { dir: Vector; pen: number } | null {
+        switch (that.type) {
+            case HitboxType.Circle:
+            case HitboxType.Rect:
+            case HitboxType.Polygon: {
+                // Approximate with rectangles
+                const rect = this.toRectangle();
+                return rect.getIntersection(that);
+            }
+            case HitboxType.Group: {
+                let maxPen = 0;
+                let selected: { dir: Vector; pen: number } | null = null;
+                for (const h of that.hitboxes) {
+                    const coll = this.getIntersection(h);
+                    if (coll && coll.pen > maxPen) {
+                        maxPen = coll.pen;
+                        selected = coll;
+                    }
+                }
+                return selected;
             }
         }
     }

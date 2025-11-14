@@ -148,18 +148,6 @@ export class UpdateManager {
                 if (
                     (isObstacle || isBuilding || isVehicle)
                     && this.player.hitbox.radius > 0
-                    && this.player.mapPerkOrDefault(
-                        PerkIds.AdvancedAthletics,
-                        () => {
-                            return potential.definition.material !== "tree"
-                                && (
-                                    !isObstacle
-                                    || !potential.definition.isWindow
-                                    || !potential.dead
-                                );
-                        },
-                        true
-                    )
                     && potential.collidable
                     && potential.hitbox?.collidesWith(this.player._hitbox)
                 ) {
@@ -361,10 +349,10 @@ export class UpdateManager {
             this.updatePosition(this.player.position, movement, speed, dt);
             this.updateMovementState(oldPosition);
             this.enforceWorldBoundaries();
+            this.resolveCollisions();
         } 
         this.handleAutomaticDoors(isInsideBuilding);
         this.handleReviving();
-        this.resolveCollisions();
         this.handleAttackingActions();
 
         this.handleInvulnerabilityAndFloor();

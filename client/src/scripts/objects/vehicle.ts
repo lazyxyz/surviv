@@ -87,8 +87,8 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             this.image.setFrame(texture);
         }
 
-        this.hitbox = this.definition.hitbox.transformRotate(this.position, 1, this.rotation);
-        this.bulletHitbox = this.definition.bulletHitbox.transformRotate(this.position, 1, this.rotation);
+        this.hitbox = this.definition.hitbox.transformRotate(this.position, this.definition.scale, this.rotation);
+        this.bulletHitbox = this.definition.bulletHitbox.transformRotate(this.position, this.definition.scale, this.rotation);
 
         // Position/rotate
         const noMovementSmoothing = !GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing");

@@ -21,6 +21,7 @@ import { Config } from "../config";
 import { Obstacle } from "../objects/obstacle";
 import { VehicleDefinition } from "@common/definitions/vehicle";
 import { Vehicle } from "../objects/vehicle";
+import { ObstacleDefinition } from "@common/definitions/obstacles";
 
 export class ObjectSpawner {
     private game: Game;
@@ -201,8 +202,14 @@ export class ObjectSpawner {
         }
     }
 
-    addVehicle(definition: VehicleDefinition, position: Vector, layer: Layer): Vehicle {
-        const vehicle = new Vehicle(this.game, position, layer, definition);
+    addObstacle(definition: ObstacleDefinition, position: Vector): Obstacle {
+        const obstacle = new Obstacle(this.game, definition, position);
+        this.game.grid.addObject(obstacle);
+        return obstacle;
+    }
+
+    addVehicle(definition: VehicleDefinition, position: Vector): Vehicle {
+        const vehicle = new Vehicle(this.game, definition, position);
         this.game.grid.addObject(vehicle);
         return vehicle;
     }
