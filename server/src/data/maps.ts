@@ -9,15 +9,12 @@ import { Collision } from "@common/utils/math";
 import { ItemType, MapObjectSpawnMode, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { random, randomFloat } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
-import { type WebSocket } from "uWebSockets.js";
-import { type GunItem } from "../inventory/gunItem";
 import { GameMap } from "../map";
-import { Gamer, type PlayerContainer } from "../objects/gamer";
 import { getLootFromTable, LootTables } from "./lootTables";
-import { PerkCategories, Perks } from "@common/definitions/perks";
+import { Perks } from "@common/definitions/perks";
 import { Melees } from "@common/definitions/melees";
 import { Scopes } from "@common/definitions/scopes";
-import { Vehicles } from "@common/definitions/vehicle";
+import { VehicleDefinition, Vehicles } from "@common/definitions/vehicle";
 
 export interface RiverDefinition {
     readonly minAmount: number
@@ -68,6 +65,8 @@ export interface MapDefinition {
         readonly name: string
         readonly position: Vector
     }>
+
+    readonly vehicles?: Record<ReferenceTo<VehicleDefinition>, number>
 
     readonly onGenerate?: (map: GameMap, params: string[]) => void
 }
@@ -613,7 +612,10 @@ const maps = {
             { name: "Crimson Dunes", position: Vec.create(0.72, 0.8) },
             { name: "Mirage Farms", position: Vec.create(0.5, 0.35) },
             { name: "Shadow Sands", position: Vec.create(0.5, 0.65) }
-        ]
+        ],
+        vehicles: {
+            buggy: 100
+        }
     },
 
     cursedIsland: {
@@ -986,10 +988,6 @@ const maps = {
                     placeItem(item, true);
                 }
 
-                // Place perks
-                for (const item of Perks.definitions) {
-                    placeItem(item);
-                }
 
                 // Place melees
                 for (const item of Melees.definitions) {
@@ -1005,7 +1003,13 @@ const maps = {
                     itemPos.x = 0;
                     itemPos.y += rowSpacing;
                 }
-                map.game.addVehicle(Vehicles.fromString('buggy'), itemPos, 0);
+                map.game.objectSpawner.addVehicle(Vehicles.fromString('buggy'), itemPos);
+
+                if (itemPos.x > maxX) {
+                    itemPos.x = 0;
+                    itemPos.y += rowSpacing;
+                }
+                map.game.objectSpawner.addObstacle(Obstacles.fromString('regular_crate'), Vec.create(itemPos.x + 30, itemPos.y));
             }
         };
     })(),

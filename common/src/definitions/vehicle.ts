@@ -31,13 +31,19 @@ export interface VehicleDefinition extends ObjectDefinition {
 
     readonly maxSpeed: number;
     readonly acceleration: number;
-    readonly turnSpeed: number;
+
+    readonly maxSteerAngle: number;  // Max front wheel deflection (radians, e.g., Math.PI / 6 ≈ 30°)
+    readonly steerRate: number;     // Max rate of steering change (rad/s, e.g., Math.PI / 2 for quick response)
+
     readonly drag: number;
     readonly seats: Array<{
         readonly offset: Vector;     // Position relative to vehicle center
         readonly type: SeatType; // Seat type
         readonly zIndex?: ZIndexes;  // Optional zIndex for rendering adjustments
     }>;
+    readonly exitOffset: Vector;
+    readonly baseDamage: number;
+    readonly frictionFactor: number; // Tune 0-1; higher=more slide reduction (real tire grip)
 }
 
 const defaultVehicle: VehicleDefinition = {
@@ -62,7 +68,8 @@ const defaultVehicle: VehicleDefinition = {
     material: "metal_heavy",
     maxSpeed: 0.09,
     acceleration: 0.00008,
-    turnSpeed: 0.002,
+    maxSteerAngle: Math.PI / 6,  // 30° max wheel turn
+    steerRate: Math.PI / 2,     // 90°/s response
     drag: 0.001,
     wheels: [
         {
@@ -97,7 +104,9 @@ const defaultVehicle: VehicleDefinition = {
             type: SeatType.Passenger
         }
     ],
-
+    exitOffset: Vec.create(140, 170),
+    baseDamage: 30,
+    frictionFactor: 0.6,
 };
 
 export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
@@ -125,9 +134,12 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
             reflectBullets: true,
             material: Materials[5],
 
-            maxSpeed: 0.09, // Default slower than player
+            maxSpeed: 0.07,
             acceleration: 0.00008, // Reach maxSpeed in ~4s (tune as needed)
-            turnSpeed: 0.002, // ~114 deg/s (tune for feel)
+
+            maxSteerAngle: Math.PI / 8,
+            steerRate: Math.PI / 2,
+
             drag: 0.001, // Decel time constant ~1s
             explosion: "super_barrel_explosion",
 
@@ -163,7 +175,11 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
                     offset: Vec.create(-10, 0), // Passenger seat, offset to the right
                     type: SeatType.Passenger
                 }
-            ]
+            ],
+
+            exitOffset: Vec.create(0, -10),
+            baseDamage: 50,
+            frictionFactor: 0.4,
         }
     ].map(def => ({
         ...defaultVehicle,

@@ -233,7 +233,7 @@ export class Game implements GameData {
         this.gameMode = maxTeamSize;
         this.gameId = gameId;
        
-        this.gameMap = "fall";
+        this.gameMap = "desert";
         this.rainDrops = 0;
 
         // const randMap = this.getRandomMap();
@@ -573,10 +573,6 @@ export class Game implements GameData {
 
     removeObject(object: GameObject): void {
         this.objectSpawner.removeObject(object);
-    }
-
-    addVehicle(definition: VehicleDefinition, position: Vector, layer: Layer): Vehicle {
-        return this.objectSpawner.addVehicle(definition, position, layer);
     }
 
     removeVehicle(vehicle: Vehicle): void {

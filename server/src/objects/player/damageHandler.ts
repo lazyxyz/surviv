@@ -177,7 +177,7 @@ export class DamageHandler {
         this.player.game.grid.addObject(new DeathMarker(this.player, layer));
     }
 
-    
+
     die(params: Omit<DamageParams, "amount">): void {
         if (this.player.health > 0 || this.player.dead) return;
 
@@ -336,7 +336,7 @@ export class DamageHandler {
         this.player.dirty.items = true;
         this.player.action?.cancel();
         this.player.communicationHandler.sendEmote(this.player.loadout.emotes[5]);
-
+        this.player.exitVehicle();
         this.player.game.livingPlayers.delete(this.player);
         this.player.game.updateGameData({ aliveCount: this.player.game.aliveCount });
         this.player.game.fullDirtyObjects.add(this.player);
