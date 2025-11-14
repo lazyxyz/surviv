@@ -157,7 +157,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private handleCollision(potential: GameObject): boolean {
         // Check if the potential object is collidable and intersects
         if (
-            (!potential.isObstacle && !potential.isBuilding) ||
+            (!potential.isObstacle && !potential.isBuilding && !potential.isVehicle) ||
             !potential.collidable ||
             potential.dead ||
             !potential.hitbox
