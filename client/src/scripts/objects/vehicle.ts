@@ -42,6 +42,8 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.floorType = floorType; // Cache for doOverlay/zIndex
         this.position = data.position;
         this.rotation = data.rotation;
+
+        console.log("position: ", this.position);
         // console.log("Vehicle rotation: ", data.rotation);
         // Handle definition (from full on spawn/update)
         if (data.full?.definition) {
