@@ -157,11 +157,16 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private handleCollision(potential: GameObject): boolean {
         // Check if the potential object is collidable and intersects
         if (
-            (!potential.isObstacle && !potential.isBuilding && !potential.isVehicle) ||
-            !potential.collidable ||
+            !(potential.isObstacle || potential.isBuilding || potential.isPlayer) ||
+            (!potential.isPlayer && !potential.collidable) ||
             potential.dead ||
             !potential.hitbox
         ) {
+            return false;
+        }
+
+        // Skip collision with own passengers
+        if (potential.isPlayer && this.occupants.includes(potential as Player)) {
             return false;
         }
 
@@ -184,7 +189,16 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 if (impactVel > 0.005) { // Approaching (threshold; note sign convention assuming dir points out)
                     let materialFactor = 1.0;
                     let inverseMaterialFactor = 1.0; // For obstacle damage (soft = high damage to obstacle)
-                    if (potential.definition.material) {
+                    if (potential.isPlayer) {
+                        const damageToPlayer = ((Math.abs(impactVel) * 100) * this.baseDamage * inverseMaterialFactor) * 0.1;
+                        potential.damage({
+                            amount: damageToPlayer,
+                            source: this,
+                            weaponUsed: undefined,
+                        });
+                        potential._hitbox.resolveCollision(potential.hitbox);
+                        return false;
+                    } else if (potential.definition.material) {
                         const material = potential.definition.material;
                         materialFactor = materialMultipliers[material] ?? 1.0;
                         inverseMaterialFactor = 1 / materialFactor; // Higher for soft
