@@ -84,6 +84,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             player.inVehicle = undefined;
             player.seatIndex = undefined;
             this.occupants[seatIndex] = undefined;
+            player.inventory.unlockAllSlots();
         } else {
             // Enter available seat (prefer driver if empty, else first available)
             let availableSeat = 0; // Driver by default
@@ -100,6 +101,40 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         }
         this.setDirty();
         player.setDirty();
+    }
+
+    switchToNextEmptySeat(player: Player): void {
+        const currentIndex = this.occupants.indexOf(player);
+        let nextIndex = -1;
+
+        // Search from currentIndex + 1 to the end
+        for (let i = currentIndex + 1; i < this.occupants.length; i++) {
+            if (!this.occupants[i]) {
+                nextIndex = i;
+                break;
+            }
+        }
+
+        // If not found, search from 0 to currentIndex - 1
+        if (nextIndex === -1) {
+            for (let i = 0; i < currentIndex; i++) {
+                if (!this.occupants[i]) {
+                    nextIndex = i;
+                    break;
+                }
+            }
+        }
+
+        // If an empty seat is found, switch to it
+        if (nextIndex !== -1) {
+            this.occupants[currentIndex] = undefined;
+            this.occupants[nextIndex] = player;
+            player.seatIndex = nextIndex;
+            this.updateOccupantPosition(player, nextIndex);
+            this.setDirty();
+            player.setDirty();
+        }
+        // If no empty seat found, do nothing (stay in current seat)
     }
 
     private updateOccupantPosition(player: Player, seatIndex: number): void {

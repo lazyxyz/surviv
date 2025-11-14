@@ -118,7 +118,8 @@ export class InputHandler {
                     break;
                 }
                 case InputActions.SwapGunSlots: {
-                    inventory.swapGunSlots();
+                    if (this.player.inVehicle) this.player.inVehicle.switchToNextEmptySeat(this.player)
+                    else inventory.swapGunSlots();
                     break;
                 }
                 case InputActions.LockSlot: {
