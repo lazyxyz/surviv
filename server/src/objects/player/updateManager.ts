@@ -141,12 +141,12 @@ export class UpdateManager {
             let collided = false;
 
             for (const potential of this.player.nearObjects) {
-                if (potential.isVehicle && potential === this.player.inVehicle) continue;
+                if (this.player.inVehicle) continue;
 
-                const { isObstacle, isBuilding, isVehicle } = potential;
+                const { isObstacle, isBuilding } = potential;
 
                 if (
-                    (isObstacle || isBuilding || isVehicle)
+                    (isObstacle || isBuilding)
                     && this.player.hitbox.radius > 0
                     && potential.collidable
                     && potential.hitbox?.collidesWith(this.player._hitbox)
@@ -350,7 +350,7 @@ export class UpdateManager {
             this.updateMovementState(oldPosition);
             this.enforceWorldBoundaries();
             this.resolveCollisions();
-        } 
+        }
         this.handleAutomaticDoors(isInsideBuilding);
         this.handleReviving();
         this.handleAttackingActions();

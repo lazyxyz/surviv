@@ -178,7 +178,7 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
             ],
 
             exitOffset: Vec.create(0, -10),
-            baseDamage: 50,
+            baseDamage: 20,
             frictionFactor: 0.4,
         }
     ].map(def => ({

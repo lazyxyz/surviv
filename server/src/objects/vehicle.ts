@@ -172,14 +172,28 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
         if (this.hitbox.collidesWith(potential.hitbox)) {
             // Calculate adjustment to resolve penetration
-            const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.3); // Tune factor (0.5=half push, reduce if too far)
+            const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.2); // Tune factor (0.5=half push, reduce if too far)
             // Clamp adjustment magnitude to prevent far jumps
             const adjustLen = Vec.length(adjust);
+
             if (adjustLen > this.maxBounceDist) {
                 const clampedAdjust = Vec.scale(adjust, this.maxBounceDist / adjustLen);
+                // Use clampedAdjust in place of adjust below
+                if (potential.isPlayer) {
+                    potential.position = Vec.add(potential.position, Vec.scale(clampedAdjust, 5));
+                }
                 this.position = Vec.sub(this.position, clampedAdjust);
             } else {
+                if (potential.isPlayer) {
+                    potential.position = Vec.add(potential.position, Vec.scale(adjust, 5));
+                }
                 this.position = Vec.sub(this.position, adjust);
+            }
+
+            // Update grid and dirty state for player if moved
+            if (potential.isPlayer) {
+                potential.setPartialDirty();
+                this.game.grid.updateObject(potential);
             }
 
             const speed = Vec.squaredLength(this.velocity);
@@ -190,14 +204,13 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     let materialFactor = 1.0;
                     let inverseMaterialFactor = 1.0; // For obstacle damage (soft = high damage to obstacle)
                     if (potential.isPlayer) {
-                        const damageToPlayer = ((Math.abs(impactVel) * 100) * this.baseDamage * inverseMaterialFactor) * 0.1;
+                        const damageToPlayer = Math.abs(impactVel) * this.baseDamage;
                         potential.damage({
                             amount: damageToPlayer,
                             source: this,
                             weaponUsed: undefined,
                         });
-                        potential._hitbox.resolveCollision(potential.hitbox);
-                        return false;
+                        return true;
                     } else if (potential.definition.material) {
                         const material = potential.definition.material;
                         materialFactor = materialMultipliers[material] ?? 1.0;
@@ -271,7 +284,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             }
             if (!collided) break;
         }
-        this.enforceWorldBoundaries();
+        // this.enforceWorldBoundaries();
     }
 
     private getInputs(): { inputForward: number; inputSteer: number } {
