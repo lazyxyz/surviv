@@ -143,10 +143,9 @@ export class UpdateManager {
             for (const potential of this.player.nearObjects) {
                 if (this.player.inVehicle) continue;
 
-                const { isObstacle, isBuilding } = potential;
-
+                const { isObstacle, isBuilding, isVehicle } = potential;
                 if (
-                    (isObstacle || isBuilding)
+                    (isObstacle || isBuilding || isVehicle)
                     && this.player.hitbox.radius > 0
                     && potential.collidable
                     && potential.hitbox?.collidesWith(this.player._hitbox)

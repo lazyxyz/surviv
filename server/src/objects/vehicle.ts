@@ -157,16 +157,17 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private handleCollision(potential: GameObject): boolean {
         // Check if the potential object is collidable and intersects
         if (
-            !(potential.isObstacle || potential.isBuilding || potential.isPlayer) ||
+            !(potential.isObstacle || potential.isBuilding || potential.isPlayer || (potential.isVehicle && potential != this)) ||
             (!potential.isPlayer && !potential.collidable) ||
             potential.dead ||
-            !potential.hitbox
+            !potential.hitbox ||
+            !this.occupants[SeatType.Driver]
         ) {
             return false;
         }
 
         // Skip collision with own passengers
-        if (potential.isPlayer && this.occupants.includes(potential as Player)) {
+        if (potential.isPlayer && potential.inVehicle) {
             return false;
         }
 
@@ -181,11 +182,15 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 // Use clampedAdjust in place of adjust below
                 if (potential.isPlayer) {
                     potential.position = Vec.add(potential.position, Vec.scale(clampedAdjust, 5));
+                } else if (potential.isVehicle) {
+                    potential.position = Vec.add(potential.position, Vec.scale(clampedAdjust, 1));
                 }
                 this.position = Vec.sub(this.position, clampedAdjust);
             } else {
                 if (potential.isPlayer) {
                     potential.position = Vec.add(potential.position, Vec.scale(adjust, 5));
+                } else if (potential.isVehicle) {
+                    potential.position = Vec.add(potential.position, Vec.scale(adjust, 1));
                 }
                 this.position = Vec.sub(this.position, adjust);
             }
@@ -204,7 +209,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     let materialFactor = 1.0;
                     let inverseMaterialFactor = 1.0; // For obstacle damage (soft = high damage to obstacle)
                     if (potential.isPlayer) {
-                        const damageToPlayer = Math.abs(impactVel) * this.baseDamage;
+                        const damageToPlayer = Math.abs(impactVel) * this.baseDamage * 5;
                         potential.damage({
                             amount: damageToPlayer,
                             source: this,
