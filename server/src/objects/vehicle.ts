@@ -84,6 +84,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             player.inVehicle = undefined;
             player.seatIndex = undefined;
             this.occupants[seatIndex] = undefined;
+            player.inventory.unlockAllSlots();
         } else {
             // Enter available seat (prefer driver if empty, else first available)
             let availableSeat = 0; // Driver by default
@@ -100,6 +101,40 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         }
         this.setDirty();
         player.setDirty();
+    }
+
+    switchToNextEmptySeat(player: Player): void {
+        const currentIndex = this.occupants.indexOf(player);
+        let nextIndex = -1;
+
+        // Search from currentIndex + 1 to the end
+        for (let i = currentIndex + 1; i < this.occupants.length; i++) {
+            if (!this.occupants[i]) {
+                nextIndex = i;
+                break;
+            }
+        }
+
+        // If not found, search from 0 to currentIndex - 1
+        if (nextIndex === -1) {
+            for (let i = 0; i < currentIndex; i++) {
+                if (!this.occupants[i]) {
+                    nextIndex = i;
+                    break;
+                }
+            }
+        }
+
+        // If an empty seat is found, switch to it
+        if (nextIndex !== -1) {
+            this.occupants[currentIndex] = undefined;
+            this.occupants[nextIndex] = player;
+            player.seatIndex = nextIndex;
+            this.updateOccupantPosition(player, nextIndex);
+            this.setDirty();
+            player.setDirty();
+        }
+        // If no empty seat found, do nothing (stay in current seat)
     }
 
     private updateOccupantPosition(player: Player, seatIndex: number): void {
@@ -122,24 +157,48 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private handleCollision(potential: GameObject): boolean {
         // Check if the potential object is collidable and intersects
         if (
-            (!potential.isObstacle && !potential.isBuilding) ||
-            !potential.collidable ||
+            !(potential.isObstacle || potential.isBuilding || potential.isPlayer || (potential.isVehicle && potential != this)) ||
+            (!potential.isPlayer && !potential.collidable) ||
             potential.dead ||
-            !potential.hitbox
+            !potential.hitbox ||
+            !this.occupants[SeatType.Driver]
         ) {
+            return false;
+        }
+
+        // Skip collision with own passengers
+        if (potential.isPlayer && potential.inVehicle) {
             return false;
         }
 
         if (this.hitbox.collidesWith(potential.hitbox)) {
             // Calculate adjustment to resolve penetration
-            const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.3); // Tune factor (0.5=half push, reduce if too far)
+            const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.2); // Tune factor (0.5=half push, reduce if too far)
             // Clamp adjustment magnitude to prevent far jumps
             const adjustLen = Vec.length(adjust);
+
             if (adjustLen > this.maxBounceDist) {
                 const clampedAdjust = Vec.scale(adjust, this.maxBounceDist / adjustLen);
+                // Use clampedAdjust in place of adjust below
+                if (potential.isPlayer) {
+                    potential.position = Vec.add(potential.position, Vec.scale(clampedAdjust, 5));
+                } else if (potential.isVehicle) {
+                    potential.position = Vec.add(potential.position, Vec.scale(clampedAdjust, 1));
+                }
                 this.position = Vec.sub(this.position, clampedAdjust);
             } else {
+                if (potential.isPlayer) {
+                    potential.position = Vec.add(potential.position, Vec.scale(adjust, 5));
+                } else if (potential.isVehicle) {
+                    potential.position = Vec.add(potential.position, Vec.scale(adjust, 1));
+                }
                 this.position = Vec.sub(this.position, adjust);
+            }
+
+            // Update grid and dirty state for player if moved
+            if (potential.isPlayer) {
+                potential.setPartialDirty();
+                this.game.grid.updateObject(potential);
             }
 
             const speed = Vec.squaredLength(this.velocity);
@@ -149,7 +208,15 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 if (impactVel > 0.005) { // Approaching (threshold; note sign convention assuming dir points out)
                     let materialFactor = 1.0;
                     let inverseMaterialFactor = 1.0; // For obstacle damage (soft = high damage to obstacle)
-                    if (potential.definition.material) {
+                    if (potential.isPlayer) {
+                        const damageToPlayer = Math.abs(impactVel) * this.baseDamage * 5;
+                        potential.damage({
+                            amount: damageToPlayer,
+                            source: this,
+                            weaponUsed: undefined,
+                        });
+                        return true;
+                    } else if (potential.definition.material) {
                         const material = potential.definition.material;
                         materialFactor = materialMultipliers[material] ?? 1.0;
                         inverseMaterialFactor = 1 / materialFactor; // Higher for soft
@@ -222,7 +289,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             }
             if (!collided) break;
         }
-        this.enforceWorldBoundaries();
+        // this.enforceWorldBoundaries();
     }
 
     private getInputs(): { inputForward: number; inputSteer: number } {

@@ -119,16 +119,16 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
             scale: 1,  // Default size
             rotationMode: RotationMode.Limited,
             hitbox: new GroupHitbox(
-                new CircleHitbox(3.6, Vec.create(10, 0)),
-                new CircleHitbox(4, Vec.create(4.6, 0)),
-                new CircleHitbox(5, Vec.create(0, 0)),
-                new CircleHitbox(3.8, Vec.create(-9, 0)),
+                new CircleHitbox(3.2, Vec.create(10, 0)),
+                new CircleHitbox(3.8, Vec.create(4.6, 0)),
+                new CircleHitbox(4.6, Vec.create(0, 0)),
+                new CircleHitbox(3.4, Vec.create(-9, 0)),
             ),
             bulletHitbox: new GroupHitbox(
                 // Hood (front)
-                new CircleHitbox(3.8, Vec.create(9, 0)),
+                new CircleHitbox(3.2, Vec.create(9, 0)),
                 // Back (rear)
-                new CircleHitbox(3.6, Vec.create(-4.6, 0)),
+                new CircleHitbox(3.4, Vec.create(-4.6, 0)),
             ),
             health: 1000,
             reflectBullets: true,
@@ -178,7 +178,7 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
             ],
 
             exitOffset: Vec.create(0, -10),
-            baseDamage: 50,
+            baseDamage: 20,
             frictionFactor: 0.4,
         }
     ].map(def => ({
