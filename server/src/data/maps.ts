@@ -1009,6 +1009,12 @@ const maps = {
                     itemPos.x = 0;
                     itemPos.y += rowSpacing;
                 }
+                map.game.objectSpawner.addVehicle(Vehicles.fromString('buggy'), itemPos);
+
+                if (itemPos.x > maxX) {
+                    itemPos.x = 0;
+                    itemPos.y += rowSpacing;
+                }
                 map.game.objectSpawner.addObstacle(Obstacles.fromString('regular_crate'), Vec.create(itemPos.x + 30, itemPos.y));
             }
         };

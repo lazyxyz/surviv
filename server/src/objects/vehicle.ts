@@ -23,6 +23,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     private _height = 1;
     health: number;
+    private _start = false;
 
     // Vehicle physics state
     private velocity: Vector = Vec.create(0, 0); // Vector velocity for realistic direction/momentum
@@ -87,6 +88,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             player.inventory.unlockAllSlots();
         } else {
             // Enter available seat (prefer driver if empty, else first available)
+            this._start = true;
             let availableSeat = 0; // Driver by default
             player.inventory.lockAllSlots();
             if (this.occupants[0]) {
@@ -177,29 +179,15 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             // Clamp adjustment magnitude to prevent far jumps
             const adjustLen = Vec.length(adjust);
 
-            if (adjustLen > this.maxBounceDist) {
-                const clampedAdjust = Vec.scale(adjust, this.maxBounceDist / adjustLen);
-                // Use clampedAdjust in place of adjust below
-                if (potential.isPlayer) {
-                    potential.position = Vec.add(potential.position, Vec.scale(clampedAdjust, 5));
-                } else if (potential.isVehicle) {
-                    potential.position = Vec.add(potential.position, Vec.scale(clampedAdjust, 1));
-                }
-                this.position = Vec.sub(this.position, clampedAdjust);
-            } else {
-                if (potential.isPlayer) {
-                    potential.position = Vec.add(potential.position, Vec.scale(adjust, 5));
-                } else if (potential.isVehicle) {
-                    potential.position = Vec.add(potential.position, Vec.scale(adjust, 1));
-                }
-                this.position = Vec.sub(this.position, adjust);
-            }
+            const effectiveAdjust = adjustLen > 0 ? Vec.scale(adjust, Math.min(adjustLen, this.maxBounceDist) / adjustLen) : Vec.create(0, 0);
 
-            // Update grid and dirty state for player if moved
-            if (potential.isPlayer) {
-                potential.setPartialDirty();
-                this.game.grid.updateObject(potential);
-            }
+            if (potential.isVehicle && !potential._start) {
+                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 1)));
+            };
+
+            this.position = Vec.sub(this.position, effectiveAdjust);
+            potential.setPartialDirty();
+            this.game.grid.updateObject(potential);
 
             const speed = Vec.squaredLength(this.velocity);
             if (speed > 0.003) { // Threshold: only apply effects if fast enough
@@ -268,11 +256,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     // Overall speed loss
                     this.velocity = Vec.scale(this.velocity, speedLossFactor);
                 }
-            } else {
+            } else if (!potential.isPlayer) {
                 // Low speed: just stop completely
                 this.velocity = Vec.create(0, 0);
             }
-
             return true;
         }
         return false;
@@ -327,6 +314,12 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         const drag = this.definition.drag;
         const dragFactor = Math.exp(-drag * dt);
         this.velocity = Vec.scale(this.velocity, dragFactor);
+
+        if (Vec.squaredLength(this.velocity) < this.velocityThreshold) {
+            if (this.occupants.every(p => p === undefined)) {
+                this._start = false;
+            }
+        }
     }
 
     private applyLateralFriction(dt: number): void {
@@ -382,7 +375,16 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         }
     }
 
+    setPosition(position: Vector) {
+        this.position = position;
+        this.hitbox = this.definition.hitbox.transformRotate(this.position, this.definition.scale, this.rotation);
+        this.bulletHitbox = this.definition.bulletHitbox.transformRotate(this.position, this.definition.scale, this.rotation);
+    }
+
+
     update(): void {
+        if (!this._start) return;
+
         const dt = this.game.dt;
         const oldPosition = Vec.clone(this.position);
 
@@ -404,11 +406,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         // Determine if moving
         const isMoving = !Vec.equals(oldPosition, this.position) || Vec.squaredLength(this.velocity) > this.velocityThreshold;
 
-        // Update all occupants (if any)
-        this.updateOccupants(isMoving);
-
         // Update grid for vehicle if moving
         if (isMoving) {
+            // Update all occupants (if any)
+            this.updateOccupants(isMoving);
             this.game.grid.updateObject(this);
         }
 

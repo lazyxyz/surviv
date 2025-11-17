@@ -148,6 +148,7 @@ export class PlayerManager {
         }
 
         player.disconnected = true;
+        player.exitVehicle();
         this.game.aliveCountDirty = true;
         this.game.connectingPlayers.delete(player);
         this.game.connectedPlayers.delete(player);

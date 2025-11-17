@@ -79,10 +79,10 @@ export const Maps: Record<MAP, ModeDefinition> = {
         ambience: "wind_ambience",
         defaultScope: "2x_scope",
         reskin: "fall",
-        particleEffects: {
-            frames: ["leaf_particle_1", "leaf_particle_2", "leaf_particle_3"],
-            delay: 1000
-        },
+        // particleEffects: {
+        //     frames: ["leaf_particle_1", "leaf_particle_2", "leaf_particle_3"],
+        //     delay: 1000
+        // },
         specialPlayButtons: true,
         // Icons
         modeLogoImage: {
@@ -110,11 +110,11 @@ export const Maps: Record<MAP, ModeDefinition> = {
         ambience: "snowstorm",
         inheritTexturesFrom: "normal",
         bulletTrailAdjust: "hsl(0, 50%, 80%)",
-        particleEffects: {
-            frames: ["snow_particle"],
-            delay: 800,
-            gravity: true
-        },
+        // particleEffects: {
+        //     frames: ["snow_particle"],
+        //     delay: 800,
+        //     gravity: true
+        // },
         specialPlayButtons: true,
         modeLogoImage: "./img/game/winter/obstacles/red_gift.svg"
     },
@@ -134,10 +134,10 @@ export const Maps: Record<MAP, ModeDefinition> = {
         inheritTexturesFrom: "fall",
         defaultScope: "2x_scope",
         reskin: "desert",
-        particleEffects: {
-            frames: ["weed_1", "weed_2"],
-            delay: 1000,
-        },
+        // particleEffects: {
+        //     frames: ["weed_1", "weed_2"],
+        //     delay: 1000,
+        // },
         specialPlayButtons: true,
         // Icons
         modeLogoImage: {
