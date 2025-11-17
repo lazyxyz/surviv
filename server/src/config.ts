@@ -24,9 +24,9 @@ export const Config = {
     v50Port: 9500,
     cursedIslandPort: 9600,
 
-    // addBot: true,
-    addBot: false,
-    testMode: "gunsTest", // For Testing
+    addBot: true,
+    // addBot: false,
+    // testMode: "gunsTest", // For Testing
 
     spawn: { mode: SpawnMode.Normal },
 

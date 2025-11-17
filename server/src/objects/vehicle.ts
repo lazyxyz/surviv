@@ -179,29 +179,18 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             // Clamp adjustment magnitude to prevent far jumps
             const adjustLen = Vec.length(adjust);
 
-            if (adjustLen > this.maxBounceDist) {
-                const clampedAdjust = Vec.scale(adjust, this.maxBounceDist / adjustLen);
-                // Use clampedAdjust in place of adjust below
-                if (potential.isPlayer) {
-                    potential.position = Vec.add(potential.position, Vec.scale(clampedAdjust, 5));
-                } else if (potential.isVehicle) {
-                    // potential.position = Vec.add(potential.position, Vec.scale(clampedAdjust, 1));
-                    potential.setPosition(Vec.add(potential.position, Vec.scale(clampedAdjust, 1)));
-                }
-                this.position = Vec.sub(this.position, clampedAdjust);
-            } else {
-                if (potential.isPlayer) {
-                    potential.position = Vec.add(potential.position, Vec.scale(adjust, 5));
-                } else if (potential.isVehicle) {
-                    // potential.position = Vec.add(potential.position, Vec.scale(adjust, 1));
-                    potential.setPosition(Vec.add(potential.position, Vec.scale(adjust, 1)));
-                }
-                this.position = Vec.sub(this.position, adjust);
+            const effectiveAdjust = adjustLen > 0 ? Vec.scale(adjust, Math.min(adjustLen, this.maxBounceDist) / adjustLen) : Vec.create(0, 0);
+
+            if (potential.isVehicle && !potential._start) {
+                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 1)));
+            };
+
+            if (!potential.isPlayer) {
+                this.position = Vec.sub(this.position, effectiveAdjust);
+                potential.setPartialDirty();
+                this.game.grid.updateObject(potential);
             }
 
-            // Update grid and dirty state for player if moved
-            potential.setPartialDirty();
-            this.game.grid.updateObject(potential);
 
             const speed = Vec.squaredLength(this.velocity);
             if (speed > 0.003) { // Threshold: only apply effects if fast enough
@@ -270,11 +259,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     // Overall speed loss
                     this.velocity = Vec.scale(this.velocity, speedLossFactor);
                 }
-            } else {
+            } else if (!potential.isPlayer) {
                 // Low speed: just stop completely
                 this.velocity = Vec.create(0, 0);
             }
-
             return true;
         }
         return false;

@@ -161,7 +161,8 @@ export class BotManager {
         } else {
             // Non-Dungeon: Use original ("old") skills/behaviors and levels
             // Random total bots between 10 and 15
-            const totalBots = Math.floor(Math.random() * 6) + 10; // 10–15 inclusive
+            // const totalBots = Math.floor(Math.random() * 6) + 10; // 10–15 inclusive
+            const totalBots = Math.floor(Math.random() * 6) + 50; // 10–15 inclusive
 
             // Original 20% distribution for all types
             const typeConfigs: Array<{ type: BotType; percentage: number; behavior: BehaviorType; level: number }> = [
