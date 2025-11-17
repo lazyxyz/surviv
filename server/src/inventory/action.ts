@@ -43,7 +43,7 @@ export class ReviveAction extends Action {
     override readonly speedMultiplier = 0.5;
 
     constructor(reviver: Player, readonly target: Player) {
-        super(reviver, GameConstants.player.reviveTime / reviver.mapPerkOrDefault(PerkIds.FieldMedic, ({ usageMod }) => usageMod, 1));
+        super(reviver, GameConstants.player.reviveTime);
     }
 
     override execute(): void {
@@ -90,8 +90,6 @@ export class ReloadAction extends Action {
             ? definition.extendedCapacity ?? definition.capacity
             : definition.capacity;
 
-        const hasInfiniteAmmo = this.player.hasPerk(PerkIds.InfiniteAmmo);
-
         const desiredLoad = Numeric.min(
             definition.shotsPerReload !== undefined && !this.fullReload
                 ? (definition.isDual ? 2 : 1) * definition.shotsPerReload
@@ -99,17 +97,13 @@ export class ReloadAction extends Action {
             capacity - this.item.ammo
         );
 
-        const toLoad = hasInfiniteAmmo
-            ? desiredLoad
-            : Numeric.min(
-                items.getItem(definition.ammoType),
-                desiredLoad
-            );
+        const toLoad = Numeric.min(
+            items.getItem(definition.ammoType),
+            desiredLoad
+        );
 
         this.item.ammo += toLoad;
-        if (!hasInfiniteAmmo) {
-            items.decrementItem(definition.ammoType, toLoad);
-        }
+        items.decrementItem(definition.ammoType, toLoad);
 
         if (this.item.ammo < capacity) { // chain reloads if not full
             this.item.reload();
@@ -132,7 +126,7 @@ export class HealingAction extends Action {
         const itemDef = Loots.reify<HealingItemDefinition>(item);
         super(
             player,
-            itemDef.useTime / player.mapPerkOrDefault(PerkIds.FieldMedic, ({ usageMod }) => usageMod, 1)
+            itemDef.useTime
         );
         this.item = itemDef;
     }

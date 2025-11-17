@@ -883,9 +883,7 @@ export class UIManager {
             let showReserve = false;
             if (activeWeapon.definition.itemType === ItemType.Gun) {
                 const ammoType = activeWeapon.definition.ammoType;
-                let totalAmmo: number | string = this.perks.hasItem(PerkIds.InfiniteAmmo)
-                    ? "∞"
-                    : this.inventory.items[ammoType];
+                let totalAmmo: number | string = this.inventory.items[ammoType];
 
                 for (const ammo of Ammos) {
                     if (ammo.idString === ammoType && ammo.ephemeral) {
