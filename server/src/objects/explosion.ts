@@ -90,7 +90,6 @@ export class Explosion {
                         object.damage({
                             amount: this.damageMod * this.definition.damage
                                 * (isObstacle ? this.definition.obstacleMultiplier : 1)
-                                * (isPlayer ? object.mapPerkOrDefault(PerkIds.LowProfile, ({ explosionMod }) => explosionMod, 1) : 1)
                                 * ((dist > min) ? (max - dist) / (max - min) : 1),
 
                             source: this.source,

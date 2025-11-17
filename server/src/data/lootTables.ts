@@ -954,18 +954,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             max: 1,
             noDuplicates: true,
             loot: [
-                { item: PerkIds.InfiniteAmmo, weight: 1 },
                 { item: PerkIds.ExtendedMags, weight: 1 },
-                { item: PerkIds.Flechettes, weight: 1 },
-                { item: PerkIds.DemoExpert, weight: 1 },
-                { item: PerkIds.SecondWind, weight: 1 },
-                { item: PerkIds.FieldMedic, weight: 1 },
-                { item: PerkIds.SabotRounds, weight: 1 },
-                { item: PerkIds.AdvancedAthletics, weight: 1 },
-                { item: PerkIds.Toploaded, weight: 1 },
-                { item: PerkIds.CloseQuartersCombat, weight: 1 },
-                { item: PerkIds.LowProfile, weight: 1 },
-                { item: PerkIds.Berserker, weight: 1 }
             ]
         },
         red_gift: [
