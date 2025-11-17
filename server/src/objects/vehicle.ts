@@ -185,12 +185,9 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 1)));
             };
 
-            if (!potential.isPlayer) {
-                this.position = Vec.sub(this.position, effectiveAdjust);
-                potential.setPartialDirty();
-                this.game.grid.updateObject(potential);
-            }
-
+            this.position = Vec.sub(this.position, effectiveAdjust);
+            potential.setPartialDirty();
+            this.game.grid.updateObject(potential);
 
             const speed = Vec.squaredLength(this.velocity);
             if (speed > 0.003) { // Threshold: only apply effects if fast enough
