@@ -487,6 +487,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     seatIndex?: number;
 
     exitVehicle(): void {
+        if(this.inVehicle) this.inVehicle.interact(this);
         this.inVehicle = undefined;
         this.seatIndex = undefined;
     }
