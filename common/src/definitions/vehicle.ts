@@ -39,9 +39,9 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly seats: Array<{
         readonly offset: Vector;     // Position relative to vehicle center
         readonly type: SeatType; // Seat type
+        readonly exitOffset: Vector;
         readonly zIndex?: ZIndexes;  // Optional zIndex for rendering adjustments
     }>;
-    readonly exitOffset: Vector;
     readonly baseDamage: number;
     readonly frictionFactor: number; // Tune 0-1; higher=more slide reduction (real tire grip)
 }
@@ -97,14 +97,15 @@ const defaultVehicle: VehicleDefinition = {
     seats: [
         {
             offset: Vec.create(0, -1.4), // Driver seat, centered forward
-            type: SeatType.Driver
+            type: SeatType.Driver,
+            exitOffset: Vec.create(140, 170),
         },
         {
             offset: Vec.create(0, 10), // Passenger seat, offset to the right
-            type: SeatType.Passenger
+            type: SeatType.Passenger,
+            exitOffset: Vec.create(140, 170),
         }
     ],
-    exitOffset: Vec.create(140, 170),
     baseDamage: 30,
     frictionFactor: 0.6,
 };
@@ -170,14 +171,15 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
                 {
                     offset: Vec.create(1.4, 0), // Driver seat, centered forward
                     type: SeatType.Driver,
+                    exitOffset: Vec.create(0, -10),
                 },
                 {
                     offset: Vec.create(-10, 0), // Passenger seat, offset to the right
-                    type: SeatType.Passenger
+                    type: SeatType.Passenger,
+                    exitOffset: Vec.create(0, -10),
                 }
             ],
 
-            exitOffset: Vec.create(0, -10),
             baseDamage: 20,
             frictionFactor: 0.4,
         }

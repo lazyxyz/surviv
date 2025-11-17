@@ -79,7 +79,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             // Exit seat
             const seatOffset = this.definition.seats[seatIndex].offset;
             const rotatedSeatOffset = Vec.rotate(seatOffset, this.rotation);
-            const exitOffset = Vec.rotate(this.definition.exitOffset, this.rotation); // Use definition's exitOffset (rotated)
+            const exitOffset = Vec.rotate(this.definition.seats[seatIndex].exitOffset, this.rotation); // Use definition's exitOffset (rotated)
             player.position = Vec.add(this.position, Vec.add(rotatedSeatOffset, exitOffset));
             player.inVehicle = undefined;
             player.seatIndex = undefined;
