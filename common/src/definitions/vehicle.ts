@@ -17,6 +17,7 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly rotationMode: RotationMode;
     readonly hitbox: Hitbox;
     readonly bulletHitbox: Hitbox;
+    readonly spawnHitbox?: Hitbox
     readonly health: number;
     readonly zIndex?: ZIndexes;
     readonly reflectBullets: boolean;
@@ -64,6 +65,7 @@ const defaultVehicle: VehicleDefinition = {
         // Back (rear)
         RectangleHitbox.fromRect(7.6, 7, Vec.create(0, 4.6))
     ),
+    spawnHitbox: new CircleHitbox(14),
     health: 1000,
     reflectBullets: true,
     material: "metal_heavy",
@@ -133,6 +135,7 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
                 // Back (rear)
                 new CircleHitbox(3.4, Vec.create(-4.6, 0)),
             ),
+            spawnHitbox: new CircleHitbox(14),
             health: 1000,
             reflectBullets: true,
             material: Materials[5],

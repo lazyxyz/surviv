@@ -459,7 +459,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
         }
         this.floorType = floorType;
 
-        if (oldPosition !== undefined) {
+        if (oldPosition !== undefined && !this.inVehicle) {
             this.distSinceLastFootstep += Geometry.distance(oldPosition, this.position);
             this.distTraveled += Geometry.distance(oldPosition, this.position);
 
@@ -480,7 +480,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
                 this.distSinceLastFootstep = 0;
 
-                if (!this.inVehicle && FloorTypes[floorType].particles && this.layer >= Layer.Ground) {
+                if (FloorTypes[floorType].particles && this.layer >= Layer.Ground) {
                     const options = {
                         frames: "ripple_particle",
                         zIndex: ZIndexes.Ground,

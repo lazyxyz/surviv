@@ -232,8 +232,8 @@ const maps = {
             maxWideAmount: 1
         },
         trails: {
-            minAmount: 2,
-            maxAmount: 3,
+            minAmount: 3,
+            maxAmount: 5,
             wideChance: 0.2,
             minWidth: 2,
             maxWidth: 4,
@@ -400,6 +400,16 @@ const maps = {
             minWideWidth: 25,
             maxWideWidth: 30
         },
+        trails: {
+            minAmount: 3,
+            maxAmount: 5,
+            wideChance: 0.2,
+            minWidth: 2,
+            maxWidth: 4,
+            minWideWidth: 3,
+            maxWideWidth: 5,
+            maxWideAmount: 1
+        },
         buildings: {
             large_bridge: 2,
             small_bridge: Infinity,
@@ -526,8 +536,8 @@ const maps = {
             bankWidth: 12
         },
         trails: {
-            minAmount: 7,
-            maxAmount: 7,
+            minAmount: 3,
+            maxAmount: 5,
             wideChance: 0.2,
             minWidth: 2,
             maxWidth: 4,

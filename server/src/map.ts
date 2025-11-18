@@ -804,10 +804,9 @@ export class GameMap {
     _generateVehicle(definition: ReifiableDef<VehicleDefinition>, count: number, getPosition?: () => Vector): void {
         const def = Vehicles.reify(definition);
 
-        const effSpawnHitbox = def.hitbox;
+        const effSpawnHitbox = def.spawnHitbox ?? def.hitbox;
 
         for (let i = 0; i < count; i++) {
-            const rotation = GameMap.getRandomRotation(RotationMode.Full);
 
             let position: Vector | undefined;
             let attempts = 0;
@@ -825,11 +824,14 @@ export class GameMap {
                 Logger.warn(`Failed to find valid position for obstacle ${def.idString}`);
                 continue;
             }
+            const rotation = GameMap.getRandomRotation(RotationMode.Full);
 
             const vehicle = new Vehicle(
                 this.game,
                 def,
                 Vec.clone(position),
+                undefined,
+                rotation
             );
 
             // if (!def.hideOnMap && !def.invisible && obstacle.layer === Layer.Ground) this._packet.objects.push(obstacle);
@@ -923,7 +925,8 @@ export class GameMap {
 
         const collidableObjects = params?.collidableObjects ?? {
             [ObjectCategory.Obstacle]: true,
-            [ObjectCategory.Building]: true
+            [ObjectCategory.Building]: true,
+            [ObjectCategory.Vehicle]: true,
         };
 
         const spawnMode = params?.spawnMode ?? MapObjectSpawnMode.Grass;

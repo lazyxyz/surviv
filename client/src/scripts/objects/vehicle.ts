@@ -271,10 +271,18 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         );
         drawHitbox(
             this.bulletHitbox,
-            this.dead ? HITBOX_COLORS.obstacleNoCollision : HITBOX_COLORS.obstacleNoCollision,
+            this.dead ? HITBOX_COLORS.obstacleNoCollision : HITBOX_COLORS.player,
             this.debugGraphics,
             alpha
         );
+        if (this.definition.spawnHitbox) {
+            drawHitbox(
+                this.definition.spawnHitbox.transform(this.position, 1, this.orientation),
+                HITBOX_COLORS.spawnHitbox,
+                this.debugGraphics,
+                alpha
+            );
+        }
     }
 
     interact(): void {

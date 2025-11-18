@@ -98,7 +98,7 @@ export const Maps: Record<MAP, ModeDefinition> = {
             border: "hsl(208, 94%, 45%)",
             beach: "hsl(210, 18%, 75%)",
             riverBank: "hsl(210, 18%, 70%)",
-            trail: "hsl(35, 50%, 40%)",
+            trail: "hsla(35, 36%, 79%, 1.00)",
             gas: "hsla(17, 100%, 50%, 0.55)",
             void: "hsl(25, 80%, 6%)"
         },
