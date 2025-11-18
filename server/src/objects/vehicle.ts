@@ -12,6 +12,7 @@ import { Numeric } from "@common/utils/math";
 import { materialMultipliers } from "../constants";
 import { Materials, RunOverMaterialsSet } from "@common/definitions/obstacles";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
+import { Maps } from "@common/definitions/modes";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 20;
@@ -54,12 +55,12 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
         // Initialize wheelbase based on wheel positions
         if (this.definition.wheels && this.definition.wheels.length >= 2) {
-            let minY = Infinity, maxY = -Infinity;
+            let minX = Infinity, maxX = -Infinity;
             for (const w of this.definition.wheels) {
-                minY = Math.min(minY, w.offset.y);
-                maxY = Math.max(maxY, w.offset.y);
+                minX = Math.min(minX, w.offset.x);
+                maxX = Math.max(maxX, w.offset.x);
             }
-            this.wheelbase = ((maxY - minY) / 20) * this.definition.scale;
+            this.wheelbase = ((maxX - minX) / 20) * this.definition.scale;
         }
 
         // Initialize hitboxes
@@ -70,7 +71,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
         this.health = this.definition.health;
         this.baseDamage = this.definition.baseDamage;
-        this.frictionFactor = this.definition.frictionFactor;
+        this.frictionFactor = this.definition.frictionFactor * (Maps[this.game.gameMap].frictionFactor ?? 1);
     }
 
     canInteract(player: Player): boolean {
@@ -94,6 +95,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             this._start = true;
             let availableSeat = 0; // Driver by default
             player.inventory.lockAllSlots();
+            player.action?.cancel();
             if (this.occupants[0]) {
                 availableSeat = this.occupants.findIndex(p => !p);
             }
@@ -132,6 +134,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
         // If an empty seat is found, switch to it
         if (nextIndex !== -1) {
+            player.action?.cancel();
             this.occupants[currentIndex] = undefined;
             this.occupants[nextIndex] = player;
             player.seatIndex = nextIndex;
@@ -319,7 +322,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     private applyLateralFriction(dt: number): void {
         // Lateral friction (reduce drift: stronger at low speeds)
-        const lateralDrag = 1.5; // Tune: higher = less drift (real tire grip)
+        const lateralDrag = this.frictionFactor * 3;
         const forwardDir = Vec.fromPolar(this.rotation);
         const sideDir = Vec.perpendicular(forwardDir);
         const sideVel = Vec.dotProduct(this.velocity, sideDir);

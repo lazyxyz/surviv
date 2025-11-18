@@ -107,10 +107,11 @@ export enum ZIndexes {
     Explosions,
     /**
      * This is the default layer for obstacles
-     */
+    */
     ObstaclesLayer1,
     Loot,
     GroundedThrowables,
+    UnderWheels,
     Vehicles,
     ObstaclesLayer2,
     TeammateName,

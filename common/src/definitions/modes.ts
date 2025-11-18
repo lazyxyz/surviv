@@ -24,6 +24,7 @@ export interface ModeDefinition {
     readonly specialPlayButtons?: boolean
     // icons for the mode
     readonly modeLogoImage?: string | { solo: string, squads: string }
+    readonly frictionFactor?: number
 }
 
 export type MAP = "normal" | "fall" | "winter" | "desert" | "cursedIsland";
@@ -116,7 +117,8 @@ export const Maps: Record<MAP, ModeDefinition> = {
         //     gravity: true
         // },
         specialPlayButtons: true,
-        modeLogoImage: "./img/game/winter/obstacles/red_gift.svg"
+        modeLogoImage: "./img/game/winter/obstacles/red_gift.svg",
+        frictionFactor: 2.0
     },
     desert: {
         idString: "desert",
@@ -144,6 +146,7 @@ export const Maps: Record<MAP, ModeDefinition> = {
             solo: "./img/misc/user.svg",
             squads: "./img/misc/user-group.svg"
         },
+        frictionFactor: 1.5
     },
     cursedIsland: {
         idString: "cursedIsland",
