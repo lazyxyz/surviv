@@ -1013,11 +1013,15 @@ const maps = {
                     placeItem(item);
                 }
 
-                if (itemPos.x > maxX) {
-                    itemPos.x = 0;
-                    itemPos.y += rowSpacing;
+                for (const vehicle of Vehicles.definitions) {
+                    map.game.objectSpawner.addVehicle(vehicle, Vec.create(itemPos.x, itemPos.y));
+                    if (itemPos.x > maxX) {
+                        itemPos.x = 0;
+
+                        itemPos.y += rowSpacing;
+                    }
+                    itemPos.x += colSpacing * 2.5;
                 }
-                map.game.objectSpawner.addVehicle(Vehicles.fromString('buggy'), itemPos);
 
                 if (itemPos.x > maxX) {
                     itemPos.x = 0;
