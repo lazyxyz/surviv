@@ -54,12 +54,12 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
         // Initialize wheelbase based on wheel positions
         if (this.definition.wheels && this.definition.wheels.length >= 2) {
-            let minY = Infinity, maxY = -Infinity;
+            let minX = Infinity, maxX = -Infinity;
             for (const w of this.definition.wheels) {
-                minY = Math.min(minY, w.offset.y);
-                maxY = Math.max(maxY, w.offset.y);
+                minX = Math.min(minX, w.offset.x);
+                maxX = Math.max(maxX, w.offset.x);
             }
-            this.wheelbase = ((maxY - minY) / 20) * this.definition.scale;
+            this.wheelbase = ((maxX - minX) / 20) * this.definition.scale;
         }
 
         // Initialize hitboxes
@@ -319,7 +319,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     private applyLateralFriction(dt: number): void {
         // Lateral friction (reduce drift: stronger at low speeds)
-        const lateralDrag = 1.5; // Tune: higher = less drift (real tire grip)
+        const lateralDrag = this.frictionFactor * 3;
         const forwardDir = Vec.fromPolar(this.rotation);
         const sideDir = Vec.perpendicular(forwardDir);
         const sideVel = Vec.dotProduct(this.velocity, sideDir);
