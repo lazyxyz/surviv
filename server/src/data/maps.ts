@@ -967,7 +967,7 @@ const maps = {
             width: 200,
             height: 200,
             beachSize: 8,
-            oceanSize: 8,
+            oceanSize: 64,
             onGenerate(map) {
                 let itemPos = Vec.create(0, 20); // Start slightly inset from top-left for better spacing
                 const colSpacing = 15;
@@ -1002,12 +1002,6 @@ const maps = {
                 for (const item of Scopes.definitions) {
                     placeItem(item);
                 }
-
-                if (itemPos.x > maxX) {
-                    itemPos.x = 0;
-                    itemPos.y += rowSpacing;
-                }
-                map.game.objectSpawner.addVehicle(Vehicles.fromString('buggy'), itemPos);
 
                 if (itemPos.x > maxX) {
                     itemPos.x = 0;

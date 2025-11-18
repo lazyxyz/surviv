@@ -11,6 +11,7 @@ import { Player } from "./player";
 import { Numeric } from "@common/utils/math";
 import { materialMultipliers } from "../constants";
 import { Materials, RunOverMaterialsSet } from "@common/definitions/obstacles";
+import { FloorNames, FloorTypes } from "@common/utils/terrain";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 20;
@@ -36,6 +37,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private maxBounceDist = 0.5; // Max depenetration distance per step (prevents unrealistic far jumps)
     private baseDamage; // Base factor for collision damage calculation
     private deadImpact = 0.3; // When obstacle dies, reduce bounce/speed loss by 70% (plow through debris with less resistance)
+    floor = FloorNames.Water;
 
     get height(): number { return this._height; }
 
@@ -260,6 +262,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     ((potential.isObstacle || potential.isBuilding || (potential.isVehicle && potential !== this))
                         || (potential.isPlayer && !potential.inVehicle))
                     && !potential.dead
+                    && potential.collidable
                 ) {
                     if (this.handleCollision(potential)) {
                         collided = true;
@@ -326,7 +329,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private clampSpeed(): void {
         // Clamp speed (along forward; allow lateral for drifts)
         const forwardDir = Vec.fromPolar(this.rotation);
-        const maxSpeed = this.definition.maxSpeed;
+        const maxSpeed = this.definition.maxSpeed * (FloorTypes[this.floor].speedMultiplier ?? 1);
         const maxReverseSpeed = maxSpeed * 0.5;
         const forwardSpeed = Vec.dotProduct(this.velocity, forwardDir);
         const clampedForward = Numeric.clamp(forwardSpeed, -maxReverseSpeed, maxSpeed);
@@ -365,6 +368,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 this.game.grid.updateObject(player);
             }
         }
+
+        this.floor = this.game.map.terrain.getFloor(this.position, this.layer, this.game.gameMap);
     }
 
     setPosition(position: Vector) {

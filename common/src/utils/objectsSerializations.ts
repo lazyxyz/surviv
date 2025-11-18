@@ -58,6 +58,7 @@ export interface ObjectsNetData extends BaseObjectsNetData {
             readonly activeDisguise?: ObstacleDefinition
             readonly blockEmoting: boolean
             readonly isDriver: boolean
+            readonly inVehicle: boolean
         },
         readonly noSize?: boolean,
     }
@@ -263,7 +264,8 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 halloweenThrowableSkin,
                 activeDisguise,
                 blockEmoting,
-                isDriver
+                isDriver,
+                inVehicle,
             } }
         ): void {
             stream.writeLayer(layer);
@@ -283,7 +285,8 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 hasVest,
                 hasDisguise,
                 blockEmoting,
-                isDriver
+                isDriver,
+                inVehicle
             );
             stream.writeUint8(teamID);
             Loots.writeToStream(stream, activeItem);
@@ -349,7 +352,8 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 hasVest,
                 hasDisguise,
                 blockEmoting,
-                isDriver
+                isDriver,
+                inVehicle,
             ] = stream.readBooleanGroup2();
 
             return {
@@ -368,7 +372,8 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 backpack: Backpacks.readFromStream(stream),
                 activeDisguise: hasDisguise ? Obstacles.readFromStream(stream) : undefined,
                 blockEmoting,
-                isDriver
+                isDriver,
+                inVehicle
             };
         }
     },

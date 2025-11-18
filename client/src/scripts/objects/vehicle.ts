@@ -1,7 +1,7 @@
-import { ObjectCategory, STEERING_SCALE, ZIndexes } from "@common/constants";
+import { Layer, ObjectCategory, STEERING_SCALE, ZIndexes } from "@common/constants";
 import { type VehicleDefinition } from "@common/definitions/vehicle";
 import { getEffectiveZIndex } from "@common/utils/layer";
-import { FloorNames } from "@common/utils/terrain"; // Import for floorType
+import { FloorNames, FloorTypes } from "@common/utils/terrain"; // Import for floorType
 import { type ObjectsNetData } from "@common/utils/objectsSerializations";
 import { type Game } from "../game";
 import { drawHitbox, SuroiSprite, toPixiCoords } from "../utils/pixi";
@@ -11,6 +11,10 @@ import type { Orientation } from "@common/typings";
 import { DIFF_LAYER_HITBOX_OPACITY, HITBOX_COLORS, HITBOX_DEBUG_MODE } from "../utils/constants";
 import { Vec, type Vector } from "@common/utils/vector";
 import { GAME_CONSOLE } from "../..";
+import { random, randomFloat } from "@common/utils/random";
+import { Geometry } from "@common/utils/math";
+import type { GameSound } from "../managers/soundManager";
+
 
 export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     definition!: VehicleDefinition;
@@ -22,6 +26,11 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     orientation: Orientation = 0;
     dead = false;
     damageable = true;
+
+    distSinceLastFootstep = 0;
+    distTraveled = 0;
+    wheelstepSound?: GameSound;
+
     constructor(game: Game, id: number, data: ObjectsNetData[ObjectCategory.Vehicle]) {
         super(game, id);
         this.image = new SuroiSprite();
@@ -40,10 +49,11 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         // Compute floorType like Player/Obstacle (fixes doOverlay)
         const floorType = this.game.map.terrain.getFloor(this.position, this.layer, this.game.gameMap);
         this.floorType = floorType; // Cache for doOverlay/zIndex
+        const oldPosition = Vec.clone(this.position);
         this.position = data.position;
         this.rotation = data.rotation;
+        const game = this.game;
 
-        console.log("position: ", this.position);
         // console.log("Vehicle rotation: ", data.rotation);
         // Handle definition (from full on spawn/update)
         if (data.full?.definition) {
@@ -112,9 +122,73 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             this.wheels[2].rotation = 0; // Rear-left aligned
             this.wheels[3].rotation = 0; // Rear-right aligned
         }
+
+        if (oldPosition !== undefined) {
+            this.distSinceLastFootstep += Geometry.distance(oldPosition, this.position);
+            this.distTraveled += Geometry.distance(oldPosition, this.position);
+
+            if (this.distSinceLastFootstep > 10) {
+                this.wheelstepSound = this.playSound(
+                    `${this.floorType}_step_${random(1, 2)}`,
+                    {
+                        falloff: 0.6,
+                        maxRange: 48
+                    }
+                );
+
+                this.distSinceLastFootstep = 0;
+
+                if (FloorTypes[floorType].particles && this.layer >= Layer.Ground) {
+                    const scaleFactor = 20;
+                    for (let i = 0; i < this.wheels.length && i < 4; i++) {
+                        const wheelLocalPos = this.wheels[i].position;
+                        const offsetGame = Vec.scale(Vec.create(wheelLocalPos.x, wheelLocalPos.y), 1 / scaleFactor);
+                        const wheelWorldPos = Vec.add(this.position, Vec.rotate(offsetGame, this.rotation));
+
+                        const options = {
+                            frames: "ripple_particle",
+                            zIndex: ZIndexes.Ground,
+                            position: wheelWorldPos,
+                            lifetime: 1000,
+                            layer: this.layer,
+                            speed: Vec.create(0, 0)
+                        };
+
+                        // outer
+                        game.particleManager.spawnParticle({
+                            ...options,
+                            scale: {
+                                start: randomFloat(0.45, 0.55),
+                                end: randomFloat(2.95, 3.05)
+                            },
+                            alpha: {
+                                start: randomFloat(0.55, 0.65),
+                                end: 0
+                            }
+                        });
+
+                        // inner
+                        game.particleManager.spawnParticle({
+                            ...options,
+                            scale: {
+                                start: randomFloat(0.15, 0.35),
+                                end: randomFloat(1.45, 1.55)
+                            },
+                            alpha: {
+                                start: randomFloat(0.25, 0.35),
+                                end: 0
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+
         this.updateZIndex();
         this.updateDebugGraphics();
     }
+
     override updateZIndex(): void {
         const baseZIndex = this.definition?.zIndex ?? ZIndexes.Vehicles ?? ZIndexes.ObstaclesLayer1;
         const zIndex = this.dead // Assuming you add dead later; stub for now
@@ -124,6 +198,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             : baseZIndex;
         this.container.zIndex = getEffectiveZIndex(zIndex, this.layer, this.game.layer);
     }
+    
     override destroy(): void {
         this.image.destroy();
         this.wheels.forEach(wheel => wheel.destroy());
