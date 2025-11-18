@@ -12,6 +12,7 @@ import { Numeric } from "@common/utils/math";
 import { materialMultipliers } from "../constants";
 import { Materials, RunOverMaterialsSet } from "@common/definitions/obstacles";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
+import { Maps } from "@common/definitions/modes";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 20;
@@ -70,7 +71,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
         this.health = this.definition.health;
         this.baseDamage = this.definition.baseDamage;
-        this.frictionFactor = this.definition.frictionFactor;
+        this.frictionFactor = this.definition.frictionFactor * (Maps[this.game.gameMap].frictionFactor ?? 1);
     }
 
     canInteract(player: Player): boolean {

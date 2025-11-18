@@ -71,12 +71,12 @@ export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(
             explosion: "super_barrel_explosion",
             spawnMode: MapObjectSpawnMode.Trail,
 
-            maxSpeed: 0.065,
-            acceleration: 0.000045,
+            maxSpeed: 0.08,
+            acceleration: 0.00008,
             maxSteerAngle: Math.PI / 5,
             steerRate: Math.PI * 0.8,
             drag: 0.0012,
-            frictionFactor: 0.75,
+            frictionFactor: 0.35,
 
             wheels: [
                 { offset: Vec.create(240, -145), scale: 1.1, zIndex: ZIndexes.UnderWheels },
@@ -121,7 +121,7 @@ export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(
             maxSteerAngle: Math.PI / 7,
             steerRate: Math.PI / 2,
             drag: 0.0009,
-            frictionFactor: 0.35,
+            frictionFactor: 0.75,
 
             wheels: [
                 { offset: Vec.create(230, -120), scale: 0.8, zIndex: ZIndexes.Vehicles },
