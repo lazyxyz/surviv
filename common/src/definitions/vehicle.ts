@@ -115,6 +115,83 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
     defaultVehicle,
     () => [
         {
+            idString: "jeep",
+            name: "Jeep",
+            scale: 1,  // Default size
+            rotationMode: RotationMode.Limited,
+            spawnHitbox: RectangleHitbox.fromRect(20, 18.4),
+            hitbox: new GroupHitbox(
+                new CircleHitbox(8.6, Vec.create(9.2, 0)),
+                new CircleHitbox(8.6, Vec.create(0, 0)),
+                new CircleHitbox(8.6, Vec.create(-9.2, 0)),
+            ),
+            bulletHitbox: new GroupHitbox(
+                // Hood (front)
+                new CircleHitbox(8.6, Vec.create(9.2, 0)),
+                new CircleHitbox(2.6, Vec.create(3.2, -6)),
+                new CircleHitbox(2.6, Vec.create(3.2, 6)),
+            ),
+            health: 1000,
+            reflectBullets: true,
+            material: Materials[5],
+
+            maxSpeed: 0.09, // Default slower than player
+            acceleration: 0.00008, // Reach maxSpeed in ~4s (tune as needed)
+            turnSpeed: 0.0001, // ~114 deg/s (tune for feel)
+            drag: 0.001, // Decel time constant ~1s
+            explosion: "super_barrel_explosion",
+
+            wheels: [
+                {  // Front-left
+                    offset: Vec.create(240, -145), // forward, left/right
+                    scale: 1.1,
+                    zIndex: ZIndexes.Ground - 1
+                },
+                {  // Front-right
+                    offset: Vec.create(240, 145),
+                    scale: 1.1,
+                    zIndex: ZIndexes.Ground - 1
+                },
+                {  // Rear-left
+                    offset: Vec.create(-190, -145),
+                    scale: 1.1,  // Standard rear
+                    zIndex: ZIndexes.Ground - 1
+                },
+                {  // Rear-right
+                    offset: Vec.create(-190, 145),
+                    scale: 1.1,
+                    zIndex: ZIndexes.Ground - 1
+                }
+            ],
+
+            seats: [
+
+                {
+                    offset: Vec.create(-3.4, -3.5), // Driver seat, centered forward
+                    type: SeatType.Driver,
+                    exitOffset: Vec.create(0, -10),
+
+                },
+                {
+                    offset: Vec.create(-3.4, 3.5), // Passenger seat, offset to the right
+                    type: SeatType.Passenger,
+                    exitOffset: Vec.create(0, 10),
+
+                },
+                {
+                    offset: Vec.create(-11.4, -3.5), // Passenger seat, offset to the right
+                    type: SeatType.Driver,
+                    exitOffset: Vec.create(4, -10),
+
+                },
+                {
+                    offset: Vec.create(-11.2, 3.5), // Passenger seat, offset to the right
+                    type: SeatType.Driver,
+                    exitOffset: Vec.create(0, 10),
+                },
+            ]
+        },
+        {
             idString: "buggy",
             name: "Buggy",
             scale: 1,  // Default size

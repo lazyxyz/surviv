@@ -999,17 +999,17 @@ const maps = {
                     placeItem(item);
                 }
 
-                if (itemPos.x > maxX) {
-                    itemPos.x = 0;
-                    itemPos.y += rowSpacing;
-                }
-                map.game.objectSpawner.addVehicle(Vehicles.fromString('buggy'), itemPos);
+                // if (itemPos.x > maxX) {
+                //     itemPos.x = 0;
+                //     itemPos.y += rowSpacing;
+                // }
+                // map.game.objectSpawner.addVehicle(Vehicles.fromString('jeep'), itemPos);
 
                 if (itemPos.x > maxX) {
                     itemPos.x = 0;
                     itemPos.y += rowSpacing;
                 }
-                map.game.objectSpawner.addVehicle(Vehicles.fromString('buggy'), itemPos);
+                map.game.objectSpawner.addVehicle(Vehicles.fromString('jeep'), itemPos);
 
                 if (itemPos.x > maxX) {
                     itemPos.x = 0;
