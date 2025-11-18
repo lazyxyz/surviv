@@ -217,10 +217,10 @@ const maps = {
     },
 
     fall: {
-        width: 1924,
-        height: 1924,
-        oceanSize: 128,
-        beachSize: 32,
+        width: 2048,
+        height: 2048,
+        oceanSize: 64,
+        beachSize: 8,
         rivers: {
             minAmount: 2,
             maxAmount: 2,
@@ -232,8 +232,8 @@ const maps = {
             maxWideAmount: 1
         },
         trails: {
-            minAmount: 2,
-            maxAmount: 3,
+            minAmount: 3,
+            maxAmount: 5,
             wideChance: 0.2,
             minWidth: 2,
             maxWidth: 4,
@@ -260,8 +260,6 @@ const maps = {
             small_bridge: Infinity,
             plumpkin_bunker: 1,
             sea_traffic_control: 1,
-            tugboat_red: 1,
-            tugboat_white: 7,
             lodge: 1,
             bombed_armory: 1,
             barn: 3,
@@ -381,14 +379,17 @@ const maps = {
             { name: "Crimson Hills", position: Vec.create(0.72, 0.8) },
             { name: "Emerald Farms", position: Vec.create(0.5, 0.35) },
             { name: "Darkwood", position: Vec.create(0.5, 0.65) }
-        ]
+        ],
+        vehicles: {
+            buggy: 10
+        }
     },
 
     winter: {
-        width: 1632,
-        height: 1632,
-        oceanSize: 128,
-        beachSize: 32,
+        width: 2048,
+        height: 2048,
+        oceanSize: 64,
+        beachSize: 8,
         rivers: {
             minAmount: 2,
             maxAmount: 3,
@@ -399,13 +400,23 @@ const maps = {
             minWideWidth: 25,
             maxWideWidth: 30
         },
+        trails: {
+            minAmount: 3,
+            maxAmount: 5,
+            wideChance: 0.2,
+            minWidth: 2,
+            maxWidth: 4,
+            minWideWidth: 3,
+            maxWideWidth: 5,
+            maxWideAmount: 1
+        },
         buildings: {
             large_bridge: 2,
             small_bridge: Infinity,
             port_complex: 1,
             sea_traffic_control: 1,
-            tugboat_red: 1,
-            tugboat_white: 5,
+            // tugboat_red: 1,
+            // tugboat_white: 5,
             armory: 1,
             headquarters: 1,
             small_bunker: 1,
@@ -506,14 +517,17 @@ const maps = {
             { name: "Noskin Narrows", position: Vec.create(0.72, 0.8) },
             { name: "Mt. Sanger", position: Vec.create(0.5, 0.35) },
             { name: "Deepwood", position: Vec.create(0.5, 0.65) }
-        ]
+        ],
+        vehicles: {
+            buggy: 10
+        }
     },
 
     desert: {
-        width: 1924,
-        height: 1924,
+        width: 2048,
+        height: 2048,
         oceanSize: 64,
-        beachSize: 16,
+        beachSize: 8,
         oases: {
             minAmount: 7,
             maxAmount: 7,
@@ -522,8 +536,8 @@ const maps = {
             bankWidth: 12
         },
         trails: {
-            minAmount: 7,
-            maxAmount: 7,
+            minAmount: 3,
+            maxAmount: 5,
             wideChance: 0.2,
             minWidth: 2,
             maxWidth: 4,
@@ -614,7 +628,7 @@ const maps = {
             { name: "Shadow Sands", position: Vec.create(0.5, 0.65) }
         ],
         vehicles: {
-            buggy: 100
+            buggy: 10
         }
     },
 
@@ -963,7 +977,7 @@ const maps = {
             width: 200,
             height: 200,
             beachSize: 8,
-            oceanSize: 8,
+            oceanSize: 64,
             onGenerate(map) {
                 let itemPos = Vec.create(0, 20); // Start slightly inset from top-left for better spacing
                 const colSpacing = 15;
@@ -999,17 +1013,15 @@ const maps = {
                     placeItem(item);
                 }
 
-                // if (itemPos.x > maxX) {
-                //     itemPos.x = 0;
-                //     itemPos.y += rowSpacing;
-                // }
-                // map.game.objectSpawner.addVehicle(Vehicles.fromString('jeep'), itemPos);
+                for (const vehicle of Vehicles.definitions) {
+                    map.game.objectSpawner.addVehicle(vehicle, Vec.create(itemPos.x, itemPos.y));
+                    if (itemPos.x > maxX) {
+                        itemPos.x = 0;
 
-                if (itemPos.x > maxX) {
-                    itemPos.x = 0;
-                    itemPos.y += rowSpacing;
+                        itemPos.y += rowSpacing;
+                    }
+                    itemPos.x += colSpacing * 2.5;
                 }
-                map.game.objectSpawner.addVehicle(Vehicles.fromString('jeep'), itemPos);
 
                 if (itemPos.x > maxX) {
                     itemPos.x = 0;

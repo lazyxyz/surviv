@@ -28,7 +28,6 @@ import { ServerPerkManager, UpdatablePerkDefinition } from "../inventory/perkMan
 import { type Team } from "../team";
 import { BaseGameObject, type DamageParams, type GameObject } from "./gameObject";
 import { type Obstacle } from "./obstacle";
-import { weaponPresentType } from "@common/typings";
 import { Maps } from "@common/definitions/modes";
 
 import { InputHandler } from "./player/inputHandler";
@@ -91,6 +90,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     joined = false;
     disconnected = false;
     resurrected = false;
+    collidable: boolean = true;
 
     _team?: Team;
     get team(): Team | undefined { return this._team; }
@@ -487,7 +487,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     seatIndex?: number;
 
     exitVehicle(): void {
-        if(this.inVehicle) this.inVehicle.interact(this);
+        if (this.inVehicle) this.inVehicle.interact(this);
         this.inVehicle = undefined;
         this.seatIndex = undefined;
     }
@@ -624,7 +624,8 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 halloweenThrowableSkin: false,
                 activeDisguise: this.activeDisguise,
                 blockEmoting: this.blockEmoting,
-                isDriver: this.seatIndex == SeatType.Driver
+                isDriver: this.seatIndex == SeatType.Driver,
+                inVehicle: this.inVehicle ? true : false,
             }
         };
 

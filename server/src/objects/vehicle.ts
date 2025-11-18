@@ -10,6 +10,8 @@ import { InventoryItem } from "../inventory/inventoryItem";
 import { Player } from "./player";
 import { Numeric } from "@common/utils/math";
 import { materialMultipliers } from "../constants";
+import { Materials, RunOverMaterialsSet } from "@common/definitions/obstacles";
+import { FloorNames, FloorTypes } from "@common/utils/terrain";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 20;
@@ -35,6 +37,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private maxBounceDist = 0.5; // Max depenetration distance per step (prevents unrealistic far jumps)
     private baseDamage; // Base factor for collision damage calculation
     private deadImpact = 0.3; // When obstacle dies, reduce bounce/speed loss by 70% (plow through debris with less resistance)
+    floor = FloorNames.Water;
 
     get height(): number { return this._height; }
 
@@ -157,23 +160,9 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     }
 
     private handleCollision(potential: GameObject): boolean {
-        // Check if the potential object is collidable and intersects
-        if (
-            !(potential.isObstacle || potential.isBuilding || potential.isPlayer || (potential.isVehicle && potential != this)) ||
-            (!potential.isPlayer && !potential.collidable) ||
-            potential.dead ||
-            !potential.hitbox ||
-            !this.occupants[SeatType.Driver]
-        ) {
-            return false;
-        }
-
-        // Skip collision with own passengers
-        if (potential.isPlayer && potential.inVehicle) {
-            return false;
-        }
-
-        if (this.hitbox.collidesWith(potential.hitbox)) {
+        if (potential.hitbox && this.hitbox.collidesWith(potential.hitbox)) {
+            const potentialMaterial = potential.isObstacle && potential.definition.material;
+            const isRunOver = potential.isPlayer || (potentialMaterial && RunOverMaterialsSet.has(potentialMaterial));
             // Calculate adjustment to resolve penetration
             const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.2); // Tune factor (0.5=half push, reduce if too far)
             // Clamp adjustment magnitude to prevent far jumps
@@ -196,7 +185,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 if (impactVel > 0.005) { // Approaching (threshold; note sign convention assuming dir points out)
                     let materialFactor = 1.0;
                     let inverseMaterialFactor = 1.0; // For obstacle damage (soft = high damage to obstacle)
-                    if (potential.isPlayer) {
+                    if (isRunOver) {
                         const damageToPlayer = Math.abs(impactVel) * this.baseDamage * 5;
                         potential.damage({
                             amount: damageToPlayer,
@@ -204,9 +193,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                             weaponUsed: undefined,
                         });
                         return true;
-                    } else if (potential.definition.material) {
-                        const material = potential.definition.material;
-                        materialFactor = materialMultipliers[material] ?? 1.0;
+                    } else if (potentialMaterial) {
+                        materialFactor = materialMultipliers[potentialMaterial] ?? 1.0;
                         inverseMaterialFactor = 1 / materialFactor; // Higher for soft
                     }
 
@@ -256,7 +244,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     // Overall speed loss
                     this.velocity = Vec.scale(this.velocity, speedLossFactor);
                 }
-            } else if (!potential.isPlayer) {
+            } else if (!isRunOver) {
                 // Low speed: just stop completely
                 this.velocity = Vec.create(0, 0);
             }
@@ -270,8 +258,15 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         for (let step = 0; step < 10; step++) {
             let collided = false;
             for (const potential of nearObjects) {
-                if (this.handleCollision(potential)) {
-                    collided = true;
+                if (
+                    ((potential.isObstacle || potential.isBuilding || (potential.isVehicle && potential !== this))
+                        || (potential.isPlayer && !potential.inVehicle))
+                    && !potential.dead
+                    && potential.collidable
+                ) {
+                    if (this.handleCollision(potential)) {
+                        collided = true;
+                    }
                 }
             }
             if (!collided) break;
@@ -334,7 +329,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private clampSpeed(): void {
         // Clamp speed (along forward; allow lateral for drifts)
         const forwardDir = Vec.fromPolar(this.rotation);
-        const maxSpeed = this.definition.maxSpeed;
+        const maxSpeed = this.definition.maxSpeed * (FloorTypes[this.floor].speedMultiplier ?? 1);
         const maxReverseSpeed = maxSpeed * 0.5;
         const forwardSpeed = Vec.dotProduct(this.velocity, forwardDir);
         const clampedForward = Numeric.clamp(forwardSpeed, -maxReverseSpeed, maxSpeed);
@@ -373,6 +368,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 this.game.grid.updateObject(player);
             }
         }
+
+        this.floor = this.game.map.terrain.getFloor(this.position, this.layer, this.game.gameMap);
     }
 
     setPosition(position: Vector) {

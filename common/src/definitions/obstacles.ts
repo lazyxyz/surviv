@@ -284,6 +284,15 @@ export const RevivableMaterials: Array<typeof Materials[number]> = [
 
 export const RevivableMaterialSet = new Set<typeof RevivableMaterials[number]>(RevivableMaterials);
 
+export const RunOverMaterials: Array<typeof Materials[number]> = [
+    "porcelain",
+    "cardboard",
+    "pumpkin",
+    "crate"
+];
+
+export const RunOverMaterialsSet = new Set<typeof RunOverMaterials[number]>(RunOverMaterials);
+
 export const MaterialSounds: Record<string, { hit?: string, destroyed?: string }> = {
     cardboard: { hit: "stone", destroyed: "crate" },
     iron: { hit: "metal_light", destroyed: "appliance" },

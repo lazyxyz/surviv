@@ -52,6 +52,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     gunAttackCounter = 0;
     private _stopTimeout?: NodeJS.Timeout;
     isDriver: boolean = false;
+    inVehicle: boolean = false;
 
     // Function to handle gun attack image/frame changes
     gunAttackCount(): void {
@@ -458,7 +459,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
         }
         this.floorType = floorType;
 
-        if (oldPosition !== undefined) {
+        if (oldPosition !== undefined && !this.inVehicle) {
             this.distSinceLastFootstep += Geometry.distance(oldPosition, this.position);
             this.distTraveled += Geometry.distance(oldPosition, this.position);
 
@@ -549,10 +550,10 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     helmet,
                     vest,
                     backpack,
-                    halloweenThrowableSkin,
                     activeDisguise,
                     blockEmoting,
-                    isDriver
+                    isDriver,
+                    inVehicle
                 }
             } = data;
 
@@ -562,6 +563,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
             this.container.visible = !dead;
             this.isDriver = isDriver;
+            this.inVehicle = inVehicle;
 
             this.disguiseContainer.visible = this.container.visible;
 
@@ -1976,35 +1978,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                         this.anims.rightFist = undefined;
                     }
                 });
-                break;
-            }
-
-            case AnimationType.GunSpinUp: {
-                if (this.activeItem.itemType !== ItemType.Gun) {
-                    console.warn(`Attempted to play gun spin-up animation with non-gun item '${this.activeItem.idString}'`);
-                    return;
-                }
-                const weaponDef = this.activeItem;
-                if (weaponDef.spinUpTime) {
-                    this.playSound(`${weaponDef.idString}_spin`, {
-                        falloff: 0.4,
-                        maxRange: 96
-                    });
-                }
-                break;
-            }
-            case AnimationType.GunSpinDown: {
-                if (this.activeItem.itemType !== ItemType.Gun) {
-                    console.warn(`Attempted to play gun spin-down animation with non-gun item '${this.activeItem.idString}'`);
-                    return;
-                }
-                const weaponDef = this.activeItem;
-                if (weaponDef.spinUpTime) {
-                    this.playSound(`${weaponDef.idString}_stop`, {
-                        falloff: 0.4,
-                        maxRange: 96
-                    });
-                }
                 break;
             }
         }
