@@ -35,6 +35,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
     constructor(game: Game, id: number, data: ObjectsNetData[ObjectCategory.Vehicle]) {
         super(game, id);
+        this.container.sortableChildren = true;
         this.image = new SuroiSprite();
         this.container.addChild(this.image);
         this.initializeWheels(4); // Initialize with 4 wheels by default
@@ -126,7 +127,6 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
                 const wheel = this.wheels[i];
                 wheel.position.copyFrom(Vec.scale(config.offset, this.definition.scale));
                 wheel.scale.set(config.scale);
-                wheel.zIndex = getEffectiveZIndex(config.zIndex, this.layer, this.game.layer);
                 wheel.visible = !this.dead;
             }
         });
@@ -239,16 +239,28 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         }
     }
 
+    private updateWheelZIndexes(): void {
+        if (!this.definition?.wheels) return;
+        this.definition.wheels.forEach((config, i) => {
+            if (i < this.wheels.length) {
+                this.wheels[i].zIndex = getEffectiveZIndex(config.zIndex, this.layer, this.game.layer);
+            }
+        });
+    }
+
     override updateZIndex(): void {
         const baseZIndex = this.definition?.zIndex ?? ZIndexes.Vehicles ?? ZIndexes.ObstaclesLayer1;
         const zIndex = FloorTypes[this.floorType].overlay
             ? this.dead
                 ? ZIndexes.UnderWaterDeadObstacles
-                : ZIndexes.UnderWaterObstacles // Adjust if ZIndexes lacks this; e.g., ZIndexes.UnderwaterPlayers - 1
+                : ZIndexes.UnderWaterObstacles
             : this.dead
                 ? ZIndexes.DeadObstacles
                 : baseZIndex;
-        this.container.zIndex = getEffectiveZIndex(zIndex, this.layer, this.game.layer);
+        const effectiveZIndex = getEffectiveZIndex(zIndex, this.layer, this.game.layer);
+        this.container.zIndex = effectiveZIndex;
+        this.image.zIndex = getEffectiveZIndex(baseZIndex, this.layer, this.game.layer);
+        this.updateWheelZIndexes();
     }
 
     override destroy(): void {
