@@ -191,14 +191,16 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
     override updateZIndex(): void {
         const baseZIndex = this.definition?.zIndex ?? ZIndexes.Vehicles ?? ZIndexes.ObstaclesLayer1;
-        const zIndex = this.dead // Assuming you add dead later; stub for now
-            ? this.doOverlay() // doOverlay now works via floorType
+        const zIndex = FloorTypes[this.floorType].overlay
+            ? this.dead
                 ? ZIndexes.UnderWaterDeadObstacles
-                : ZIndexes.DeadObstacles
-            : baseZIndex;
+                : ZIndexes.UnderWaterObstacles // Assuming ZIndexes has UnderWaterObstacles; if not, use ZIndexes.UnderwaterPlayers - 1 or adjust accordingly
+            : this.dead
+                ? ZIndexes.DeadObstacles
+                : baseZIndex;
         this.container.zIndex = getEffectiveZIndex(zIndex, this.layer, this.game.layer);
     }
-    
+
     override destroy(): void {
         this.image.destroy();
         this.wheels.forEach(wheel => wheel.destroy());
