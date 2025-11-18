@@ -79,7 +79,7 @@ export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(
             frictionFactor: 0.75,
 
             wheels: [
-                { offset: Vec.create(240, -145), scale: 1.1, zIndex: ZIndexes.UnderWheels - 9 },
+                { offset: Vec.create(240, -145), scale: 1.1, zIndex: ZIndexes.UnderWheels },
                 { offset: Vec.create(240, 145), scale: 1.1, zIndex: ZIndexes.UnderWheels },
                 { offset: Vec.create(-190, -145), scale: 1.1, zIndex: ZIndexes.UnderWheels },
                 { offset: Vec.create(-190, 145), scale: 1.1, zIndex: ZIndexes.UnderWheels }

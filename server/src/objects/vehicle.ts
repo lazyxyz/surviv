@@ -94,6 +94,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             this._start = true;
             let availableSeat = 0; // Driver by default
             player.inventory.lockAllSlots();
+            player.action?.cancel();
             if (this.occupants[0]) {
                 availableSeat = this.occupants.findIndex(p => !p);
             }
@@ -132,6 +133,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
         // If an empty seat is found, switch to it
         if (nextIndex !== -1) {
+            player.action?.cancel();
             this.occupants[currentIndex] = undefined;
             this.occupants[nextIndex] = player;
             player.seatIndex = nextIndex;
