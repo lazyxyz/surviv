@@ -1112,8 +1112,8 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 1,
                     destroy: 0.5
                 },
-                hitbox: new CircleHitbox(4),
-                spawnHitbox: new CircleHitbox(4.5),
+                hitbox: new CircleHitbox(5.4),
+                spawnHitbox: new CircleHitbox(6),
                 rotationMode: RotationMode.Full,
                 frames: { particle: "bull_skeleton_particle", residue: "bull_skeleton_residue" }
             },
@@ -1127,9 +1127,15 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 1,
                     destroy: 0.5
                 },
-                hitbox: new CircleHitbox(6),
-                spawnHitbox: new CircleHitbox(6.5),
-                rotationMode: RotationMode.Full,
+                // hitbox: new CircleHitbox(6),
+                // spawnHitbox: new CircleHitbox(6.5),
+                // RectangleHitbox.fromRect(14, 9),
+                hitbox: new GroupHitbox(
+                    new CircleHitbox(3.6, Vec.create(-3.8, -1.35)),
+                    new CircleHitbox(4.5, Vec.create(2.1, 0.5)),
+                ),
+                spawnHitbox: RectangleHitbox.fromRect(16, 12),
+                rotationMode: RotationMode.None,
                 frames: { particle: "bull_skeleton_particle", residue: "dinosaur_skeleton_residue" }
             },
             {
@@ -1142,8 +1148,8 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 1,
                     destroy: 0.5
                 },
-                hitbox: new CircleHitbox(8),
-                spawnHitbox: new CircleHitbox(8.5),
+                hitbox: new CircleHitbox(10),
+                spawnHitbox: new CircleHitbox(10.2),
                 rotationMode: RotationMode.Full,
                 frames: { particle: "bull_skeleton_particle", residue: "mammoth_skeleton_residue" }
             },
@@ -1157,7 +1163,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 0.7,
                     destroy: 0.45
                 },
-                hitbox: new CircleHitbox(4.2),
+                hitbox: new CircleHitbox(6),
                 noCollisions: true,
                 rotationMode: RotationMode.Full,
                 zIndex: ZIndexes.ObstaclesLayer3,
@@ -1173,7 +1179,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 0.9,
                     destroy: 0.55
                 },
-                hitbox: new CircleHitbox(4.2),
+                hitbox: new CircleHitbox(6),
                 noCollisions: true,
                 rotationMode: RotationMode.Full,
                 zIndex: ZIndexes.ObstaclesLayer3,
@@ -1189,7 +1195,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 0.7,
                     destroy: 0.45
                 },
-                hitbox: new CircleHitbox(4.2),
+                hitbox: new CircleHitbox(6),
                 noCollisions: true,
                 rotationMode: RotationMode.Full,
                 zIndex: ZIndexes.ObstaclesLayer3,
@@ -1201,7 +1207,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 material: "wood",
                 health: 120,
                 scale: { spawnMin: 1, spawnMax: 1, destroy: 0.7 },
-                hitbox: new CircleHitbox(3.75),
+                hitbox: new CircleHitbox(4.45),
                 rotationMode: RotationMode.Full,
                 hasLoot: true,
                 frames: { particle: "wood_barrel_particle", residue: "wood_barrel_residue" }
@@ -1212,7 +1218,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 material: "porcelain",
                 health: 80,
                 scale: { spawnMin: 0.9, spawnMax: 0.9, destroy: 0.6 },
-                hitbox: new CircleHitbox(3.75),
+                hitbox: new CircleHitbox(4.45),
                 rotationMode: RotationMode.Full,
                 spawnMode: MapObjectSpawnMode.GrassAndAroundOasis,
                 hasLoot: true,
