@@ -815,6 +815,7 @@ export class GameMap {
             do {
                 position = this.getRandomPosition(effSpawnHitbox, {
                     getPosition,
+                    spawnMode: def.spawnMode
                 });
 
                 attempts++;

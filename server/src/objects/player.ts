@@ -28,7 +28,6 @@ import { ServerPerkManager, UpdatablePerkDefinition } from "../inventory/perkMan
 import { type Team } from "../team";
 import { BaseGameObject, type DamageParams, type GameObject } from "./gameObject";
 import { type Obstacle } from "./obstacle";
-import { weaponPresentType } from "@common/typings";
 import { Maps } from "@common/definitions/modes";
 
 import { InputHandler } from "./player/inputHandler";

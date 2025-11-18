@@ -217,10 +217,10 @@ const maps = {
     },
 
     fall: {
-        width: 1924,
-        height: 1924,
-        oceanSize: 128,
-        beachSize: 32,
+        width: 2048,
+        height: 2048,
+        oceanSize: 64,
+        beachSize: 8,
         rivers: {
             minAmount: 2,
             maxAmount: 2,
@@ -260,8 +260,6 @@ const maps = {
             small_bridge: Infinity,
             plumpkin_bunker: 1,
             sea_traffic_control: 1,
-            tugboat_red: 1,
-            tugboat_white: 7,
             lodge: 1,
             bombed_armory: 1,
             barn: 3,
@@ -381,14 +379,17 @@ const maps = {
             { name: "Crimson Hills", position: Vec.create(0.72, 0.8) },
             { name: "Emerald Farms", position: Vec.create(0.5, 0.35) },
             { name: "Darkwood", position: Vec.create(0.5, 0.65) }
-        ]
+        ],
+        vehicles: {
+            buggy: 10
+        }
     },
 
     winter: {
-        width: 1632,
-        height: 1632,
-        oceanSize: 128,
-        beachSize: 32,
+        width: 2048,
+        height: 2048,
+        oceanSize: 64,
+        beachSize: 8,
         rivers: {
             minAmount: 2,
             maxAmount: 3,
@@ -404,8 +405,8 @@ const maps = {
             small_bridge: Infinity,
             port_complex: 1,
             sea_traffic_control: 1,
-            tugboat_red: 1,
-            tugboat_white: 5,
+            // tugboat_red: 1,
+            // tugboat_white: 5,
             armory: 1,
             headquarters: 1,
             small_bunker: 1,
@@ -506,14 +507,17 @@ const maps = {
             { name: "Noskin Narrows", position: Vec.create(0.72, 0.8) },
             { name: "Mt. Sanger", position: Vec.create(0.5, 0.35) },
             { name: "Deepwood", position: Vec.create(0.5, 0.65) }
-        ]
+        ],
+        vehicles: {
+            buggy: 10
+        }
     },
 
     desert: {
-        width: 1924,
-        height: 1924,
+        width: 2048,
+        height: 2048,
         oceanSize: 64,
-        beachSize: 16,
+        beachSize: 8,
         oases: {
             minAmount: 7,
             maxAmount: 7,
@@ -614,7 +618,7 @@ const maps = {
             { name: "Shadow Sands", position: Vec.create(0.5, 0.65) }
         ],
         vehicles: {
-            buggy: 100
+            buggy: 10
         }
     },
 

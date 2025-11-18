@@ -1,6 +1,6 @@
 import { Layers, ZIndexes } from "../constants";
 import { CircleHitbox, GroupHitbox, Hitbox, RectangleHitbox } from "../utils/hitbox";
-import { ObjectDefinitions, type ObjectDefinition } from "../utils/objectDefinitions";
+import { MapObjectSpawnMode, ObjectDefinitions, type ObjectDefinition } from "../utils/objectDefinitions";
 import { Vec, Vector } from "../utils/vector";
 import { Materials, RotationMode } from "./obstacles";  // Reuse from obstacles, as vehicles rotate like them
 
@@ -22,6 +22,7 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly reflectBullets: boolean;
     readonly material?: typeof Materials[number];
     readonly explosion?: string;
+    readonly spawnMode: MapObjectSpawnMode;
 
     readonly wheels: Array<{  // NEW: Per-wheel config
         offset: Vector;     // Position relative to vehicle center
@@ -71,6 +72,7 @@ const defaultVehicle: VehicleDefinition = {
     maxSteerAngle: Math.PI / 6,  // 30° max wheel turn
     steerRate: Math.PI / 2,     // 90°/s response
     drag: 0.001,
+    spawnMode: MapObjectSpawnMode.Trail,
     wheels: [
         {
             offset: Vec.create(-120, -230),
@@ -143,7 +145,7 @@ export const Vehicles = ObjectDefinitions.withDefault<VehicleDefinition>()(
 
             drag: 0.001, // Decel time constant ~1s
             explosion: "super_barrel_explosion",
-
+            spawnMode: MapObjectSpawnMode.Trail,
             wheels: [
                 {  // Front-left
                     offset: Vec.create(230, -120), // forward, left/right
