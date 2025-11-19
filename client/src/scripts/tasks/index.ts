@@ -40,8 +40,6 @@ async function updateTasksUI(account: Account) {
 
         const data = await account.getAllTasks();
 
-        console.log("data: ", data);
-
         // Update each task by ID
         data.tasks.forEach(task => {
             const $task = $(`.task-item[data-task-id="${task.id}"]`);
@@ -78,8 +76,6 @@ async function updateTasksUI(account: Account) {
                 if (i < streak) $(`.streak-day:eq(${i})`).addClass("completed");
                 if (i === streak) $(`.streak-day:eq(${i})`).addClass("current");
             }
-
-            $("#claim-streak-reward").toggle(streakTask.completed && !streakTask.claimed);
         }
 
         // Timer

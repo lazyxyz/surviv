@@ -39,7 +39,7 @@ export async function savePlayerRank(chain: Blockchain, player: string, rank: nu
     teamMode: boolean, gameId: string, boost: number = 0, timeout: number = 10000): Promise<any> {
     const url = `${Config.earnConfig?.api}/admin/savePlayerRank`;
 
-    const chainId  = chainToConfig[chain].chainId;
+    const chainId = chainToConfig[chain].chainId;
     const survivRewards = getSurvivAddress(chain, "SurvivRewards");
 
     const controller = new AbortController();
@@ -72,7 +72,9 @@ export async function savePlayerGame(chain: Blockchain, player: string, rank: nu
     gameId: string, kills: number, timeAlive: number, damageDone: number,
     damageTaken: number, timeout: number = 10000): Promise<any> {
     const url = `${Config.earnConfig?.api}/admin/savePlayerGame`;
-     const chainId  = chainToConfig[chain].chainId;
+
+    const chainId = chainToConfig[chain].chainId;
+    const survivRewards = getSurvivAddress(chain, "SurvivRewards");
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
     try {
@@ -82,7 +84,7 @@ export async function savePlayerGame(chain: Blockchain, player: string, rank: nu
                 'Content-Type': 'application/json',
                 'x-api-key': process.env.X_API_KEY || '',
             },
-            body: JSON.stringify({chainId, player, rank, teamMode, gameId, kills, timeAlive, damageDone, damageTaken }),
+            body: JSON.stringify({ chainId, player, rank, teamMode, gameId, kills, timeAlive, damageDone, damageTaken, survivRewards }),
             signal: controller.signal,
         });
 

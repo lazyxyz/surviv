@@ -323,7 +323,6 @@ export class Gamer extends Player {
                 timeAlive,
                 this.damageDone,
                 this.damageTaken,
-                3000
             );
         } catch (err) {
             console.log("Error save game:", err);
