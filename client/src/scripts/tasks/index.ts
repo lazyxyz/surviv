@@ -15,13 +15,6 @@ export async function setupTasks(account: Account) {
             $("#tasks-menu").hide();
         }
     });
-
-    // Claim buttons (visual only)
-    $("#tasks-menu").on("click", ".task-claim-btn.active", function () {
-        const reward = $(this).data("reward").split(",");
-        warningAlert(`🎉 Claimed ${reward[0]} Crate${reward[0] > 1 ? 's' : ''} + ${reward[1]} Key${reward[1] > 1 ? 's' : ''}!`, 4000);
-        $(this).removeClass("active").css("opacity", "0.4");
-    });
 }
 
 
