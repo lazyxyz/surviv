@@ -1,0 +1,327 @@
+@use "./palette.scss";
+@use "./variables";
+@use "./utils/buttons.scss";
+
+#tasks-menu {
+    width: 600px !important;
+    max-width: 95vw !important;
+
+    .dialog-header {
+        background: #5b8939;
+        height: 45px;
+    }
+
+    #tasks-container {
+        padding: 0;
+        background: #5b8939;
+        display: flex;
+        flex-direction: column;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    // ─────── 7-DAY STREAK SECTION ───────
+    .tasks-streak-section {
+        flex-shrink: 0;
+        margin: 16px 16px 0;
+        padding: 16px;
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 12px;
+        text-align: center;
+
+        .tasks-streak-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 17px;
+            color: white;
+        }
+
+        .streak-counter {
+            color: #f9c72f;
+            font-size: 20px;
+        }
+
+        .streak-days {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 14px 0;
+        }
+
+        .streak-day {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #333;
+            color: #999;
+            line-height: 48px;
+            font-weight: bold;
+            font-size: 15px;
+
+            &.completed {
+                background: #f9c72f;
+                color: black;
+            }
+
+            &.current {
+                border: 4px solid #f9c72f;
+                box-sizing: border-box;
+                background: #5b8939;
+                color: white;
+            }
+        }
+
+        .streak-reward {
+            margin-top: 12px;
+
+            .reward-preview {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 10px;
+
+                img {
+                    width: 28px;
+                    height: 28px;
+                }
+
+                span {
+                    color: #a8e063;
+                    font-weight: bold;
+                    font-size: 15px;
+                }
+            }
+
+            #claim-streak-reward {
+                width: 180px;
+                height: 42px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        }
+    }
+
+    // ─────── DAILY TASKS LIST ───────
+    .tasks-list {
+        flex: 1;
+        padding: 16px 16px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .task-item {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        &.completed {
+            background: rgba(0, 255, 100, 0.18);
+            border-color: #0f0;
+        }
+
+        .task-progress {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+        }
+
+        .task-icon {
+            font-size: 36px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .task-info {
+            .task-title {
+                font-weight: bold;
+                font-size: 17px;
+                color: white;
+            }
+
+            .task-desc {
+                font-size: 13.5px;
+                color: rgba(255, 255, 255, 0.85);
+                margin-top: 3px;
+            }
+        }
+
+        .task-status-text {
+            font-weight: bold;
+            color: #f9c72f;
+            font-size: 18px;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .task-claim-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            opacity: 0.4;
+            pointer-events: none;
+            transition: all 0.3s ease;
+
+            img {
+                width: 26px;
+                height: 26px;
+            }
+
+            span {
+                color: #73a246;
+                font-weight: bold;
+                font-size: 14px;
+                min-width: 20px;
+                text-align: center;
+            }
+
+            &.active {
+                opacity: 1;
+                pointer-events: all;
+                cursor: pointer;
+                background: rgba(0, 0, 0, 0.5);
+
+                &:hover {
+                    background: rgba(255, 255, 255, 0.15);
+                    transform: scale(1.05);
+                }
+            }
+        }
+    }
+
+    // ─────── FOOTER ───────
+    .tasks-footer {
+        flex-shrink: 0;
+        margin: 0 16px 16px;
+        padding: 12px 16px 16px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 13px;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+
+        strong {
+            color: #a8e063;
+            font-size: 16px;
+        }
+    }
+
+    // ─────── MOBILE: SUPER COMPACT TASK ITEMS (≈50% shorter) ───────
+    @media screen and (max-width: variables.$screen_xsmall) {
+        width: 95vw !important;
+        border-radius: 16px !important;
+
+        .tasks-streak-section,
+        .tasks-list,
+        .tasks-footer {
+            margin-left: 10px !important;
+            margin-right: 10px !important;
+        }
+
+        // Streak section – tiny but clear
+        .tasks-streak-section {
+            padding: 10px;
+            margin: 10px 10px 0 !important;
+
+            .tasks-streak-header {
+                font-size: 14px;
+            }
+
+            .streak-counter {
+                font-size: 17px;
+            }
+
+            .streak-days {
+                gap: 6px;
+                margin: 8px 0;
+            }
+
+            .streak-day {
+                width: 34px;
+                height: 34px;
+                line-height: 34px;
+                font-size: 12px;
+            }
+
+            #claim-streak-reward {
+                height: 36px;
+                font-size: 14px;
+                width: 150px;
+            }
+        }
+
+        // Task items – half the height
+        .task-item {
+            flex-direction: row !important; // back to horizontal (saves huge space)
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 9px 12px !important; // was 16px → now ~9px vertical
+            min-height: 62px !important; // forces ~50% reduction
+
+            .task-progress {
+                gap: 10px;
+                flex: 1;
+            }
+
+            .task-icon {
+                font-size: 28px;
+                width: 36px;
+            }
+
+            .task-info {
+                .task-title {
+                    font-size: 14.5px;
+                }
+
+                .task-desc {
+                    font-size: 11.5px;
+                    margin-top: 1px;
+                    opacity: 0.9;
+                }
+            }
+
+            .task-status-text {
+                font-size: 16px;
+                min-width: 50px;
+            }
+
+            .task-claim-btn {
+                padding: 5px 10px;
+                gap: 4px;
+                border-radius: 8px;
+
+                img {
+                    width: 22px;
+                    height: 22px;
+                }
+
+                span {
+                    font-size: 12.5px;
+                    min-width: 16px;
+                }
+            }
+        }
+
+        // Footer tiny
+        .tasks-footer {
+            padding: 8px 10px;
+            font-size: 11.5px;
+            margin-bottom: 12px !important;
+
+            strong {
+                font-size: 13px;
+            }
+        }
+    }
+}
