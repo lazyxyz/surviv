@@ -1,184 +1,410 @@
 @use "./palette.scss";
 @use "./variables";
+@use "./utils/buttons.scss";
 
 #tasks-menu {
-  .dialog-header h3 {
-    @include variables.text-shadow;
-  }
+    width: 600px !important;
+    max-width: 95vw !important;
 
-  #tasks-container {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    height: 410px;
-    max-height: 80vh;
-    overflow-y: auto;
-    background: #5b8939; // same background as customize-tabs
-  }
-
-  // 7-Day Streak Section
-  .tasks-streak-section {
-    background: rgba(0,0,0,0.25);
-    border-radius: 12px;
-    padding: 16px;
-    text-align: center;
-
-    h4 {
-      margin: 0 0 12px 0;
-      font-size: 18px;
-      font-weight: bold;
-      @include variables.text-shadow;
+    .dialog-header {
+        background: #5b8939;
+        height: 45px;
     }
 
-    .streak-counter {
-      font-size: 24px;
-      font-weight: bold;
-      color: palette.$lime;
-      @include variables.text-shadow;
+    #tasks-container {
+        padding: 0;
+        background: #5b8939;
+        display: flex;
+        flex-direction: column;
+        height: auto !important;
+        overflow: visible !important;
     }
 
-    .streak-days {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 16px 0;
+    // Smaller streak section (~30% reduced height)
+    .tasks-streak-section {
+        margin: 14px 16px 0;
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 12px;
+        padding: 12px;
+        text-align: center;
+
+        .tasks-streak-header {
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .streak-counter {
+            color: #f9c72f;
+            font-size: 18px;
+        }
+
+        .streak-days {
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .streak-day {
+            width: 36px;
+            height: 36px;
+            line-height: 36px;
+            font-size: 13px;
+
+            &.completed {
+                background: #f9c72f;
+                color: black;
+            }
+
+            &.current {
+                border: 3px solid #f9c72f;
+                box-sizing: border-box;
+                background: #5b8939;
+                color: white;
+            }
+        }
+
+        .streak-reward {
+            margin-top: 8px;
+
+            .reward-preview {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 10px;
+
+                img {
+                    width: 28px;
+                    height: 28px;
+                }
+
+                span {
+                    color: #a8e063;
+                    font-weight: bold;
+                    font-size: 15px;
+                }
+            }
+
+            #claim-streak-reward {
+                width: 180px;
+                height: 38px;
+                font-size: 15px;
+            }
+        }
     }
 
-    .streak-day {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: #333;
-      color: #999;
-      line-height: 44px;
-      font-weight: bold;
-      font-size: 16px;
-      transition: all 0.3s;
-
-      &.completed {
-        background: #f9c72f;
-        color: black;
-      }
-
-      &.current {
-        border: 3px solid #f9c72f;
-        box-sizing: border-box;
-        background: rgba(249, 199, 47, 0.2);
-        color: #f9c72f;
-      }
+    .tasks-list {
+        padding: 12px 16px 0;
+        gap: 11px;
+        flex: 1;
     }
 
-    .streak-reward {
-      p {
-        margin: 8px 0;
-        font-size: 15px;
-        strong { color: palette.$lime; }
-      }
+    .task-item {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 13px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid rgba(255, 255, 255, 0.1);
 
-      #claim-streak-reward {
-        margin-top: 8px;
-        height: 42px;
-        padding: 0 24px;
-        font-size: 16px;
-        font-weight: bold;
-        animation: pulse 2s infinite;
-      }
+        &.completed {
+            background: rgba(0, 255, 100, 0.18);
+            border-color: #0f0;
+        }
+
+        .task-progress {
+            gap: 12px;
+            flex: 1;
+        }
+
+        .task-icon {
+            font-size: 28px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .task-info {
+            .task-title {
+                font-size: 14.5px;
+                font-weight: bold;
+                color: white;
+            }
+
+            .task-desc {
+                font-size: 12px;
+                color: rgba(255, 255, 255, 0.8);
+                margin-top: 2px;
+            }
+        }
+
+        .task-claim-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            opacity: 0.4;
+            pointer-events: none;
+            transition: all 0.3s;
+
+            img {
+                width: 26px;
+                height: 26px;
+            }
+
+            span {
+                color: #73a246;
+                font-weight: bold;
+                font-size: 14px;
+                min-width: 18px;
+                text-align: center;
+            }
+
+            &.active {
+                opacity: 1;
+                pointer-events: all;
+                cursor: pointer;
+                background: rgba(0, 0, 0, 0.5);
+
+                &:hover {
+                    background: rgba(255, 255, 255, 0.15);
+                    transform: scale(1.05);
+                }
+            }
+        }
     }
-  }
 
-  // Daily Tasks List
-  .tasks-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .task-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(255,255,255,0.06);
-    padding: 14px 16px;
-    border-radius: 10px;
-    transition: all 0.3s;
-    border: 2px solid transparent;
-
-    &.completed {
-      background: rgba(0, 255, 0, 0.15);
-      border-color: #0f0;
-    }
-
-    .task-progress {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .task-icon {
-      font-size: 32px;
-    }
-
-    .task-info {
-      .task-title {
-        font-weight: bold;
-        font-size: 16px;
-        @include variables.text-shadow;
-      }
-      .task-desc {
+    .tasks-footer {
+        padding: 12px 16px;
+        margin: 0 16px 16px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.75);
         font-size: 13px;
-        opacity: 0.9;
-      }
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
     }
 
-    .task-status {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: bold;
-      color: #f9c72f;
-      font-size: 16px;
+    @media screen and (max-width: variables.$screen_xsmall) {
+        .task-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
 
-      .task-complete {
-        color: #0f0;
-        font-size: 22px;
-      }
+        .task-claim-btn {
+            align-self: flex-end;
+        }
+    }
+}
+
+// ==================================================================
+// TASKS MENU – PERFECT MATCH WITH INVENTORY (600px, no scroll)
+// ==================================================================
+#tasks-menu {
+    width: 600px !important;
+    max-width: 95vw !important;
+
+    .dialog-header {
+        background: #5b8939;
+        height: 45px;
     }
 
-    .task-reward {
-      color: #4caf50;
-      font-weight: bold;
-      font-size: 15px;
-      white-space: nowrap;
-      padding: 6px 12px;
-      background: rgba(0,0,0,0.2);
-      border-radius: 8px;
-    }
-  }
-
-  // Footer
-  .tasks-footer {
-    text-align: center;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    color: #ccc;
-    font-size: 14px;
-
-    #daily-reset-timer {
-      font-weight: bold;
-      color: palette.$lime;
-      font-size: 18px;
+    #tasks-container {
+        padding: 0;
+        background: #5b8939;
+        display: flex;
+        flex-direction: column;
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
     }
 
-    strong {
-      color: palette.$lime;
-    }
-  }
+    .tasks-streak-section {
+        margin: 16px 16px 0;
+        background: rgba(0, 0, 0, 0.25);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        flex-shrink: 0;
 
-  // Pulse animation (reused from your existing styles)
-  @keyframes pulse {
-    0%   { transform: scale(1); }
-    50%  { transform: scale(1.06); }
-    100% { transform: scale(1); }
-  }
+        .tasks-streak-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 17px;
+            color: white;
+        }
+
+        .streak-counter {
+            color: #f9c72f;
+            font-size: 20px;
+        }
+
+        .streak-days {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 14px 0;
+        }
+
+        .streak-day {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #333;
+            color: #999;
+            line-height: 48px;
+            font-weight: bold;
+            font-size: 15px;
+
+            &.completed {
+                background: #f9c72f;
+                color: black;
+            }
+
+            &.current {
+                border: 4px solid #f9c72f;
+                box-sizing: border-box;
+                background: #5b8939;
+                color: white;
+            }
+        }
+
+        .streak-reward {
+            margin-top: 10px;
+            color: white;
+
+            strong {
+                color: #a8e063;
+            }
+
+            #claim-streak-reward {
+                margin-top: 12px;
+                height: 42px;
+                font-size: 16px;
+                font-weight: bold;
+            }
+        }
+    }
+
+    .tasks-list {
+        padding: 16px 16px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+    }
+
+    .task-item {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+
+        &.completed {
+            background: rgba(0, 255, 100, 0.18);
+            border-color: #0f0;
+        }
+
+        .task-progress {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+        }
+
+        .task-icon {
+            font-size: 36px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .task-info {
+            .task-title {
+                font-weight: bold;
+                font-size: 17px;
+                color: white;
+            }
+
+            .task-desc {
+                font-size: 13.5px;
+                color: rgba(255, 255, 255, 0.85);
+                margin-top: 3px;
+            }
+        }
+
+        .task-status {
+            text-align: right;
+            min-width: 90px;
+
+            .task-progress-text {
+                font-weight: bold;
+                color: #f9c72f;
+                font-size: 18px;
+            }
+
+            .task-complete {
+                color: #0f8;
+                font-size: 26px;
+                margin-left: 6px;
+            }
+        }
+
+        .task-reward {
+            background: rgba(0, 0, 0, 0.3);
+            color: #73a246;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 8px 14px;
+            border-radius: 10px;
+        }
+    }
+
+    .tasks-footer {
+        padding: 12px 16px 16px;
+        margin: 0 16px 16px;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.8);
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+
+        strong {
+            color: #a8e063;
+            font-size: 16px;
+        }
+    }
+
+    @media screen and (max-width: variables.$screen_xsmall) {
+        width: 95vw !important;
+
+        .tasks-streak-section,
+        .tasks-list,
+        .tasks-footer {
+            margin-left: 12px;
+            margin-right: 12px;
+        }
+
+        .task-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .task-status,
+        .task-reward {
+            align-self: flex-end;
+        }
+
+        .streak-day {
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+        }
+    }
 }

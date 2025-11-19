@@ -20,6 +20,13 @@ export async function setupTasks(account: Account) {
         if (e.target === this) $("#tasks-menu").hide();
     });
 
+    // Make individual task claim buttons clickable when active
+    $("#tasks-menu").on("click", ".task-claim-btn.active", function () {
+        const reward = $(this).data("reward").split(",");
+        warningAlert(`🎉 Claimed ${reward[0]} Crate${reward[0] > 1 ? 's' : ''} + ${reward[1]} Key${reward[1] > 1 ? 's' : ''}!`, 4000);
+        $(this).removeClass("active").css("opacity", "0.4");
+    });
+
     // Fake "Claim Reward" button (just for show + success message)
     $("#claim-streak-reward").off("click").on("click", () => {
         if (!account?.address) {
@@ -40,11 +47,11 @@ export async function setupTasks(account: Account) {
 function updateTasksUI() {
     // === CHANGE THESE VALUES TO TEST DIFFERENT SCENARIOS ===
     const fakeData = {
-        warmup:    1,   // 0 or 1
-        hunter:    8,   // 0–10
-        champion:  0,   // 0 or 1
-        streak:    6,   // 0–7
-        canClaim:  true // only matters when streak === 7
+        warmup: 1,   // 0 or 1
+        hunter: 8,   // 0–10
+        champion: 0,   // 0 or 1
+        streak: 6,   // 0–7
+        canClaim: true // only matters when streak === 7
     };
     // ======================================================
 
@@ -55,9 +62,9 @@ function updateTasksUI() {
 
     // Mark completed tasks
     $("[data-task]").removeClass("completed");
-    if (fakeData.warmup >= 1)    $(`[data-task="warmup"]`).addClass("completed");
-    if (fakeData.hunter >= 10)   $(`[data-task="hunter"]`).addClass("completed");
-    if (fakeData.champion >= 1)  $(`[data-task="champion"]`).addClass("completed");
+    if (fakeData.warmup >= 1) $(`[data-task="warmup"]`).addClass("completed");
+    if (fakeData.hunter >= 10) $(`[data-task="hunter"]`).addClass("completed");
+    if (fakeData.champion >= 1) $(`[data-task="champion"]`).addClass("completed");
 
     // Update streak visuals
     $("#current-streak-days").text(fakeData.streak);
