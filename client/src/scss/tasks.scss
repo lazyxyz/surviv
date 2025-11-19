@@ -407,4 +407,12 @@
             line-height: 40px;
         }
     }
+
+    .task-status-text {
+        font-weight: bold;
+        color: #f9c72f;
+        font-size: 18px;
+        min-width: 50px;
+        text-align: center;
+    }
 }
