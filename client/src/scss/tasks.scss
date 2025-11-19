@@ -1,0 +1,184 @@
+@use "./palette.scss";
+@use "./variables";
+
+#tasks-menu {
+  .dialog-header h3 {
+    @include variables.text-shadow;
+  }
+
+  #tasks-container {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 410px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background: #5b8939; // same background as customize-tabs
+  }
+
+  // 7-Day Streak Section
+  .tasks-streak-section {
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+
+    h4 {
+      margin: 0 0 12px 0;
+      font-size: 18px;
+      font-weight: bold;
+      @include variables.text-shadow;
+    }
+
+    .streak-counter {
+      font-size: 24px;
+      font-weight: bold;
+      color: palette.$lime;
+      @include variables.text-shadow;
+    }
+
+    .streak-days {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .streak-day {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #333;
+      color: #999;
+      line-height: 44px;
+      font-weight: bold;
+      font-size: 16px;
+      transition: all 0.3s;
+
+      &.completed {
+        background: #f9c72f;
+        color: black;
+      }
+
+      &.current {
+        border: 3px solid #f9c72f;
+        box-sizing: border-box;
+        background: rgba(249, 199, 47, 0.2);
+        color: #f9c72f;
+      }
+    }
+
+    .streak-reward {
+      p {
+        margin: 8px 0;
+        font-size: 15px;
+        strong { color: palette.$lime; }
+      }
+
+      #claim-streak-reward {
+        margin-top: 8px;
+        height: 42px;
+        padding: 0 24px;
+        font-size: 16px;
+        font-weight: bold;
+        animation: pulse 2s infinite;
+      }
+    }
+  }
+
+  // Daily Tasks List
+  .tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.06);
+    padding: 14px 16px;
+    border-radius: 10px;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+
+    &.completed {
+      background: rgba(0, 255, 0, 0.15);
+      border-color: #0f0;
+    }
+
+    .task-progress {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .task-icon {
+      font-size: 32px;
+    }
+
+    .task-info {
+      .task-title {
+        font-weight: bold;
+        font-size: 16px;
+        @include variables.text-shadow;
+      }
+      .task-desc {
+        font-size: 13px;
+        opacity: 0.9;
+      }
+    }
+
+    .task-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      color: #f9c72f;
+      font-size: 16px;
+
+      .task-complete {
+        color: #0f0;
+        font-size: 22px;
+      }
+    }
+
+    .task-reward {
+      color: #4caf50;
+      font-weight: bold;
+      font-size: 15px;
+      white-space: nowrap;
+      padding: 6px 12px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+    }
+  }
+
+  // Footer
+  .tasks-footer {
+    text-align: center;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    color: #ccc;
+    font-size: 14px;
+
+    #daily-reset-timer {
+      font-weight: bold;
+      color: palette.$lime;
+      font-size: 18px;
+    }
+
+    strong {
+      color: palette.$lime;
+    }
+  }
+
+  // Pulse animation (reused from your existing styles)
+  @keyframes pulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+}

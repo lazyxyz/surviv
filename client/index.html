@@ -146,6 +146,12 @@
             <i class="fa-solid fa-book"></i>
             How to play?
           </button>
+
+          <button class="btn btn-lg btn-darken btn-secondary" id="btn-settings">
+            <i class="fa-solid fa-gear"></i>
+            <span translation="settings"></span>
+          </button>
+
         </a>
       </div>
 
@@ -244,13 +250,14 @@
           </div>
           <div style="display: flex; flex-direction: row; gap: 15px">
             <button class="btn btn-lg btn-darken btn-primary" id="btn-customize">
-              <i class="fa-solid fa-shirt"></i>
+              <i class="fa-solid fa-gift"></i>
               <span class="splash-text" translation="inventory"></span>
               <div class="pulse-glow">New</div>
             </button>
-            <button class="btn btn-lg btn-darken btn-secondary" id="btn-settings">
-              <i class="fa-solid fa-gear"></i>
-              <span translation="settings"></span>
+
+            <button class="btn btn-lg btn-darken btn-secondary" id="btn-tasks">
+              <i class="fa-solid fa-gun"></i>
+              <span translation="Tasks"></span>
             </button>
           </div>
         </div>
@@ -259,6 +266,7 @@
 
     </div>
     <div>
+
       <!-- Language stuff -->
       <div id="language-dropdown" class="dropdown">
         <button class="btn btn-darken btn-secondary" id="btn-language">
@@ -1225,6 +1233,95 @@
           </div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Tasks / Daily Missions Modal -->
+  <div class="modal dialog persistent-scrollbar" id="tasks-menu" style="display: none">
+    <div class="dialog-header">
+      <h3 translation="Tasks"></h3>
+      <span class="dialog-close-btn fa-solid fa-xmark" id="close-tasks"></span>
+    </div>
+
+    <div id="tasks-container">
+      <!-- 7-Day Streak Section -->
+      <div class="tasks-streak-section">
+        <div class="tasks-streak-header">
+          <h4>7-Day Login Streak</h4>
+          <div class="streak-counter">
+            <span id="current-streak-days">0</span>/7 Days
+          </div>
+        </div>
+        <div class="streak-days">
+          <div class="streak-day" data-day="1">1</div>
+          <div class="streak-day" data-day="2">2</div>
+          <div class="streak-day" data-day="3">3</div>
+          <div class="streak-day" data-day="4">4</div>
+          <div class="streak-day" data-day="5">5</div>
+          <div class="streak-day" data-day="6">6</div>
+          <div class="streak-day" data-day="7">7</div>
+        </div>
+        <div class="streak-reward">
+          <p>Complete 7 days → <strong>10 Crates + 10 Keys</strong></p>
+          <button class="btn btn-success btn-lg" id="claim-streak-reward" style="display:none">Claim Reward!</button>
+        </div>
+      </div>
+
+      <div class="tasks-list">
+        <!-- Task 1 -->
+        <div class="task-item" data-task="warmup">
+          <div class="task-progress">
+            <div class="task-icon">🏅</div>
+            <div class="task-info">
+              <div class="task-title">Daily Warm-Up</div>
+              <div class="task-desc">Finish Top 5 in at least 1 match</div>
+            </div>
+          </div>
+          <div class="task-status">
+            <span class="task-progress-text">0/1</span>
+            <i class="fa-solid fa-check task-complete" style="display:none"></i>
+          </div>
+          <div class="task-reward">1 Crate + 1 Key</div>
+        </div>
+
+        <!-- Task 2 -->
+        <div class="task-item" data-task="hunter">
+          <div class="task-progress">
+            <div class="task-icon">🔫</div>
+            <div class="task-info">
+              <div class="task-title">Hunter</div>
+              <div class="task-desc">Eliminate 10 players today</div>
+            </div>
+          </div>
+          <div class="task-status">
+            <span class="task-progress-text">0/10</span>
+            <i class="fa-solid fa-check task-complete" style="display:none"></i>
+          </div>
+          <div class="task-reward">1 Crate + 1 Key</div>
+        </div>
+
+        <!-- Task 3 -->
+        <div class="task-item" data-task="champion">
+          <div class="task-progress">
+            <div class="task-icon">👑</div>
+            <div class="task-info">
+              <div class="task-title">Champion</div>
+              <div class="task-desc">Win 1 match (1st place)</div>
+            </div>
+          </div>
+          <div class="task-status">
+            <span class="task-progress-text">0/1</span>
+            <i class="fa-solid fa-check task-complete" style="display:none"></i>
+          </div>
+          <div class="task-reward">2 Crates + 2 Keys</div>
+        </div>
+      </div>
+
+      <div class="tasks-footer">
+        <p>Daily tasks reset in: <span id="daily-reset-timer">--:--:--</span></p>
+        <p>Max daily reward: <strong>4 Crates + 4 Keys</strong></p>
       </div>
     </div>
   </div>
