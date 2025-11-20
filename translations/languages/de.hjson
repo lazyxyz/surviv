@@ -305,4 +305,8 @@
   "create_team_lock": "Sperren"
   "play_dungeon": "Dungeon"
   "new_dungeon_wave": "Welle <waves> — Die Zombies kommen!"
+
+  "go_bounties": "Kopfgelder"
+  "go_loots": "Beute"
+  "daily_quests": "Tägliche Quests"
 }

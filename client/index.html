@@ -191,11 +191,11 @@
                 </button>
               </div>
 
-              <button class="btn btn-lg btn-darken btn-success" id="btn-play-dungeon">
+              <!-- <button class="btn btn-lg btn-darken btn-success" id="btn-play-dungeon">
                 <div class="pulsating-circle" style="display: block"></div>
                 <i class="fa-solid fa-crown"></i>
                 <span translation="play_dungeon"></span>
-              </button>
+              </button> -->
 
               <div id="option-btns-group" class="team-btns-container">
                 <button class="btn btn-lg btn-darken btn-purple" id="btn-join-team" translation="join_team"></button>
@@ -246,12 +246,12 @@
             <button class="btn btn-lg btn-darken btn-primary" id="btn-customize">
               <i class="fa-solid fa-gift"></i>
               <span class="splash-text" translation="inventory"></span>
-              <div class="pulse-glow">New</div>
             </button>
-
-            <button class="btn btn-lg btn-darken btn-secondary" id="btn-tasks">
-              <i class="fa-solid fa-gun"></i>
-              <span translation="Tasks"></span>
+            
+            <button class="btn btn-lg btn-darken btn-primary" id="btn-tasks">
+              <i class="fa-solid fa-list-check"></i>
+              <span translation="daily_quests"></span>
+              <div class="pulse-glow">New</div>
             </button>
           </div>
         </div>
@@ -500,6 +500,7 @@
         <div class="emote-left"></div>
         <div class="button-center"></div>
       </div>
+
       <div id="game-over-overlay" style="display: none">
         <div id="game-over-top-screen">
           <img id="chicken-dinner" src="./img/game/shared/emotes/chicken_dinner.svg" />
@@ -508,6 +509,7 @@
             <span translation="msg_your_rank"></span>
             <span id="game-over-rank" class="modal-item"></span>
           </div>
+          <p id="game-over-subtitle" class="rewards-header-subtitle"></p>
         </div>
         <div id="game-over-screen">
           <h1 id="game-over-player-name" class="modal-item">Player</h1>
@@ -515,6 +517,10 @@
             <div class="stat">
               <span class="stat-name" translation="go_kills">Kills:</span>
               <span class="stat-value" id="game-over-kills"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-name" translation="go_bounties">Bounties:</span>
+              <span class="stat-value" id="game-over-bounties"></span>
             </div>
             <div class="stat">
               <span class="stat-name" translation="go_damage_done">Damage done:</span>
@@ -528,16 +534,21 @@
               <span class="stat-name" translation="go_time_alive">Time alive:</span>
               <span class="stat-value" id="game-over-time"></span>
             </div>
+            <div class="stat" id="game-over-loots-stat" style="display: none;">
+              <span class="stat-name" translation="go_loots">Loots:</span>
+              <span class="stat-value" id="game-over-loots"></span>
+            </div>
           </div>
           <div class="modal-item">
             <button class="btn btn-lg btn-darken btn-primary" id="btn-play-again" translation="btn_play_again"></button>
-            <div style="display: flex; gap: 8px">
+            <div id="game-over-secondary-buttons" style="display: flex; gap: 8px">
               <button class="btn btn-lg btn-darken btn-primary" id="btn-spectate" translation="btn_spectate"></button>
               <button class="btn btn-lg btn-darken btn-secondary" id="btn-menu" translation="btn_menu"></button>
             </div>
           </div>
         </div>
       </div>
+
     </div>
     <canvas id="game-canvas"></canvas>
   </div>
@@ -1239,7 +1250,7 @@
   <!-- Tasks / Daily Missions Modal -->
   <div class="modal dialog persistent-scrollbar" id="tasks-menu" style="display: none;">
     <div class="dialog-header">
-      <h3>Tasks</h3>
+      <h3 translation="daily_quests"></h3>
       <span class="dialog-close-btn fa-solid fa-xmark" id="close-tasks"></span>
     </div>
 
@@ -1294,10 +1305,10 @@
             <div class="task-icon">💀</div>
             <div class="task-info">
               <div class="task-title">Hunter</div>
-              <div class="task-desc">Eliminate 10 players</div>
+              <div class="task-desc">Eliminate 5 players</div>
             </div>
           </div>
-          <div class="task-status-text">0/10</div>
+          <div class="task-status-text">0/5</div>
           <div class="task-claim-btn" data-reward="1,1">
             <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
             <span>1</span>

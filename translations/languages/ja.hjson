@@ -305,4 +305,8 @@
   "create_team_lock": "ロック"
   "play_dungeon": "ダンジョン"
   "new_dungeon_wave": "ウェーブ <waves> — ゾンビが来る！"
+
+  "go_bounties": "バウンティ"
+  "go_loots": "ルート"
+  "daily_quests": "デイリークエスト"
 }

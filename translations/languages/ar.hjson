@@ -305,4 +305,8 @@
   "create_team_lock": "قفل"
   "play_dungeon": "زنزانة"
   "new_dungeon_wave": "موجة <waves> — الزومبي قادمون!"
+
+  "go_bounties": "مكافآت"
+  "go_loots": "غنائم"
+  "daily_quests": "مهام يومية"
 }

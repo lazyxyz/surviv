@@ -14,6 +14,7 @@ import { ExtendedWearerAttributes } from "@common/utils/objectDefinitions";
 import { ThrowableItem } from "../../inventory/throwableItem";
 import { Team } from "../../team";
 import { removeFrom } from "../../utils/misc";
+import { Gamer } from "../gamer";
 
 export class DamageHandler {
     constructor(private player: Player) { }
@@ -200,11 +201,11 @@ export class DamageHandler {
             action.cancel();
         }
 
-        const sourceIsPlayer = source instanceof Player;
+        const sourceIsPlayer = source instanceof Gamer;
 
         if (sourceIsPlayer) {
             this.player.killedBy = source;
-            if (source !== this.player && (!this.player.game.teamMode || source.teamID !== this.player.teamID)) source.kills++;
+            if (source !== this.player && (!this.player.game.teamMode || source.teamID !== this.player.teamID)) source.kill(this.player);
         }
 
         if (
@@ -258,7 +259,7 @@ export class DamageHandler {
 
                 const { player, item } = downer;
 
-                ++player.kills;
+                player.kill(this.player);
                 if (
                     (item instanceof GunItem || item instanceof MeleeItem)
                     && player.inventory.weapons.includes(item)

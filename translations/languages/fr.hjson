@@ -305,4 +305,8 @@
   "create_team_lock": "Verrou"
   "play_dungeon": "Donjon"
   "new_dungeon_wave": "Vague <waves> — Les zombies arrivent!"
+
+  "go_bounties": "Primes"
+  "go_loots": "Butins"
+  "daily_quests": "Quêtes Quotidiennes"
 }

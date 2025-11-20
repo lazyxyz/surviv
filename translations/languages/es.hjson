@@ -305,4 +305,8 @@
   "create_team_lock": "Bloquear"
   "play_dungeon": "Mazmorra"
   "new_dungeon_wave": "Ola <waves> — ¡Los zombis vienen!"
+
+  "go_bounties": "Recompensas"
+  "go_loots": "Botines"
+  "daily_quests": "Misiones Diarias"
 }

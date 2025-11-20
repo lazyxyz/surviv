@@ -105,12 +105,14 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this._team = value;
     }
 
-    _kills = 0;
+    protected _kills = 0;
+    protected _bounties = 0; // number of kills nft player
+
     get kills(): number { return this._kills; }
-    set kills(kills: number) {
-        this._kills = kills;
-        this.dirty.modifiers = true; // Added: Mark modifiers dirty on kills change
-        this.game.updateKillLeader(this);
+    get bounties(): number { return this._bounties; }
+
+    kill(_: Player) {
+        // does nothing
     }
 
     private _maxHealth = GameConstants.player.defaultHealth;

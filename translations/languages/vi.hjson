@@ -305,4 +305,8 @@
   "create_team_lock": "Khóa"
   "play_dungeon": "Ngục Tối"
   "new_dungeon_wave": "Sóng <waves> — Zombie đang đến!"
+
+  "go_bounties": "Phần Thưởng"
+  "go_loots": "Chiến Lợi Phẩm"
+  "daily_quests": "Nhiệm Vụ Hàng Ngày"
 }
