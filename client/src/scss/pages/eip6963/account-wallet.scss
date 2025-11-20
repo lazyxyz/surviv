@@ -2,10 +2,54 @@
 @use "../../variables.scss";
 
 
-.account-wallet-container {
+.topbar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
   position: absolute;
-  right: calc(220px + 12px); // position : padding
+  right: 20px;
   top: 1rem;
+  z-index: 10;
+
+  @media screen and (max-width: variables.$screen_large) {
+    right: 5px; // Move closer to edge
+    top: 0.5rem;
+    gap: 5px; // Very tight gap between buttons
+  }
+
+  .btn {
+    @media screen and (max-width: variables.$screen_large) {
+      height: 26px; // 30% smaller height
+      padding: 0 8px; // Tight padding
+      width: auto !important; // Force auto width
+      min-width: unset;
+
+      // Font and Icon sizing
+      font-size: 10px; // Smallest readable font size
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px; // Reduce space between icon and text inside button
+    }
+  }
+}
+
+// Make sure the dropdown wrappers themselves don't force line breaks
+.dropdown,
+.account-wallet-container {
+  position: relative; // needed so .dropdown-content positions relative to the button
+  display: flex; // keeps the button and future caret in flow
+}
+
+// Optional: if your buttons are still too wide or wrap on small screens
+.btn {
+  white-space: nowrap;
+}
+
+.account-wallet-container {
+  // Removed margin-left: auto to keep items grouped closely
   z-index: 10;
 
   .dropdown-content {
@@ -20,12 +64,90 @@
     }
   }
 
-  // For mobile
   @media screen and (max-width: variables.$screen_large) {
 
-    transform: scale(55%);
+    .dropdown-content {
+      // 1. Force it to be wider than the tiny button
+      width: auto;
+      min-width: 140px; // Ensure it's wide enough for text
+
+      // 2. Adjust position to fit the new small button height
+      top: 30px; // Button is 26px, so 30px adds a nice small gap
+
+      // 3. Align it to the RIGHT edge so it doesn't go off-screen
+      // (Since your buttons are on the right side of the screen)
+      right: 0;
+      left: auto;
+
+      // Optional: Adjust text size inside the dropdown if needed
+      a {
+        font-size: 12px;
+        padding: 8px 12px; // Give it some breathing room
+        justify-content: flex-start; // Align text to left
+      }
+    }
+  }
+}
+
+#language-dropdown {
+  // Removed absolute positioning to keep it in the flex flow
+  z-index: 10;
+
+  img {
+    vertical-align: middle;
+  }
+
+  #btn-language {
+    width: 160px;
+    height: 40px;
+    display: flex;
+    gap: 1rem;
+    // Removed fixed positioning; it's now relative to the parent
+    justify-content: center;
+    align-items: center;
+    position: relative;
     top: 0;
-    right: calc(74px + 12px); // position : padding
+    left: 0;
+  }
+
+  .dropdown-content {
+    background: palette.$grey;
+    top: 34px;
+    overflow-x: none;
+    overflow-y: scroll;
+    height: 600px;
+
+    a {
+      cursor: pointer;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .selected {
+      background-color: palette.$orange;
+      pointer-events: none;
+    }
+  }
+
+  @media screen and (max-width: variables.$screen_large) {
+
+    #btn-language {
+      // Ensure specific overrides
+      width: auto;
+      height: 26px;
+
+      // Fix the Globe icon size
+      specialI,
+      i {
+        font-size: 10px;
+      }
+
+      // Fix the text size
+      txt {
+        font-size: 10px;
+        line-height: 1;
+      }
+    }
   }
 }
 
@@ -39,4 +161,21 @@
 
 .account-wallet-placeholder {
   margin: unset;
+}
+
+#btn-settings {
+   height: 40px;
+  @media screen and (max-width: variables.$screen_large) {
+   height: 26px;
+
+    // Fix the Gear icon size
+    i {
+      font-size: 10px;
+    }
+
+    span {
+      font-size: 10px;
+      line-height: 1;
+    }
+  }
 }

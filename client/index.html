@@ -146,12 +146,6 @@
             <i class="fa-solid fa-book"></i>
             How to play?
           </button>
-
-          <button class="btn btn-lg btn-darken btn-secondary" id="btn-settings">
-            <i class="fa-solid fa-gear"></i>
-            <span translation="settings"></span>
-          </button>
-
         </a>
       </div>
 
@@ -262,21 +256,9 @@
           </div>
         </div>
       </div>
-
-
     </div>
-    <div>
 
-      <!-- Language stuff -->
-      <div id="language-dropdown" class="dropdown">
-        <button class="btn btn-darken btn-secondary" id="btn-language">
-          <specialI class="fa-solid fa-globe"></specialI>
-          <txt translation="languages"></txt>
-          <i class="fa-solid fa-caret-down"></i>
-        </button>
-        <div id="languages-selector" class="dropdown-content persistent-scrollbar"></div>
-      </div>
-
+    <div class="topbar-buttons">
       <!-- Connect wallet button -->
       <div id="wallet-inactive" class="account-wallet-container dropdown" style="display: block;">
         <button id="connect-wallet-btn" class="btn btn-darken btn-primary account-wallet-button">
@@ -291,9 +273,26 @@
         </button>
         <div id="account-wallet-fieldset" class="dropdown-content persistent-scrollbar"></div>
       </div>
-    </div>
-  </div>
 
+      <!-- Language stuff -->
+      <div id="language-dropdown" class="dropdown">
+        <button class="btn btn-darken btn-secondary" id="btn-language">
+          <specialI class="fa-solid fa-globe"></specialI>
+          <txt translation="languages"></txt>
+          <i class="fa-solid fa-caret-down"></i>
+        </button>
+        <div id="languages-selector" class="dropdown-content persistent-scrollbar"></div>
+      </div>
+
+      <!-- Setting -->
+      <button class="btn btn-darken btn-secondary" id="btn-settings">
+        <i class="fa-solid fa-gear"></i>
+        <span translation="settings"></span>
+      </button>
+
+    </div>
+
+  </div>
   <div id="game">
     <div id="game-ui">
       <div id="joysticks-containers">
@@ -1237,119 +1236,119 @@
     </div>
   </div>
 
-<!-- Tasks / Daily Missions Modal -->
-<div class="modal dialog persistent-scrollbar" id="tasks-menu" style="display: none;">
-  <div class="dialog-header">
-    <h3>Tasks</h3>
-    <span class="dialog-close-btn fa-solid fa-xmark" id="close-tasks"></span>
+  <!-- Tasks / Daily Missions Modal -->
+  <div class="modal dialog persistent-scrollbar" id="tasks-menu" style="display: none;">
+    <div class="dialog-header">
+      <h3>Tasks</h3>
+      <span class="dialog-close-btn fa-solid fa-xmark" id="close-tasks"></span>
+    </div>
+
+    <div id="tasks-container">
+      <!-- Loading overlay -->
+      <div id="tasks-loading" style="text-align:center; padding:50px; color:#aaa; display: none;">
+        Loading tasks...
+      </div>
+
+      <!-- 7-Day Streak (smaller) -->
+      <div class="tasks-streak-section">
+        <div class="tasks-streak-header">
+          <div>7-Day Streak</div>
+          <div class="streak-counter"><span id="current-streak-days">0</span>/7</div>
+        </div>
+
+        <div class="streak-days">
+          <div class="streak-day">1</div>
+          <div class="streak-day">2</div>
+          <div class="streak-day">3</div>
+          <div class="streak-day">4</div>
+          <div class="streak-day">5</div>
+          <div class="streak-day">6</div>
+          <div class="streak-day">7</div>
+        </div>
+
+      </div>
+
+      <!-- Daily Tasks -->
+      <div class="tasks-list">
+        <!-- Task 1 -->
+        <div class="task-item" data-task-id="0">
+          <div class="task-progress">
+            <div class="task-icon">🏆</div>
+            <div class="task-info">
+              <div class="task-title">Daily Warm-Up</div>
+              <div class="task-desc">Finish Top 5 in 1 match</div>
+            </div>
+          </div>
+          <div class="task-status-text">0/1</div>
+          <div class="task-claim-btn" data-reward="1,1">
+            <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
+            <span>1</span>
+            <img src="./img/assets/surviv_kit_key.webp" alt="Key">
+            <span>1</span>
+          </div>
+        </div>
+
+        <!-- Task 2 -->
+        <div class="task-item" data-task-id="1">
+          <div class="task-progress">
+            <div class="task-icon">💀</div>
+            <div class="task-info">
+              <div class="task-title">Hunter</div>
+              <div class="task-desc">Eliminate 10 players</div>
+            </div>
+          </div>
+          <div class="task-status-text">0/10</div>
+          <div class="task-claim-btn" data-reward="1,1">
+            <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
+            <span>1</span>
+            <img src="./img/assets/surviv_kit_key.webp" alt="Key">
+            <span>1</span>
+          </div>
+        </div>
+
+        <!-- Task 3 -->
+        <div class="task-item" data-task-id="2">
+          <div class="task-progress">
+            <div class="task-icon">👑</div>
+            <div class="task-info">
+              <div class="task-title">Champion</div>
+              <div class="task-desc">Win 1 match (1st place)</div>
+            </div>
+          </div>
+          <div class="task-status-text">0/1</div>
+          <div class="task-claim-btn" data-reward="2,2">
+            <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
+            <span>2</span>
+            <img src="./img/assets/surviv_kit_key.webp" alt="Key">
+            <span>2</span>
+          </div>
+        </div>
+
+        <!-- Streak as Task 100 -->
+        <div class="task-item" data-task-id="100">
+          <div class="task-progress">
+            <div class="task-icon">🔥</div>
+            <div class="task-info">
+              <div class="task-title">7-Day Streak</div>
+              <div class="task-desc">Play every day for 7 days</div>
+            </div>
+          </div>
+          <div class="task-status-text">0/7</div>
+          <div class="task-claim-btn" data-reward="10,10">
+            <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
+            <span>10</span>
+            <img src="./img/assets/surviv_kit_key.webp" alt="Key">
+            <span>10</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="tasks-footer">
+        <p>Resets in: <span id="daily-reset-timer">00:00:00</span></p>
+      </div>
+    </div>
   </div>
-
-  <div id="tasks-container">
-    <!-- Loading overlay -->
-    <div id="tasks-loading" style="text-align:center; padding:50px; color:#aaa; display: none;">
-      Loading tasks...
-    </div>
-
-    <!-- 7-Day Streak (smaller) -->
-    <div class="tasks-streak-section">
-      <div class="tasks-streak-header">
-        <div>7-Day Streak</div>
-        <div class="streak-counter"><span id="current-streak-days">0</span>/7</div>
-      </div>
-
-      <div class="streak-days">
-        <div class="streak-day">1</div>
-        <div class="streak-day">2</div>
-        <div class="streak-day">3</div>
-        <div class="streak-day">4</div>
-        <div class="streak-day">5</div>
-        <div class="streak-day">6</div>
-        <div class="streak-day">7</div>
-      </div>
-
-    </div>
-
-    <!-- Daily Tasks -->
-    <div class="tasks-list">
-      <!-- Task 1 -->
-      <div class="task-item" data-task-id="0">
-        <div class="task-progress">
-          <div class="task-icon">🏆</div>
-          <div class="task-info">
-            <div class="task-title">Daily Warm-Up</div>
-            <div class="task-desc">Finish Top 5 in 1 match</div>
-          </div>
-        </div>
-        <div class="task-status-text">0/1</div>
-        <div class="task-claim-btn" data-reward="1,1">
-          <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
-          <span>1</span>
-          <img src="./img/assets/surviv_kit_key.webp" alt="Key">
-          <span>1</span>
-        </div>
-      </div>
-
-      <!-- Task 2 -->
-      <div class="task-item" data-task-id="1">
-        <div class="task-progress">
-          <div class="task-icon">💀</div>
-          <div class="task-info">
-            <div class="task-title">Hunter</div>
-            <div class="task-desc">Eliminate 10 players</div>
-          </div>
-        </div>
-        <div class="task-status-text">0/10</div>
-        <div class="task-claim-btn" data-reward="1,1">
-          <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
-          <span>1</span>
-          <img src="./img/assets/surviv_kit_key.webp" alt="Key">
-          <span>1</span>
-        </div>
-      </div>
-
-      <!-- Task 3 -->
-      <div class="task-item" data-task-id="2">
-        <div class="task-progress">
-          <div class="task-icon">👑</div>
-          <div class="task-info">
-            <div class="task-title">Champion</div>
-            <div class="task-desc">Win 1 match (1st place)</div>
-          </div>
-        </div>
-        <div class="task-status-text">0/1</div>
-        <div class="task-claim-btn" data-reward="2,2">
-          <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
-          <span>2</span>
-          <img src="./img/assets/surviv_kit_key.webp" alt="Key">
-          <span>2</span>
-        </div>
-      </div>
-
-      <!-- Streak as Task 100 -->
-      <div class="task-item" data-task-id="100">
-        <div class="task-progress">
-          <div class="task-icon">🔥</div>
-          <div class="task-info">
-            <div class="task-title">7-Day Streak</div>
-            <div class="task-desc">Play every day for 7 days</div>
-          </div>
-        </div>
-        <div class="task-status-text">0/7</div>
-        <div class="task-claim-btn" data-reward="10,10">
-          <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
-          <span>10</span>
-          <img src="./img/assets/surviv_kit_key.webp" alt="Key">
-          <span>10</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="tasks-footer">
-      <p>Resets in: <span id="daily-reset-timer">00:00:00</span></p>
-    </div>
-  </div>
-</div>
 
   <script src="./src/index.ts" type="module"></script>
 </body>
