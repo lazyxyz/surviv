@@ -61,7 +61,7 @@ export class Gamer extends Player {
         if (!source.isBot()
             && source instanceof Gamer
             && source.address !== this.address
-            && source.ip !== this.ip
+            // && source.ip !== this.ip
         ) {
             if (source.rewardsBoost > 0) {
                 this._bounties++;
@@ -308,6 +308,8 @@ export class Gamer extends Player {
                 this.chain,
                 this.address,
                 rank,
+                this.kills,
+                this.bounties,
                 this.game.teamMode,
                 this.game.gameId,
                 this.rewardsBoost,
@@ -316,7 +318,6 @@ export class Gamer extends Player {
 
             if (data.success && data.rewards.success) {
                 const rewards = data.rewards.rewards;
-                console.log("rewards: ", rewards);
                 if (rewards.crates > 0 || rewards.keys > 0) {
                     processRewardsPacket(true, rank, rewards.crates, rewards.keys);
                 }
@@ -336,6 +337,7 @@ export class Gamer extends Player {
                 this.game.teamMode,
                 this.game.gameId,
                 this.kills,
+                this.bounties,
                 timeAlive,
                 this.damageDone,
                 this.damageTaken,
