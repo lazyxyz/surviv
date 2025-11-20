@@ -307,4 +307,7 @@
   "team_mode": "Mode"
   "play_dungeon": "Dungeon"
   "new_dungeon_wave": "Wave <waves> — The zombies are coming!"
+
+  "go_bounties": "Kill Bounties"
+  "go_loots": "Loots"
 }

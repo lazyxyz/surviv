@@ -216,6 +216,7 @@ export class Gamer extends Player {
             won: rank === 1,
             playerID: this.id,
             kills: this.kills,
+            bounties: this.bounties,
             damageDone: this.damageDone,
             damageTaken: this.damageTaken,
             timeAlive: (this.game.now - this.joinTime) / 1000,

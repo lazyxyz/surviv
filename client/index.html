@@ -500,6 +500,7 @@
         <div class="emote-left"></div>
         <div class="button-center"></div>
       </div>
+
       <div id="game-over-overlay" style="display: none">
         <div id="game-over-top-screen">
           <img id="chicken-dinner" src="./img/game/shared/emotes/chicken_dinner.svg" />
@@ -508,6 +509,7 @@
             <span translation="msg_your_rank"></span>
             <span id="game-over-rank" class="modal-item"></span>
           </div>
+          <p id="game-over-subtitle" class="rewards-header-subtitle"></p>
         </div>
         <div id="game-over-screen">
           <h1 id="game-over-player-name" class="modal-item">Player</h1>
@@ -515,6 +517,10 @@
             <div class="stat">
               <span class="stat-name" translation="go_kills">Kills:</span>
               <span class="stat-value" id="game-over-kills"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-name" translation="go_bounties">Bounties:</span>
+              <span class="stat-value" id="game-over-bounties"></span>
             </div>
             <div class="stat">
               <span class="stat-name" translation="go_damage_done">Damage done:</span>
@@ -528,16 +534,21 @@
               <span class="stat-name" translation="go_time_alive">Time alive:</span>
               <span class="stat-value" id="game-over-time"></span>
             </div>
+            <div class="stat" id="game-over-loots-stat" style="display: none;">
+              <span class="stat-name" translation="go_loots">Loots:</span>
+              <span class="stat-value" id="game-over-loots"></span>
+            </div>
           </div>
           <div class="modal-item">
             <button class="btn btn-lg btn-darken btn-primary" id="btn-play-again" translation="btn_play_again"></button>
-            <div style="display: flex; gap: 8px">
+            <div id="game-over-secondary-buttons" style="display: flex; gap: 8px">
               <button class="btn btn-lg btn-darken btn-primary" id="btn-spectate" translation="btn_spectate"></button>
               <button class="btn btn-lg btn-darken btn-secondary" id="btn-menu" translation="btn_menu"></button>
             </div>
           </div>
         </div>
       </div>
+
     </div>
     <canvas id="game-canvas"></canvas>
   </div>
