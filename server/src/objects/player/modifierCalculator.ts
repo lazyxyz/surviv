@@ -61,7 +61,7 @@ export class ModifierCalculator {
 
         for (
             const [modifiers, count] of [
-                [eventMods.kill, this.player._kills],
+                [eventMods.kill, this.player.kills],
                 [eventMods.damageDealt, this.player.damageDone]
             ] as const
         ) {
