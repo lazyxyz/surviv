@@ -216,65 +216,6 @@ input::-webkit-inner-spin-button {
   // max-width: 850px;
 }
 
-
-#language-dropdown {
-  position: absolute;
-  right: 20px;
-  top: 1rem;
-  z-index: 10;
-
-  img {
-    vertical-align: middle;
-  }
-
-  #btn-language {
-    width: 200px;
-    height: 40px;
-    display: flex;
-    gap: 1rem;
-    position: fixed;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    top: 0;
-    left: 0;
-  }
-
-  .dropdown-content {
-    background: palette.$grey;
-    top: 34px;
-    overflow-x: none;
-    overflow-y: scroll;
-    height: 600px;
-
-    a {
-      cursor: pointer;
-      text-align: center;
-      display: inline-block;
-    }
-
-    .selected {
-      background-color: palette.$orange;
-      pointer-events: none;
-    }
-  }
-
-  // For mobile
-  @media screen and (max-width: variables.$screen_large) {
-    transform: scale(55%);
-    top: 0;
-    right: -20px;
-
-    .dropdown-content {
-      height: 300px;
-    }
-
-    @media screen and (max-height: variables.$screen_large) {
-      right: -40px;
-    }
-  }
-}
-
 // TODO Refactor this, make classes
 .dialog {
   user-select: none;

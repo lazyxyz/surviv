@@ -59,7 +59,23 @@ interface ClaimResponse {
         chainId: number,
         survivRewards: string,
     }>;
+}
 
+interface Task {
+  id: number;
+  name: string;
+  description: string;
+  completed: boolean;
+  status: string;        // e.g., "1/1", "8/10", "7/7"
+  claimed: boolean;
+}
+
+interface GetAllTasksResponse {
+  success: boolean;
+  chainId: number;
+  survivRewards: string;
+  tasks: Task[];
+  resetInSeconds: number;
 }
 
 /**
@@ -830,37 +846,6 @@ export class Account extends EIP6963 {
             throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
         }
     }
-    // async buyItemsV2(collection: SaleCollections, item: SaleItems, amount: number, value: bigint): Promise<any> {
-    //     if (!this.provider?.provider) {
-    //         throw new Error('Web3 provider not initialized');
-    //     }
-    //     let itemAddress = getSurvivAddress(this.blockchain, collection);
-    //     let itemIndex = saleMappings[collection].assets.indexOf(item);
-    //     if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
-    //         throw new Error(`Invalid contract address or tokenId for ${item}`);
-    //     }
-
-    //     // Set fetch timeout
-    //     const controller = new AbortController();
-    //     const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    //     try {
-    //         // Initialize contract
-    //         const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-    //         const signer = await ethersProvider.getSigner();
-    //         const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShopV2"), survivShopV2ABI, signer);
-
-    //         const tx = await survivShopContract.buyItems(itemAddress, itemIndex, amount, { value });
-    //         const receipt = await tx.wait();
-    //         clearTimeout(timeoutId);
-    //         return receipt;
-
-    //     } catch (error: any) {
-    //         console.log("error: ", error);
-    //         clearTimeout(timeoutId);
-    //         throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
-    //     }
-    // }
 
     /**
      * Queries the price for a specified item.
@@ -921,41 +906,6 @@ export class Account extends EIP6963 {
             throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
         }
     }
-
-    // async queryPriceV2(collection: SaleCollections, item: SaleItems): Promise<any> {
-    //     // Ensure RPC URL is available
-    //     if (!this.chainConfig.rpcUrls[0]) {
-    //         throw new Error('RPC URL not configured');
-    //     }
-
-    //     let itemAddress = getSurvivAddress(this.blockchain, collection);
-    //     let itemIndex = saleMappings[collection].assets.indexOf(item);
-    //     if (!ethers.isAddress(itemAddress) || itemIndex === -1) {
-    //         throw new Error(`Invalid contract address or tokenId for ${item}`);
-    //     }
-
-    //     // Set fetch timeout
-    //     const controller = new AbortController();
-    //     const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-    //     try {
-    //         // Initialize JSON-RPC provider
-    //         const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
-
-    //         // Initialize contract with read-only provider (no signer needed)
-    //         const survivShopContract = new ethers.Contract(getSurvivAddress(this.blockchain, "SurvivShopV2"), survivShopV2ABI, ethersProvider);
-
-    //         // Call the getPrice function
-    //         const price = await survivShopContract.getPrice(itemAddress, itemIndex);
-
-    //         clearTimeout(timeoutId);
-    //         return price;
-    //     } catch (error: any) {
-    //         console.log("error: ", error);
-    //         clearTimeout(timeoutId);
-    //         throw new Error(`Failed to query price: ${error.message || 'Unknown error'}`);
-    //     }
-    // }
 
     async getCommits(): Promise<any> {
         // Ensure RPC URL is available
@@ -1226,4 +1176,61 @@ export class Account extends EIP6963 {
         }
     }
 
+    async getAllTasks(): Promise<GetAllTasksResponse> {
+        // Ensure authentication token is present
+        if (!this.token) {
+            throw new Error('Authentication token is missing');
+        }
+
+        // Ensure chain config is loaded
+        if (!this.chainConfig || !this.chainConfig.rpcUrls[0]) {
+            throw new Error('Chain configuration or RPC URL not available');
+        }
+
+        const chainId = this.chainConfig.chainId;
+        const survivRewards = getSurvivAddress(this.blockchain, "SurvivRewards");
+
+        if (!chainId || !survivRewards) {
+            throw new Error('chainId or survivRewards contract address missing in chain config');
+        }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
+
+        try {
+            const url = new URL(`${this.api}/api/getAllTasks`);
+
+            console.log("url: ", url);
+            url.searchParams.append('chainId', chainId.toString());
+            url.searchParams.append('survivRewards', survivRewards);
+
+            const response = await fetch(url.toString(), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`,
+                },
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+            }
+
+            const data: GetAllTasksResponse = await response.json();
+            return data;
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+
+            if (error.name === 'AbortError') {
+                throw new Error('Request timed out while fetching tasks');
+            }
+
+            throw new Error(`Failed to get tasks: ${error.message || 'Network error'}`);
+        }
+    }
 }

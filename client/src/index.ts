@@ -13,6 +13,7 @@ import "./scss/pages/client.scss";
 import { Buffer } from "buffer";
 import { initTranslation } from "./translations";
 import { setupConsoleListener, setupRangeInputs, setupSettingsImportExport, setupTabNavigation } from "./scripts/ui/setup";
+import { setupTasks } from "./scripts/tasks";
 
 if (typeof window !== "undefined") {
     // Polyfill for Buffer
@@ -38,6 +39,7 @@ void (async () => {
         setupGame(game);
         setupPlay(game, account);
         showInventory(account);
+        setupTasks(account);
     });
 
     setupConsoleListener();
