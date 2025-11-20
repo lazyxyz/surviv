@@ -1,4 +1,5 @@
-import { Layer, ObjectCategory, STEERING_SCALE, ZIndexes } from "@common/constants";
+// server/src/scripts/objects/vehicle.ts
+import { Layer, ObjectCategory, VEHICLE_NETDATA, ZIndexes } from "@common/constants";
 import { type VehicleDefinition } from "@common/definitions/vehicle";
 import { getEffectiveZIndex } from "@common/utils/layer";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
@@ -29,9 +30,17 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     dead = false;
     damageable = true;
 
+    private speed: number = 0;
+    private throttle: number = 0;
+    private slip: number = 0;
+
     private distSinceLastFootstep = 0;
     private distTraveled = 0;
+
     private wheelstepSound?: GameSound;
+    private engineSound?: GameSound;
+    private skidSound?: GameSound;
+    private brakeSound?: GameSound;
 
     constructor(game: Game, id: number, data: ObjectsNetData[ObjectCategory.Vehicle]) {
         super(game, id);
@@ -57,7 +66,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     override updateFromData(data: ObjectsNetData[ObjectCategory.Vehicle], isNew = false): void {
         const oldPosition = Vec.clone(this.position);
         this.updateFloorType();
-        this.updatePositionAndRotation(data, isNew);
+        this.updatePartial(data, isNew);
         this.updateDefinitionAndState(data);
         this.updateTexture();
         this.updateHitboxes();
@@ -81,14 +90,90 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
      * @param data The network data.
      * @param isNew Whether this is a new object (no smoothing).
      */
-    private updatePositionAndRotation(data: ObjectsNetData[ObjectCategory.Vehicle], isNew: boolean): void {
+    private updatePartial(data: ObjectsNetData[ObjectCategory.Vehicle], isNew: boolean): void {
         this.position = data.position;
         this.rotation = data.rotation;
+
+
+        this.speed = data.speed / VEHICLE_NETDATA.SPEED_SCALE;
+        this.slip = data.slip / VEHICLE_NETDATA.SLIP_SCALE;
+        this.throttle = data.throttle / VEHICLE_NETDATA.THROTTLE_SCALE;
+
         const noMovementSmoothing = !GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing");
         if (noMovementSmoothing || isNew) {
             this.container.position.copyFrom(toPixiCoords(this.position));
             this.container.rotation = this.rotation;
         }
+    }
+
+    private updateSounds(): void {
+        if (this.dead) {
+            this.stopAllVehicleSounds();
+            return;
+        }
+
+        const maxSpeed = this.definition.maxSpeed;
+        const speedNorm = Math.min(this.speed / maxSpeed, 1);  // 0-1 normalized
+        const absThrottle = Math.abs(this.throttle);
+
+        // ENGINE LOOP (always attempt; vol=0 when idle)
+        if (!this.engineSound) {
+            this.engineSound = this.playSound("vehicle_engine_loop", {
+                loop: true,
+                falloff: 1.0,
+                maxRange: 120,  // Tune based on map
+            });
+        }
+        // Pitch: low-speed = throttle-driven (revving), high-speed = speed-driven (cruising)
+        const enginePitch = 0.6 + (absThrottle * 0.5) + (speedNorm * 1.2);
+        this.engineSound.pitch = Math.max(0.4, Math.min(2.5, enginePitch));
+        // Volume: ramp with speed/throttle
+        const engineVol = speedNorm * 0.7 + (absThrottle * 0.3 * (1 - speedNorm));
+        this.engineSound.volume = Math.max(0, Math.min(1, engineVol));
+
+        // SKID/DRIFT LOOP (trigger on slip)
+        const skidThreshold = 0.15;  // Tune: ~8° slip angle
+        if (this.slip > skidThreshold && this.speed > 0.5) {
+            if (!this.skidSound) {
+                this.skidSound = this.playSound("tire_skid_loop", {
+                    loop: true,
+                    falloff: 0.8,
+                    maxRange: 80,
+                    volume: 0
+                });
+            }
+            const skidVol = ((this.slip - skidThreshold) / (1 - skidThreshold)) * (this.speed / 8) * 0.6;
+            this.skidSound.volume = Math.min(1, skidVol);
+            this.skidSound.pitch = 0.7 + this.slip * 0.6;
+        } else if (this.skidSound) {
+            this.skidSound.stop();
+            this.skidSound = undefined;
+        }
+
+        // BRAKE SQUEAL (optional: hard brake only, blends with skid)
+        if (this.throttle < -0.2 && this.speed > 1.5) {
+            if (!this.brakeSound) {
+                this.brakeSound = this.playSound("brake_squeal_loop", {
+                    loop: true,
+                    falloff: 0.7,
+                    maxRange: 60,
+                    volume: 0
+                });
+            }
+            const brakeVol = (-this.throttle * 0.5) * (this.speed / 10);
+            this.brakeSound.volume = Math.min(0.8, brakeVol);
+            this.brakeSound.pitch = 1.0 + (this.speed / 10) * 0.5;
+        } else if (this.brakeSound) {
+            this.brakeSound.stop();
+            this.brakeSound = undefined;
+        }
+    }
+
+    private stopAllVehicleSounds(): void {
+        [this.engineSound, this.skidSound, this.brakeSound].forEach(sound => {
+            sound?.stop();
+        });
+        this.engineSound = this.skidSound = this.brakeSound = undefined;
     }
 
     /**
@@ -164,7 +249,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
      */
     private updateWheelRotations(data: ObjectsNetData[ObjectCategory.Vehicle]): void {
         const quantizedAngle = data.steeringAngle;
-        const steeringAngle = quantizedAngle / STEERING_SCALE;
+        const steeringAngle = quantizedAngle / VEHICLE_NETDATA.STEERING_SCALE;
         this.wheels[0].rotation = steeringAngle; // Front-left
         this.wheels[1].rotation = steeringAngle; // Front-right
         if (this.wheels.length > 2) {

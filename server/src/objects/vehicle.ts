@@ -1,4 +1,5 @@
-import { Layer, ObjectCategory, STEERING_SCALE } from "@common/constants";
+// server/src/objects/vehicle.ts
+import { Layer, ObjectCategory, VEHICLE_NETDATA } from "@common/constants";
 import { Hitbox } from "@common/utils/hitbox";
 import { BaseGameObject, DamageParams, GameObject } from "./gameObject";
 import { SDeepMutable } from "@common/utils/misc";
@@ -16,7 +17,7 @@ import { Maps } from "@common/definitions/modes";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 20;
-    override readonly partialAllocBytes = 10;
+    override readonly partialAllocBytes = 13;
 
     declare hitbox: Hitbox;
     declare bulletHitbox: Hitbox;
@@ -27,6 +28,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private _height = 1;
     health: number;
     private _start = false;
+
+    private currentThrottle: number = 0;
 
     // Vehicle physics state
     private velocity: Vector = Vec.create(0, 0); // Vector velocity for realistic direction/momentum
@@ -389,6 +392,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         const oldPosition = Vec.clone(this.position);
 
         const { inputForward, inputSteer } = this.getInputs();
+        this.currentThrottle = inputForward;
 
         // Physics update (always, with 0 input if no driver)
         this.applyAcceleration(dt, inputForward);
@@ -461,10 +465,25 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     }
 
     override get data(): FullData<ObjectCategory.Vehicle> {
+        // Compute fresh values (velocity is up-to-date post-update())
+        const speed = Vec.length(this.velocity);
+        let slip = 0;
+        if (speed > 0.001) {
+            const forwardDir = Vec.fromPolar(this.rotation);
+            const sideDir = Vec.perpendicular(forwardDir);
+            const lateralVel = Math.abs(Vec.dotProduct(this.velocity, sideDir));
+            slip = lateralVel / speed;
+        }
+
         const data: SDeepMutable<FullData<ObjectCategory.Vehicle>> = {
             position: this.position,
             rotation: this.rotation,
-            steeringAngle: Math.round(this.steeringAngle * STEERING_SCALE), // Quantized to int (fits in int8)
+            steeringAngle: Math.round(this.steeringAngle * VEHICLE_NETDATA.STEERING_SCALE), // Quantized to int (fits in int8)
+
+            speed: Math.min(255, Math.round(speed * VEHICLE_NETDATA.SPEED_SCALE)),
+            slip: Math.min(255, Math.round(slip * VEHICLE_NETDATA.SLIP_SCALE)),
+            throttle: Math.max(-128, Math.min(127, Math.round(this.currentThrottle * VEHICLE_NETDATA.THROTTLE_SCALE))),
+
             full: {
                 definition: this.definition,
                 layer: this.layer,
