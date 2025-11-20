@@ -57,6 +57,21 @@ export class Gamer extends Player {
         }
     }
 
+    override kill(source: Player) {
+        if (!source.isBot()
+            && source instanceof Gamer
+            && source.address !== this.address
+            && source.ip !== this.ip
+        ) {
+            if (source.rewardsBoost > 0) {
+                this._bounties++;
+            }
+            this._kills++;
+            this.dirty.modifiers = true;
+            this.game.updateKillLeader(this);
+        }
+    }
+
     secondUpdate(): void {
         super.secondUpdate();
         this._packetStream.stream.index = 0;
@@ -89,7 +104,7 @@ export class Gamer extends Player {
     }
 
     override handleDeathDrops(position: Vector, layer: number): void {
-        if(this.game.gameMode == MODE.Dungeon) {
+        if (this.game.gameMode == MODE.Dungeon) {
             this.inventory.cleanInventory();
         } else {
             super.handleDeathDrops(position, layer);
@@ -201,6 +216,7 @@ export class Gamer extends Player {
             won: rank === 1,
             playerID: this.id,
             kills: this.kills,
+            bounties: this.bounties,
             damageDone: this.damageDone,
             damageTaken: this.damageTaken,
             timeAlive: (this.game.now - this.joinTime) / 1000,
@@ -248,6 +264,7 @@ export class Gamer extends Player {
             won: rank === 1,
             playerID: this.id,
             kills: this.kills,
+            bounties: this.bounties, 
             damageDone: this.damageDone,
             timeAlive: (this.game.now - this.joinTime) / 1000,
             rank,
@@ -292,6 +309,8 @@ export class Gamer extends Player {
                 this.chain,
                 this.address,
                 rank,
+                this.kills,
+                this.bounties,
                 this.game.teamMode,
                 this.game.gameId,
                 this.rewardsBoost,
@@ -300,7 +319,6 @@ export class Gamer extends Player {
 
             if (data.success && data.rewards.success) {
                 const rewards = data.rewards.rewards;
-                console.log("rewards: ", rewards);
                 if (rewards.crates > 0 || rewards.keys > 0) {
                     processRewardsPacket(true, rank, rewards.crates, rewards.keys);
                 }
@@ -320,10 +338,10 @@ export class Gamer extends Player {
                 this.game.teamMode,
                 this.game.gameId,
                 this.kills,
+                this.bounties,
                 timeAlive,
                 this.damageDone,
                 this.damageTaken,
-                3000
             );
         } catch (err) {
             console.log("Error save game:", err);

@@ -3,6 +3,7 @@ import { createPacket } from "./packet";
 export type GameOverData = {
     readonly playerID: number
     readonly kills: number
+    readonly bounties: number
     readonly damageDone: number
     readonly damageTaken: number
     readonly timeAlive: number
@@ -19,6 +20,7 @@ export const GameOverPacket = createPacket("GameOverPacket")<GameOverData>({
         strm.writeUint8(data.rank)
             .writeObjectId(data.playerID)
             .writeUint8(data.kills)
+            .writeUint8(data.bounties)
             .writeUint16(data.damageDone)
             .writeUint16(data.damageTaken)
             .writeUint16(data.timeAlive);
@@ -31,6 +33,7 @@ export const GameOverPacket = createPacket("GameOverPacket")<GameOverData>({
             rank,
             playerID: stream.readObjectId(),
             kills: stream.readUint8(),
+            bounties: stream.readUint8(),
             damageDone: stream.readUint16(),
             damageTaken: stream.readUint16(),
             timeAlive: stream.readUint16()

@@ -191,11 +191,11 @@
                 </button>
               </div>
 
-              <button class="btn btn-lg btn-darken btn-success" id="btn-play-dungeon">
+              <!-- <button class="btn btn-lg btn-darken btn-success" id="btn-play-dungeon">
                 <div class="pulsating-circle" style="display: block"></div>
                 <i class="fa-solid fa-crown"></i>
                 <span translation="play_dungeon"></span>
-              </button>
+              </button> -->
 
               <div id="option-btns-group" class="team-btns-container">
                 <button class="btn btn-lg btn-darken btn-purple" id="btn-join-team" translation="join_team"></button>
@@ -244,31 +244,21 @@
           </div>
           <div style="display: flex; flex-direction: row; gap: 15px">
             <button class="btn btn-lg btn-darken btn-primary" id="btn-customize">
-              <i class="fa-solid fa-shirt"></i>
+              <i class="fa-solid fa-gift"></i>
               <span class="splash-text" translation="inventory"></span>
-              <div class="pulse-glow">New</div>
             </button>
-            <button class="btn btn-lg btn-darken btn-secondary" id="btn-settings">
-              <i class="fa-solid fa-gear"></i>
-              <span translation="settings"></span>
+            
+            <button class="btn btn-lg btn-darken btn-primary" id="btn-tasks">
+              <i class="fa-solid fa-list-check"></i>
+              <span translation="daily_quests"></span>
+              <div class="pulse-glow">New</div>
             </button>
           </div>
         </div>
       </div>
-
-
     </div>
-    <div>
-      <!-- Language stuff -->
-      <div id="language-dropdown" class="dropdown">
-        <button class="btn btn-darken btn-secondary" id="btn-language">
-          <specialI class="fa-solid fa-globe"></specialI>
-          <txt translation="languages"></txt>
-          <i class="fa-solid fa-caret-down"></i>
-        </button>
-        <div id="languages-selector" class="dropdown-content persistent-scrollbar"></div>
-      </div>
 
+    <div class="topbar-buttons">
       <!-- Connect wallet button -->
       <div id="wallet-inactive" class="account-wallet-container dropdown" style="display: block;">
         <button id="connect-wallet-btn" class="btn btn-darken btn-primary account-wallet-button">
@@ -283,9 +273,26 @@
         </button>
         <div id="account-wallet-fieldset" class="dropdown-content persistent-scrollbar"></div>
       </div>
-    </div>
-  </div>
 
+      <!-- Language stuff -->
+      <div id="language-dropdown" class="dropdown">
+        <button class="btn btn-darken btn-secondary" id="btn-language">
+          <specialI class="fa-solid fa-globe"></specialI>
+          <txt translation="languages"></txt>
+          <i class="fa-solid fa-caret-down"></i>
+        </button>
+        <div id="languages-selector" class="dropdown-content persistent-scrollbar"></div>
+      </div>
+
+      <!-- Setting -->
+      <button class="btn btn-darken btn-secondary" id="btn-settings">
+        <i class="fa-solid fa-gear"></i>
+        <span translation="settings"></span>
+      </button>
+
+    </div>
+
+  </div>
   <div id="game">
     <div id="game-ui">
       <div id="joysticks-containers">
@@ -493,6 +500,7 @@
         <div class="emote-left"></div>
         <div class="button-center"></div>
       </div>
+
       <div id="game-over-overlay" style="display: none">
         <div id="game-over-top-screen">
           <img id="chicken-dinner" src="./img/game/shared/emotes/chicken_dinner.svg" />
@@ -501,6 +509,7 @@
             <span translation="msg_your_rank"></span>
             <span id="game-over-rank" class="modal-item"></span>
           </div>
+          <p id="game-over-subtitle" class="rewards-header-subtitle"></p>
         </div>
         <div id="game-over-screen">
           <h1 id="game-over-player-name" class="modal-item">Player</h1>
@@ -508,6 +517,10 @@
             <div class="stat">
               <span class="stat-name" translation="go_kills">Kills:</span>
               <span class="stat-value" id="game-over-kills"></span>
+            </div>
+            <div class="stat">
+              <span class="stat-name" translation="go_bounties">Bounties:</span>
+              <span class="stat-value" id="game-over-bounties"></span>
             </div>
             <div class="stat">
               <span class="stat-name" translation="go_damage_done">Damage done:</span>
@@ -521,16 +534,21 @@
               <span class="stat-name" translation="go_time_alive">Time alive:</span>
               <span class="stat-value" id="game-over-time"></span>
             </div>
+            <div class="stat" id="game-over-loots-stat" style="display: none;">
+              <span class="stat-name" translation="go_loots">Loots:</span>
+              <span class="stat-value" id="game-over-loots"></span>
+            </div>
           </div>
           <div class="modal-item">
             <button class="btn btn-lg btn-darken btn-primary" id="btn-play-again" translation="btn_play_again"></button>
-            <div style="display: flex; gap: 8px">
+            <div id="game-over-secondary-buttons" style="display: flex; gap: 8px">
               <button class="btn btn-lg btn-darken btn-primary" id="btn-spectate" translation="btn_spectate"></button>
               <button class="btn btn-lg btn-darken btn-secondary" id="btn-menu" translation="btn_menu"></button>
             </div>
           </div>
         </div>
       </div>
+
     </div>
     <canvas id="game-canvas"></canvas>
   </div>
@@ -1225,6 +1243,120 @@
           </div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- Tasks / Daily Missions Modal -->
+  <div class="modal dialog persistent-scrollbar" id="tasks-menu" style="display: none;">
+    <div class="dialog-header">
+      <h3 translation="daily_quests"></h3>
+      <span class="dialog-close-btn fa-solid fa-xmark" id="close-tasks"></span>
+    </div>
+
+    <div id="tasks-container">
+      <!-- Loading overlay -->
+      <div id="tasks-loading" style="text-align:center; padding:50px; color:#aaa; display: none;">
+        Loading tasks...
+      </div>
+
+      <!-- 7-Day Streak (smaller) -->
+      <div class="tasks-streak-section">
+        <div class="tasks-streak-header">
+          <div>7-Day Streak</div>
+          <div class="streak-counter"><span id="current-streak-days">0</span>/7</div>
+        </div>
+
+        <div class="streak-days">
+          <div class="streak-day">1</div>
+          <div class="streak-day">2</div>
+          <div class="streak-day">3</div>
+          <div class="streak-day">4</div>
+          <div class="streak-day">5</div>
+          <div class="streak-day">6</div>
+          <div class="streak-day">7</div>
+        </div>
+
+      </div>
+
+      <!-- Daily Tasks -->
+      <div class="tasks-list">
+        <!-- Task 1 -->
+        <div class="task-item" data-task-id="0">
+          <div class="task-progress">
+            <div class="task-icon">🏆</div>
+            <div class="task-info">
+              <div class="task-title">Daily Warm-Up</div>
+              <div class="task-desc">Finish Top 5 in 1 match</div>
+            </div>
+          </div>
+          <div class="task-status-text">0/1</div>
+          <div class="task-claim-btn" data-reward="1,1">
+            <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
+            <span>1</span>
+            <img src="./img/assets/surviv_kit_key.webp" alt="Key">
+            <span>1</span>
+          </div>
+        </div>
+
+        <!-- Task 2 -->
+        <div class="task-item" data-task-id="1">
+          <div class="task-progress">
+            <div class="task-icon">💀</div>
+            <div class="task-info">
+              <div class="task-title">Hunter</div>
+              <div class="task-desc">Eliminate 5 players</div>
+            </div>
+          </div>
+          <div class="task-status-text">0/5</div>
+          <div class="task-claim-btn" data-reward="1,1">
+            <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
+            <span>1</span>
+            <img src="./img/assets/surviv_kit_key.webp" alt="Key">
+            <span>1</span>
+          </div>
+        </div>
+
+        <!-- Task 3 -->
+        <div class="task-item" data-task-id="2">
+          <div class="task-progress">
+            <div class="task-icon">👑</div>
+            <div class="task-info">
+              <div class="task-title">Champion</div>
+              <div class="task-desc">Win 1 match (1st place)</div>
+            </div>
+          </div>
+          <div class="task-status-text">0/1</div>
+          <div class="task-claim-btn" data-reward="2,2">
+            <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
+            <span>2</span>
+            <img src="./img/assets/surviv_kit_key.webp" alt="Key">
+            <span>2</span>
+          </div>
+        </div>
+
+        <!-- Streak as Task 100 -->
+        <div class="task-item" data-task-id="100">
+          <div class="task-progress">
+            <div class="task-icon">🔥</div>
+            <div class="task-info">
+              <div class="task-title">7-Day Streak</div>
+              <div class="task-desc">Play every day for 7 days</div>
+            </div>
+          </div>
+          <div class="task-status-text">0/7</div>
+          <div class="task-claim-btn" data-reward="10,10">
+            <img src="./img/assets/surviv_kit_crate.webp" alt="Crate">
+            <span>10</span>
+            <img src="./img/assets/surviv_kit_key.webp" alt="Key">
+            <span>10</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="tasks-footer">
+        <p>Resets in: <span id="daily-reset-timer">00:00:00</span></p>
       </div>
     </div>
   </div>

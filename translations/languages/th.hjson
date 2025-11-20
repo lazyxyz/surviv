@@ -305,4 +305,8 @@
   "create_team_lock": "ล็อก"
   "play_dungeon": "คุกใต้ดิน"
   "new_dungeon_wave": "คลื่น <waves> — ซอมบี้กำลังมา!"
+
+  "go_bounties": "รางวัล"
+  "go_loots": "ของรางวัล"
+  "daily_quests": "เควสต์รายวัน"
 }
