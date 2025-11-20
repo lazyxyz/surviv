@@ -166,10 +166,10 @@ export class BotManager {
             // Original 20% distribution for all types
             const typeConfigs: Array<{ type: BotType; percentage: number; behavior: BehaviorType; level: number }> = [
                 { type: BotType.Zombie, percentage: 0.2, behavior: BehaviorType.ProximityAttack, level: 10 },
-                { type: BotType.Ninja, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 5 },
-                { type: BotType.Werewolf, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 7 },
-                { type: BotType.Boomer, percentage: 0.2, behavior: BehaviorType.ProximityAttack, level: 7 },
-                { type: BotType.Butcher, percentage: 0.2, behavior: BehaviorType.LockOnChase, level: 7 }
+                { type: BotType.Ninja, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 10 },
+                { type: BotType.Werewolf, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 10 },
+                { type: BotType.Boomer, percentage: 0.2, behavior: BehaviorType.ProximityAttack, level: 10 },
+                { type: BotType.Butcher, percentage: 0.2, behavior: BehaviorType.LockOnChase, level: 10 }
             ];
 
             // Calculate base counts
