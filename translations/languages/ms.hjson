@@ -305,4 +305,8 @@
   "create_team_lock": "Kunci"
   "play_dungeon": "Penjara Bawah"
   "new_dungeon_wave": "Gelombang <waves> — Zombie datang!"
+
+  "go_bounties": "Hadiah"
+  "go_loots": "Rampasan"
+  "daily_quests": "Quest Harian"
 }

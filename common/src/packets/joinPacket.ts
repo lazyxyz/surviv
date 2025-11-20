@@ -1,10 +1,4 @@
 import { GameConstants } from "../constants";
-import { BadgeDefinition, Badges } from "../definitions/badges";
-import { EmoteDefinition, Emotes } from "../definitions/emotes";
-import { Loots } from "../definitions/loots";
-import { MeleeDefinition, Melees } from "../definitions/melees";
-import { GunDefinition, Guns } from "../definitions/guns";
-import { SkinDefinition, Skins } from "../definitions/skins";
 import { createPacket } from "./packet";
 
 export type PlayerData = {

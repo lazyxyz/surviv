@@ -305,4 +305,8 @@
   "create_team_lock": "Zámok"
   "play_dungeon": "Žalár"
   "new_dungeon_wave": "Vlna <waves> — Zombie prichádzajú!"
+
+  "go_bounties": "Odmeny"
+  "go_loots": "Koristi"
+  "daily_quests": "Denné Úlohy"
 }

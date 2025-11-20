@@ -1201,7 +1201,6 @@ export class Account extends EIP6963 {
         try {
             const url = new URL(`${this.api}/api/getAllTasks`);
 
-            console.log("url: ", url);
             url.searchParams.append('chainId', chainId.toString());
             url.searchParams.append('survivRewards', survivRewards);
 

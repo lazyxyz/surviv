@@ -30,6 +30,7 @@ export class PlayerManager {
             return undefined;
         }
 
+
         let spawnPosition = Vec.create(this.game.map.width / 2, this.game.map.height / 2);
         let spawnLayer: Layer | undefined;
 
@@ -40,6 +41,7 @@ export class PlayerManager {
         if (layer) spawnLayer = layer;
 
         const player = new Gamer(this.game, socket, spawnPosition, spawnLayer, team);
+
         this.game.connectingPlayers.add(player);
         this.game.pluginManager.emit("player_did_connect", player);
         return player;
@@ -97,7 +99,6 @@ export class PlayerManager {
             if (assets.melee) player.inventory.weapons[2] = new MeleeItem(assets.melee, player);
             if (assets.gun) player.inventory.weapons[0] = new GunItem(assets.gun, player);
         }
-
         this.game.livingPlayers.add(player);
         this.game.spectatablePlayers.push(player);
         this.game.connectingPlayers.delete(player);

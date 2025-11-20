@@ -305,4 +305,8 @@
   "create_team_lock": "Slot"
   "play_dungeon": "Kerker"
   "new_dungeon_wave": "Golf <waves> — De zombies komen!"
+
+  "go_bounties": "Beloningen"
+  "go_loots": "Buit"
+  "daily_quests": "Dagelijkse Quests"
 }

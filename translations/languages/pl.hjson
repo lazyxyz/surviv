@@ -305,4 +305,8 @@
   "create_team_lock": "Blokada"
   "play_dungeon": "Loch"
   "new_dungeon_wave": "Fala <waves> — Zombie nadchodzą!"
+
+  "go_bounties": "Nagrody"
+  "go_loots": "Łupy"
+  "daily_quests": "Codzienne Zadania"
 }
