@@ -305,4 +305,8 @@
   "create_team_lock": "ताला"
   "play_dungeon": "कालकोठरी"
   "new_dungeon_wave": "लहर <waves> — ज़ॉम्बी आ रहे हैं!"
+
+  "go_bounties": "बाउंटी"
+  "go_loots": "लूट"
+  "daily_quests": "दैनिक क्वेस्ट"
 }

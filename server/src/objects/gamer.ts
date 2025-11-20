@@ -61,7 +61,7 @@ export class Gamer extends Player {
         if (!source.isBot()
             && source instanceof Gamer
             && source.address !== this.address
-            // && source.ip !== this.ip
+            && source.ip !== this.ip
         ) {
             if (source.rewardsBoost > 0) {
                 this._bounties++;
@@ -264,6 +264,7 @@ export class Gamer extends Player {
             won: rank === 1,
             playerID: this.id,
             kills: this.kills,
+            bounties: this.bounties, 
             damageDone: this.damageDone,
             timeAlive: (this.game.now - this.joinTime) / 1000,
             rank,

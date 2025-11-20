@@ -305,4 +305,8 @@
   "create_team_lock": "鎖定"
   "play_dungeon": "地下城"
   "new_dungeon_wave": "波次 <waves> — 殭屍來襲！"
+
+  "go_bounties": "賞金"
+  "go_loots": "戰利品"
+  "daily_quests": "日常任務"
 }

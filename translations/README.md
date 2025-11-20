@@ -1,19 +1,8 @@
 # Translation File Reports
 
-This file is a report of all errors and missing keys in the translation files of this game. Last generated Thu, 20 Nov 2025 08:55:11 GMT
+This file is a report of all errors and missing keys in the translation files of this game. Last generated Thu, 20 Nov 2025 10:40:22 GMT
 
-## 🇸🇦 العربية (98% Complete) - ar.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
-
-## 🇩🇪 Deutsch (98% Complete) - de.hjson
+## 🇸🇦 العربية (99% Complete) - ar.hjson
 
 ### (No Invalid Keys)
 
@@ -21,10 +10,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇪🇸 Español (98% Complete) - es.hjson
+## 🇩🇪 Deutsch (99% Complete) - de.hjson
 
 ### (No Invalid Keys)
 
@@ -32,10 +19,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇫🇷 Français (98% Complete) - fr.hjson
+## 🇪🇸 Español (99% Complete) - es.hjson
 
 ### (No Invalid Keys)
 
@@ -43,10 +28,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇮🇳 हिन्दी (98% Complete) - hi.hjson
+## 🇫🇷 Français (99% Complete) - fr.hjson
 
 ### (No Invalid Keys)
 
@@ -54,10 +37,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇮🇩 Bahasa Indonesia (98% Complete) - id.hjson
+## 🇮🇳 हिन्दी (99% Complete) - hi.hjson
 
 ### (No Invalid Keys)
 
@@ -65,10 +46,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇮🇹 Italiano (98% Complete) - it.hjson
+## 🇮🇩 Bahasa Indonesia (99% Complete) - id.hjson
 
 ### (No Invalid Keys)
 
@@ -76,10 +55,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇯🇵 日本語 (98% Complete) - ja.hjson
+## 🇮🇹 Italiano (99% Complete) - it.hjson
 
 ### (No Invalid Keys)
 
@@ -87,10 +64,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇰🇷 한국어 (98% Complete) - ko.hjson
+## 🇯🇵 日本語 (99% Complete) - ja.hjson
 
 ### (No Invalid Keys)
 
@@ -98,10 +73,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇲🇾 Bahasa Melayu (98% Complete) - ms.hjson
+## 🇰🇷 한국어 (99% Complete) - ko.hjson
 
 ### (No Invalid Keys)
 
@@ -109,10 +82,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇳🇱 Nederlands (98% Complete) - nl.hjson
+## 🇲🇾 Bahasa Melayu (99% Complete) - ms.hjson
 
 ### (No Invalid Keys)
 
@@ -120,10 +91,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇵🇱 Polski (98% Complete) - pl.hjson
+## 🇳🇱 Nederlands (99% Complete) - nl.hjson
 
 ### (No Invalid Keys)
 
@@ -131,10 +100,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇵🇹 Português (98% Complete) - pt.hjson
+## 🇵🇱 Polski (99% Complete) - pl.hjson
 
 ### (No Invalid Keys)
 
@@ -142,10 +109,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇧🇷 Português Brasil (98% Complete) - pt_BR.hjson
+## 🇵🇹 Português (99% Complete) - pt.hjson
 
 ### (No Invalid Keys)
 
@@ -153,10 +118,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇷🇺 Русский (98% Complete) - ru.hjson
+## 🇧🇷 Português Brasil (99% Complete) - pt_BR.hjson
 
 ### (No Invalid Keys)
 
@@ -164,10 +127,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇸🇰 Slovenčina (98% Complete) - sk.hjson
+## 🇷🇺 Русский (99% Complete) - ru.hjson
 
 ### (No Invalid Keys)
 
@@ -175,10 +136,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇹🇭 ไทย (98% Complete) - th.hjson
+## 🇸🇰 Slovenčina (99% Complete) - sk.hjson
 
 ### (No Invalid Keys)
 
@@ -186,10 +145,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇵🇭 Tagalog (98% Complete) - tl.hjson
+## 🇹🇭 ไทย (99% Complete) - th.hjson
 
 ### (No Invalid Keys)
 
@@ -197,10 +154,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇹🇷 Türkçe (98% Complete) - tr.hjson
+## 🇵🇭 Tagalog (99% Complete) - tl.hjson
 
 ### (No Invalid Keys)
 
@@ -208,10 +163,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇺🇦 Українська (98% Complete) - uk.hjson
+## 🇹🇷 Türkçe (99% Complete) - tr.hjson
 
 ### (No Invalid Keys)
 
@@ -219,10 +172,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇻🇳 Tiếng Việt (98% Complete) - vi.hjson
+## 🇺🇦 Українська (99% Complete) - uk.hjson
 
 ### (No Invalid Keys)
 
@@ -230,10 +181,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇳🇬 Yorùbá (98% Complete) - yo.hjson
+## 🇻🇳 Tiếng Việt (99% Complete) - vi.hjson
 
 ### (No Invalid Keys)
 
@@ -241,10 +190,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇨🇳 简体中文 (98% Complete) - zh_CN.hjson
+## 🇳🇬 Yorùbá (99% Complete) - yo.hjson
 
 ### (No Invalid Keys)
 
@@ -252,10 +199,8 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
 
-## 🇭🇰 繁體中文 (98% Complete) - zh_HK.hjson
+## 🇨🇳 简体中文 (99% Complete) - zh_CN.hjson
 
 ### (No Invalid Keys)
 
@@ -263,6 +208,13 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
-- Key `go_bounties` is not defined
-- Key `go_loots` is not defined
+
+## 🇭🇰 繁體中文 (99% Complete) - zh_HK.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
 

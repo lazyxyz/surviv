@@ -305,4 +305,8 @@
   "create_team_lock": "Trancar"
   "play_dungeon": "Masmorra"
   "new_dungeon_wave": "Onda <waves> — Os zumbis chegam!"
+
+  "go_bounties": "Recompensas"
+  "go_loots": "Saques"
+  "daily_quests": "Missões Diárias"
 }

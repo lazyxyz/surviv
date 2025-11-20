@@ -305,4 +305,8 @@
   "create_team_lock": "Блок"
   "play_dungeon": "Підземелля"
   "new_dungeon_wave": "Хвиля <waves> — Зомбі йдуть!"
+
+  "go_bounties": "Нагороди"
+  "go_loots": "Лут"
+  "daily_quests": "Щоденні Завдання"
 }

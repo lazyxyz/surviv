@@ -24,17 +24,18 @@ export const Config = {
     v50Port: 9500,
     cursedIslandPort: 9600,
 
-    addBot: true,
+    // addBot: true,
 
-    // addBot: false,
-    // testMode: "gunsTest", // For Testing
+    addBot: false,
+    testMode: "gunsTest", // For Testing
 
     spawn: { mode: SpawnMode.Normal },
 
     maxPlayersPerGame: 100,
 
     maxGames: 20,
-    gameJoinTime: 90,
+    // gameJoinTime: 90,
+    gameJoinTime: 10,
 
     objectLifetime: 180000, // Remove loot after 3 mins
     obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
