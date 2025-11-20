@@ -57,6 +57,21 @@ export class Gamer extends Player {
         }
     }
 
+    override kill(source: Player) {
+        if (!source.isBot()
+            && source instanceof Gamer
+            && source.address !== this.address
+            && source.ip !== this.ip
+        ) {
+            if (source.rewardsBoost > 0) {
+                this._bounties++;
+            }
+            this._kills++;
+            this.dirty.modifiers = true;
+            this.game.updateKillLeader(this);
+        }
+    }
+
     secondUpdate(): void {
         super.secondUpdate();
         this._packetStream.stream.index = 0;
@@ -89,7 +104,7 @@ export class Gamer extends Player {
     }
 
     override handleDeathDrops(position: Vector, layer: number): void {
-        if(this.game.gameMode == MODE.Dungeon) {
+        if (this.game.gameMode == MODE.Dungeon) {
             this.inventory.cleanInventory();
         } else {
             super.handleDeathDrops(position, layer);
