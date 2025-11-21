@@ -1,3 +1,5 @@
+// src/objects/bots/bot.ts
+
 import { GameConstants, KillfeedEventType, Layer } from "@common/constants";
 import { type Vector, Vec } from "@common/utils/vector";
 import { Game } from "../../game";
