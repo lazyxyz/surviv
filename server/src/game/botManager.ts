@@ -2,7 +2,7 @@ import { CircleHitbox } from "@common/utils/hitbox";
 import { Geometry } from "@common/utils/math";
 import { MapObjectSpawnMode } from "@common/utils/objectDefinitions";
 import { Vec } from "@common/utils/vector";
-import { BotType, Zombie, Ninja, Boomer, Butcher, Ghost, Werewolf } from "../objects/bots";
+import { BotType, Zombie, Ninja, Boomer, Butcher, Ghost, Werewolf, Assassin } from "../objects/bots";
 import { ActorContainer, Player } from "../objects/player";
 import { Game } from "../game";
 import { Logger } from "../utils/misc";
@@ -72,6 +72,10 @@ export class BotManager {
                 bot = new Boomer(this.game, botData, spawnPosition, behaviorType, layer, team, level);
                 break;
             }
+            case BotType.Assassin: {
+                bot = new Assassin(this.game, botData, spawnPosition, layer);
+                break;
+            }
         }
 
         if (this.game.gameMode !== MODE.Dungeon) {
@@ -118,7 +122,7 @@ export class BotManager {
                 if (wave >= 5) availableTypes.push(BotType.Butcher);
             } else {
                 // Waves 6+: Always all types
-                availableTypes = [BotType.Zombie, BotType.Werewolf, BotType.Ghost, BotType.Boomer, BotType.Butcher];
+                availableTypes = [BotType.Zombie, BotType.Werewolf, BotType.Ghost, BotType.Boomer, BotType.Butcher, BotType.Assassin];
             }
 
             if (availableTypes.length === 0) {
@@ -134,7 +138,7 @@ export class BotManager {
                 [BotType.Boomer]: BehaviorType.ChaseRandom,
                 [BotType.Butcher]: BehaviorType.ChaseRandom,
                 [BotType.Ninja]: BehaviorType.HideAndAttack,
-
+                [BotType.Assassin]: BehaviorType.HideAndAttack,
             };
 
             const level = wave;
@@ -161,15 +165,16 @@ export class BotManager {
         } else {
             // Non-Dungeon: Use original ("old") skills/behaviors and levels
             // Random total bots between 10 and 15
-            const totalBots = Math.floor(Math.random() * 6) + 10; // 10–15 inclusive
+            const totalBots = Math.floor(Math.random() * 6) + 20; // 10–15 inclusive
 
             // Original 20% distribution for all types
             const typeConfigs: Array<{ type: BotType; percentage: number; behavior: BehaviorType; level: number }> = [
-                { type: BotType.Zombie, percentage: 0.2, behavior: BehaviorType.ProximityAttack, level: 10 },
-                { type: BotType.Ninja, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 10 },
-                { type: BotType.Werewolf, percentage: 0.2, behavior: BehaviorType.HideAndAttack, level: 10 },
-                { type: BotType.Boomer, percentage: 0.2, behavior: BehaviorType.ProximityAttack, level: 10 },
-                { type: BotType.Butcher, percentage: 0.2, behavior: BehaviorType.LockOnChase, level: 10 }
+                { type: BotType.Zombie, percentage: 0.20, behavior: BehaviorType.ProximityAttack, level: 10 },
+                { type: BotType.Ninja, percentage: 0.20, behavior: BehaviorType.HideAndAttack, level: 10 },
+                { type: BotType.Werewolf, percentage: 0.15, behavior: BehaviorType.HideAndAttack, level: 10 },
+                { type: BotType.Boomer, percentage: 0.15, behavior: BehaviorType.ProximityAttack, level: 10 },
+                { type: BotType.Butcher, percentage: 0.15, behavior: BehaviorType.LockOnChase, level: 10 },
+                { type: BotType.Assassin, percentage: 0.15, behavior: BehaviorType.HideAndAttack, level: 10 }
             ];
 
             // Calculate base counts
