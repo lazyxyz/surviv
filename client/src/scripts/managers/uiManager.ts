@@ -588,157 +588,16 @@ export class UIManager {
         }
     }
 
-    // showRewardsScreen(packet: RewardsData): void {
-    //     // const { eligible, rank, crates, keys } = packet;
 
-    //     const { eligible, rank, crates, keys } = {
-    //         crates: 1,
-    //         eligible: true,
-    //         keys: 2,
-    //         rank: 1
-    //     };
+    updateWaveCounter(waves: number) {
+        this.ui.waveMsgCounter.text(waves.toString());
 
-    //     if (eligible && crates === 0 && keys === 0) {
-    //         return;
-    //     }
+        const newWave = getTranslatedString("new_dungeon_wave", { waves: waves.toString() });
+        this.ui.gasMsgInfo.text(newWave);
 
-    //     // Define random content options for sharing
-    //     const rank1TitleContent = [
-    //         "Chicken Dinner Winner #1 🔥🔥",
-    //         "GGWP #1 🎉",
-    //         "Game is easy #1 🏆",
-    //         "Unstoppable #1 💥",
-    //         "Carried the squad to #1 💪😂",
-    //         "1st Place Loot King 🌟 - GG!",
-    //         "You play to kill zombies, I play for Chicken Dinner #1. We are not the same. 😎",
-    //         "Make chicken dinner great again #1 😂",
-    //         "Top #1 or out, noobs! 😜🏆",
-    //         "Warzone proven warrior #1 💪",
-    //         "GGWP, easy peasy #1 😎🍋",
-    //         "Clutched #1, time for a nap 😴🏆",
-    //         "Winner takes all, #1 vibes! 🥇🔥",
-    //         "This is MY game, #1 GG! 😤👑"
-    //     ];
-
-    //     const otherTitleContent = [
-    //         "Missed #1, but I'm a survivor! 👾💪",
-    //         "GGWP! 🎉",
-    //         "Just warming up 💪🎮",
-    //         "One step closer to #1! 🏃‍♂️💨",
-    //         "No crown, still proud! 🧢🏅",
-    //         "Zombies got me, but I’m too cool 😎🧟",
-    //         "Mom called mid-game, oops! 😅📱",
-    //         "No scope, still dope! 😜",
-    //         "Bots hate me, I’m too good 😤🤖",
-    //         "No chicken, but I’m winning vibes! 😎✨",
-    //         "Nothing to see, my team carried me! 😂🙌",
-    //         "My strategy? Nothing! 😂😜",
-    //         "Hid till the end, still GG! 🫣🎉"
-    //     ];
-
-    //     const randomContent =
-    //         rank === 1
-    //             ? rank1TitleContent[Math.floor(Math.random() * rank1TitleContent.length)]
-    //             : otherTitleContent[Math.floor(Math.random() * otherTitleContent.length)];
-
-    //     // pool of CTA phrases with pointing icons
-    //     const ctaPhrases = [
-    //         "Check this out 👇",
-    //         "See for yourself 👇",
-    //         "Have a look 👇",
-    //         "More details below 👇",
-    //         "Look what I found 👇"
-    //     ];
-    //     const getCTA = () => ctaPhrases[Math.floor(Math.random() * ctaPhrases.length)];
-
-    //     let tweetTextRaw: string | undefined;
-
-    //     // === Main logic ===
-    //     if (!eligible) {
-    //         tweetTextRaw = undefined;
-    //     } else {
-    //         // eligible and has rewards (since we returned if 0)
-    //         if (crates > 0 && keys > 0) {
-    //             const rewardContent = [
-    //                 `${randomContent}\nI just played and earned awesome @SurvivFun rewards on @Somnia_Network!\n${getCTA()}`,
-    //                 `${randomContent}\nJust earned ${crates} crates and ${keys} keys baby!\n${getCTA()}`,
-    //                 `${randomContent}\nLoot secured: ${crates} crates + ${keys} keys\n${getCTA()}`,
-    //                 `${randomContent}\nTreasure hunt success → ${crates} crates, ${keys} keys\n${getCTA()}`,
-    //             ];
-    //             tweetTextRaw = rewardContent[Math.floor(Math.random() * rewardContent.length)];
-    //         } else if (crates > 0) {
-    //             const cratesContent = [
-    //                 `${randomContent}\nClaimed ${crates} shiny crates with @SurvivFun on @Somnia_Network!\n${getCTA()}`,
-    //                 `${randomContent}\nLoot box vibes → ${crates} crates earned today\n${getCTA()}`,
-    //                 `${randomContent}\nWho needs keys? ${crates} crates are enough\n${getCTA()}`,
-    //                 `${randomContent}\nJust stacked ${crates} crates — Somnia rewards hitting different!\n${getCTA()}`,
-    //             ];
-    //             tweetTextRaw = cratesContent[Math.floor(Math.random() * cratesContent.length)];
-    //         } else if (keys > 0) {
-    //             const keysContent = [
-    //                 `${randomContent}\nUnlocked ${keys} keys with @SurvivFun on @Somnia_Network!\n${getCTA()}`,
-    //                 `${randomContent}\nNo crates, but got ${keys} golden keys\n${getCTA()}`,
-    //                 `${randomContent}\nEarned ${keys} rare keys — time to unlock the future!\n${getCTA()}`,
-    //                 `${randomContent}\nKeys only run → ${keys} keys secured\n${getCTA()}`,
-    //             ];
-    //             tweetTextRaw = keysContent[Math.floor(Math.random() * keysContent.length)];
-    //         }
-    //     }
-
-    //     // Update game over screen elements
-    //     const gameOverText = this.ui.gameOverText;
-    //     const gameOverSubtitle = $('#game-over-subtitle');
-    //     const gameOverLootsStat = $('#game-over-loots-stat');
-    //     const gameOverSecondaryButtons = $('#game-over-secondary-buttons');
-
-    //     // Set title and style
-    //     const headerStyle = eligible
-    //         ? {
-    //             background: 'linear-gradient(180deg, #f2770f 0%, #ffd23a 50%, #fde57d 100%)',
-    //             'background-clip': 'text',
-    //             '-webkit-background-clip': 'text',
-    //             '-webkit-text-fill-color': 'transparent',
-    //             color: 'transparent' // Fallback
-    //         }
-    //         : { color: 'white' };
-
-    //     // Apply styles individually to avoid TypeScript overload error
-    //     for (const [key, value] of Object.entries(headerStyle)) {
-    //         gameOverText.css(key, value);
-    //     }
-
-    //     gameOverText.html(
-    //         eligible ? (rank === 1 ? "Chicken Dinner #1!" : `Rank #${rank}`) : "Missed rewards"
-    //     );
-
-    //     // Set subtitle
-    //     gameOverSubtitle.html(
-    //         eligible ? "Claim your rewards in Inventory!" : "No Surviv Card or campaign not started. Grab a Surviv Card or check back soon!"
-    //     );
-
-    //     if (eligible && (crates > 0 || keys > 0)) {
-    //         let lootsText = `${crates + keys} loots`;
-    //         this.ui.gameOverLoots.text(lootsText);
-    //         gameOverLootsStat.show();
-    //     } else {
-    //         gameOverLootsStat.hide();
-    //     }
-
-    //     // Add share button if eligible and has rewards
-    //     if (eligible && tweetTextRaw) {
-    //         const shareBtn = $(`
-    //         <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/1965608005204165083"
-    //            target="_blank"
-    //            rel="noopener noreferrer"
-    //            class="btn btn-lg btn-darken btn-secondary"
-    //            id="btn-share">
-    //             Share on <img src="./img/misc/x_logo.svg" alt="X (Twitter)" loading="lazy">
-    //         </a>
-    //     `);
-
-    //         gameOverSecondaryButtons.append(shareBtn);
-    //     }
-    // }
+        this.ui.gasMsg.fadeIn();
+        setTimeout(() => this.ui.gasMsg.fadeOut(1000), 5000);
+    }
 
     readonly mapPings: readonly PlayerPing[] = [
         "warning_ping",
