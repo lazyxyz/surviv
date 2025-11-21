@@ -1,4 +1,5 @@
-import { Layer, ObjectCategory, STEERING_SCALE, ZIndexes } from "@common/constants";
+// server/src/scripts/objects/vehicle.ts
+import { Layer, ObjectCategory, VEHICLE_NETDATA, ZIndexes } from "@common/constants";
 import { type VehicleDefinition } from "@common/definitions/vehicle";
 import { getEffectiveZIndex } from "@common/utils/layer";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
@@ -11,9 +12,10 @@ import type { Orientation } from "@common/typings";
 import { DIFF_LAYER_HITBOX_OPACITY, HITBOX_COLORS, HITBOX_DEBUG_MODE } from "../utils/constants";
 import { Vec, type Vector } from "@common/utils/vector";
 import { GAME_CONSOLE } from "../..";
-import { random, randomFloat } from "@common/utils/random";
+import { random, randomBoolean, randomFloat } from "@common/utils/random";
 import { Geometry } from "@common/utils/math";
 import type { GameSound } from "../managers/soundManager";
+import { MaterialSounds } from "@common/definitions/obstacles";
 
 /**
  * Represents a vehicle game object in the frontend, handling rendering, updates, and effects.
@@ -29,9 +31,26 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     dead = false;
     damageable = true;
 
+    private speed: number = 0;
+    private throttle: number = 0;
+    private slip: number = 0;
+
     private distSinceLastFootstep = 0;
     private distTraveled = 0;
+
     private wheelstepSound?: GameSound;
+    private engineSound?: GameSound;
+    private skidSound?: GameSound;
+    private brakeSound?: GameSound;
+    private shiftSound?: GameSound;
+
+    private hitSound?: GameSound;
+
+    private hasDriver: boolean = false;
+
+    // For gear shift detection
+    private lastCheckTime: number = Date.now();
+    private lastSpeed: number = 0;
 
     constructor(game: Game, id: number, data: ObjectsNetData[ObjectCategory.Vehicle]) {
         super(game, id);
@@ -57,15 +76,16 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     override updateFromData(data: ObjectsNetData[ObjectCategory.Vehicle], isNew = false): void {
         const oldPosition = Vec.clone(this.position);
         this.updateFloorType();
-        this.updatePositionAndRotation(data, isNew);
+        this.updatePartial(data, isNew);
         this.updateDefinitionAndState(data);
         this.updateTexture();
         this.updateHitboxes();
         this.updateWheelRotations(data);
         if (!isNew) {
             this.handleMovementEffects(oldPosition);
+            this.updateZIndex();
+            this.updateSounds();
         }
-        this.updateZIndex();
         this.updateDebugGraphics();
     }
 
@@ -81,9 +101,15 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
      * @param data The network data.
      * @param isNew Whether this is a new object (no smoothing).
      */
-    private updatePositionAndRotation(data: ObjectsNetData[ObjectCategory.Vehicle], isNew: boolean): void {
+    private updatePartial(data: ObjectsNetData[ObjectCategory.Vehicle], isNew: boolean): void {
         this.position = data.position;
         this.rotation = data.rotation;
+
+
+        this.speed = data.speed / VEHICLE_NETDATA.SPEED_SCALE;
+        this.slip = data.slip / VEHICLE_NETDATA.SLIP_SCALE;
+        this.throttle = data.throttle / VEHICLE_NETDATA.THROTTLE_SCALE;
+
         const noMovementSmoothing = !GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing");
         if (noMovementSmoothing || isNew) {
             this.container.position.copyFrom(toPixiCoords(this.position));
@@ -91,6 +117,124 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         }
     }
 
+    private updateSounds(): void {
+        if (this.dead || !this.hasDriver) {
+            this.stopAllVehicleSounds();
+            return;
+        }
+
+        const maxSpeed = this.definition.maxSpeed;
+        const speedNorm = Math.min(this.speed / maxSpeed, 1);  // 0-1 normalized
+        const absThrottle = Math.abs(this.throttle);
+
+        if (!this.engineSound || this.engineSound.ended) {
+            this.engineSound = this.playSound(`${this.definition.idString}_engine_loop`, {
+                falloff: 0.5,
+                maxRange: 200,
+                layer: this.layer,
+                loop: true,
+                dynamic: true,
+                ambient: false,
+                onEnd: () => { this.engineSound = undefined; }
+            });
+        }
+        if (this.engineSound?.instance) {
+            // Pitch: low-speed = throttle-driven (revving), high-speed = speed-driven (cruising)
+            const enginePitch = 0.6 + (absThrottle * 0.5) + (speedNorm * 1.2);
+            this.engineSound.instance.speed = Math.max(0.4, Math.min(2.5, enginePitch));
+        }
+
+        // SKID/DRIFT LOOP (trigger on slip)
+        if (this.slip > 0.04 && this.speed > 0.05) {
+            if (!this.skidSound || this.skidSound.ended) {
+                this.skidSound = this.playSound(`${this.definition.idString}_skid_loop`, {
+                    // position: this.position,
+                    falloff: 0.8,
+                    maxRange: 100,
+                    layer: this.layer,
+                    loop: true,
+                    dynamic: true,
+                    ambient: false,
+                    onEnd: () => { this.skidSound = undefined; }
+                });
+            }
+            if (this.skidSound?.instance) {
+                const skidPitch = 0.7 + this.slip * 0.6;
+                this.skidSound.instance.speed = Math.min(1.5, skidPitch);
+                // Volume handled in dynamic update; optionally scale base volume here
+            }
+        } else if (this.skidSound) {
+            this.skidSound.stop();
+            this.skidSound = undefined;
+        }
+
+        // BRAKE SQUEAL (optional: hard brake only, blends with skid)
+        if (this.throttle < -0.2 && this.speed > 0.04) {
+            if (!this.brakeSound || this.brakeSound.ended) {
+                this.brakeSound = this.playSound(`${this.definition.idString}_brake_loop`, {
+                    falloff: 0.7,
+                    maxRange: 80,
+                    layer: this.layer,
+                    loop: true,
+                    dynamic: true,
+                    ambient: false,
+                    onEnd: () => { this.brakeSound = undefined; }
+                });
+            }
+            if (this.brakeSound?.instance) {
+                const brakePitch = 1.0 + (this.speed / 10) * 0.5;
+                this.brakeSound.instance.speed = Math.min(1.8, brakePitch);
+            }
+        } else if (this.brakeSound) {
+            this.brakeSound.stop();
+            this.brakeSound = undefined;
+        }
+
+        // Gear shift "pump" sound based on speed increase over time
+        const now = Date.now();
+        if (now - this.lastCheckTime >= 3000) { // Check every 3 seconds
+            if (this.lastSpeed > 0) { // Avoid divide by zero
+                const percentIncrease = ((this.speed - this.lastSpeed) / this.lastSpeed) * 100;
+                if (percentIncrease > 20 && this.throttle > 0) { // e.g., >20% increase and accelerating
+                    this.playShiftSound();
+                }
+            }
+            this.lastSpeed = this.speed;
+            this.lastCheckTime = now;
+        }
+
+        // Additional: Idle hum when stopped but throttle >0 (revving)
+        if (this.speed < 0.2 && absThrottle > 0.1 && this.engineSound?.instance) {
+            this.engineSound.instance.speed = 0.8 + absThrottle * 0.6;  // Rev pitch
+        }
+
+        // Ensure positions are updated for dynamic sounds
+        if (this.engineSound) this.engineSound.position = this.position;
+        if (this.skidSound) this.skidSound.position = this.position;
+        if (this.brakeSound) this.brakeSound.position = this.position;
+        if (this.shiftSound) this.shiftSound.position = this.position;
+    }
+
+    private playShiftSound(): void {
+        if (!this.shiftSound || this.shiftSound.ended) {
+            this.shiftSound = this.playSound(`${this.definition.idString}_gear_shift`, {
+                falloff: 0.6,
+                maxRange: 150,
+                layer: this.layer,
+                loop: false,
+                dynamic: true,
+                ambient: false,
+                onEnd: () => { this.shiftSound = undefined; }
+            });
+        }
+    }
+
+    private stopAllVehicleSounds(): void {
+        [this.engineSound, this.skidSound, this.brakeSound, this.shiftSound, this.hitSound].forEach(sound => {
+            sound?.stop();
+        });
+        this.engineSound = this.skidSound = this.brakeSound = this.shiftSound = this.hitSound = undefined;
+    }
     /**
      * Updates the vehicle definition, layer, dead state, and configures wheels if provided.
      * @param data The network data.
@@ -105,6 +249,8 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             } else {
                 this.hideAllWheels();
             }
+            this.hasDriver = data.full.hasDriver ?? false;
+
             this.dead = data.full.dead ?? false;
             if (this.dead) {
                 this.hideAllWheels();
@@ -164,7 +310,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
      */
     private updateWheelRotations(data: ObjectsNetData[ObjectCategory.Vehicle]): void {
         const quantizedAngle = data.steeringAngle;
-        const steeringAngle = quantizedAngle / STEERING_SCALE;
+        const steeringAngle = quantizedAngle / VEHICLE_NETDATA.STEERING_SCALE;
         this.wheels[0].rotation = steeringAngle; // Front-left
         this.wheels[1].rotation = steeringAngle; // Front-right
         if (this.wheels.length > 2) {
@@ -266,6 +412,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     override destroy(): void {
         this.image.destroy();
         this.wheels.forEach(wheel => wheel.destroy());
+        this.stopAllVehicleSounds();
         super.destroy();
     }
 
@@ -306,7 +453,29 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     }
 
     hitEffect(position: Vector, angle: number): void {
-        // TODO: Implement hit effects (sounds, particles) if needed
-        // Currently commented out in original code
+        if (!this.definition.hitSoundVariations) this.hitSound?.stop();
+
+        const { material } = this.definition;
+        if (material)
+            this.hitSound = this.game.soundManager.play(
+                `${MaterialSounds[material]?.hit ?? material}_hit_${this.definition.hitSoundVariations ? random(1, this.definition.hitSoundVariations) : randomBoolean() ? "1" : "2"}`,
+                {
+                    position,
+                    falloff: 0.2,
+                    maxRange: 96,
+                    layer: this.layer
+                }
+            );
+
+        // this.game.particleManager.spawnParticle({
+        //     frames: this.particleFrames,
+        //     position,
+        //     zIndex: Numeric.max((this.definition.zIndex ?? ZIndexes.Players) + 1, 4),
+        //     lifetime: 600,
+        //     layer: this.layer,
+        //     scale: { start: 0.9, end: 0.2 },
+        //     alpha: { start: 1, end: 0.65 },
+        //     speed: Vec.fromPolar((angle + randomFloat(-0.3, 0.3)), randomFloat(2.5, 4.5))
+        // });
     }
 }

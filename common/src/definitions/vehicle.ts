@@ -43,6 +43,7 @@ export interface VehicleDefinition extends ObjectDefinition {
     }>;
     readonly baseDamage: number;
     readonly frictionFactor: number;
+    readonly hitSoundVariations?: number
 }
 
 
@@ -122,6 +123,8 @@ export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(
             steerRate: Math.PI / 2,
             drag: 0.0009,
             frictionFactor: 0.75,
+            baseDamage: 20,
+            hitSoundVariations: 2,
 
             wheels: [
                 { offset: Vec.create(230, -120), scale: 0.8, zIndex: ZIndexes.Vehicles },
@@ -135,7 +138,6 @@ export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(
                 { offset: Vec.create(-10, 0), type: SeatType.Passenger, exitOffset: Vec.create(0, -10) }
             ],
 
-            baseDamage: 20
         }
     ]
 );
