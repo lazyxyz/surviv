@@ -188,6 +188,7 @@ export interface ObjectsNetData extends BaseObjectsNetData {
             readonly definition: VehicleDefinition
             readonly dead: boolean
             readonly layer: Layer
+            readonly hasDriver: boolean
         }
     }
 }
@@ -879,6 +880,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
         serializeFull(stream, { full }) {
             stream.writeBooleanGroup(
                 full.dead,
+                full.hasDriver,
             );
             stream.writeLayer(full.layer);
 
@@ -898,13 +900,15 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
         deserializeFull(stream) {
             const [
                 dead,
+                hasDriver
             ] = stream.readBooleanGroup();
             const layer = stream.readLayer();
             const definition = Vehicles.readFromStream(stream);
             return {
                 definition,
                 dead,
-                layer
+                layer,
+                hasDriver
                 // Add more full props later
             };
         }

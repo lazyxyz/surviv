@@ -488,6 +488,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 definition: this.definition,
                 layer: this.layer,
                 dead: this.dead,
+                hasDriver: this.occupants[SeatType.Driver] !== undefined
             }
         };
         return data;

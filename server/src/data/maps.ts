@@ -977,10 +977,10 @@ const maps = {
 
     gunsTest: (() => {
         return {
-            width: 200,
-            height: 200,
+            width: 240,
+            height: 240,
             beachSize: 8,
-            oceanSize: 64,
+            oceanSize: 8,
             onGenerate(map) {
                 let itemPos = Vec.create(0, 20); // Start slightly inset from top-left for better spacing
                 const colSpacing = 15;
