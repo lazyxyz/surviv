@@ -3,6 +3,7 @@ import { Account } from "../account";
 import { GAME_CONSOLE } from "../..";
 import { AssetTier } from "@common/blockchain";
 import { Vehicles } from "@common/definitions/vehicle";
+import { ZIndexes } from "@common/constants";
 
 // Constants for repeated strings
 const ASSET_PATH = "./img/game/shared";
@@ -30,9 +31,7 @@ const appendPreview = (images: Array<{
   x: number
   y: number
   scale?: number
-}>): JQuery<Partial<HTMLElement>> => {
-  const asideElement = $(".vehicles-container-aside-preview");
-
+}>, asideElement: JQuery<Partial<HTMLElement>>): JQuery<Partial<HTMLElement>> => {
   // clear previous
   asideElement.empty();
 
@@ -97,7 +96,7 @@ const showViewBox = () => {
       url: `${ASSET_PATH}/skins/${currentSkin}_base.svg`,
       x: baseX,
       y: baseY,
-      zIndex: 2,
+      zIndex: ZIndexes.Players,
       rotate: 0,
       scale: 0.7,
     },
@@ -106,7 +105,7 @@ const showViewBox = () => {
       url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
       x: baseX + fistXOffset,
       y: baseY + fistYOffset,
-      zIndex: 3,
+      zIndex: ZIndexes.Players,
       rotate: 0,
       scale: 0.7,
     },
@@ -115,7 +114,7 @@ const showViewBox = () => {
       url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
       x: baseX + fistXOffset,
       y: baseY - fistYOffset,
-      zIndex: 4,
+      zIndex: ZIndexes.Players,
       rotate: 0,
       scale: 0.7,
     },
@@ -146,7 +145,7 @@ const showViewBox = () => {
   });
 
   // Append assets and set viewBox
-  appendPreview(assets).attr("viewBox", VIEWBOX);
+  appendPreview(assets, $(".vehicles-container-aside-preview")).attr("viewBox", VIEWBOX);
 }
 
 // Function to select a vehicle
@@ -191,6 +190,44 @@ function isOwned(id: string, ownedIds: string[]) {
   return ownedIds.includes(id);
 }
 
+// Function to render mini preview for list cards
+const renderMiniPreview = (vehicle: any, container: JQuery<Partial<HTMLElement>>) => {
+  const vehicleScale = 0.5;
+  const wheelScale = 1.1 * vehicleScale;
+
+  const centerX = 50;
+  const centerY = 30;
+
+  let assets: AssetConfig[] = [
+    {
+      class: "assets-world",
+      url: `${ASSET_PATH}/vehicles/${vehicle.idString}.svg`,
+      x: centerX,
+      y: centerY,
+      rotate: 0,
+      zIndex: vehicle.zIndex ?? 1,
+      scale: vehicleScale,
+    }
+  ];
+
+  // Add wheels
+  vehicle.wheels.forEach((wheel: { offset: { x: number; y: number; }; zIndex: any; }) => {
+    const wheelX = centerX + wheel.offset.x * vehicleScale;
+    const wheelY = centerY + wheel.offset.y * vehicleScale;
+    assets.push({
+      class: "assets-wheel",
+      url: `${ASSET_PATH}/vehicles/basic_wheel.svg`,
+      x: wheelX,
+      y: wheelY,
+      zIndex: wheel.zIndex ?? vehicle.zIndex,
+      rotate: 0,
+      scale: wheelScale,
+    });
+  });
+
+  appendPreview(assets, container).attr("viewBox", VIEWBOX);
+};
+
 // Function to display vehicles
 async function showVehiclesList(account: Account, selectedVehicleId?: string) {
   if (!account.address) {
@@ -214,20 +251,27 @@ async function showVehiclesList(account: Account, selectedVehicleId?: string) {
     // Render vehicle items (all as owned, default to Silver tier)
     const $vehicleList = $("#list-vehicle").empty();
 
-    for (const { idString, name } of ownedVehicles) {
+    for (const vehicle of ownedVehicles) {
+      const { idString, name } = vehicle;
       // Hardcode tier to Silver for testing
       const tier = AssetTier.Silver;
       const backgroundImage = tierBackgrounds[tier];
 
-      $vehicleList.append(`
+      const cardHtml = `
         <div class="vehicles-container-card"
              id="vehicles-list-${idString}" data-id="${idString}">
              <div class="vehicles-tier-background" style="background-image: url('${backgroundImage}')">
-          <img src="${ASSET_PATH}/vehicles/${idString}.svg" alt="${name}" width="98px" height="56px" />
-          </div>
+               <svg class="vehicles-mini-preview" width="98px" height="56px"></svg>
+             </div>
           <p class="vehicles-container-paragraph">${name}</p>
         </div>
-      `);
+      `;
+
+      $vehicleList.append(cardHtml);
+
+      // Render mini preview inside the SVG
+      const $miniPreview = $(`#vehicles-list-${idString} .vehicles-mini-preview`);
+      renderMiniPreview(vehicle, $miniPreview);
     }
 
     // No unowned for testing
