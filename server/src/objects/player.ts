@@ -301,6 +301,10 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
      */
     ticksSinceLastUpdate = 0;
 
+    /** VEHICLE LOGICS */
+    inVehicle?: Vehicle;
+    seatIndex?: number;
+
     _scope!: ScopeDefinition;
     get effectiveScope(): ScopeDefinition { return this._scope; }
     set effectiveScope(target: ReifiableDef<ScopeDefinition>) {
@@ -484,15 +488,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
         this.modifierCalculator.updateAndApplyModifiers();
     }
 
-    /** VEHICLE LOGICS */
-    inVehicle?: Vehicle;
-    seatIndex?: number;
 
-    exitVehicle(): void {
-        if (this.inVehicle) this.inVehicle.interact(this);
-        this.inVehicle = undefined;
-        this.seatIndex = undefined;
-    }
 
     /**
      * Clean up internal state after all packets have been sent
@@ -654,4 +650,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     isBot(): boolean {
         return false;
     }
+
+    exitVehicle(): void { };
 }

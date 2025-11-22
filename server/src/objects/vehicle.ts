@@ -14,6 +14,7 @@ import { materialMultipliers } from "../constants";
 import { RunOverMaterialsSet } from "@common/definitions/obstacles";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Maps } from "@common/definitions/modes";
+import { Gamer } from "./gamer";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 20;
@@ -30,12 +31,13 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private _start = false;
 
     private currentThrottle: number = 0;
+    // private definition: VehicleDefinition;
 
     // Vehicle physics state
     private velocity: Vector = Vec.create(0, 0); // Vector velocity for realistic direction/momentum
     private steeringAngle: number = 0;
     private wheelbase: number = 4;
-    private occupants: (Player | undefined)[] = [];
+    private occupants: (Gamer | undefined)[] = [];
     private frictionFactor; // Tune 0-1; higher=more slide reduction (real tire grip)
     private velocityThreshold = 0.0001; // Squared speed threshold for "moving" (fine-grained stop detection)
     private maxBounceDist = 0.5; // Max depenetration distance per step (prevents unrealistic far jumps)
@@ -53,6 +55,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         rotation?: number,
     ) {
         super(game, position);
+        this.definition = definition;
         this.layer = layer ?? Layer.Ground;
         this.rotation = rotation ?? 0;
 
@@ -82,6 +85,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     }
 
     interact(player: Player): void {
+        if (!(player instanceof Gamer)) return; // Only allow gamer
+
         const seatIndex = this.occupants.indexOf(player);
         if (seatIndex !== -1) {
             // Exit seat
@@ -119,12 +124,36 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 player.seatIndex = availableSeat;
                 this.updateOccupantPosition(player, availableSeat);
             }
+
+            if (availableSeat == SeatType.Driver) {
+                if (this.definition.idString !== this.definition.base) {
+                    // Already upgrade
+                    return;
+                };
+
+                const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
+
+                if (matches.length > 0) {
+                    const lastFound = matches[matches.length - 1];
+
+                    this.definition.idString = lastFound.idString;
+                    this.definition.name = lastFound.name;
+
+                    const indexToRemove = player.vehicleVariations.indexOf(lastFound);
+
+                    if (indexToRemove > -1) {
+                        player.vehicleVariations.splice(indexToRemove, 1);
+                    }
+                }
+            }
         }
         this.setDirty();
         player.setDirty();
     }
 
     switchToNextEmptySeat(player: Player): void {
+        if (!(player instanceof Gamer)) return; // Only allow gamer
+
         const currentIndex = this.occupants.indexOf(player);
         let nextIndex = -1;
 

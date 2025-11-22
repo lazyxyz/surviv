@@ -89,7 +89,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         }
         this.updateDebugGraphics();
 
-        const inVehicle = this.game.activePlayer?.inVehicle?? false;
+        const inVehicle = this.game.activePlayer?.inVehicle ?? false;
         this.game.uiManager.updateVehicleUI({
             inVehicle,
             health: this.health,
