@@ -46,6 +46,13 @@ export class UIManager {
     private minAdrenaline = 0;
     private adrenaline = 0;
 
+    private _oldVehicleHealthPercent = 100;
+    private vehicleMaxHealth = 100;
+    private vehicleHealth = 0;
+    private vehicleMaxSpeed = 100;
+    private vehicleSpeed = 0;
+    private inVehicle = false;
+
     readonly inventory: {
         activeWeaponIndex: number
         weapons: (PlayerData["inventory"] & object)["weapons"] & object
@@ -179,6 +186,17 @@ export class UIManager {
 
         adrenalineBar: $<HTMLDivElement>("#adrenaline-bar"),
         adrenalineBarAmount: $<HTMLSpanElement>("#adrenaline-bar-amount"),
+
+        // Vehicle
+        vehicleHealthBarContainer: $<HTMLDivElement>("#vehicle-health-bar-container"),
+        vehicleHealthBar: $<HTMLDivElement>("#vehicle-health-bar"),
+        vehicleHealthBarAmount: $<HTMLSpanElement>("#vehicle-health-bar-amount"),
+        vehicleHealthAnim: $<HTMLDivElement>("#vehicle-health-bar-animation"),
+        vehicleHealthBarMax: $<HTMLSpanElement>("#vehicle-health-bar-max"),
+        vehicleSpeedBarContainer: $<HTMLDivElement>("#vehicle-speed-bar-container"),
+        vehicleSpeedBar: $<HTMLDivElement>("#vehicle-speed-bar"),
+        vehicleSpeedBarAmount: $<HTMLSpanElement>("#vehicle-speed-bar-amount"),
+        vehicleSpeedBarMinMax: $<HTMLSpanElement>("#vehicle-speed-bar-min-max"),
 
         killFeed: $<HTMLDivElement>("#kill-feed"),
 
@@ -839,6 +857,71 @@ export class UIManager {
                     this.updatePerkSlot(perk, i);
                 }
             }
+        }
+    }
+
+    private static getSpeedColor(normalized: number): string {
+        const grey = 0x88; // #888888
+        const white = 0xff; // #ffffff
+        const value = Math.floor(grey + (white - grey) * normalized);
+        return `#${value.toString(16).padStart(2, '0').repeat(3)}`;
+    }
+
+    updateVehicleUI(vehicle: { inVehicle: boolean, health: number, maxHealth: number, speed: number, maxSpeed: number }): void {
+
+        this.inVehicle = vehicle.inVehicle;
+
+        if (!this.inVehicle) {
+            this.ui.vehicleHealthBarContainer.hide();
+            this.ui.vehicleSpeedBarContainer.hide();
+            return;
+        } else {
+            this.ui.vehicleHealthBarContainer.show();
+            this.ui.vehicleSpeedBarContainer.show();
+        }
+
+        if (vehicle.maxHealth !== undefined) {
+            this.vehicleMaxHealth = vehicle.maxHealth;
+            this.ui.vehicleHealthBarMax.text(safeRound(this.vehicleMaxHealth));
+        }
+
+        if (vehicle.health !== undefined) {
+            this.vehicleHealth = vehicle.health;
+
+            const normalizedHealth = this.vehicleHealth / this.vehicleMaxHealth;
+            const healthPercent = 100 * normalizedHealth;
+
+            this.ui.vehicleHealthBar
+                .width(`${healthPercent}%`)
+                .css("background-color", UIManager.getHealthColor(normalizedHealth));
+
+            this.ui.vehicleHealthAnim.stop();
+            if (this._oldVehicleHealthPercent - healthPercent >= 1) {
+                this.ui.vehicleHealthAnim
+                    .width(`${this._oldVehicleHealthPercent}%`)
+                    .animate({ width: `${healthPercent}%` }, 500);
+            } else {
+                this.ui.vehicleHealthAnim.width(`${healthPercent}%`);
+            }
+            this._oldVehicleHealthPercent = healthPercent;
+
+            this.ui.vehicleHealthBarAmount
+                .text(safeRound(this.vehicleHealth))
+                .css("color", healthPercent <= 40 ? "#ffffff" : "#000000");
+        }
+
+        if (vehicle.maxSpeed !== undefined) {
+            this.vehicleMaxSpeed = vehicle.maxSpeed;
+        }
+
+        if (vehicle.speed !== undefined) {
+            this.vehicleSpeed = vehicle.speed;
+            const normalizedSpeed = this.vehicleSpeed / this.vehicleMaxSpeed;
+            const percent = 100 * normalizedSpeed;
+
+            this.ui.vehicleSpeedBar
+                .width(`${percent}%`)
+                .css("background-color", UIManager.getSpeedColor(normalizedSpeed));
         }
     }
 

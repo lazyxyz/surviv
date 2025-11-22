@@ -1535,6 +1535,30 @@
   text-align: center;
 }
 
+#bottom-left-container {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  width: 150px; // Narrower to fit smaller vehicle bars
+
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 5px; // Space between bars
+
+  @media screen and (max-width: variables.$screen_large) {
+    bottom: 5px;
+    left: 5px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: 150px;
+
+    .btn-lg {
+      height: unset;
+    }
+  }
+}
+
 #scopes-container {
   flex-direction: row !important;
   align-items: center;
