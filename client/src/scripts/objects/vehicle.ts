@@ -125,6 +125,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             this.container.position.copyFrom(toPixiCoords(this.position));
             this.container.rotation = this.rotation;
         }
+
     }
 
     private updateSounds(): void {
@@ -138,7 +139,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         const absThrottle = Math.abs(this.throttle);
 
         if (!this.engineSound || this.engineSound.ended) {
-            this.engineSound = this.playSound(`${this.definition.idString}_engine_loop`, {
+            this.engineSound = this.playSound(`${this.definition.base}_engine_loop`, {
                 falloff: 0.5,
                 maxRange: 200,
                 layer: this.layer,
@@ -157,7 +158,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         // SKID/DRIFT LOOP (trigger on slip)
         if (this.slip > 0.04 && this.speed > 0.05) {
             if (!this.skidSound || this.skidSound.ended) {
-                this.skidSound = this.playSound(`${this.definition.idString}_skid_loop`, {
+                this.skidSound = this.playSound(`${this.definition.base}_skid_loop`, {
                     // position: this.position,
                     falloff: 0.8,
                     maxRange: 100,
@@ -181,7 +182,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         // BRAKE SQUEAL (optional: hard brake only, blends with skid)
         if (this.throttle < -0.2 && this.speed > 0.04) {
             if (!this.brakeSound || this.brakeSound.ended) {
-                this.brakeSound = this.playSound(`${this.definition.idString}_brake_loop`, {
+                this.brakeSound = this.playSound(`${this.definition.base}_brake_loop`, {
                     falloff: 0.7,
                     maxRange: 80,
                     layer: this.layer,
@@ -227,7 +228,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
     private playShiftSound(): void {
         if (!this.shiftSound || this.shiftSound.ended) {
-            this.shiftSound = this.playSound(`${this.definition.idString}_gear_shift`, {
+            this.shiftSound = this.playSound(`${this.definition.base}_gear_shift`, {
                 falloff: 0.6,
                 maxRange: 150,
                 layer: this.layer,
@@ -301,7 +302,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
      */
     private updateTexture(): void {
         const texture = this.dead
-            ? `${this.definition.idString}_residue`
+            ? `${this.definition.base}_residue`
             : this.definition.idString;
         this.image.setFrame(texture);
     }
@@ -453,10 +454,6 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
                 alpha
             );
         }
-    }
-
-    interact(): void {
-        console.log(`Interacted with vehicle: ${this.definition.idString}`);
     }
 
     canInteract(player: any): boolean {
