@@ -15,7 +15,6 @@ export const enum Constants {
     PLAYER_ADDRESS_MAX_LENGTH = 42,
     LOOT_MAX_LENGTH = 32,
     EMOTES_MAX_LENGTH = 128,
-    CHAT_MESSAGE_MAX_LENGTH = 32,
     TOKEN_MAX_LENGTH = 500,
 }
 

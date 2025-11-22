@@ -28,7 +28,6 @@ import { ClientPerkManager } from "./perkManager";
 import type { RewardsData } from "@common/packets/rewardsPacket";
 import { getBadgeImage } from "../inventory/badges";
 import { GAME_CONSOLE } from "../..";
-import type { ServerChatPacketData } from "@common/packets/chatPacket";
 import { Maps } from "@common/definitions/modes";
 
 function safeRound(value: number): number {
@@ -1163,79 +1162,6 @@ export class UIManager {
         });
     }
 
-    private _addChatMessage(text: string, color: number): void {
-
-        const killFeedItem = $<HTMLDivElement>('<div class="chat-feed-item">');
-
-        killFeedItem.html(text);
-        killFeedItem.css("color", `#${color.toString(16).padStart(6, "0")}`);
-
-        const others = this._getKillFeedElements();
-
-        this.ui.killFeed.prepend(killFeedItem);
-
-        killFeedItem.css("opacity", 0);
-
-        others.forEach(otherKillFeedItem => {
-            const newPosition = otherKillFeedItem.element.getBoundingClientRect();
-            if (newPosition.y === otherKillFeedItem.position.y) return;
-
-            otherKillFeedItem.element.animate([
-                { transform: `translateY(${otherKillFeedItem.position.y - newPosition.y}px)` },
-                { transform: "translateY(0px)" }
-            ], {
-                duration: 300,
-                iterations: 1,
-                easing: "ease-in"
-            });
-        });
-        killFeedItem.css("opacity", "");
-        killFeedItem.get(0)?.animate([
-            { opacity: 0 },
-            { opacity: 1 }
-        ], {
-            duration: 300,
-            iterations: 1,
-            easing: "ease-in"
-        });
-
-        if (!UI_DEBUG_MODE) {
-            let iterationCount = 0;
-            while (this.ui.killFeed.children().length > 5) {
-                if (++iterationCount === 1e3) {
-                    console.warn("1000 iterations of removing killfeed entries; possible infinite loop");
-                }
-
-                this.ui.killFeed.children()
-                    .last()
-                    .remove();
-            }
-        }
-
-        setTimeout(() => {
-            const removeAnimation = killFeedItem.get(0)?.animate([
-                {
-                    opacity: 1,
-                    transform: "translateX(0%)"
-                },
-                {
-                    opacity: 0,
-                    transform: "translateY(100%)"
-                }
-            ], {
-                duration: 300,
-                fill: "backwards",
-                easing: "ease-out"
-            });
-
-            if (!removeAnimation) return;
-
-            removeAnimation.onfinish = () => {
-                killFeedItem.remove();
-            };
-        }, 4000);
-    }
-
     private _addKillFeedMessage(text: string, classes: string[]): void {
         const killFeedItem = $<HTMLDivElement>('<div class="kill-feed-item">');
 
@@ -1386,10 +1312,6 @@ export class UIManager {
             [KillfeedEventSeverity.Down]: name => getTranslatedString("kf_airdrop_down", { player: name })
         }
     });
-
-    processChatMessage(data: ServerChatPacketData): void {
-        this._addChatMessage(data.message, data.messageColor);
-    }
 
     processKillFeedPacket(message: KillFeedPacketData): void {
         const { messageType } = message;

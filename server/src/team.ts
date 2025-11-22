@@ -6,7 +6,6 @@ import { type Player } from "./objects/player";
 import { CUSTOM_TEAMS } from "./server";
 import { removeFrom } from "./utils/misc";
 import {  MODE } from "@common/constants";
-import { ServerChatPacket, ServerChatPacketData } from "@common/packets/chatPacket";
 
 export class Team {
     readonly id: number; // team index in a game
@@ -58,17 +57,6 @@ export class Team {
 
     getLivingPlayers(): Player[] {
         return this.players.filter(player => !player.dead && !player.disconnected);
-    }
-
-    sendTeamMessage(message: string): void {
-        for (const player of this.players) {
-            player.sendPacket(
-                ServerChatPacket.create({
-                    messageColor: 0xffffff,
-                    message: message
-                } as ServerChatPacketData)
-            );
-        }
     }
 }
 
