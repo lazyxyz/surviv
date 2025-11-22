@@ -52,9 +52,54 @@ export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(
     "Vehicles",
     [
         {
+            idString: "jeep_rust",
+            name: "Jeep Rust",
+            scale: 1,
+            rotationMode: RotationMode.Limited,
+            hitbox: new GroupHitbox(
+                new CircleHitbox(8.2, Vec.create(9.2, 0)),
+                new CircleHitbox(8.4, Vec.create(0, 0)),
+                new CircleHitbox(8.4, Vec.create(-9.2, 0)),
+            ),
+            bulletHitbox: new GroupHitbox(
+                new CircleHitbox(8.0, Vec.create(9.2, 0)),
+                new CircleHitbox(2.6, Vec.create(3.2, -5.8)),
+                new CircleHitbox(2.6, Vec.create(3.2, 5.8)),
+            ),
+            spawnHitbox: new CircleHitbox(18),
+            health: 1000,
+            reflectBullets: true,
+            material: Materials[5],
+            explosion: "super_barrel_explosion",
+            spawnMode: MapObjectSpawnMode.Trail,
+
+            maxSpeed: 0.08,
+            acceleration: 0.00008,
+            maxSteerAngle: Math.PI / 5,
+            steerRate: Math.PI * 0.8,
+            drag: 0.0012,
+            frictionFactor: 0.35,
+
+            wheels: [
+                { offset: Vec.create(230, -130), scale: 1.1, zIndex: ZIndexes.UnderWheels },
+                { offset: Vec.create(230, 130), scale: 1.1, zIndex: ZIndexes.UnderWheels },
+                { offset: Vec.create(-190, -130), scale: 1.1, zIndex: ZIndexes.UnderWheels },
+                { offset: Vec.create(-190, 130), scale: 1.1, zIndex: ZIndexes.UnderWheels }
+            ],
+
+            seats: [
+                { offset: Vec.create(-3.4, -3.2), type: SeatType.Driver, exitOffset: Vec.create(0, -10) },
+                { offset: Vec.create(-3.4, 3.2), type: SeatType.Passenger, exitOffset: Vec.create(0, 10) },
+                { offset: Vec.create(-11.4, -3.2), type: SeatType.Passenger, exitOffset: Vec.create(4, -10) },
+                { offset: Vec.create(-11.2, 3.2), type: SeatType.Passenger, exitOffset: Vec.create(0, 10) }
+            ],
+
+            baseDamage: 35
+        },
+        {
             idString: "jeep",
             name: "Jeep",
-            scale: 1,
+            scale: 0.8,
             rotationMode: RotationMode.Limited,
             hitbox: new GroupHitbox(
                 new CircleHitbox(8.2, Vec.create(9.2, 0)),

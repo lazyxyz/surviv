@@ -89,6 +89,17 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             const rotatedSeatOffset = Vec.rotate(seatOffset, this.rotation);
             const exitOffset = Vec.rotate(this.definition.seats[seatIndex].exitOffset, this.rotation); // Use definition's exitOffset (rotated)
             player.position = Vec.add(this.position, Vec.add(rotatedSeatOffset, exitOffset));
+
+            // Damage player if vehicle is moving fast
+            const speed = Vec.length(this.velocity);
+            if (speed > 0.05) {
+                player.damage({
+                    amount: speed * 200, // Tune this multiplier
+                    source: this,
+                    weaponUsed: undefined
+                });
+            }
+
             player.inVehicle = undefined;
             player.seatIndex = undefined;
             this.occupants[seatIndex] = undefined;
