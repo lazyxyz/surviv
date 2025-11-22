@@ -1539,7 +1539,7 @@
   position: absolute;
   bottom: 10px;
   left: 10px;
-  width: 150px; // Narrower to fit smaller vehicle bars
+  width: 300px; // Narrower to fit smaller vehicle bars
 
   display: flex;
   flex-direction: column;
@@ -1551,7 +1551,7 @@
     left: 5px;
     flex-direction: column;
     flex-wrap: nowrap;
-    width: 150px;
+    width: 300px;
 
     .btn-lg {
       height: unset;

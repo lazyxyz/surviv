@@ -89,8 +89,6 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         }
         this.updateDebugGraphics();
 
-        console.log("speed: ", this.speed);
-        console.log("maxSpeed: ", this.definition.maxSpeed);
         const inVehicle = this.game.activePlayer?.inVehicle?? false;
         this.game.uiManager.updateVehicleUI({
             inVehicle,
