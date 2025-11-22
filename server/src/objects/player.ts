@@ -650,4 +650,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     isBot(): boolean {
         return false;
     }
+
+    exitVehicle(): void { };
 }

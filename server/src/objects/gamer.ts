@@ -38,7 +38,7 @@ export class Gamer extends Player {
     rewardsBoost: number = 0;
     chain: Blockchain = Blockchain.Somnia;
 
-    vehicleVariations: Array<VehicleDefinition | undefined>;
+    vehicleVariations: Array<VehicleDefinition>;
 
     constructor(game: Game, socket: WebSocket<PlayerContainer>, position: Vector, layer?: Layer, team?: Team) {
         const userData = socket.getUserData();
@@ -353,7 +353,7 @@ export class Gamer extends Player {
         }
     }
 
-     exitVehicle(): void {
+    override exitVehicle(): void {
         if (this.inVehicle) this.inVehicle.interact(this);
         this.inVehicle = undefined;
         this.seatIndex = undefined;

@@ -491,9 +491,11 @@ export class ThrowableProjectile extends BaseGameObject.derive(ObjectCategory.Th
                 for (const target of hitbox.hitboxes) {
                     if (target.collidesWith(this.hitbox)) {
                         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-                        target instanceof CircleHitbox
-                            ? handleCircle(target)
-                            : handleRectangle(target);
+                        if (target instanceof CircleHitbox) {
+                            handleCircle(target)
+                        } else if (target instanceof RectangleHitbox) {
+                            handleRectangle(target);
+                        }
                     }
                 }
                 break;

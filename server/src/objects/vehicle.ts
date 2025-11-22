@@ -31,7 +31,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private _start = false;
 
     private currentThrottle: number = 0;
-    private definition;
+    // private definition: VehicleDefinition;
 
     // Vehicle physics state
     private velocity: Vector = Vec.create(0, 0); // Vector velocity for realistic direction/momentum
@@ -49,7 +49,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     constructor(
         game: Game,
-        definition: VehicleDefinition,
+        readonly definition: VehicleDefinition,
         position: Vector,
         layer?: Layer,
         rotation?: number,
@@ -84,7 +84,9 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         return !this.dead;
     }
 
-    interact(player: Gamer): void {
+    interact(player: Player): void {
+        if (!(player instanceof Gamer)) return; // Only allow gamer
+
         const seatIndex = this.occupants.indexOf(player);
         if (seatIndex !== -1) {
             // Exit seat
@@ -125,15 +127,17 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
             if (availableSeat == SeatType.Driver) {
                 if (this.definition.idString !== this.definition.base) {
+                    // Already upgrade
                     return;
-                }; // Already upgrade
+                };
 
                 const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
 
                 if (matches.length > 0) {
-                    const lastFound = matches[matches.length - 1] as VehicleDefinition;
+                    const lastFound = matches[matches.length - 1];
 
-                    this.definition = lastFound;
+                    this.definition.idString = lastFound.idString;
+                    this.definition.name = lastFound.name;
 
                     const indexToRemove = player.vehicleVariations.indexOf(lastFound);
 
@@ -147,7 +151,9 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         player.setDirty();
     }
 
-    switchToNextEmptySeat(player: Gamer): void {
+    switchToNextEmptySeat(player: Player): void {
+        if (!(player instanceof Gamer)) return; // Only allow gamer
+
         const currentIndex = this.occupants.indexOf(player);
         let nextIndex = -1;
 

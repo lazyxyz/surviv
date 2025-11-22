@@ -10,6 +10,9 @@ export enum SeatType {
 }
 
 export interface VehicleDefinition extends ObjectDefinition {
+    idString: string; // override
+    name: string; // override
+
     readonly base: string;
     readonly scale: number;
     readonly rotationMode: RotationMode;
@@ -48,7 +51,7 @@ export interface VehicleDefinition extends ObjectDefinition {
 }
 
 // BASE STATS
-const BaseVehicles: Record<string, Omit<VehicleDefinition, "idString" | "name" | "base">> = {
+const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" | "name">> = {
     jeep: {
         scale: 1,
         rotationMode: RotationMode.Limited,
@@ -141,7 +144,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "idString" | "name" |
 // VARIATIONS LIST
 interface VehicleVariantConfig {
     base: keyof typeof BaseVehicles;
-    id: string;
+    idString: string;
     name: string;
     overrides?: Partial<VehicleDefinition>;
 }
@@ -150,20 +153,20 @@ const Variations: VehicleVariantConfig[] = [
     // --- JEEPS ---
     {
         base: "jeep",
-        id: "jeep",
-        name: "Jeep"
+        idString: "jeep",
+        name: "Jeep",
     },
     {
         base: "jeep",
-        id: "jeep_rust",
+        idString: "jeep_rust",
         name: "Jeep Rust",
     },
 
     // --- BUGGIES ---
     {
         base: "buggy",
-        id: "buggy",
-        name: "Buggy"
+        idString: "buggy",
+        name: "Buggy",
     },
 ];
 
@@ -176,7 +179,7 @@ export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(
         return {
             ...baseStats,
             ...variant.overrides,
-            idString: variant.id,
+            idString: variant.idString,
             name: variant.name,
             base: variant.base
         };

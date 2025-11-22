@@ -241,7 +241,7 @@ export const Buildings = ObjectDefinitions.withDefault<BuildingDefinition>()(
     "Buildings",
     {
         hideOnMap: false,
-        spawnMode: MapObjectSpawnMode.NearPlace,
+        spawnMode: MapObjectSpawnMode.GrassAndSand,
         obstacles: [],
         lootSpawners: [],
         subBuildings: [],
@@ -3721,7 +3721,7 @@ export const Buildings = ObjectDefinitions.withDefault<BuildingDefinition>()(
                 idString: "armory",
                 name: "Armory",
                 spawnHitbox: RectangleHitbox.fromRect(160, 176),
-                spawnMode: MapObjectSpawnMode.NearPlace,
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
                 subBuildings: [
                     { idString: "armory_barracks", position: Vec.create(-41.31, 27.86) },
                     { idString: "armory_center", position: Vec.create(55.4, 15.07) },
@@ -4226,7 +4226,7 @@ export const Buildings = ObjectDefinitions.withDefault<BuildingDefinition>()(
                 idString: "construction_site",
                 name: "Construction Site",
                 spawnHitbox: RectangleHitbox.fromRect(75, 75, Vec.create(0, 0)),
-                spawnMode: MapObjectSpawnMode.NearPlace,
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
                 floorImages: [
                     {
                         key: "construction_site_floor_1_left",
@@ -4405,7 +4405,7 @@ export const Buildings = ObjectDefinitions.withDefault<BuildingDefinition>()(
                     RectangleHitbox.fromRect(45, 25, Vec.create(-30, 47)) // ADJUST THIS! (not sure if its correct) - pap,
                     // RectangleHitbox.fromRect(12.4, 12, Vec.create(66.05, -42.5))
                 ),
-                spawnMode: MapObjectSpawnMode.NearPlace,
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
                 puzzle: {
                     triggerOnSolve: "metal_door",
                     delay: 1000,
@@ -4699,7 +4699,7 @@ export const Buildings = ObjectDefinitions.withDefault<BuildingDefinition>()(
                     RectangleHitbox.fromRect(11.5, 40, Vec.create(-70, -86)),
                     RectangleHitbox.fromRect(12.4, 15, Vec.create(77.05 - 5.6, -42.5 + 0.6))
                 ),
-                spawnMode: MapObjectSpawnMode.NearPlace,
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
                 floorImages: [
                     {
                         key: "headquarters_second_floor_top",
@@ -5461,7 +5461,7 @@ export const Buildings = ObjectDefinitions.withDefault<BuildingDefinition>()(
                 idString: "bombed_armory",
                 name: "Bombed Armory",
                 spawnHitbox: RectangleHitbox.fromRect(160, 176),
-                spawnMode: MapObjectSpawnMode.NearPlace,
+                spawnMode: MapObjectSpawnMode.GrassAndSand,
                 subBuildings: [
                     { idString: "bombed_armory_barracks", position: Vec.create(-41.31, 27.86) },
                     { idString: "bombed_armory_center", position: Vec.create(55.4, 15.07) },
