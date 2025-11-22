@@ -11,13 +11,13 @@ import { InventoryItem } from "../inventory/inventoryItem";
 import { Player } from "./player";
 import { Numeric } from "@common/utils/math";
 import { materialMultipliers } from "../constants";
-import { Materials, RunOverMaterialsSet } from "@common/definitions/obstacles";
+import { RunOverMaterialsSet } from "@common/definitions/obstacles";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Maps } from "@common/definitions/modes";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 20;
-    override readonly partialAllocBytes = 13;
+    override readonly partialAllocBytes = 14;
 
     declare hitbox: Hitbox;
     declare bulletHitbox: Hitbox;
@@ -308,6 +308,11 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 // Keyboard: Assume relative (up=forward, left=steer left). No change needed here.
                 inputForward = +pm.up - +pm.down;
                 inputSteer = +pm.right - +pm.left; // right=+1 (will be negated below for correct turn)
+
+                // if (inputForward >0) {
+                // } else {
+                //     inputSteer = +pm.left - +pm.right;  // Now correct
+                // }
             }
         }
         return { inputForward, inputSteer };
@@ -344,14 +349,27 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     }
 
     private clampSpeed(): void {
-        // Clamp speed (along forward; allow lateral for drifts)
         const forwardDir = Vec.fromPolar(this.rotation);
         const maxSpeed = this.definition.maxSpeed * (FloorTypes[this.floor].speedMultiplier ?? 1);
         const maxReverseSpeed = maxSpeed * 0.5;
+
+        // 1. Directional Clamp (Keep this to handle Reverse limit vs Forward limit)
         const forwardSpeed = Vec.dotProduct(this.velocity, forwardDir);
         const clampedForward = Numeric.clamp(forwardSpeed, -maxReverseSpeed, maxSpeed);
+
+        // Apply the adjustment to the forward component only
         const forwardDiff = clampedForward - forwardSpeed;
         this.velocity = Vec.add(this.velocity, Vec.scale(forwardDir, forwardDiff));
+
+        // 2. FIX: Total Magnitude Clamp
+        // This ensures that even if drifting sideways, the total speed cannot exceed maxSpeed
+        const currentSpeedSq = Vec.squaredLength(this.velocity);
+        const maxSpeedSq = maxSpeed * maxSpeed;
+
+        if (currentSpeedSq > maxSpeedSq) {
+            const scale = Math.sqrt(maxSpeedSq / currentSpeedSq);
+            this.velocity = Vec.scale(this.velocity, scale);
+        }
     }
 
     private applySteering(dt: number, inputSteer: number): void {
@@ -494,12 +512,13 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             speed: Math.min(255, Math.round(speed * VEHICLE_NETDATA.SPEED_SCALE)),
             slip: Math.min(255, Math.round(slip * VEHICLE_NETDATA.SLIP_SCALE)),
             throttle: Math.max(-128, Math.min(127, Math.round(this.currentThrottle * VEHICLE_NETDATA.THROTTLE_SCALE))),
+            health: Math.round(this.health / VEHICLE_NETDATA.HEALTH_SCALE),
 
             full: {
                 definition: this.definition,
                 layer: this.layer,
                 dead: this.dead,
-                hasDriver: this.occupants[SeatType.Driver] !== undefined
+                hasDriver: this.occupants[SeatType.Driver] !== undefined,
             }
         };
         return data;

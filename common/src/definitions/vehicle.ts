@@ -1,4 +1,5 @@
-import { Layers, ZIndexes } from "../constants";
+// common/src/definitions/vehicle.ts
+import { ZIndexes } from "../constants";
 import { CircleHitbox, GroupHitbox, Hitbox, RectangleHitbox } from "../utils/hitbox";
 import { MapObjectSpawnMode, ObjectDefinitions, type ObjectDefinition } from "../utils/objectDefinitions";
 import { Vec, Vector } from "../utils/vector";
@@ -121,8 +122,9 @@ export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(
             acceleration: 0.00008,
             maxSteerAngle: Math.PI / 5,
             steerRate: Math.PI * 0.8,
-            drag: 0.0012,
-            frictionFactor: 0.35,
+            drag: 0.00095,
+
+            frictionFactor: 0.75,
 
             wheels: [
                 { offset: Vec.create(240, -145), scale: 1.1, zIndex: ZIndexes.UnderWheels },
@@ -167,7 +169,7 @@ export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(
             maxSteerAngle: Math.PI / 7,
             steerRate: Math.PI / 2,
             drag: 0.0009,
-            frictionFactor: 0.75,
+            frictionFactor: 0.5,
             baseDamage: 20,
             hitSoundVariations: 2,
 

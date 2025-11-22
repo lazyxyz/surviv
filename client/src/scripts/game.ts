@@ -59,9 +59,8 @@ import { errorAlert } from "./modal";
 import { Maps, NumberToMode, type MAP } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "..";
 import { resetPlayButtons, updateDisconnectTime } from "./ui/home";
-import { autoPickup, updateChatSendAllVisibility, updateUsersBadge } from "./ui/game";
+import { autoPickup } from "./ui/game";
 import { teamSocket } from "./ui/play";
-import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 import { CustomTeamMessages } from "@common/typings";
 import { FogOfWar } from "./fogOfWar";
 import { RainEffect } from "./rainEffect";
@@ -386,20 +385,6 @@ export class Game {
         }
     }
 
-    sendChatMessage(message: string, isTeamChat: boolean = true) {
-        if (this.teamMode) {
-            this.sendPacket(ClientChatPacket.create({
-                isSendAll: !isTeamChat,
-                message: message
-            }));
-        } else {
-            this.sendPacket(ClientChatPacket.create({
-                isSendAll: true,
-                message: message
-            }));
-        }
-    }
-
     async connectWebSocket(
         url: string,
         totalRetryTime: number = 10000,
@@ -646,9 +631,6 @@ export class Game {
             case packet instanceof KillFeedPacket:
                 this.uiManager.processKillFeedPacket(packet.output);
                 break;
-            case packet instanceof ServerChatPacket:
-                this.uiManager.processChatMessage(packet.output);
-                break;
             case packet instanceof PingPacket: {
                 this.uiManager.debugReadouts.ping.text(`${Date.now() - this.lastPingDate} ms`);
                 setTimeout((): void => {
@@ -752,7 +734,6 @@ export class Game {
         ui.spectateKillLeader.addClass("btn-disabled");
 
         ui.teamContainer.toggle(this.teamMode);
-        updateChatSendAllVisibility(this.teamMode);
     }
 
     async disconnect() {

@@ -118,7 +118,7 @@ export const Maps: Record<MAP, ModeDefinition> = {
         // },
         specialPlayButtons: true,
         modeLogoImage: "./img/game/winter/obstacles/red_gift.svg",
-        frictionFactor: 2.0
+        frictionFactor: 0.5 
     },
     desert: {
         idString: "desert",
@@ -146,7 +146,7 @@ export const Maps: Record<MAP, ModeDefinition> = {
             solo: "./img/misc/user.svg",
             squads: "./img/misc/user-group.svg"
         },
-        frictionFactor: 1.5
+        frictionFactor: 0.75
     },
     cursedIsland: {
         idString: "cursedIsland",
