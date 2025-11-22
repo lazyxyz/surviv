@@ -16,6 +16,8 @@ import { savePlayerGame, savePlayerRank } from "../api/api";
 import { GameOverData, GameOverPacket } from "@common/packets/gameOverPacket";
 import { DamageParams } from "./gameObject";
 import { Blockchain } from "@common/blockchain/contracts";
+import { VehicleDefinition, Vehicles } from "@common/definitions/vehicle";
+import { Vehicle } from "./vehicle";
 
 export interface PlayerContainer {
     readonly name: string
@@ -36,6 +38,8 @@ export class Gamer extends Player {
     rewardsBoost: number = 0;
     chain: Blockchain = Blockchain.Somnia;
 
+    vehicleVariations: Array<VehicleDefinition | undefined>;
+
     constructor(game: Game, socket: WebSocket<PlayerContainer>, position: Vector, layer?: Layer, team?: Team) {
         const userData = socket.getUserData();
         const actorData: ActorContainer = {
@@ -47,6 +51,7 @@ export class Gamer extends Player {
         };
         super(game, actorData, position, layer, team);
         this.socket = socket;
+        this.vehicleVariations = [Vehicles.fromString('jeep_rust')];
     }
 
     sendData(buffer: ArrayBuffer): void {
@@ -264,7 +269,7 @@ export class Gamer extends Player {
             won: rank === 1,
             playerID: this.id,
             kills: this.kills,
-            bounties: this.bounties, 
+            bounties: this.bounties,
             damageDone: this.damageDone,
             timeAlive: (this.game.now - this.joinTime) / 1000,
             rank,
@@ -346,5 +351,11 @@ export class Gamer extends Player {
         } catch (err) {
             console.log("Error save game:", err);
         }
+    }
+
+     exitVehicle(): void {
+        if (this.inVehicle) this.inVehicle.interact(this);
+        this.inVehicle = undefined;
+        this.seatIndex = undefined;
     }
 }

@@ -14,6 +14,7 @@ import { materialMultipliers } from "../constants";
 import { RunOverMaterialsSet } from "@common/definitions/obstacles";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Maps } from "@common/definitions/modes";
+import { Gamer } from "./gamer";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 20;
@@ -30,12 +31,13 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private _start = false;
 
     private currentThrottle: number = 0;
+    private definition;
 
     // Vehicle physics state
     private velocity: Vector = Vec.create(0, 0); // Vector velocity for realistic direction/momentum
     private steeringAngle: number = 0;
     private wheelbase: number = 4;
-    private occupants: (Player | undefined)[] = [];
+    private occupants: (Gamer | undefined)[] = [];
     private frictionFactor; // Tune 0-1; higher=more slide reduction (real tire grip)
     private velocityThreshold = 0.0001; // Squared speed threshold for "moving" (fine-grained stop detection)
     private maxBounceDist = 0.5; // Max depenetration distance per step (prevents unrealistic far jumps)
@@ -47,12 +49,13 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     constructor(
         game: Game,
-        readonly definition: VehicleDefinition,
+        definition: VehicleDefinition,
         position: Vector,
         layer?: Layer,
         rotation?: number,
     ) {
         super(game, position);
+        this.definition = definition;
         this.layer = layer ?? Layer.Ground;
         this.rotation = rotation ?? 0;
 
@@ -81,7 +84,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         return !this.dead;
     }
 
-    interact(player: Player): void {
+    interact(player: Gamer): void {
         const seatIndex = this.occupants.indexOf(player);
         if (seatIndex !== -1) {
             // Exit seat
@@ -119,12 +122,32 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 player.seatIndex = availableSeat;
                 this.updateOccupantPosition(player, availableSeat);
             }
+
+            if (availableSeat == SeatType.Driver) {
+                if (this.definition.idString !== this.definition.base) {
+                    return;
+                }; // Already upgrade
+
+                const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
+
+                if (matches.length > 0) {
+                    const lastFound = matches[matches.length - 1] as VehicleDefinition;
+
+                    this.definition = lastFound;
+
+                    const indexToRemove = player.vehicleVariations.indexOf(lastFound);
+
+                    if (indexToRemove > -1) {
+                        player.vehicleVariations.splice(indexToRemove, 1);
+                    }
+                }
+            }
         }
         this.setDirty();
         player.setDirty();
     }
 
-    switchToNextEmptySeat(player: Player): void {
+    switchToNextEmptySeat(player: Gamer): void {
         const currentIndex = this.occupants.indexOf(player);
         let nextIndex = -1;
 
