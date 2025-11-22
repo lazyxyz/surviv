@@ -15,7 +15,6 @@ export const enum Constants {
     PLAYER_ADDRESS_MAX_LENGTH = 42,
     LOOT_MAX_LENGTH = 32,
     EMOTES_MAX_LENGTH = 128,
-    CHAT_MESSAGE_MAX_LENGTH = 32,
     TOKEN_MAX_LENGTH = 500,
 }
 
@@ -23,7 +22,8 @@ export const VEHICLE_NETDATA = {
     SPEED_SCALE: 3000,      // u8: 0-255 -> speed 0-10.2 (covers typical maxSpeed ~8-10)
     SLIP_SCALE: 5000,       // u8: 0-255 -> slip ratio 0-1 (lateralSpeed / speed)
     THROTTLE_SCALE: 127, // u8: 0-255 -> throttle -1 to +1
-    STEERING_SCALE: 100 // u8
+    STEERING_SCALE: 100, // u8
+    HEALTH_SCALE: 10, // u8
 } as const;
 
 /* eslint-disable @typescript-eslint/prefer-literal-enum-member */

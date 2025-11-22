@@ -31,6 +31,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     dead = false;
     damageable = true;
 
+    private health: number = 0;
     private speed: number = 0;
     private throttle: number = 0;
     private slip: number = 0;
@@ -87,6 +88,15 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             this.updateSounds();
         }
         this.updateDebugGraphics();
+
+        const inVehicle = this.game.activePlayer?.inVehicle?? false;
+        this.game.uiManager.updateVehicleUI({
+            inVehicle,
+            health: this.health,
+            maxHealth: this.definition.health,
+            speed: this.speed,
+            maxSpeed: this.definition.maxSpeed
+        });
     }
 
     /**
@@ -105,10 +115,10 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.position = data.position;
         this.rotation = data.rotation;
 
-
         this.speed = data.speed / VEHICLE_NETDATA.SPEED_SCALE;
         this.slip = data.slip / VEHICLE_NETDATA.SLIP_SCALE;
         this.throttle = data.throttle / VEHICLE_NETDATA.THROTTLE_SCALE;
+        this.health = data.health * VEHICLE_NETDATA.HEALTH_SCALE;
 
         const noMovementSmoothing = !GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing");
         if (noMovementSmoothing || isNew) {
@@ -235,6 +245,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         });
         this.engineSound = this.skidSound = this.brakeSound = this.shiftSound = this.hitSound = undefined;
     }
+
     /**
      * Updates the vehicle definition, layer, dead state, and configures wheels if provided.
      * @param data The network data.
