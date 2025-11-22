@@ -8,6 +8,7 @@ import type { Account } from '../account';
 import { GAME_CONSOLE } from '../..';
 import { AssetTier, SurvivAssets } from '@common/blockchain';
 import { warningAlert } from '../modal';
+import { showVehicles } from './vehicles';
 
 // handler display change preview
 export const updateSplashCustomize = (skinID: string): void => {
@@ -78,6 +79,10 @@ export async function showInventory(account: Account) {
 
     $('#tab-weapons').on('click', async () => {
         await showWeapons(account);
+    })
+   
+    $('#tab-vehicles').on('click', async () => {
+        await showVehicles(account);
     })
 
     $('#tab-badges').on('click', async () => {
