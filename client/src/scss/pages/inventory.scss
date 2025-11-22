@@ -60,6 +60,187 @@ input::-webkit-inner-spin-button {
   overflow-y: unset;
 }
 
+// Vehicle styles (adapted from weapons)
+.vehicles-container {
+  display: flex;
+  gap: 8px;
+  height: 100%;
+}
+
+.vehicle-list {
+  display: flex;
+  flex-wrap: wrap;
+  height: 340px;
+  overflow: hidden;
+  overflow-y: auto;
+
+  @include variables.mobile-device {
+    gap: 8px;
+    max-height: 235px;
+  }
+}
+
+.vehicles-container-card.inactive {
+  opacity: 0.4;
+}
+
+.vehicles-container-card.selected {
+  border: 2px solid #ffd700;
+}
+
+.vehicles-tier-background {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 100px;
+  height: 94px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 94px;
+
+  @media screen and (max-width: variables.$screen_xsmall) {
+    width: 60px;
+    height: 60px;
+    background-size: 60px;
+
+    img {
+      width: 48px;
+      height: auto;
+    }
+  }
+}
+
+.vehicles-container-card {
+  padding: 6px;
+  border-radius: 8px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  align-items: center;
+  text-align: center;
+  border: 3px solid transparent;
+
+  cursor: pointer;
+  height: fit-content;
+
+  &.selected {
+    border-color: #f2770f;
+  }
+}
+
+.vehicles-container-paragraph {
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  margin: unset;
+
+  @media screen and (max-width: variables.$screen_xsmall) {
+    font-size: 9px;
+    font-weight: 600;
+  }
+}
+
+.vehicles-container-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  overflow-y: auto;
+  flex: 1;
+}
+
+.vehicles-container-aside-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #16161626;
+  border-radius: 8px;
+  height: 100%;
+}
+
+.vehicles-container-list {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+
+  align-content: flex-start;
+  flex: 1;
+  gap: 4px;
+
+  @include variables.mobile-device {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  h2 {
+    margin: unset;
+    color: white;
+
+    font-weight: 600;
+    width: 100%;
+    font-size: 16px;
+
+    &:not(:first-child) {
+      margin-top: 4px;
+    }
+  }
+}
+
+// Shared info panel styles for weapon and vehicle
+#weapon-info,
+#vehicle-info {
+  background: #22222267;
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+}
+
+.weapon-title,
+.vehicle-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.row-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.row-section {
+  margin: 5px;
+  text-align: center;
+  flex: 1 1 40%;
+}
+
+.stat-type {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.child-section {
+  text-align: center;
+  margin-top: 8px;
+}
+
+.weapon-title-state {
+  color: #ffc107;
+  font-size: 14px;
+}
+
 #customize-menu {
   background-color: #4c722f;
   max-width: 920px;

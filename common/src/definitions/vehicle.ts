@@ -68,7 +68,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "idString" | "name" |
         material: Materials[5],
         explosion: "super_barrel_explosion",
         spawnMode: MapObjectSpawnMode.Trail,
-
+        zIndex: ZIndexes.Vehicles,
         maxSpeed: 0.08,
         acceleration: 0.00008,
         maxSteerAngle: Math.PI / 5,
@@ -113,6 +113,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "idString" | "name" |
         material: Materials[5],
         explosion: "super_barrel_explosion",
         spawnMode: MapObjectSpawnMode.Trail,
+        zIndex: ZIndexes.Vehicles,
 
         maxSpeed: 0.075,
         acceleration: 0.00008,

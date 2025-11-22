@@ -1,8 +1,7 @@
 import $ from "jquery";
 import { Account } from "../account";
 import { GAME_CONSOLE } from "../..";
-import { SurvivAssets, AssetTier } from "@common/blockchain";
-import { SurvivAssetBalances } from ".";
+import { AssetTier } from "@common/blockchain";
 import { Vehicles } from "@common/definitions/vehicle";
 
 // Constants for repeated strings
@@ -16,6 +15,7 @@ interface AssetConfig {
   y: number;
   zIndex: number;
   rotate: number;
+  scale?: number;
 }
 
 const selectVehiclePreset = (value: string) => {
@@ -29,6 +29,7 @@ const appendPreview = (images: Array<{
   class: string
   x: number
   y: number
+  scale?: number
 }>): JQuery<Partial<HTMLElement>> => {
   const asideElement = $(".vehicles-container-aside-preview");
 
@@ -40,12 +41,15 @@ const appendPreview = (images: Array<{
     const gVector = document.createElementNS("http://www.w3.org/2000/svg", "g");
     const iVector = document.createElementNS("http://www.w3.org/2000/svg", "image");
 
-    $(gVector).css({
+    const cssStyles: any = {
       transformBox: "fill-box",
       translate: `calc(${argument.x}px - 50%) calc(${argument.y}px - 50%)`,
       transformOrigin: "center",
-      rotate: `${argument.rotate}deg`
-    });
+      rotate: `${argument.rotate}deg`,
+      scale: `${argument.scale ?? 1}`
+    };
+
+    $(gVector).css(cssStyles);
 
     $(iVector).attr({
       class: argument.class,
@@ -70,17 +74,76 @@ const showViewBox = () => {
     return;
   }
 
+  const scaleFactor = 10; // Adjust this scale factor as needed to match the SVG coordinates
+  const seatOffsetX = (vehicle.seats[0]?.offset?.x ?? 0) * scaleFactor;
+  const seatOffsetY = (vehicle.seats[0]?.offset?.y ?? 0) * scaleFactor;
+
+  const centerX = 50;
+  const centerY = 30;
+
+  const baseX = centerX + seatOffsetX;
+  const baseY = centerY + seatOffsetY;
+
+  const fistXOffset = 30; // Relative offset for fists
+  const fistYOffset = 25; // Relative offset for fists
+
+  const vehicleScale = 0.5;
+  const wheelScale = 1.1 * vehicleScale;
+
   // Generate asset configuration
   let assets: AssetConfig[] = [
     {
       class: "assets-base",
       url: `${ASSET_PATH}/skins/${currentSkin}_base.svg`,
-      x: 0,
-      y: 0,
+      x: baseX,
+      y: baseY,
       zIndex: 2,
       rotate: 0,
+      scale: 0.7,
     },
+    {
+      class: "assets-fist",
+      url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
+      x: baseX + fistXOffset,
+      y: baseY + fistYOffset,
+      zIndex: 3,
+      rotate: 0,
+      scale: 0.7,
+    },
+    {
+      class: "assets-fist",
+      url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
+      x: baseX + fistXOffset,
+      y: baseY - fistYOffset,
+      zIndex: 4,
+      rotate: 0,
+      scale: 0.7,
+    },
+    {
+      class: "assets-world",
+      url: `${ASSET_PATH}/vehicles/${vehicle.idString}.svg`,
+      x: centerX,
+      y: centerY,
+      rotate: 0,
+      zIndex: vehicle.zIndex ?? 1,
+      scale: vehicleScale,
+    }
   ];
+
+  // Add wheels
+  vehicle.wheels.forEach(wheel => {
+    const wheelX = centerX + wheel.offset.x * vehicleScale; // Adjust scaleFactor for wheels if needed
+    const wheelY = centerY + wheel.offset.y * vehicleScale;
+    assets.push({
+      class: "assets-wheel",
+      url: `${ASSET_PATH}/vehicles/basic_wheel.svg`,
+      x: wheelX,
+      y: wheelY,
+      zIndex: wheel.zIndex ?? vehicle.zIndex,
+      rotate: 0,
+      scale: wheelScale,
+    });
+  });
 
   // Append assets and set viewBox
   appendPreview(assets).attr("viewBox", VIEWBOX);
@@ -160,7 +223,7 @@ async function showVehiclesList(account: Account, selectedVehicleId?: string) {
         <div class="vehicles-container-card"
              id="vehicles-list-${idString}" data-id="${idString}">
              <div class="vehicles-tier-background" style="background-image: url('${backgroundImage}')">
-          <img src="${ASSET_PATH}/vehicles/${idString}.svg" alt="${name}" width="72px" height="72px" />
+          <img src="${ASSET_PATH}/vehicles/${idString}.svg" alt="${name}" width="98px" height="56px" />
           </div>
           <p class="vehicles-container-paragraph">${name}</p>
         </div>
