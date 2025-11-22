@@ -96,7 +96,8 @@ export const CVarCasters = Object.freeze({
 
     dv_name_color: Casters.toString,
     dv_lobby_clearing: Casters.toBoolean,
-    dv_weapon_preset: Casters.toString
+    dv_weapon_preset: Casters.toString,
+    dv_vehicle_preset: Casters.toString,
 } satisfies Record<string, (val: string) => Result<unknown, string>>);
 
 type GetRes<R extends Result<unknown, unknown>> = R extends ResultRes<infer Res> ? Res : never;
@@ -223,7 +224,8 @@ export const defaultClientCVars: SimpleCVarMapping = Object.freeze({
 
     dv_name_color: "",
     dv_lobby_clearing: false,
-    dv_weapon_preset: ""
+    dv_weapon_preset: "",
+    dv_vehicle_preset: "",
 } satisfies SimpleCVarMapping);
 
 export const defaultBinds = Object.freeze({
