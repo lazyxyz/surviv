@@ -128,11 +128,13 @@ export enum ZIndexes {
     AirborneThrowables,
 
     /**
-     * Vehicles
+     * 
+     *  Vehicles,
      */
     UnderWheels,
     Vehicles,
     InVehicle,
+
     /**
      * trees
      */

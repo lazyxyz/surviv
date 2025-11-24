@@ -45,6 +45,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private baseDamage; // Base factor for collision damage calculation
     private deadImpact = 0.3; // When obstacle dies, reduce bounce/speed loss by 70% (plow through debris with less resistance)
     floor = FloorNames.Water;
+    private minMoveSpeed = 0.02;
 
     customSkin?: {
         idString: string;
@@ -130,25 +131,25 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 this.updateOccupantPosition(player, availableSeat);
             }
 
-            if (availableSeat == SeatType.Driver) {
-                if (this.definition.idString == this.definition.base) {
-                    const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
-                    if (matches.length > 0) {
-                        const lastFound = matches[matches.length - 1];
+            // if (availableSeat == SeatType.Driver) {
+            //     if (this.definition.idString == this.definition.base) {
+            //         const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
+            //         if (matches.length > 0) {
+            //             const lastFound = matches[matches.length - 1];
 
-                        this.customSkin = {
-                            idString: lastFound.idString,
-                            name: lastFound.name
-                        };
+            //             this.customSkin = {
+            //                 idString: lastFound.idString,
+            //                 name: lastFound.name
+            //             };
 
-                        const indexToRemove = player.vehicleVariations.indexOf(lastFound);
+            //             const indexToRemove = player.vehicleVariations.indexOf(lastFound);
 
-                        if (indexToRemove > -1) {
-                            player.vehicleVariations.splice(indexToRemove, 1);
-                        }
-                    }
-                };
-            }
+            //             if (indexToRemove > -1) {
+            //                 player.vehicleVariations.splice(indexToRemove, 1);
+            //             }
+            //         }
+            //     };
+            // }
         }
         this.setDirty();
         player.setDirty();
@@ -220,7 +221,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             const effectiveAdjust = adjustLen > 0 ? Vec.scale(adjust, Math.min(adjustLen, this.maxBounceDist) / adjustLen) : Vec.create(0, 0);
 
             if (potential.isVehicle && !potential._start) {
-                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 1)));
+                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 0.5)));
             };
 
             this.position = Vec.sub(this.position, effectiveAdjust);
@@ -321,7 +322,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             }
             if (!collided) break;
         }
-        this.enforceWorldBoundaries();
     }
 
     private getInputs(): { inputForward: number; inputSteer: number } {
@@ -349,8 +349,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private applyAcceleration(dt: number, inputForward: number): void {
         // Accelerate along forward (or reverse)
         const forwardDir = Vec.fromPolar(this.rotation);
-        const accel = this.definition.acceleration;
-        const accelVec = Vec.scale(forwardDir, inputForward * accel * dt);
+        const accel = dt / (this.definition.acceleration * 5);
+        const accelVec = Vec.scale(forwardDir, inputForward * accel);
         this.velocity = Vec.add(this.velocity, accelVec);
     }
 
@@ -360,7 +360,14 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         const dragFactor = Math.exp(-drag * dt);
         this.velocity = Vec.scale(this.velocity, dragFactor);
 
-        if (Vec.squaredLength(this.velocity) < this.velocityThreshold) {
+        const forwardDir = Vec.fromPolar(this.rotation);
+        const forwardSpeed = Vec.dotProduct(this.velocity, forwardDir);
+        const absForwardSpeed = Math.abs(forwardSpeed);
+
+        if (absForwardSpeed < this.minMoveSpeed && this.currentThrottle === 0) {
+            // When below minTurnSpeed, zero the velocity to stop dragging/creeping
+            this.velocity = Vec.create(0, 0);
+
             if (this.occupants.every(p => p === undefined)) {
                 this._start = false;
             }
@@ -405,11 +412,14 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         const forwardDir = Vec.fromPolar(this.rotation);
         const forwardSpeed = Vec.dotProduct(this.velocity, forwardDir);
         const speedForTurn = forwardSpeed; // Positive for forward turn, negative for reverse (flips turn dir)
+
         const targetSteer = inputSteer * this.definition.maxSteerAngle;
         const maxSteerDelta = this.definition.steerRate * dt / 1000;
         this.steeringAngle += Numeric.clamp(targetSteer - this.steeringAngle, -maxSteerDelta, maxSteerDelta);
         const steerAngle = this.steeringAngle;
+
         let turnRate = (speedForTurn * Math.tan(steerAngle)) / this.wheelbase;
+
         this.rotation += turnRate * dt;
     }
 
@@ -456,6 +466,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         this.applyDrag(dt);
         this.applyLateralFriction(dt);
         this.clampSpeed();
+
         this.applySteering(dt, inputSteer);
         this.updatePosition(dt);
 

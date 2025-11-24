@@ -1025,21 +1025,10 @@ const maps = {
                     }
                     itemPos.x += colSpacing * 2.5;
                 }
-                for (const vehicle of Vehicles.definitions) {
-                    map.game.objectSpawner.addVehicle(vehicle, Vec.create(itemPos.x, itemPos.y));
-                    if (itemPos.x > maxX) {
-                        itemPos.x = 0;
 
-                        itemPos.y += rowSpacing;
-                    }
-                    itemPos.x += colSpacing * 2.5;
-                }
-
-                if (itemPos.x > maxX) {
-                    itemPos.x = 0;
-                    itemPos.y += rowSpacing;
-                }
-                map.game.objectSpawner.addObstacle(Obstacles.fromString('regular_crate'), Vec.create(itemPos.x + 30, itemPos.y));
+                itemPos.x = 0;
+                itemPos.y += rowSpacing;
+                map.game.objectSpawner.addObstacle(Obstacles.fromString('blueberry_bush'), Vec.create(itemPos.x + 30, itemPos.y));
             }
         };
     })(),

@@ -59,7 +59,11 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         hitbox: new GroupHitbox(
             new CircleHitbox(8, Vec.create(9.2, 0)),
             new CircleHitbox(7.8, Vec.create(0, 0)),
-            new CircleHitbox(8, Vec.create(-9.2, 0)),
+            new CircleHitbox(8.4, Vec.create(-9.2, 0)),
+
+            // front hood
+            new CircleHitbox(4, Vec.create(12, -5)),
+            new CircleHitbox(4, Vec.create(12, 5)),
         ),
         bulletHitbox: new GroupHitbox(
             new CircleHitbox(7, Vec.create(7.4, 0)),
@@ -74,10 +78,10 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         spawnMode: MapObjectSpawnMode.Trail,
         zIndex: ZIndexes.Vehicles,
         maxSpeed: 0.08,
-        acceleration: 0.00008,
+        acceleration: 4000, // 4s to reach full speed
         maxSteerAngle: Math.PI / 5,
         steerRate: Math.PI * 0.8,
-        drag: 0.00095,
+        drag: 0.0005,
 
         frictionFactor: 0.75,
         wheelType: 'basic_wheel',
@@ -128,11 +132,11 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         spawnMode: MapObjectSpawnMode.Trail,
         zIndex: ZIndexes.Vehicles,
 
-        maxSpeed: 0.075,
-        acceleration: 0.00008,
+        maxSpeed: 0.07,
+        acceleration: 3000, // 3s
         maxSteerAngle: Math.PI / 7,
         steerRate: Math.PI / 2,
-        drag: 0.0009,
+        drag: 0.00045,
         frictionFactor: 0.5,
         baseDamage: 20,
         hitSoundVariations: 2,
