@@ -100,7 +100,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             const speed = Vec.length(this.velocity);
             if (speed > 0.05) {
                 player.damage({
-                    amount: speed * 200, // Tune this multiplier
+                    amount: speed * 500, // Tune this multiplier
                     source: this,
                     weaponUsed: undefined
                 });
