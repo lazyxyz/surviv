@@ -15,6 +15,7 @@ import { RunOverMaterialsSet } from "@common/definitions/obstacles";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Maps } from "@common/definitions/modes";
 import { Gamer } from "./gamer";
+import { MeleeItem } from "../inventory/meleeItem";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 20;
@@ -334,11 +335,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 // Keyboard: Assume relative (up=forward, left=steer left). No change needed here.
                 inputForward = +pm.up - +pm.down;
                 inputSteer = +pm.right - +pm.left; // right=+1 (will be negated below for correct turn)
-
-                // if (inputForward >0) {
-                // } else {
-                //     inputSteer = +pm.left - +pm.right;  // Now correct
-                // }
             }
         }
         return { inputForward, inputSteer };
@@ -491,9 +487,14 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     damage(params: DamageParams & { position?: Vector }): void {
         const definition = this.definition;
-        const { amount, source, weaponUsed, position } = params;
+        const { source, weaponUsed } = params;
+        let { amount } = params;
+
         if (this.health <= 0) return;
 
+        if (weaponUsed instanceof MeleeItem) {
+            amount *= 0.5;
+        }
         this.health -= amount;
         this.setPartialDirty();
 
@@ -504,7 +505,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             this.collidable = false;
             const weaponIsItem = weaponUsed instanceof InventoryItem;
             if (definition.explosion !== undefined && source instanceof BaseGameObject) {
-                this.game.addExplosion(definition.explosion, this.position, source, source.layer, weaponIsItem ? weaponUsed : weaponUsed?.weapon);
+                this.game.addExplosion(definition.explosion, this.position, source, source.layer, weaponIsItem ? weaponUsed : weaponUsed?.weapon, 5);
             }
 
             // Eject all occupants
@@ -514,7 +515,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     occupant.exitVehicle();
                 }
             }
-
             this.setDirty();
         }
     }
