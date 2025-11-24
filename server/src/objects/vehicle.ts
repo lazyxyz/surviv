@@ -230,7 +230,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     let materialFactor = 1.0;
                     let inverseMaterialFactor = 1.0; // For obstacle damage (soft = high damage to obstacle)
                     if (isRunOver) {
-                        const damageToPlayer = Math.abs(impactVel) * this.baseDamage * 5;
+                        const damageToPlayer = Math.abs(impactVel) * this.baseDamage * 10;
                         potential.damage({
                             amount: damageToPlayer,
                             source: this,
@@ -312,10 +312,11 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                         collided = true;
                     }
                 }
+               
             }
             if (!collided) break;
         }
-        // this.enforceWorldBoundaries();
+        this.enforceWorldBoundaries();
     }
 
     private getInputs(): { inputForward: number; inputSteer: number } {

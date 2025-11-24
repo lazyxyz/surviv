@@ -26,6 +26,7 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly explosion?: string;
     readonly spawnMode: MapObjectSpawnMode;
 
+    readonly wheelType: string;
     readonly wheels: Array<{
         offset: Vector;
         scale: number;
@@ -79,7 +80,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         drag: 0.00095,
 
         frictionFactor: 0.75,
-
+        wheelType: 'basic_wheel',
         wheels: [
             { offset: Vec.create(240, -145), scale: 1.1, zIndex: ZIndexes.UnderWheels },
             { offset: Vec.create(240, 145), scale: 1.1, zIndex: ZIndexes.UnderWheels },
@@ -105,7 +106,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
             new CircleHitbox(3.8, Vec.create(4.6, 0)),
             new CircleHitbox(4.6, Vec.create(0, 0)),
             new CircleHitbox(3.4, Vec.create(-9, 0)),
-            
+
             // Front Wheels
             new CircleHitbox(2.4, Vec.create(11.2, -4.4)),
             new CircleHitbox(2.4, Vec.create(11.2, 4.4)),
@@ -135,7 +136,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         frictionFactor: 0.5,
         baseDamage: 20,
         hitSoundVariations: 2,
-
+        wheelType: 'basic_wheel',
         wheels: [
             { offset: Vec.create(230, -118), scale: 0.8, zIndex: ZIndexes.Vehicles },
             { offset: Vec.create(230, 118), scale: 0.8, zIndex: ZIndexes.Vehicles },

@@ -116,8 +116,6 @@ export enum ZIndexes {
     ObstaclesLayer1,
     Loot,
     GroundedThrowables,
-    UnderWheels,
-    Vehicles,
     ObstaclesLayer2,
     TeammateName,
     Bullets,
@@ -128,6 +126,13 @@ export enum ZIndexes {
      */
     ObstaclesLayer3,
     AirborneThrowables,
+
+    /**
+     * Vehicles
+     */
+    UnderWheels,
+    Vehicles,
+    InVehicle,
     /**
      * trees
      */

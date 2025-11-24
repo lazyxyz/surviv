@@ -62,20 +62,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.container.sortableChildren = true;
         this.image = new SuroiSprite();
         this.container.addChild(this.image);
-        this.initializeWheels(4); // Initialize with 4 wheels by default
         this.updateFromData(data, true);
-    }
-
-    /**
-     * Initializes the specified number of wheel sprites.
-     * @param count Number of wheels to create.
-     */
-    private initializeWheels(count: number): void {
-        for (let i = 0; i < count; i++) {
-            const wheel = new SuroiSprite("basic_wheel");
-            this.wheels.push(wheel);
-            this.container.addChild(wheel);
-        }
     }
 
     override updateFromData(data: ObjectsNetData[ObjectCategory.Vehicle], isNew = false): void {
@@ -244,10 +231,10 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     }
 
     private stopAllVehicleSounds(): void {
-        [this.engineSound, this.skidSound, this.brakeSound, this.shiftSound, this.hitSound].forEach(sound => {
+        [this.engineSound, this.skidSound, this.brakeSound, this.shiftSound, this.hitSound, this.wheelstepSound].forEach(sound => {
             sound?.stop();
         });
-        this.engineSound = this.skidSound = this.brakeSound = this.shiftSound = this.hitSound = undefined;
+        this.engineSound = this.skidSound = this.brakeSound = this.shiftSound = this.hitSound = this.wheelstepSound = undefined;
     }
 
     /**
@@ -281,7 +268,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
      */
     private configureWheels(wheelConfig: VehicleDefinition["wheels"]): void {
         while (this.wheels.length < wheelConfig.length) {
-            const wheel = new SuroiSprite("basic_wheel").setZIndex(ZIndexes.Ground);
+            const wheel = new SuroiSprite(this.definition.wheelType);
             this.container.addChild(wheel);
             this.wheels.push(wheel);
         }
@@ -290,6 +277,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
                 const wheel = this.wheels[i];
                 wheel.position.copyFrom(Vec.scale(config.offset, this.definition.scale));
                 wheel.scale.set(config.scale);
+                wheel.zIndex = config.zIndex;
                 wheel.visible = !this.dead;
             }
         });
@@ -338,7 +326,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
     private updateWheelFrames(): void {
         for (let i = 0; i < this.wheels.length; i++) {
-            this.wheels[i].setFrame(this.wheelFrame ? "basic_wheel_use" : "basic_wheel");
+            this.wheels[i].setFrame(this.wheelFrame ? `${this.definition.wheelType}_use` : this.definition.wheelType);
         }
     }
 
