@@ -46,6 +46,11 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private deadImpact = 0.3; // When obstacle dies, reduce bounce/speed loss by 70% (plow through debris with less resistance)
     floor = FloorNames.Water;
 
+    customSkin?: {
+        idString: string;
+        name: string;
+    };
+
     get height(): number { return this._height; }
 
     constructor(
@@ -87,7 +92,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     interact(player: Player): void {
         if (!(player instanceof Gamer)) return; // Only allow gamer
-
         const seatIndex = this.occupants.indexOf(player);
         if (seatIndex !== -1) {
             // Exit seat
@@ -129,12 +133,13 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             if (availableSeat == SeatType.Driver) {
                 if (this.definition.idString == this.definition.base) {
                     const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
-
                     if (matches.length > 0) {
                         const lastFound = matches[matches.length - 1];
 
-                        this.definition.idString = lastFound.idString;
-                        this.definition.name = lastFound.name;
+                        this.customSkin = {
+                            idString: lastFound.idString,
+                            name: lastFound.name
+                        };
 
                         const indexToRemove = player.vehicleVariations.indexOf(lastFound);
 
@@ -312,7 +317,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                         collided = true;
                     }
                 }
-               
+
             }
             if (!collided) break;
         }
@@ -542,7 +547,11 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             health: Math.round(this.health / VEHICLE_NETDATA.HEALTH_SCALE),
 
             full: {
-                definition: this.definition,
+                definition: {
+                    ...this.definition,
+                    idString: this.customSkin?.idString ?? this.definition.idString,
+                    name: this.customSkin?.name ?? this.definition.name
+                },
                 layer: this.layer,
                 dead: this.dead,
                 hasDriver: this.occupants[SeatType.Driver] !== undefined,

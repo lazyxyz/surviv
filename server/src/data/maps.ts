@@ -1025,6 +1025,15 @@ const maps = {
                     }
                     itemPos.x += colSpacing * 2.5;
                 }
+                for (const vehicle of Vehicles.definitions) {
+                    map.game.objectSpawner.addVehicle(vehicle, Vec.create(itemPos.x, itemPos.y));
+                    if (itemPos.x > maxX) {
+                        itemPos.x = 0;
+
+                        itemPos.y += rowSpacing;
+                    }
+                    itemPos.x += colSpacing * 2.5;
+                }
 
                 if (itemPos.x > maxX) {
                     itemPos.x = 0;
