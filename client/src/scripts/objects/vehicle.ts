@@ -84,9 +84,9 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.updateWheelRotations(data);
         if (!isNew) {
             this.handleMovementEffects(oldPosition);
-            this.updateZIndex();
             this.updateSounds();
         }
+        this.updateZIndex();
         this.updateDebugGraphics();
 
         const inVehicle = this.game.activePlayer?.inVehicle ?? false;

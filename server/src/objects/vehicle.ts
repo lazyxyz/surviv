@@ -126,25 +126,22 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             }
 
             if (availableSeat == SeatType.Driver) {
-                if (this.definition.idString !== this.definition.base) {
-                    // Already upgrade
-                    return;
-                };
+                if (this.definition.idString == this.definition.base) {
+                    const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
 
-                const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
+                    if (matches.length > 0) {
+                        const lastFound = matches[matches.length - 1];
 
-                if (matches.length > 0) {
-                    const lastFound = matches[matches.length - 1];
+                        this.definition.idString = lastFound.idString;
+                        this.definition.name = lastFound.name;
 
-                    this.definition.idString = lastFound.idString;
-                    this.definition.name = lastFound.name;
+                        const indexToRemove = player.vehicleVariations.indexOf(lastFound);
 
-                    const indexToRemove = player.vehicleVariations.indexOf(lastFound);
-
-                    if (indexToRemove > -1) {
-                        player.vehicleVariations.splice(indexToRemove, 1);
+                        if (indexToRemove > -1) {
+                            player.vehicleVariations.splice(indexToRemove, 1);
+                        }
                     }
-                }
+                };
             }
         }
         this.setDirty();
