@@ -670,10 +670,10 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             }
 
             this.container.alpha = invulnerable ? 0.5 : 1;
+            updateContainerZIndex = true;
 
             if (this.downed !== downed) {
                 this.downed = downed;
-                updateContainerZIndex = true;
                 this.updateFistsPosition(false);
                 this.updateWeapon(isNew);
                 this.updateEquipment();
@@ -1137,14 +1137,18 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     }
 
     override updateZIndex(): void {
-        // i love ternary spam
-        const zIndex = FloorTypes[this.floorType].overlay
-            ? this.downed
-                ? ZIndexes.UnderwaterDownedPlayers
-                : ZIndexes.UnderwaterPlayers
-            : this.downed
-                ? ZIndexes.DownedPlayers
-                : ZIndexes.Players;
+        let zIndex;
+        if (this.inVehicle) {
+            zIndex = ZIndexes.InVehicle;
+        } else {
+            zIndex = FloorTypes[this.floorType].overlay
+                ? this.downed
+                    ? ZIndexes.UnderwaterDownedPlayers
+                    : ZIndexes.UnderwaterPlayers
+                : this.downed
+                    ? ZIndexes.DownedPlayers
+                    : ZIndexes.Players;
+        }
 
         this.container.zIndex = getEffectiveZIndex(zIndex, this.layer, this.game.layer);
         this.disguiseContainer.zIndex = this.container.zIndex + 1;

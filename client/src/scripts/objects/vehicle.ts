@@ -53,25 +53,16 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     private lastCheckTime: number = Date.now();
     private lastSpeed: number = 0;
 
+    private wheelFrame: boolean = false;
+    private distSinceLastWheelAnim: number = 0;
+    private wheelAnimDistanceThreshold: number = 1;
+
     constructor(game: Game, id: number, data: ObjectsNetData[ObjectCategory.Vehicle]) {
         super(game, id);
         this.container.sortableChildren = true;
         this.image = new SuroiSprite();
         this.container.addChild(this.image);
-        this.initializeWheels(4); // Initialize with 4 wheels by default
         this.updateFromData(data, true);
-    }
-
-    /**
-     * Initializes the specified number of wheel sprites.
-     * @param count Number of wheels to create.
-     */
-    private initializeWheels(count: number): void {
-        for (let i = 0; i < count; i++) {
-            const wheel = new SuroiSprite("basic_wheel").setScale(0.8);
-            this.wheels.push(wheel);
-            this.container.addChild(wheel);
-        }
     }
 
     override updateFromData(data: ObjectsNetData[ObjectCategory.Vehicle], isNew = false): void {
@@ -79,7 +70,6 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.updateFloorType();
         this.updatePartial(data, isNew);
         this.updateDefinitionAndState(data);
-        this.updateTexture();
         this.updateHitboxes();
         this.updateWheelRotations(data);
         if (!isNew) {
@@ -241,10 +231,10 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     }
 
     private stopAllVehicleSounds(): void {
-        [this.engineSound, this.skidSound, this.brakeSound, this.shiftSound, this.hitSound].forEach(sound => {
+        [this.engineSound, this.skidSound, this.brakeSound, this.shiftSound, this.hitSound, this.wheelstepSound].forEach(sound => {
             sound?.stop();
         });
-        this.engineSound = this.skidSound = this.brakeSound = this.shiftSound = this.hitSound = undefined;
+        this.engineSound = this.skidSound = this.brakeSound = this.shiftSound = this.hitSound = this.wheelstepSound = undefined;
     }
 
     /**
@@ -267,6 +257,8 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             if (this.dead) {
                 this.hideAllWheels();
             }
+
+            this.updateTexture();
         }
     }
 
@@ -276,7 +268,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
      */
     private configureWheels(wheelConfig: VehicleDefinition["wheels"]): void {
         while (this.wheels.length < wheelConfig.length) {
-            const wheel = new SuroiSprite("basic_wheel").setZIndex(ZIndexes.Ground);
+            const wheel = new SuroiSprite(this.definition.wheelType);
             this.container.addChild(wheel);
             this.wheels.push(wheel);
         }
@@ -285,6 +277,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
                 const wheel = this.wheels[i];
                 wheel.position.copyFrom(Vec.scale(config.offset, this.definition.scale));
                 wheel.scale.set(config.scale);
+                wheel.zIndex = config.zIndex;
                 wheel.visible = !this.dead;
             }
         });
@@ -331,6 +324,12 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         }
     }
 
+    private updateWheelFrames(): void {
+        for (let i = 0; i < this.wheels.length; i++) {
+            this.wheels[i].setFrame(this.wheelFrame ? `${this.definition.wheelType}_use` : this.definition.wheelType);
+        }
+    }
+
     /**
      * Handles movement-related effects like sounds and particles.
      * @param oldPosition The previous position.
@@ -339,11 +338,19 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         const distanceMoved = Geometry.distance(oldPosition, this.position);
         this.distSinceLastFootstep += distanceMoved;
         this.distTraveled += distanceMoved;
+        this.distSinceLastWheelAnim += distanceMoved;
 
         if (this.distSinceLastFootstep > 10) {
             this.playWheelStepSound();
             this.distSinceLastFootstep = 0;
             this.spawnWheelParticles();
+        }
+
+        // Wheel animation: Toggle frame every X units traveled (only if moving and has driver)
+        if (this.hasDriver && this.speed > 0 && this.distSinceLastWheelAnim > this.wheelAnimDistanceThreshold) {
+            this.wheelFrame = !this.wheelFrame;
+            this.updateWheelFrames();
+            this.distSinceLastWheelAnim = 0;
         }
     }
 

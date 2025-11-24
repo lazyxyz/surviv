@@ -15,6 +15,7 @@ import { RunOverMaterialsSet } from "@common/definitions/obstacles";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Maps } from "@common/definitions/modes";
 import { Gamer } from "./gamer";
+import { MeleeItem } from "../inventory/meleeItem";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override readonly fullAllocBytes = 20;
@@ -44,6 +45,12 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private baseDamage; // Base factor for collision damage calculation
     private deadImpact = 0.3; // When obstacle dies, reduce bounce/speed loss by 70% (plow through debris with less resistance)
     floor = FloorNames.Water;
+    private minMoveSpeed = 0.02;
+
+    customSkin?: {
+        idString: string;
+        name: string;
+    };
 
     get height(): number { return this._height; }
 
@@ -86,7 +93,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     interact(player: Player): void {
         if (!(player instanceof Gamer)) return; // Only allow gamer
-
         const seatIndex = this.occupants.indexOf(player);
         if (seatIndex !== -1) {
             // Exit seat
@@ -99,7 +105,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             const speed = Vec.length(this.velocity);
             if (speed > 0.05) {
                 player.damage({
-                    amount: speed * 200, // Tune this multiplier
+                    amount: speed * 500, // Tune this multiplier
                     source: this,
                     weaponUsed: undefined
                 });
@@ -125,24 +131,25 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 this.updateOccupantPosition(player, availableSeat);
             }
 
-            if (availableSeat == SeatType.Driver) {
-                if (this.definition.idString == this.definition.base) {
-                    const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
+            // if (availableSeat == SeatType.Driver) {
+            //     if (this.definition.idString == this.definition.base) {
+            //         const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
+            //         if (matches.length > 0) {
+            //             const lastFound = matches[matches.length - 1];
 
-                    if (matches.length > 0) {
-                        const lastFound = matches[matches.length - 1];
+            //             this.customSkin = {
+            //                 idString: lastFound.idString,
+            //                 name: lastFound.name
+            //             };
 
-                        this.definition.idString = lastFound.idString;
-                        this.definition.name = lastFound.name;
+            //             const indexToRemove = player.vehicleVariations.indexOf(lastFound);
 
-                        const indexToRemove = player.vehicleVariations.indexOf(lastFound);
-
-                        if (indexToRemove > -1) {
-                            player.vehicleVariations.splice(indexToRemove, 1);
-                        }
-                    }
-                };
-            }
+            //             if (indexToRemove > -1) {
+            //                 player.vehicleVariations.splice(indexToRemove, 1);
+            //             }
+            //         }
+            //     };
+            // }
         }
         this.setDirty();
         player.setDirty();
@@ -214,7 +221,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             const effectiveAdjust = adjustLen > 0 ? Vec.scale(adjust, Math.min(adjustLen, this.maxBounceDist) / adjustLen) : Vec.create(0, 0);
 
             if (potential.isVehicle && !potential._start) {
-                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 1)));
+                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 0.5)));
             };
 
             this.position = Vec.sub(this.position, effectiveAdjust);
@@ -229,7 +236,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     let materialFactor = 1.0;
                     let inverseMaterialFactor = 1.0; // For obstacle damage (soft = high damage to obstacle)
                     if (isRunOver) {
-                        const damageToPlayer = Math.abs(impactVel) * this.baseDamage * 5;
+                        const damageToPlayer = Math.abs(impactVel) * this.baseDamage * 10;
                         potential.damage({
                             amount: damageToPlayer,
                             source: this,
@@ -287,8 +294,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     // Overall speed loss
                     this.velocity = Vec.scale(this.velocity, speedLossFactor);
                 }
-            } else if (!isRunOver) {
-                // Low speed: just stop completely
+            } else if (!potential.isPlayer) {
                 this.velocity = Vec.create(0, 0);
             }
             return true;
@@ -311,10 +317,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                         collided = true;
                     }
                 }
+
             }
             if (!collided) break;
         }
-        // this.enforceWorldBoundaries();
     }
 
     private getInputs(): { inputForward: number; inputSteer: number } {
@@ -334,11 +340,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 // Keyboard: Assume relative (up=forward, left=steer left). No change needed here.
                 inputForward = +pm.up - +pm.down;
                 inputSteer = +pm.right - +pm.left; // right=+1 (will be negated below for correct turn)
-
-                // if (inputForward >0) {
-                // } else {
-                //     inputSteer = +pm.left - +pm.right;  // Now correct
-                // }
             }
         }
         return { inputForward, inputSteer };
@@ -347,8 +348,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private applyAcceleration(dt: number, inputForward: number): void {
         // Accelerate along forward (or reverse)
         const forwardDir = Vec.fromPolar(this.rotation);
-        const accel = this.definition.acceleration;
-        const accelVec = Vec.scale(forwardDir, inputForward * accel * dt);
+        const accel = dt / (this.definition.acceleration * 5);
+        const accelVec = Vec.scale(forwardDir, inputForward * accel);
         this.velocity = Vec.add(this.velocity, accelVec);
     }
 
@@ -358,7 +359,14 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         const dragFactor = Math.exp(-drag * dt);
         this.velocity = Vec.scale(this.velocity, dragFactor);
 
-        if (Vec.squaredLength(this.velocity) < this.velocityThreshold) {
+        const forwardDir = Vec.fromPolar(this.rotation);
+        const forwardSpeed = Vec.dotProduct(this.velocity, forwardDir);
+        const absForwardSpeed = Math.abs(forwardSpeed);
+
+        if (absForwardSpeed < this.minMoveSpeed && this.currentThrottle === 0) {
+            // When below minTurnSpeed, zero the velocity to stop dragging/creeping
+            this.velocity = Vec.create(0, 0);
+
             if (this.occupants.every(p => p === undefined)) {
                 this._start = false;
             }
@@ -403,11 +411,14 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         const forwardDir = Vec.fromPolar(this.rotation);
         const forwardSpeed = Vec.dotProduct(this.velocity, forwardDir);
         const speedForTurn = forwardSpeed; // Positive for forward turn, negative for reverse (flips turn dir)
+
         const targetSteer = inputSteer * this.definition.maxSteerAngle;
         const maxSteerDelta = this.definition.steerRate * dt / 1000;
         this.steeringAngle += Numeric.clamp(targetSteer - this.steeringAngle, -maxSteerDelta, maxSteerDelta);
         const steerAngle = this.steeringAngle;
+
         let turnRate = (speedForTurn * Math.tan(steerAngle)) / this.wheelbase;
+
         this.rotation += turnRate * dt;
     }
 
@@ -454,6 +465,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         this.applyDrag(dt);
         this.applyLateralFriction(dt);
         this.clampSpeed();
+
         this.applySteering(dt, inputSteer);
         this.updatePosition(dt);
 
@@ -491,9 +503,14 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
     damage(params: DamageParams & { position?: Vector }): void {
         const definition = this.definition;
-        const { amount, source, weaponUsed, position } = params;
+        const { source, weaponUsed } = params;
+        let { amount } = params;
+
         if (this.health <= 0) return;
 
+        if (weaponUsed instanceof MeleeItem) {
+            amount *= 0.5;
+        }
         this.health -= amount;
         this.setPartialDirty();
 
@@ -504,7 +521,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             this.collidable = false;
             const weaponIsItem = weaponUsed instanceof InventoryItem;
             if (definition.explosion !== undefined && source instanceof BaseGameObject) {
-                this.game.addExplosion(definition.explosion, this.position, source, source.layer, weaponIsItem ? weaponUsed : weaponUsed?.weapon);
+                this.game.addExplosion(definition.explosion, this.position, source, source.layer, weaponIsItem ? weaponUsed : weaponUsed?.weapon, 5);
             }
 
             // Eject all occupants
@@ -514,7 +531,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     occupant.exitVehicle();
                 }
             }
-
             this.setDirty();
         }
     }
@@ -541,7 +557,11 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             health: Math.round(this.health / VEHICLE_NETDATA.HEALTH_SCALE),
 
             full: {
-                definition: this.definition,
+                definition: {
+                    ...this.definition,
+                    idString: this.customSkin?.idString ?? this.definition.idString,
+                    name: this.customSkin?.name ?? this.definition.name
+                },
                 layer: this.layer,
                 dead: this.dead,
                 hasDriver: this.occupants[SeatType.Driver] !== undefined,

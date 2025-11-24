@@ -288,7 +288,8 @@ export const RunOverMaterials: Array<typeof Materials[number]> = [
     "porcelain",
     "cardboard",
     "pumpkin",
-    "crate"
+    "crate",
+    "bush"
 ];
 
 export const RunOverMaterialsSet = new Set<typeof RunOverMaterials[number]>(RunOverMaterials);
