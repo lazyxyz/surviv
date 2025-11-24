@@ -56,14 +56,14 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         scale: 1,
         rotationMode: RotationMode.Limited,
         hitbox: new GroupHitbox(
-            new CircleHitbox(8.2, Vec.create(9.2, 0)),
-            new CircleHitbox(8.4, Vec.create(0, 0)),
-            new CircleHitbox(8.4, Vec.create(-9.2, 0)),
+            new CircleHitbox(8, Vec.create(9.2, 0)),
+            new CircleHitbox(7.8, Vec.create(0, 0)),
+            new CircleHitbox(8, Vec.create(-9.2, 0)),
         ),
         bulletHitbox: new GroupHitbox(
-            new CircleHitbox(8.0, Vec.create(9.2, 0)),
-            new CircleHitbox(2.6, Vec.create(3.2, -5.8)),
-            new CircleHitbox(2.6, Vec.create(3.2, 5.8)),
+            new CircleHitbox(7, Vec.create(7.4, 0)),
+            new CircleHitbox(2.6, Vec.create(3.2, -5.2)),
+            new CircleHitbox(2.6, Vec.create(3.2, 5.2)),
         ),
         spawnHitbox: new CircleHitbox(18),
         health: 1000,
@@ -105,6 +105,15 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
             new CircleHitbox(3.8, Vec.create(4.6, 0)),
             new CircleHitbox(4.6, Vec.create(0, 0)),
             new CircleHitbox(3.4, Vec.create(-9, 0)),
+            
+            // Front Wheels
+            new CircleHitbox(2.4, Vec.create(11.2, -4.4)),
+            new CircleHitbox(2.4, Vec.create(11.2, 4.4)),
+
+            // Back Wheels
+            new CircleHitbox(3, Vec.create(-8.2, -5.2)),
+            new CircleHitbox(3, Vec.create(-8.2, 5.2)),
+
         ),
         bulletHitbox: new GroupHitbox(
             new CircleHitbox(3.2, Vec.create(9, 0)),
@@ -128,10 +137,10 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         hitSoundVariations: 2,
 
         wheels: [
-            { offset: Vec.create(230, -120), scale: 0.8, zIndex: ZIndexes.Vehicles },
-            { offset: Vec.create(230, 120), scale: 0.8, zIndex: ZIndexes.Vehicles },
-            { offset: Vec.create(-170, -140), scale: 1.0, zIndex: ZIndexes.Vehicles },
-            { offset: Vec.create(-170, 140), scale: 1.0, zIndex: ZIndexes.Vehicles }
+            { offset: Vec.create(230, -118), scale: 0.8, zIndex: ZIndexes.Vehicles },
+            { offset: Vec.create(230, 118), scale: 0.8, zIndex: ZIndexes.Vehicles },
+            { offset: Vec.create(-164, -136), scale: 1.0, zIndex: ZIndexes.Vehicles },
+            { offset: Vec.create(-164, 136), scale: 1.0, zIndex: ZIndexes.Vehicles }
         ],
 
         seats: [
