@@ -294,8 +294,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     // Overall speed loss
                     this.velocity = Vec.scale(this.velocity, speedLossFactor);
                 }
-            } else if (!isRunOver) {
-                // Low speed: just stop completely
+            } else if (!potential.isPlayer) {
                 this.velocity = Vec.create(0, 0);
             }
             return true;
