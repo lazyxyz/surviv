@@ -145,7 +145,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
                 // Change Variation Skin
                 if (this.definition.idString == this.definition.base) {
-                    const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
+                    const matches = player.vehicleVariants.filter(v => v && v.base === this.definition.base);
                     if (matches.length > 0) {
                         const lastFound = matches[matches.length - 1];
 
@@ -154,10 +154,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                             name: lastFound.name
                         };
 
-                        const indexToRemove = player.vehicleVariations.indexOf(lastFound);
+                        const indexToRemove = player.vehicleVariants.indexOf(lastFound);
 
                         if (indexToRemove > -1) {
-                            player.vehicleVariations.splice(indexToRemove, 1);
+                            player.vehicleVariants.splice(indexToRemove, 1);
                         }
                     }
                 };

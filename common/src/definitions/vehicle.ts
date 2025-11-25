@@ -194,6 +194,22 @@ const Variations: VehicleVariantConfig[] = [
         idString: "buggy",
         name: "Buggy",
     },
+     {
+        base: "buggy",
+        idString: "buggy_rust",
+        name: "Buggy Rust",
+    },
+    {
+        base: "buggy",
+        idString: "buggy_captain",
+        name: "Buggy Captain",
+    },
+    {
+        base: "buggy",
+        idString: "buggy_reaper",
+        name: "Buggy Reaper",
+    },
+
 ];
 
 export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(

@@ -7,6 +7,7 @@ import { GunDefinition, Guns } from '@common/definitions/guns';
 import { MeleeDefinition, Melees } from '@common/definitions/melees';
 import { SkinDefinition, Skins, DEFAULT_SKIN } from '@common/definitions/skins';
 import { Blockchain, getSurvivAddress } from '@common/blockchain/contracts';
+import { VehicleDefinition, Vehicles } from '@common/definitions/vehicle';
 
 interface Mapping {
     address: string;
@@ -29,6 +30,7 @@ interface VerifiedAssets {
     melee: MeleeDefinition | undefined;
     gun: GunDefinition | undefined;
     emotes: readonly (EmoteDefinition | undefined)[];
+    vehicles: (VehicleDefinition)[];
 }
 
 /**
@@ -232,6 +234,7 @@ export async function verifyAllAssets(
         melee?: string;
         gun?: string;
         emotes?: (string | undefined)[];
+        vehicles?: string[];
     },
     timeout: number = 2000
 ): Promise<VerifiedAssets> {
@@ -240,7 +243,8 @@ export async function verifyAllAssets(
         skin: Skins.fromStringSafe(DEFAULT_SKIN),
         melee: undefined,
         gun: undefined,
-        emotes: EMOTE_SLOTS.map(() => undefined)
+        emotes: EMOTE_SLOTS.map(() => undefined),
+        vehicles: [],
     };
 
     try {
@@ -249,9 +253,11 @@ export async function verifyAllAssets(
             ...(assets.skin ? [{ type: 'skin', value: assets.skin }] : []),
             ...(assets.melee ? [{ type: 'melee', value: assets.melee }] : []),
             ...(assets.gun ? [{ type: 'gun', value: assets.gun }] : []),
-            ...(assets.emotes ? assets.emotes.map(value => ({ type: 'emotes', value: value || '' })) : [])
+            ...(assets.emotes ? assets.emotes.map(value => ({ type: 'emotes', value: value || '' })) : []),
+            ...(Vehicles.definitions.map(vehicle => ({ type: 'vehicles', value: vehicle.idString || '' }))),
         ];
 
+        console.log("allItems: ", allItems);
         // Prepare items for SurvivAssetsMapping
         const items = allItems.map(item => item.value);
         const itemTypes = allItems.map(item => item.type);
@@ -265,6 +271,8 @@ export async function verifyAllAssets(
 
         // Process results
         const emoteResults: string[] = [];
+        const vehicleResults: VehicleDefinition[] = [];
+
         checkResult.validItems.forEach((validItem, index) => {
             const itemIndex = items.indexOf(validItem);
             const type = itemTypes[itemIndex];
@@ -276,12 +284,16 @@ export async function verifyAllAssets(
                 result.gun = Guns.fromStringSafe(validItem);
             } else if (type === 'emotes') {
                 emoteResults.push(validItem);
+            } else if(type === 'vehicles') {
+                const validVehicle = Vehicles.fromStringSafe(validItem);
+                if(validVehicle) vehicleResults.push(validVehicle);
             }
         });
 
         if (emoteResults.length > 0) {
             result.emotes = EMOTE_SLOTS.map((_, i) => Emotes.fromStringSafe(emoteResults[i] || ''));
         }
+        result.vehicles = vehicleResults;
     } catch (err) {
         console.error('Asset verification failed:', err);
         // Return defaults on error
