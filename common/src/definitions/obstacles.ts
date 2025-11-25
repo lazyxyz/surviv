@@ -954,7 +954,10 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 hideOnMap: true,
                 hasLoot: true,
                 spawnMode: MapObjectSpawnMode.GrassAndSand,
-                hitbox: RectangleHitbox.fromRect(11.2, 16),
+                hitbox: new GroupHitbox(
+                    RectangleHitbox.fromRect(4, 14),
+                    new CircleHitbox(3.5, Vec.create(0, -2.5)),
+                ),
                 rotationMode: RotationMode.Limited,
                 allowFlyover: FlyoverPref.Always,
                 frames: {
@@ -977,7 +980,10 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 spawnMode: MapObjectSpawnMode.GrassAndSand,
                 hideOnMap: true,
                 hasLoot: true,
-                hitbox: RectangleHitbox.fromRect(9, 16),
+                hitbox: new GroupHitbox(
+                    RectangleHitbox.fromRect(4, 14),
+                    new CircleHitbox(3.5, Vec.create(0, -2.5)),
+                ),
                 rotationMode: RotationMode.Limited,
                 allowFlyover: FlyoverPref.Never,
                 frames: {
@@ -1016,7 +1022,8 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     destroy: 0.5
                 },
                 hitbox: new CircleHitbox(4),
-                spawnHitbox: new CircleHitbox(4.5),
+                noCollisions: true,
+                spawnHitbox: new CircleHitbox(3),
                 rotationMode: RotationMode.Full,
                 frames: { particle: "skeleton_bone_particle", residue: "skeleton_bone_residue" }
             },
@@ -1032,7 +1039,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 spawnHitbox: new CircleHitbox(8.5),
                 spawnMode: MapObjectSpawnMode.GrassAndSand,
                 rotationMode: RotationMode.Full,
-                hitbox: new CircleHitbox(3.5),
+                hitbox: new CircleHitbox(3),
                 frames: {
                     particle: "spooky_oak_tree_particle",
                     residue: "spooky_oak_tree_residue"
@@ -1050,7 +1057,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 spawnHitbox: new CircleHitbox(8.5),
                 spawnMode: MapObjectSpawnMode.GrassAndSand,
                 rotationMode: RotationMode.Full,
-                hitbox: new CircleHitbox(3.5),
+                hitbox: new CircleHitbox(4),
                 frames: {
                     particle: "mutant_oak_tree_particle",
                     residue: "mutant_oak_tree_residue"
@@ -1068,7 +1075,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 spawnHitbox: new CircleHitbox(8.5),
                 spawnMode: MapObjectSpawnMode.GrassAndSand,
                 rotationMode: RotationMode.Full,
-                hitbox: new CircleHitbox(3.5),
+                hitbox: new CircleHitbox(4.6),
                 frames: {
                     particle: "skull_oak_tree_particle",
                     residue: "skull_oak_tree_residue"
@@ -1122,7 +1129,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 1,
                     destroy: 0.5
                 },
-                hitbox: new CircleHitbox(5.4),
+                hitbox: new CircleHitbox(5),
                 spawnHitbox: new CircleHitbox(6),
                 rotationMode: RotationMode.Full,
                 frames: { particle: "bull_skeleton_particle", residue: "bull_skeleton_residue" }
@@ -1137,12 +1144,9 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 1,
                     destroy: 0.5
                 },
-                // hitbox: new CircleHitbox(6),
-                // spawnHitbox: new CircleHitbox(6.5),
-                // RectangleHitbox.fromRect(14, 9),
                 hitbox: new GroupHitbox(
                     new CircleHitbox(3.6, Vec.create(-3.8, -1.35)),
-                    new CircleHitbox(4.5, Vec.create(2.1, 0.5)),
+                    new CircleHitbox(4, Vec.create(2.1, 0.8)),
                 ),
                 spawnHitbox: RectangleHitbox.fromRect(16, 12),
                 rotationMode: RotationMode.None,
@@ -1158,9 +1162,9 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 1,
                     destroy: 0.5
                 },
-                hitbox: new CircleHitbox(10),
+                hitbox: RectangleHitbox.fromRect(12, 17.8),
                 spawnHitbox: new CircleHitbox(10.2),
-                rotationMode: RotationMode.Full,
+                rotationMode: RotationMode.Limited,
                 frames: { particle: "bull_skeleton_particle", residue: "mammoth_skeleton_residue" }
             },
             {
@@ -1392,7 +1396,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 },
                 spawnHitbox: new CircleHitbox(8.5),
                 rotationMode: RotationMode.Full,
-                hitbox: new CircleHitbox(3.5),
+                hitbox: new CircleHitbox(2.6),
                 variations: 6
             }]),
 
@@ -1406,7 +1410,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 },
                 spawnHitbox: new CircleHitbox(8.5),
                 rotationMode: RotationMode.Full,
-                hitbox: new CircleHitbox(3.5),
+                hitbox: new CircleHitbox(2.4),
                 variations: 3,
                 zIndex: ZIndexes.ObstaclesLayer4,
                 frames: {
@@ -1441,7 +1445,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                 },
                 spawnHitbox: new CircleHitbox(20),
                 rotationMode: RotationMode.Full,
-                hitbox: new CircleHitbox(5.5),
+                hitbox: new CircleHitbox(4),
                 variations: 3,
                 allowFlyOver: FlyoverPref.Never
             }]),
@@ -1468,7 +1472,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 1.1,
                     destroy: 0.75
                 },
-                hitbox: new CircleHitbox(3.5),
+                hitbox: new CircleHitbox(2.5),
                 spawnHitbox: new CircleHitbox(8.5),
                 rotationMode: RotationMode.Full,
                 variations: 2,
@@ -2395,7 +2399,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
                     spawnMax: 1,
                     destroy: 0.75
                 },
-                hitbox: new CircleHitbox(5.5),
+                hitbox: new CircleHitbox(3),
                 spawnHitbox: new CircleHitbox(15),
                 rotationMode: RotationMode.Full,
                 zIndex: ZIndexes.ObstaclesLayer4,
