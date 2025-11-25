@@ -175,6 +175,11 @@ const Variations: VehicleVariantConfig[] = [
         idString: "jeep_rust",
         name: "Jeep Rust",
     },
+    {
+        base: "jeep",
+        idString: "jeep_pirate",
+        name: "Jeep Pirate",
+    },
 
     // --- BUGGIES ---
     {
