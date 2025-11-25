@@ -51,9 +51,11 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly hitSoundVariations?: number
 }
 
+export const DEFAULT_VEHICLES: string[] = ["rover", "buggy"];
+
 // BASE STATS
 const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" | "name">> = {
-    jeep: {
+    rover: {
         scale: 1,
         rotationMode: RotationMode.Limited,
         hitbox: new GroupHitbox(
@@ -164,21 +166,26 @@ interface VehicleVariantConfig {
 }
 
 const Variations: VehicleVariantConfig[] = [
-    // --- JEEPS ---
+    // --- ROVERS ---
     {
-        base: "jeep",
-        idString: "jeep",
-        name: "Jeep",
+        base: "rover",
+        idString: "rover",
+        name: "Rover",
     },
     {
-        base: "jeep",
-        idString: "jeep_rust",
-        name: "Jeep Rust",
+        base: "rover",
+        idString: "rover_rust",
+        name: "Rover Rust",
     },
     {
-        base: "jeep",
-        idString: "jeep_pirate",
-        name: "Jeep Pirate",
+        base: "rover",
+        idString: "rover_captain",
+        name: "Rover Captain",
+    },
+    {
+        base: "rover",
+        idString: "rover_reaper",
+        name: "Rover Reaper",
     },
 
     // --- BUGGIES ---

@@ -51,7 +51,7 @@ export class Gamer extends Player {
         };
         super(game, actorData, position, layer, team);
         this.socket = socket;
-        this.vehicleVariations = [Vehicles.fromString('jeep_rust')];
+        this.vehicleVariations = [Vehicles.fromString('rover_rust')];
     }
 
     sendData(buffer: ArrayBuffer): void {

@@ -382,7 +382,7 @@ const maps = {
         ],
         vehicles: {
             buggy: 5,
-            jeep: 5,
+            rover: 5,
         }
     },
 
@@ -520,7 +520,7 @@ const maps = {
         ],
         vehicles: {
             buggy: 5,
-            jeep: 5,
+            rover: 5,
         }
     },
 
@@ -630,7 +630,7 @@ const maps = {
         ],
         vehicles: {
             buggy: 5,
-            jeep: 5,
+            rover: 5,
         }
     },
 

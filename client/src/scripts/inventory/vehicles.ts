@@ -1,9 +1,11 @@
+// inventory/vehicles.ts
 import $ from "jquery";
 import { Account } from "../account";
 import { GAME_CONSOLE } from "../..";
-import { AssetTier } from "@common/blockchain";
-import { Vehicles } from "@common/definitions/vehicle";
+import { AssetTier, SurvivAssets } from "@common/blockchain";
 import { ZIndexes } from "@common/constants";
+import { SurvivAssetBalances } from ".";
+import { DEFAULT_VEHICLES, Vehicles, type VehicleDefinition } from "@common/definitions/vehicle";
 
 // Constants for repeated strings
 const ASSET_PATH = "./img/game/shared";
@@ -63,9 +65,7 @@ const appendPreview = (images: Array<{
   return asideElement;
 };
 
-const showViewBox = () => {
-  const vehicleId = localStorage.getItem("selectedVehicle");
-
+const showViewBox = (vehicleId: string, isOwned: boolean) => {
   const currentSkin = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
   const vehicle = Vehicles.definitions.find((w) => w.idString === vehicleId);
   if (!vehicle) {
@@ -96,7 +96,7 @@ const showViewBox = () => {
       url: `${ASSET_PATH}/skins/${currentSkin}_base.svg`,
       x: baseX,
       y: baseY,
-      zIndex: ZIndexes.Players,
+      zIndex: ZIndexes.InVehicle,
       rotate: 0,
       scale: 0.7,
     },
@@ -105,7 +105,7 @@ const showViewBox = () => {
       url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
       x: baseX + fistXOffset,
       y: baseY + fistYOffset,
-      zIndex: ZIndexes.Players,
+      zIndex: ZIndexes.InVehicle,
       rotate: 0,
       scale: 0.7,
     },
@@ -114,7 +114,7 @@ const showViewBox = () => {
       url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
       x: baseX + fistXOffset,
       y: baseY - fistYOffset,
-      zIndex: ZIndexes.Players,
+      zIndex: ZIndexes.InVehicle,
       rotate: 0,
       scale: 0.7,
     },
@@ -146,9 +146,24 @@ const showViewBox = () => {
 
   // Append assets and set viewBox
   appendPreview(assets, $(".vehicles-container-aside-preview")).attr("viewBox", VIEWBOX);
-}
 
-// Function to select a vehicle
+  // Update vehicle info panel
+  $("#vehicle-info").html(`
+    <div class="vehicle-title">${vehicle.name}${isOwned? ' <span class="weapon-title-state">(Locked)</span>' : ''}</div>
+    <div class="row-stats">
+      <div class="row-section">
+        <p class="stat-type">Health:</p>
+        <span class="stat-value">${vehicle.health ?? "N/A"}</span>
+      </div>
+      <div class="row-section">
+        <p class="stat-type">Max Speed:</p>
+        <span class="stat-value">${vehicle.maxSpeed ?? "N/A"}</span>
+      </div>
+    </div>
+  `);
+};
+
+// Function to select a vehicle (only for owned)
 const selectVehicle = (vehicleId: string) => {
   // Store the selected vehicle
   selectVehiclePreset(vehicleId);
@@ -157,32 +172,8 @@ const selectVehicle = (vehicleId: string) => {
   localStorage.setItem("selectedVehicle", vehicleId);
 
   // Add "selected" class to the vehicle element
-  $(`.vehicles-container-card`).removeClass("selected");
+  $(".vehicles-container-card").removeClass("selected");
   $(`#vehicles-list-${vehicleId}`).addClass("selected");
-
-  // Find the vehicle definition
-  const vehicle = Vehicles.definitions.find((w) => w.idString === vehicleId);
-  if (!vehicle) {
-    console.warn(`Vehicle not found: ${vehicleId}`);
-    return;
-  }
-
-  // Update vehicle info panel
-  $("#vehicle-info").html(`
-     <div class="vehicle-title">${vehicle.name}</div>
-    <div class="row-stats">
-      <div class="row-section">
-              <p class="stat-type">Health:</p>
-              <span class="stat-value">${vehicle.health ?? "N/A"}</span>
-      </div>
-      <div class="row-section">
-              <p class="stat-type">Max Speed:</p>
-              <span class="stat-value">${vehicle.maxSpeed ?? "N/A"}</span>
-      </div>
-      </div>
-  `);
-
-  showViewBox();
 };
 
 // Utility to check if a vehicle is owned
@@ -191,7 +182,7 @@ function isOwned(id: string, ownedIds: string[]) {
 }
 
 // Function to render mini preview for list cards
-const renderMiniPreview = (vehicle: any, container: JQuery<Partial<HTMLElement>>) => {
+const renderMiniPreview = (vehicle: VehicleDefinition, container: JQuery<Partial<HTMLElement>>) => {
   const vehicleScale = 0.5;
   const wheelScale = 1.1 * vehicleScale;
 
@@ -228,18 +219,37 @@ const renderMiniPreview = (vehicle: any, container: JQuery<Partial<HTMLElement>>
   appendPreview(assets, container).attr("viewBox", VIEWBOX);
 };
 
-// Function to display vehicles
+// Function to display vehicles list
 async function showVehiclesList(account: Account, selectedVehicleId?: string) {
   if (!account.address) {
     return;
   }
 
   try {
+    let userVehicleBalance: [string, number][] = DEFAULT_VEHICLES.map(
+      (vehicle) => [vehicle, 1] as [string, number]
+    );
+
+    for (const tier of Object.values(AssetTier).filter(val => typeof val === 'number') as AssetTier[]) {
+      const vehiclesInTier = Object.entries(SurvivAssetBalances[SurvivAssets.Vehicles][tier] || {});
+      userVehicleBalance.push(...vehiclesInTier);
+    }
+    const userVehicles = userVehicleBalance
+      .filter(([_, balance]) => balance > 0)
+      .map(([id]) => id);
+
+    // All vehicles
     const allVehicles = Vehicles.definitions;
-    // Hardcode show all as owned for testing
-    const userVehicles = allVehicles.map((vehicle) => vehicle.idString);
-    const ownedVehicles = allVehicles;
-    const unownedVehicles = [];
+
+    // Inactive vehicles (not owned by the user)
+    const inactiveVehicles = allVehicles
+      .filter(vehicle => !userVehicles.includes(vehicle.idString));
+
+    // Sort vehicles: owned first, then inactive
+    const sortedVehicles = [
+      ...allVehicles.filter(vehicle => userVehicles.includes(vehicle.idString)),
+      ...inactiveVehicles
+    ];
 
     // Map tiers to background images
     const tierBackgrounds: Record<AssetTier, string> = {
@@ -248,21 +258,31 @@ async function showVehiclesList(account: Account, selectedVehicleId?: string) {
       [AssetTier.Divine]: `${ASSET_PATH}/patterns/divine.svg`
     };
 
-    // Render vehicle items (all as owned, default to Silver tier)
+    // Render vehicle items
     const $vehicleList = $("#list-vehicle").empty();
 
-    for (const vehicle of ownedVehicles) {
+    for (const vehicle of sortedVehicles) {
       const { idString, name } = vehicle;
-      // Hardcode tier to Silver for testing
-      const tier = AssetTier.Silver;
-      const backgroundImage = tierBackgrounds[tier];
+      const owned = isOwned(idString, userVehicles);
+
+      // Determine the tier of the vehicle
+      let tier: AssetTier | undefined;
+      for (const t of Object.values(AssetTier).filter(val => typeof val === 'number') as AssetTier[]) {
+        if (Object.keys(SurvivAssetBalances[SurvivAssets.Vehicles][t] || {}).includes(idString)) {
+          tier = t;
+          break;
+        }
+      }
+
+      // Default to Silver if tier not found (e.g., for inactive vehicles)
+      const backgroundImage = tier !== undefined ? tierBackgrounds[tier] : tierBackgrounds[AssetTier.Silver];
 
       const cardHtml = `
-        <div class="vehicles-container-card"
+        <div class="vehicles-container-card${owned ? "" : " inactive"}"
              id="vehicles-list-${idString}" data-id="${idString}">
-             <div class="vehicles-tier-background" style="background-image: url('${backgroundImage}')">
-               <svg class="vehicles-mini-preview" width="98px" height="56px"></svg>
-             </div>
+          <div class="vehicles-tier-background" style="background-image: url('${backgroundImage}')">
+            <svg class="vehicles-mini-preview" width="98px" height="56px"></svg>
+          </div>
           <p class="vehicles-container-paragraph">${name}</p>
         </div>
       `;
@@ -273,8 +293,6 @@ async function showVehiclesList(account: Account, selectedVehicleId?: string) {
       const $miniPreview = $(`#vehicles-list-${idString} .vehicles-mini-preview`);
       renderMiniPreview(vehicle, $miniPreview);
     }
-
-    // No unowned for testing
 
     // Reapply selected class if provided
     if (selectedVehicleId && $(`#vehicles-list-${selectedVehicleId}`).length) {
@@ -316,24 +334,34 @@ export async function showVehicles(account: Account, highlightId?: string): Prom
   // Load vehicle list
   await showVehiclesList(account, vehiclePreset);
 
-  showViewBox();
+  let userVehicleBalance: [string, number][] = DEFAULT_VEHICLES.map(
+    (vehicle) => [vehicle, 1] as [string, number]
+  );
+
+  for (const tier of Object.values(AssetTier).filter(val => typeof val === 'number') as AssetTier[]) {
+    const vehiclesInTier = Object.entries(SurvivAssetBalances[SurvivAssets.Vehicles][tier] || {});
+    userVehicleBalance.push(...vehiclesInTier);
+  }
+  const userVehicles = userVehicleBalance
+    .filter(([_, balance]) => balance > 0)
+    .map(([id]) => id);
 
   $container.off("click", ".vehicles-container-card").on("click", ".vehicles-container-card", function () {
     const id = $(this).data("id");
+    const owned = isOwned(id, userVehicles);
 
-    // Remove all selected classes first
-    $(".vehicles-container-card").removeClass("selected");
-
-    $(this).addClass("selected");
-    selectVehiclePreset(id);
-    selectVehicle(id);
+    if (owned) {
+      selectVehicle(id);
+    }
+    // Always show preview, even if not owned
+    showViewBox(id, owned);
   });
 
   // Load selected vehicle from dv_vehicle_preset
   if (!highlightId) {
     if (vehiclePreset && $(`#vehicles-list-${vehiclePreset}`).length) {
       $(`#vehicles-list-${vehiclePreset}`).addClass("selected");
-      selectVehicle(vehiclePreset);
+      showViewBox(vehiclePreset, true); // Assuming preset is owned
     }
   }
 
@@ -341,9 +369,13 @@ export async function showVehicles(account: Account, highlightId?: string): Prom
   if (highlightId) {
     const $item = $(`#vehicles-list-${highlightId}`);
     if ($item.length) {
-      $item.addClass("selected");
-      selectVehiclePreset(highlightId);
-      selectVehicle(highlightId);
+      const owned = isOwned(highlightId, userVehicles);
+      if (owned) {
+        $item.addClass("selected");
+        selectVehiclePreset(highlightId);
+        selectVehicle(highlightId);
+      }
+      showViewBox(highlightId, owned);
     }
   }
 }

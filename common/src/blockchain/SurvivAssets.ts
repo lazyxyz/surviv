@@ -227,6 +227,14 @@ export const assetsMapping = {
       "usas12",
       "vector",
       "vks"
+    ],
+    [
+      "buggy_rust",
+      "buggy_captain",
+      "buggy_reaper",
+      "rover_rust",
+      "rover_captain",
+      "rover_reaper",
     ]
   ]
 };
