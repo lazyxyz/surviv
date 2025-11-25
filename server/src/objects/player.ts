@@ -37,7 +37,7 @@ import { CommunicationHandler } from "./player/communicationHandler";
 import { DamageHandler } from "./player/damageHandler";
 import { UpdateManager } from "./player/updateManager";
 import { Vehicle } from "./vehicle";
-import { SeatType } from "@common/definitions/vehicle";
+import { SeatType, VehicleDefinition, Vehicles } from "@common/definitions/vehicles";
 
 
 export interface ActorContainer {
@@ -404,6 +404,14 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     readonly DEFAULT_WEAPON = new MeleeItem("fists", this);
 
+    private _vehicleVariants:  Array<VehicleDefinition>;
+    set vehicleVariants(variants: VehicleDefinition[]) {
+        this._vehicleVariants = variants;
+    }
+    get vehicleVariants(): Array<VehicleDefinition> { return this._vehicleVariants; }
+
+
+
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team) {
         super(game, position);
 
@@ -457,6 +465,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             this.inventory.scope = DEFAULT_SCOPE.idString;
         }
         this.effectiveScope = DEFAULT_SCOPE;
+        this._vehicleVariants = [];
     }
 
     spawnPos(position: Vector): void {

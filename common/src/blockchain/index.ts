@@ -6,7 +6,8 @@ export enum SurvivAssets {
     Skins,
     Emotes,
     Arms,
-    Guns
+    Guns,
+    Vehicles
 }
 
 export enum AssetTier {
@@ -28,5 +29,8 @@ export const SurvivAssetRanges: Record<SurvivAssets, { mappingIndices: number[] 
     },
     [SurvivAssets.Guns]: {
         mappingIndices: [7, 8] // GoldGuns, DivineGuns
-    }
+    },
+    [SurvivAssets.Vehicles]: {
+        mappingIndices: [9] // Divine Vehicles
+    },
 };

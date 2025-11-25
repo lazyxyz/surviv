@@ -1139,7 +1139,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     override updateZIndex(): void {
         let zIndex;
         if (this.inVehicle) {
-            zIndex = ZIndexes.InVehicle;
+            zIndex = ZIndexes.Players;
         } else {
             zIndex = FloorTypes[this.floorType].overlay
                 ? this.downed

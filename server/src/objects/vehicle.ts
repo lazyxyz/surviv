@@ -6,7 +6,7 @@ import { SDeepMutable } from "@common/utils/misc";
 import { FullData } from "@common/utils/objectsSerializations";
 import { Vec, Vector } from "@common/utils/vector";
 import { Game } from "../game";
-import { SeatType, VehicleDefinition } from "@common/definitions/vehicle";
+import { SeatType, VehicleDefinition } from "@common/definitions/vehicles";
 import { InventoryItem } from "../inventory/inventoryItem";
 import { Player } from "./player";
 import { Numeric } from "@common/utils/math";
@@ -145,7 +145,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
                 // Change Variation Skin
                 if (this.definition.idString == this.definition.base) {
-                    const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
+                    const matches = player.vehicleVariants.filter(v => v && v.base === this.definition.base);
                     if (matches.length > 0) {
                         const lastFound = matches[matches.length - 1];
 
@@ -154,10 +154,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                             name: lastFound.name
                         };
 
-                        const indexToRemove = player.vehicleVariations.indexOf(lastFound);
+                        const indexToRemove = player.vehicleVariants.indexOf(lastFound);
 
                         if (indexToRemove > -1) {
-                            player.vehicleVariations.splice(indexToRemove, 1);
+                            player.vehicleVariants.splice(indexToRemove, 1);
                         }
                     }
                 };

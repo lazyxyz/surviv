@@ -98,6 +98,9 @@ export class PlayerManager {
             if (assets.skin) player.loadout.skin = assets.skin;
             if (assets.melee) player.inventory.weapons[2] = new MeleeItem(assets.melee, player);
             if (assets.gun) player.inventory.weapons[0] = new GunItem(assets.gun, player);
+
+            // Vehicles
+            player.vehicleVariants = assets.vehicles;
         }
         this.game.livingPlayers.add(player);
         this.game.spectatablePlayers.push(player);

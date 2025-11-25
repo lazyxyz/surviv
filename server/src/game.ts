@@ -46,7 +46,7 @@ import { PlayerManager } from "./game/playerManager";
 import { BotManager } from "./game/botManager";
 import { ConnectionManager } from "./game/connectionManager";
 import { SpawnManager } from "./game/spawnManager";
-import { VehicleDefinition } from "@common/definitions/vehicle";
+import { VehicleDefinition } from "@common/definitions/vehicles";
 import { Vehicle } from "./objects/vehicle";
 import { DungeonPacketData, DungeonPacket } from "@common/packets/dungeonPackage";
 

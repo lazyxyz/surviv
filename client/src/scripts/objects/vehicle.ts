@@ -1,6 +1,6 @@
 // server/src/scripts/objects/vehicle.ts
 import { Layer, ObjectCategory, VEHICLE_NETDATA, ZIndexes } from "@common/constants";
-import { type VehicleDefinition } from "@common/definitions/vehicle";
+import { type VehicleDefinition } from "@common/definitions/vehicles";
 import { getEffectiveZIndex } from "@common/utils/layer";
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { type ObjectsNetData } from "@common/utils/objectsSerializations";

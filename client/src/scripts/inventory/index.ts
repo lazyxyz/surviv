@@ -54,14 +54,19 @@ export let SurvivAssetBalances: Record<SurvivAssets, Record<AssetTier, Record<st
         [AssetTier.Silver]: {},
         [AssetTier.Gold]: {},
         [AssetTier.Divine]: {}
-    }
+    },
+    [SurvivAssets.Vehicles]: {
+        [AssetTier.Silver]: {},
+        [AssetTier.Gold]: {},
+        [AssetTier.Divine]: {}
+    },
 };
 
 export async function showInventory(account: Account) {
     $("#btn-customize").on('click', async () => {
         try {
             account.getAssetBalances().then(balances => {
-                SurvivAssetBalances =balances;
+                SurvivAssetBalances = balances;
             });
         } catch (errr) {
             warningAlert("Please connect your wallet to continue!", 3000);
@@ -80,7 +85,7 @@ export async function showInventory(account: Account) {
     $('#tab-weapons').on('click', async () => {
         await showWeapons(account);
     })
-   
+
     $('#tab-vehicles').on('click', async () => {
         await showVehicles(account);
     })

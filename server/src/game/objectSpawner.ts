@@ -19,7 +19,7 @@ import { SyncedParticle } from "../objects/syncedParticle";
 import { ThrowableProjectile } from "../objects/throwableProj";
 import { Config } from "../config";
 import { Obstacle } from "../objects/obstacle";
-import { VehicleDefinition } from "@common/definitions/vehicle";
+import { VehicleDefinition } from "@common/definitions/vehicles";
 import { Vehicle } from "../objects/vehicle";
 import { ObstacleDefinition } from "@common/definitions/obstacles";
 

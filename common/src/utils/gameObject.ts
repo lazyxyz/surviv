@@ -5,7 +5,7 @@ import { type LootDefinition } from "../definitions/loots";
 import { type ObstacleDefinition } from "../definitions/obstacles";
 import { type SyncedParticleDefinition } from "../definitions/syncedParticles";
 import { type ThrowableDefinition } from "../definitions/throwables";
-import { VehicleDefinition } from "../definitions/vehicle";
+import { VehicleDefinition } from "../definitions/vehicles";
 import { type Orientation } from "../typings";
 import { type CircleHitbox } from "./hitbox";
 import { type AbstractConstructor, type Constructor, type GetEnumMemberName } from "./misc";

@@ -51,19 +51,21 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly hitSoundVariations?: number
 }
 
+export const DEFAULT_VEHICLES: string[] = ["rover", "buggy"];
+
 // BASE STATS
 const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" | "name">> = {
-    jeep: {
+    rover: {
         scale: 1,
         rotationMode: RotationMode.Limited,
         hitbox: new GroupHitbox(
-            new CircleHitbox(8, Vec.create(9.2, 0)),
-            new CircleHitbox(7.8, Vec.create(0, 0)),
-            new CircleHitbox(8.4, Vec.create(-9.2, 0)),
+            new CircleHitbox(7.8, Vec.create(9, 0)),
+            new CircleHitbox(7.6, Vec.create(0, 0)),
+            new CircleHitbox(7.8, Vec.create(-9, 0)),
 
             // front hood
-            new CircleHitbox(4, Vec.create(12, -5)),
-            new CircleHitbox(4, Vec.create(12, 5)),
+            new CircleHitbox(4, Vec.create(12.2, -5)),
+            new CircleHitbox(4, Vec.create(12.2, 5)),
         ),
         bulletHitbox: new GroupHitbox(
             new CircleHitbox(7, Vec.create(7.4, 0)),
@@ -164,21 +166,26 @@ interface VehicleVariantConfig {
 }
 
 const Variations: VehicleVariantConfig[] = [
-    // --- JEEPS ---
+    // --- ROVERS ---
     {
-        base: "jeep",
-        idString: "jeep",
-        name: "Jeep",
+        base: "rover",
+        idString: "rover",
+        name: "Rover",
     },
     {
-        base: "jeep",
-        idString: "jeep_rust",
-        name: "Jeep Rust",
+        base: "rover",
+        idString: "rover_rust",
+        name: "Rover Rust",
     },
     {
-        base: "jeep",
-        idString: "jeep_pirate",
-        name: "Jeep Pirate",
+        base: "rover",
+        idString: "rover_captain",
+        name: "Rover Captain",
+    },
+    {
+        base: "rover",
+        idString: "rover_reaper",
+        name: "Rover Reaper",
     },
 
     // --- BUGGIES ---
@@ -187,6 +194,22 @@ const Variations: VehicleVariantConfig[] = [
         idString: "buggy",
         name: "Buggy",
     },
+     {
+        base: "buggy",
+        idString: "buggy_rust",
+        name: "Buggy Rust",
+    },
+    {
+        base: "buggy",
+        idString: "buggy_captain",
+        name: "Buggy Captain",
+    },
+    {
+        base: "buggy",
+        idString: "buggy_reaper",
+        name: "Buggy Reaper",
+    },
+
 ];
 
 export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(
