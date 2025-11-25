@@ -47,6 +47,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     floor = FloorNames.Water;
     private minMoveSpeed = 0.02;
 
+    private _driver: Player | undefined;
+    set driver(driver: Player | undefined) { this._driver = driver; }
+    get driver(): Player | undefined { return this._driver };
+
     customSkin?: {
         idString: string;
         name: string;
@@ -96,9 +100,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         const seatIndex = this.occupants.indexOf(player);
         if (seatIndex !== -1) {
             // Exit seat
-            const seatOffset = this.definition.seats[seatIndex].offset;
+            const seat = this.definition.seats[seatIndex];
+            const seatOffset = seat.offset;
             const rotatedSeatOffset = Vec.rotate(seatOffset, this.rotation);
-            const exitOffset = Vec.rotate(this.definition.seats[seatIndex].exitOffset, this.rotation); // Use definition's exitOffset (rotated)
+            const exitOffset = Vec.rotate(seat.exitOffset, this.rotation); // Use definition's exitOffset (rotated)
             player.position = Vec.add(this.position, Vec.add(rotatedSeatOffset, exitOffset));
 
             // Damage player if vehicle is moving fast
@@ -115,6 +120,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             player.seatIndex = undefined;
             this.occupants[seatIndex] = undefined;
             player.inventory.unlockAllSlots();
+
+            if (seat.type == SeatType.Driver) {
+                this.driver = undefined;
+            }
         } else {
             // Enter available seat (prefer driver if empty, else first available)
             this._start = true;
@@ -131,28 +140,31 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 this.updateOccupantPosition(player, availableSeat);
             }
 
-            // if (availableSeat == SeatType.Driver) {
-            //     if (this.definition.idString == this.definition.base) {
-            //         const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
-            //         if (matches.length > 0) {
-            //             const lastFound = matches[matches.length - 1];
+            if (availableSeat == SeatType.Driver) {
+                this.driver = player;
 
-            //             this.customSkin = {
-            //                 idString: lastFound.idString,
-            //                 name: lastFound.name
-            //             };
+                // Change Variation Skin
+                if (this.definition.idString == this.definition.base) {
+                    const matches = player.vehicleVariations.filter(v => v && v.base === this.definition.base);
+                    if (matches.length > 0) {
+                        const lastFound = matches[matches.length - 1];
 
-            //             const indexToRemove = player.vehicleVariations.indexOf(lastFound);
+                        this.customSkin = {
+                            idString: lastFound.idString,
+                            name: lastFound.name
+                        };
 
-            //             if (indexToRemove > -1) {
-            //                 player.vehicleVariations.splice(indexToRemove, 1);
-            //             }
-            //         }
-            //     };
-            // }
+                        const indexToRemove = player.vehicleVariations.indexOf(lastFound);
+
+                        if (indexToRemove > -1) {
+                            player.vehicleVariations.splice(indexToRemove, 1);
+                        }
+                    }
+                };
+            }
         }
-        this.setDirty();
         player.setDirty();
+        this.setDirty();
     }
 
     switchToNextEmptySeat(player: Player): void {
@@ -234,23 +246,22 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 const impactVel = Vec.dotProduct(this.velocity, normal); // Component along normal (negative if approaching)
                 if (impactVel > 0.005) { // Approaching (threshold; note sign convention assuming dir points out)
                     let materialFactor = 1.0;
-                    let inverseMaterialFactor = 1.0; // For obstacle damage (soft = high damage to obstacle)
                     if (isRunOver) {
                         const damageToPlayer = Math.abs(impactVel) * this.baseDamage * 10;
+
                         potential.damage({
                             amount: damageToPlayer,
-                            source: this,
+                            source: this.driver,
                             weaponUsed: undefined,
                         });
                         return true;
                     } else if (potentialMaterial) {
                         materialFactor = materialMultipliers[potentialMaterial] ?? 1.0;
-                        inverseMaterialFactor = 1 / materialFactor; // Higher for soft
                     }
 
-                    const damageToVehicle = (Math.abs(impactVel) * 100) * this.baseDamage * materialFactor; // Align with speed^2
+                    const damageToVehicle = (Math.abs(impactVel) * 50) * this.baseDamage * materialFactor; // Align with speed^2
                     this.damage({
-                        amount: Math.min(damageToVehicle, this.health * 0.1),
+                        amount: damageToVehicle,
                         source: potential,
                         weaponUsed: undefined,
                     });
@@ -261,16 +272,15 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                         if (occupant) {
                             occupant.damage({
                                 amount: playerDamage,
-                                source: potential,
+                                source: potential.isVehicle ? potential.driver : potential,
                                 weaponUsed: undefined,
                             });
                         }
                     }
 
-                    const damageToObstacle = (Math.abs(impactVel) * 100) * this.baseDamage * inverseMaterialFactor; // Higher for soft
                     potential.damage({
-                        amount: damageToObstacle,
-                        source: this,
+                        amount: damageToVehicle,
+                        source: this.driver,
                         weaponUsed: undefined,
                     });
 
@@ -521,7 +531,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             this.collidable = false;
             const weaponIsItem = weaponUsed instanceof InventoryItem;
             if (definition.explosion !== undefined && source instanceof BaseGameObject) {
-                this.game.addExplosion(definition.explosion, this.position, source, source.layer, weaponIsItem ? weaponUsed : weaponUsed?.weapon, 5);
+                this.game.addExplosion(definition.explosion, this.position, source,
+                    source.layer, weaponIsItem ? weaponUsed : weaponUsed?.weapon, 5);
             }
 
             // Eject all occupants

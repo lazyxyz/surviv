@@ -180,6 +180,7 @@ export class DamageHandler {
 
 
     die(params: Omit<DamageParams, "amount">): void {
+        console.log("DIE: ", params);
         if (this.player.health > 0 || this.player.dead) return;
 
         this.player.game.pluginManager.emit("player_will_die", {
