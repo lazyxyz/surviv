@@ -5,7 +5,7 @@ import { GAME_CONSOLE } from "../..";
 import { AssetTier, SurvivAssets } from "@common/blockchain";
 import { ZIndexes } from "@common/constants";
 import { SurvivAssetBalances } from ".";
-import { DEFAULT_VEHICLES, Vehicles, type VehicleDefinition } from "@common/definitions/vehicle";
+import { DEFAULT_VEHICLES, Vehicles, type VehicleDefinition } from "@common/definitions/vehicles";
 
 // Constants for repeated strings
 const ASSET_PATH = "./img/game/shared";
@@ -96,7 +96,7 @@ const showViewBox = (vehicleId: string, isOwned: boolean) => {
       url: `${ASSET_PATH}/skins/${currentSkin}_base.svg`,
       x: baseX,
       y: baseY,
-      zIndex: ZIndexes.InVehicle,
+      zIndex: ZIndexes.Players,
       rotate: 0,
       scale: 0.7,
     },
@@ -105,7 +105,7 @@ const showViewBox = (vehicleId: string, isOwned: boolean) => {
       url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
       x: baseX + fistXOffset,
       y: baseY + fistYOffset,
-      zIndex: ZIndexes.InVehicle,
+      zIndex: ZIndexes.Players,
       rotate: 0,
       scale: 0.7,
     },
@@ -114,7 +114,7 @@ const showViewBox = (vehicleId: string, isOwned: boolean) => {
       url: `${ASSET_PATH}/skins/${currentSkin}_fist.svg`,
       x: baseX + fistXOffset,
       y: baseY - fistYOffset,
-      zIndex: ZIndexes.InVehicle,
+      zIndex: ZIndexes.Players,
       rotate: 0,
       scale: 0.7,
     },

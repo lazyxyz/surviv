@@ -20,7 +20,7 @@ import { type Game } from "./game";
 import { Building } from "./objects/building";
 import { Obstacle } from "./objects/obstacle";
 import { CARDINAL_DIRECTIONS, Logger, getRandomIDString } from "./utils/misc";
-import { VehicleDefinition, Vehicles } from "@common/definitions/vehicle";
+import { VehicleDefinition, Vehicles } from "@common/definitions/vehicles";
 import { Vehicle } from "./objects/vehicle";
 
 export class GameMap {

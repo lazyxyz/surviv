@@ -37,7 +37,7 @@ import { CommunicationHandler } from "./player/communicationHandler";
 import { DamageHandler } from "./player/damageHandler";
 import { UpdateManager } from "./player/updateManager";
 import { Vehicle } from "./vehicle";
-import { SeatType, VehicleDefinition, Vehicles } from "@common/definitions/vehicle";
+import { SeatType, VehicleDefinition, Vehicles } from "@common/definitions/vehicles";
 
 
 export interface ActorContainer {

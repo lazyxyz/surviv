@@ -9,7 +9,7 @@ import { type Player } from "../player";  // Adjust import
 import { ItemType } from "@common/utils/objectDefinitions";
 import { GunItem } from "../../inventory/gunItem";
 import { Vehicle } from "../vehicle";
-import { SeatType } from "@common/definitions/vehicle";
+import { SeatType } from "@common/definitions/vehicles";
 
 // Driver-specific allowed actions
 const driverAllowed = new Set([

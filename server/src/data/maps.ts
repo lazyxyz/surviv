@@ -14,7 +14,7 @@ import { getLootFromTable, LootTables } from "./lootTables";
 import { Perks } from "@common/definitions/perks";
 import { Melees } from "@common/definitions/melees";
 import { Scopes } from "@common/definitions/scopes";
-import { VehicleDefinition, Vehicles } from "@common/definitions/vehicle";
+import { VehicleDefinition, Vehicles } from "@common/definitions/vehicles";
 
 export interface RiverDefinition {
     readonly minAmount: number

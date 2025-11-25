@@ -9,7 +9,7 @@ import { Obstacles, RotationMode, type ObstacleDefinition } from "../definitions
 import { Skins, type SkinDefinition } from "../definitions/skins";
 import { SyncedParticles, type SyncedParticleDefinition } from "../definitions/syncedParticles";
 import { type ThrowableDefinition } from "../definitions/throwables";
-import { VehicleDefinition, Vehicles } from "../definitions/vehicle";
+import { VehicleDefinition, Vehicles } from "../definitions/vehicles";
 import { type Orientation, type Variation } from "../typings";
 import { Angle, halfπ } from "./math";
 import { type Mutable, type SDeepMutable } from "./misc";

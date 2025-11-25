@@ -6,7 +6,7 @@ import { SDeepMutable } from "@common/utils/misc";
 import { FullData } from "@common/utils/objectsSerializations";
 import { Vec, Vector } from "@common/utils/vector";
 import { Game } from "../game";
-import { SeatType, VehicleDefinition } from "@common/definitions/vehicle";
+import { SeatType, VehicleDefinition } from "@common/definitions/vehicles";
 import { InventoryItem } from "../inventory/inventoryItem";
 import { Player } from "./player";
 import { Numeric } from "@common/utils/math";

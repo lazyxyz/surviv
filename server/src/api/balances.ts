@@ -6,8 +6,7 @@ import { EmoteDefinition, Emotes } from '@common/definitions/emotes';
 import { GunDefinition, Guns } from '@common/definitions/guns';
 import { MeleeDefinition, Melees } from '@common/definitions/melees';
 import { SkinDefinition, Skins, DEFAULT_SKIN } from '@common/definitions/skins';
-import { Blockchain, getSurvivAddress } from '@common/blockchain/contracts';
-import { VehicleDefinition, Vehicles } from '@common/definitions/vehicle';
+import { VehicleDefinition, Vehicles } from '@common/definitions/vehicles';
 
 interface Mapping {
     address: string;
@@ -257,7 +256,6 @@ export async function verifyAllAssets(
             ...(Vehicles.definitions.map(vehicle => ({ type: 'vehicles', value: vehicle.idString || '' }))),
         ];
 
-        console.log("allItems: ", allItems);
         // Prepare items for SurvivAssetsMapping
         const items = allItems.map(item => item.value);
         const itemTypes = allItems.map(item => item.type);

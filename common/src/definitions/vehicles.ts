@@ -59,13 +59,13 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         scale: 1,
         rotationMode: RotationMode.Limited,
         hitbox: new GroupHitbox(
-            new CircleHitbox(8, Vec.create(9.2, 0)),
-            new CircleHitbox(7.8, Vec.create(0, 0)),
-            new CircleHitbox(8.4, Vec.create(-9.2, 0)),
+            new CircleHitbox(7.8, Vec.create(9, 0)),
+            new CircleHitbox(7.6, Vec.create(0, 0)),
+            new CircleHitbox(7.8, Vec.create(-9, 0)),
 
             // front hood
-            new CircleHitbox(4, Vec.create(12, -5)),
-            new CircleHitbox(4, Vec.create(12, 5)),
+            new CircleHitbox(4, Vec.create(12.2, -5)),
+            new CircleHitbox(4, Vec.create(12.2, 5)),
         ),
         bulletHitbox: new GroupHitbox(
             new CircleHitbox(7, Vec.create(7.4, 0)),
