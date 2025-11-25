@@ -466,7 +466,6 @@ const maps = {
             river_chest: 1,
             river_rock: 45,
             bush: 110,
-            // birthday_cake: 100, // birthday mode
             blueberry_bush: 30,
             barrel_winter: 80,
             viking_chest: 1,
@@ -818,6 +817,18 @@ const maps = {
                     itemPos.y += 10;
                 }
             }
+
+            // // Generate all vehicles
+            // const itemPos = Vec.create(map.width / 2, map.height / 2);
+            // for (const item of Loots.definitions) {
+            //     map.game.addLoot(item, itemPos, 0, { count: Infinity, pushVel: 0, jitterSpawn: false });
+
+            //     itemPos.x += 10;
+            //     if (itemPos.x > map.width / 2 + 100) {
+            //         itemPos.x = map.width / 2;
+            //         itemPos.y += 10;
+            //     }
+            // }
         },
         places: [
             { name: "[object Object]", position: Vec.create(0.8, 0.7) },
@@ -942,6 +953,7 @@ const maps = {
             { name: "stark is pro", position: Vec.create(0.5, 0.5) }
         ]
     },
+
     singleBuilding: {
         width: 1024,
         height: 1024,
@@ -955,6 +967,7 @@ const maps = {
             map.generateBuilding(building, Vec.create(this.width / 2, this.height / 2), 0);
         }
     },
+
     singleObstacle: {
         width: 256,
         height: 256,
@@ -964,6 +977,7 @@ const maps = {
             map.generateObstacle(obstacle, Vec.create(this.width / 2, this.height / 2), { layer: 0, rotation: 0 });
         }
     },
+
     singleGun: {
         width: 256,
         height: 256,
@@ -1033,20 +1047,32 @@ const maps = {
         };
     })(),
 
+    obstaclesTest: (() => {
+        return {
+            width: 240,
+            height: 240,
+            beachSize: 0,
+            oceanSize: 0,
+            onGenerate(mapGen) {
+                const map = mapGen.game.gameMap;
+                const config = maps[map]; // Or change to maps.fall for the fall map
+                const obstacleTypes = Object.keys(config.obstacles);
 
-    obstaclesTest: {
-        width: 128,
-        height: 128,
-        beachSize: 0,
-        oceanSize: 0,
-        onGenerate(map, [obstacle]) {
-            for (let x = 0; x <= 128; x += 16) {
-                for (let y = 0; y <= 128; y += 16) {
-                    map.generateObstacle(obstacle, Vec.create(x, y));
+                let index = 0;
+                for (let x = 32; x <= 240; x += 32) {
+                    for (let y = 32; y <= 240; y += 32) {
+                        if (index >= obstacleTypes.length) break;
+                        const obstacle = obstacleTypes[index];
+                        console.log("obstacle: ", obstacle);
+                        mapGen.generateObstacle(obstacle, Vec.create(x, y));
+                        index++;
+                    }
+                    if (index >= obstacleTypes.length) break;
                 }
             }
-        }
-    },
+        };
+    })(),
+
     playersTest: {
         width: 256,
         height: 256,
