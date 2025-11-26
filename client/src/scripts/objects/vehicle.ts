@@ -105,6 +105,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.position = data.position;
         this.rotation = data.rotation;
 
+        console.log(" data.speed: ",  data.speed);
         this.speed = data.speed / VEHICLE_NETDATA.SPEED_SCALE;
         this.slip = data.slip / VEHICLE_NETDATA.SLIP_SCALE;
         this.throttle = data.throttle / VEHICLE_NETDATA.THROTTLE_SCALE;

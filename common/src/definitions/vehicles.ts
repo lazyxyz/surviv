@@ -79,11 +79,11 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         explosion: "super_barrel_explosion",
         spawnMode: MapObjectSpawnMode.Trail,
         zIndex: ZIndexes.Vehicles,
-        maxSpeed: 0.08,
-        acceleration: 4000, // 4s to reach full speed
+        maxSpeed: 0.077,
+        acceleration: 6000, // 6s to reach full speed
         maxSteerAngle: Math.PI / 5,
         steerRate: Math.PI * 0.7,
-        drag: 0.0005,
+        drag: 0.5,
 
         frictionFactor: 0.75,
         wheelType: 'basic_wheel',
@@ -134,11 +134,11 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         spawnMode: MapObjectSpawnMode.Trail,
         zIndex: ZIndexes.Vehicles,
 
-        maxSpeed: 0.085,
-        acceleration: 3000, // 3s
+        maxSpeed: 0.083,
+        acceleration: 4000, // 4s
         maxSteerAngle: Math.PI / 6,
         steerRate: Math.PI * 1.0,
-        drag: 0.00045,
+        drag: 0.45,
         frictionFactor: 0.6,
         baseDamage: 20,
         hitSoundVariations: 2,

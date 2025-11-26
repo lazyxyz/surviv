@@ -989,8 +989,8 @@ const maps = {
 
     gunsTest: (() => {
         return {
-            width: 240,
-            height: 240,
+            width: 300,
+            height: 300,
             beachSize: 8,
             oceanSize: 8,
             onGenerate(map) {

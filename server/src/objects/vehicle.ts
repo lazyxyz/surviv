@@ -32,7 +32,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private _start = false;
 
     private currentThrottle: number = 0;
-    // private definition: VehicleDefinition;
 
     // Vehicle physics state
     private velocity: Vector = Vec.create(0, 0); // Vector velocity for realistic direction/momentum
@@ -356,17 +355,22 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     }
 
     private applyAcceleration(dt: number, inputForward: number): void {
-        // Accelerate along forward (or reverse)
         const forwardDir = Vec.fromPolar(this.rotation);
-        const accel = dt / (this.definition.acceleration * 5);
+
+        const timeToMax = this.definition.acceleration / 1000; // time in seconds
+        const dragPerS = this.definition.drag; // adjust drag to per second (since dt is ms)
+        const a = this.definition.maxSpeed * dragPerS / (1 - Math.exp(-dragPerS * timeToMax)); // effective acceleration rate per second
+        const accel = a * (dt / 1000); // per tick increment
+
         const accelVec = Vec.scale(forwardDir, inputForward * accel);
         this.velocity = Vec.add(this.velocity, accelVec);
     }
 
     private applyDrag(dt: number): void {
+        const dts = dt / 1000; // seconds
         // Drag (proportional to velocity)
         const drag = this.definition.drag;
-        const dragFactor = Math.exp(-drag * dt);
+        const dragFactor = Math.exp(-drag * dts);
         this.velocity = Vec.scale(this.velocity, dragFactor);
 
         const forwardDir = Vec.fromPolar(this.rotation);
@@ -549,6 +553,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override get data(): FullData<ObjectCategory.Vehicle> {
         // Compute fresh values (velocity is up-to-date post-update())
         const speed = Vec.length(this.velocity);
+
         let slip = 0;
         if (speed > 0.001) {
             const forwardDir = Vec.fromPolar(this.rotation);
