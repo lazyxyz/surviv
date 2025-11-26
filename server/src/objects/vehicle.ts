@@ -144,7 +144,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 this.driver = player;
 
                 // Change Variation Skin
-                if (this.definition.idString == this.definition.base) {
+                if (!this.customSkin) {
                     const matches = player.vehicleVariants.filter(v => v && v.base === this.definition.base);
                     if (matches.length > 0) {
                         const lastFound = matches[matches.length - 1];
@@ -241,7 +241,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             this.game.grid.updateObject(potential);
 
             const speed = Vec.squaredLength(this.velocity);
-            if (speed > 0.003) { // Threshold: only apply effects if fast enough
+            if (speed > 0.0025) { // Threshold: only apply effects if fast enough
                 const normal = Vec.normalizeSafe(adjust); // Direction of push (from obstacle to vehicle)
                 const impactVel = Vec.dotProduct(this.velocity, normal); // Component along normal (negative if approaching)
                 if (impactVel > 0.005) { // Approaching (threshold; note sign convention assuming dir points out)

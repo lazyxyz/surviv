@@ -60,8 +60,8 @@ export class Gamer extends Player {
     override kill(source: Player) {
         if (!source.isBot()
             && source instanceof Gamer
-            // && source.address !== this.address
-            // && source.ip !== this.ip
+            && source.address !== this.address
+            && source.ip !== this.ip
         ) {
             if (source.rewardsBoost > 0) {
                 this._bounties++;

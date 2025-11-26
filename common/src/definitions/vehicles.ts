@@ -73,7 +73,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
             new CircleHitbox(2.6, Vec.create(3.2, 5.2)),
         ),
         spawnHitbox: new CircleHitbox(18),
-        health: 1000,
+        health: 1092,
         reflectBullets: true,
         material: Materials[5],
         explosion: "super_barrel_explosion",
@@ -82,7 +82,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         maxSpeed: 0.08,
         acceleration: 4000, // 4s to reach full speed
         maxSteerAngle: Math.PI / 5,
-        steerRate: Math.PI * 0.8,
+        steerRate: Math.PI * 0.7,
         drag: 0.0005,
 
         frictionFactor: 0.75,
@@ -108,18 +108,18 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         scale: 1,
         rotationMode: RotationMode.Limited,
         hitbox: new GroupHitbox(
-            new CircleHitbox(3.2, Vec.create(10, 0)),
+            new CircleHitbox(3.2, Vec.create(11, 0)),
             new CircleHitbox(3.8, Vec.create(4.6, 0)),
             new CircleHitbox(4.6, Vec.create(0, 0)),
             new CircleHitbox(3.4, Vec.create(-9, 0)),
 
             // Front Wheels
-            new CircleHitbox(2.4, Vec.create(11.2, -4.4)),
-            new CircleHitbox(2.4, Vec.create(11.2, 4.4)),
+            new CircleHitbox(2.5, Vec.create(11.2, -4.6)),
+            new CircleHitbox(2.5, Vec.create(11.2, 4.6)),
 
             // Back Wheels
-            new CircleHitbox(3, Vec.create(-8.2, -5.2)),
-            new CircleHitbox(3, Vec.create(-8.2, 5.2)),
+            new CircleHitbox(3, Vec.create(-8.2, -4.8)),
+            new CircleHitbox(3, Vec.create(-8.2, 4.8)),
 
         ),
         bulletHitbox: new GroupHitbox(
@@ -127,25 +127,25 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
             new CircleHitbox(3.4, Vec.create(-4.6, 0)),
         ),
         spawnHitbox: new CircleHitbox(14),
-        health: 600,
+        health: 765,
         reflectBullets: true,
         material: Materials[5],
         explosion: "super_barrel_explosion",
         spawnMode: MapObjectSpawnMode.Trail,
         zIndex: ZIndexes.Vehicles,
 
-        maxSpeed: 0.07,
+        maxSpeed: 0.085,
         acceleration: 3000, // 3s
-        maxSteerAngle: Math.PI / 7,
-        steerRate: Math.PI / 2,
+        maxSteerAngle: Math.PI / 6,
+        steerRate: Math.PI * 1.0,
         drag: 0.00045,
-        frictionFactor: 0.5,
+        frictionFactor: 0.6,
         baseDamage: 20,
         hitSoundVariations: 2,
         wheelType: 'basic_wheel',
         wheels: [
-            { offset: Vec.create(230, -118), scale: 0.8, zIndex: ZIndexes.Vehicles },
-            { offset: Vec.create(230, 118), scale: 0.8, zIndex: ZIndexes.Vehicles },
+            { offset: Vec.create(230, -118), scale: 0.9, zIndex: ZIndexes.Vehicles },
+            { offset: Vec.create(230, 118), scale: 0.9, zIndex: ZIndexes.Vehicles },
             { offset: Vec.create(-164, -136), scale: 1.0, zIndex: ZIndexes.Vehicles },
             { offset: Vec.create(-164, 136), scale: 1.0, zIndex: ZIndexes.Vehicles }
         ],
@@ -194,7 +194,7 @@ const Variations: VehicleVariantConfig[] = [
         idString: "buggy",
         name: "Buggy",
     },
-     {
+    {
         base: "buggy",
         idString: "buggy_rust",
         name: "Buggy Rust",

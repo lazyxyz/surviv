@@ -15,7 +15,7 @@ import { PingPacket } from "@common/packets/pingPacket";
 import { UpdatePacket, type UpdatePacketDataOut } from "@common/packets/updatePacket";
 import { CircleHitbox } from "@common/utils/hitbox";
 import { adjacentOrEqualLayer } from "@common/utils/layer";
-import { EaseFunctions, Geometry } from "@common/utils/math";
+import { EaseFunctions, Geometry, Numeric } from "@common/utils/math";
 import { Timeout } from "@common/utils/misc";
 import { ItemType, ObstacleSpecialRoles } from "@common/utils/objectDefinitions";
 import { ObjectPool } from "@common/utils/objectPool";
@@ -1202,6 +1202,14 @@ export class Game {
                     }
                 } else if (isBuilding) {
                     object.toggleCeiling();
+                } else if (isObstacle && object.definition.material == "tree") {
+                    const {
+                        minDist = 48,
+                        maxDist = 729,
+                        trunkMinAlpha = 0.8,
+                    } = {};
+                    const dist = Geometry.distanceSquared(object.position, player.position);
+                    object.image.alpha = Numeric.remap(dist, minDist, maxDist, trunkMinAlpha, 1);
                 }
             }
 
