@@ -44,6 +44,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     private skidSound?: GameSound;
     private brakeSound?: GameSound;
     private shiftSound?: GameSound;
+    private crashSound?: GameSound;
 
     private hitSound?: GameSound;
 
@@ -51,7 +52,9 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
     // For gear shift detection
     private lastCheckTime: number = Date.now();
+
     private lastSpeed: number = 0;
+    private playCrashSound: boolean = false;
 
     private wheelFrame: boolean = false;
     private distSinceLastWheelAnim: number = 0;
@@ -105,7 +108,6 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         this.position = data.position;
         this.rotation = data.rotation;
 
-        console.log(" data.speed: ",  data.speed);
         this.speed = data.speed / VEHICLE_NETDATA.SPEED_SCALE;
         this.slip = data.slip / VEHICLE_NETDATA.SLIP_SCALE;
         this.throttle = data.throttle / VEHICLE_NETDATA.THROTTLE_SCALE;
@@ -117,9 +119,25 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             this.container.rotation = this.rotation;
         }
 
+        if (data.playCrashSound) {
+            this.playCrashSound = true;
+        }
     }
 
     private updateSounds(): void {
+        const now = Date.now();
+        if (this.playCrashSound && (!this.crashSound || this.crashSound.ended)) {
+            this.crashSound = this.playSound(`vehicle_crash`, {
+                falloff: 0.8,
+                maxRange: 80,
+                layer: this.layer,
+                dynamic: true,
+                ambient: false,
+                onEnd: () => { this.crashSound = undefined; }
+            });
+            this.playCrashSound = false;
+        }
+
         if (this.dead || !this.hasDriver) {
             this.stopAllVehicleSounds();
             return;
@@ -191,8 +209,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         }
 
         // Gear shift "pump" sound based on speed increase over time
-        const now = Date.now();
-        if (now - this.lastCheckTime >= 3000) { // Check every 3 seconds
+        if (now - this.lastCheckTime >= 2000) { // Check every 2 seconds
             if (this.lastSpeed > 0) { // Avoid divide by zero
                 const percentIncrease = ((this.speed - this.lastSpeed) / this.lastSpeed) * 100;
                 if (percentIncrease > 20 && this.throttle > 0) { // e.g., >20% increase and accelerating
@@ -213,6 +230,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         if (this.skidSound) this.skidSound.position = this.position;
         if (this.brakeSound) this.brakeSound.position = this.position;
         if (this.shiftSound) this.shiftSound.position = this.position;
+        if (this.crashSound) this.crashSound.position = this.position;
     }
 
     private playShiftSound(): void {
@@ -230,10 +248,11 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     }
 
     private stopAllVehicleSounds(): void {
-        [this.engineSound, this.skidSound, this.brakeSound, this.shiftSound, this.hitSound, this.wheelstepSound].forEach(sound => {
+        [this.engineSound, this.skidSound, this.brakeSound, this.shiftSound,
+        this.hitSound, this.wheelstepSound, this.crashSound].forEach(sound => {
             sound?.stop();
         });
-        this.engineSound = this.skidSound = this.brakeSound = this.shiftSound = this.hitSound = this.wheelstepSound = undefined;
+        this.engineSound = this.skidSound = this.brakeSound = this.shiftSound = this.hitSound = this.wheelstepSound = this.crashSound = undefined;
     }
 
     /**

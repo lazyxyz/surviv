@@ -78,7 +78,7 @@ export const Maps: Record<MAP, ModeDefinition> = {
             void: "hsl(25, 80%, 6%)"
         },
         ambience: "wind_ambience",
-        defaultScope: "8x_scope",
+        defaultScope: "2x_scope",
         reskin: "fall",
         // particleEffects: {
         //     frames: ["leaf_particle_1", "leaf_particle_2", "leaf_particle_3"],

@@ -18,8 +18,8 @@ import { Gamer } from "./gamer";
 import { MeleeItem } from "../inventory/meleeItem";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
-    override readonly fullAllocBytes = 20;
-    override readonly partialAllocBytes = 14;
+    override readonly fullAllocBytes = 10;
+    override readonly partialAllocBytes = 15;
 
     declare hitbox: Hitbox;
     declare bulletHitbox: Hitbox;
@@ -30,6 +30,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private _height = 1;
     health: number;
     private _start = false;
+
+    private _playCrashSound = false;
 
     private currentThrottle: number = 0;
 
@@ -302,6 +304,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
                     // Overall speed loss
                     this.velocity = Vec.scale(this.velocity, speedLossFactor);
+                    this._playCrashSound = true;
                     return true;
                 }
             } else if (!potential.isPlayer) {
@@ -527,7 +530,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         }
         this.health -= amount;
         this.setPartialDirty();
-
         const notDead = this.health > 0 && !this.dead;
         if (!notDead) {
             this.health = 0;
@@ -571,6 +573,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             slip: Math.min(255, Math.round(slip * VEHICLE_NETDATA.SLIP_SCALE)),
             throttle: Math.max(-128, Math.min(127, Math.round(this.currentThrottle * VEHICLE_NETDATA.THROTTLE_SCALE))),
             health: Math.round(this.health / VEHICLE_NETDATA.HEALTH_SCALE),
+            playCrashSound: this._playCrashSound,
 
             full: {
                 definition: {
@@ -583,6 +586,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 hasDriver: this.occupants[SeatType.Driver] !== undefined,
             }
         };
+
+        if (this._playCrashSound) this._playCrashSound = false; // 
         return data;
     }
 }
