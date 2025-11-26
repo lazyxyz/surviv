@@ -989,8 +989,8 @@ const maps = {
 
     gunsTest: (() => {
         return {
-            width: 240,
-            height: 240,
+            width: 300,
+            height: 300,
             beachSize: 8,
             oceanSize: 8,
             onGenerate(map) {
@@ -1040,7 +1040,7 @@ const maps = {
 
                 itemPos.x = 0;
                 itemPos.y += rowSpacing;
-                map.game.objectSpawner.addObstacle(Obstacles.fromString('regular_crate'), Vec.create(itemPos.x + 30, itemPos.y));
+                map.game.objectSpawner.addObstacle(Obstacles.fromString('blueberry_bush'), Vec.create(itemPos.x + 30, itemPos.y));
             }
         };
     })(),

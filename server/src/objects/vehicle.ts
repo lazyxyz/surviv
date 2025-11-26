@@ -18,8 +18,8 @@ import { Gamer } from "./gamer";
 import { MeleeItem } from "../inventory/meleeItem";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
-    override readonly fullAllocBytes = 20;
-    override readonly partialAllocBytes = 14;
+    override readonly fullAllocBytes = 10;
+    override readonly partialAllocBytes = 15;
 
     declare hitbox: Hitbox;
     declare bulletHitbox: Hitbox;
@@ -31,8 +31,9 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     health: number;
     private _start = false;
 
+    private _playCrashSound = false;
+
     private currentThrottle: number = 0;
-    // private definition: VehicleDefinition;
 
     // Vehicle physics state
     private velocity: Vector = Vec.create(0, 0); // Vector velocity for realistic direction/momentum
@@ -303,6 +304,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
                     // Overall speed loss
                     this.velocity = Vec.scale(this.velocity, speedLossFactor);
+                    this._playCrashSound = true;
                     return true;
                 }
             } else if (!potential.isPlayer) {
@@ -356,17 +358,22 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     }
 
     private applyAcceleration(dt: number, inputForward: number): void {
-        // Accelerate along forward (or reverse)
         const forwardDir = Vec.fromPolar(this.rotation);
-        const accel = dt / (this.definition.acceleration * 5);
+
+        const timeToMax = this.definition.acceleration / 1000; // time in seconds
+        const dragPerS = this.definition.drag; // adjust drag to per second (since dt is ms)
+        const a = this.definition.maxSpeed * dragPerS / (1 - Math.exp(-dragPerS * timeToMax)); // effective acceleration rate per second
+        const accel = a * (dt / 1000); // per tick increment
+
         const accelVec = Vec.scale(forwardDir, inputForward * accel);
         this.velocity = Vec.add(this.velocity, accelVec);
     }
 
     private applyDrag(dt: number): void {
+        const dts = dt / 1000; // seconds
         // Drag (proportional to velocity)
         const drag = this.definition.drag;
-        const dragFactor = Math.exp(-drag * dt);
+        const dragFactor = Math.exp(-drag * dts);
         this.velocity = Vec.scale(this.velocity, dragFactor);
 
         const forwardDir = Vec.fromPolar(this.rotation);
@@ -523,7 +530,6 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         }
         this.health -= amount;
         this.setPartialDirty();
-
         const notDead = this.health > 0 && !this.dead;
         if (!notDead) {
             this.health = 0;
@@ -549,6 +555,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     override get data(): FullData<ObjectCategory.Vehicle> {
         // Compute fresh values (velocity is up-to-date post-update())
         const speed = Vec.length(this.velocity);
+
         let slip = 0;
         if (speed > 0.001) {
             const forwardDir = Vec.fromPolar(this.rotation);
@@ -566,6 +573,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             slip: Math.min(255, Math.round(slip * VEHICLE_NETDATA.SLIP_SCALE)),
             throttle: Math.max(-128, Math.min(127, Math.round(this.currentThrottle * VEHICLE_NETDATA.THROTTLE_SCALE))),
             health: Math.round(this.health / VEHICLE_NETDATA.HEALTH_SCALE),
+            playCrashSound: this._playCrashSound,
 
             full: {
                 definition: {
@@ -578,6 +586,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 hasDriver: this.occupants[SeatType.Driver] !== undefined,
             }
         };
+
+        if (this._playCrashSound) this._playCrashSound = false; // 
         return data;
     }
 }
