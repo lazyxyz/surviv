@@ -512,3 +512,4 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         // });
     }
 }
+
