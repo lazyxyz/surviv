@@ -60,6 +60,18 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     private distSinceLastWheelAnim: number = 0;
     private wheelAnimDistanceThreshold: number = 1;
 
+    // Optimization: Old values for change detection
+    private oldPosition: Vector = Vec.create(-Infinity, -Infinity);
+    private oldRotation: number = Infinity;
+    private oldLayer: Layer = -1 as Layer;
+    private oldFloorType: FloorNames = FloorNames.Water;
+    private oldSpeed = -1;
+    private oldThrottle = -1;
+    private oldSlip = -1;
+    private oldHasDriver = false;
+    private oldSteeringAngle = Infinity;
+    private oldHealth = -1;
+
     constructor(game: Game, id: number, data: ObjectsNetData[ObjectCategory.Vehicle]) {
         super(game, id);
         this.container.sortableChildren = true;
@@ -69,20 +81,65 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     }
 
     override updateFromData(data: ObjectsNetData[ObjectCategory.Vehicle], isNew = false): void {
-        const oldPosition = Vec.clone(this.position);
-        this.updateFloorType();
         this.updatePartial(data, isNew);
         this.updateDefinitionAndState(data);
-        this.updateHitboxes();
-        this.updateWheelRotations(data);
-        if (!isNew) {
-            this.handleMovementEffects(oldPosition);
+
+        const positionChanged = !Vec.equals(this.position, this.oldPosition);
+        const rotationChanged = this.rotation !== this.oldRotation;
+        const layerChanged = this.layer !== this.oldLayer;
+        const speedChanged = this.speed !== this.oldSpeed;
+        const throttleChanged = this.throttle !== this.oldThrottle;
+        const slipChanged = this.slip !== this.oldSlip;
+        const hasDriverChanged = this.hasDriver !== this.oldHasDriver;
+        const healthChanged = this.health !== this.oldHealth;
+
+        if (positionChanged || layerChanged || isNew) {
+            this.updateFloorType();
+        }
+
+        if (positionChanged || rotationChanged || isNew) {
+            this.updateHitboxes();
+        }
+
+        const steeringAngle = data.steeringAngle / VEHICLE_NETDATA.STEERING_SCALE;
+        if (steeringAngle !== this.oldSteeringAngle) {
+            this.updateWheelRotations(data);
+            this.oldSteeringAngle = steeringAngle;
+        }
+
+        if (positionChanged || speedChanged) {
+            this.handleMovementEffects(this.oldPosition);
+        }
+
+        if (!isNew && (!this.dead || hasDriverChanged || speedChanged || throttleChanged || slipChanged)) {
             this.updateSounds();
         }
-        this.updateZIndex();
-        this.updateDebugGraphics();
 
-        const inVehicle = this.game.activePlayer?.inVehicle ?? false;
+        if (this.floorType !== this.oldFloorType || layerChanged || isNew) {
+            this.updateZIndex();
+        }
+
+        if (HITBOX_DEBUG_MODE && (positionChanged || rotationChanged || layerChanged)) {
+            this.updateDebugGraphics();
+        }
+
+        if (this.game.activePlayer?.inVehicle && (healthChanged || speedChanged)) {
+            this.updateDashboard(true);
+        }
+
+        // Update old values
+        this.oldPosition = Vec.clone(this.position);
+        this.oldRotation = this.rotation;
+        this.oldLayer = this.layer;
+        this.oldFloorType = this.floorType;
+        this.oldSpeed = this.speed;
+        this.oldThrottle = this.throttle;
+        this.oldSlip = this.slip;
+        this.oldHasDriver = this.hasDriver;
+        this.oldHealth = this.health;
+    }
+
+    private updateDashboard(inVehicle: boolean) {
         this.game.uiManager.updateVehicleUI({
             inVehicle,
             health: this.health,
@@ -165,7 +222,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         }
 
         // SKID/DRIFT LOOP (trigger on slip)
-        if (this.slip > 0.04 && this.speed > 0.05) {
+        if (this.slip > 0.04 && this.speed > (this.definition.maxSpeed * 0.7)) {
             if (!this.skidSound || this.skidSound.ended) {
                 this.skidSound = this.playSound(`${this.definition.base}_skid_loop`, {
                     falloff: 0.8,
@@ -188,7 +245,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         }
 
         // BRAKE SQUEAL (optional: hard brake only, blends with skid)
-        if (this.throttle < -0.2 && this.speed > (this.definition.maxSpeed * 0.6)) {
+        if (this.throttle < -0.2 && this.speed > (this.definition.maxSpeed * 0.7)) {
             if (!this.brakeSound || this.brakeSound.ended) {
                 this.brakeSound = this.playSound(`vehicle_brake_loop`, {
                     falloff: 1,
@@ -261,6 +318,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
      */
     private updateDefinitionAndState(data: ObjectsNetData[ObjectCategory.Vehicle]): void {
         if (data.full?.definition) {
+            console.log("FULL!");
             this.layer = data.full.layer;
             this.definition = data.full.definition;
             const wheelConfig = this.definition.wheels;
@@ -277,6 +335,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             }
 
             this.updateTexture();
+            this.updateDashboard(this.hasDriver);
         }
     }
 
@@ -512,3 +571,4 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         // });
     }
 }
+
