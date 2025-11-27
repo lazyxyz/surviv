@@ -1,6 +1,5 @@
 import { type PlayerInputData } from "@common/packets/inputPacket";
 import { InputActions, PlayerActions } from "@common/constants";
-import { Numeric } from "@common/utils/math";
 import { CircleHitbox } from "@common/utils/hitbox";
 import { Geometry } from "@common/utils/math";
 import { adjacentOrEqualLayer } from "@common/utils/layer";
@@ -9,6 +8,27 @@ import { type Obstacle } from "../obstacle";
 import { type Player } from "../player";  // Adjust import
 import { ItemType } from "@common/utils/objectDefinitions";
 import { GunItem } from "../../inventory/gunItem";
+import { Vehicle } from "../vehicle";
+import { SeatType } from "@common/definitions/vehicles";
+
+// Driver-specific allowed actions
+const driverAllowed = new Set([
+    InputActions.DropWeapon,
+    InputActions.DropItem,
+    InputActions.SwapGunSlots,
+    InputActions.LockSlot,
+    InputActions.UnlockSlot,
+    InputActions.ToggleSlotLock,
+    InputActions.Emote,
+    InputActions.MapPing,
+    InputActions.Interact,     // but ONLY vehicle interact
+]);
+
+// Passenger cannot loot/interact world objects
+const passengerDenied = new Set([
+    InputActions.Loot,
+    InputActions.Interact       // except vehicle interact
+]);
 
 export class InputHandler {
     constructor(private player: Player) { }
@@ -22,12 +42,16 @@ export class InputHandler {
         const wasAttacking = this.player.attacking;
         const isAttacking = packet.attacking;
 
-        this.player.attacking = isAttacking;
-        this.player.startedAttacking ||= !wasAttacking && isAttacking;
+        const isInVehicle = this.player.inVehicle !== undefined;
+        const isDriver = isInVehicle && this.player.seatIndex === SeatType.Driver;
+
+        if (!isDriver) this.player.attacking = isAttacking;
+        if (!isDriver) this.player.startedAttacking ||= !wasAttacking && isAttacking;
         this.player.stoppedAttacking ||= wasAttacking && !isAttacking;
 
+
         if (this.player.turning = packet.turning) {
-            this.player.rotation = packet.rotation;
+            if (!isDriver) this.player.rotation = packet.rotation;
             this.player.distanceToMouse = (packet as typeof packet).distanceToMouse ?? 0;
             /*
                 we put ?? cause even though the packet's isMobile should match the server's, it might
@@ -39,6 +63,25 @@ export class InputHandler {
 
         const inventory = this.player.inventory;
         for (const action of packet.actions) {
+            // === VEHICLE RESTRICTIONS ===
+            if (isInVehicle) {
+                if (isDriver) {
+                    if (!driverAllowed.has(action.type)) continue;
+                } else {
+                    // Passenger: deny loot & world interact
+                    if (passengerDenied.has(action.type)) {
+                        // allowed only if interacting with vehicle
+                        if (action.type !== InputActions.Interact) continue;
+                    }
+                }
+
+                // If interact action → force vehicle interact
+                if (action.type === InputActions.Interact) {
+                    this.player.inVehicle?.interact(this.player);
+                    continue; // do not run your normal interact/loot code
+                }
+            }
+
             const type = action.type;
 
             switch (type) {
@@ -75,7 +118,8 @@ export class InputHandler {
                     break;
                 }
                 case InputActions.SwapGunSlots: {
-                    inventory.swapGunSlots();
+                    if (this.player.inVehicle) this.player.inVehicle.switchToNextEmptySeat(this.player)
+                    else inventory.swapGunSlots();
                     break;
                 }
                 case InputActions.LockSlot: {
@@ -96,7 +140,7 @@ export class InputHandler {
                 case InputActions.Loot:
                 case InputActions.Interact: {
                     interface CloseObject {
-                        object: Obstacle | Player | Loot | undefined
+                        object: Obstacle | Player | Loot | Vehicle | undefined
                         dist: number
                     }
 
@@ -112,8 +156,8 @@ export class InputHandler {
                     const nearObjects = this.player.game.grid.intersectsHitbox(detectionHitbox);
 
                     for (const object of nearObjects) {
-                        const { isLoot, isObstacle, isPlayer } = object;
-                        const isInteractable = (isLoot || isObstacle || isPlayer) && object.canInteract(this.player) === true;
+                        const { isLoot, isObstacle, isPlayer, isVehicle } = object;
+                        const isInteractable = (isLoot || isObstacle || isPlayer || isVehicle) && object.canInteract(this.player) === true;
 
                         if (
                             (isLoot || (type === InputActions.Interact && isInteractable))

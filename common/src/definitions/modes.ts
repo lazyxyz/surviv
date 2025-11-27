@@ -24,6 +24,7 @@ export interface ModeDefinition {
     readonly specialPlayButtons?: boolean
     // icons for the mode
     readonly modeLogoImage?: string | { solo: string, squads: string }
+    readonly frictionFactor?: number
 }
 
 export type MAP = "normal" | "fall" | "winter" | "desert" | "cursedIsland";
@@ -79,10 +80,10 @@ export const Maps: Record<MAP, ModeDefinition> = {
         ambience: "wind_ambience",
         defaultScope: "2x_scope",
         reskin: "fall",
-        particleEffects: {
-            frames: ["leaf_particle_1", "leaf_particle_2", "leaf_particle_3"],
-            delay: 1000
-        },
+        // particleEffects: {
+        //     frames: ["leaf_particle_1", "leaf_particle_2", "leaf_particle_3"],
+        //     delay: 1000
+        // },
         specialPlayButtons: true,
         // Icons
         modeLogoImage: {
@@ -98,7 +99,7 @@ export const Maps: Record<MAP, ModeDefinition> = {
             border: "hsl(208, 94%, 45%)",
             beach: "hsl(210, 18%, 75%)",
             riverBank: "hsl(210, 18%, 70%)",
-            trail: "hsl(35, 50%, 40%)",
+            trail: "hsla(35, 36%, 79%, 1.00)",
             gas: "hsla(17, 100%, 50%, 0.55)",
             void: "hsl(25, 80%, 6%)"
         },
@@ -110,13 +111,14 @@ export const Maps: Record<MAP, ModeDefinition> = {
         ambience: "snowstorm",
         inheritTexturesFrom: "normal",
         bulletTrailAdjust: "hsl(0, 50%, 80%)",
-        particleEffects: {
-            frames: ["snow_particle"],
-            delay: 800,
-            gravity: true
-        },
+        // particleEffects: {
+        //     frames: ["snow_particle"],
+        //     delay: 800,
+        //     gravity: true
+        // },
         specialPlayButtons: true,
-        modeLogoImage: "./img/game/winter/obstacles/red_gift.svg"
+        modeLogoImage: "./img/game/winter/obstacles/red_gift.svg",
+        frictionFactor: 0.5 
     },
     desert: {
         idString: "desert",
@@ -134,16 +136,17 @@ export const Maps: Record<MAP, ModeDefinition> = {
         inheritTexturesFrom: "fall",
         defaultScope: "2x_scope",
         reskin: "desert",
-        particleEffects: {
-            frames: ["weed_1", "weed_2"],
-            delay: 1000,
-        },
+        // particleEffects: {
+        //     frames: ["weed_1", "weed_2"],
+        //     delay: 1000,
+        // },
         specialPlayButtons: true,
         // Icons
         modeLogoImage: {
             solo: "./img/misc/user.svg",
             squads: "./img/misc/user-group.svg"
         },
+        frictionFactor: 0.75
     },
     cursedIsland: {
         idString: "cursedIsland",

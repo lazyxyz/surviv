@@ -1,6 +1,5 @@
 import { ObjectCategory } from "@common/constants";
 import { Obstacles, RevivableMaterialSet, RotationMode, type ObstacleDefinition } from "@common/definitions/obstacles";
-import { PerkIds } from "@common/definitions/perks";
 import { type Orientation, type Variation } from "@common/typings";
 import { CircleHitbox, RectangleHitbox, type Hitbox } from "@common/utils/hitbox";
 import { equalLayer } from "@common/utils/layer";

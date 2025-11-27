@@ -24,20 +24,20 @@ export const Config = {
     v50Port: 9500,
     cursedIslandPort: 9600,
 
-    addBot: true,
-
-    // addBot: false,
-    // testMode: "gunsTest", // For Testing
+    // addBot: true,
+    addBot: false,
+    testMode: "gunsTest", // For Testing
 
     spawn: { mode: SpawnMode.Normal },
 
     maxPlayersPerGame: 100,
 
     maxGames: 20,
-    gameJoinTime: 90,
+    gameJoinTime: 900,
+    // gameJoinTime: 0,
 
-    objectLifetime: 180000, // Remove loot after 3 mins
-    obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
+    // objectLifetime: 180000, // Remove loot after 3 mins
+    // obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
 
     gas: { mode: GasMode.Normal },
 
@@ -52,8 +52,8 @@ export const Config = {
 
     earnConfig: {
         rank: 5,
-        // api: "https://admin.surviv.fun",
-        api: "http://localhost:3001",
+        api: "https://admin.surviv.fun",
+        // api: "http://localhost:3001",
     },
 } satisfies ConfigType as ConfigType;
 

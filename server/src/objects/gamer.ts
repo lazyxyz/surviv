@@ -264,7 +264,7 @@ export class Gamer extends Player {
             won: rank === 1,
             playerID: this.id,
             kills: this.kills,
-            bounties: this.bounties, 
+            bounties: this.bounties,
             damageDone: this.damageDone,
             timeAlive: (this.game.now - this.joinTime) / 1000,
             rank,
@@ -346,5 +346,11 @@ export class Gamer extends Player {
         } catch (err) {
             console.log("Error save game:", err);
         }
+    }
+
+    override exitVehicle(): void {
+        if (this.inVehicle) this.inVehicle.interact(this);
+        this.inVehicle = undefined;
+        this.seatIndex = undefined;
     }
 }

@@ -33,21 +33,6 @@ export class ModifierCalculator {
             newModifiers.hpRegen += modifiers.hpRegen;
         }
 
-        for (const perk of this.player.perks) {
-            switch (perk.idString) {
-                case PerkIds.Berserker: {
-                    if (this.player.activeItem instanceof MeleeItem) {
-                        newModifiers.baseSpeed *= perk.speedMod;
-                    }
-                    break;
-                }
-                case PerkIds.LowProfile: {
-                    newModifiers.size *= perk.sizeMod;
-                    break;
-                }
-            }
-        }
-
         const applyModifiers = (modifiers: WearerAttributes): void => {
             newModifiers.maxHealth *= modifiers.maxHealth ?? 1;
             newModifiers.maxAdrenaline *= modifiers.maxAdrenaline ?? 1;

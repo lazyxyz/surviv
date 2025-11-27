@@ -8,8 +8,8 @@ export const Config = {
             mainAddress: "http://127.0.0.1:8000",
             gameAddress: "ws://127.0.0.1:<ID>",
             teamAddress: "ws://127.0.0.1:8000",
-            // apiAddress: "https://admin.surviv.fun",
-            apiAddress: "http://localhost:3001",
+            apiAddress: "https://admin.surviv.fun",
+            // apiAddress: "http://localhost:3001",
         },
         // as: {
         //     name: "Asia",
@@ -43,9 +43,9 @@ export interface ConfigType {
 
 export const Chains: Record<string, Blockchain> = {
     shannon: Blockchain.Shannon,
-    minato: Blockchain.Minato,
-    somnia: Blockchain.Somnia,
-    soneium: Blockchain.Soneium,
+    // minato: Blockchain.Minato,
+    // somnia: Blockchain.Somnia,
+    // soneium: Blockchain.Soneium,
 } as const;
 
 export interface Region {

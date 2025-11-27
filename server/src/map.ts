@@ -13,13 +13,15 @@ import { MapObjectSpawnMode, NullString, type ReferenceTo, type ReifiableDef } f
 import { SeededRandom, pickRandomInArray, random, randomFloat, randomPointInsideCircle, randomRotation, randomVector } from "@common/utils/random";
 import { Oasis, River, Terrain } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
-import { Config } from "./config";
+import { Config, SpawnMode } from "./config";
 import { getLootFromTable } from "./data/lootTables";
 import { MapDefinition, MapName, Maps, OasisDefinition, ObstacleClump, RiverDefinition } from "./data/maps";
 import { type Game } from "./game";
 import { Building } from "./objects/building";
 import { Obstacle } from "./objects/obstacle";
 import { CARDINAL_DIRECTIONS, Logger, getRandomIDString } from "./utils/misc";
+import { VehicleDefinition, Vehicles } from "@common/definitions/vehicles";
+import { Vehicle } from "./objects/vehicle";
 
 export class GameMap {
     readonly game: Game;
@@ -166,7 +168,10 @@ export class GameMap {
 
         Object.entries(mapDef.obstacles ?? {}).forEach(([obstacle, count]) => this._generateObstacles(obstacle, count));
 
+
         Object.entries(mapDef.loots ?? {}).forEach(([loot, count]) => this._generateLoots(loot, count));
+
+        Object.entries(mapDef.vehicles ?? {}).forEach(([vehicle, count]) => this._generateVehicle(vehicle, count));
 
         mapDef.onGenerate?.(this, [game.gameMap]);
 
@@ -795,6 +800,46 @@ export class GameMap {
         return obstacle;
     }
 
+
+    _generateVehicle(definition: ReifiableDef<VehicleDefinition>, count: number, getPosition?: () => Vector): void {
+        const def = Vehicles.reify(definition);
+
+        const effSpawnHitbox = def.spawnHitbox ?? def.hitbox;
+
+        for (let i = 0; i < count; i++) {
+
+            let position: Vector | undefined;
+            let attempts = 0;
+            const maxAttempts = 200;
+            do {
+                position = this.getRandomPosition(effSpawnHitbox, {
+                    getPosition,
+                    spawnMode: def.spawnMode
+                });
+
+                attempts++;
+            } while (!position && attempts < maxAttempts);
+
+            if (!position) {
+                Logger.warn(`Failed to find valid position for obstacle ${def.idString}`);
+                continue;
+            }
+            const rotation = GameMap.getRandomRotation(RotationMode.Full);
+
+            const vehicle = new Vehicle(
+                this.game,
+                def,
+                Vec.clone(position),
+                undefined,
+                rotation
+            );
+
+            // if (!def.hideOnMap && !def.invisible && obstacle.layer === Layer.Ground) this._packet.objects.push(obstacle);
+            this.game.grid.addObject(vehicle);
+            this.game.updateObjects = true;
+        }
+    }
+
     _generateObstacleClumps(clumpDef: ObstacleClump): void {
         const clumpAmount = clumpDef.clumpAmount;
         const firstObstacle = Obstacles.reify(clumpDef.clump.obstacles[0]);
@@ -880,7 +925,8 @@ export class GameMap {
 
         const collidableObjects = params?.collidableObjects ?? {
             [ObjectCategory.Obstacle]: true,
-            [ObjectCategory.Building]: true
+            [ObjectCategory.Building]: true,
+            [ObjectCategory.Vehicle]: true,
         };
 
         const spawnMode = params?.spawnMode ?? MapObjectSpawnMode.Grass;

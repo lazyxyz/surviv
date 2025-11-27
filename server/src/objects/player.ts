@@ -4,7 +4,7 @@ import { type BadgeDefinition } from "@common/definitions/badges";
 import { Emotes, type EmoteDefinition } from "@common/definitions/emotes";
 import { type GunDefinition } from "@common/definitions/guns";
 import { Loots, type WeaponDefinition } from "@common/definitions/loots";
-import { type MeleeDefinition } from "@common/definitions/melees";
+import { Melees, type MeleeDefinition } from "@common/definitions/melees";
 import { type ObstacleDefinition } from "@common/definitions/obstacles";
 import { Perks, type PerkDefinition, type PerkNames } from "@common/definitions/perks";
 import { DEFAULT_SCOPE, Scopes, type ScopeDefinition } from "@common/definitions/scopes";
@@ -28,7 +28,6 @@ import { ServerPerkManager, UpdatablePerkDefinition } from "../inventory/perkMan
 import { type Team } from "../team";
 import { BaseGameObject, type DamageParams, type GameObject } from "./gameObject";
 import { type Obstacle } from "./obstacle";
-import { weaponPresentType } from "@common/typings";
 import { Maps } from "@common/definitions/modes";
 
 import { InputHandler } from "./player/inputHandler";
@@ -37,7 +36,8 @@ import { InventoryHelper } from "./player/inventoryHelper";
 import { CommunicationHandler } from "./player/communicationHandler";
 import { DamageHandler } from "./player/damageHandler";
 import { UpdateManager } from "./player/updateManager";
-import { Gamer } from "./gamer";
+import { Vehicle } from "./vehicle";
+import { SeatType, VehicleDefinition, Vehicles } from "@common/definitions/vehicles";
 
 
 export interface ActorContainer {
@@ -51,7 +51,7 @@ export interface ActorContainer {
 export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     private static readonly baseHitbox = new CircleHitbox(GameConstants.player.radius);
 
-    override readonly fullAllocBytes = 16;
+    override readonly fullAllocBytes = 17;
     override readonly partialAllocBytes = 14;
     override readonly damageable = true;
 
@@ -90,6 +90,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     joined = false;
     disconnected = false;
     resurrected = false;
+    collidable: boolean = true;
 
     _team?: Team;
     get team(): Team | undefined { return this._team; }
@@ -261,6 +262,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     }
 
     get activeItem(): InventoryItem {
+        if (this.seatIndex == SeatType.Driver) return this.DEFAULT_WEAPON;
         return this.inventory.activeWeapon;
     }
 
@@ -298,6 +300,10 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
      * Ticks since last visible objects update
      */
     ticksSinceLastUpdate = 0;
+
+    /** VEHICLE LOGICS */
+    inVehicle?: Vehicle;
+    seatIndex?: number;
 
     _scope!: ScopeDefinition;
     get effectiveScope(): ScopeDefinition { return this._scope; }
@@ -396,6 +402,16 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     readonly perks = new ServerPerkManager(this, Perks.defaults);
     perkUpdateMap?: Map<UpdatablePerkDefinition, number>; // key = perk, value = last updated
 
+    readonly DEFAULT_WEAPON = new MeleeItem("fists", this);
+
+    private _vehicleVariants:  Array<VehicleDefinition>;
+    set vehicleVariants(variants: VehicleDefinition[]) {
+        this._vehicleVariants = variants;
+    }
+    get vehicleVariants(): Array<VehicleDefinition> { return this._vehicleVariants; }
+
+
+
     constructor(game: Game, userData: ActorContainer, position: Vector, layer?: Layer, team?: Team) {
         super(game, position);
 
@@ -449,6 +465,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
             this.inventory.scope = DEFAULT_SCOPE.idString;
         }
         this.effectiveScope = DEFAULT_SCOPE;
+        this._vehicleVariants = [];
     }
 
     spawnPos(position: Vector): void {
@@ -479,6 +496,8 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     updateAndApplyModifiers(): void {
         this.modifierCalculator.updateAndApplyModifiers();
     }
+
+
 
     /**
      * Clean up internal state after all packets have been sent
@@ -611,7 +630,9 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
                 backpack: this.inventory.backpack,
                 halloweenThrowableSkin: false,
                 activeDisguise: this.activeDisguise,
-                blockEmoting: this.blockEmoting
+                blockEmoting: this.blockEmoting,
+                isDriver: this.seatIndex == SeatType.Driver,
+                inVehicle: this.inVehicle ? true : false,
             }
         };
 
@@ -638,4 +659,6 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     isBot(): boolean {
         return false;
     }
+
+    exitVehicle(): void { };
 }
