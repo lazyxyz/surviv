@@ -165,7 +165,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         }
 
         // SKID/DRIFT LOOP (trigger on slip)
-        if (this.slip > 0.04 && this.speed > 0.05) {
+        if (this.slip > 0.04 && this.speed > (this.definition.maxSpeed * 0.7)) {
             if (!this.skidSound || this.skidSound.ended) {
                 this.skidSound = this.playSound(`${this.definition.base}_skid_loop`, {
                     falloff: 0.8,
@@ -188,7 +188,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         }
 
         // BRAKE SQUEAL (optional: hard brake only, blends with skid)
-        if (this.throttle < -0.2 && this.speed > (this.definition.maxSpeed * 0.6)) {
+        if (this.throttle < -0.2 && this.speed > (this.definition.maxSpeed * 0.8)) {
             if (!this.brakeSound || this.brakeSound.ended) {
                 this.brakeSound = this.playSound(`vehicle_brake_loop`, {
                     falloff: 1,

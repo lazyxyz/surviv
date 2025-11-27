@@ -18,7 +18,7 @@ import { Gamer } from "./gamer";
 import { MeleeItem } from "../inventory/meleeItem";
 
 export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
-    override readonly fullAllocBytes = 10;
+    override readonly fullAllocBytes = 11;
     override readonly partialAllocBytes = 15;
 
     declare hitbox: Hitbox;
@@ -46,7 +46,13 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private baseDamage; // Base factor for collision damage calculation
     private deadImpact = 0.3; // When obstacle dies, reduce bounce/speed loss by 70% (plow through debris with less resistance)
     floor = FloorNames.Water;
-    private minMoveSpeed = 0.02;
+    private minMoveSpeedSq = 0.02;
+
+    private _minDamageSpeed = 0.06;
+    private _minRunOverDamageSpeed = 0.04;
+
+    private _minDamageImpactLevel = 0.05;
+    private _minDamageCrashLevel = 0.065;
 
     private _driver: Player | undefined;
     set driver(driver: Player | undefined) { this._driver = driver; }
@@ -109,9 +115,9 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
             // Damage player if vehicle is moving fast
             const speed = Vec.length(this.velocity);
-            if (speed > 0.05) {
+            if (speed > this._minDamageSpeed) {
                 player.damage({
-                    amount: speed * 500, // Tune this multiplier
+                    amount: speed * 1000, // 90hp at maxmimum speed (0.09)
                     source: this,
                     weaponUsed: undefined
                 });
@@ -227,7 +233,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             const potentialMaterial = potential.isObstacle && potential.definition.material;
             const isRunOver = potential.isPlayer || (potentialMaterial && RunOverMaterialsSet.has(potentialMaterial));
             // Calculate adjustment to resolve penetration
-            const adjust = this.hitbox.getAdjustment(potential.hitbox, 1);
+            const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.5);
             // Clamp adjustment magnitude to prevent far jumps
             const adjustLen = Vec.length(adjust);
 
@@ -241,17 +247,16 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             potential.setPartialDirty();
             this.game.grid.updateObject(potential);
 
-            const speed = Vec.squaredLength(this.velocity);
-            if (speed > 0.0025) { // Threshold: only apply effects if fast enough
+            const speed = Vec.length(this.velocity);
+            if (speed > (isRunOver ? this._minRunOverDamageSpeed : this._minDamageSpeed)) { // Threshold: only apply effects if fast enough
                 const normal = Vec.normalizeSafe(adjust); // Direction of push (from obstacle to vehicle)
                 const impactVel = Vec.dotProduct(this.velocity, normal); // Component along normal (negative if approaching)
-                if (impactVel > 0.005) { // Approaching (threshold; note sign convention assuming dir points out)
+                if (impactVel > this._minDamageImpactLevel) { // Approaching (threshold; note sign convention assuming dir points out)
                     let materialFactor = 1.0;
                     if (isRunOver) {
-                        const damageToPlayer = Math.abs(impactVel) * this.baseDamage * 10;
-
+                        const damageToSoft = Math.abs(impactVel) * this.baseDamage * 10;
                         potential.damage({
-                            amount: damageToPlayer,
+                            amount: damageToSoft,
                             source: this.driver,
                             weaponUsed: undefined,
                         });
@@ -267,8 +272,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                         weaponUsed: undefined,
                     });
 
-                    // Apply 5% of damageToVehicle to all occupants
-                    const playerDamage = 0.05 * damageToVehicle;
+                    // Apply 20% of damageToVehicle to all occupants
+                    const playerDamage = 0.2 * damageToVehicle;
                     for (const occupant of this.occupants) {
                         if (occupant) {
                             occupant.damage({
@@ -304,7 +309,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
 
                     // Overall speed loss
                     this.velocity = Vec.scale(this.velocity, speedLossFactor);
-                    this._playCrashSound = true;
+
+                    if (impactVel > this._minDamageCrashLevel) this._playCrashSound = true;
                     return true;
                 }
             } else if (!potential.isPlayer) {
@@ -380,7 +386,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
         const forwardSpeed = Vec.dotProduct(this.velocity, forwardDir);
         const absForwardSpeed = Math.abs(forwardSpeed);
 
-        if (absForwardSpeed < this.minMoveSpeed && this.currentThrottle === 0) {
+        if (absForwardSpeed < this.minMoveSpeedSq && this.currentThrottle === 0) {
             // When below minTurnSpeed, zero the velocity to stop dragging/creeping
             this.velocity = Vec.create(0, 0);
 
