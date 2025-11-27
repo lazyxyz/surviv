@@ -889,6 +889,7 @@ export class Game {
             for (const vehicle of this.objects.getCategory(ObjectCategory.Vehicle)) {
                 vehicle.updateContainerPosition();
                 vehicle.updateContainerRotation();
+                vehicle.update(delta);
             }
         }
 

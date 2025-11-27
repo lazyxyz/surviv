@@ -59,6 +59,34 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     private wheelFrame: boolean = false;
     private distSinceLastWheelAnim: number = 0;
     private wheelAnimDistanceThreshold: number = 1;
+    private lastSmokeTime: number = 0;
+
+    update(dt: number): void {
+        if (this.dead) return;
+
+        // Smoke effect when health is low (<= 25%)
+        if (this.health <= this.definition.health * 0.25 && this.health > 0) {
+            const now = Date.now();
+            if (now - this.lastSmokeTime > 100) { // Spawn smoke every 100ms
+                this.lastSmokeTime = now;
+
+                const smokeOffset = this.definition.smokeOffset ?? Vec.create(0, 0);
+                const offset = Vec.rotate(Vec.scale(smokeOffset, this.definition.scale), this.rotation);
+                const smokePosition = Vec.add(this.position, offset);
+
+                this.game.particleManager.spawnParticle({
+                    frames: "smoke_particle",
+                    position: smokePosition,
+                    zIndex: ZIndexes.Emotes, // Use a high zIndex to ensure visibility
+                    lifetime: 1000,
+                    layer: this.layer,
+                    scale: { start: 1, end: 4.5 },
+                    alpha: { start: 0.5, end: 0 },
+                    speed: Vec.create(randomFloat(-2, 8), randomFloat(-6, 1))
+                });
+            }
+        }
+    }
 
     constructor(game: Game, id: number, data: ObjectsNetData[ObjectCategory.Vehicle]) {
         super(game, id);
