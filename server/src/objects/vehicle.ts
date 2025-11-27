@@ -42,7 +42,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private occupants: (Gamer | undefined)[] = [];
     private frictionFactor; // Tune 0-1; higher=more slide reduction (real tire grip)
     private velocityThreshold = 0.0001; // Squared speed threshold for "moving" (fine-grained stop detection)
-    private maxBounceDist = 0.5; // Max depenetration distance per step (prevents unrealistic far jumps)
+    private maxBounceDist = 1; // Max depenetration distance per step (prevents unrealistic far jumps)
     private baseDamage; // Base factor for collision damage calculation
     private deadImpact = 0.3; // When obstacle dies, reduce bounce/speed loss by 70% (plow through debris with less resistance)
     floor = FloorNames.Water;
@@ -227,14 +227,14 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             const potentialMaterial = potential.isObstacle && potential.definition.material;
             const isRunOver = potential.isPlayer || (potentialMaterial && RunOverMaterialsSet.has(potentialMaterial));
             // Calculate adjustment to resolve penetration
-            const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.2); // Tune factor (0.5=half push, reduce if too far)
+            const adjust = this.hitbox.getAdjustment(potential.hitbox, 1);
             // Clamp adjustment magnitude to prevent far jumps
             const adjustLen = Vec.length(adjust);
 
             const effectiveAdjust = adjustLen > 0 ? Vec.scale(adjust, Math.min(adjustLen, this.maxBounceDist) / adjustLen) : Vec.create(0, 0);
 
             if (potential.isVehicle && !potential._start) {
-                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 0.5)));
+                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 1)));
             };
 
             this.position = Vec.sub(this.position, effectiveAdjust);
