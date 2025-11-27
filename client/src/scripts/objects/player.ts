@@ -2,13 +2,11 @@ import { AnimationType, GameConstants, InputActions, Layer, ObjectCategory, Play
 import { Ammos } from "@common/definitions/ammos";
 import { type ArmorDefinition } from "@common/definitions/armors";
 import { type BackpackDefinition } from "@common/definitions/backpacks";
-import { Explosions } from "@common/definitions/explosions";
-import { Guns, type GunDefinition, type SingleGunNarrowing } from "@common/definitions/guns";
+import {  type GunDefinition, type SingleGunNarrowing } from "@common/definitions/guns";
 import { HealType, type HealingItemDefinition } from "@common/definitions/healingItems";
 import { Loots, type WeaponDefinition } from "@common/definitions/loots";
 import { DEFAULT_HAND_RIGGING, type MeleeDefinition } from "@common/definitions/melees";
 import { type ObstacleDefinition } from "@common/definitions/obstacles";
-import { PerkData, PerkIds } from "@common/definitions/perks";
 import { Skins, type SkinDefinition } from "@common/definitions/skins";
 import { SpectatePacket } from "@common/packets/spectatePacket";
 import { CircleHitbox } from "@common/utils/hitbox";
@@ -21,7 +19,6 @@ import { random, randomBoolean, randomFloat, randomPointInsideCircle, randomRota
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
 import $ from "jquery";
-import { DashLine } from "pixi-dashed-line";
 import { Container, Graphics, Text, TilingSprite, Assets, Texture } from "pixi.js";
 import { getTranslatedString } from "../../translations";
 import { type TranslationKeys } from "../../typings/translations";
