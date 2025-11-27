@@ -60,6 +60,19 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     private distSinceLastWheelAnim: number = 0;
     private wheelAnimDistanceThreshold: number = 1;
 
+
+    // Optimization: Old values for change detection
+    private oldPosition: Vector = Vec.create(0, 0);
+    private oldRotation: number = 0;
+    private oldLayer: Layer = Layer.Ground;
+    private oldFloorType: FloorNames = FloorNames.Grass;
+    private oldSpeed: number = 0;
+    private oldThrottle: number = 0;
+    private oldSlip: number = 0;
+    private oldHasDriver: boolean = false;
+    private oldSteeringAngle: number = 0;
+    private oldHealth: number = 0;
+
     constructor(game: Game, id: number, data: ObjectsNetData[ObjectCategory.Vehicle]) {
         super(game, id);
         this.container.sortableChildren = true;
@@ -70,26 +83,56 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
     override updateFromData(data: ObjectsNetData[ObjectCategory.Vehicle], isNew = false): void {
         const oldPosition = Vec.clone(this.position);
+
+        const positionChanged = !Vec.equals(this.position, this.oldPosition);
+        const rotationChanged = this.rotation !== this.oldRotation;
+        const layerChanged = this.layer !== this.oldLayer;
+        const speedChanged = this.speed !== this.oldSpeed;
+        const throttleChanged = this.throttle !== this.oldThrottle;
+        const slipChanged = this.slip !== this.oldSlip;
+        const hasDriverChanged = this.hasDriver !== this.oldHasDriver;
+        const healthChanged = this.health !== this.oldHealth;
+
+
         this.updateFloorType();
         this.updatePartial(data, isNew);
         this.updateDefinitionAndState(data);
-        this.updateHitboxes();
-        this.updateWheelRotations(data);
-        if (!isNew) {
+
+        if (positionChanged || rotationChanged || isNew) {
+            this.updateHitboxes();
+        }
+
+        const steeringAngle = data.steeringAngle / VEHICLE_NETDATA.STEERING_SCALE;
+        if (steeringAngle !== this.oldSteeringAngle) {
+            this.updateWheelRotations(data);
+            this.oldSteeringAngle = steeringAngle;
+        }
+
+        if (!isNew && (positionChanged || speedChanged)) {
             this.handleMovementEffects(oldPosition);
+        }
+
+        if (!isNew && (!this.dead || hasDriverChanged || speedChanged || throttleChanged || slipChanged)) {
             this.updateSounds();
         }
-        this.updateZIndex();
-        this.updateDebugGraphics();
 
-        const inVehicle = this.game.activePlayer?.inVehicle ?? false;
-        this.game.uiManager.updateVehicleUI({
-            inVehicle,
-            health: this.health,
-            maxHealth: this.definition.health,
-            speed: this.speed,
-            maxSpeed: this.definition.maxSpeed
-        });
+        if (this.floorType !== this.oldFloorType || layerChanged) {
+            this.updateZIndex();
+        }
+
+        if (HITBOX_DEBUG_MODE && (positionChanged || rotationChanged || layerChanged)) {
+            this.updateDebugGraphics();
+        }
+
+        if (this.game.activePlayer?.inVehicle && (healthChanged || speedChanged)) {
+            this.game.uiManager.updateVehicleUI({
+                inVehicle: true,
+                health: this.health,
+                maxHealth: this.definition.health,
+                speed: this.speed,
+                maxSpeed: this.definition.maxSpeed
+            });
+        }
     }
 
     /**
