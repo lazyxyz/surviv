@@ -313,7 +313,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
      */
     private updateTexture(): void {
         const texture = this.dead
-            ? `${this.definition.base}_residue`
+            ? "vehicle_residue"
             : this.definition.idString;
         this.image.setFrame(texture);
     }
