@@ -381,8 +381,8 @@ const maps = {
             { name: "Darkwood", position: Vec.create(0.5, 0.65) }
         ],
         vehicles: {
-            buggy: 5,
-            rover: 5,
+            buggy: 3,
+            rover: 3,
         }
     },
 
@@ -517,8 +517,8 @@ const maps = {
             { name: "Deepwood", position: Vec.create(0.5, 0.65) }
         ],
         vehicles: {
-            buggy: 5,
-            rover: 5,
+            buggy: 3,
+            rover: 3,
         }
     },
 
@@ -627,8 +627,8 @@ const maps = {
             { name: "Shadow Sands", position: Vec.create(0.5, 0.65) }
         ],
         vehicles: {
-            buggy: 5,
-            rover: 5,
+            buggy: 3,
+            rover: 3,
         }
     },
 
