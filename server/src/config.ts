@@ -25,7 +25,6 @@ export const Config = {
     cursedIslandPort: 9600,
 
     addBot: true,
-
     // addBot: false,
     // testMode: "gunsTest", // For Testing
 
@@ -37,7 +36,7 @@ export const Config = {
     gameJoinTime: 90,
 
     objectLifetime: 180000, // Remove loot after 3 mins
-    obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
+    // obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
 
     gas: { mode: GasMode.Normal },
 

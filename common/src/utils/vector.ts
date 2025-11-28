@@ -232,5 +232,14 @@ export const Vec = Object.freeze({
                 break;
         }
         return Vec.add(position1, Vec.create(xOffset, yOffset));
-    }
+    },
+
+    /**
+     * Returns a vector perpendicular to the input vector (90 degrees counterclockwise)
+     * @param a The input `Vector`
+     * @returns A new `Vector` that is perpendicular to `a` (e.g., for (x,y) returns (-y, x))
+     */
+    perpendicular(a: Vector): Vector {
+        return this.create(-a.y, a.x);
+    },
 });

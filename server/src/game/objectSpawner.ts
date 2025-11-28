@@ -19,6 +19,9 @@ import { SyncedParticle } from "../objects/syncedParticle";
 import { ThrowableProjectile } from "../objects/throwableProj";
 import { Config } from "../config";
 import { Obstacle } from "../objects/obstacle";
+import { VehicleDefinition } from "@common/definitions/vehicles";
+import { Vehicle } from "../objects/vehicle";
+import { ObstacleDefinition } from "@common/definitions/obstacles";
 
 export class ObjectSpawner {
     private game: Game;
@@ -197,6 +200,23 @@ export class ObjectSpawner {
         } else {
             spawnParticles(particles.count);
         }
+    }
+
+    addObstacle(definition: ObstacleDefinition, position: Vector): Obstacle {
+        const obstacle = new Obstacle(this.game, definition, position);
+        this.game.grid.addObject(obstacle);
+        return obstacle;
+    }
+
+    addVehicle(definition: VehicleDefinition, position: Vector): Vehicle {
+        const vehicle = new Vehicle(this.game, definition, position);
+        this.game.grid.addObject(vehicle);
+        return vehicle;
+    }
+
+    removeVehicle(vehicle: Vehicle): void {
+        this.removeObject(vehicle);
+        vehicle.dead = true;
     }
 
     removeObject(object: GameObject): void {

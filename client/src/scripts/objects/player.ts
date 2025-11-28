@@ -2,13 +2,11 @@ import { AnimationType, GameConstants, InputActions, Layer, ObjectCategory, Play
 import { Ammos } from "@common/definitions/ammos";
 import { type ArmorDefinition } from "@common/definitions/armors";
 import { type BackpackDefinition } from "@common/definitions/backpacks";
-import { Explosions } from "@common/definitions/explosions";
-import { Guns, type GunDefinition, type SingleGunNarrowing } from "@common/definitions/guns";
+import {  type GunDefinition, type SingleGunNarrowing } from "@common/definitions/guns";
 import { HealType, type HealingItemDefinition } from "@common/definitions/healingItems";
 import { Loots, type WeaponDefinition } from "@common/definitions/loots";
 import { DEFAULT_HAND_RIGGING, type MeleeDefinition } from "@common/definitions/melees";
 import { type ObstacleDefinition } from "@common/definitions/obstacles";
-import { PerkData, PerkIds } from "@common/definitions/perks";
 import { Skins, type SkinDefinition } from "@common/definitions/skins";
 import { SpectatePacket } from "@common/packets/spectatePacket";
 import { CircleHitbox } from "@common/utils/hitbox";
@@ -21,7 +19,6 @@ import { random, randomBoolean, randomFloat, randomPointInsideCircle, randomRota
 import { FloorNames, FloorTypes } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
 import $ from "jquery";
-import { DashLine } from "pixi-dashed-line";
 import { Container, Graphics, Text, TilingSprite, Assets, Texture } from "pixi.js";
 import { getTranslatedString } from "../../translations";
 import { type TranslationKeys } from "../../typings/translations";
@@ -51,6 +48,8 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     meleeAttackCounter = 0;
     gunAttackCounter = 0;
     private _stopTimeout?: NodeJS.Timeout;
+    isDriver: boolean = false;
+    inVehicle: boolean = false;
 
     // Function to handle gun attack image/frame changes
     gunAttackCount(): void {
@@ -415,7 +414,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
 
         const noMovementSmoothing = !GAME_CONSOLE.getBuiltInCVar("cv_movement_smoothing");
 
-        if (noMovementSmoothing || isNew) this.container.rotation = this.rotation;
+        if (noMovementSmoothing || isNew || this.isDriver) this.container.rotation = this.rotation;
 
         if (this.isActivePlayer) {
             game.soundManager.position = this.position;
@@ -457,7 +456,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
         }
         this.floorType = floorType;
 
-        if (oldPosition !== undefined) {
+        if (oldPosition !== undefined && !this.inVehicle) {
             this.distSinceLastFootstep += Geometry.distance(oldPosition, this.position);
             this.distTraveled += Geometry.distance(oldPosition, this.position);
 
@@ -548,9 +547,10 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     helmet,
                     vest,
                     backpack,
-                    halloweenThrowableSkin,
                     activeDisguise,
-                    blockEmoting
+                    blockEmoting,
+                    isDriver,
+                    inVehicle
                 }
             } = data;
 
@@ -559,6 +559,9 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             if (layerChange) game.changeLayer(this.layer);
 
             this.container.visible = !dead;
+            this.isDriver = isDriver;
+            this.inVehicle = inVehicle;
+
             this.disguiseContainer.visible = this.container.visible;
 
             if (
@@ -664,10 +667,10 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             }
 
             this.container.alpha = invulnerable ? 0.5 : 1;
+            updateContainerZIndex = true;
 
             if (this.downed !== downed) {
                 this.downed = downed;
-                updateContainerZIndex = true;
                 this.updateFistsPosition(false);
                 this.updateWeapon(isNew);
                 this.updateEquipment();
@@ -839,7 +842,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                                 `action_${itemDef.idString}_use` as TranslationKeys,
                                 { item: getTranslatedString(itemDef.idString as TranslationKeys) }
                             ),
-                            itemDef.useTime / uiManager.perks.mapOrDefault(PerkIds.FieldMedic, ({ usageMod }) => usageMod, 1)
+                            itemDef.useTime
                         );
                     }
                     break;
@@ -848,7 +851,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     if (this.isActivePlayer) {
                         uiManager.animateAction(
                             getTranslatedString("action_reviving"),
-                            GameConstants.player.reviveTime / uiManager.perks.mapOrDefault(PerkIds.FieldMedic, ({ usageMod }) => usageMod, 1)
+                            GameConstants.player.reviveTime
                         );
                     }
                     break;
@@ -861,7 +864,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                     {
                         falloff: 0.6,
                         maxRange: 48,
-                        speed: game.uiManager.perks.hasItem(PerkIds.FieldMedic) && actionSoundName === action.item?.idString ? PerkData[PerkIds.FieldMedic].usageMod : 1
+                        speed: 1
                     }
                 );
             }
@@ -888,98 +891,8 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
             && this.activeItem.itemType === ItemType.Throwable
             && this.isActivePlayer
         ) {
-            // prediction for impact point is basically just done by yoinking sever
-            // code and plopping it client-side lol
-            if (this.game.uiManager.perks.hasItem(PerkIds.DemoExpert)) {
-                if (this.grenadeImpactPreview === undefined) {
-                    this.grenadeImpactPreview = new Graphics();
-                    this.grenadeImpactPreview.zIndex = 999;
-                    this.game.camera.addObject(this.grenadeImpactPreview);
-                }
-
-                const graphics = this.grenadeImpactPreview;
-                const def = this.activeItem;
-
-                // mirrors server logic
-                const pos = Vec.add(
-                    toPixiCoords(this.position),
-                    Vec.rotate(toPixiCoords(def.animation.cook.rightFist), this.rotation)
-                );
-
-                const range = Numeric.min(
-                    this.game.inputManager.distanceToMouse * 0.9, // <- this constant is defined server-side
-                    def.maxThrowDistance * PerkData[PerkIds.DemoExpert].rangeMod
-                );
-
-                const cookMod = def.cookable ? Date.now() - this.animationChangeTime : 0;
-                const drag = 0.001; // defined server-side
-                const physDist = (range / (985 * drag)) * (1 - Math.exp(-drag * (def.fuseTime - cookMod))); // also defined server-side
-
-                const { x, y } = Vec.add(
-                    pos,
-                    Vec.fromPolar(
-                        this.rotation,
-                        physDist * PIXI_SCALE
-                    )
-                );
-
-                const ln = new DashLine(graphics, { dash: [100, 50] });
-
-                graphics.clear()
-                    .setFillStyle({
-                        color: 0xff0000,
-                        alpha: 0.3
-                    })
-                    .setStrokeStyle({
-                        color: 0xff0000,
-                        width: 8,
-                        alpha: 0.7
-                    })
-                    .beginPath();
-
-                ln.moveTo(pos.x, pos.y)
-                    .lineTo(x, y);
-
-                graphics.stroke()
-                    .setStrokeStyle({
-                        color: 0xff0000,
-                        width: 3,
-                        alpha: 0.5
-                    })
-                    .beginPath();
-
-                const explosionDef = Explosions.fromStringSafe(def.detonation.explosion ?? "");
-                if (explosionDef !== undefined
-                    && explosionDef.damage !== 0
-                    && explosionDef.radius.min + explosionDef.radius.max !== 0) {
-                    graphics.circle(x, y, explosionDef.radius.min * PIXI_SCALE)
-                        .closePath()
-                        .fill()
-                        .stroke()
-                        .beginPath()
-                        .setFillStyle({
-                            color: 0xFFFF00,
-                            alpha: 0.8
-                        })
-                        .setStrokeStyle({
-                            color: 0xFFFF00,
-                            width: 3,
-                            alpha: 0.1
-                        })
-                        .circle(x, y, 0.5 * PIXI_SCALE)
-                        .closePath()
-                        .fill()
-                        .stroke();
-                } else {
-                    graphics.circle(x, y, 1.5 * PIXI_SCALE)
-                        .closePath()
-                        .fill()
-                        .stroke();
-                }
-            } else {
-                this.grenadeImpactPreview?.destroy();
-                this.grenadeImpactPreview = undefined;
-            }
+            this.grenadeImpactPreview?.destroy();
+            this.grenadeImpactPreview = undefined;
         }
     }
 
@@ -1221,14 +1134,18 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
     }
 
     override updateZIndex(): void {
-        // i love ternary spam
-        const zIndex = FloorTypes[this.floorType].overlay
-            ? this.downed
-                ? ZIndexes.UnderwaterDownedPlayers
-                : ZIndexes.UnderwaterPlayers
-            : this.downed
-                ? ZIndexes.DownedPlayers
-                : ZIndexes.Players;
+        let zIndex;
+        if (this.inVehicle) {
+            zIndex = ZIndexes.Players;
+        } else {
+            zIndex = FloorTypes[this.floorType].overlay
+                ? this.downed
+                    ? ZIndexes.UnderwaterDownedPlayers
+                    : ZIndexes.UnderwaterPlayers
+                : this.downed
+                    ? ZIndexes.DownedPlayers
+                    : ZIndexes.Players;
+        }
 
         this.container.zIndex = getEffectiveZIndex(zIndex, this.layer, this.game.layer);
         this.disguiseContainer.zIndex = this.container.zIndex + 1;
@@ -2062,35 +1979,6 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                         this.anims.rightFist = undefined;
                     }
                 });
-                break;
-            }
-
-            case AnimationType.GunSpinUp: {
-                if (this.activeItem.itemType !== ItemType.Gun) {
-                    console.warn(`Attempted to play gun spin-up animation with non-gun item '${this.activeItem.idString}'`);
-                    return;
-                }
-                const weaponDef = this.activeItem;
-                if (weaponDef.spinUpTime) {
-                    this.playSound(`${weaponDef.idString}_spin`, {
-                        falloff: 0.4,
-                        maxRange: 96
-                    });
-                }
-                break;
-            }
-            case AnimationType.GunSpinDown: {
-                if (this.activeItem.itemType !== ItemType.Gun) {
-                    console.warn(`Attempted to play gun spin-down animation with non-gun item '${this.activeItem.idString}'`);
-                    return;
-                }
-                const weaponDef = this.activeItem;
-                if (weaponDef.spinUpTime) {
-                    this.playSound(`${weaponDef.idString}_stop`, {
-                        falloff: 0.4,
-                        maxRange: 96
-                    });
-                }
                 break;
             }
         }

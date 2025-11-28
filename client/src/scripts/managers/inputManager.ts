@@ -246,14 +246,14 @@ export class InputManager {
 
             this.rotation = Math.atan2(e.clientY - window.innerHeight / 2, e.clientX - window.innerWidth / 2);
 
-            if (!game.gameOver && game.activePlayer) {
+            if (!game.gameOver && game.activePlayer && !game.activePlayer.isDriver) {
                 const globalPos = Vec.create(e.clientX, e.clientY);
                 const pixiPos = game.camera.container.toLocal(globalPos);
                 this.gameMousePosition = Vec.scale(pixiPos, 1 / PIXI_SCALE);
                 this.distanceToMouse = Geometry.distance(game.activePlayer.position, this.gameMousePosition);
 
                 if (GAME_CONSOLE.getBuiltInCVar("cv_responsive_rotation")) {
-                    game.activePlayer.container.rotation = this.rotation;
+                     game.activePlayer.container.rotation = this.rotation;
                 }
             }
 

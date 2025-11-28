@@ -46,6 +46,8 @@ import { PlayerManager } from "./game/playerManager";
 import { BotManager } from "./game/botManager";
 import { ConnectionManager } from "./game/connectionManager";
 import { SpawnManager } from "./game/spawnManager";
+import { VehicleDefinition } from "@common/definitions/vehicles";
+import { Vehicle } from "./objects/vehicle";
 import { DungeonPacketData, DungeonPacket } from "@common/packets/dungeonPackage";
 
 /*
@@ -85,7 +87,7 @@ export class Game implements GameData {
 
     readonly teamMode: boolean;
 
-    readonly rainDrops: number;
+    readonly rainDrops: number = 0;
 
     readonly gameMap: MAP;
     totalBots: number = 0;
@@ -212,7 +214,7 @@ export class Game implements GameData {
             { map: "desert", rainChance: 0 },
             { map: "fall", rainChance: 0.5 },
             { map: "winter", rainChance: 0.5 },
-            { map: "cursedIsland", rainChance: 1 },
+            // { map: "cursedIsland", rainChance: 1 },
         ];
 
         const selectedConfig = configs[(Math.random() * configs.length) | 0];
@@ -308,6 +310,10 @@ export class Game implements GameData {
 
         for (const syncedParticle of this.grid.pool.getCategory(ObjectCategory.SyncedParticle)) {
             syncedParticle.update();
+        }
+       
+        for (const vehicle of this.grid.pool.getCategory(ObjectCategory.Vehicle)) {
+            vehicle.update();
         }
 
         // Update bullets
@@ -564,6 +570,10 @@ export class Game implements GameData {
 
     removeObject(object: GameObject): void {
         this.objectSpawner.removeObject(object);
+    }
+
+    removeVehicle(vehicle: Vehicle): void {
+        this.objectSpawner.removeVehicle(vehicle);
     }
 
     // Delegated to airdropManager

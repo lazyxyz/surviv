@@ -1,3 +1,4 @@
+// inventory/skins.ts
 import $ from "jquery";
 import type { ReferenceTo } from "@common/utils/objectDefinitions";
 import { Skins, type SkinDefinition } from "@common/definitions/skins";

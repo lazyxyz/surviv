@@ -35,6 +35,7 @@ export interface BulletOptions {
 
 type GameObject = {
     readonly hitbox?: Hitbox
+    readonly bulletHitbox?: Hitbox
     readonly damageable: boolean
     readonly id: number
 } & CommonGameObject;
@@ -141,7 +142,8 @@ export class BaseBullet {
         const collisions: Collision[] = [];
 
         for (const object of objects) {
-            const { isPlayer, isObstacle, isBuilding } = object;
+            const { isPlayer, isObstacle, isBuilding, isVehicle } = object;
+
             if (
                 ((isObstacle || isBuilding) && (
                     object.definition.noBulletCollision
@@ -154,7 +156,12 @@ export class BaseBullet {
                 || (object.id === this.sourceID && !this.canHitShooter)
             ) continue;
 
-            const intersection = object.hitbox?.intersectsLine(oldPosition, this.position);
+            let intersection;
+            if (isVehicle) {
+                intersection = object.bulletHitbox?.intersectsLine(oldPosition, this.position);
+            } else {
+                intersection = object.hitbox?.intersectsLine(oldPosition, this.position);
+            }
 
             if (intersection) {
                 collisions.push({ intersection, object });

@@ -9,6 +9,7 @@ import { Obstacles, RotationMode, type ObstacleDefinition } from "../definitions
 import { Skins, type SkinDefinition } from "../definitions/skins";
 import { SyncedParticles, type SyncedParticleDefinition } from "../definitions/syncedParticles";
 import { type ThrowableDefinition } from "../definitions/throwables";
+import { VehicleDefinition, Vehicles } from "../definitions/vehicles";
 import { type Orientation, type Variation } from "../typings";
 import { Angle, halfπ } from "./math";
 import { type Mutable, type SDeepMutable } from "./misc";
@@ -56,6 +57,8 @@ export interface ObjectsNetData extends BaseObjectsNetData {
             readonly halloweenThrowableSkin: boolean
             readonly activeDisguise?: ObstacleDefinition
             readonly blockEmoting: boolean
+            readonly isDriver: boolean
+            readonly inVehicle: boolean
         },
         readonly noSize?: boolean,
     }
@@ -170,6 +173,26 @@ export interface ObjectsNetData extends BaseObjectsNetData {
             readonly creatorID?: number
         }
     }
+
+    //
+    // Vehicle data
+    //
+    readonly [ObjectCategory.Vehicle]: {
+        readonly position: Vector
+        readonly rotation: number
+        readonly steeringAngle: number
+        readonly speed: number
+        readonly throttle: number
+        readonly slip: number
+        readonly health: number
+        readonly playCrashSound: boolean
+        readonly full?: {
+            readonly definition: VehicleDefinition
+            readonly dead: boolean
+            readonly layer: Layer
+            readonly hasDriver: boolean
+        }
+    }
 }
 
 interface ObjectSerialization<T extends ObjectCategory> {
@@ -246,7 +269,9 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 backpack,
                 halloweenThrowableSkin,
                 activeDisguise,
-                blockEmoting
+                blockEmoting,
+                isDriver,
+                inVehicle,
             } }
         ): void {
             stream.writeLayer(layer);
@@ -265,7 +290,9 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 hasHelmet,
                 hasVest,
                 hasDisguise,
-                blockEmoting
+                blockEmoting,
+                isDriver,
+                inVehicle
             );
             stream.writeUint8(teamID);
             Loots.writeToStream(stream, activeItem);
@@ -282,7 +309,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
 
             if (hasDisguise) Obstacles.writeToStream(stream, activeDisguise);
         },
-      
+
         deserializePartial(stream) {
             const data: Mutable<ObjectsNetData[ObjectCategory.Player]> = {
                 position: stream.readPosition(),
@@ -330,7 +357,9 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 hasHelmet,
                 hasVest,
                 hasDisguise,
-                blockEmoting
+                blockEmoting,
+                isDriver,
+                inVehicle,
             ] = stream.readBooleanGroup2();
 
             return {
@@ -348,7 +377,9 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 vest: hasVest ? Armors.readFromStream(stream) : undefined,
                 backpack: Backpacks.readFromStream(stream),
                 activeDisguise: hasDisguise ? Obstacles.readFromStream(stream) : undefined,
-                blockEmoting
+                blockEmoting,
+                isDriver,
+                inVehicle
             };
         }
     },
@@ -701,6 +732,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
         },
         deserializeFull() { /* decals have no full serialization */ }
     },
+
     [ObjectCategory.Parachute]: {
         serializePartial(stream, data) {
             stream.writeFloat(data.height, 0, 1, 1);
@@ -721,6 +753,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
             };
         }
     },
+
     [ObjectCategory.SyncedParticle]: {
         serializePartial(stream, data) {
             const { position, rotation, layer, scale, alpha } = data;
@@ -794,6 +827,7 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
             };
         }
     },
+
     [ObjectCategory.ThrowableProjectile]: {
         serializePartial(strm, data) {
             strm.writeBooleanGroup(
@@ -832,5 +866,61 @@ export const ObjectSerializations: { [K in ObjectCategory]: ObjectSerialization<
                 tintIndex: stream.readUint8()
             };
         }
-    }
+    },
+
+    [ObjectCategory.Vehicle]: {
+        serializePartial(stream, data) {
+            const { position, rotation, steeringAngle, speed, slip, throttle, health, playCrashSound } = data;
+            stream.writeBooleanGroup(playCrashSound);
+
+            stream.writePosition(position);
+            stream.writeRotation2(rotation);
+            stream.writeInt8(steeringAngle);
+            stream.writeUint8(speed);
+            stream.writeInt8(slip);
+            stream.writeUint8(throttle);
+            stream.writeUint8(health);
+        },
+        serializeFull(stream, { full }) {
+            stream.writeBooleanGroup(
+                full.dead,
+                full.hasDriver,
+            );
+            stream.writeLayer(full.layer);
+
+            Vehicles.writeToStream(stream, full.definition);
+            // Add more full props later (e.g., health, passengers)
+        },
+        deserializePartial(stream) {
+            const [
+                playCrashSound
+            ] = stream.readBooleanGroup();
+
+            return {
+                position: stream.readPosition(),
+                rotation: stream.readRotation2(),
+                steeringAngle: stream.readInt8(),
+                speed: stream.readUint8(),
+                slip: stream.readUint8(),
+                throttle: stream.readInt8(),
+                health: stream.readUint8(),
+                playCrashSound,
+            };
+        },
+        deserializeFull(stream) {
+            const [
+                dead,
+                hasDriver
+            ] = stream.readBooleanGroup();
+            const layer = stream.readLayer();
+            const definition = Vehicles.readFromStream(stream);
+            return {
+                definition,
+                dead,
+                layer,
+                hasDriver,
+                // Add more full props later
+            };
+        }
+    },
 };

@@ -9,7 +9,6 @@ import { PacketStream } from "@common/packets/packetStream";
 import { SuroiByteStream } from "@common/utils/suroiByteStream";
 import { Config } from "../config";
 import { Logger } from "../utils/misc";
-import { ClientChatPacket, ServerChatPacket, ServerChatPacketData } from "@common/packets/chatPacket";
 import { PlayerInputPacket } from "@common/packets/inputPacket";
 import { OutputPacket } from "@common/packets/packet";
 import { PingPacket } from "@common/packets/pingPacket";
@@ -141,19 +140,6 @@ export class ConnectionManager {
         }
     }
 
-    private sendChatMessage(player: Player, isSendAll: boolean, message: string): void {
-        if (isSendAll && player.loadout.badge) {
-            this.game.packets.push(
-                ServerChatPacket.create({
-                    messageColor: 0xffffff,
-                    message
-                } as ServerChatPacketData)
-            );
-        } else if (this.game.teamMode && !isSendAll && player.team) {
-            player.team.sendTeamMessage(message);
-        }
-    }
-
     private onPacket(packet: OutputPacket, player: Gamer): void {
         switch (true) {
             case packet instanceof JoinPacket:
@@ -173,10 +159,6 @@ export class ConnectionManager {
                 const stream = new PacketStream(new ArrayBuffer(8));
                 stream.serializeServerPacket(PingPacket.create());
                 player.sendData(stream.getBuffer());
-                break;
-            }
-            case packet instanceof ClientChatPacket: {
-                this.sendChatMessage(player, packet.output.isSendAll, packet.output.message);
                 break;
             }
         }

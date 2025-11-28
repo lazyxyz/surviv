@@ -9,14 +9,12 @@ import { Collision } from "@common/utils/math";
 import { ItemType, MapObjectSpawnMode, type ReferenceTo } from "@common/utils/objectDefinitions";
 import { random, randomFloat } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
-import { type WebSocket } from "uWebSockets.js";
-import { type GunItem } from "../inventory/gunItem";
 import { GameMap } from "../map";
-import { Gamer, type PlayerContainer } from "../objects/gamer";
 import { getLootFromTable, LootTables } from "./lootTables";
-import { PerkCategories, Perks } from "@common/definitions/perks";
+import { Perks } from "@common/definitions/perks";
 import { Melees } from "@common/definitions/melees";
 import { Scopes } from "@common/definitions/scopes";
+import { VehicleDefinition, Vehicles } from "@common/definitions/vehicles";
 
 export interface RiverDefinition {
     readonly minAmount: number
@@ -67,6 +65,8 @@ export interface MapDefinition {
         readonly name: string
         readonly position: Vector
     }>
+
+    readonly vehicles?: Record<ReferenceTo<VehicleDefinition>, number>
 
     readonly onGenerate?: (map: GameMap, params: string[]) => void
 }
@@ -217,10 +217,10 @@ const maps = {
     },
 
     fall: {
-        width: 1924,
-        height: 1924,
-        oceanSize: 128,
-        beachSize: 32,
+        width: 2048,
+        height: 2048,
+        oceanSize: 64,
+        beachSize: 8,
         rivers: {
             minAmount: 2,
             maxAmount: 2,
@@ -232,8 +232,8 @@ const maps = {
             maxWideAmount: 1
         },
         trails: {
-            minAmount: 2,
-            maxAmount: 3,
+            minAmount: 3,
+            maxAmount: 5,
             wideChance: 0.2,
             minWidth: 2,
             maxWidth: 4,
@@ -260,8 +260,6 @@ const maps = {
             small_bridge: Infinity,
             plumpkin_bunker: 1,
             sea_traffic_control: 1,
-            tugboat_red: 1,
-            tugboat_white: 7,
             lodge: 1,
             bombed_armory: 1,
             barn: 3,
@@ -299,27 +297,27 @@ const maps = {
             tent_4: 1
         },
         obstacles: {
-            oak_tree: 230,
+            oak_tree: 100,
             small_oak_tree: 50,
             birch_tree: 25,
-            maple_tree: 70,
-            pine_tree: 95,
+            maple_tree: 50,
+            pine_tree: 30,
             dormant_oak_tree: 25,
-            stump: 40,
+            stump: 20,
             hatchet_stump: 3,
             regular_crate: 200,
             flint_crate: 10,
             grenade_crate: 50,
-            rock: 220,
+            rock: 30,
             clearing_boulder: 15,
             river_chest: 1,
-            river_rock: 60,
-            vibrant_bush: 200,
-            oak_leaf_pile: 200,
+            river_rock: 30,
+            vibrant_bush: 100,
+            oak_leaf_pile: 100,
             lily_pad: 50,
-            barrel: 90,
+            barrel: 30,
             viking_chest: 1,
-            super_barrel: 35,
+            super_barrel: 15,
             melee_crate: 1,
             gold_rock: 1,
             loot_tree: 4,
@@ -381,14 +379,18 @@ const maps = {
             { name: "Crimson Hills", position: Vec.create(0.72, 0.8) },
             { name: "Emerald Farms", position: Vec.create(0.5, 0.35) },
             { name: "Darkwood", position: Vec.create(0.5, 0.65) }
-        ]
+        ],
+        vehicles: {
+            buggy: 5,
+            rover: 5,
+        }
     },
 
     winter: {
-        width: 1632,
-        height: 1632,
-        oceanSize: 128,
-        beachSize: 32,
+        width: 2048,
+        height: 2048,
+        oceanSize: 64,
+        beachSize: 8,
         rivers: {
             minAmount: 2,
             maxAmount: 3,
@@ -399,13 +401,21 @@ const maps = {
             minWideWidth: 25,
             maxWideWidth: 30
         },
+        trails: {
+            minAmount: 3,
+            maxAmount: 5,
+            wideChance: 0.2,
+            minWidth: 2,
+            maxWidth: 4,
+            minWideWidth: 3,
+            maxWideWidth: 5,
+            maxWideAmount: 1
+        },
         buildings: {
             large_bridge: 2,
             small_bridge: Infinity,
             port_complex: 1,
             sea_traffic_control: 1,
-            tugboat_red: 1,
-            tugboat_white: 5,
             armory: 1,
             headquarters: 1,
             small_bunker: 1,
@@ -450,13 +460,12 @@ const maps = {
             flint_crate_winter: 5,
             aegis_crate_winter: 5,
             grenade_crate_winter: 35,
-            rock: 150,
+            rock: 30,
             river_chest: 1,
             river_rock: 45,
             bush: 110,
-            // birthday_cake: 100, // birthday mode
             blueberry_bush: 30,
-            barrel_winter: 80,
+            barrel_winter: 30,
             viking_chest: 1,
             super_barrel_winter: 30,
             melee_crate_winter: 1,
@@ -506,14 +515,18 @@ const maps = {
             { name: "Noskin Narrows", position: Vec.create(0.72, 0.8) },
             { name: "Mt. Sanger", position: Vec.create(0.5, 0.35) },
             { name: "Deepwood", position: Vec.create(0.5, 0.65) }
-        ]
+        ],
+        vehicles: {
+            buggy: 5,
+            rover: 5,
+        }
     },
 
     desert: {
-        width: 1924,
-        height: 1924,
+        width: 2048,
+        height: 2048,
         oceanSize: 64,
-        beachSize: 16,
+        beachSize: 8,
         oases: {
             minAmount: 7,
             maxAmount: 7,
@@ -522,8 +535,8 @@ const maps = {
             bankWidth: 12
         },
         trails: {
-            minAmount: 7,
-            maxAmount: 7,
+            minAmount: 3,
+            maxAmount: 5,
             wideChance: 0.2,
             minWidth: 2,
             maxWidth: 4,
@@ -567,7 +580,7 @@ const maps = {
         },
         obstacles: {
             palm_tree: 100,
-            date_palm_tree: 150,
+            date_palm_tree: 100,
             small_palm_tree: 50,
             child_palm_tree: 60,
             doum_palm_tree: 100,
@@ -578,8 +591,8 @@ const maps = {
             century_plant: 100,
             ghost_plant: 80,
             pencil_cactus: 80,
-            bull_skeleton: 60,
-            dinosaur_skeleton: 15,
+            bull_skeleton: 30,
+            dinosaur_skeleton: 10,
             mammoth_skeleton: 5,
             dry_tree: 100,
             stump: 40,
@@ -587,14 +600,14 @@ const maps = {
             regular_crate: 100,
             flint_crate: 10,
             grenade_crate: 50,
-            rock: 220,
+            rock: 30,
             clearing_boulder: 15,
             river_chest: 7,
             river_rock: 20,
             lily_pad: 15,
-            barrel: 90,
+            barrel: 30,
             viking_chest: 1,
-            super_barrel: 35,
+            super_barrel: 15,
             melee_crate: 1,
             gold_rock: 1,
             loot_tree: 4,
@@ -612,7 +625,11 @@ const maps = {
             { name: "Crimson Dunes", position: Vec.create(0.72, 0.8) },
             { name: "Mirage Farms", position: Vec.create(0.5, 0.35) },
             { name: "Shadow Sands", position: Vec.create(0.5, 0.65) }
-        ]
+        ],
+        vehicles: {
+            buggy: 5,
+            rover: 5,
+        }
     },
 
     cursedIsland: {
@@ -798,6 +815,18 @@ const maps = {
                     itemPos.y += 10;
                 }
             }
+
+            // // Generate all vehicles
+            // const itemPos = Vec.create(map.width / 2, map.height / 2);
+            // for (const item of Loots.definitions) {
+            //     map.game.addLoot(item, itemPos, 0, { count: Infinity, pushVel: 0, jitterSpawn: false });
+
+            //     itemPos.x += 10;
+            //     if (itemPos.x > map.width / 2 + 100) {
+            //         itemPos.x = map.width / 2;
+            //         itemPos.y += 10;
+            //     }
+            // }
         },
         places: [
             { name: "[object Object]", position: Vec.create(0.8, 0.7) },
@@ -922,6 +951,7 @@ const maps = {
             { name: "stark is pro", position: Vec.create(0.5, 0.5) }
         ]
     },
+
     singleBuilding: {
         width: 1024,
         height: 1024,
@@ -935,6 +965,7 @@ const maps = {
             map.generateBuilding(building, Vec.create(this.width / 2, this.height / 2), 0);
         }
     },
+
     singleObstacle: {
         width: 256,
         height: 256,
@@ -944,6 +975,7 @@ const maps = {
             map.generateObstacle(obstacle, Vec.create(this.width / 2, this.height / 2), { layer: 0, rotation: 0 });
         }
     },
+
     singleGun: {
         width: 256,
         height: 256,
@@ -957,8 +989,8 @@ const maps = {
 
     gunsTest: (() => {
         return {
-            width: 200,
-            height: 200,
+            width: 300,
+            height: 300,
             beachSize: 8,
             oceanSize: 8,
             onGenerate(map) {
@@ -973,11 +1005,11 @@ const maps = {
                         map.game.addLoot(item.ammoType, itemPos, 0, { count: Infinity });
                     }
 
-                    itemPos.x += colSpacing;
                     if (itemPos.x > maxX) {
                         itemPos.x = 0;
                         itemPos.y += rowSpacing;
                     }
+                    itemPos.x += colSpacing;
                 };
 
                 // Place guns
@@ -985,10 +1017,6 @@ const maps = {
                     placeItem(item, true);
                 }
 
-                // Place perks
-                for (const item of Perks.definitions) {
-                    placeItem(item);
-                }
 
                 // Place melees
                 for (const item of Melees.definitions) {
@@ -999,24 +1027,55 @@ const maps = {
                 for (const item of Scopes.definitions) {
                     placeItem(item);
                 }
+
+                for (const vehicle of Vehicles.definitions) {
+                    map.game.objectSpawner.addVehicle(vehicle, Vec.create(itemPos.x, itemPos.y));
+                    if ((itemPos.x * 2) > maxX) {
+                        itemPos.x = 0;
+                        itemPos.y += rowSpacing;
+                    }
+                    itemPos.x += colSpacing * 3;
+                }
+
+                itemPos.y += rowSpacing;
+                for (let i = 0; i < 10; i++) {
+                    itemPos.x += colSpacing;
+                    map.game.objectSpawner.addObstacle(Obstacles.fromString('regular_crate'), Vec.create(itemPos.x + 30, itemPos.y));
+                }
+
+                // itemPos.x = 0;
+                // itemPos.y += rowSpacing;
+                // map.game.objectSpawner.addObstacle(Obstacles.fromString('regular_crate'), Vec.create(itemPos.x + 30, itemPos.y));
             }
         };
     })(),
 
+    obstaclesTest: (() => {
+        return {
+            width: 240,
+            height: 240,
+            beachSize: 0,
+            oceanSize: 0,
+            onGenerate(mapGen) {
+                const map = mapGen.game.gameMap;
+                const config = maps[map]; // Or change to maps.fall for the fall map
+                const obstacleTypes = Object.keys(config.obstacles);
 
-    obstaclesTest: {
-        width: 128,
-        height: 128,
-        beachSize: 0,
-        oceanSize: 0,
-        onGenerate(map, [obstacle]) {
-            for (let x = 0; x <= 128; x += 16) {
-                for (let y = 0; y <= 128; y += 16) {
-                    map.generateObstacle(obstacle, Vec.create(x, y));
+                let index = 0;
+                for (let x = 32; x <= 240; x += 32) {
+                    for (let y = 32; y <= 240; y += 32) {
+                        if (index >= obstacleTypes.length) break;
+                        const obstacle = obstacleTypes[index];
+                        console.log("obstacle: ", obstacle);
+                        mapGen.generateObstacle(obstacle, Vec.create(x, y));
+                        index++;
+                    }
+                    if (index >= obstacleTypes.length) break;
                 }
             }
-        }
-    },
+        };
+    })(),
+
     playersTest: {
         width: 256,
         height: 256,

@@ -379,6 +379,11 @@ export class Account extends EIP6963 {
                 [AssetTier.Silver]: {}, // Guns may not have Silver, but included for consistency
                 [AssetTier.Gold]: {},
                 [AssetTier.Divine]: {}
+            },
+            [SurvivAssets.Vehicles]: {
+                [AssetTier.Silver]: {}, 
+                [AssetTier.Gold]: {},
+                [AssetTier.Divine]: {}
             }
         };
 
@@ -396,7 +401,9 @@ export class Account extends EIP6963 {
             6: AssetTier.Divine, // DivineArms
             // Guns
             7: AssetTier.Gold,   // GoldGuns
-            8: AssetTier.Divine  // DivineGuns
+            8: AssetTier.Divine,  // DivineGuns
+            // Vehicles
+            9: AssetTier.Divine,  // DivineVehicles
         };
 
         // Iterate through all SurvivAssets enum values

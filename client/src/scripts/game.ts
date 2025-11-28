@@ -15,7 +15,7 @@ import { PingPacket } from "@common/packets/pingPacket";
 import { UpdatePacket, type UpdatePacketDataOut } from "@common/packets/updatePacket";
 import { CircleHitbox } from "@common/utils/hitbox";
 import { adjacentOrEqualLayer } from "@common/utils/layer";
-import { EaseFunctions, Geometry } from "@common/utils/math";
+import { EaseFunctions, Geometry, Numeric } from "@common/utils/math";
 import { Timeout } from "@common/utils/misc";
 import { ItemType, ObstacleSpecialRoles } from "@common/utils/objectDefinitions";
 import { ObjectPool } from "@common/utils/objectPool";
@@ -59,12 +59,12 @@ import { errorAlert } from "./modal";
 import { Maps, NumberToMode, type MAP } from "@common/definitions/modes";
 import { GAME_CONSOLE } from "..";
 import { resetPlayButtons, updateDisconnectTime } from "./ui/home";
-import { autoPickup, updateChatSendAllVisibility, updateUsersBadge } from "./ui/game";
+import { autoPickup } from "./ui/game";
 import { teamSocket } from "./ui/play";
-import { ClientChatPacket, ServerChatPacket } from "@common/packets/chatPacket";
 import { CustomTeamMessages } from "@common/typings";
 import { FogOfWar } from "./fogOfWar";
 import { RainEffect } from "./rainEffect";
+import { Vehicle } from "./objects/vehicle";
 import { DungeonPacket } from "@common/packets/dungeonPackage";
 import { ConnectPacket } from "@common/packets/connectPacket";
 import { numberByBlockchain } from "@common/blockchain/contracts";
@@ -84,6 +84,7 @@ type ObjectClassMapping = {
     readonly [ObjectCategory.Parachute]: typeof Parachute
     readonly [ObjectCategory.ThrowableProjectile]: typeof ThrowableProjectile
     readonly [ObjectCategory.SyncedParticle]: typeof SyncedParticle
+    readonly [ObjectCategory.Vehicle]: typeof Vehicle
 };
 
 const ObjectClassMapping: ObjectClassMapping = Object.freeze<{
@@ -97,7 +98,8 @@ const ObjectClassMapping: ObjectClassMapping = Object.freeze<{
     [ObjectCategory.Decal]: Decal,
     [ObjectCategory.Parachute]: Parachute,
     [ObjectCategory.ThrowableProjectile]: ThrowableProjectile,
-    [ObjectCategory.SyncedParticle]: SyncedParticle
+    [ObjectCategory.SyncedParticle]: SyncedParticle,
+    [ObjectCategory.Vehicle]: Vehicle,
 });
 
 type ObjectMapping = {
@@ -383,20 +385,6 @@ export class Game {
         }
     }
 
-    sendChatMessage(message: string, isTeamChat: boolean = true) {
-        if (this.teamMode) {
-            this.sendPacket(ClientChatPacket.create({
-                isSendAll: !isTeamChat,
-                message: message
-            }));
-        } else {
-            this.sendPacket(ClientChatPacket.create({
-                isSendAll: true,
-                message: message
-            }));
-        }
-    }
-
     async connectWebSocket(
         url: string,
         totalRetryTime: number = 10000,
@@ -483,7 +471,7 @@ export class Game {
 
         if (this.gameStarted) return;
 
-        if(account?.token) {
+        if (account?.token) {
             // token is expired
             const { exp } = parseJWT(account.token);
             if (new Date().getTime() >= (exp * 1000)) {
@@ -643,9 +631,6 @@ export class Game {
             case packet instanceof KillFeedPacket:
                 this.uiManager.processKillFeedPacket(packet.output);
                 break;
-            case packet instanceof ServerChatPacket:
-                this.uiManager.processChatMessage(packet.output);
-                break;
             case packet instanceof PingPacket: {
                 this.uiManager.debugReadouts.ping.text(`${Date.now() - this.lastPingDate} ms`);
                 setTimeout((): void => {
@@ -749,7 +734,6 @@ export class Game {
         ui.spectateKillLeader.addClass("btn-disabled");
 
         ui.teamContainer.toggle(this.teamMode);
-        updateChatSendAllVisibility(this.teamMode);
     }
 
     async disconnect() {
@@ -900,6 +884,12 @@ export class Game {
                 syncedParticle.updateContainerPosition();
                 syncedParticle.updateContainerRotation();
                 syncedParticle.updateContainerScale();
+            }
+
+            for (const vehicle of this.objects.getCategory(ObjectCategory.Vehicle)) {
+                vehicle.updateContainerPosition();
+                vehicle.updateContainerRotation();
+                vehicle.update(delta);
             }
         }
 
@@ -1143,7 +1133,7 @@ export class Game {
          * - whether the user can interact with it
         */
         const cache: {
-            object?: Loot | Obstacle | Player
+            object?: Loot | Obstacle | Player | Vehicle
             offset?: number
             isAction?: boolean
             bind?: string
@@ -1178,7 +1168,7 @@ export class Game {
             }
 
             interface CloseObject {
-                object?: Loot | Obstacle | Player
+                object?: Loot | Obstacle | Player | Vehicle
                 dist: number
             }
 
@@ -1193,8 +1183,8 @@ export class Game {
             const detectionHitbox = new CircleHitbox(3 * player.sizeMod, player.position);
 
             for (const object of this.objects) {
-                const { isLoot, isObstacle, isPlayer, isBuilding } = object;
-                const isInteractable = (isLoot || isObstacle || isPlayer) && object.canInteract(player);
+                const { isLoot, isObstacle, isPlayer, isBuilding, isVehicle } = object;
+                const isInteractable = (isLoot || isObstacle || isPlayer || isVehicle) && object.canInteract(player);
 
                 if (
                     (isLoot || isInteractable)
@@ -1213,6 +1203,14 @@ export class Game {
                     }
                 } else if (isBuilding) {
                     object.toggleCeiling();
+                } else if (isObstacle && object.definition.material == "tree") {
+                    const {
+                        minDist = 48,
+                        maxDist = 729,
+                        trunkMinAlpha = 0.8,
+                    } = {};
+                    const dist = Geometry.distanceSquared(object.position, player.position);
+                    object.image.alpha = Numeric.remap(dist, minDist, maxDist, trunkMinAlpha, 1);
                 }
             }
 
@@ -1282,6 +1280,10 @@ export class Game {
                                     : getTranslatedString(definition.idString as TranslationKeys);
 
                                 text = `${itemName}${object.count > 1 ? ` (${object.count})` : ""}`;
+                                break;
+                            }
+                            case object?.isVehicle: {
+                                text = getTranslatedString(object.definition.idString as TranslationKeys);
                                 break;
                             }
                             case object?.isPlayer: {

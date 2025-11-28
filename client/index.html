@@ -216,7 +216,7 @@
             <a href=" https://opensea.io/collection/surviv-assets" target="_blank">
               <button class="btn btn-lg btn-darken btn-quests btn-primary" id="btn-single-home">
                 <div class="pulsating-circle" style="display: none"></div>
-                <img src="public/img/misc/opensea.svg" alt="">
+                <img src="/img/misc/opensea.svg" alt="">
                 <span translation="marketplace"></span>
               </button>
             </a>
@@ -247,7 +247,7 @@
               <i class="fa-solid fa-gift"></i>
               <span class="splash-text" translation="inventory"></span>
             </button>
-            
+
             <button class="btn btn-lg btn-darken btn-primary" id="btn-tasks">
               <i class="fa-solid fa-list-check"></i>
               <span translation="daily_quests"></span>
@@ -351,18 +351,9 @@
             </div>
             <div id="kill-feed">
               <div class="kill-feed-item"></div>
-              <div class="chat-feed-item"></div>
             </div>
           </div>
-          <!-- Chat Button -->
-          <div id="chat-btn"><i class="fa-solid fa-comment"></i></div>
 
-          <!-- Chat Box -->
-          <div id="chat-box">
-            <textarea spellcheck="false" id="chat-input" placeholder="Type your message..."></textarea>
-            <button id="chat-send">Send</button>
-            <button id="chat-send-all">All</button>
-          </div>
           <div id="spectating-container">
             <button id="btn-spectate-previous" class="btn btn-lg btn-primary">
               <i class="fa-solid fa-arrow-left"></i>
@@ -378,7 +369,6 @@
           </div>
         </div>
       </div>
-
 
       <button id="btn-emotes" class="emotes-container">
         <i class="fa-solid fa-smile"></i>
@@ -399,6 +389,7 @@
         <kbd id="interact-key"></kbd>
         <span id="interact-text"></span>
       </div>
+
       <div id="center-bottom-container">
         <span id="inventory-message"></span>
         <div id="weapon-ammo-container" style="display: none">
@@ -435,6 +426,20 @@
         </div>
         <div id="gas-msg" style="display: none">
           <div id="gas-msg-info"></div>
+        </div>
+      </div>
+
+      <div id="bottom-left-container">
+
+        <div id="vehicle-speed-bar-container" style="display: none;">
+          <div id="vehicle-speed-bar"></div>
+        </div>
+
+        <div id="vehicle-health-bar-container" style="display: none;">
+          <div id="vehicle-health-bar-animation"></div>
+          <div id="vehicle-health-bar"></div>
+          <span id="vehicle-health-bar-amount"></span>
+          <span id="vehicle-health-bar-max"></span>
         </div>
       </div>
 
@@ -925,6 +930,9 @@
         <button class="tab" id="tab-weapons">
           <i class="fa-solid fa-gun"></i><span class="tab-child" translation="loadout_weapons">Weapons</span>
         </button>
+        <button class="tab" id="tab-vehicles">
+          <i class="fa-solid fa-car"></i><span class="tab-child" translation="loadout_vehicles">Vehicles</span>
+        </button>
         <button class="tab" id="tab-emotes">
           <i class="fa-solid fa-face-smile-wink"></i><span class="tab-child" translation="loadout_emotes"></span>
         </button>
@@ -1068,46 +1076,16 @@
           </div>
 
         </div>
-        <div class="tab-content" id="tab-special-content" style="display: none">
-          <div class="modal-item">
-            Note that the role you are inputting may not exist on the game
-            server configuration.
+
+        <div class="tab-content vehicles-container" id="tab-vehicles-content" style="display: none">
+          <div class="vehicles-container-aside">
+            <svg class="vehicles-container-aside-preview"></svg>
+            <div id="vehicle-info"></div>
           </div>
-          <div class="modal-item">
-            <label>
-              <span class="setting-title">Role Name:</span>
-              <input type="text" class="text-field" id="role-name" />
-            </label>
-          </div>
-          <div class="modal-item">
-            <button class="btn btn-primary btn-lg" onclick="window.location.reload(false)">
-              Login
-            </button>
-          </div>
-          <div class="modal-item">
-            Note that some of these settings may not be avaliable depending on
-            game server configuration.
-          </div>
-          <div class="modal-item">
-            <label>
-              <span class="setting-title">Name Color:</span>
-              <input type="color" id="namecolor-color-picker" value="#000000" />
-            </label>
-          </div>
-          <div class="modal-item checkbox-setting">
-            <label>
-              <span class="setting-title">Developer Cheats</span>
-              <input type="checkbox" id="toggle-lobbyclearing" />
-            </label>
-          </div>
-          <div class="modal-item">
-            <label>
-              <span class="setting-title">Weapon Preset:</span>
-              <input type="text" class="text-field" id="weapon-preset" placeholder="USAGE: Gun1 Gun2 Melee"
-                title="NOTE: Please use valid weapon ids from Guns.ts" />
-            </label>
+          <div class="vehicles-container-list">
           </div>
         </div>
+
       </div>
     </div>
   </div>
