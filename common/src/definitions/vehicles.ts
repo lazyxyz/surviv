@@ -59,13 +59,13 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         scale: 1,
         rotationMode: RotationMode.Limited,
         hitbox: new GroupHitbox(
-            new CircleHitbox(7.8, Vec.create(9, 0)),
+            new CircleHitbox(7.8, Vec.create(8.6, 0)),
             new CircleHitbox(7.6, Vec.create(0, 0)),
-            new CircleHitbox(7.8, Vec.create(-9, 0)),
+            new CircleHitbox(7.8, Vec.create(-8.6, 0)),
 
             // front hood
-            new CircleHitbox(4, Vec.create(12.2, -5)),
-            new CircleHitbox(4, Vec.create(12.2, 5)),
+            new CircleHitbox(4, Vec.create(12.2, -4.8)),
+            new CircleHitbox(4, Vec.create(12.2, 4.8)),
         ),
         bulletHitbox: new GroupHitbox(
             new CircleHitbox(7, Vec.create(7.4, 0)),
@@ -108,18 +108,16 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         scale: 1,
         rotationMode: RotationMode.Limited,
         hitbox: new GroupHitbox(
-            new CircleHitbox(3.2, Vec.create(11, 0)),
-            new CircleHitbox(3.8, Vec.create(4.6, 0)),
-            new CircleHitbox(4.6, Vec.create(0, 0)),
-            new CircleHitbox(3.4, Vec.create(-9, 0)),
+            new CircleHitbox(4.4, Vec.create(9, 0)),
+            new CircleHitbox(5.0, Vec.create(0, 0)),
 
             // Front Wheels
             new CircleHitbox(2.5, Vec.create(11.2, -4.6)),
             new CircleHitbox(2.5, Vec.create(11.2, 4.6)),
 
             // Back Wheels
-            new CircleHitbox(3, Vec.create(-8.2, -4.8)),
-            new CircleHitbox(3, Vec.create(-8.2, 4.8)),
+            new CircleHitbox(4, Vec.create(-8.2, -4)),
+            new CircleHitbox(4, Vec.create(-8.2, 4)),
 
         ),
         bulletHitbox: new GroupHitbox(

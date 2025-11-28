@@ -86,7 +86,7 @@ const showViewBox = (vehicleId: string, isOwned: boolean) => {
   const fistXOffset = 30; // Relative offset for fists
   const fistYOffset = 25; // Relative offset for fists
 
-  const vehicleScale = 0.5;
+  const vehicleScale = 0.6;
   const wheelScale = 1.1 * vehicleScale;
 
   // Generate asset configuration
@@ -149,7 +149,7 @@ const showViewBox = (vehicleId: string, isOwned: boolean) => {
 
   // Update vehicle info panel
   $("#vehicle-info").html(`
-    <div class="vehicle-title">${vehicle.name}${isOwned? ' <span class="weapon-title-state">(Locked)</span>' : ''}</div>
+    <div class="vehicle-title">${vehicle.name}${isOwned ? ' <span class="weapon-title-state">(Locked)</span>' : ''}</div>
     <div class="row-stats">
       <div class="row-section">
         <p class="stat-type">Health:</p>
@@ -157,7 +157,7 @@ const showViewBox = (vehicleId: string, isOwned: boolean) => {
       </div>
       <div class="row-section">
         <p class="stat-type">Max Speed:</p>
-        <span class="stat-value">${vehicle.maxSpeed ?? "N/A"}</span>
+        <span class="stat-value">${vehicle.maxSpeed * 1500}</span>
       </div>
     </div>
   `);

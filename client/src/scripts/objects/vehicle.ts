@@ -206,7 +206,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
         if (!this.engineSound || this.engineSound.ended) {
             this.engineSound = this.playSound(`${this.definition.base}_engine_loop`, {
-                falloff: 0.5,
+                falloff: 0.8,
                 maxRange: 200,
                 layer: this.layer,
                 loop: true,
@@ -245,7 +245,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
         }
 
         // BRAKE SQUEAL (optional: hard brake only, blends with skid)
-        if (this.throttle < -0.2 && this.speed > (this.definition.maxSpeed * 0.7)) {
+        if (this.throttle < -0.2 && this.speed > (this.definition.maxSpeed * 0.6)) {
             if (!this.brakeSound || this.brakeSound.ended) {
                 this.brakeSound = this.playSound(`vehicle_brake_loop`, {
                     falloff: 1,

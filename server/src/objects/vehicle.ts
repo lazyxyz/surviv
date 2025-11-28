@@ -44,15 +44,15 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private velocityThreshold = 0.0001; // Squared speed threshold for "moving" (fine-grained stop detection)
     private maxBounceDist = 1; // Max depenetration distance per step (prevents unrealistic far jumps)
     private baseDamage; // Base factor for collision damage calculation
-    private deadImpact = 0.3; // When obstacle dies, reduce bounce/speed loss by 70% (plow through debris with less resistance)
+    private readonly deadImpact = 0.3; // When obstacle dies, reduce bounce/speed loss by 70% (plow through debris with less resistance)
     floor = FloorNames.Water;
-    private minMoveSpeedSq = 0.02;
 
-    private _minDamageSpeed = 0.06;
-    private _minRunOverDamageSpeed = 0.04;
+    private readonly minMoveSpeedSq = 0.015;
+    private readonly _minDamageSpeed = 0.06;
+    private readonly _minRunOverDamageSpeed = 0.05;
 
-    private _minDamageImpactLevel = 0.05;
-    private _minDamageCrashLevel = 0.065;
+    private readonly _minDamageImpactLevel = 0.065;
+    private readonly _minDamageCrashLevel = 0.065;
 
     private _driver: Player | undefined;
     set driver(driver: Player | undefined) { this._driver = driver; }
@@ -231,7 +231,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private handleCollision(potential: GameObject): boolean {
         if (potential.hitbox && this.hitbox.collidesWith(potential.hitbox)) {
             const potentialMaterial = potential.isObstacle && potential.definition.material;
-            const isRunOver = potential.isPlayer || (potentialMaterial && RunOverMaterialsSet.has(potentialMaterial));
+            const isRunOver = potentialMaterial && RunOverMaterialsSet.has(potentialMaterial);
             // Calculate adjustment to resolve penetration
             const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.5);
             // Clamp adjustment magnitude to prevent far jumps
@@ -240,7 +240,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             const effectiveAdjust = adjustLen > 0 ? Vec.scale(adjust, Math.min(adjustLen, this.maxBounceDist) / adjustLen) : Vec.create(0, 0);
 
             if (potential.isVehicle && !potential._start) {
-                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 1)));
+                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 0.8)));
             };
 
             this.position = Vec.sub(this.position, effectiveAdjust);
@@ -251,10 +251,10 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             if (speed > (isRunOver ? this._minRunOverDamageSpeed : this._minDamageSpeed)) { // Threshold: only apply effects if fast enough
                 const normal = Vec.normalizeSafe(adjust); // Direction of push (from obstacle to vehicle)
                 const impactVel = Vec.dotProduct(this.velocity, normal); // Component along normal (negative if approaching)
-                if (impactVel > this._minDamageImpactLevel) { // Approaching (threshold; note sign convention assuming dir points out)
+                if (isRunOver || impactVel > this._minDamageImpactLevel) { // Approaching (threshold; note sign convention assuming dir points out)
                     let materialFactor = 1.0;
-                    if (isRunOver) {
-                        const damageToSoft = Math.abs(impactVel) * this.baseDamage * 10;
+                    if (isRunOver || potential.isPlayer) {
+                        const damageToSoft = Math.abs(impactVel) * this.baseDamage * (potential.isPlayer ? 3 : 10);
                         potential.damage({
                             amount: damageToSoft,
                             source: this.driver,

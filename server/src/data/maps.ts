@@ -1030,17 +1030,22 @@ const maps = {
 
                 for (const vehicle of Vehicles.definitions) {
                     map.game.objectSpawner.addVehicle(vehicle, Vec.create(itemPos.x, itemPos.y));
-                    if (itemPos.x > maxX) {
+                    if ((itemPos.x * 2) > maxX) {
                         itemPos.x = 0;
-
                         itemPos.y += rowSpacing;
                     }
-                    itemPos.x += colSpacing * 2.5;
+                    itemPos.x += colSpacing * 3;
                 }
 
-                itemPos.x = 0;
                 itemPos.y += rowSpacing;
-                map.game.objectSpawner.addObstacle(Obstacles.fromString('regular_crate'), Vec.create(itemPos.x + 30, itemPos.y));
+                for (let i = 0; i < 10; i++) {
+                    itemPos.x += colSpacing;
+                    map.game.objectSpawner.addObstacle(Obstacles.fromString('regular_crate'), Vec.create(itemPos.x + 30, itemPos.y));
+                }
+
+                // itemPos.x = 0;
+                // itemPos.y += rowSpacing;
+                // map.game.objectSpawner.addObstacle(Obstacles.fromString('regular_crate'), Vec.create(itemPos.x + 30, itemPos.y));
             }
         };
     })(),
