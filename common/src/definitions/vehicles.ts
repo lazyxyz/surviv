@@ -49,6 +49,7 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly baseDamage: number;
     readonly frictionFactor: number;
     readonly hitSoundVariations?: number
+    readonly smokeOffset?: Vector;
 }
 
 export const DEFAULT_VEHICLES: string[] = ["rover", "buggy"];
@@ -101,6 +102,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
             { offset: Vec.create(-11.2, 3.5), type: SeatType.Passenger, exitOffset: Vec.create(0, 10) }
         ],
 
+        smokeOffset: Vec.create(14, 0),
         baseDamage: 35
     },
 
@@ -152,6 +154,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
             { offset: Vec.create(1.4, 0), type: SeatType.Driver, exitOffset: Vec.create(0, -10) },
             { offset: Vec.create(-10, 0), type: SeatType.Passenger, exitOffset: Vec.create(0, -10) }
         ],
+        smokeOffset: Vec.create(12, 0),
     }
 };
 
