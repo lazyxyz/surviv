@@ -197,7 +197,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             if (!this.skidSound || this.skidSound.ended) {
                 this.skidSound = this.playSound(`${this.definition.base}_skid_loop`, {
                     falloff: 0.8,
-                    maxRange: 100,
+                    maxRange: 25,
                     layer: this.layer,
                     loop: true,
                     dynamic: true,
@@ -515,7 +515,6 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
 
     hitEffect(position: Vector, angle: number): void {
         if (!this.definition.hitSoundVariations) this.hitSound?.stop();
-
         const { material } = this.definition;
         if (material)
             this.hitSound = this.game.soundManager.play(
