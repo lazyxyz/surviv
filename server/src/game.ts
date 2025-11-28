@@ -214,7 +214,7 @@ export class Game implements GameData {
             { map: "desert", rainChance: 0 },
             { map: "fall", rainChance: 0.5 },
             { map: "winter", rainChance: 0.5 },
-            { map: "cursedIsland", rainChance: 1 },
+            // { map: "cursedIsland", rainChance: 1 },
         ];
 
         const selectedConfig = configs[(Math.random() * configs.length) | 0];
@@ -233,12 +233,9 @@ export class Game implements GameData {
         this.gameMode = maxTeamSize;
         this.gameId = gameId;
        
-        this.gameMap = "fall";
-        this.rainDrops = 0;
-
-        // const randMap = this.getRandomMap();
-        // this.gameMap = randMap.map;
-        // this.rainDrops = randMap.rainDrops;
+        const randMap = this.getRandomMap();
+        this.gameMap = randMap.map;
+        this.rainDrops = randMap.rainDrops;
 
         this.teamMode = this.gameMode > MODE.Solo;
         this.updateGameData({

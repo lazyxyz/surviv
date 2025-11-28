@@ -51,7 +51,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
     private readonly _minDamageSpeed = 0.06;
     private readonly _minRunOverDamageSpeed = 0.05;
 
-    private readonly _minDamageImpactLevel = 0.065;
+    private readonly _minDamageImpactLevel = 0.055;
     private readonly _minDamageCrashLevel = 0.065;
 
     private _driver: Player | undefined;
@@ -240,7 +240,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             const effectiveAdjust = adjustLen > 0 ? Vec.scale(adjust, Math.min(adjustLen, this.maxBounceDist) / adjustLen) : Vec.create(0, 0);
 
             if (potential.isVehicle && !potential._start) {
-                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 0.8)));
+                potential.setPosition(Vec.add(potential.position, Vec.scale(effectiveAdjust, 1)));
             };
 
             this.position = Vec.sub(this.position, effectiveAdjust);
@@ -254,7 +254,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 if (isRunOver || impactVel > this._minDamageImpactLevel) { // Approaching (threshold; note sign convention assuming dir points out)
                     let materialFactor = 1.0;
                     if (isRunOver || potential.isPlayer) {
-                        const damageToSoft = Math.abs(impactVel) * this.baseDamage * (potential.isPlayer ? 3 : 10);
+                        const damageToSoft = Math.abs(impactVel) * this.baseDamage * (potential.isPlayer ? 4 : 20);
                         potential.damage({
                             amount: damageToSoft,
                             source: this.driver,

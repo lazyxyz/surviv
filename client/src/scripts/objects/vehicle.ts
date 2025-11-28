@@ -321,7 +321,7 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
     private playShiftSound(): void {
         if (!this.shiftSound || this.shiftSound.ended) {
             this.shiftSound = this.playSound(`${this.definition.base}_gear_shift`, {
-                falloff: 0.6,
+                falloff: 1,
                 maxRange: 150,
                 layer: this.layer,
                 loop: false,

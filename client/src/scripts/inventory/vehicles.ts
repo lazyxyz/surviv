@@ -149,7 +149,7 @@ const showViewBox = (vehicleId: string, isOwned: boolean) => {
 
   // Update vehicle info panel
   $("#vehicle-info").html(`
-    <div class="vehicle-title">${vehicle.name}${isOwned ? ' <span class="weapon-title-state">(Locked)</span>' : ''}</div>
+    <div class="vehicle-title">${vehicle.name}${!isOwned ? ' <span class="weapon-title-state">(Locked)</span>' : ''}</div>
     <div class="row-stats">
       <div class="row-section">
         <p class="stat-type">Health:</p>

@@ -1218,7 +1218,7 @@ export const Obstacles = ObjectDefinitions.withDefault<ObstacleDefinition>()(
             {
                 idString: "wood_barrel",
                 name: "Wood Barrel",
-                material: "wood",
+                material: "crate",
                 health: 120,
                 scale: { spawnMin: 1, spawnMax: 1, destroy: 0.7 },
                 hitbox: new CircleHitbox(4.45),
