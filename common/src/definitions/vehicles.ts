@@ -77,7 +77,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         health: 1092,
         reflectBullets: true,
         material: Materials[5],
-        explosion: "super_barrel_explosion",
+        explosion: "vehicle_explosion",
         spawnMode: MapObjectSpawnMode.Trail,
         zIndex: ZIndexes.Vehicles,
         maxSpeed: 0.077,
@@ -131,7 +131,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         health: 765,
         reflectBullets: true,
         material: Materials[5],
-        explosion: "super_barrel_explosion",
+        explosion: "vehicle_explosion",
         spawnMode: MapObjectSpawnMode.Trail,
         zIndex: ZIndexes.Vehicles,
 

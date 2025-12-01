@@ -29,6 +29,35 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
     "Explosions",
     { ballistics: defaultBulletTemplate },
     () => [
+        // vehicle explosion
+        {
+            name: "vehicle",
+            damage: 95,
+            obstacleMultiplier: 1,
+            radius: {
+                min: 8,
+                max: 25
+            },
+            cameraShake: {
+                duration: 500,
+                intensity: 100
+            },
+            animation: {
+                duration: 1500,
+                tint: 0xff0000,
+                scale: 2.5
+            },
+            shrapnelCount: 20,
+            ballistics: {
+                damage: 4,
+                obstacleMultiplier: 2,
+                speed: 0.08,
+                range: 30,
+                rangeVariance: 1,
+                shrapnel: true
+            },
+            sound: "vehicle_explosion"
+        },
         {
             name: "Barrel",
             damage: 90,
@@ -162,7 +191,8 @@ export const Explosions = ObjectDefinitions.withDefault<ExplosionDefinition>()(
                 range: 30,
                 rangeVariance: 1,
                 shrapnel: true
-            }
+            },
+            sound: "frag_grenade"
         },
         {
             name: "Small Refinery Barrel",
