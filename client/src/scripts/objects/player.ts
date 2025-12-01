@@ -2,7 +2,7 @@ import { AnimationType, GameConstants, InputActions, Layer, ObjectCategory, Play
 import { Ammos } from "@common/definitions/ammos";
 import { type ArmorDefinition } from "@common/definitions/armors";
 import { type BackpackDefinition } from "@common/definitions/backpacks";
-import {  type GunDefinition, type SingleGunNarrowing } from "@common/definitions/guns";
+import { type GunDefinition, type SingleGunNarrowing } from "@common/definitions/guns";
 import { HealType, type HealingItemDefinition } from "@common/definitions/healingItems";
 import { Loots, type WeaponDefinition } from "@common/definitions/loots";
 import { DEFAULT_HAND_RIGGING, type MeleeDefinition } from "@common/definitions/melees";
@@ -1461,7 +1461,7 @@ export class Player extends GameObject.derive(ObjectCategory.Player) {
                                     && (
                                         (
                                             object.damageable
-                                            && (object.isObstacle || object.isPlayer || object.isBuilding)
+                                            && (object.isObstacle || object.isPlayer || object.isBuilding || object.isVehicle)
                                         )
                                     )
                                     && object.hitbox?.collidesWith(hitbox)

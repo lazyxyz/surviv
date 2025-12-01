@@ -103,7 +103,8 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         ],
 
         smokeOffset: Vec.create(14, 0),
-        baseDamage: 35
+        baseDamage: 35,
+        hitSoundVariations: 2
     },
 
     buggy: {
