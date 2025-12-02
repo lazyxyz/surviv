@@ -191,35 +191,37 @@ export class SoundManager {
     }
 
     loadSounds(gameMap: MAP): void {
-        for (const path in import.meta.glob(["/public/audio/sfx/**/*.mp3", "/public/audio/ambience/**/*.mp3"])) {
-            /**
-             * For some reason, PIXI will call the `loaded` callback twice
-             * when an error occurs…
-             */
-            let called = false;
+        for (const path in import.meta.glob([
+            "/public/audio/sfx/**/*.mp3",
+            "/public/audio/ambience/**/*.mp3"
+        ], { eager: false })) {   // keep lazy so Vite gives real paths
 
-            const name = path.slice(path.lastIndexOf("/") + 1, -4); // removes path and extension
-            let url = path.slice(7); // removes the "/public"
+            let called = false;
+            const name = path.slice(path.lastIndexOf("/") + 1, -4);
+            let url = path.slice(7); // remove "/public"
+
             const mode = Maps[gameMap];
             if (mode.specialSounds?.includes(name)) {
                 url = url.replace(name, `${name}_${mode.reskin}`);
             }
 
-            PixiSound.sound.add(
-                name,
-                {
-                    url,
-                    preload: true,
-                    loaded(error: Error | null) {
-                        // despite what the pixi typings say, logging `error` shows that it can be null
-                        if (error !== null && !called) {
-                            called = true;
-                            console.warn(`Failed to load sound '${name}' (path '${url}')\nError object provided below`);
-                            console.error(error);
-                        }
+            // This is the fix:
+            if (PixiSound.sound.exists(name)) {
+                // already loaded → skip
+                continue;
+            }
+
+            PixiSound.sound.add(name, {
+                url,
+                preload: true,
+                loaded: (error: Error | null) => {
+                    if (error !== null && !called) {
+                        called = true;
+                        console.warn(`Failed to load sound '${name}' (path '${url}')`);
+                        console.error(error);
                     }
                 }
-            );
+            });
         }
     }
 }

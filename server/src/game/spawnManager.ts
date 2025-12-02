@@ -109,7 +109,6 @@ export class SpawnManager {
                     this.game.teams.add(team = new Team(this.game.nextTeamID));
                 }
 
-                console.log("TEAM: ", team.id);
             } else if (teamID && !roomMode) {
                 team = this.game.teamsMapping.get(teamID);
                 if (
