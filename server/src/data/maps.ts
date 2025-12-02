@@ -1066,7 +1066,6 @@ const maps = {
                     for (let y = 32; y <= 240; y += 32) {
                         if (index >= obstacleTypes.length) break;
                         const obstacle = obstacleTypes[index];
-                        console.log("obstacle: ", obstacle);
                         mapGen.generateObstacle(obstacle, Vec.create(x, y));
                         index++;
                     }

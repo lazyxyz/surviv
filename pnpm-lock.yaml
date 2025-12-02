@@ -56,7 +56,7 @@ importers:
         version: 6.7.2
       '@pixi/sound':
         specifier: ^6.0.1
-        version: 6.0.1(pixi.js@8.11.0)
+        version: 6.0.1(pixi.js@8.14.3)
       '@walletconnect/ethereum-provider':
         specifier: ^2.21.8
         version: 2.21.8(react@18.3.1)(typescript@5.8.3)(zod@3.22.4)
@@ -74,13 +74,13 @@ importers:
         version: 0.10.2
       pixi-dashed-line:
         specifier: ^1.4.2
-        version: 1.4.2(pixi.js@8.11.0)
+        version: 1.4.2(pixi.js@8.14.3)
       pixi-filters:
-        specifier: ^6.0.5
-        version: 6.1.4(pixi.js@8.11.0)
+        specifier: ^6.1.5
+        version: 6.1.5(pixi.js@8.14.3)
       pixi.js:
-        specifier: ^8.6.6
-        version: 8.11.0
+        specifier: ^8.14.3
+        version: 8.14.3
     devDependencies:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^5.0.3
@@ -2534,13 +2534,13 @@ packages:
     peerDependencies:
       pixi.js: ^6.2.2
 
-  pixi-filters@6.1.4:
-    resolution: {integrity: sha512-6QdkhR8hZ/jXyV7GZG8R0UKkRy9jPeZsOnHaQiKSFEe4tGJ4PfUG90vaC9eyi7g+YKxhKLpNOXu6tmO1+R2tpQ==}
+  pixi-filters@6.1.5:
+    resolution: {integrity: sha512-Ewb/J+kxAbaNN+0/ATJbglAJG+skGJfh7BIDP3ILIDdD6wWk1p0pGa25pVf1T8hGBOQSUNVAmwwJBwkj+cyLLA==}
     peerDependencies:
       pixi.js: '>=8.0.0-0'
 
-  pixi.js@8.11.0:
-    resolution: {integrity: sha512-dyuThzncsgEgJZnvd/A/5x6IkUERbK+phXqUQrI+0C6WE+8xqGH5VChRTLecemhgZF0kQ+gZOM3tJTX9937xpg==}
+  pixi.js@8.14.3:
+    resolution: {integrity: sha512-6xGYARV8D9E/fO1c2NmYn+k2dQ5oZldVm5tNlLQJ8obTlOQXdL5QpMc217qTpRyHVDFaw5eoFCLF1gr6p5ZcjQ==}
 
   plimit-lit@1.6.1:
     resolution: {integrity: sha512-B7+VDyb8Tl6oMJT9oSO2CW8XC/T4UcJGrwOVoNGwOQsQYhlpfajmrMj5xeejqaASq3V/EqThyOeATEOMuSEXiA==}
@@ -2974,6 +2974,10 @@ packages:
 
   thread-stream@0.15.2:
     resolution: {integrity: sha512-UkEhKIg2pD+fjkHQKyJO3yoIvAP3N6RlNFt2dUhcS1FGvCD1cQa1M/PGknCLFIyZdtJOWQjejp7bdNqmN7zwdA==}
+
+  tiny-lru@11.4.5:
+    resolution: {integrity: sha512-hkcz3FjNJfKXjV4mjQ1OrXSLAehg8Hw+cEZclOVT+5c/cWQWImQ9wolzTjth+dmmDe++p3bme3fTxz6Q4Etsqw==}
+    engines: {node: '>=12'}
 
   tinydate@1.3.0:
     resolution: {integrity: sha512-7cR8rLy2QhYHpsBDBVYnnWXm8uRTr38RoZakFSW7Bs7PzfMPNZthuMLkwqZv7MTu8lhQ91cOFYS5a7iFj2oR3w==}
@@ -3961,9 +3965,9 @@ snapshots:
 
   '@pixi/colord@2.9.6': {}
 
-  '@pixi/sound@6.0.1(pixi.js@8.11.0)':
+  '@pixi/sound@6.0.1(pixi.js@8.14.3)':
     dependencies:
-      pixi.js: 8.11.0
+      pixi.js: 8.14.3
 
   '@polka/url@1.0.0-next.29': {}
 
@@ -6219,16 +6223,16 @@ snapshots:
       sonic-boom: 2.8.0
       thread-stream: 0.15.2
 
-  pixi-dashed-line@1.4.2(pixi.js@8.11.0):
+  pixi-dashed-line@1.4.2(pixi.js@8.14.3):
     dependencies:
-      pixi.js: 8.11.0
+      pixi.js: 8.14.3
 
-  pixi-filters@6.1.4(pixi.js@8.11.0):
+  pixi-filters@6.1.5(pixi.js@8.14.3):
     dependencies:
       '@types/gradient-parser': 0.1.5
-      pixi.js: 8.11.0
+      pixi.js: 8.14.3
 
-  pixi.js@8.11.0:
+  pixi.js@8.14.3:
     dependencies:
       '@pixi/colord': 2.9.6
       '@types/css-font-loading-module': 0.0.12
@@ -6240,6 +6244,7 @@ snapshots:
       gifuct-js: 2.1.2
       ismobilejs: 1.1.1
       parse-svg-path: 0.1.2
+      tiny-lru: 11.4.5
 
   plimit-lit@1.6.1:
     dependencies:
@@ -6745,6 +6750,8 @@ snapshots:
   thread-stream@0.15.2:
     dependencies:
       real-require: 0.1.0
+
+  tiny-lru@11.4.5: {}
 
   tinydate@1.3.0: {}
 

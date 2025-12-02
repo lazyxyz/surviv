@@ -346,7 +346,6 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
      */
     private updateDefinitionAndState(data: ObjectsNetData[ObjectCategory.Vehicle]): void {
         if (data.full?.definition) {
-            console.log("FULL!");
             this.layer = data.full.layer;
             this.definition = data.full.definition;
             const wheelConfig = this.definition.wheels;
