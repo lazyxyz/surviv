@@ -83,7 +83,7 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         maxSpeed: 0.077,
         acceleration: 6000, // 6s to reach full speed
         maxSteerAngle: Math.PI / 5,
-        steerRate: Math.PI * 0.7,
+        steerRate: Math.PI * 0.8,
         drag: 0.45,
 
         frictionFactor: 0.75,

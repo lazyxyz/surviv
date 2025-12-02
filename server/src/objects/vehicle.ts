@@ -233,7 +233,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             const potentialMaterial = potential.isObstacle && potential.definition.material;
             const isRunOver = potentialMaterial && RunOverMaterialsSet.has(potentialMaterial);
             // Calculate adjustment to resolve penetration
-            const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.5);
+            // const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.5);
+            const adjust = this.hitbox.getAdjustment(potential.hitbox, 1);
             // Clamp adjustment magnitude to prevent far jumps
             const adjustLen = Vec.length(adjust);
 
@@ -313,7 +314,8 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                     if (impactVel > this._minDamageCrashLevel) this._playCrashSound = true;
                     return true;
                 }
-            } else if (!potential.isPlayer) {
+            }
+            else if (!potential.isPlayer) {
                 this.velocity = Vec.create(0, 0);
             }
         }

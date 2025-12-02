@@ -381,8 +381,8 @@ const maps = {
             { name: "Darkwood", position: Vec.create(0.5, 0.65) }
         ],
         vehicles: {
-            buggy: 3,
-            rover: 3,
+            buggy: 10,
+            rover: 10,
         }
     },
 
@@ -517,8 +517,8 @@ const maps = {
             { name: "Deepwood", position: Vec.create(0.5, 0.65) }
         ],
         vehicles: {
-            buggy: 3,
-            rover: 3,
+            buggy: 10,
+            rover: 10,
         }
     },
 
@@ -627,8 +627,8 @@ const maps = {
             { name: "Shadow Sands", position: Vec.create(0.5, 0.65) }
         ],
         vehicles: {
-            buggy: 3,
-            rover: 3,
+            buggy: 10,
+            rover: 10,
         }
     },
 
@@ -1066,7 +1066,6 @@ const maps = {
                     for (let y = 32; y <= 240; y += 32) {
                         if (index >= obstacleTypes.length) break;
                         const obstacle = obstacleTypes[index];
-                        console.log("obstacle: ", obstacle);
                         mapGen.generateObstacle(obstacle, Vec.create(x, y));
                         index++;
                     }

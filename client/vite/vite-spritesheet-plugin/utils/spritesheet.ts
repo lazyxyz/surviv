@@ -131,7 +131,6 @@ export async function createSpritesheets(pathMap: Map<string, { lastModified: nu
             );
         }
         writeFromStart(`Added ${length} images to packer`);
-        console.log("");
 
         const atlases: AtlasList = [];
 
