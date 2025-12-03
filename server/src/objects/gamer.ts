@@ -57,19 +57,65 @@ export class Gamer extends Player {
         }
     }
 
+    // override kill(source: Player) {
+    //     if (!source.isBot()
+    //         && source instanceof Gamer
+    //         && source.address !== this.address
+    //         && source.ip !== this.ip
+    //     ) {
+    //         if (source.rewardsBoost > 0) {
+    //             this._bounties++;
+    //         }
+    //         this._kills++;
+    //         this.dirty.modifiers = true;
+    //         this.game.updateKillLeader(this);
+    //     }
+    // }
+
     override kill(source: Player) {
-        if (!source.isBot()
-            && source instanceof Gamer
-            && source.address !== this.address
-            && source.ip !== this.ip
-        ) {
-            if (source.rewardsBoost > 0) {
-                this._bounties++;
-            }
-            this._kills++;
-            this.dirty.modifiers = true;
-            this.game.updateKillLeader(this);
+        console.log("[KILL DEBUG] kill() called on", this.name ?? this.address);
+        console.log("[KILL DEBUG] source:", {
+            name: source.name ?? "unknown",
+            isBot: source.isBot(),
+            isGamer: source instanceof Gamer,
+            address: source.address,
+            ip: source.ip,
+        });
+
+        if (source.isBot()) {
+            console.log("→ Kill NOT counted: source is a bot");
+            return;
         }
+
+        if (!(source instanceof Gamer)) {
+            console.log("→ Kill NOT counted: source is not a Gamer instance");
+            return;
+        }
+
+        if (source.address === this.address) {
+            console.log("→ Kill NOT counted: same address (probably suicide or clone)");
+            return;
+        }
+
+        if (source.ip !== undefined && source.ip === this.ip) {
+            console.log("→ Kill NOT counted: same IP address (multi-box prevention)");
+            return;
+        }
+
+        // If we get here, the kill SHOULD be counted
+        console.log("✓ Kill conditions passed – counting kill");
+
+        if (source.rewardsBoost > 0) {
+            console.log(`   +1 bounty (source has rewardsBoost = ${source.rewardsBoost})`);
+            this._bounties++;
+        }
+
+        console.log(`   +1 kill (total kills: ${this._kills + 1})`);
+        this._kills++;
+        this.dirty.modifiers = true;
+        this.game.updateKillLeader(this);
+
+        console.log("[KILL DEBUG] Kill processed successfully\n");
     }
 
     secondUpdate(): void {
