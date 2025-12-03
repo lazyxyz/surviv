@@ -18,6 +18,7 @@ export const enum GasMode {
 
 export const Config = {
     host: "127.0.0.1",
+    ipHeader: "CF-Connecting-IP",
     port: 8000,
     soloPort: 8001,
     squadPort: 9001,
