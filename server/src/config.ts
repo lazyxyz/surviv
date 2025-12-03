@@ -18,6 +18,7 @@ export const enum GasMode {
 
 export const Config = {
     host: "127.0.0.1",
+    ipHeader: "x-forwarded-for",
     port: 8000,
     soloPort: 8001,
     squadPort: 9001,
@@ -35,7 +36,7 @@ export const Config = {
     maxGames: 20,
     gameJoinTime: 90,
 
-    objectLifetime: 180000, // Remove loot after 3 mins
+    // objectLifetime: 180000, // Remove loot after 3 mins
     // obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
 
     gas: { mode: GasMode.Normal },
