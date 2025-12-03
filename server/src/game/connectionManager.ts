@@ -34,6 +34,7 @@ export class ConnectionManager {
                 res.onAborted((): void => { /* Handle errors in WS connection */ });
 
                 const ip = getIP(res, req);
+                console.log("Player IP: ", ip);
 
                 // Extract token from Authorization header
                 const searchParams = new URLSearchParams(req.getQuery());
