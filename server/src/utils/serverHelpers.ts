@@ -28,23 +28,6 @@ export function forbidden(resp: HttpResponse): void {
 
 export const textDecoder = new TextDecoder();
 
-// export function getIP(res: HttpResponse, req: HttpRequest): string {
-//     return (Config.ipHeader && req.getHeader(Config.ipHeader)) || textDecoder.decode(res.getRemoteAddressAsText());
-// }
-
-
 export function getIP(res: HttpResponse, req: HttpRequest): string {
-    let ip = Config.ipHeader && req.getHeader(Config.ipHeader);
-
-    // If X-Forwarded-For, parse the FIRST IP (real client)
-    if (Config.ipHeader === "x-forwarded-for" && ip) {
-        ip = ip.split(",")[0]?.trim() || ip;
-    }
-
-    // Validate it's a real IP (optional but recommended)
-    if (ip && !ip.match(/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/)) {
-        ip = undefined;  // Invalid → fallback
-    }
-
-    return ip || textDecoder.decode(res.getRemoteAddressAsText()) || "127.0.0.1";
+    return (Config.ipHeader && req.getHeader(Config.ipHeader)) || textDecoder.decode(res.getRemoteAddressAsText());
 }

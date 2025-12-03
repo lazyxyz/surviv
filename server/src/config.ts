@@ -18,7 +18,7 @@ export const enum GasMode {
 
 export const Config = {
     host: "127.0.0.1",
-    ipHeader: "True-Client-IP",
+    ipHeader: "x-forwarded-for",
     port: 8000,
     soloPort: 8001,
     squadPort: 9001,
