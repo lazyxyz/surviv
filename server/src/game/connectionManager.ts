@@ -33,8 +33,13 @@ export class ConnectionManager {
             upgrade: (res, req, context) => {
                 res.onAborted((): void => { /* Handle errors in WS connection */ });
 
+
+                console.log("[IP DEBUG] Config.ipHeader:", Config.ipHeader);
+                console.log("[IP DEBUG] True-Client-IP header:", req.getHeader("true-client-ip"));
+                console.log("[IP DEBUG] X-Forwarded-For header:", req.getHeader("x-forwarded-for"));
+                console.log("[IP DEBUG] getIP result:", getIP(res, req));
+
                 const ip = getIP(res, req);
-                console.log("Player IP: ", ip);
 
                 // Extract token from Authorization header
                 const searchParams = new URLSearchParams(req.getQuery());
