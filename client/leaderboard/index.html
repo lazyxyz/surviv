@@ -132,7 +132,7 @@
             </div>
           </div>
           <div id="rewards-image" class="hidden text-center mt-6">
-            <img src="../img/news/rewards.png" alt="Season Rewards" class="max-w-full h-auto mx-auto" />
+            <img src="../img/backgrounds/rewards.webp" alt="Season Rewards" class="max-w-full h-auto mx-auto" />
           </div>
           <div id="loading" class="text-center text-[#ffd23a] font-semibold mt-6 hidden">Loading...</div>
           <div id="error" class="text-center text-red-400 font-semibold mt-6 hidden"></div>
@@ -144,12 +144,12 @@
     // Seasons configuration
     const seasons = [
       {
-        id: "3",
-        name: "Season III",
-        title: "Comming Soon!",
-        api: "https://admin.surviv.fun/stats/playerRankingsByDate?startDate=2025-12-12T00:00:00Z&endDate=2026-02-01T00:00:00Z",
-        icon: "../img/logos/surviv_round.svg",
-        playerPointsApi: "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}&startDate=2025-12-12T00:00:00Z&endDate=2026-02-01T00:00:00Z"
+        "id": "3",
+        "name": "Season III",
+        "title": "20 Dec 2025 - 1 Feb 2026",
+        "api": "https://admin.surviv.fun/stats/playerRankingsByDate?startDate=2025-12-20T00:00:00Z&endDate=2026-02-01T00:00:00Z",
+        "icon": "../img/logos/surviv_round.svg",
+        "playerPointsApi": "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}&startDate=2025-12-20T00:00:00Z&endDate=2026-02-01T00:00:00Z"
       },
       {
         id: "2",
@@ -256,9 +256,8 @@
       const button = document.createElement('button');
       // Highlight selected season with yellow background and border
       const isSelected = selectedSeason && s.id.toLowerCase() === selectedSeason.id.toLowerCase();
-      button.className = `btn-darken flex p-1 pl-2 pr-4 items-center justify-center gap-1 rounded-[10px] m-auto ${
-        isSelected ? 'bg-yellow-400/20 border border-yellow-400/60 text-yellow-300' : ''
-      }`;
+      button.className = `btn-darken flex p-1 pl-2 pr-4 items-center justify-center gap-1 rounded-[10px] m-auto ${isSelected ? 'bg-yellow-400/20 border border-yellow-400/60 text-yellow-300' : ''
+        }`;
 
       button.id = `season-${s.id.toLowerCase()}-button`;
       button.innerHTML = `

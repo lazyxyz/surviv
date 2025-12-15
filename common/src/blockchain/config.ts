@@ -44,7 +44,7 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         blockExplorerUrls: ["https://explorer.somnia.network/"],
         blockExplorerAPI: "https://mainnet.somnia.w3us.site/api/v2",
         kitsSale: false,
-        badgesSale: false,
+        badgesSale: true,
     },
     [Blockchain.Minato]: {
         // chainId: '0x' + Number(1946).toString(16),
