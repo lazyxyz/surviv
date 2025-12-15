@@ -10,6 +10,7 @@ import { DEFAULT_VEHICLES, Vehicles, type VehicleDefinition } from "@common/defi
 // Constants for repeated strings
 const ASSET_PATH = "./img/game/shared";
 const VIEWBOX = "-100 -120 300 300";
+const VIEWBOX_VEHICLE = "-140 -180 400 400";
 
 interface AssetConfig {
   class: string;
@@ -145,7 +146,7 @@ const showViewBox = (vehicleId: string, isOwned: boolean) => {
   });
 
   // Append assets and set viewBox
-  appendPreview(assets, $(".vehicles-container-aside-preview")).attr("viewBox", VIEWBOX);
+  appendPreview(assets, $(".vehicles-container-aside-preview")).attr("viewBox", VIEWBOX_VEHICLE);
 
   // Update vehicle info panel
   $("#vehicle-info").html(`

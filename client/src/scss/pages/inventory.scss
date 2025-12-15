@@ -70,13 +70,13 @@ input::-webkit-inner-spin-button {
 .vehicle-list {
   display: flex;
   flex-wrap: wrap;
-  height: 340px;
+  gap: 8px;
+  height: 390px;
   overflow: hidden;
   overflow-y: auto;
 
-  @include variables.mobile-device {
-    gap: 8px;
-    max-height: 235px;
+  @media screen and (max-width: variables.$screen_xsmall) {
+    gap: 4px;
   }
 }
 
@@ -93,7 +93,7 @@ input::-webkit-inner-spin-button {
   justify-content: center;
   align-items: center;
 
-  width: 100px;
+  width: 94px;
   height: 94px;
   background-repeat: no-repeat;
   background-position: center;
@@ -128,6 +128,10 @@ input::-webkit-inner-spin-button {
 
   &.selected {
     border-color: #f2770f;
+  }
+
+  @media screen and (max-width: variables.$screen_xsmall) {
+    padding: 4px;
   }
 }
 
