@@ -15,7 +15,7 @@
   z-index: 100;
 
   //noinspection CssUnknownTarget
-  background-image: url("/img/backgrounds/background_cursedisland.webp");
+  background-image: url("/img/backgrounds/background_winter.webp");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -25,7 +25,8 @@
   display: flex;
   justify-content: center;
 
-  margin: 20px auto 20px auto;
+  margin: 40px auto 20px auto;
+  // margin: 20px auto 20px auto;
 
   width: 10%;
   min-width: 350px;
@@ -90,11 +91,13 @@
     box-shadow: 0 0 0 0 rgba(255, 146, 50, 0.7);
     transform: scale(1);
   }
+
   50% {
     box-shadow: 0 0 0 15px rgba(255, 107, 107, 0);
     transform: scale(1.05);
     transform: rotate(-5deg);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
     transform: scale(1);
@@ -135,8 +138,7 @@
   margin-top: -100%;
   border-radius: 45px;
   background-color: white;
-  -webkit-animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1)
-    infinite;
+  -webkit-animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
   animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
@@ -151,8 +153,7 @@
   background-color: white;
   border-radius: 15px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-  -webkit-animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s
-    infinite;
+  -webkit-animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s infinite;
   animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s infinite;
 }
 
@@ -231,6 +232,7 @@
 }
 
 .blur {
+
   #create-team-menu,
   #splash-news,
   #splash-options,
@@ -291,7 +293,7 @@
     margin-bottom: 15px;
   }
 
-  > div {
+  >div {
     height: 240px;
     overflow-y: auto;
     padding-right: 10px;
