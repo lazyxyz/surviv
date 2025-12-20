@@ -99,7 +99,7 @@ export const Maps: Record<MAP, ModeDefinition> = {
             border: "hsl(208, 94%, 45%)",
             beach: "hsl(210, 18%, 75%)",
             riverBank: "hsl(210, 18%, 70%)",
-            trail: "hsla(35, 36%, 79%, 1.00)",
+            trail: "hsl(210, 18%, 75%)",
             gas: "hsla(17, 100%, 50%, 0.55)",
             void: "hsl(25, 80%, 6%)"
         },
@@ -118,7 +118,7 @@ export const Maps: Record<MAP, ModeDefinition> = {
         // },
         specialPlayButtons: true,
         modeLogoImage: "./img/game/winter/obstacles/red_gift.svg",
-        frictionFactor: 0.5 
+        frictionFactor: 0.5
     },
     desert: {
         idString: "desert",
