@@ -69,6 +69,8 @@ export class Gamer extends Player {
             this._kills++;
             this.dirty.modifiers = true;
             this.game.updateKillLeader(this);
+        } else if(source.isBot()) {
+            this._botKills++;
         }
     }
 
@@ -339,6 +341,7 @@ export class Gamer extends Player {
                 this.game.gameId,
                 this.kills,
                 this.bounties,
+                this.botKills,
                 timeAlive,
                 this.damageDone,
                 this.damageTaken,

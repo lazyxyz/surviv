@@ -38,6 +38,10 @@ async function updateTasksUI(account: Account) {
             const $task = $(`.task-item[data-task-id="${task.id}"]`);
             if ($task.length === 0) return;
 
+            // Title and description from API
+            $task.find(".task-title").text(task.name);
+            $task.find(".task-desc").text(task.description);
+
             // Status text
             $task.find(".task-status-text").text(task.status);
 
