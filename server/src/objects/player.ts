@@ -107,9 +107,11 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     protected _kills = 0;
     protected _bounties = 0; // number of kills nft player
+    protected _botKills = 0;
 
     get kills(): number { return this._kills; }
     get bounties(): number { return this._bounties; }
+    get botKills(): number {return this._botKills; }
 
     kill(_: Player) {
         // does nothing

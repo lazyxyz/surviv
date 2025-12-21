@@ -69,7 +69,7 @@ export async function savePlayerRank(chain: Blockchain, player: string, rank: nu
 }
 
 export async function savePlayerGame(chain: Blockchain, player: string, rank: number, teamMode: boolean,
-    gameId: string, kills: number, bounties: number, timeAlive: number, damageDone: number,
+    gameId: string, kills: number, bounties: number, botKills: number, timeAlive: number, damageDone: number,
     damageTaken: number, timeout: number = 10000): Promise<any> {
     const url = `${Config.earnConfig?.api}/admin/savePlayerGame`;
 
@@ -84,7 +84,10 @@ export async function savePlayerGame(chain: Blockchain, player: string, rank: nu
                 'Content-Type': 'application/json',
                 'x-api-key': process.env.X_API_KEY || '',
             },
-            body: JSON.stringify({ chainId, player, rank, teamMode, gameId, kills, bounties, timeAlive, damageDone, damageTaken, survivRewards }),
+            body: JSON.stringify({
+                chainId, player, rank, teamMode, gameId, kills, bounties, timeAlive, botKills,
+                damageDone, damageTaken, survivRewards
+            }),
             signal: controller.signal,
         });
 

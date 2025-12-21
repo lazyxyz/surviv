@@ -209,7 +209,7 @@ export class Game {
         })();
 
 
-        this.music = sound.add("halloween_theme", {
+        this.music = sound.add("christmas_theme", {
             url: url,
             loop: true,
             singleInstance: true,
