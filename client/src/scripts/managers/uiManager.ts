@@ -592,7 +592,7 @@ export class UIManager {
         // Add share button if eligible and has rewards
         if (eligible && tweetTextRaw) {
             const shareBtn = $(`
-            <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/1965608005204165083"
+            <a href="https://x.com/intent/tweet?text=${encodeURIComponent(tweetTextRaw)}&url=https://x.com/SurvivFun/status/2000426812787277963"
                target="_blank"
                rel="noopener noreferrer"
                class="btn btn-lg btn-darken btn-secondary"
