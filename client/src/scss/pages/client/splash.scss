@@ -218,6 +218,29 @@
   }
 }
 
+#btn-drop-sale {
+  margin-top: 10px;
+  position: relative;
+
+  &.btn-drop-sale {
+    background-color: #2d3436;     // Dark calm grayish
+    border-bottom: 3px solid #1e2124; // Deeper subtle shade
+    box-shadow: inset 0 -3px #1e2124;
+    color: #dfe6e9;                // Soft light text
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #383e42;   // Slightly lighter on hover
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    small {
+      color: #b2bec3;              // Muted gray for countdown
+    }
+  }
+}
+
 #create-team-menu,
 #splash-news,
 #splash-options,
