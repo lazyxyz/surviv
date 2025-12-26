@@ -227,7 +227,6 @@
               <button
                 class="btn btn-lg btn-darken btn-quests btn-primary btn-sales d-flex align-items-center justify-content-center position-relative py-3"
                 id="btn-single-home">
-                <!-- <img src="/img/misc/opensea.svg" alt="" class="me-2"> -->
                 <span class="fw-bold">Mint SurvivArmy</span>
                 <small id="countdown-inside" class="ms-2 fw-normal opacity-75" style="font-size: 0.8rem;"></small>
                 <div class="pulsating-circle" style="display: block"></div>
@@ -235,20 +234,40 @@
             </a>
 
             <style>
-              .btn-sales {
-                background-color: #ff4500;
-                border-color: #ff4500;
-                color: #fff;
+              /* High specificity override for the sale button */
+              button.btn-sales {
+                background-color: #ff4500 !important;
+                border-color: #ff4500 !important;
+                color: #fff !important;
               }
 
-              .btn-sales:hover {
-                background-color: #ff6347;
-                border-color: #ff6347;
-                box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+              button.btn-sales:hover {
+                background-color: #ff6347 !important;
+                border-color: #ff6347 !important;
+                box-shadow: 0 0 15px rgba(255, 69, 0, 0.6) !important;
               }
 
-              .btn-sales #countdown-inside {
-                color: #ffd700;
+              button.btn-sales #countdown-inside {
+                color: #ffd700 !important;
+              }
+
+              /* Optional: Add a pulsing glow for extra excitement */
+              @keyframes pulse-glow {
+                0% {
+                  box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+                }
+
+                50% {
+                  box-shadow: 0 0 20px rgba(255, 69, 0, 0.8);
+                }
+
+                100% {
+                  box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+                }
+              }
+
+              button.btn-sales {
+                animation: pulse-glow 2s infinite;
               }
             </style>
 
