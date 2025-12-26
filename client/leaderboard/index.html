@@ -311,7 +311,7 @@
     }
 
     // Helper to create a leaderboard row
-    function createRow(player, rankNumber, uniqueKey, highlight = false) {
+    function createRow(player, rankNumber, uniqueKey, infoMap) {
       const row = document.createElement('div');
       row.className = 'leaderboard-body-row';
 
@@ -323,11 +323,17 @@
       const kills = asNumber(player.kills, 0);
       const games = asNumber(player.games, 0);
 
-      const addr = (player.player || '').toString();
+      const fullAddr = player.player;
+      const addrLower = fullAddr.toLowerCase();
+      const info = infoMap.get(addrLower) || { name: addrLower, image: '' };
+      const displayName = info.name.toLowerCase().startsWith('0x') ? shortenAddress(fullAddr) : info.name;
+      const addressDisplay = '';
+
       row.innerHTML = `
         <div class="w-[100px] h-[48px]" id="row-child">${rankNumber}</div>
-        <div class="w-[270px] h-[48px]" id="row-child">
-          ${shortenAddress(addr)}
+        <div class="w-[270px] h-[48px] flex items-center" id="row-child">
+          ${info.image ? `<img src="${info.image}" alt="${displayName}'s Image" class="w-8 h-8 rounded-full mr-2" loading="lazy">` : ''}
+          ${displayName} ${addressDisplay}
           <i id="copy-address-${uniqueKey}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i>
         </div>
         <div class="w-[140px] h-[48px]" id="row-child">${total}</div>
@@ -344,7 +350,7 @@
       if (copyIcon) {
         copyIcon.addEventListener('click', async () => {
           try {
-            await navigator.clipboard.writeText(addr);
+            await navigator.clipboard.writeText(fullAddr);
 
             // Visual feedback
             copyIcon.classList.remove('fa-copy');
@@ -359,7 +365,7 @@
           } catch (err) {
             // Fallback for older browsers
             const textArea = document.createElement('textarea');
-            textArea.value = addr;
+            textArea.value = fullAddr;
             document.body.appendChild(textArea);
             textArea.select();
             document.execCommand('copy');
@@ -447,11 +453,31 @@
           return;
         }
 
+        // Fetch player infos (names and images)
+        let allAddresses = players.map(p => p.player.toLowerCase());
+        if (myPublicKey && !allAddresses.includes(myPublicKey)) {
+          allAddresses.push(myPublicKey);
+        }
+
+        console.log("allAddresses: ", allAddresses);
+        const infoRes = await fetch('https://admin.surviv.fun/user/playersInfo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ players: allAddresses })
+        });
+        const infoData = await infoRes.json();
+        const infoMap = new Map();
+        if (infoData.success) {
+          infoData.players.forEach(i => {
+            infoMap.set(i.address.toLowerCase(), { name: i.name, image: i.image });
+          });
+        }
+
         // Create rows using createRow for consistency and copy functionality
         players.forEach((playerRaw, index) => {
           const player = normalizePlayer(playerRaw);
           const rankNumber = (page - 1) * limit + index + 1;
-          const row = createRow(player, rankNumber, `page${page}-${index}`);
+          const row = createRow(player, rankNumber, `page${page}-${index}`, infoMap);
           leaderboardBody.appendChild(row);
         });
 
@@ -459,15 +485,25 @@
         if (myPublicKey && myRankingContainer) {
           const myData = await fetchMyPlayerPoints(myPublicKey, seasonConfig);
           if (myData) {
-            // Determine rank based on current page if present; otherwise show "—"
             const playerIndex = players.findIndex(p => (p.player || '').toLowerCase() === myPublicKey);
-            const rankNumber = playerIndex >= 0 ? (page - 1) * limit + playerIndex + 1 : '—';
-
-            // Replace the prompt (if any) with the pinned row
-            myRankingContainer.innerHTML = '';
-            const pinned = createRow(myData, rankNumber, `my-${page}`);
-            addYouBadgeToRow(pinned);
-            myRankingContainer.appendChild(pinned);
+            if (playerIndex >= 0) {
+              // Highlight the row in body
+              const row = leaderboardBody.children[playerIndex];
+              if (row) {
+                row.classList.add('bg-yellow-400/25', 'border', 'border-yellow-400/60');
+                addYouBadgeToRow(row);
+              }
+              // Remove bg from container since not using it
+              myRankingContainer.className = '';
+            } else {
+              // Add pinned row
+              const rankNumber = '—';
+              const pinned = createRow(myData, rankNumber, `my-${page}`, infoMap);
+              addYouBadgeToRow(pinned);
+              myRankingContainer.appendChild(pinned);
+            }
+          } else {
+            myRankingContainer.className = '';
           }
         }
       } catch (err) {
