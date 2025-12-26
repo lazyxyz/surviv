@@ -70,7 +70,7 @@ export class CustomTeam {
 
     autoFill = true;
     locked = false;
-    roomMode = true; // always room mode
+    roomMode = false; // always room mode
     teamSize = MODE.Squad;
 
     gameID?: number;

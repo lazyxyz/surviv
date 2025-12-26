@@ -212,14 +212,76 @@
               </button>
             </a>
 
+
             <!-- Marketplace -->
-            <a href=" https://opensea.io/collection/surviv-assets" target="_blank">
+            <!-- <a href="https://opensea.io/collection/surviv-assets" target="_blank">
               <button class="btn btn-lg btn-darken btn-quests btn-primary" id="btn-single-home">
                 <div class="pulsating-circle" style="display: none"></div>
                 <img src="/img/misc/opensea.svg" alt="">
                 <span translation="marketplace"></span>
               </button>
+            </a> -->
+
+            <!-- Live Drop -->
+            <a href="https://opensea.io/collection/surviv-army/overview" target="_blank">
+              <button
+                class="btn btn-lg btn-darken btn-quests btn-primary btn-sales d-flex align-items-center justify-content-center position-relative py-3"
+                id="btn-single-home">
+                <!-- <img src="/img/misc/opensea.svg" alt="" class="me-2"> -->
+                <span class="fw-bold">Mint SurvivArmy</span>
+                <small id="countdown-inside" class="ms-2 fw-normal opacity-75" style="font-size: 0.8rem;"></small>
+                <div class="pulsating-circle" style="display: block"></div>
+              </button>
             </a>
+
+            <style>
+              .btn-sales {
+                background-color: #ff4500;
+                border-color: #ff4500;
+                color: #fff;
+              }
+
+              .btn-sales:hover {
+                background-color: #ff6347;
+                border-color: #ff6347;
+                box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
+              }
+
+              .btn-sales #countdown-inside {
+                color: #ffd700;
+              }
+            </style>
+
+            <script>
+              // Sale start: December 29, 2025, 2:30 PM GMT+7
+              const saleDate = new Date("2025-12-29T14:30:00+07:00").getTime();
+
+              function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = saleDate - now;
+
+                if (distance < 0) {
+                  document.getElementById("countdown-inside").textContent = "LIVE NOW";
+                  return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                let text = "";
+                if (days > 0) text += `${days}d `;
+                if (days > 0 || hours > 0) text += `${hours}h `;
+                if (days > 0 || hours > 0 || minutes > 0) text += `${minutes}m `;
+                text += `${seconds}s`;
+
+                document.getElementById("countdown-inside").textContent = text.trim();
+              }
+
+              updateCountdown();
+              setInterval(updateCountdown, 1000); // Update every second
+            </script>
 
           </div>
         </div>

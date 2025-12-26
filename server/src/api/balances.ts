@@ -282,9 +282,9 @@ export async function verifyAllAssets(
                 result.gun = Guns.fromStringSafe(validItem);
             } else if (type === 'emotes') {
                 emoteResults.push(validItem);
-            } else if(type === 'vehicles') {
+            } else if (type === 'vehicles') {
                 const validVehicle = Vehicles.fromStringSafe(validItem);
-                if(validVehicle) vehicleResults.push(validVehicle);
+                if (validVehicle) vehicleResults.push(validVehicle);
             }
         });
 
@@ -316,10 +316,6 @@ export async function verifyBadges(
     badge: string,
     timeout: number = 2000
 ): Promise<{ badgeDefinition: BadgeDefinition | undefined; totalBoost: number }> {
-    if (!badge) {
-        return { badgeDefinition: undefined, totalBoost: 0 };
-    }
-
     try {
         // Pass all badges from SurvivBadgesMapping.assets to getBalance
         const checkResult = await getBalance(player, rpc, SurvivBadgesMapping.assets,
@@ -343,9 +339,12 @@ export async function verifyBadges(
         }
 
         // Verify the requested badge
-        const badgeDefinition = checkResult.isValid && checkResult.validItems.includes(badge)
-            ? Badges.fromStringSafe(badge)
-            : undefined;
+        let badgeDefinition = undefined;
+        if (badge) {
+            badgeDefinition = checkResult.isValid && checkResult.validItems.includes(badge)
+                ? Badges.fromStringSafe(badge)
+                : undefined;
+        }
 
         return { badgeDefinition, totalBoost };
     } catch (err) {
