@@ -419,6 +419,11 @@ export async function joinGame(teamSize: number, game: Game, account?: Account):
     ui.splashOptions.addClass("loading");
     ui.loadingText.text(getTranslatedString("loading_finding_game"));
 
+    if (window.location.pathname !== '/') {
+        window.location.href = `${window.location.origin}/?${window.location.search.substring(1)}${window.location.hash}`;
+        return;
+    }
+
     try {
         const data: GetGameResponse = await $.get(`${selectedRegion.mainAddress}/api/getGame?teamSize=${teamSize}${teamID ? `&teamID=${teamID}` : ""}`);
         await connectToGame(data, selectedRegion.gameAddress, game, account);
