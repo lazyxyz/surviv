@@ -402,6 +402,8 @@ export class Vehicle extends GameObject.derive(ObjectCategory.Vehicle) {
             ? "vehicle_residue"
             : this.definition.idString;
         this.image.setFrame(texture);
+         console.log("this.definition: ", this.definition);
+        this.image.scale.set(this.definition.scale);
     }
 
     /**
