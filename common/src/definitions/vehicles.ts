@@ -3,16 +3,13 @@ import { CircleHitbox, GroupHitbox, Hitbox } from "../utils/hitbox";
 import { MapObjectSpawnMode, ObjectDefinitions, type ObjectDefinition } from "../utils/objectDefinitions";
 import { Vec, Vector } from "../utils/vector";
 import { Materials, RotationMode } from "./obstacles";
-
 export enum SeatType {
     Driver,
     Passenger
 }
-
 export interface VehicleDefinition extends ObjectDefinition {
     idString: string; // override
     name: string; // override
-
     readonly base: string;
     readonly scale: number;
     readonly rotationMode: RotationMode;
@@ -25,20 +22,16 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly material?: typeof Materials[number];
     readonly explosion?: string;
     readonly spawnMode: MapObjectSpawnMode;
-
     readonly wheelType: string;
     readonly wheels: Array<{
         offset: Vector;
         scale: number;
         zIndex: ZIndexes;
     }>;
-
     readonly maxSpeed: number;
     readonly acceleration: number;
-
     readonly maxSteerAngle: number;
     readonly steerRate: number;
-
     readonly drag: number;
     readonly seats: Array<{
         readonly offset: Vector;
@@ -51,27 +44,24 @@ export interface VehicleDefinition extends ObjectDefinition {
     readonly hitSoundVariations?: number
     readonly smokeOffset?: Vector;
 }
-
 export const DEFAULT_VEHICLES: string[] = ["rover", "buggy"];
-
 // BASE STATS
 const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" | "name">> = {
     rover: {
-        scale: 1,
+        scale: 0.8,
         rotationMode: RotationMode.Limited,
         hitbox: new GroupHitbox(
-            new CircleHitbox(7.8, Vec.create(8.6, 0)),
+            new CircleHitbox(7.8, Vec.create(6.6, 0)),
             new CircleHitbox(7.6, Vec.create(0, 0)),
-            new CircleHitbox(7.8, Vec.create(-8.6, 0)),
-
+            new CircleHitbox(7.8, Vec.create(-6.6, 0)),
             // front hood
-            new CircleHitbox(4, Vec.create(12.2, -4.8)),
-            new CircleHitbox(4, Vec.create(12.2, 4.8)),
+            new CircleHitbox(3.6, Vec.create(10, -4)),
+            new CircleHitbox(3.6, Vec.create(10, 4)),
         ),
         bulletHitbox: new GroupHitbox(
             new CircleHitbox(7, Vec.create(7.4, 0)),
-            new CircleHitbox(2.6, Vec.create(3.2, -5.2)),
-            new CircleHitbox(2.6, Vec.create(3.2, 5.2)),
+            new CircleHitbox(2.6, Vec.create(3.2, -4)),
+            new CircleHitbox(2.6, Vec.create(3.2, 4)),
         ),
         spawnHitbox: new CircleHitbox(18),
         health: 1092,
@@ -85,43 +75,38 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         maxSteerAngle: Math.PI / 5,
         steerRate: Math.PI * 0.8,
         drag: 0.45,
-
         frictionFactor: 0.75,
         wheelType: 'basic_wheel',
         wheels: [
-            { offset: Vec.create(240, -145), scale: 1.1, zIndex: ZIndexes.UnderWheels },
-            { offset: Vec.create(240, 145), scale: 1.1, zIndex: ZIndexes.UnderWheels },
-            { offset: Vec.create(-190, -145), scale: 1.1, zIndex: ZIndexes.UnderWheels },
-            { offset: Vec.create(-190, 145), scale: 1.1, zIndex: ZIndexes.UnderWheels }
+            // front wheel
+            { offset: Vec.create(240, -140), scale: 1, zIndex: ZIndexes.UnderWheels },
+            { offset: Vec.create(240, 140), scale: 1, zIndex: ZIndexes.UnderWheels },
+            { offset: Vec.create(-190, -140), scale: 1, zIndex: ZIndexes.UnderWheels },
+            { offset: Vec.create(-190, 140), scale: 1, zIndex: ZIndexes.UnderWheels }
         ],
-
         seats: [
-            { offset: Vec.create(-3.4, -3.5), type: SeatType.Driver, exitOffset: Vec.create(0, -10) },
-            { offset: Vec.create(-3.4, 3.5), type: SeatType.Passenger, exitOffset: Vec.create(0, 10) },
-            { offset: Vec.create(-11.4, -3.5), type: SeatType.Passenger, exitOffset: Vec.create(4, -10) },
-            { offset: Vec.create(-11.2, 3.5), type: SeatType.Passenger, exitOffset: Vec.create(0, 10) }
+            // Two front seats
+            { offset: Vec.create(-3, -3), type: SeatType.Driver, exitOffset: Vec.create(0, -10) },
+            { offset: Vec.create(-3, 3), type: SeatType.Passenger, exitOffset: Vec.create(0, 10) },
+            { offset: Vec.create(-9, -3), type: SeatType.Passenger, exitOffset: Vec.create(4, -10) },
+            { offset: Vec.create(-9, 3), type: SeatType.Passenger, exitOffset: Vec.create(0, 10) }
         ],
-
         smokeOffset: Vec.create(14, 0),
         baseDamage: 35,
         hitSoundVariations: 2
     },
-
     buggy: {
-        scale: 1,
+        scale: 0.8,
         rotationMode: RotationMode.Limited,
         hitbox: new GroupHitbox(
-            new CircleHitbox(4.4, Vec.create(9, 0)),
+            new CircleHitbox(4, Vec.create(8, 0)),
             new CircleHitbox(5.0, Vec.create(0, 0)),
-
             // Front Wheels
-            new CircleHitbox(2.5, Vec.create(11.2, -4.6)),
-            new CircleHitbox(2.5, Vec.create(11.2, 4.6)),
-
+            new CircleHitbox(3, Vec.create(9.2, -3.6)),
+            new CircleHitbox(3, Vec.create(9.2, 3.6)),
             // Back Wheels
-            new CircleHitbox(4, Vec.create(-8.2, -4)),
-            new CircleHitbox(4, Vec.create(-8.2, 4)),
-
+            new CircleHitbox(4, Vec.create(-6.8, -3.8)),
+            new CircleHitbox(4, Vec.create(-6.8, 3.8)),
         ),
         bulletHitbox: new GroupHitbox(
             new CircleHitbox(3.2, Vec.create(9, 0)),
@@ -134,7 +119,6 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
         explosion: "vehicle_explosion",
         spawnMode: MapObjectSpawnMode.Trail,
         zIndex: ZIndexes.Vehicles,
-
         maxSpeed: 0.083,
         acceleration: 4000, // 4s
         maxSteerAngle: Math.PI / 6,
@@ -150,15 +134,13 @@ const BaseVehicles: Record<string, Omit<VehicleDefinition, "base" | "idString" |
             { offset: Vec.create(-164, -136), scale: 1.0, zIndex: ZIndexes.Vehicles },
             { offset: Vec.create(-164, 136), scale: 1.0, zIndex: ZIndexes.Vehicles }
         ],
-
         seats: [
-            { offset: Vec.create(1.4, 0), type: SeatType.Driver, exitOffset: Vec.create(0, -10) },
-            { offset: Vec.create(-10, 0), type: SeatType.Passenger, exitOffset: Vec.create(0, -10) }
+            { offset: Vec.create(0.8, 0), type: SeatType.Driver, exitOffset: Vec.create(0, -10) },
+            { offset: Vec.create(-8, 0), type: SeatType.Passenger, exitOffset: Vec.create(0, -10) }
         ],
         smokeOffset: Vec.create(12, 0),
     }
 };
-
 // VARIATIONS LIST
 interface VehicleVariantConfig {
     base: keyof typeof BaseVehicles;
@@ -166,7 +148,6 @@ interface VehicleVariantConfig {
     name: string;
     overrides?: Partial<VehicleDefinition>;
 }
-
 const Variations: VehicleVariantConfig[] = [
     // --- ROVERS ---
     {
@@ -189,7 +170,6 @@ const Variations: VehicleVariantConfig[] = [
         idString: "rover_reaper",
         name: "Rover Reaper",
     },
-
     // --- BUGGIES ---
     {
         base: "buggy",
@@ -211,15 +191,12 @@ const Variations: VehicleVariantConfig[] = [
         idString: "buggy_reaper",
         name: "Buggy Reaper",
     },
-
 ];
-
 export const Vehicles = ObjectDefinitions.create<VehicleDefinition>(
     "Vehicles",
     Variations.map(variant => {
         const baseStats = BaseVehicles[variant.base];
         if (!baseStats) throw new Error(`Unknown base vehicle: ${variant.base}`);
-
         return {
             ...baseStats,
             ...variant.overrides,

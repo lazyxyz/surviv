@@ -234,7 +234,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
             const isRunOver = potentialMaterial && RunOverMaterialsSet.has(potentialMaterial);
             // Calculate adjustment to resolve penetration
             // const adjust = this.hitbox.getAdjustment(potential.hitbox, 0.5);
-            const adjust = this.hitbox.getAdjustment(potential.hitbox, 1);
+            const adjust = this.hitbox.getAdjustment(potential.hitbox, 1.5);
             // Clamp adjustment magnitude to prevent far jumps
             const adjustLen = Vec.length(adjust);
 
@@ -255,7 +255,7 @@ export class Vehicle extends BaseGameObject.derive(ObjectCategory.Vehicle) {
                 if (isRunOver || impactVel > this._minDamageImpactLevel) { // Approaching (threshold; note sign convention assuming dir points out)
                     let materialFactor = 1.0;
                     if (isRunOver || potential.isPlayer) {
-                        const damageToSoft = Math.abs(impactVel) * this.baseDamage * (potential.isPlayer ? 4 : 20);
+                        const damageToSoft = Math.abs(impactVel) * this.baseDamage * (potential.isPlayer ? 10 : 20);
                         potential.damage({
                             amount: damageToSoft,
                             source: this.driver,
