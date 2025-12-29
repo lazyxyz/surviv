@@ -58,8 +58,8 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         },
         blockExplorerUrls: ["https://soneium-minato.blockscout.com/"],
         blockExplorerAPI: "https://soneium-minato.blockscout.com/api/v2", // Blockscout API endpoint
-        kitsSale: true,
-        badgesSale: true,
+        kitsSale: false,
+        badgesSale: false,
     },
     [Blockchain.Soneium]: {
         chainId: 1868,
@@ -72,8 +72,8 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         },
         blockExplorerUrls: ["https://soneium.blockscout.com/"],
         blockExplorerAPI: "https://soneium.blockscout.com/api/v2", // Blockscout API endpoint
-        kitsSale: true,
-        badgesSale: true,
+        kitsSale: false,
+        badgesSale: false,
     },
 } as const;
 
