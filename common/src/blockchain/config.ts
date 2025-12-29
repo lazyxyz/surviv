@@ -29,8 +29,8 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         },
         blockExplorerUrls: ["https://shannon-explorer.somnia.network/"],
         blockExplorerAPI: "https://somnia.w3us.site/api/v2",
-        kitsSale: true,
-        badgesSale: true,
+        kitsSale: false,
+        badgesSale: false,
     },
     [Blockchain.Somnia]: {
         chainId: 5031,
@@ -44,7 +44,7 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         blockExplorerUrls: ["https://explorer.somnia.network/"],
         blockExplorerAPI: "https://mainnet.somnia.w3us.site/api/v2",
         kitsSale: false,
-        badgesSale: true,
+        badgesSale: false,
     },
     [Blockchain.Minato]: {
         // chainId: '0x' + Number(1946).toString(16),
