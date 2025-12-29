@@ -28,10 +28,7 @@ export async function validateJWT(token: string, timeout: number = 5000): Promis
         };
     } catch (error: any) {
         clearTimeout(timeoutId);
-        if (error.name === 'AbortError') {
-            throw new Error('Request timed out');
-        }
-        throw error;
+        return { walletAddress: "" }
     }
 }
 
