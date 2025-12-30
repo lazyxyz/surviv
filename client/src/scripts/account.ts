@@ -1181,7 +1181,6 @@ export class Account extends EIP6963 {
 
         try {
             const body = tokenId ? { tokenId } : {};
-            console.log("URL: ", `${this.api}/users/updatePlayerInfo`);
 
             const response = await fetch(`${this.api}/users/updatePlayerInfo`, {
                 method: 'POST',
@@ -1195,7 +1194,6 @@ export class Account extends EIP6963 {
 
             clearTimeout(timeoutId);
             const data = await response.json();
-            console.log("data: ", data);
 
             if (!data.success) {
                 throw new Error(data.error || 'Failed to update profile');

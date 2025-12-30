@@ -132,7 +132,7 @@
             </div>
           </div>
           <div id="rewards-image" class="hidden text-center mt-6">
-            <img src="../img/news/rewards.png" alt="Season Rewards" class="max-w-full h-auto mx-auto" />
+            <img src="../img/backgrounds/rewards.webp" alt="Season Rewards" class="max-w-full h-auto mx-auto" />
           </div>
           <div id="loading" class="text-center text-[#ffd23a] font-semibold mt-6 hidden">Loading...</div>
           <div id="error" class="text-center text-red-400 font-semibold mt-6 hidden"></div>
@@ -144,12 +144,12 @@
     // Seasons configuration
     const seasons = [
       {
-        id: "3",
-        name: "Season III",
-        title: "Comming Soon!",
-        api: "https://admin.surviv.fun/stats/playerRankingsByDate?startDate=2025-12-12T00:00:00Z&endDate=2026-02-01T00:00:00Z",
-        icon: "../img/logos/surviv_round.svg",
-        playerPointsApi: "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}&startDate=2025-12-12T00:00:00Z&endDate=2026-02-01T00:00:00Z"
+        "id": "3",
+        "name": "Season III",
+        "title": "20 Dec 2025 - 1 Feb 2026",
+        "api": "https://admin.surviv.fun/stats/playerRankingsByDate?startDate=2025-12-20T00:00:00Z&endDate=2026-02-01T00:00:00Z",
+        "icon": "../img/logos/surviv_round.svg",
+        "playerPointsApi": "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}&startDate=2025-12-20T00:00:00Z&endDate=2026-02-01T00:00:00Z"
       },
       {
         id: "2",
@@ -157,7 +157,7 @@
         title: "Season II Ended! Check Inventory and Claim Your Rewards.",
         api: "https://admin.surviv.fun/stats/playerRankingsByDate?startDate=2025-09-15T14:00:00Z&endDate=2025-11-01T14:00:00Z",
         icon: "../img/game/shared/badges/somnia_s1.svg",
-        playerPointsApi: "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}&startDate=2025-09-15T14:00:00Z&endDate=2025-11-01T14:00:00Z"
+        playerPointsApi: "https://admin.surviv.fun/stats/playerPointsByDate?walletAddress={walletAddress}&startDate=2025-10-16T00:00:00Z&endDate=2025-10-21T00:00:00Z"
       },
       {
         id: "1",
@@ -256,9 +256,8 @@
       const button = document.createElement('button');
       // Highlight selected season with yellow background and border
       const isSelected = selectedSeason && s.id.toLowerCase() === selectedSeason.id.toLowerCase();
-      button.className = `btn-darken flex p-1 pl-2 pr-4 items-center justify-center gap-1 rounded-[10px] m-auto ${
-        isSelected ? 'bg-yellow-400/20 border border-yellow-400/60 text-yellow-300' : ''
-      }`;
+      button.className = `btn-darken flex p-1 pl-2 pr-4 items-center justify-center gap-1 rounded-[10px] m-auto ${isSelected ? 'bg-yellow-400/20 border border-yellow-400/60 text-yellow-300' : ''
+        }`;
 
       button.id = `season-${s.id.toLowerCase()}-button`;
       button.innerHTML = `
@@ -326,7 +325,7 @@
 
       const fullAddr = player.player;
       const addrLower = fullAddr.toLowerCase();
-      const info = infoMap.get(addrLower) || { name: addrLower, image: '' };
+      const info = infoMap.get(addrLower) || { name: addrLower, image: '', "totalKills": 0, "totalBotKills": 0, totalTimeAlive: 0, totalGames: 0 };
       const displayName = info.name.toLowerCase().startsWith('0x') ? shortenAddress(fullAddr) : info.name;
       const addressDisplay = '';
 
@@ -336,6 +335,7 @@
           ${info.image ? `<img src="${info.image}" alt="${displayName}'s Image" class="w-8 h-8 rounded-full mr-2" loading="lazy">` : ''}
           ${displayName} ${addressDisplay}
           <i id="copy-address-${uniqueKey}" class="fa-solid fa-copy ml-2 cursor-pointer hover:text-green-400 transition-colors" title="Copy full address"></i>
+          <i id="expand-${uniqueKey}" class="fa-solid fa-chevron-right ml-2 cursor-pointer hover:text-yellow-400 transition-colors" title="Show details"></i>
         </div>
         <div class="w-[140px] h-[48px]" id="row-child">${total}</div>
         <div class="w-[140px] h-[48px]" id="row-child">${solo}</div>
@@ -347,7 +347,7 @@
       `;
 
       // Copy-to-clipboard handler
-      const copyIcon = row.querySelector(`#copy-address-${CSS.escape(uniqueKey)}`);
+      const copyIcon = row.querySelector(`#copy-address-${uniqueKey}`);
       if (copyIcon) {
         copyIcon.addEventListener('click', async () => {
           try {
@@ -374,6 +374,42 @@
 
             copyIcon.classList.add('text-blue-400');
             setTimeout(() => copyIcon.classList.remove('text-blue-400'), 500);
+          }
+        });
+      }
+
+      // Expand details handler
+      const expandIcon = row.querySelector(`#expand-${uniqueKey}`);
+      if (expandIcon) {
+        expandIcon.addEventListener('click', () => {
+          let detailRow = row.nextSibling;
+          if (detailRow && detailRow.classList.contains('detail-row')) {
+            if (detailRow.classList.contains('hidden')) {
+              detailRow.classList.remove('hidden');
+              expandIcon.classList.add('rotate-90');
+            } else {
+              detailRow.classList.add('hidden');
+              expandIcon.classList.remove('rotate-90');
+            }
+          } else {
+            detailRow = document.createElement('div');
+            detailRow.className = 'detail-row bg-[#5b8939]/20 p-4';
+            let html = `<div class="w-full flex text-sm">`;
+            if (info.image) {
+              html += `<div class="flex-none mr-4">`;
+              html += `<img src="${info.image}" alt="${displayName}'s avatar" class="w-24 h-24 rounded-full object-cover" loading="lazy">`;
+              html += `</div>`;
+            }
+            html += `<div class="flex-1 space-y-2">`;
+            html += `<p><strong>Total Games:</strong> ${info.totalGames}</p>`;
+            html += `<p><strong>Total Kills:</strong> ${info['totalKills']}</p>`;
+            html += `<p><strong>Total Bot Kills:</strong> ${info['totalBotKills']}</p>`;
+            html += `<p><strong>Time Play:</strong> ${(info.totalTimeAlive / 3600).toFixed(2)} hours</p>`;
+            html += `</div>`;
+            html += `</div>`;
+            detailRow.innerHTML = html;
+            row.parentNode.insertBefore(detailRow, row.nextSibling);
+            expandIcon.classList.add('rotate-90');
           }
         });
       }
@@ -461,7 +497,7 @@
         }
 
         console.log("allAddresses: ", allAddresses);
-        const infoRes = await fetch('https://admin.surviv.fun/user/playersInfo', {
+        const infoRes = await fetch('https://admin.surviv.fun/users/getPlayersInfo', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ players: allAddresses })
@@ -470,7 +506,7 @@
         const infoMap = new Map();
         if (infoData.success) {
           infoData.players.forEach(i => {
-            infoMap.set(i.address.toLowerCase(), { name: i.name, image: i.image });
+            infoMap.set(i.address.toLowerCase(), i);
           });
         }
 
