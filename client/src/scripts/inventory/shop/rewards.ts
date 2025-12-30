@@ -1,7 +1,7 @@
 import $ from "jquery";
 import { successAlert, errorAlert } from "../../modal";
 import { ShopCache, updateRewardsTab } from ".";
-import type { Account, SeasonRewardsData } from "../../account";
+import type { Account } from "../../account";
 
 interface RewardItem {
     image: string;
@@ -13,39 +13,6 @@ interface RewardData {
     validCrates?: Array<{ tokenId: number, amount: number; expiry: number }>;
 }
 
-// Constant to enable/disable season rewards
-const ENABLE_SEASON_REWARDS = false;
-
-async function getSeasonRewards(account: Account): Promise<RewardItem[]> {
-    const rewards: RewardItem[] = [];
-
-    if (!ENABLE_SEASON_REWARDS) {
-        return rewards;
-    }
-
-    try {
-        const seasonRewards = await account.getSeasonRewards();
-        if (seasonRewards?.success) {
-            let seasonImage = "../img/game/shared/badges/surviv_card.svg";
-            if (seasonRewards.tokenIds[1][0] === 1) {
-                seasonImage = "../img/game/shared/badges/surviv_s1_gold.svg";
-            } else if (seasonRewards.tokenIds[1][0] === 2) {
-                seasonImage = "../img/game/shared/badges/surviv_s1_silver.svg";
-            } else if (seasonRewards.tokenIds[1][0] === 3) {
-                seasonImage = "../img/game/shared/badges/somnia_s1.svg";
-            }
-            rewards.push({
-                image: seasonImage,
-                amount: 1,
-                time: "Season I Reward",
-            });
-        }
-    } catch (err) {
-        console.error(`Failed to fetch season rewards: ${err}`);
-    }
-
-    return rewards;
-}
 
 async function getCrateRewards(rewardData: RewardData | undefined): Promise<RewardItem[]> {
     const rewards: RewardItem[] = [];
@@ -73,9 +40,8 @@ async function getCrateRewards(rewardData: RewardData | undefined): Promise<Rewa
 }
 
 async function renderRewardList(account: Account, rewardData: RewardData | undefined): Promise<void> {
-    const seasonRewards = await getSeasonRewards(account);
     const crateRewards = await getCrateRewards(rewardData);
-    const rewards = [...seasonRewards, ...crateRewards];
+    const rewards = [...crateRewards];
 
     const $rewardGrid = $(".rewards-grid-group");
     const $totalReward = $("#total-reward");
@@ -102,15 +68,8 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
         $claimButton.prop("disabled", true);
 
         try {
-            if (ENABLE_SEASON_REWARDS && seasonRewards.length > 0) {
-                const seasonData = await account.getSeasonRewards();
-                await account.claimSeasonRewards(seasonData);
-                await account.claimRewards();
-                successAlert("Season rewards and crates claimed successfully!");
-            } else {
-                await account.claimRewards();
-                successAlert("Crates claimed successfully!");
-            }
+            await account.claimRewards();
+            successAlert("Crates claimed successfully!");
             await updateRewardsTab(0); // reset rewards count
             ShopCache.assetsBalance.crate += totalCrates;
             ShopCache.PlayerValidRewards = undefined;

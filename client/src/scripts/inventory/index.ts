@@ -9,6 +9,7 @@ import { GAME_CONSOLE } from '../..';
 import { AssetTier, SurvivAssets } from '@common/blockchain';
 import { warningAlert } from '../modal';
 import { showVehicles } from './vehicles';
+import { showProfile } from './profile';
 
 // handler display change preview
 export const updateSplashCustomize = (skinID: string): void => {
@@ -92,6 +93,10 @@ export async function showInventory(account: Account) {
 
     $('#tab-badges').on('click', async () => {
         await showBadges(account);
+    })
+   
+    $('#tab-profile').on('click', async () => {
+        await showProfile(account);
     })
 
     const idString = GAME_CONSOLE.getBuiltInCVar("cv_loadout_skin");
