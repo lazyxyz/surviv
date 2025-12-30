@@ -62,20 +62,20 @@ interface ClaimResponse {
 }
 
 interface Task {
-  id: number;
-  name: string;
-  description: string;
-  completed: boolean;
-  status: string;        // e.g., "1/1", "8/10", "7/7"
-  claimed: boolean;
+    id: number;
+    name: string;
+    description: string;
+    completed: boolean;
+    status: string;        // e.g., "1/1", "8/10", "7/7"
+    claimed: boolean;
 }
 
 interface GetAllTasksResponse {
-  success: boolean;
-  chainId: number;
-  survivRewards: string;
-  tasks: Task[];
-  resetInSeconds: number;
+    success: boolean;
+    chainId: number;
+    survivRewards: string;
+    tasks: Task[];
+    resetInSeconds: number;
 }
 
 /**
@@ -91,14 +91,16 @@ export interface MintResult {
     values: [number, number][];
 }
 
-export interface SeasonRewardsData {
-    success: boolean;
-    distributionContract: string;
-    claimFee: string;
-    collections: string[];
-    merkleProofs: string[][];
-    tokenIds: number[][];
-    amounts: number[][];
+export interface UserInfo {
+    address: string;
+    name: string;
+    image: string;
+    avatarTokenId?: string;
+    ownedTokens: { tokenId: string; imageUrl: string }[];
+    totalKills: number;
+    totalBotKills: number;
+    totalTimeAlive: number;
+    totalGames: number;
 }
 
 // ABI for the TransferSingle event
@@ -381,7 +383,7 @@ export class Account extends EIP6963 {
                 [AssetTier.Divine]: {}
             },
             [SurvivAssets.Vehicles]: {
-                [AssetTier.Silver]: {}, 
+                [AssetTier.Silver]: {},
                 [AssetTier.Gold]: {},
                 [AssetTier.Divine]: {}
             }
@@ -1036,117 +1038,6 @@ export class Account extends EIP6963 {
         }
     }
 
-    async getSeasonRewards(season: string = "1"): Promise<SeasonRewardsData> {
-        if (!this.chainConfig.rpcUrls[0]) {
-            throw new Error('RPC URL not configured');
-        }
-        // Validate userAddress
-        if (!this.address) {
-            throw new Error('Please connect your wallet to continue!');
-        }
-
-        // Set fetch timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-        try {
-            // Fetch available crates
-            const response = await fetch(`${this.api}/season/proof/${this.address}/?season=${season}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.token}`,
-                },
-                signal: controller.signal,
-            });
-
-            const rewardsData: SeasonRewardsData = await response.json();
-
-            if (rewardsData.success) {
-                const ethersProvider = new ethers.JsonRpcProvider(this.chainConfig.rpcUrls[0]);
-
-                const distributionContract = new ethers.Contract(
-                    rewardsData.distributionContract,
-                    seasonRewardsABI,
-                    ethersProvider
-                );
-
-                // Store valid rewards
-                let validRewards: SeasonRewardsData = {
-                    success: true,
-                    distributionContract: rewardsData.distributionContract,
-                    claimFee: rewardsData.claimFee,
-                    collections: [],
-                    merkleProofs: [],
-                    tokenIds: [],
-                    amounts: []
-                };
-
-                // Filter rewards
-                for (let i = 0; i < rewardsData.collections.length; i++) {
-                    const isValid = await distributionContract.verifyRewards(
-                        this.address,
-                        rewardsData.collections[i],
-                        rewardsData.merkleProofs[i],
-                        rewardsData.tokenIds[i],
-                        rewardsData.amounts[i]
-                    );
-
-                    if (isValid) {
-                        validRewards.collections.push(rewardsData.collections[i]);
-                        validRewards.merkleProofs.push(rewardsData.merkleProofs[i]);
-                        validRewards.tokenIds.push(rewardsData.tokenIds[i]);
-                        validRewards.amounts.push(rewardsData.amounts[i]);
-                    }
-                }
-
-                // Update rewardsData with only valid rewards
-                rewardsData.collections = validRewards.collections;
-                rewardsData.merkleProofs = validRewards.merkleProofs;
-                rewardsData.tokenIds = validRewards.tokenIds;
-                rewardsData.amounts = validRewards.amounts;
-
-                // Set success to false if no valid rewards
-                rewardsData.success = validRewards.collections.length > 0;
-            }
-
-            return rewardsData;
-        } catch (error) {
-            clearTimeout(timeoutId);
-            throw error;
-        } finally {
-            clearTimeout(timeoutId);
-        }
-    }
-
-    async claimSeasonRewards(rewardsData: SeasonRewardsData): Promise<any> {
-        if (!this.provider?.provider) {
-            throw new Error('Web3 provider not initialized');
-        }
-
-        // Set fetch timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-        try {
-            // Initialize contract
-            const ethersProvider = new ethers.BrowserProvider(this.provider.provider);
-            const signer = await ethersProvider.getSigner();
-            const distributionContract = new ethers.Contract(rewardsData.distributionContract, seasonRewardsABI, signer);
-
-            const tx = await distributionContract.claimAll(rewardsData.collections, rewardsData.merkleProofs, rewardsData.tokenIds, rewardsData.amounts, {
-                value: rewardsData.claimFee,
-            });
-            const receipt = await tx.wait();
-            clearTimeout(timeoutId);
-            return receipt;
-
-        } catch (error: any) {
-            clearTimeout(timeoutId);
-            throw new Error(`Failed to buy item: ${error.message || 'Unknown error'}`);
-        }
-    }
-
     async getBadgeSupply(badgeName: string) {
         try {
             // Find index of badgeName in assets array
@@ -1237,6 +1128,81 @@ export class Account extends EIP6963 {
             }
 
             throw new Error(`Failed to get tasks: ${error.message || 'Network error'}`);
+        }
+    }
+
+
+    async profile(): Promise<UserInfo> {
+        // Ensure authentication token is present
+        if (!this.token) {
+            throw new Error('Authentication token is missing');
+        }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            const response = await fetch(`${this.api}/users/getSingleUserInfo/${this.address}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`,
+                },
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+            const data = await response.json();
+
+            if (!data.success || !data.player) {
+                // No info found, call updateProfile without tokenId
+                await this.updateProfile();
+                // Refetch after update
+                return await this.profile();
+            }
+
+            return data.player as UserInfo;
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            throw new Error(`Failed to fetch profile: ${error.message || 'Unknown error'}`);
+        }
+    }
+
+    async updateProfile(tokenId?: string): Promise<void> {
+        // Ensure authentication token is present
+        if (!this.token) {
+            throw new Error('Authentication token is missing');
+        }
+
+        // Set fetch timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            const body = tokenId ? { tokenId } : {};
+            console.log("URL: ", `${this.api}/users/updatePlayerInfo`);
+
+            const response = await fetch(`${this.api}/users/updatePlayerInfo`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`,
+                },
+                body: JSON.stringify(body),
+                signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+            const data = await response.json();
+            console.log("data: ", data);
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to update profile');
+            }
+        } catch (error: any) {
+            clearTimeout(timeoutId);
+            throw new Error(`Failed to update profile: ${error.message || 'Unknown error'}`);
         }
     }
 }

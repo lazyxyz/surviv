@@ -1,18 +1,8 @@
 # Translation File Reports
 
-This file is a report of all errors and missing keys in the translation files of this game. Last generated Sat, 22 Nov 2025 08:33:56 GMT
+This file is a report of all errors and missing keys in the translation files of this game. Last generated Tue, 30 Dec 2025 13:00:35 GMT
 
-## 🇸🇦 العربية (99% Complete) - ar.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇩🇪 Deutsch (99% Complete) - de.hjson
+## 🇸🇦 العربية (98% Complete) - ar.hjson
 
 ### (No Invalid Keys)
 
@@ -21,18 +11,9 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
-## 🇪🇸 Español (99% Complete) - es.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇫🇷 Français (99% Complete) - fr.hjson
+## 🇩🇪 Deutsch (98% Complete) - de.hjson
 
 ### (No Invalid Keys)
 
@@ -41,18 +22,9 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
-## 🇮🇳 हिन्दी (99% Complete) - hi.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇮🇩 Bahasa Indonesia (99% Complete) - id.hjson
+## 🇪🇸 Español (98% Complete) - es.hjson
 
 ### (No Invalid Keys)
 
@@ -61,18 +33,9 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
-## 🇮🇹 Italiano (99% Complete) - it.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇯🇵 日本語 (99% Complete) - ja.hjson
+## 🇫🇷 Français (98% Complete) - fr.hjson
 
 ### (No Invalid Keys)
 
@@ -81,18 +44,9 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
-## 🇰🇷 한국어 (99% Complete) - ko.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇲🇾 Bahasa Melayu (99% Complete) - ms.hjson
+## 🇮🇳 हिन्दी (98% Complete) - hi.hjson
 
 ### (No Invalid Keys)
 
@@ -101,18 +55,9 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
-## 🇳🇱 Nederlands (99% Complete) - nl.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇵🇱 Polski (99% Complete) - pl.hjson
+## 🇮🇩 Bahasa Indonesia (98% Complete) - id.hjson
 
 ### (No Invalid Keys)
 
@@ -121,18 +66,9 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
-## 🇵🇹 Português (99% Complete) - pt.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇧🇷 Português Brasil (99% Complete) - pt_BR.hjson
+## 🇮🇹 Italiano (98% Complete) - it.hjson
 
 ### (No Invalid Keys)
 
@@ -141,18 +77,9 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
-## 🇷🇺 Русский (99% Complete) - ru.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇸🇰 Slovenčina (99% Complete) - sk.hjson
+## 🇯🇵 日本語 (98% Complete) - ja.hjson
 
 ### (No Invalid Keys)
 
@@ -161,18 +88,9 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
-## 🇹🇭 ไทย (99% Complete) - th.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇵🇭 Tagalog (99% Complete) - tl.hjson
+## 🇰🇷 한국어 (98% Complete) - ko.hjson
 
 ### (No Invalid Keys)
 
@@ -181,18 +99,9 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
-## 🇹🇷 Türkçe (99% Complete) - tr.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇺🇦 Українська (99% Complete) - uk.hjson
+## 🇲🇾 Bahasa Melayu (98% Complete) - ms.hjson
 
 ### (No Invalid Keys)
 
@@ -201,18 +110,9 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
-## 🇻🇳 Tiếng Việt (99% Complete) - vi.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇳🇬 Yorùbá (99% Complete) - yo.hjson
+## 🇳🇱 Nederlands (98% Complete) - nl.hjson
 
 ### (No Invalid Keys)
 
@@ -221,18 +121,9 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
-## 🇨🇳 简体中文 (99% Complete) - zh_CN.hjson
-
-### (No Invalid Keys)
-
-### Undefined Keys
-
-- Key `leave_team` is not defined
-- Key `team_mode` is not defined
-- Key `loadout_vehicles` is not defined
-
-## 🇭🇰 繁體中文 (99% Complete) - zh_HK.hjson
+## 🇵🇱 Polski (98% Complete) - pl.hjson
 
 ### (No Invalid Keys)
 
@@ -241,4 +132,137 @@ This file is a report of all errors and missing keys in the translation files of
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
 - Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇵🇹 Português (98% Complete) - pt.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇧🇷 Português Brasil (98% Complete) - pt_BR.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇷🇺 Русский (98% Complete) - ru.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇸🇰 Slovenčina (98% Complete) - sk.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇹🇭 ไทย (98% Complete) - th.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇵🇭 Tagalog (98% Complete) - tl.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇹🇷 Türkçe (98% Complete) - tr.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇺🇦 Українська (98% Complete) - uk.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇻🇳 Tiếng Việt (98% Complete) - vi.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇳🇬 Yorùbá (98% Complete) - yo.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇨🇳 简体中文 (98% Complete) - zh_CN.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
+
+## 🇭🇰 繁體中文 (98% Complete) - zh_HK.hjson
+
+### (No Invalid Keys)
+
+### Undefined Keys
+
+- Key `leave_team` is not defined
+- Key `team_mode` is not defined
+- Key `loadout_vehicles` is not defined
+- Key `loadout_profile` is not defined
 
