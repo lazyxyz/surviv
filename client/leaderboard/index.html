@@ -309,8 +309,8 @@
       prevButton.disabled = currentPage <= 1;
       nextButton.disabled = currentPage >= totalPages;
     }
-
-    // Helper to create a leaderboard row
+    
+     // Helper to create a leaderboard row
     function createRow(player, rankNumber, uniqueKey, infoMap) {
       const row = document.createElement('div');
       row.className = 'leaderboard-body-row';
@@ -381,7 +381,7 @@
       // Expand details handler
       const expandIcon = row.querySelector(`#expand-${uniqueKey}`);
       if (expandIcon) {
-        expandIcon.addEventListener('click', () => {
+        expandIcon.addEventListener('click', async () => {
           let detailRow = row.nextSibling;
           if (detailRow && detailRow.classList.contains('detail-row')) {
             if (detailRow.classList.contains('hidden')) {
@@ -391,30 +391,66 @@
               detailRow.classList.add('hidden');
               expandIcon.classList.remove('rotate-90');
             }
-          } else {
-            detailRow = document.createElement('div');
-            detailRow.className = 'detail-row bg-[#5b8939]/20 p-4';
-            let html = `<div class="w-full flex text-sm">`;
-            if (info.image) {
-              html += `<div class="flex-none mr-4">`;
-              html += `<img src="${info.image}" alt="${displayName}'s avatar" class="w-24 h-24 rounded-full object-cover" loading="lazy">`;
-              html += `</div>`;
-            }
-            html += `<div class="flex-1 space-y-2">`;
-            html += `<p><strong>Total Games:</strong> ${info.totalGames}</p>`;
-            html += `<p><strong>Total Kills:</strong> ${info['totalKills']}</p>`;
-            html += `<p><strong>Total Bot Kills:</strong> ${info['totalBotKills']}</p>`;
-            html += `<p><strong>Time Play:</strong> ${(info.totalTimeAlive / 3600).toFixed(2)} hours</p>`;
-            html += `</div>`;
-            html += `</div>`;
-            detailRow.innerHTML = html;
-            row.parentNode.insertBefore(detailRow, row.nextSibling);
-            expandIcon.classList.add('rotate-90');
+            return;
           }
+
+          // Fetch data if not loaded
+          detailRow = document.createElement('div');
+          detailRow.className = 'detail-row bg-[#5b8939]/20 p-4 hidden';
+          let html = `<div class="w-full flex text-sm gap-4">`;
+          // Avatar
+          html += `<div class="flex-none">`;
+          if (info.image) {
+            html += `<img src="${info.image}" alt="${displayName}'s avatar" class="w-24 h-24 rounded-full object-cover" loading="lazy">`;
+          } else {
+            html += `<div class="w-24 h-24 rounded-full bg-gray-600 flex items-center justify-center text-white">No Image</div>`;
+          }
+          html += `</div>`;
+          // Stats
+          html += `<div class="flex-1 space-y-2">`;
+          html += `<p><strong>Total Games:</strong> ${info.totalGames}</p>`;
+          html += `<p><strong>Total Kills:</strong> ${info['totalKills']}</p>`;
+          html += `</div>`;
+          // Recent games
+          html += `<div class="flex-1 space-y-2">`;
+          if (info.recentGames && info.recentGames.length > 0) {
+            html += `<ul class="list-disc pl-5 space-y-1">`;
+            info.recentGames.forEach(game => {
+              const timeAgo = getTimeAgo(game.createdAt);
+              html += `<li>${timeAgo}: Rank ${game.rank}, Kills ${game.kills}, Damage Done ${Math.round(game.damageDone)}</li>`;
+            });
+            html += `</ul>`;
+          } else {
+            html += `<p>No recent games.</p>`;
+          }
+          html += `</div>`;
+          html += `</div>`;
+          detailRow.innerHTML = html;
+          row.parentNode.insertBefore(detailRow, row.nextSibling);
+          detailRow.classList.remove('hidden');
+          expandIcon.classList.add('rotate-90');
         });
       }
 
       return row;
+    }
+
+    // Function to get relative time
+    function getTimeAgo(dateStr) {
+      const date = new Date(dateStr);
+      const now = new Date();
+      const seconds = Math.floor((now - date) / 1000);
+      let interval = Math.floor(seconds / 31536000);
+      if (interval > 1) return `${interval} years ago`;
+      interval = Math.floor(seconds / 2592000);
+      if (interval > 1) return `${interval} months ago`;
+      interval = Math.floor(seconds / 86400);
+      if (interval > 1) return `${interval} days ago`;
+      interval = Math.floor(seconds / 3600);
+      if (interval > 1) return `${interval} hours ago`;
+      interval = Math.floor(seconds / 60);
+      if (interval > 1) return `${interval} minutes ago`;
+      return `${Math.floor(seconds)} seconds ago`;
     }
 
     async function fetchMyPlayerPoints(address, seasonConfig) {
