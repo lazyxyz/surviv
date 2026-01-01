@@ -69,7 +69,7 @@ export class Gamer extends Player {
             this._kills++;
             this.dirty.modifiers = true;
             this.game.updateKillLeader(this);
-        } else if(source.isBot()) {
+        } else if (source.isBot()) {
             this._botKills++;
         }
     }
@@ -192,12 +192,12 @@ export class Gamer extends Player {
             const teammates = this.team.players;
             const teamIsDead = teammates.every(player => !this.game.livingPlayers.has(player));
             if (teamIsDead) {
-                const uniqueTeams = new Set(
-                    [...this.game.livingPlayers]
-                        .map(p => p.teamID)
-                        .filter(id => id !== undefined)
-                ).size;
-                return uniqueTeams + 1;
+                const livingPlayersArray = [...this.game.livingPlayers];
+                const livingHumans = livingPlayersArray.filter(p => p.teamID !== undefined);
+                const uniqueHumanTeams = new Set(livingHumans.map(p => p.teamID)).size;
+                const livingBots = livingPlayersArray.length - livingHumans.length;
+                const remainingCompetitors = uniqueHumanTeams + livingBots;
+                return remainingCompetitors + 1;
             }
             return undefined;
         }
