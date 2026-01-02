@@ -226,7 +226,10 @@ export const assetsMapping = {
       "negev",
       "usas12",
       "vector",
-      "vks"
+      "vks",
+      "rpk",
+      "m134_minigun",
+      "barrett_m82"
     ],
     [
       "buggy_rust",
