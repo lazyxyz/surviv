@@ -1,3 +1,4 @@
+// tasks/index.ts
 import $ from 'jquery';
 import type { Account } from "../account";
 import { warningAlert } from "../modal";
@@ -68,11 +69,36 @@ async function updateTasksUI(account: Account) {
             const streak = parseInt(streakTask.status.split("/")[0]);
             $("#current-streak-days").text(streak);
 
+            // Weekday labels: left start of streak, right future
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const today = new Date();
+            const startDaysAgo = streak > 0 ? streak - 1 : 0;
+            const startDate = new Date(today.getTime() - startDaysAgo * 86400000);
+
             $(".streak-day").removeClass("completed current");
-            for (let i = 0; i < 7; i++) {
-                if (i < streak) $(`.streak-day:eq(${i})`).addClass("completed");
-                if (i === streak) $(`.streak-day:eq(${i})`).addClass("current");
+            for (let k = 0; k < 7; k++) {
+                const dayDate = new Date(startDate.getTime() + k * 86400000);
+                let label = days[dayDate.getDay()];
+                $(`.streak-day:eq(${k})`).html(label);
+
+                if (k < streak) {
+                    $(`.streak-day:eq(${k})`).addClass("completed");
+                }
+                if (streak < 7 && k === streak) {
+                    $(`.streak-day:eq(${k})`).addClass("current");
+                }
             }
+
+            // Streak notice
+            let notice = "";
+            if (streak === 0) {
+                notice = "Complete at least 3 daily tasks today to start your streak!";
+            } else if (streak < 7) {
+                notice = "Today's streak is complete! Come back tomorrow to continue.";
+            } else {
+                notice = "Congratulations! Your 7-day streak is complete.";
+            }
+            $("#streak-notice").text(notice);
         }
 
         // Timer

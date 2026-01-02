@@ -1119,6 +1119,7 @@ export class Account extends EIP6963 {
             }
 
             const data: GetAllTasksResponse = await response.json();
+            console.log("TASKS: ", data);
             return data;
         } catch (error: any) {
             clearTimeout(timeoutId);
