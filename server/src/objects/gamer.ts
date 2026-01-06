@@ -230,7 +230,8 @@ export class Gamer extends Player {
         this.notifySpectators(gameOverData);
 
         // Handle rewards if rank qualifies
-        if (rank < Config.earnConfig.rank && !this.disconnected) {
+        if (rank < Config.earnConfig.rank && !this.disconnected
+            && (this.game.gameMode == MODE.Solo || this.game.gameMode == MODE.Squad)) {
             this.handleRewards(rank);
         }
     }
@@ -273,7 +274,10 @@ export class Gamer extends Player {
         } as unknown as GameOverData);
 
         this.sendPacket(gameOverPacket);
-        this.saveGame(rank);
+
+        if (this.game.gameMode == MODE.Solo || this.game.gameMode == MODE.Squad) {
+            this.saveGame(rank);
+        }
     }
 
     spectatorSendGameOverPacket(data: GameOverData): void {
@@ -301,10 +305,7 @@ export class Gamer extends Player {
         }
 
         // Only Solo and Squad allow to earn loots atm
-        if (this.game.gameMode !== MODE.Solo && this.game.gameMode !== MODE.Squad) {
-            processRewardsPacket(true, rank, 0, 0);
-            return;
-        }
+        processRewardsPacket(true, rank, 0, 0);
 
         try {
             const data = await savePlayerRank(
