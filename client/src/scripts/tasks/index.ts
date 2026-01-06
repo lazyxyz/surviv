@@ -30,7 +30,7 @@ async function updateTasksUI(account: Account) {
     try {
         // Show loading, hide main content
         $(".tasks-streak-section, .tasks-list, .tasks-footer").hide();
-        $("#tasks-loading").html('<div style="text-align:center;padding:50px;color:#aaa;">Loading tasks...</div>').show();
+        $("#tasks-loading").html('<div style="text-align:center;padding:50px;color:#f9c72f;">Loading tasks...</div>').show();
 
         const data = await account.getAllTasks();
 
