@@ -70,7 +70,7 @@ async function updateTasksUI(account: Account) {
             $("#current-streak-days").text(streak);
 
             // Weekday labels: left start of streak, right future
-            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
             const today = new Date();
             const startDaysAgo = streak > 0 ? streak - 1 : 0;
             const startDate = new Date(today.getTime() - startDaysAgo * 86400000);
