@@ -464,6 +464,15 @@ export class DamageHandler {
         this.player.canDespawn = false;  // Allow despawn again
         this.player.killedBy = undefined;  // Clear killer reference
 
+        let spawnPosition = this.player.position;
+        let spawnLayer = this.player.layer;
+        const { pos, layer } = this.player.game.spawnManager.getSpawnPosition();
+         if (pos) spawnPosition = pos;
+        if (layer) spawnLayer = layer;
+
+        this.player.layer = spawnLayer;
+        this.player.position = spawnPosition;
+
         // Reset movement/attack states (similar to die, but reversing)
         this.player.movement.up = this.player.movement.down = this.player.movement.left = this.player.movement.right = false;
         this.player.startedAttacking = false;
@@ -493,6 +502,8 @@ export class DamageHandler {
         this.player.dirty.items = true;
         this.player.game.fullDirtyObjects.add(this.player);
         this.player.game.spectatablePlayers.push(this.player);
+        this.player.setPartialDirty();
+        this.player.game.grid.updateObject(this.player);
 
         // // Emit post-resurrection event
         // this.player.game.pluginManager.emit("player_did_resurrect", {

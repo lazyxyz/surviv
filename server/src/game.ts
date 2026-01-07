@@ -458,20 +458,6 @@ export class Game implements GameData {
                     this.botManager.activateBots()
                 }, 5000);
             }
-        } else if (this.gameMode === MODE.Bloody && this._started && !this.over) {
-            for (const player of this.connectedPlayers) {
-                if (player.dead && !player.resurrecting) {
-                    player.resurrecting = true;
-                    this.packets.push(
-                        ResurrectPacket.create({
-                            time: 5,
-                        } as ResurrectPacketData))
-
-                    this.addTimeout(() => {
-                        player.damageHandler.resurrect();
-                    }, 5000);
-                };
-            }
         }
 
         if (this.aliveCount >= Config.maxPlayersPerGame) {

@@ -1,3 +1,4 @@
+// uiManager.ts
 import { DEFAULT_INVENTORY, GameConstants, KillfeedEventSeverity, KillfeedEventType, KillfeedMessageType } from "@common/constants";
 import { Ammos } from "@common/definitions/ammos";
 import { type BadgeDefinition } from "@common/definitions/badges";
@@ -225,6 +226,8 @@ export class UIManager {
         spectatingMsg: $<HTMLDivElement>("#spectating-msg"),
         spectatingMsgPlayer: $<HTMLSpanElement>("#spectating-msg-player"),
         btnSpectate: $<HTMLButtonElement>("#btn-spectate"),
+        btnPlayAgain: $<HTMLButtonElement>("#btn-play-again"),
+        btnMenu: $<HTMLButtonElement>("#btn-menu"),
         spectatePrevious: $<HTMLButtonElement>("#btn-spectate-previous"),
         spectateNext: $<HTMLButtonElement>("#btn-spectate-next"),
         spectatingOptions: $<HTMLButtonElement>("#btn-spectate-options-icon"),
@@ -296,7 +299,7 @@ export class UIManager {
         createTeamPlayers: $<HTMLDivElement>("#create-team-players"),
         closeCreateTeam: $<HTMLButtonElement>("#close-create-team"),
 
-        inventoryMsg: $<HTMLSpanElement>("#inventory-message")
+        inventoryMsg: $<HTMLSpanElement>("#inventory-message"),
     });
 
     private readonly _weaponSlotCache = new ExtendedMap<
@@ -333,6 +336,9 @@ export class UIManager {
     private readonly _itemCountCache: Record<string, JQuery<HTMLSpanElement>> = {};
     private readonly _itemSlotCache: Record<string, JQuery<HTMLDivElement>> = {};
     private readonly _scopeSlotCache: Record<ReferenceTo<ScopeDefinition>, JQuery<HTMLDivElement>> = {};
+
+    private _resurrectionCountdownInterval?: number;
+    private _resurrectionCountdownElement?: JQuery<HTMLHeadingElement>;
 
     readonly action = {
         active: false,
@@ -455,7 +461,59 @@ export class UIManager {
 
         if (packet.won) void game.music.play();
 
-        this.gameOverScreenTimeout = window.setTimeout(() => gameOverOverlay.fadeIn(500), 500);
+        this.gameOverScreenTimeout = window.setTimeout(() => {
+            // New resurrection logic
+            if (packet.resurrecting > 0) {
+                // Hide buttons: Play Again, Spectate, Menu (game over buttons)
+                this.ui.btnPlayAgain.hide();
+                this.ui.btnSpectate.hide();
+                this.ui.btnMenu.hide();
+
+                // Also hide spectating buttons if any
+                this.ui.btnPlayAgainSpectating.hide();
+                this.ui.btnSpectateMenu.hide();
+
+                // Create and show countdown element dynamically if not exists
+                if (!this._resurrectionCountdownElement) {
+                    this._resurrectionCountdownElement = $<HTMLHeadingElement>('<h3 id="game-over-countdown" style="color: white; font-size: 24px; margin-top: 20px;"></h3>');
+                    gameOverOverlay.append(this._resurrectionCountdownElement);
+                }
+                this._resurrectionCountdownElement.show();
+
+                // Start countdown
+                let remaining = packet.resurrecting * 1000; // To milliseconds
+                this._resurrectionCountdownElement.text(`Resurrecting in ${Math.ceil(remaining / 1000)} seconds...`);
+                this._resurrectionCountdownInterval = window.setInterval(() => {
+                    remaining -= 1000;
+                    if (remaining <= 0) {
+                        clearInterval(this._resurrectionCountdownInterval);
+                        this._resurrectionCountdownElement?.hide();
+                        // Optionally: trigger resurrection logic here if needed
+                    } else {
+                        this._resurrectionCountdownElement?.text(`Resurrecting in ${Math.ceil(remaining / 1000)} seconds...`);
+                    }
+                }, 1000);
+            } else {
+                // Show buttons as normal
+                this.ui.btnPlayAgain.show();
+                this.ui.btnMenu.show();
+                if (!packet.won) {
+                    this.ui.btnSpectate.removeClass("btn-disabled").show();
+                } else {
+                    this.ui.btnSpectate.hide();
+                }
+                this.ui.btnPlayAgainSpectating.show();
+                this.ui.btnSpectateMenu.show();
+
+                // Cleanup countdown if exists
+                if (this._resurrectionCountdownInterval) {
+                    clearInterval(this._resurrectionCountdownInterval);
+                }
+                this._resurrectionCountdownElement?.hide();
+            }
+
+            gameOverOverlay.fadeIn(500);
+        }, 500);
     }
 
     showRewardsScreen(packet: RewardsData): void {

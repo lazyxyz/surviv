@@ -271,12 +271,26 @@ export class Gamer extends Player {
             damageDone: this.damageDone,
             timeAlive: (this.game.now - this.joinTime) / 1000,
             rank,
+            resurrecting: 0,
         } as unknown as GameOverData);
 
-        this.sendPacket(gameOverPacket);
 
         if (this.game.gameMode == MODE.Solo || this.game.gameMode == MODE.Squad) {
             this.saveGame(rank);
+            this.sendPacket(gameOverPacket);
+        } else if (this.game.gameMode == MODE.Bloody) {
+            gameOverPacket.input.resurrecting = 5; // 5 seconds
+            this.sendPacket(gameOverPacket);
+            this.isGameOverSend = false;
+            this.gameOver = false;
+
+            if (this.dead && !this.resurrecting) {
+                this.resurrecting = true;
+
+                this.game.addTimeout(() => {
+                    this.damageHandler.resurrect();
+                }, 5000);
+            };
         }
     }
 
