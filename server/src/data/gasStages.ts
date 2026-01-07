@@ -106,6 +106,39 @@ export interface GasStage {
 //     },
 // ];
 
+
+export const BloodyGasStages: GasStage[] = [
+    {
+        state: GasState.Inactive,
+        duration: 0,
+        oldRadius: 0.762,
+        newRadius: 0.762,
+        dps: 0,
+    },
+    {
+        state: GasState.Waiting,
+        duration: 255,
+        oldRadius: 0.762,
+        newRadius: 0.762,
+        dps: 0,
+    },
+    {
+        state: GasState.Advancing,
+        duration: 45,
+        oldRadius: 0.762,
+        newRadius: 0,
+        dps: 5
+    },
+    {
+        state: GasState.Final,
+        duration: 0,
+        oldRadius: 0,
+        newRadius: 0,
+        dps: 5
+    },
+];
+
+
 export const GasStages: GasStage[] = [
     {
         state: GasState.Inactive,

@@ -5,7 +5,7 @@ import { MapObjectSpawnMode } from "@common/utils/objectDefinitions";
 import { randomBoolean, randomPointInsideCircle } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
 import { Config, GasMode } from "./config";
-import { GasStages } from "./data/gasStages";
+import { GasStage } from "./data/gasStages";
 import { type Game } from "./game";
 
 export class Gas {
@@ -22,6 +22,7 @@ export class Gas {
     oldRadius: number;
     newRadius: number;
     currentRadius: number;
+    gasStages: GasStage[];
 
     dps = 0;
     private _lastDamageTimestamp;
@@ -37,11 +38,12 @@ export class Gas {
     readonly game: Game;
     readonly mapSize: number;
 
-    constructor(game: Game) {
+    constructor(game: Game, gasStages: GasStage[]) {
         this.game = game;
+        this.gasStages = gasStages;
         this.mapSize = (this.game.map.width + this.game.map.height) / 2;
 
-        const firstStage = GasStages[0];
+        const firstStage = this.gasStages[0];
         this.oldRadius = firstStage.oldRadius * this.mapSize;
         this.newRadius = firstStage.newRadius * this.mapSize;
         this.currentRadius = firstStage.oldRadius * this.mapSize;
@@ -109,7 +111,7 @@ export class Gas {
         const { gas } = Config;
         if (gas.mode === GasMode.Disabled) return;
 
-        const currentStage = GasStages[this.stage + 1];
+        const currentStage = this.gasStages[this.stage + 1];
         if (currentStage === undefined) return;
 
         const isDebug = gas.mode === GasMode.Debug;
@@ -208,7 +210,7 @@ export class Gas {
         this.countdownStart = 0;
         this.completionRatio = 0;
 
-        const firstStage = GasStages[0];
+        const firstStage = this.gasStages[0];
         this.oldRadius = firstStage.oldRadius * this.mapSize;
         this.newRadius = firstStage.newRadius * this.mapSize;
         this.currentRadius = firstStage.oldRadius * this.mapSize;

@@ -106,7 +106,7 @@ export class Gamer extends Player {
     }
 
     override handleDeathDrops(position: Vector, layer: number): void {
-        if (this.game.gameMode == MODE.Dungeon) {
+        if (this.game.gameMode == MODE.Dungeon || this.game.gameMode == MODE.Bloody) {
             this.inventory.cleanInventory();
         } else {
             super.handleDeathDrops(position, layer);

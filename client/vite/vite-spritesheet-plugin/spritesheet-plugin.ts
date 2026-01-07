@@ -27,7 +27,7 @@ export const GAME_MAPS: (MAP | "shared")[] = [
     "fall",
     "winter",
     "desert",
-    "cursedIsland",
+    // "cursedIsland",
     "shared",
 ];
 
@@ -140,13 +140,13 @@ export function spritesheet(): Plugin[] {
     let watcher: FSWatcher;
     let config: ResolvedConfig;
 
-    const atlasesByMode: Record<string, MultiResAtlasList> = {};
+    const atlasesByMode: Record<string, MultiResAtlasList> = {};    
     const exportedAtlasesByMode: Record<string, { low: SpritesheetData[], high: SpritesheetData[] }> = {
         normal: { low: [], high: [] },
         fall: { low: [], high: [] },
         winter: { low: [], high: [] },
         desert: { low: [], high: [] },
-        cursedIsland: { low: [], high: [] },
+        // cursedIsland: { low: [], high: [] },
         shared: { low: [], high: [] }
     };
 

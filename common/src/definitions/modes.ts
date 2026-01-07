@@ -116,6 +116,8 @@ export const Maps: Record<MAP, ModeDefinition> = {
         //     delay: 800,
         //     gravity: true
         // },
+        defaultScope: "8x_scope",
+
         specialPlayButtons: true,
         modeLogoImage: "./img/game/winter/obstacles/red_gift.svg",
         frictionFactor: 0.5

@@ -1,6 +1,6 @@
 # Translation File Reports
 
-This file is a report of all errors and missing keys in the translation files of this game. Last generated Tue, 30 Dec 2025 13:00:35 GMT
+This file is a report of all errors and missing keys in the translation files of this game. Last generated Tue, 06 Jan 2026 11:45:33 GMT
 
 ## 🇸🇦 العربية (98% Complete) - ar.hjson
 
@@ -10,6 +10,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -21,6 +22,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -32,6 +34,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -43,6 +46,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -54,6 +58,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -65,6 +70,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -76,6 +82,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -87,6 +94,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -98,6 +106,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -109,6 +118,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -120,6 +130,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -131,6 +142,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -142,6 +154,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -153,6 +166,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -164,6 +178,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -175,6 +190,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -186,6 +202,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -197,6 +214,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -208,6 +226,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -219,6 +238,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -230,6 +250,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -241,6 +262,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -252,6 +274,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 
@@ -263,6 +286,7 @@ This file is a report of all errors and missing keys in the translation files of
 
 - Key `leave_team` is not defined
 - Key `team_mode` is not defined
+- Key `play_bloody` is not defined
 - Key `loadout_vehicles` is not defined
 - Key `loadout_profile` is not defined
 

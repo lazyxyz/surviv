@@ -1,4 +1,4 @@
-import { GameConstants, Layer, ObjectCategory } from "@common/constants";
+import { GameConstants, Layer, MODE, ObjectCategory } from "@common/constants";
 import { Buildings, type BuildingDefinition } from "@common/definitions/buildings";
 import { Obstacles, RotationMode, type ObstacleDefinition } from "@common/definitions/obstacles";
 import { ObstacleModeVariations } from "@common/definitions/modes";
@@ -13,7 +13,6 @@ import { MapObjectSpawnMode, NullString, type ReferenceTo, type ReifiableDef } f
 import { SeededRandom, pickRandomInArray, random, randomFloat, randomPointInsideCircle, randomRotation, randomVector } from "@common/utils/random";
 import { Oasis, River, Terrain } from "@common/utils/terrain";
 import { Vec, type Vector } from "@common/utils/vector";
-import { Config, SpawnMode } from "./config";
 import { getLootFromTable } from "./data/lootTables";
 import { MapDefinition, MapName, Maps, OasisDefinition, ObstacleClump, RiverDefinition } from "./data/maps";
 import { type Game } from "./game";
@@ -86,7 +85,13 @@ export class GameMap {
     constructor(game: Game) {
         this.game = game;
 
-        const mapDef: MapDefinition = Config.testMode ? Maps[Config.testMode as MapName] : Maps[game.gameMap];
+        // const mapDef: MapDefinition = Config.testMode ? Maps[Config.testMode as MapName] : Maps[game.gameMap];
+        let mapDef: MapDefinition;
+        if (game.gameMode == MODE.Bloody) {
+             mapDef = Maps["bloody" as MapName];
+        } else {
+             mapDef = Maps[game.gameMap];
+        }
 
         // @ts-expect-error I don't know why this rule exists
         type PacketType = this["_packet"];
