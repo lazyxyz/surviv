@@ -90,6 +90,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
     joined = false;
     disconnected = false;
     resurrected = false;
+    resurrecting = false;
     collidable: boolean = true;
 
     _team?: Team;

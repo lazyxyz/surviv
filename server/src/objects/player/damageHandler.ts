@@ -472,7 +472,9 @@ export class DamageHandler {
         this.player.startedSpectating = false;
         this.player.spectating = undefined;
         this.player.joined = true;
+        this.player.dirty.id = true;
         this.player.resurrected = true;
+        this.player.resurrecting = false;
 
         // Re-add to living players and update counts
         this.player.game.livingPlayers.add(this.player);

@@ -417,8 +417,6 @@ export class UIManager {
             gameOverLoots
         } = this.ui;
 
-        game.gameOver = true;
-
         if (!packet.won) {
             this.ui.btnSpectate.removeClass("btn-disabled").show();
             game.map.indicator.setFrame("player_indicator_dead");

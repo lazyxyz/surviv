@@ -49,6 +49,7 @@ import { SpawnManager } from "./game/spawnManager";
 import { Vehicle } from "./objects/vehicle";
 import { DungeonPacketData, DungeonPacket } from "@common/packets/dungeonPackage";
 import { BloodyGasStages, GasStages } from "./data/gasStages";
+import { ResurrectPacket, ResurrectPacketData } from "@common/packets/resurrectPackage";
 
 /*
     eslint-disable
@@ -232,7 +233,7 @@ export class Game implements GameData {
         this.port = port;
         this.gameMode = ganeMode;
         this.gameId = gameId;
-       
+
         const randMap = this.getRandomMap();
         this.gameMap = randMap.map;
         this.rainDrops = randMap.rainDrops;
@@ -261,7 +262,7 @@ export class Game implements GameData {
         this.map = new GameMap(this);
 
         let gasStages = GasStages;
-        if(this.gameMode == MODE.Bloody) {
+        if (this.gameMode == MODE.Bloody) {
             gasStages = BloodyGasStages;
         }
 
@@ -317,7 +318,7 @@ export class Game implements GameData {
         for (const syncedParticle of this.grid.pool.getCategory(ObjectCategory.SyncedParticle)) {
             syncedParticle.update();
         }
-       
+
         for (const vehicle of this.grid.pool.getCategory(ObjectCategory.Vehicle)) {
             vehicle.update();
         }
@@ -456,6 +457,20 @@ export class Game implements GameData {
                     );
                     this.botManager.activateBots()
                 }, 5000);
+            }
+        } else if (this.gameMode === MODE.Bloody && this._started && !this.over) {
+            for (const player of this.connectedPlayers) {
+                if (player.dead && !player.resurrecting) {
+                    player.resurrecting = true;
+                    this.packets.push(
+                        ResurrectPacket.create({
+                            time: 5,
+                        } as ResurrectPacketData))
+
+                    this.addTimeout(() => {
+                        player.damageHandler.resurrect();
+                    }, 5000);
+                };
             }
         }
 

@@ -23,7 +23,6 @@ import { type ObjectsNetData } from "@common/utils/objectsSerializations";
 import { randomFloat, randomVector } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound, type Sound } from "@pixi/sound";
-import $, { data } from "jquery";
 import { Application, Color } from "pixi.js";
 import "pixi.js/prepare";
 import { getTranslatedString } from "../translations";
@@ -71,6 +70,7 @@ import { numberByBlockchain } from "@common/blockchain/contracts";
 import { Emotes } from "@common/definitions/emotes";
 import { Loots } from "@common/definitions/loots";
 import { Skins } from "@common/definitions/skins";
+import { ResurrectPacket } from "@common/packets/resurrectPackage";
 
 /* eslint-disable @stylistic/indent */
 
@@ -618,12 +618,18 @@ export class Game {
             case packet instanceof UpdatePacket:
                 this.processUpdate(packet.output);
                 break;
-            case packet instanceof GameOverPacket:
+            case packet instanceof GameOverPacket: {
                 this.uiManager.showGameOverScreen(packet.output);
-                break;
+                this.gameOver = true;
+            } break;
             case packet instanceof DungeonPacket:
                 this.uiManager.updateWaveCounter(packet.output.waves);
                 break;
+            case packet instanceof ResurrectPacket: {
+                this.gameOver = false;
+                this.spectating = false;
+                break;
+            }
             case packet instanceof RewardsPacket:
                 this.uiManager.showRewardsScreen(packet.output);
                 break;
