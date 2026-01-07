@@ -345,7 +345,7 @@ export async function loadStore(account: Account): Promise<void> {
     if (storeItems.length === 0) {
         // Show empty state message
         $storeContainer.empty().html(`
-            <div class="no-sales-message" style="text-align: center; padding: 40px; color: #ffd23a; font-size: 18px;">
+            <div class="no-sales-message" style="width: 100%; text-align: center; padding: 64px 16px; color: #ffd23a; font-size: 16px;">
                 Sales have ended. Check back later!
             </div>
         `);
