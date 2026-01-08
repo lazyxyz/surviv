@@ -1,3 +1,30 @@
+import { MODE } from "@common/constants";
+
+// Mapping from mode to join time in seconds
+const GAME_JOIN_TIMES: Record<MODE, number> = {
+    [MODE.Solo]:   90000,   // 90 seconds
+    [MODE.Squad]:  90000,  
+    [MODE.V50]:    90000, 
+    [MODE.Dungeon]: 255000,
+    [MODE.Bloody]:  0,
+};
+
+// Helper function to get the join time for a given mode
+export function getGameJoinTime(mode: MODE): number {
+    return GAME_JOIN_TIMES[mode];
+}
+
+export function getMaxPlayers(mode: MODE): number {
+    switch (mode) {
+        case MODE.Solo: return 1;
+        case MODE.Squad: return 4;
+        case MODE.V50: return 50;
+        case MODE.Dungeon: return 10;
+        case MODE.Bloody: return 1;
+        default: return 1; // fallback
+    }
+}
+
 export const KNOCK_BACK_AMOUNT = 0.6; // knockback distance when bullet/explosion hit bot 
 
 export const materialMultipliers = {

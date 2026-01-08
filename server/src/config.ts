@@ -34,8 +34,6 @@ export const Config = {
     maxPlayersPerGame: 100,
 
     maxGames: 20,
-    // gameJoinTime: 90,
-    gameJoinTime: 0,
 
     // objectLifetime: 180000, // Remove loot after 3 mins
     // obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
@@ -123,11 +121,6 @@ export interface ConfigType {
      * The maximum number of concurrent games.
      */
     readonly maxGames: number
-
-    /**
-     * The number of seconds after which players are prevented from joining a game.
-     */
-    readonly gameJoinTime: number
 
     readonly objectLifetime?: number; // Auto-removal lifetime in ms of loot/deathMarker
     readonly obstacleRevivalDelay?: number; // Auto-revival obstacle delay in ms

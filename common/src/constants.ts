@@ -173,17 +173,6 @@ export enum MODE {
     Bloody,
 }
 
-export function getMaxPlayers(mode: MODE): number {
-    switch (mode) {
-        case MODE.Solo: return 1;
-        case MODE.Squad: return 4;
-        case MODE.V50: return 50;
-        case MODE.Dungeon: return 10;
-        case MODE.Bloody: return 1;
-        default: return 1; // fallback
-    }
-}
-
 export enum ObjectCategory {
     Player,
     Obstacle,

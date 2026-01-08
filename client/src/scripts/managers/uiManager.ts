@@ -482,7 +482,7 @@ export class UIManager {
 
                 // Start countdown
                 let remaining = packet.resurrecting * 1000; // To milliseconds
-                this._resurrectionCountdownElement.text(`Resurrecting in ${Math.ceil(remaining / 1000)} seconds...`);
+                this._resurrectionCountdownElement.text(`Respawn in ${Math.ceil(remaining / 1000)} seconds...`);
                 this._resurrectionCountdownInterval = window.setInterval(() => {
                     remaining -= 1000;
                     if (remaining <= 0) {
@@ -490,7 +490,7 @@ export class UIManager {
                         this._resurrectionCountdownElement?.hide();
                         // Optionally: trigger resurrection logic here if needed
                     } else {
-                        this._resurrectionCountdownElement?.text(`Resurrecting in ${Math.ceil(remaining / 1000)} seconds...`);
+                        this._resurrectionCountdownElement?.text(`Respawn in ${Math.ceil(remaining / 1000)} seconds...`);
                     }
                 }, 1000);
             } else {

@@ -441,7 +441,7 @@ export class DamageHandler {
         source?: Player | string;  // Optional: Who/what caused the resurrection (for killfeed/logging)
         meleeWeapon?: InventoryItem<WeaponDefinition> | undefined;  // Optional: Who/what caused the resurrection (for killfeed/logging)
     }): void {
-        if (!this.player.dead || this.player.health > 0) {
+        if (!this.player.dead || this.player.health > 0 || this.player.game.over) {
             console.warn(`Cannot resurrect player ${this.player.name} (id: ${this.player.id}): Not dead.`);
             return;
         }

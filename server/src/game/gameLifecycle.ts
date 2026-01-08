@@ -3,6 +3,7 @@ import { Game } from "../game";
 import { WorkerMessages } from "../gameManager";
 import { Gamer } from "../objects/gamer";
 import { Logger } from "../utils/misc";
+import { MODE } from "@common/constants";
 
 export class GameLifecycle {
     private game: Game;
@@ -15,7 +16,9 @@ export class GameLifecycle {
         this.game._started = true;
         this.game.setGameData({ startedTime: this.game.now });
         this.game.gas.advanceGasStage();
-        this.game.setGameData({ allowJoin: false });
+        let allowJoin = false;
+        if (this.game.gameMode == MODE.Bloody) allowJoin = true;
+        this.game.setGameData({ allowJoin: allowJoin });
     }
 
     endGame(): void {

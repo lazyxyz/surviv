@@ -78,7 +78,7 @@ export class Gamer extends Player {
         }
 
         if (this.game.gameMode == MODE.Bloody) {
-            this.bloodyLevelUp();
+            this.bloodyLevelUp(source);
         }
     }
 
@@ -86,31 +86,40 @@ export class Gamer extends Player {
     // Add to class properties
     weapon_index: number = 0;
     current_sublevel_kills: number = 0;
-    bloodyLevelUp() {
+    // Replace bloodyLevelUp() entirely (now takes optional source)
+    bloodyLevelUp(source?: Player): void {
         if (this.dead) return;
 
-        this.current_sublevel_kills++;  // +1 per kill
-        this.bloody_level++;  // Total kills tracker (for UI/achievements?)
-
-        const required = SUBLEVELS_PER_WEAPON[this.weapon_index];
-        if (this.current_sublevel_kills >= required) {
-            this.weapon_index++;
-            this.current_sublevel_kills = 0;
-            const maxIndex = BLOODY_WEAPONS.length - 1;
-            if (this.weapon_index <= maxIndex) {
-                this.inventory.weapons[2] = new MeleeItem(
-                    Melees.fromString(BLOODY_WEAPONS[this.weapon_index]),
-                    this
-                );
-            }
+        let killsAdded = 1;
+        if (source && source instanceof Gamer) {
+            const bonus = Math.max(1, Math.floor((source as Gamer).bloody_level * 0.65));
+            console.log("bonus: ", bonus);
+            killsAdded += bonus;
         }
+
+        this.current_sublevel_kills += killsAdded;
+        this.bloody_level += killsAdded;
+
+        // Batch process upgrades (handles multi-upgrades from big steals)
+        while (this.weapon_index < BLOODY_WEAPONS.length - 1) {
+            const required = SUBLEVELS_PER_WEAPON[this.weapon_index];
+            if (this.current_sublevel_kills < required) break;
+
+            this.current_sublevel_kills -= required;
+            this.weapon_index++;
+            this.inventory.weapons[2] = new MeleeItem(
+                Melees.fromString(BLOODY_WEAPONS[this.weapon_index]),
+                this
+            );
+        }
+
         this.health += 20;
         this.setDirty();
     }
 
-    halfBloodyLevel() {
-        this.bloody_level = Math.round(this.bloody_level / 2);  // Halve total progress
-        this.weapon_index = Math.floor(this.weapon_index / 2);   // Halve weapon tier (floor to prev)
+    bloodyLevelDown() {
+        this.bloody_level = Math.round(this.bloody_level * 0.65);  // Halve total progress
+        this.weapon_index = Math.floor(this.weapon_index * 0.65);   // Halve weapon tier (floor to prev)
         this.current_sublevel_kills = 0;                         // Reset current grind
 
         const clampedIndex = Math.max(0, Math.min(this.weapon_index, BLOODY_WEAPONS.length - 1));
@@ -325,7 +334,7 @@ export class Gamer extends Player {
             this.saveGame(rank);
             this.sendPacket(gameOverPacket);
         } else if (this.game.gameMode == MODE.Bloody) {
-            gameOverPacket.input.resurrecting = 5; // 5 seconds
+            if (!this.game.over) gameOverPacket.input.resurrecting = 5; // 5 seconds
             this.sendPacket(gameOverPacket);
             this.isGameOverSend = false;
             this.gameOver = false;
@@ -333,7 +342,7 @@ export class Gamer extends Player {
             if (this.dead && !this.resurrecting) {
                 this.resurrecting = true;
 
-                this.halfBloodyLevel();
+                this.bloodyLevelDown();
 
                 this.game.addTimeout(() => {
                     this.damageHandler.resurrect();

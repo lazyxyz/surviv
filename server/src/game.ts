@@ -1,5 +1,5 @@
 
-import { getMaxPlayers, Layer, MODE, ObjectCategory } from "@common/constants";
+import { Layer, MODE, ObjectCategory } from "@common/constants";
 import { type ExplosionDefinition } from "@common/definitions/explosions";
 import { type LootDefinition } from "@common/definitions/loots";
 import { type ObstacleDefinition } from "@common/definitions/obstacles";
@@ -50,6 +50,7 @@ import { Vehicle } from "./objects/vehicle";
 import { DungeonPacketData, DungeonPacket } from "@common/packets/dungeonPackage";
 import { BloodyGasStages, GasStages } from "./data/gasStages";
 import { ResurrectPacket, ResurrectPacketData } from "@common/packets/resurrectPackage";
+import { getMaxPlayers } from "./constants";
 
 /*
     eslint-disable
@@ -212,9 +213,9 @@ export class Game implements GameData {
 
     getRandomMap(): { map: MAP; rainDrops: number } {
         const configs: { map: MAP; rainChance: number }[] = [
-            // { map: "desert", rainChance: 0 },
+            { map: "desert", rainChance: 0 },
             // { map: "fall", rainChance: 0.5 },
-            { map: "winter", rainChance: 0.5 },
+            // { map: "winter", rainChance: 0.5 },
             // { map: "cursedIsland", rainChance: 1 },
         ];
 
@@ -457,6 +458,10 @@ export class Game implements GameData {
                     );
                     this.botManager.activateBots()
                 }, 5000);
+            }
+        } if (this.gameMode === MODE.Bloody && this._started && !this.over) {
+            if (this.gas.isFinal()) {
+                this.gameLifecycle.endGame();
             }
         }
 

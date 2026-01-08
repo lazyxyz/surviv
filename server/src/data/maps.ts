@@ -811,13 +811,13 @@ const maps = {
                         break;
                     case "desert":
                         obstacles = {
-                            palm_tree: 20,
-                            date_palm_tree: 20,
+                            palm_tree: 10,
+                            date_palm_tree: 10,
                             small_palm_tree: 10,
-                            child_palm_tree: 12,
-                            doum_palm_tree: 20,
-                            quiver_tree: 12,
-                            dry_tree: 20,
+                            child_palm_tree: 10,
+                            doum_palm_tree: 10,
+                            quiver_tree: 10,
+                            dry_tree: 5,
                             stump: 8,
                             hatchet_stump: 1,
                             rock: 6,

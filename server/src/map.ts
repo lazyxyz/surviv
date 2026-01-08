@@ -88,9 +88,9 @@ export class GameMap {
         // const mapDef: MapDefinition = Config.testMode ? Maps[Config.testMode as MapName] : Maps[game.gameMap];
         let mapDef: MapDefinition;
         if (game.gameMode == MODE.Bloody) {
-             mapDef = Maps["bloody" as MapName];
+            mapDef = Maps["bloody" as MapName];
         } else {
-             mapDef = Maps[game.gameMap];
+            mapDef = Maps[game.gameMap];
         }
 
         // @ts-expect-error I don't know why this rule exists
@@ -1001,7 +1001,7 @@ export class GameMap {
                 }
                 case MapObjectSpawnMode.GrassAndAroundOasis: {
                     return () => {
-                        if (Math.random() < 0.05) { // oasis bank area much smaller then grass.
+                        if (this.terrain.oases.length == 0 || Math.random() < 0.05) { // oasis bank area much smaller then grass.
                             // Grass logic
                             return randomVector(
                                 this._beachPadding + width,
