@@ -22,8 +22,8 @@ export const Config = {
     port: 8000,
     soloPort: 8001,
     squadPort: 9001,
-    v50Port: 9500,
-    cursedIslandPort: 9600,
+
+    customPort: 9500,
 
     addBot: true,
     // addBot: false,
@@ -34,7 +34,6 @@ export const Config = {
     maxPlayersPerGame: 100,
 
     maxGames: 20,
-    gameJoinTime: 90,
 
     // objectLifetime: 180000, // Remove loot after 3 mins
     // obstacleRevivalDelay: 180000, // Revive obstacle after 3 mins
@@ -72,8 +71,7 @@ export interface ConfigType {
 
     readonly soloPort: number;
     readonly squadPort: number;
-    readonly v50Port: number;
-    readonly cursedIslandPort: number;
+    readonly customPort: number;
     readonly addBot: boolean;
 
     readonly testMode?: string;
@@ -123,11 +121,6 @@ export interface ConfigType {
      * The maximum number of concurrent games.
      */
     readonly maxGames: number
-
-    /**
-     * The number of seconds after which players are prevented from joining a game.
-     */
-    readonly gameJoinTime: number
 
     readonly objectLifetime?: number; // Auto-removal lifetime in ms of loot/deathMarker
     readonly obstacleRevivalDelay?: number; // Auto-revival obstacle delay in ms

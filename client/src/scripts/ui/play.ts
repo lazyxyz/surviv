@@ -72,7 +72,7 @@ async function initializePlayButtons(game: Game, account: Account): Promise<void
         }[] = [
             { selector: "#btn-play-solo", mode: MODE.Solo, key: "solo", icon: "./img/misc/user.svg", spanMargin: "0" },
             { selector: "#btn-play-squad", mode: MODE.Squad, key: "squad", icon: "./img/misc/user-group.svg", spanMargin: "20px" },
-            { selector: "#btn-play-dungeon", mode: MODE.Dungeon, key: "dungeon", icon: "./img/misc/gate.svg", spanMargin: "20px" }
+            { selector: "#btn-play-event", mode: MODE.Bloody, key: "bloody", icon: "./img/misc/gate.svg", spanMargin: "20px" }
         ];
 
     playConfigs.forEach(config => {
@@ -260,6 +260,7 @@ function setupTeamSocketHandlers(socket: WebSocket, game: Game, account: Account
                 ui.createTeamAutoFill.prop("checked", data.autoFill);
                 ui.createTeamRoomMode.prop("checked", data.roomMode);
                 ui.createTeamLock.prop("checked", data.locked);
+
                 updateRoomOptions(ui, data.roomMode ? true : false, data.teamSize ? data.teamSize : MODE.Squad);
                 break;
             case CustomTeamMessages.Started:

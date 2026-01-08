@@ -162,6 +162,47 @@ export class BotManager {
 
             // Let createBot handle totalBots increments
             console.log(`Wave ${wave} Bots activated: ${spawned} fixed total (level ${level}), types: ${availableTypes.join(', ')}`);
+        } else if (this.game.gameMode == MODE.Bloody) {
+            const totalBots = 10; // Fixed to 10 bots
+
+            // Adjusted distribution to achieve exactly: Zombie 5, Ninja 2, Werewolf 2, Butcher 1 when totalBots = 10
+            const typeConfigs: Array<{ type: BotType; percentage: number; behavior: BehaviorType; level: number }> = [
+                { type: BotType.Zombie, percentage: 0.50, behavior: BehaviorType.ProximityAttack, level: 5 },
+                { type: BotType.Ninja, percentage: 0.20, behavior: BehaviorType.HideAndAttack, level: 5 },
+                { type: BotType.Werewolf, percentage: 0.20, behavior: BehaviorType.HideAndAttack, level: 5 },
+                { type: BotType.Butcher, percentage: 0.10, behavior: BehaviorType.ProximityAttack, level: 5 },
+            ];
+
+            // Calculate base counts
+            let counts: Record<BotType, number> = {} as Record<BotType, number>;
+            let currentTotal = 0;
+            for (const { type, percentage } of typeConfigs) {
+                counts[type] = Math.floor(totalBots * percentage);
+                currentTotal += counts[type];
+            }
+
+            // Distribute remainder round-robin (fair)
+            const remainder = totalBots - currentTotal;
+            const typeOrder = typeConfigs.map(({ type }) => type);
+            for (let i = 0; i < remainder; i++) {
+                const type = typeOrder[i % typeOrder.length];
+                counts[type]++;
+            }
+
+            // Spawn using original skills
+            let spawned = 0;
+            for (const { type, behavior, level } of typeConfigs) {
+                const count = counts[type];
+
+                for (let i = 0; i < count; i++) {
+                    this.createBot(type, botData, behavior, undefined, undefined, level);
+                    spawned++;
+                }
+            }
+
+            // Let createBot handle totalBots increments
+            Logger.log(`Bots added to game: Total Bots = ${spawned} (random ${totalBots}) (${Object.entries(counts).map(([t, c]) => `${t}: ${c}`).join(', ')})`);
+
         } else {
             // Non-Dungeon: Use original ("old") skills/behaviors and levels
             // Random total bots between 10 and 15

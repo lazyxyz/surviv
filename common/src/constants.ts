@@ -166,10 +166,11 @@ export const enum Layers {
 }
 
 export enum MODE {
-    Solo = 1,
-    Squad = 4,
-    V50 = 50,
-    Dungeon = 10,
+    Solo,
+    Squad,
+    V50,
+    Dungeon,
+    Bloody,
 }
 
 export enum ObjectCategory {

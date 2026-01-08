@@ -48,6 +48,9 @@ import { ConnectionManager } from "./game/connectionManager";
 import { SpawnManager } from "./game/spawnManager";
 import { Vehicle } from "./objects/vehicle";
 import { DungeonPacketData, DungeonPacket } from "@common/packets/dungeonPackage";
+import { BloodyGasStages, GasStages } from "./data/gasStages";
+import { ResurrectPacket, ResurrectPacketData } from "@common/packets/resurrectPackage";
+import { getMaxPlayers } from "./constants";
 
 /*
     eslint-disable
@@ -227,16 +230,16 @@ export class Game implements GameData {
         return { map, rainDrops };
     }
 
-    constructor(port: number, maxTeamSize: MODE, gameId: string) {
+    constructor(port: number, ganeMode: MODE, gameId: string) {
         this.port = port;
-        this.gameMode = maxTeamSize;
+        this.gameMode = ganeMode;
         this.gameId = gameId;
-       
+
         const randMap = this.getRandomMap();
         this.gameMap = randMap.map;
         this.rainDrops = randMap.rainDrops;
 
-        this.teamMode = this.gameMode > MODE.Solo;
+        this.teamMode = getMaxPlayers(this.gameMode) > 1;
         this.updateGameData({
             aliveCount: 0,
             allowJoin: false,
@@ -258,7 +261,13 @@ export class Game implements GameData {
         const { width, height } = Maps[this.gameMap];
         this.grid = new Grid(this, width, height);
         this.map = new GameMap(this);
-        this.gas = new Gas(this);
+
+        let gasStages = GasStages;
+        if (this.gameMode == MODE.Bloody) {
+            gasStages = BloodyGasStages;
+        }
+
+        this.gas = new Gas(this, gasStages);
 
         this.setGameData({ allowJoin: true });
 
@@ -310,7 +319,7 @@ export class Game implements GameData {
         for (const syncedParticle of this.grid.pool.getCategory(ObjectCategory.SyncedParticle)) {
             syncedParticle.update();
         }
-       
+
         for (const vehicle of this.grid.pool.getCategory(ObjectCategory.Vehicle)) {
             vehicle.update();
         }
@@ -412,10 +421,10 @@ export class Game implements GameData {
             this._started
             && !this.over
             && !Config.startImmediately
-            && this.gameMode != MODE.Dungeon
+            && (this.gameMode == MODE.Solo || this.gameMode == MODE.Squad)
             && (
                 this.teamMode
-                    ? this.aliveCount <= (this.gameMode as number) && new Set([...this.livingPlayers].map(p => p.teamID)).size <= 1
+                    ? this.aliveCount <= getMaxPlayers(this.gameMode) && new Set([...this.livingPlayers].map(p => p.teamID)).size <= 1
                     : this.aliveCount <= 1
             )
         ) {
@@ -449,6 +458,10 @@ export class Game implements GameData {
                     );
                     this.botManager.activateBots()
                 }, 5000);
+            }
+        } if (this.gameMode === MODE.Bloody && this._started && !this.over) {
+            if (this.gas.isFinal()) {
+                this.gameLifecycle.endGame();
             }
         }
 

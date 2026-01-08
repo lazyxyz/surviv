@@ -16,6 +16,9 @@ import { savePlayerGame, savePlayerRank } from "../api/api";
 import { GameOverData, GameOverPacket } from "@common/packets/gameOverPacket";
 import { DamageParams } from "./gameObject";
 import { Blockchain } from "@common/blockchain/contracts";
+import { MeleeItem } from "../inventory/meleeItem";
+import { Melees } from "@common/definitions/melees";
+import { BLOODY_WEAPONS, SUBLEVELS_PER_WEAPON } from "../constants";
 
 export interface PlayerContainer {
     readonly name: string
@@ -35,6 +38,7 @@ export class Gamer extends Player {
     gameOver: boolean = false;
     rewardsBoost: number = 0;
     chain: Blockchain = Blockchain.Somnia;
+    bloody_level = 0;
 
     constructor(game: Game, socket: WebSocket<PlayerContainer>, position: Vector, layer?: Layer, team?: Team) {
         const userData = socket.getUserData();
@@ -72,6 +76,57 @@ export class Gamer extends Player {
         } else if (source.isBot()) {
             this._botKills++;
         }
+
+        if (this.game.gameMode == MODE.Bloody) {
+            this.bloodyLevelUp(source);
+        }
+    }
+
+
+    // Add to class properties
+    weapon_index: number = 0;
+    current_sublevel_kills: number = 0;
+    // Replace bloodyLevelUp() entirely (now takes optional source)
+    bloodyLevelUp(source?: Player): void {
+        if (this.dead) return;
+
+        let killsAdded = 1;
+        if (source && source instanceof Gamer) {
+            const bonus = Math.max(1, Math.floor((source as Gamer).bloody_level * 0.65));
+            console.log("bonus: ", bonus);
+            killsAdded += bonus;
+        }
+
+        this.current_sublevel_kills += killsAdded;
+        this.bloody_level += killsAdded;
+
+        // Batch process upgrades (handles multi-upgrades from big steals)
+        while (this.weapon_index < BLOODY_WEAPONS.length - 1) {
+            const required = SUBLEVELS_PER_WEAPON[this.weapon_index];
+            if (this.current_sublevel_kills < required) break;
+
+            this.current_sublevel_kills -= required;
+            this.weapon_index++;
+            this.inventory.weapons[2] = new MeleeItem(
+                Melees.fromString(BLOODY_WEAPONS[this.weapon_index]),
+                this
+            );
+        }
+
+        this.health += 20;
+        this.setDirty();
+    }
+
+    bloodyLevelDown() {
+        this.bloody_level = Math.round(this.bloody_level * 0.65);  // Halve total progress
+        this.weapon_index = Math.floor(this.weapon_index * 0.65);   // Halve weapon tier (floor to prev)
+        this.current_sublevel_kills = 0;                         // Reset current grind
+
+        const clampedIndex = Math.max(0, Math.min(this.weapon_index, BLOODY_WEAPONS.length - 1));
+        this.inventory.weapons[2] = new MeleeItem(
+            Melees.fromString(BLOODY_WEAPONS[clampedIndex]),
+            this
+        );
     }
 
     secondUpdate(): void {
@@ -106,7 +161,7 @@ export class Gamer extends Player {
     }
 
     override handleDeathDrops(position: Vector, layer: number): void {
-        if (this.game.gameMode == MODE.Dungeon) {
+        if (this.game.gameMode == MODE.Dungeon || this.game.gameMode == MODE.Bloody) {
             this.inventory.cleanInventory();
         } else {
             super.handleDeathDrops(position, layer);
@@ -271,12 +326,28 @@ export class Gamer extends Player {
             damageDone: this.damageDone,
             timeAlive: (this.game.now - this.joinTime) / 1000,
             rank,
+            resurrecting: 0,
         } as unknown as GameOverData);
 
-        this.sendPacket(gameOverPacket);
 
         if (this.game.gameMode == MODE.Solo || this.game.gameMode == MODE.Squad) {
             this.saveGame(rank);
+            this.sendPacket(gameOverPacket);
+        } else if (this.game.gameMode == MODE.Bloody) {
+            if (!this.game.over) gameOverPacket.input.resurrecting = 5; // 5 seconds
+            this.sendPacket(gameOverPacket);
+            this.isGameOverSend = false;
+            this.gameOver = false;
+
+            if (this.dead && !this.resurrecting) {
+                this.resurrecting = true;
+
+                this.bloodyLevelDown();
+
+                this.game.addTimeout(() => {
+                    this.damageHandler.resurrect();
+                }, 5000);
+            };
         }
     }
 

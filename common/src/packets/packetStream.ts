@@ -14,6 +14,7 @@ import { RewardsPacket } from "./rewardsPacket";
 import { SpectatePacket } from "./spectatePacket";
 import { UpdatePacket } from "./updatePacket";
 import { DungeonPacket } from "./dungeonPackage";
+import { ResurrectPacket } from "./resurrectPackage";
 
 
 class PacketRegister {
@@ -60,6 +61,7 @@ export const ServerToClientPackets = new PacketRegister(
     RewardsPacket,
     DisconnectPacket,
     DungeonPacket,
+    ResurrectPacket,
     ConnectPacket,
 );
 

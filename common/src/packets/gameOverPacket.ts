@@ -13,7 +13,9 @@ export type GameOverData = {
 } | {
     readonly won: false
     readonly rank: number
-});
+}) & {
+    resurrecting: number,
+};
 
 export const GameOverPacket = createPacket("GameOverPacket")<GameOverData>({
     serialize(strm, data) {
@@ -23,7 +25,8 @@ export const GameOverPacket = createPacket("GameOverPacket")<GameOverData>({
             .writeUint8(data.bounties)
             .writeUint16(data.damageDone)
             .writeUint16(data.damageTaken)
-            .writeUint16(data.timeAlive);
+            .writeUint16(data.timeAlive)
+            .writeUint8(data.resurrecting);
     },
 
     deserialize(stream) {
@@ -36,7 +39,8 @@ export const GameOverPacket = createPacket("GameOverPacket")<GameOverData>({
             bounties: stream.readUint8(),
             damageDone: stream.readUint16(),
             damageTaken: stream.readUint16(),
-            timeAlive: stream.readUint16()
+            timeAlive: stream.readUint16(),
+            resurrecting: stream.readUint8(),
         } as GameOverData;
     }
 });

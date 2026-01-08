@@ -1,11 +1,11 @@
 import { InputActions, InventoryMessages, Layer, ObjectCategory, MODE, EMOTE_SLOTS } from "@common/constants";
 import { ArmorType } from "@common/definitions/armors";
-import { Badges, type BadgeDefinition } from "@common/definitions/badges";
+import { type BadgeDefinition } from "@common/definitions/badges";
 import { type DualGunNarrowing } from "@common/definitions/guns";
 import { DisconnectPacket } from "@common/packets/disconnectPacket";
 import { GameOverPacket } from "@common/packets/gameOverPacket";
 import { JoinedPacket, type JoinedPacketData } from "@common/packets/joinedPacket";
-import { JoinPacket, type JoinPacketCreation } from "@common/packets/joinPacket";
+import { JoinPacket } from "@common/packets/joinPacket";
 import { KillFeedPacket } from "@common/packets/killFeedPacket";
 import { MapPacket } from "@common/packets/mapPacket";
 import { type InputPacket, type OutputPacket } from "@common/packets/packet";
@@ -23,7 +23,6 @@ import { type ObjectsNetData } from "@common/utils/objectsSerializations";
 import { randomFloat, randomVector } from "@common/utils/random";
 import { Vec, type Vector } from "@common/utils/vector";
 import { sound, type Sound } from "@pixi/sound";
-import $, { data } from "jquery";
 import { Application, Color } from "pixi.js";
 import "pixi.js/prepare";
 import { getTranslatedString } from "../translations";
@@ -69,8 +68,7 @@ import { DungeonPacket } from "@common/packets/dungeonPackage";
 import { ConnectPacket } from "@common/packets/connectPacket";
 import { numberByBlockchain } from "@common/blockchain/contracts";
 import { Emotes } from "@common/definitions/emotes";
-import { Loots } from "@common/definitions/loots";
-import { Skins } from "@common/definitions/skins";
+import { ResurrectPacket } from "@common/packets/resurrectPackage";
 
 /* eslint-disable @stylistic/indent */
 
@@ -618,9 +616,15 @@ export class Game {
             case packet instanceof UpdatePacket:
                 this.processUpdate(packet.output);
                 break;
-            case packet instanceof GameOverPacket:
+            case packet instanceof GameOverPacket: {
                 this.uiManager.showGameOverScreen(packet.output);
-                break;
+                if (packet.output.resurrecting > 0) {
+                    this.gameOver = false;
+                    this.spectating = false;
+                } else {
+                    this.gameOver = true;
+                }
+            } break;
             case packet instanceof DungeonPacket:
                 this.uiManager.updateWaveCounter(packet.output.waves);
                 break;
