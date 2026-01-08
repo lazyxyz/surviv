@@ -121,7 +121,7 @@ export class Gas {
         // Halve duration for CursedIsland mode
         if (this.game.gameMode === MODE.Dungeon) {
             duration = Math.floor(duration / 2);
-            dps = Math.floor(dps / 3);
+            dps = Math.floor(dps / 2);
         }
 
         this.stage++;

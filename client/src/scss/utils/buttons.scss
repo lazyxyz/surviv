@@ -192,3 +192,50 @@
   border-bottom: 2px solid palette.$orange_bg;
   box-shadow: inset 0 -2px palette.$orange_bg;
 }
+
+.split-button-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background-color: #008aff; /* match your btn-primary background */
+  border-radius: 40px; /* or match your original button's border-radius */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); /* match btn-darken shadow */
+  overflow: hidden;
+  font-size: 1.1rem;
+}
+
+.split-part {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+  flex: 1; /* equal width for both sides */
+  min-width: 120px;
+  background: transparent; /* ensures uniform color from container */
+}
+
+.split-part:hover {
+  background-color: rgba(255, 255, 255, 0.15); /* hover brightens only the hovered half */
+}
+
+.split-part img {
+  height: 18px; /* adjust to match your original icon size */
+}
+
+/* Force all text and divider to white */
+.button-text,
+.split-divider {
+  color: white !important;
+  font-weight: 500;
+}
+
+.split-divider {
+  font-size: 1.6rem;
+  font-weight: bold;
+  padding: 0 12px;
+  pointer-events: none;
+  user-select: none;
+}

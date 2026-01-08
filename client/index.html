@@ -214,15 +214,25 @@
 
 
             <!-- Marketplace -->
-            <!-- <a href="https://opensea.io/collection/surviv-assets" target="_blank">
-              <button class="btn btn-lg btn-darken btn-quests btn-primary" id="btn-single-home">
-                <div class="pulsating-circle" style="display: none"></div>
-                <img src="/img/misc/opensea.svg" alt="">
-                <span translation="marketplace"></span>
-              </button>
-            </a> -->
+            <div class="split-button-container" id="btn-single-home">
+              <div class="pulsating-circle" style="display: none"></div>
 
-            <!-- Live Drop -->
+              <!-- Left part -->
+              <a href="https://opensea.io/collection/surviv-assets" class="split-part" target="_blank">
+                <img src="/img/misc/opensea.svg" alt="OpenSea">
+                <span class="button-text">Assets</span>
+              </a>
+
+              <!-- Slash divider -->
+              <span class="split-divider">/</span>
+
+              <!-- Right part (replace with your second link/icon/text) -->
+              <a href="https://opensea.io/collection/surviv-army" class="split-part" target="_blank">
+                <span class="button-text">Army</span>
+              </a>
+            </div>
+
+            <!-- Live Drop
             <a href="https://opensea.io/collection/surviv-army/overview" target="_blank">
               <button
                 class="btn btn-lg btn-darken btn-quests btn-primary btn-sales d-flex align-items-center justify-content-center position-relative py-3"
@@ -231,7 +241,7 @@
                 <small id="countdown-inside" class="ms-2 fw-normal opacity-75" style="font-size: 0.8rem;"></small>
                 <div class="pulsating-circle" style="display: block"></div>
               </button>
-            </a>
+            </a> -->
 
             <style>
               /* High specificity override for the sale button */
@@ -266,8 +276,8 @@
             </style>
 
             <script>
-              // Sale start: December 29, 2025, 2:30 PM GMT+7
-              const saleDate = new Date("2025-12-29T14:30:00+07:00").getTime();
+              // Sale start: December 28, 2025, 2:30 AM GMT+7
+              const saleDate = new Date("2025-12-28T14:30:00+07:00").getTime();
 
               function updateCountdown() {
                 const now = new Date().getTime();
