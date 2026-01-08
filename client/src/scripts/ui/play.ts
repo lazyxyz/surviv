@@ -72,7 +72,7 @@ async function initializePlayButtons(game: Game, account: Account): Promise<void
         }[] = [
             { selector: "#btn-play-solo", mode: MODE.Solo, key: "solo", icon: "./img/misc/user.svg", spanMargin: "0" },
             { selector: "#btn-play-squad", mode: MODE.Squad, key: "squad", icon: "./img/misc/user-group.svg", spanMargin: "20px" },
-            { selector: "#btn-play-event", mode: MODE.Bloody, key: "bloody", icon: "./img/misc/gate.svg", spanMargin: "20px" }
+            { selector: "#btn-play-event", mode: MODE.Bloody, key: "bloody", icon: "./img/misc/sword.svg", spanMargin: "20px" }
         ];
 
     playConfigs.forEach(config => {
