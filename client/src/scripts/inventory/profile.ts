@@ -26,7 +26,7 @@ function selectNft(tokenId: string, account: Account): void {
     $(`#nft-${tokenId}`).addClass("selected");
 
     // Show update button
-    $(".update-btn").css("display", "block");
+    $("#update-profile-btn").css("display", "block");
 }
 
 // Function to format time in seconds to readable hours
@@ -65,43 +65,27 @@ export async function showProfile(account: Account) {
     // Display player name with similar styling to other elements
     const nameDisplay = $<HTMLDivElement>(
         html`<div class="profile-name-display badges-boost-display">
-            <p>Player Name</p>
-            <span>${info.name}</span>
+            Player Name: <span>${info.name}</span>
         </div>`
     );
     profileContent.append(nameDisplay);
 
     // Display stats with grid or flex similar to rewards
     const statsDisplay = $<HTMLDivElement>(
-        html`<div class="profile-stats-display">
-            <div class="stats-child">
-                <p>🎮 Total Games</p> 
-                <span>${info.totalGames}</span>
-            </div>
-            <div class="📊 stats-child">
-                <p>☠️ Total Kills</p> 
-                <span>${info.totalKills}</span>
-            </div>
-            <div class="stats-child">
-                <p>👾 Total Bot Kills</p> 
-                <span>${info.totalBotKills}</span>
-            </div>
-            <div class="stats-child">
-                <p>⏰ Time Play</p> 
-                <span>${formatTimePlay(info.totalTimeAlive)}</span>
-            </div>
+        html`<div class="profile-stats-display rewards-grid-group">
+            <div class="reward-child">Total Games: ${info.totalGames}</div>
+            <div class="reward-child">Total Kills: ${info.totalKills}</div>
+            <div class="reward-child">Total Bot Kills: ${info.totalBotKills}</div>
+            <div class="reward-child">Time Play: ${formatTimePlay(info.totalTimeAlive)}</div>
         </div>`
     );
     profileContent.append(statsDisplay);
 
     // NFTs header with refresh button
     const nftsHeader = $<HTMLDivElement>(
-        html`<div class="profile-nfts-header">
-            <p>My Surviv Soldiers</p>
-            <button id="refresh-nfts-btn" class="btn btn-alert btn-darken">
-                <i class="fa-solid fa-refresh"></i>
-                Refresh
-            </button>
+        html`<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; margin-bottom: 12px;">
+            <h3 style="color: white; margin: 0;">My Surviv Soldiers</h3>
+            <button id="refresh-nfts-btn" class="btn btn-alert btn-darken" style="width: auto; padding: 8px 16px;">Refresh</button>
         </div>`
     );
     profileContent.append(nftsHeader);
@@ -121,7 +105,7 @@ export async function showProfile(account: Account) {
                 const isSelected = token.tokenId === info.avatarTokenId;
                 const nftItem = $<HTMLDivElement>(
                     html`<div id="nft-${token.tokenId}" class="nft-item-container badges-list-item-container${isSelected ? " selected" : ""}">
-                        <div class="nft-profile-image badges-list-item">
+                        <div class="badges-list-item">
                             <img class="nft-image badge-image" src="${token.imageUrl}" alt="NFT #${token.tokenId}" style="width: 120px; height: 120px; object-fit: cover;" />
                         </div>
                         <span class="nft-token-id badge-name">#${token.tokenId}</span>
@@ -140,12 +124,9 @@ export async function showProfile(account: Account) {
             // Add Update button, initially hidden, centered with clean styling
             const updateButtonWrapper = $<HTMLDivElement>(html`<div style="display: flex; justify-content: center; margin-top: 16px;"></div>`);
             const updateButton = $<HTMLButtonElement>(
-                html`
-                <div class="update-btn" style="display: none;">
-                    <button id="update-profile-btn" class="btn btn-alert btn-darken" style="width: auto; padding: 8px 16px;">
-                        Update
-                    </button>
-                </div>`
+                html`<button id="update-profile-btn" class="btn btn-alert btn-darken" style="display: none; width: auto; padding: 8px 16px;">
+                    Update
+                </button>`
             );
             updateButton.on("click", async () => {
                 const selectedTokenId = $(".nft-item-container.selected").attr("id")?.split("-")[1];
@@ -163,10 +144,8 @@ export async function showProfile(account: Account) {
         } else {
             // Display no NFTs message with link
             const noNftsMessage = $<HTMLDivElement>(
-                html`
-                <div class="no-nfts-message" style="text-align: center; color: white; font-size: 16px; padding: 40px 0px;">
-                    <p style="margin:0;">No Soldier found, grab one here</p>
-                    <a href="https://opensea.io/collection/surviv-army" target="_blank" style="color: #ffd700; margin-top: 4px; text-decoration: underline;">https://opensea.io/collection/surviv-army</a>
+                html`<div class="no-nfts-message" style="text-align: center; color: white; font-size: 16px;">
+                    No Soldier found, grab one here: <a href="https://opensea.io/collection/surviv-army" target="_blank" style="color: #ffd700; text-decoration: underline;">https://opensea.io/collection/surviv-army</a>
                 </div>`
             );
             nftsContainer.append(noNftsMessage);

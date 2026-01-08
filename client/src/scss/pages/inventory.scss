@@ -842,8 +842,7 @@ input::-webkit-inner-spin-button {
     }
   }
 
-  .claim-all-btn,
-  .update-btn {
+  .claim-all-btn {
     position: fixed;
     justify-content: center;
     align-items: center;
@@ -1525,12 +1524,22 @@ input::-webkit-inner-spin-button {
   }
 }
 
-// .badges-list-item-container {
-//   gap: 8px; // Add small gap between image wrapper and name for better separation
-//   border: 2px solid transparent; // Reserve space for border to avoid layout shifts
-//   box-shadow: none; // Remove any existing shadow from base
-// }
+.nfts-list {
+  display: flex;
+  flex-direction: row; // Explicitly row for wrapping horizontally
+  flex-wrap: wrap;
+  justify-content: flex-start; // Align to start for row-by-row feel
+  gap: 12px; // Add gap for spacing between items
+  width: 100%; // Ensure full width to allow multiple per row
+}
 
-// .badges-list-item-container.selected {
-//   border: 2.5px solid palette.$orange;
-// }
+.badges-list-item-container {
+  gap: 8px; // Add small gap between image wrapper and name for better separation
+  border: 2px solid transparent; // Reserve space for border to avoid layout shifts
+  box-shadow: none; // Remove any existing shadow from base
+}
+
+.badges-list-item-container.selected,
+.nft-item-container.selected {
+  border: 2px solid palette.$orange; 
+}
