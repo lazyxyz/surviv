@@ -214,8 +214,8 @@ export class Game implements GameData {
     getRandomMap(): { map: MAP; rainDrops: number } {
         const configs: { map: MAP; rainChance: number }[] = [
             { map: "desert", rainChance: 0 },
-            // { map: "fall", rainChance: 0.5 },
-            // { map: "winter", rainChance: 0.5 },
+            { map: "fall", rainChance: 0.5 },
+            { map: "winter", rainChance: 0.5 },
             // { map: "cursedIsland", rainChance: 1 },
         ];
 
@@ -424,7 +424,7 @@ export class Game implements GameData {
             && (this.gameMode == MODE.Solo || this.gameMode == MODE.Squad)
             && (
                 this.teamMode
-                    ? this.aliveCount <= (this.gameMode as number) && new Set([...this.livingPlayers].map(p => p.teamID)).size <= 1
+                    ? this.aliveCount <= getMaxPlayers(this.gameMode) && new Set([...this.livingPlayers].map(p => p.teamID)).size <= 1
                     : this.aliveCount <= 1
             )
         ) {

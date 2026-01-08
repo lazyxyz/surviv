@@ -241,3 +241,18 @@
   pointer-events: none;
   user-select: none;
 }
+
+#btn-play-event {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #d4af37, #b8860b);  /* Metallic gold gradient */
+    border: none;
+    color: #fff !important;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);         /* Subtle gold glow */
+}
+
+#btn-play-event:hover {
+    background: linear-gradient(135deg, #e6c04a, #cc9a1e);  /* Brighter gold on hover */
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.6);
+    transition: all 0.3s ease;
+}

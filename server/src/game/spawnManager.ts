@@ -9,6 +9,7 @@ import { Game } from "../game";
 import { Team } from "../team";
 import { PlayerContainer } from "../objects/gamer";
 import { type WebSocket } from "uWebSockets.js";
+import { getMaxPlayers } from "../constants";
 
 export class SpawnManager {
     private game: Game;
@@ -99,7 +100,7 @@ export class SpawnManager {
 
             if (this.game.gameMode == MODE.Dungeon) {
                 const vacantTeams = this.game.teams.valueArray.filter(
-                    team => team.players.length < (this.game.gameMode as number)
+                    team => team.players.length < getMaxPlayers(this.game.gameMode)
                         && team.hasLivingPlayers()
                 );
                 
@@ -114,7 +115,7 @@ export class SpawnManager {
                 if (
                     !team // team doesn't exist
                     || (team.players.length && !team.hasLivingPlayers()) // team isn't empty but has no living players
-                    || team.players.length >= (this.game.gameMode as number) // team is full
+                    || team.players.length >= getMaxPlayers(this.game.gameMode) // team is full
                 ) {
                     this.game.teams.add(team = new Team(this.game.nextTeamID, autoFill));
                     this.game.teamsMapping.set(teamID, team);
@@ -123,7 +124,7 @@ export class SpawnManager {
                 const vacantTeams = this.game.teams.valueArray.filter(
                     team =>
                         team.autoFill
-                        && team.players.length < (this.game.gameMode as number)
+                        && team.players.length < getMaxPlayers(this.game.gameMode)
                         && team.hasLivingPlayers()
                 );
                 if (vacantTeams.length > 1) {
