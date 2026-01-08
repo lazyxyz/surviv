@@ -37,8 +37,7 @@ import { CommunicationHandler } from "./player/communicationHandler";
 import { DamageHandler } from "./player/damageHandler";
 import { UpdateManager } from "./player/updateManager";
 import { Vehicle } from "./vehicle";
-import { SeatType, VehicleDefinition, Vehicles } from "@common/definitions/vehicles";
-
+import { SeatType, VehicleDefinition } from "@common/definitions/vehicles";
 
 export interface ActorContainer {
     readonly teamID?: string
@@ -112,7 +111,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     get kills(): number { return this._kills; }
     get bounties(): number { return this._bounties; }
-    get botKills(): number {return this._botKills; }
+    get botKills(): number { return this._botKills; }
 
     kill(_: Player) {
         // does nothing
@@ -407,7 +406,7 @@ export class Player extends BaseGameObject.derive(ObjectCategory.Player) {
 
     readonly DEFAULT_WEAPON = new MeleeItem("fists", this);
 
-    private _vehicleVariants:  Array<VehicleDefinition>;
+    private _vehicleVariants: Array<VehicleDefinition>;
     set vehicleVariants(variants: VehicleDefinition[]) {
         this._vehicleVariants = variants;
     }

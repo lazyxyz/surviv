@@ -16,6 +16,9 @@ import { savePlayerGame, savePlayerRank } from "../api/api";
 import { GameOverData, GameOverPacket } from "@common/packets/gameOverPacket";
 import { DamageParams } from "./gameObject";
 import { Blockchain } from "@common/blockchain/contracts";
+import { MeleeItem } from "../inventory/meleeItem";
+import { Melees } from "@common/definitions/melees";
+import { BLOODY_WEAPONS, SUBLEVELS_PER_WEAPON } from "../constants";
 
 export interface PlayerContainer {
     readonly name: string
@@ -35,6 +38,7 @@ export class Gamer extends Player {
     gameOver: boolean = false;
     rewardsBoost: number = 0;
     chain: Blockchain = Blockchain.Somnia;
+    bloody_level = 0;
 
     constructor(game: Game, socket: WebSocket<PlayerContainer>, position: Vector, layer?: Layer, team?: Team) {
         const userData = socket.getUserData();
@@ -72,6 +76,48 @@ export class Gamer extends Player {
         } else if (source.isBot()) {
             this._botKills++;
         }
+
+        if (this.game.gameMode == MODE.Bloody) {
+            this.bloodyLevelUp();
+        }
+    }
+
+
+    // Add to class properties
+    weapon_index: number = 0;
+    current_sublevel_kills: number = 0;
+    bloodyLevelUp() {
+        if (this.dead) return;
+
+        this.current_sublevel_kills++;  // +1 per kill
+        this.bloody_level++;  // Total kills tracker (for UI/achievements?)
+
+        const required = SUBLEVELS_PER_WEAPON[this.weapon_index];
+        if (this.current_sublevel_kills >= required) {
+            this.weapon_index++;
+            this.current_sublevel_kills = 0;
+            const maxIndex = BLOODY_WEAPONS.length - 1;
+            if (this.weapon_index <= maxIndex) {
+                this.inventory.weapons[2] = new MeleeItem(
+                    Melees.fromString(BLOODY_WEAPONS[this.weapon_index]),
+                    this
+                );
+            }
+        }
+        this.health += 20;
+        this.setDirty();
+    }
+
+    halfBloodyLevel() {
+        this.bloody_level = Math.round(this.bloody_level / 2);  // Halve total progress
+        this.weapon_index = Math.floor(this.weapon_index / 2);   // Halve weapon tier (floor to prev)
+        this.current_sublevel_kills = 0;                         // Reset current grind
+
+        const clampedIndex = Math.max(0, Math.min(this.weapon_index, BLOODY_WEAPONS.length - 1));
+        this.inventory.weapons[2] = new MeleeItem(
+            Melees.fromString(BLOODY_WEAPONS[clampedIndex]),
+            this
+        );
     }
 
     secondUpdate(): void {
@@ -286,6 +332,8 @@ export class Gamer extends Player {
 
             if (this.dead && !this.resurrecting) {
                 this.resurrecting = true;
+
+                this.halfBloodyLevel();
 
                 this.game.addTimeout(() => {
                     this.damageHandler.resurrect();
