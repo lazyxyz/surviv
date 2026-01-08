@@ -77,6 +77,7 @@ export const Melees = ObjectDefinitions.withDefault<MeleeDefinition>()(
             damage: 20,
             obstacleMultiplier: 1,
             iceMultiplier: 0.01,
+            fireMode: FireMode.Auto,
             radius: 1.5,
             offset: Vec.create(2.5, 0),
             cooldown: 250,

@@ -75,7 +75,6 @@ async function renderRewardList(account: Account, rewardData: RewardData | undef
             ShopCache.PlayerValidRewards = undefined;
         } catch (err) {
             console.error(`Failed to claim rewards: ${err}`);
-            errorAlert("No valid rewards found");
         } finally {
             isProcessing = false;
             $claimButton.prop("disabled", false);
