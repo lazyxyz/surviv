@@ -191,11 +191,10 @@
                 </button>
               </div>
 
-              <!-- <button class="btn btn-lg btn-darken btn-success" id="btn-play-dungeon">
-                <div class="pulsating-circle" style="display: block"></div>
+              <button class="btn btn-lg btn-darken btn-success" id="btn-play-event">
                 <i class="fa-solid fa-crown"></i>
-                <span translation="play_dungeon"></span>
-              </button> -->
+                <span translation="play_bloody"></span>
+              </button>
 
               <div id="option-btns-group" class="team-btns-container">
                 <button class="btn btn-lg btn-darken btn-purple" id="btn-join-team" translation="join_team"></button>
@@ -204,6 +203,7 @@
               </div>
 
             </div>
+
             <a href="/leaderboard/" target="_blank">
               <button class="btn btn-lg btn-darken btn-success btn-leaderboard" id="btn-single-home">
                 <div class="pulsating-circle" style="display: none"></div>
@@ -231,80 +231,6 @@
                 <span class="button-text">Army</span>
               </a>
             </div>
-
-            <!-- Live Drop
-            <a href="https://opensea.io/collection/surviv-army/overview" target="_blank">
-              <button
-                class="btn btn-lg btn-darken btn-quests btn-primary btn-sales d-flex align-items-center justify-content-center position-relative py-3"
-                id="btn-single-home">
-                <span class="fw-bold">Mint SurvivArmy</span>
-                <small id="countdown-inside" class="ms-2 fw-normal opacity-75" style="font-size: 0.8rem;"></small>
-                <div class="pulsating-circle" style="display: block"></div>
-              </button>
-            </a> -->
-
-            <style>
-              /* High specificity override for the sale button */
-              button.btn-sales {
-                background-color: #ff7500 !important;
-                border-color: #ff7500 !important;
-                color: #fff !important;
-              }
-
-              button.btn-sales #countdown-inside {
-                color: #ffd700 !important;
-              }
-
-              /* Optional: Add a pulsing glow for extra excitement */
-              @keyframes pulse-glow {
-                0% {
-                  box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
-                }
-
-                50% {
-                  box-shadow: 0 0 20px rgba(255, 69, 0, 0.8);
-                }
-
-                100% {
-                  box-shadow: 0 0 10px rgba(255, 69, 0, 0.5);
-                }
-              }
-
-              button.btn-sales {
-                animation: pulse-glow 2s infinite;
-              }
-            </style>
-
-            <script>
-              // Sale start: December 28, 2025, 2:30 AM GMT+7
-              const saleDate = new Date("2025-12-28T14:30:00+07:00").getTime();
-
-              function updateCountdown() {
-                const now = new Date().getTime();
-                const distance = saleDate - now;
-
-                if (distance < 0) {
-                  document.getElementById("countdown-inside").textContent = "LIVE NOW";
-                  return;
-                }
-
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                let text = "";
-                if (days > 0) text += `${days}d `;
-                if (days > 0 || hours > 0) text += `${hours}h `;
-                if (days > 0 || hours > 0 || minutes > 0) text += `${minutes}m `;
-                text += `${seconds}s`;
-
-                document.getElementById("countdown-inside").textContent = text.trim();
-              }
-
-              updateCountdown();
-              setInterval(updateCountdown, 1000); // Update every second
-            </script>
 
           </div>
         </div>
@@ -1226,6 +1152,7 @@
               <option value="Squad" translation="play_squad"></option>
               <option value="V50">50v50</option>
               <option value="Dungeon" translation="play_dungeon"></option>
+              <option value="Bloody" translation="play_bloody"></option>
             </select>
           </label>
           <!-- <label>

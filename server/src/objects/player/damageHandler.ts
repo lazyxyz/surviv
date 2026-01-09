@@ -15,6 +15,7 @@ import { ThrowableItem } from "../../inventory/throwableItem";
 import { Team } from "../../team";
 import { removeFrom } from "../../utils/misc";
 import { Gamer } from "../gamer";
+import { WeaponDefinition } from "@common/definitions/loots";
 
 export class DamageHandler {
     constructor(private player: Player) { }
@@ -438,13 +439,14 @@ export class DamageHandler {
         adrenaline?: number;  // Optional: Restore adrenaline (default: 0)
         restoreLoot?: boolean;  // Optional: Attempt to restore dropped loot (default: false; complex to implement fully)
         source?: Player | string;  // Optional: Who/what caused the resurrection (for killfeed/logging)
+        meleeWeapon?: InventoryItem<WeaponDefinition> | undefined;  // Optional: Who/what caused the resurrection (for killfeed/logging)
     }): void {
-        if (!this.player.dead || this.player.health > 0) {
+        if (!this.player.dead || this.player.health > 0 || this.player.game.over) {
             console.warn(`Cannot resurrect player ${this.player.name} (id: ${this.player.id}): Not dead.`);
             return;
         }
 
-        const { health = 100, adrenaline = 0, restoreLoot = false, source } = params ?? {};
+        const { health = 100, adrenaline = 0, meleeWeapon } = params ?? {};
 
         // // Emit pre-resurrection event for plugins to hook/modify
         // if (this.player.game.pluginManager.emit("player_will_resurrect", {
@@ -464,6 +466,16 @@ export class DamageHandler {
         this.player.canDespawn = false;  // Allow despawn again
         this.player.killedBy = undefined;  // Clear killer reference
 
+        let spawnPosition = this.player.position;
+        let spawnLayer = this.player.layer;
+        const { pos, layer } = this.player.game.spawnManager.getSpawnPosition();
+        if (pos) spawnPosition = pos;
+        if (layer) spawnLayer = layer;
+
+        this.player.layer = spawnLayer;
+        this.player.position = spawnPosition;
+        if (meleeWeapon) this.player.inventory.weapons[2] = meleeWeapon;
+
         // Reset movement/attack states (similar to die, but reversing)
         this.player.movement.up = this.player.movement.down = this.player.movement.left = this.player.movement.right = false;
         this.player.startedAttacking = false;
@@ -472,7 +484,9 @@ export class DamageHandler {
         this.player.startedSpectating = false;
         this.player.spectating = undefined;
         this.player.joined = true;
+        this.player.dirty.id = true;
         this.player.resurrected = true;
+        this.player.resurrecting = false;
 
         // Re-add to living players and update counts
         this.player.game.livingPlayers.add(this.player);
@@ -491,6 +505,8 @@ export class DamageHandler {
         this.player.dirty.items = true;
         this.player.game.fullDirtyObjects.add(this.player);
         this.player.game.spectatablePlayers.push(this.player);
+        this.player.setPartialDirty();
+        this.player.game.grid.updateObject(this.player);
 
         // // Emit post-resurrection event
         // this.player.game.pluginManager.emit("player_did_resurrect", {

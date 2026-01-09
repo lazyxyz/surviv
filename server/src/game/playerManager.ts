@@ -15,6 +15,7 @@ import { type WebSocket } from "uWebSockets.js";
 import { validateJWT } from "../api/api";
 import { blockchainByNumber, getSurvivAddress } from "@common/blockchain/contracts";
 import { chainToConfig } from "@common/blockchain/config";
+import { getGameJoinTime } from "../constants";
 
 export class PlayerManager {
     private game: Game;
@@ -138,7 +139,7 @@ export class PlayerManager {
             && this.game.startTimeout === undefined
         ) {
             this.game.startTimeout = this.game.addTimeout(() => {
-                this.game.addTimeout(this.game.postGameStarted.bind(this.game), Config.gameJoinTime * 1000);
+                this.game.addTimeout(this.game.postGameStarted.bind(this.game), getGameJoinTime(this.game.gameMode));
             }, 3000);
         }
 

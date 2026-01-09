@@ -303,7 +303,6 @@ export abstract class Bot extends Player {
 
     protected onDie(): void {
         this.game.totalBots--;
-        this.dropLoot();
     }
 
     update(): void {

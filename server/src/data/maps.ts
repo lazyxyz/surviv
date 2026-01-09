@@ -766,226 +766,96 @@ const maps = {
         ]
     },
 
-    debug: {
-        width: 1620,
-        height: 1620,
-        oceanSize: 128,
-        beachSize: 32,
-        onGenerate(map) {
-            // Generate all buildings
-
-            const buildingPos = Vec.create(200, map.height - 600);
-
-            for (const building of Buildings.definitions) {
-                map.generateBuilding(building.idString, buildingPos);
-                const rect = building.spawnHitbox.toRectangle();
-                buildingPos.x += rect.max.x - rect.min.x;
-
-                buildingPos.x += 20;
-                if (buildingPos.x > map.width - 300) {
-                    buildingPos.x = 200 - 140;
-                    buildingPos.y += 200;
+    bloody: (() => {
+        return {
+            width: 512,
+            height: 512,
+            beachSize: 32,
+            oceanSize: 8,
+            onGenerate(map, args) {
+                const season = args[0];
+                let obstacles = {};
+                switch (season) {
+                    case "normal":
+                        obstacles = {
+                            oak_tree: 2,
+                            small_oak_tree: 20,
+                            birch_tree: 4,
+                            pine_tree: 2,
+                            rock: 30,
+                            river_rock: 9,
+                        };
+                        break;
+                    case "fall":
+                        obstacles = {
+                            oak_tree: 20,
+                            small_oak_tree: 10,
+                            birch_tree: 5,
+                            maple_tree: 10,
+                            pine_tree: 6,
+                            dormant_oak_tree: 5,
+                            stump: 4,
+                            hatchet_stump: 1,
+                            rock: 6,
+                            clearing_boulder: 3,
+                            river_rock: 6,
+                        };
+                        break;
+                    case "winter":
+                        obstacles = {
+                            oak_tree: 15,
+                            birch_tree: 15,
+                            pine_tree: 20,
+                            rock: 15,
+                        };
+                        break;
+                    case "desert":
+                        obstacles = {
+                            palm_tree: 10,
+                            date_palm_tree: 10,
+                            small_palm_tree: 10,
+                            child_palm_tree: 10,
+                            doum_palm_tree: 10,
+                            quiver_tree: 10,
+                            dry_tree: 5,
+                            stump: 8,
+                            hatchet_stump: 1,
+                            rock: 6,
+                            clearing_boulder: 3,
+                            river_rock: 4,
+                        };
+                        break;
+                    case "cursedIsland":
+                        obstacles = {
+                            spooky_oak_tree: 20,
+                            mutant_oak_tree: 20,
+                            skull_oak_tree: 20,
+                            haunted_tree: 10,
+                            cursed_tree: 30,
+                            stump: 8,
+                            hatchet_stump: 1,
+                            rock: 44,
+                            clearing_boulder: 3,
+                            river_rock: 4,
+                        };
+                        break;
+                    default:
+                        obstacles = {
+                            oak_tree: 2,
+                            small_oak_tree: 20,
+                            birch_tree: 4,
+                            pine_tree: 2,
+                            rock: 30,
+                            river_rock: 9,
+                        };
+                }
+                for (const [idString, count] of Object.entries(obstacles)) {
+                    map._generateObstacles(idString, count as number);
                 }
             }
+        };
+    })(),
 
-            // Generate all obstacles
-            const obstaclePos = Vec.create(200, 200);
-
-            for (const obstacle of Obstacles.definitions) {
-                if (obstacle.invisible) continue;
-                for (let i = 0; i < (obstacle.variations ?? 1); i++) {
-                    map.generateObstacle(obstacle.idString, obstaclePos, { variation: i as Variation });
-
-                    obstaclePos.x += 20;
-                    if (obstaclePos.x > map.width / 2 - 20) {
-                        obstaclePos.x = map.width / 2 - 140;
-                        obstaclePos.y += 20;
-                    }
-                }
-            }
-
-            // Generate all Loots
-            const itemPos = Vec.create(map.width / 2, map.height / 2);
-            for (const item of Loots.definitions) {
-                map.game.addLoot(item, itemPos, 0, { count: Infinity, pushVel: 0, jitterSpawn: false });
-
-                itemPos.x += 10;
-                if (itemPos.x > map.width / 2 + 100) {
-                    itemPos.x = map.width / 2;
-                    itemPos.y += 10;
-                }
-            }
-
-            // // Generate all vehicles
-            // const itemPos = Vec.create(map.width / 2, map.height / 2);
-            // for (const item of Loots.definitions) {
-            //     map.game.addLoot(item, itemPos, 0, { count: Infinity, pushVel: 0, jitterSpawn: false });
-
-            //     itemPos.x += 10;
-            //     if (itemPos.x > map.width / 2 + 100) {
-            //         itemPos.x = map.width / 2;
-            //         itemPos.y += 10;
-            //     }
-            // }
-        },
-        places: [
-            { name: "[object Object]", position: Vec.create(0.8, 0.7) },
-            { name: "Kernel Panic", position: Vec.create(0.6, 0.8) },
-            { name: "NullPointerException", position: Vec.create(0.7, 0.3) },
-            { name: "undefined Forest", position: Vec.create(0.3, 0.2) },
-            { name: "seg. fault\n(core dumped)", position: Vec.create(0.3, 0.7) },
-            { name: "Can't read props of null", position: Vec.create(0.4, 0.5) }
-        ]
-    },
-    // Arena map to test guns with really bad custom generation code lol
-    arena: {
-        width: 512,
-        height: 512,
-        beachSize: 16,
-        oceanSize: 40,
-        onGenerate(map) {
-            // Function to generate all game loot items
-            const genLoots = (pos: Vector, ySpacing: number, xSpacing: number): void => {
-                const width = 80;
-
-                const startPos = Vec.clone(pos);
-                startPos.x -= width / 2;
-                const itemPos = Vec.clone(startPos);
-
-                const countMap = {
-                    [ItemType.Gun]: 1,
-                    [ItemType.Ammo]: Infinity,
-                    [ItemType.Melee]: 1,
-                    [ItemType.Throwable]: Infinity,
-                    [ItemType.Healing]: Infinity,
-                    [ItemType.Armor]: 1,
-                    [ItemType.Backpack]: 1,
-                    [ItemType.Scope]: 1,
-                    [ItemType.Skin]: 1,
-                    [ItemType.Perk]: Infinity
-                };
-
-                const game = map.game;
-                for (const item of Loots.definitions) {
-                    if (
-                        ((item.itemType === ItemType.Melee || item.itemType === ItemType.Scope) && item.noDrop)
-                        || ("ephemeral" in item && item.ephemeral)
-                        || (item.itemType === ItemType.Backpack && item.level === 0)
-                        || item.itemType === ItemType.Skin
-                        || item.devItem
-                    ) continue;
-
-                    game.addLoot(item, itemPos, 0, { count: countMap[item.itemType] ?? 1, pushVel: 0, jitterSpawn: false });
-
-                    itemPos.x += xSpacing;
-                    if (
-                        (xSpacing > 0 && itemPos.x > startPos.x + width)
-                        || (xSpacing < 0 && itemPos.x < startPos.x - width)
-                    ) {
-                        itemPos.x = startPos.x;
-                        itemPos.y -= ySpacing;
-                    }
-                }
-            };
-
-            // Fixed obstacles
-            const obstacles = [
-                { id: "rock", pos: Vec.create(10, 10) },
-                { id: "rock", pos: Vec.create(20, 40) },
-                { id: "rock", pos: Vec.create(20, 80) },
-                { id: "regular_crate", pos: Vec.create(20, 15) },
-                { id: "barrel", pos: Vec.create(25, 25) },
-                { id: "rock", pos: Vec.create(80, 10) },
-                { id: "rock", pos: Vec.create(60, 15) },
-                { id: "oak_tree", pos: Vec.create(20, 70) },
-                { id: "oil_tank", pos: Vec.create(140, 25) },
-                { id: "birch_tree", pos: Vec.create(120, 50) }
-            ];
-
-            const center = Vec.create(map.width / 2, map.height / 2);
-
-            for (const obstacle of obstacles) {
-                const { id, pos } = obstacle;
-                const { x: posX, y: posY } = pos;
-
-                map.generateObstacle(id, Vec.add(center, pos), { rotation: 0 });
-                map.generateObstacle(id, Vec.add(center, Vec.create(-posX, posY)), { rotation: 0 });
-                map.generateObstacle(id, Vec.add(center, Vec.create(posX, -posY)), { rotation: 0 });
-                map.generateObstacle(id, Vec.add(center, Vec.create(-posX, -posY)), { rotation: 0 });
-            }
-
-            genLoots(Vec.add(center, Vec.create(-70, 100)), 8, 8);
-            genLoots(Vec.add(center, Vec.create(70, 100)), 8, 8);
-            genLoots(Vec.add(center, Vec.create(-70, -100)), -8, 8);
-            genLoots(Vec.add(center, Vec.create(70, -100)), -8, 8);
-
-            // Generate random obstacles around the center
-            const randomObstacles: MapDefinition["obstacles"] = {
-                oak_tree: 50,
-                rock: 50,
-                bush: 20,
-                birch_tree: 5,
-                barrel: 15,
-                super_barrel: 2
-            };
-
-            for (const obstacle in randomObstacles) {
-                const limit = randomObstacles[obstacle];
-                const definition = Obstacles.fromString(obstacle);
-
-                for (let i = 0; i < limit; i++) {
-                    const pos = map.getRandomPosition(
-                        definition.spawnHitbox ?? definition.hitbox,
-                        {
-                            collides: pos => Collision.circleCollision(center, 150, pos, 1)
-                        }
-                    );
-
-                    if (!pos) continue;
-
-                    map.generateObstacle(definition, pos);
-                }
-            }
-        },
-        places: [
-            { name: "stark is pro", position: Vec.create(0.5, 0.5) }
-        ]
-    },
-
-    singleBuilding: {
-        width: 1024,
-        height: 1024,
-        beachSize: 32,
-        oceanSize: 64,
-        onGenerate(map, [building]) {
-            // map.game.grid.addObject(new Decal(map.game, "lodge_decal", Vec.create(this.width / 2, this.height / 2), 0));
-            /* for (let i = 0; i < 10; i++) {
-                map.generateBuilding(`container_${i + 1}`, Vec.create((this.width / 2) + 15 * i, this.height / 2 - 15), 0);
-            } */
-            map.generateBuilding(building, Vec.create(this.width / 2, this.height / 2), 0);
-        }
-    },
-
-    singleObstacle: {
-        width: 256,
-        height: 256,
-        beachSize: 8,
-        oceanSize: 8,
-        onGenerate(map, [obstacle]) {
-            map.generateObstacle(obstacle, Vec.create(this.width / 2, this.height / 2), { layer: 0, rotation: 0 });
-        }
-    },
-
-    singleGun: {
-        width: 256,
-        height: 256,
-        beachSize: 8,
-        oceanSize: 8,
-        onGenerate(map, [gun]) {
-            map.game.addLoot(gun, Vec.create(this.width / 2, this.height / 2 - 10), 0);
-            map.game.addLoot(Guns.fromString(gun).ammoType, Vec.create(this.width / 2, this.height / 2 - 10), 0, { count: Infinity });
-        }
-    },
 
     gunsTest: (() => {
         return {
@@ -1050,253 +920,6 @@ const maps = {
         };
     })(),
 
-    obstaclesTest: (() => {
-        return {
-            width: 240,
-            height: 240,
-            beachSize: 0,
-            oceanSize: 0,
-            onGenerate(mapGen) {
-                const map = mapGen.game.gameMap;
-                const config = maps[map]; // Or change to maps.fall for the fall map
-                const obstacleTypes = Object.keys(config.obstacles);
-
-                let index = 0;
-                for (let x = 32; x <= 240; x += 32) {
-                    for (let y = 32; y <= 240; y += 32) {
-                        if (index >= obstacleTypes.length) break;
-                        const obstacle = obstacleTypes[index];
-                        mapGen.generateObstacle(obstacle, Vec.create(x, y));
-                        index++;
-                    }
-                    if (index >= obstacleTypes.length) break;
-                }
-            }
-        };
-    })(),
-
-    playersTest: {
-        width: 256,
-        height: 256,
-        beachSize: 16,
-        oceanSize: 16,
-        onGenerate(map) {
-            for (let x = 0; x < 256; x += 16) {
-                for (let y = 0; y < 256; y += 16) {
-                    /* const player = new Player(map.game, { getUserData: () => { return {}; } } as unknown as WebSocket<PlayerContainer>, Vec.create(x, y));
-                    player.disableInvulnerability();
-                    player.loadout.skin = pickRandomInArray(Skins.definitions);
-                    map.game.grid.addObject(player); */
-                    if (random(0, 1) === 1) map.generateObstacle("barrel", Vec.create(x, y));
-                }
-            }
-        }
-    },
-    river: {
-        width: 1344,
-        height: 1344,
-        oceanSize: 144,
-        beachSize: 32
-    },
-    armory: {
-        width: 850,
-        height: 850,
-        oceanSize: 144,
-        beachSize: 32,
-        buildings: {
-            armory: 1
-        },
-        obstacles: {
-            regular_crate: 30,
-            grenade_crate: 15,
-            toilet: 20,
-            aegis_crate: 10,
-            flint_crate: 10,
-            melee_crate: 5,
-            birch_tree: 30,
-            pine_tree: 30,
-            rock: 30,
-            barrel: 15
-        }
-    },
-    new_port: {
-        width: 875,
-        height: 875,
-        oceanSize: 144,
-        beachSize: 32,
-        buildings: {
-            port_complex: 1
-        },
-        obstacles: {
-            regular_crate: 30,
-            grenade_crate: 15,
-            toilet: 20,
-            aegis_crate: 10,
-            flint_crate: 10,
-            melee_crate: 5,
-            birch_tree: 30,
-            pine_tree: 30,
-            rock: 30,
-            barrel: 15
-        }
-    },
-    gallery: {
-        width: 1024,
-        height: 1024,
-        beachSize: 64,
-        oceanSize: 64,
-        onGenerate(map) {
-            const targetBuildingIdString = "headquarters";
-            map.generateBuilding(targetBuildingIdString, Vec.create(this.width / 2, this.height / 2), 0);
-
-            const buildings = {
-                red_house: ~~Math.random(),
-                blue_house: ~~Math.random(),
-                green_house: ~~Math.random(),
-                red_house_v2: ~~Math.random(),
-                mobile_home: ~~(Math.random() * 5) + 3,
-                porta_potty: ~~(Math.random() * 5) + 3,
-                warehouse: 1,
-                container_3: 1,
-                container_4: 1,
-                container_5: 1,
-                container_6: 1,
-                container_7: 1,
-                container_8: 1,
-                container_9: 1,
-                container_10: 1,
-                small_bunker: 1
-            };
-
-            const obstacles = {
-                oil_tank: 5,
-                oak_tree: 40,
-                birch_tree: 40,
-                box: 50,
-                pine_tree: 30,
-                regular_crate: 75,
-                fridge: 40,
-                flint_crate: 12,
-                aegis_crate: 12,
-                grenade_crate: 30,
-                rock: 45,
-                bush: 25,
-                blueberry_bush: 25,
-                barrel: 40,
-                gun_case: 15,
-                super_barrel: 15,
-                briefcase: 4,
-                melee_crate: 4,
-                gold_rock: 1,
-                loot_tree: 1,
-                loot_barrel: 1,
-
-                viking_chest: Math.random() > 0.9 ? 1 : 0,
-                river_chest: Math.random() > 0.9 ? 1 : 0,
-                tango_crate: Math.random() > 0.8 ? 1 : 0,
-                lux_crate: Math.random() > 0.8 ? 1 : 0
-            };
-
-            const loots = {
-                ground_loot: 40,
-                regular_crate: 40
-            };
-
-            Object.entries(buildings).forEach(([building, count]) => {
-                const definition = Buildings.reify(building);
-
-                const { rotationMode } = definition;
-                let attempts = 0;
-
-                for (let i = 0; i < count; i++) {
-                    let validPositionFound = false;
-
-                    while (!validPositionFound && attempts < 100) {
-                        let orientation = GameMap.getRandomBuildingOrientation(rotationMode);
-
-                        const position = map.getRandomPosition(definition.spawnHitbox, {
-                            orientation,
-                            spawnMode: definition.spawnMode,
-                            orientationConsumer: (newOrientation: Orientation) => {
-                                orientation = newOrientation;
-                            },
-                            maxAttempts: 400
-                        });
-
-                        if (!position) {
-                            attempts++;
-                            continue;
-                        }
-
-                        map.generateBuilding(definition, position, orientation);
-                        validPositionFound = true;
-                    }
-
-                    attempts = 0; // Reset attempts counter for the next building
-                }
-            });
-
-            Object.entries(obstacles).forEach(([obstacle, count]) => {
-                const def = Obstacles.reify(obstacle);
-
-                const { scale = { spawnMin: 1, spawnMax: 1 }, variations, rotationMode } = def;
-                const { spawnMin, spawnMax } = scale;
-                const effSpawnHitbox = def.spawnHitbox ?? def.hitbox;
-
-                for (let i = 0; i < count; i++) {
-                    const scale = randomFloat(spawnMin ?? 1, spawnMax ?? 1);
-                    const variation = (variations !== undefined ? random(0, variations - 1) : 0) as Variation;
-                    const rotation = GameMap.getRandomRotation(rotationMode);
-
-                    let orientation: Orientation = 0;
-
-                    if (rotationMode === RotationMode.Limited) {
-                        orientation = rotation as Orientation;
-                    }
-
-                    const position = map.getRandomPosition(effSpawnHitbox, {
-                        scale,
-                        orientation,
-                        spawnMode: def.spawnMode
-                    });
-
-                    if (!position) {
-                        continue;
-                    }
-
-                    map.generateObstacle(def, position, { layer: Layer.Ground, scale, variation });
-                }
-            });
-
-            Object.entries(loots ?? {}).forEach(([lootTable, count]) => {
-                for (let i = 0; i < count; i++) {
-                    // const loot = getLootFromTable(lootTable);
-                    const loot = getLootFromTable("fall", lootTable);
-
-                    const position = map.getRandomPosition(
-                        new CircleHitbox(5),
-                        { spawnMode: MapObjectSpawnMode.GrassAndSand }
-                    );
-
-                    if (!position) {
-                        continue;
-                    }
-
-                    for (const item of loot) {
-                        map.game.addLoot(
-                            item.idString,
-                            position,
-                            Layer.Ground,
-                            { count: item.count, jitterSpawn: false }
-                        );
-                    }
-                }
-            });
-        },
-        places: [
-            { name: "pap's lonely place", position: Vec.create(0.5, 0.5) }
-        ]
-    }
 } satisfies Record<string, MapDefinition>;
 
 export type MapName = keyof typeof maps;

@@ -1,3 +1,30 @@
+import { MODE } from "@common/constants";
+
+// Mapping from mode to join time in seconds
+const GAME_JOIN_TIMES: Record<MODE, number> = {
+    [MODE.Solo]:   90000,   // 90 seconds
+    [MODE.Squad]:  90000,  
+    [MODE.V50]:    90000, 
+    [MODE.Dungeon]: 255000,
+    [MODE.Bloody]:  0,
+};
+
+// Helper function to get the join time for a given mode
+export function getGameJoinTime(mode: MODE): number {
+    return GAME_JOIN_TIMES[mode];
+}
+
+export function getMaxPlayers(mode: MODE): number {
+    switch (mode) {
+        case MODE.Solo: return 1;
+        case MODE.Squad: return 4;
+        case MODE.V50: return 50;
+        case MODE.Dungeon: return 10;
+        case MODE.Bloody: return 1;
+        default: return 1; // fallback
+    }
+}
+
 export const KNOCK_BACK_AMOUNT = 0.6; // knockback distance when bullet/explosion hit bot 
 
 export const materialMultipliers = {
@@ -20,3 +47,17 @@ export const materialMultipliers = {
   trash_bag: 0,    // Extremely soft, minimal
   ice: 0.9           // Slippery but breakable, standard
 } as const;
+
+export const BLOODY_WEAPONS = [
+  "fists", "gas_can", "baseball_bat", "crowbar", "feral_claws", "hatchet",
+  "ice_pick", "kbar", "sickle", "fire_hatchet", "seax",
+  "pan", "falchion", "steelfang", "maul",
+  "heap_sword", "chainsaw"
+]
+
+export const SUBLEVELS_PER_WEAPON = [
+  1, 1, 1, 1, 1,  // First 5 upgrades: 1 kill each (blitz to Hatchet)
+  2, 2, 2, 2, 2,  // Next 5: 2 kills each (+1 more needed)
+  4, 4, 4, 4,     // Next 4: 3 kills each (then 2 more)
+  8, 8            // Last 2 unlocks: jump to 5 kills each
+];

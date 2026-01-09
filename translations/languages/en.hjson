@@ -306,6 +306,7 @@
   "create_team_lock": "Lock"
   "team_mode": "Mode"
   "play_dungeon": "Dungeon"
+  "play_bloody": "Infinite Bloody"
   "new_dungeon_wave": "Wave <waves> — The zombies are coming!"
 
   "go_bounties": "Kill Bounties"

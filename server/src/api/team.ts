@@ -6,6 +6,7 @@ import { CustomTeam, CustomTeamPlayer, type CustomTeamPlayerContainer } from "..
 import { Logger, cleanUsername } from "../utils/misc";
 import { forbidden, getIP, textDecoder } from "../utils/serverHelpers";
 import { CUSTOM_TEAMS, teamsCreated } from "../server";
+import { getMaxPlayers } from "../constants";
 
 export function initTeamRoutes(app: TemplatedApp) {
     app.ws("/team", {
@@ -33,7 +34,7 @@ export function initTeamRoutes(app: TemplatedApp) {
             }
 
             if (noTeamIdGiven) {
-                if (team.locked || (!team.roomMode && team.players.length >= team.teamSize )) {
+                if (team.locked || (!team.roomMode && team.players.length >= getMaxPlayers(team.teamSize))) {
                     forbidden(res); // TODO "Team is locked" and "Team is full" messages
                     return;
                 }

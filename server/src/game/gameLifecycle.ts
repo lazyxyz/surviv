@@ -3,6 +3,7 @@ import { Game } from "../game";
 import { WorkerMessages } from "../gameManager";
 import { Gamer } from "../objects/gamer";
 import { Logger } from "../utils/misc";
+import { MODE } from "@common/constants";
 
 export class GameLifecycle {
     private game: Game;
@@ -15,7 +16,9 @@ export class GameLifecycle {
         this.game._started = true;
         this.game.setGameData({ startedTime: this.game.now });
         this.game.gas.advanceGasStage();
-        this.game.setGameData({ allowJoin: false });
+        let allowJoin = false;
+        if (this.game.gameMode == MODE.Bloody) allowJoin = true;
+        this.game.setGameData({ allowJoin: allowJoin });
     }
 
     endGame(): void {
@@ -67,7 +70,7 @@ export class GameLifecycle {
         if (!this.game.allowJoin) return;
 
         parentPort?.postMessage({
-            type: WorkerMessages.CreateNewGame, maxTeamSize: this.game.gameMode
+            type: WorkerMessages.CreateNewGame, gameMode: this.game.gameMode
         });
         Logger.log(`Game ${this.game.port} | Attempting to create new game`);
         this.game.setGameData({ allowJoin: false });
