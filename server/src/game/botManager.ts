@@ -167,8 +167,8 @@ export class BotManager {
 
             // Adjusted distribution to achieve exactly: Zombie 5, Ninja 2, Werewolf 2, Butcher 1 when totalBots = 10
             const typeConfigs: Array<{ type: BotType; percentage: number; behavior: BehaviorType; level: number }> = [
-                { type: BotType.Zombie, percentage: 0.5, behavior: BehaviorType.ProximityAttack, level: 5 },
-                { type: BotType.Werewolf, percentage: 0.3, behavior: BehaviorType.HideAndAttack, level: 5 },
+                { type: BotType.Zombie, percentage: 0.5, behavior: BehaviorType.ProximityAttack, level: 1 },
+                { type: BotType.Werewolf, percentage: 0.3, behavior: BehaviorType.HideAndAttack, level: 1 },
                 { type: BotType.Ninja, percentage: 0.1, behavior: BehaviorType.HideAndAttack, level: 1 },
                 { type: BotType.Butcher, percentage: 0.1, behavior: BehaviorType.ProximityAttack, level: 1 },
             ];
