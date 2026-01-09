@@ -55,7 +55,7 @@ export class Butcher extends Bot {
         super.die(params);  // Handles dead=true, onDie(), etc.
 
         if (this.game.gameMode === MODE.Bloody) {
-            this.level += 2;
+            this.level += 1;
             this.updateLevelStats();  // Speed increased! (via speedMult)
 
             this.game.addTimeout(() => {

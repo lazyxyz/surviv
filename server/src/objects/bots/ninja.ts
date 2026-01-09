@@ -63,7 +63,7 @@ export class Ninja extends Bot {
 
         if (this.game.gameMode === MODE.Bloody) {
             // LEVEL UP: +1 level → higher speedMult/apsMult/maxHealth
-            this.level += 2;
+            this.level += 1;
             this.updateLevelStats();  // Speed increased! (via speedMult)
 
             this.game.addTimeout(() => {

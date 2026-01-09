@@ -50,7 +50,7 @@ export class Zombie extends Bot {
         super.die(params);
 
         if (this.game.gameMode === MODE.Bloody) {
-            this.level += 2;
+            this.level += 1;
             this.updateLevelStats();
 
             this.game.addTimeout(() => {
