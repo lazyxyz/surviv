@@ -324,13 +324,6 @@ export async function loadStore(account: Account): Promise<void> {
     if (account.chainConfig.badgesSale) {
         const kitItems: StoreItem[] = [
             {
-                name: "Survivor's Pass",
-                image: "./img/game/shared/badges/surviv_pass.svg",
-                price: "Loading...",
-                itemType: "surviv_pass",
-                collection: "SurvivBadges",
-            },
-            {
                 name: "Genesis Survivor's Card",
                 image: "./img/game/shared/badges/surviv_card.svg",
                 price: "Loading...",

@@ -73,7 +73,7 @@ export const chainToConfig: Record<Blockchain, ChainInfo> = {
         blockExplorerUrls: ["https://soneium.blockscout.com/"],
         blockExplorerAPI: "https://soneium.blockscout.com/api/v2", // Blockscout API endpoint
         kitsSale: false,
-        badgesSale: false,
+        badgesSale: true,
     },
 } as const;
 
