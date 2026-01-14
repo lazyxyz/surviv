@@ -43,9 +43,9 @@ export interface ConfigType {
 
 export const Chains: Record<string, Blockchain> = {
     shannon: Blockchain.Shannon,
-    // minato: Blockchain.Minato,
-    // somnia: Blockchain.Somnia,
-    // soneium: Blockchain.Soneium,
+    minato: Blockchain.Minato,
+    somnia: Blockchain.Somnia,
+    soneium: Blockchain.Soneium,
 } as const;
 
 export interface Region {

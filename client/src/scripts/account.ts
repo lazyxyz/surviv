@@ -18,7 +18,6 @@ import { abi as crateBaseABI } from "@common/abis/ICrateBase.json";
 import { abi as erc1155ABI } from "@common/abis/IERC1155.json";
 import { abi as survivShopABI } from "@common/abis/ISurvivShop.json";
 import { abi as survivShopV2ABI } from "@common/abis/ISurvivShopV2.json";
-import { abi as seasonRewardsABI } from "@common/abis/INFTDistribution.json";
 import { errorAlert, warningAlert } from "./modal";
 import { resetPlayButtons } from "./ui/home";
 import { getWalletConnectInfo, getWalletConnectInit } from "./wallet/walletConnect";
