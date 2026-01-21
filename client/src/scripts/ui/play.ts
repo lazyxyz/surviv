@@ -109,6 +109,7 @@ function setupTeamMenu(game: Game, account: Account): void {
         $("#splash-inventory").prepend($(".splash-earn-get-now").detach());
         $("#splash-earn").append($("#create-team-menu").detach().show());
         $("#option-btns-group").hide();
+        $('#btn-server-select').prop('disabled', true);
 
         const params = new URLSearchParams();
         if (this.id === "btn-join-team") {
@@ -149,6 +150,7 @@ function leaveTeam() {
     $("#splash-earn").append($("#create-team-menu").detach().hide());
     $(".splash-earn-get-now").show();
     $("#option-btns-group").show();
+    $('#btn-server-select').prop('disabled', false);
 }
 
 function setupTeamMenuControls(game: Game, account: Account): void {
