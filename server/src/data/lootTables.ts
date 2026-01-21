@@ -545,6 +545,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "rpk", weight: 0.05 },
                 { item: "spas12", weight: 0.5 },
                 { item: "mk12", weight: 0.1 },
+                { item: "m134_minigun", weight: 0.01 }
             ]
         },
         ammo_crate: [
@@ -692,6 +693,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "rpk", weight: 0.005 },
             { item: "spas12", weight: 0.008 },
             { item: "mk12", weight: 0.01 },
+            { item: "m134_minigun", weight: 0.001 }
         ],
         healing_items: [
             { item: "gauze", count: 5, weight: 3 },
@@ -772,6 +774,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "rpk", weight: 0.01 },
             { item: "spas12", weight: 0.04 },
             { item: "mk12", weight: 0.05 },
+            { item: "m134_minigun", weight: 0.001 }
         ],
         special_healing_items: [
             { item: "cola", weight: 3 },
@@ -851,6 +854,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "rpk", weight: 0.9 },
             { item: "spas12", weight: 1 },
             { item: "mk12", weight: 1 },
+            { item: "m134_minigun", weight: 0.1 }
         ],
         gold_airdrop_guns: [
             { item: "m1_garand", weight: 1.1 },
@@ -905,6 +909,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "rpk", weight: 0.15 },
             { item: "spas12", weight: 0.6 },
             { item: "mk12", weight: 0.75 },
+            { item: "m134_minigun", weight: 0.1 }
         ],
         river_chest_guns: [
             { item: "m16a2", weight: 1 },
@@ -926,6 +931,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "rpk", weight: 0.08 },
             { item: "spas12", weight: 0.4 },
             { item: "mk12", weight: 0.75 },
+            { item: "m134_minigun", weight: 0.05 }
         ],
         jack_o_lantern: [
             [{ table: "pumpkin", weight: 1 }],
@@ -1182,6 +1188,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
                 { item: "vks", weight: 0.01 },
                 { item: "model_89", weight: 0.01 },
                 { item: "m1_garand", weight: 0.01 },
+                 { item: "m134_minigun", weight: 0.01 }
             ]
         },
 
@@ -1262,6 +1269,9 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "vks", weight: 0.002 },
             { item: "radio", weight: 0.002 },
             { item: "m1_garand", weight: 0.002 },
+
+            { item: "m134_minigun", weight: 0.001 }
+
         ],
         airdrop_guns: [
             { item: "sr25", weight: 1.5 },
@@ -1277,6 +1287,7 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "famas", weight: 1 },
             { item: "spas12", weight: 1 },
             { item: "mk12", weight: 1.5 },
+            { item: "m134_minigun", weight: 0.1 }
         ],
         airdrop_skins: [
             { item: NullString, weight: 1 },
@@ -1333,6 +1344,9 @@ export const LootTables: Record<string, Record<string, LootTable>> = {
             { item: "vks", weight: 0.01 },
             { item: "tango_51", weight: 0.01 },
             { item: "m1_garand", weight: 0.01 },
+
+            { item: "m134_minigun", weight: 0.01 }
+
         ],
         river_chest_guns: [
             // 60% chance for one of these
