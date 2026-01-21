@@ -140,6 +140,14 @@ function updateServerSelectors(): void {
     resetPlayButtons();
 }
 
+export function updateServerSelection(name: string): void {
+    selectedRegion = regionInfo[name];
+    GAME_CONSOLE.setBuiltInCVar("cv_region", name);
+
+    $("#server-name").text(name);
+    $("#server-player-count").text(selectedRegion.playerCount ?? "-");
+    resetPlayButtons();
+}
 
 
 function handleQueryParams(account: Account): void {

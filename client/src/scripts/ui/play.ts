@@ -7,15 +7,11 @@ import type { Account } from "../account";
 import type { Game } from "../game";
 import { errorAlert, warningAlert } from "../modal";
 import { parseJWT } from "../utils/constants";
-import { resetPlayButtons, selectedRegion } from "./home";
+import { resetPlayButtons, selectedRegion, updateServerSelection } from "./home";
 import { Color } from "pixi.js";
 import { GAME_CONSOLE } from "../..";
 import { Config } from "../../config";
 import { html } from "../utils/misc";
-import { Loots } from "@common/definitions/loots";
-import { defaultClientCVars } from "../utils/console/defaultClientCVars";
-import { Emotes } from "@common/definitions/emotes";
-import { DEFAULT_BADGE } from "@common/definitions/badges";
 
 export let teamSocket: WebSocket | undefined;
 export let teamID: string | undefined | null;
@@ -58,6 +54,12 @@ function setTeamParameters(params: URLSearchParams): void {
             GAME_CONSOLE.setBuiltInCVar("dv_name_color", "");
             console.error(e);
         }
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("region")) {
+        const region = urlParams.get("region"); // Preserve if already in URL
+        if (region) updateServerSelection(region);
     }
 }
 
@@ -102,12 +104,12 @@ function setupTeamMenu(game: Game, account: Account): void {
         if (new Date().getTime() >= (parseJWT(account.token).exp * 1000)) {
             return account.sessionExpired();
         }
-
         // Custom UI changes for both leader and member when clicking #btn-create-team
         $(".splash-earn-learn-more").hide();
         $("#splash-inventory").prepend($(".splash-earn-get-now").detach());
         $("#splash-earn").append($("#create-team-menu").detach().show());
         $("#option-btns-group").hide();
+        $('#btn-server-select').prop('disabled', true);
 
         const params = new URLSearchParams();
         if (this.id === "btn-join-team") {
@@ -148,6 +150,7 @@ function leaveTeam() {
     $("#splash-earn").append($("#create-team-menu").detach().hide());
     $(".splash-earn-get-now").show();
     $("#option-btns-group").show();
+    $('#btn-server-select').prop('disabled', false);
 }
 
 function setupTeamMenuControls(game: Game, account: Account): void {
@@ -291,14 +294,33 @@ function handleTeamJoin(data: CustomTeamMessage, ui: Game['uiManager']['ui']): v
     joinedTeam = true;
     if (data.type != CustomTeamMessages.Join) throw Error("handleTeamJoin Failed");
     teamID = data.teamID;
-    window.location.hash = `#${teamID}`;
-    ui.createTeamUrl.val(`${window.location.origin}/?region=${GAME_CONSOLE.getBuiltInCVar("cv_region") || Config.defaultRegion}#${teamID}`);
+
+    // Get current region (from cvar, fallback to default, or preserve existing query if any)
+    let region = GAME_CONSOLE.getBuiltInCVar("cv_region") || Config.defaultRegion;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("region")) {
+        region = urlParams.get("region") || region; // Preserve if already in URL
+    }
+
+    // Update full browser URL (query + hash) without reload, for correct sharing/copying
+    const newSearch = region ? `?region=${region}` : "";
+    const newUrl = `${window.location.pathname}${newSearch}#${teamID}`;
+    if (window.history.replaceState) {
+        window.history.replaceState(null, "", newUrl);
+    } else {
+        window.location.hash = `#${teamID}`; // Fallback for older browsers
+    }
+
+    // Set the shareable URL (always includes origin + region + hash)
+    ui.createTeamUrl.val(`${window.location.origin}${newUrl}`);
+
     ui.createTeamAutoFill.prop("checked", data.autoFill);
     ui.createTeamLock.prop("checked", data.locked);
     ui.createTeamRoomMode.prop("checked", data.roomMode);
 
     updateRoomOptions(ui, data.roomMode, data.teamSize);
 }
+
 
 /**
  * Updates the start game button state based on team readiness
